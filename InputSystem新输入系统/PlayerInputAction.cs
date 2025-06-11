@@ -89,6 +89,24 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Crouch"",
+                    ""type"": ""Button"",
+                    ""id"": ""62a1a7fe-be3f-410e-b29c-098377c8b7fc"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Crawl"",
+                    ""type"": ""Button"",
+                    ""id"": ""4e3f9a18-f619-4eeb-92aa-4b0c7abd6c5b"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -223,6 +241,28 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
                     ""action"": ""Dodge"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""5851f8ce-43c6-4990-ae7b-cd0391f1822b"",
+                    ""path"": ""<Keyboard>/c"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Crouch"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""ac176ca2-cc57-4a9d-8d45-2d3e1b091f6b"",
+                    ""path"": ""<Keyboard>/z"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Crawl"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -244,6 +284,8 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
         m_GamePlay_PickUp = m_GamePlay.FindAction("PickUp", throwIfNotFound: true);
         m_GamePlay_Run = m_GamePlay.FindAction("Run", throwIfNotFound: true);
         m_GamePlay_Dodge = m_GamePlay.FindAction("Dodge", throwIfNotFound: true);
+        m_GamePlay_Crouch = m_GamePlay.FindAction("Crouch", throwIfNotFound: true);
+        m_GamePlay_Crawl = m_GamePlay.FindAction("Crawl", throwIfNotFound: true);
     }
 
     ~@PlayerInputAction()
@@ -317,6 +359,8 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
     private readonly InputAction m_GamePlay_PickUp;
     private readonly InputAction m_GamePlay_Run;
     private readonly InputAction m_GamePlay_Dodge;
+    private readonly InputAction m_GamePlay_Crouch;
+    private readonly InputAction m_GamePlay_Crawl;
     public struct GamePlayActions
     {
         private @PlayerInputAction m_Wrapper;
@@ -328,6 +372,8 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
         public InputAction @PickUp => m_Wrapper.m_GamePlay_PickUp;
         public InputAction @Run => m_Wrapper.m_GamePlay_Run;
         public InputAction @Dodge => m_Wrapper.m_GamePlay_Dodge;
+        public InputAction @Crouch => m_Wrapper.m_GamePlay_Crouch;
+        public InputAction @Crawl => m_Wrapper.m_GamePlay_Crawl;
         public InputActionMap Get() { return m_Wrapper.m_GamePlay; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -358,6 +404,12 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
             @Dodge.started += instance.OnDodge;
             @Dodge.performed += instance.OnDodge;
             @Dodge.canceled += instance.OnDodge;
+            @Crouch.started += instance.OnCrouch;
+            @Crouch.performed += instance.OnCrouch;
+            @Crouch.canceled += instance.OnCrouch;
+            @Crawl.started += instance.OnCrawl;
+            @Crawl.performed += instance.OnCrawl;
+            @Crawl.canceled += instance.OnCrawl;
         }
 
         private void UnregisterCallbacks(IGamePlayActions instance)
@@ -383,6 +435,12 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
             @Dodge.started -= instance.OnDodge;
             @Dodge.performed -= instance.OnDodge;
             @Dodge.canceled -= instance.OnDodge;
+            @Crouch.started -= instance.OnCrouch;
+            @Crouch.performed -= instance.OnCrouch;
+            @Crouch.canceled -= instance.OnCrouch;
+            @Crawl.started -= instance.OnCrawl;
+            @Crawl.performed -= instance.OnCrawl;
+            @Crawl.canceled -= instance.OnCrawl;
         }
 
         public void RemoveCallbacks(IGamePlayActions instance)
@@ -418,5 +476,7 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
         void OnPickUp(InputAction.CallbackContext context);
         void OnRun(InputAction.CallbackContext context);
         void OnDodge(InputAction.CallbackContext context);
+        void OnCrouch(InputAction.CallbackContext context);
+        void OnCrawl(InputAction.CallbackContext context);
     }
 }
