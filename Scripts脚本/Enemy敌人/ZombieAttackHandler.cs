@@ -1,7 +1,7 @@
 
 using UnityEngine;
 
-public class EnemyAttackHandler : MonoBehaviour
+public class ZombieAttackHandler : MonoBehaviour
 {
     [Header("攻击参数")]
     [SerializeField] private LayerMask playerLayer; // 玩家层过滤

@@ -44,21 +44,21 @@ public class Bullet : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D collision)
     {
-        // 优先尝试获取 EnemyHealth
-        EnemyHealth enemyHealth = collision.GetComponent<EnemyHealth>();
-        if (enemyHealth != null)
+        // 优先尝试获取 ZombieHealth
+        ZombieHealth zombieHealth = collision.GetComponent<ZombieHealth>();
+        if (zombieHealth != null)
         {
             Debug.Log($"[子弹命中] 敌人: {collision.name} | 伤害: {BulletDamage}", this);
-            enemyHealth.TakeDamage(BulletDamage);
+            zombieHealth.TakeDamage(BulletDamage);
         }
         else
         {
-            // 回退到 Enemy（兼容旧逻辑）
-            Enemy enemy = collision.GetComponent<Enemy>();
-            if (enemy != null)
+            // 回退到 Zombie（兼容旧逻辑）
+            Zombie zombie = collision.GetComponent<Zombie>();
+            if (zombie != null)
             {
                 Debug.Log($"[子弹命中] 兼容模式敌人: {collision.name} | 伤害: {BulletDamage}", this);
-                enemy.TakeDamage(BulletDamage);
+                zombie.TakeDamage(BulletDamage);
             }
             else
             {

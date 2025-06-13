@@ -1,19 +1,19 @@
 using UnityEngine;
 
-[RequireComponent(typeof(Enemy))]
-public class EnemyHealth : MonoBehaviour
+[RequireComponent(typeof(Zombie))]
+public class ZombieHealth : MonoBehaviour
 {
     public int MaxHealth = 100;
     private int currentHealth;
 
-    private Enemy enemy;
-    private EnemyController enemyController;
+    private Zombie zombie;
+    private ZombieController zombieController;
 
     void Awake()
     {
         currentHealth = MaxHealth;
-        enemy = GetComponent<Enemy>();
-        enemyController = GetComponent<EnemyController>();
+        zombie = GetComponent<Zombie>();
+        zombieController = GetComponent<ZombieController>();
     }
 
     public void TakeDamage(int damage)
@@ -21,12 +21,12 @@ public class EnemyHealth : MonoBehaviour
         currentHealth -= damage;
 
         // 触发受伤动画
-        enemy.OnHurt?.Invoke();
+        zombie.OnHurt?.Invoke();
 
         if (currentHealth <= 0)
         {
             currentHealth = 0;
-            enemy.OnDie?.Invoke(); // 触发死亡事件
+            zombie.OnDie?.Invoke(); // 触发死亡事件
         }
     }
 }

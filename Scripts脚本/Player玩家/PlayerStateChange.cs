@@ -21,6 +21,7 @@ public class PlayerStateChange : MonoBehaviour
                 if (child.CompareTag("Weapons"))
                 {
                     AIMTOR.SetBool("isHaveWeapon", true);
+                    AIMTOR.SetBool("isDodging with weapons?", true);
                     return; // 找到一个后就可以退出循环
                 }
             }

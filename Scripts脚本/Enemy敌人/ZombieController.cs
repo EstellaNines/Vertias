@@ -1,7 +1,7 @@
 using System.Collections;
 using UnityEngine;
 
-public class EnemyController : MonoBehaviour
+public class ZombieController : MonoBehaviour
 {
     [Header("属性")]
     [SerializeField] private float CurrentSpeed = 0;
