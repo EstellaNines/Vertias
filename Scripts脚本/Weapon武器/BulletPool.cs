@@ -71,14 +71,6 @@ public class BulletPool : MonoBehaviour
     // 将子弹返回到池中
     public void ReturnBullet(GameObject bullet)
     {
-        // // 如果池中的子弹数量已经达到最大值，销毁子弹
-        // if (bulletPool.Count >= maxPoolSize)
-        // {
-        //     Debug.LogWarning("Bullet pool has reached its maximum size. Bullet will be destroyed.");
-        //     Destroy(bullet);
-        //     return;
-        // }
-
         bullet.transform.SetParent(transform);
         bullet.SetActive(false);
         bulletPool.Enqueue(bullet);

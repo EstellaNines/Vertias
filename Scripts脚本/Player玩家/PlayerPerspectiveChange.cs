@@ -32,23 +32,5 @@ public class PlayerPerspectiveChange : MonoBehaviour
 
             hand.GetChild(0).localScale = scale;
         }
-
-
-
-        // var mousePos = Mouse.current.position.ReadValue();
-        // Vector3 scale = hand.localScale;
-
-        // if (mousePos.x < screenCenterX)
-        // {
-        //     // 左侧翻转Y轴
-        //     if (scale.y > 0) scale.y = -scale.y;
-        // }
-        // else
-        // {
-        //     // 右侧保持正常
-        //     if (scale.y < 0) scale.y = -scale.y;
-        // }
-
-        // hand.localScale = scale;
     }
 }

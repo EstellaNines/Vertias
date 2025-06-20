@@ -74,6 +74,10 @@ public class WeaponTrigger : MonoBehaviour
         // 设置子弹的初始位置
         bullet.StartPos = Muzzle.position;
 
+        // 设置子弹发射者为玩家
+        bullet.shooter = this.transform;
+        Debug.Log($"[玩家开火] 发射者: {gameObject.name}");
+
         // 设置子弹的运动方向
         Rigidbody2D rb = bulletObj.GetComponent<Rigidbody2D>();
         rb.velocity = bulletObj.transform.right * bullet.BulletSpeed;

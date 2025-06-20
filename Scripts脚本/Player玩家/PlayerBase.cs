@@ -1,6 +1,7 @@
+// 修改后的PlayerBase.cs代码
 using UnityEngine;
 
-[RequireComponent(typeof(Rigidbody2D), typeof(Animator), typeof(BoxCollider2D))]
+[RequireComponent(typeof(Rigidbody2D), typeof(Animator), typeof(CapsuleCollider2D))] // 修改碰撞体类型
 public class PlayerBase : MonoBehaviour
 {
     #region 基础属性
@@ -23,6 +24,7 @@ public class PlayerBase : MonoBehaviour
     #region 组件引用
     protected Rigidbody2D RB2D { get; private set; }
     protected Animator Animator { get; private set; }
+    private CapsuleCollider2D capsuleCollider; // 新增胶囊碰撞体引用
 
     // 功能模块引用
     public PlayerController Controller { get; private set; }
@@ -45,6 +47,7 @@ public class PlayerBase : MonoBehaviour
         // 获取核心组件
         RB2D = GetComponent<Rigidbody2D>();
         Animator = GetComponent<Animator>();
+        capsuleCollider = GetComponent<CapsuleCollider2D>(); // 获取胶囊碰撞体
 
         // 获取功能组件
         Controller = GetComponent<PlayerController>();
@@ -52,6 +55,12 @@ public class PlayerBase : MonoBehaviour
         Aim = GetComponent<PlayerAim>();
         Perspective = GetComponent<PlayerPerspectiveChange>();
         PickItems = GetComponent<PlayerPickItems>();
+
+        // 验证碰撞体类型
+        if (capsuleCollider == null)
+        {
+            Debug.LogError("角色必须包含CapsuleCollider2D组件");
+        }
 
         // 获取手部位置
         // if (PickItems != null)

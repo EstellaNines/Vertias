@@ -95,7 +95,7 @@ public class Zombie : MonoBehaviour
         }
     }
     // 路径点获取
-    private void GeneratePath(Vector3 target)
+    public void GeneratePath(Vector3 target)
     {
         currentIndex = 0;
         seeker.StartPath(transform.position, target, Path =>
