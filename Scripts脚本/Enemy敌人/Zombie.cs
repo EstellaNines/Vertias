@@ -3,76 +3,138 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 using Pathfinding;
+// 敌人状态枚举
+public enum ZombieStateType
+{
+    Idle,
+    Chase,
+    Attack,
+    Hurt,
+    Dead
+}
 
 public class Zombie : MonoBehaviour
 {
+    [Header("目标")]
     public Transform player; // 玩家对象
-    [Header("追击范围")]
-    public float ChaseDistance = 5f;
-    public float AttackDistance = 1.5f;
+    [Header("移动追击")]
+    [FieldLabel("追击距离")] public float ChaseDistance = 5f; // 追击距离
+    [FieldLabel("攻击距离")] public float AttackDistance = 1.5f; // 攻击距离
 
-    // 事件
-    [Header("事件")]
-    public UnityEvent<Vector2> OnMovement;
-    public UnityEvent OnAttack;
-    public UnityEvent OnStopAttack;
-    public UnityEvent OnHurt; // 受伤事件
-    public UnityEvent OnDie;  // 死亡事件
-
-    // 内部状态
-    private int health = 100;
-    private bool isDead = false;
+    [FieldLabel("追击范围")] public float chaseRange = 5f; // 追击范围
+    [HideInInspector] public Vector2 MovementInput { get; set; }
+    [FieldLabel("当前速度")] public float CurrentSpeed = 0; // 当前速度
 
     // A*寻路调用
     [Header("A*寻路")]
     private Seeker seeker;
-    private List<Vector3> PathPointList; // 路径点列表
-    private int currentIndex = 0; // 路径点索引
-    public float PathGenerateInterval = 0.5f; // 路径生成间隔
-    public float PathGenerateTimer = 0f; // 计时器
+    [HideInInspector] public List<Vector3> PathPointList; // 路径点列表
+    [HideInInspector] public int currentIndex = 0; // 路径点索引
+    [FieldLabel("路径生成间隔")] public float PathGenerateInterval = 0.5f; // 路径生成间隔
+    [FieldLabel("计时器")] public float PathGenerateTimer = 0f; // 计时器
+
+    // 攻击
+    [Header("攻击")]
+    [FieldLabel("伤害")] public float ZombieAttackDamage; // 丧尸攻击伤害
+    [HideInInspector] public float distance; // 丧尸攻击范围
+    [FieldLabel("玩家图层")] public LayerMask playerMask; // 玩家图层
+    [FieldLabel("攻击冷却时间")] public float AttackCooldownDuration = 2f; // 攻击冷却时间
+
+    // 受伤
+    [Header("受伤")]
+    public bool isHurt; // 受伤状态确认
+    private bool _isHurt; // 私有受伤状态字段
+    public bool isKnockBack = true; // 击退状态确认
+    [FieldLabel("击退的力")] public float KnockBackForce = 1f; // 击退的力
+    public float KnockBackDuration = 0.1f;// 击退的时长
+    [FieldLabel("击退方向向量")] public Vector2 KnockBackDirection; // 击退的向量
+    [FieldLabel("受伤动画长度")] public float HurtAnimationDuration = 0.5f;
+
+    // 受伤事件（true=受伤开始, false=受伤结束）
+    public UnityEvent<bool> OnHurt = new UnityEvent<bool>();
+
+    [HideInInspector] public bool isAttack = true; // 攻击状态确认
+    [HideInInspector] public bool isDead = false; // 丧尸死亡状态确认
+    private IState currentState; // 当前状态
+    // 字典
+    private Dictionary<ZombieStateType, IState> states = new Dictionary<ZombieStateType, IState>();
+    [HideInInspector] public Collider2D physicalCollider; // 碰撞体
+    [HideInInspector] public Rigidbody2D rb; // 刚体
+    [HideInInspector] public Animator animator; // 动画器
+    [HideInInspector] public SpriteRenderer spriteRenderer; // 精灵渲染器
+
+
+    [Header("死亡视觉效果")]
+    public Sprite deadSpriteLeft;  // 左方向死亡精灵
+    public Sprite deadSpriteRight; // 右方向死亡精灵
+    private float currentHorizontalDirection; // 缓存最后一次水平方向
+
+
 
     private void Awake()
     {
-        seeker = GetComponent<Seeker>();
+        seeker = GetComponent<Seeker>(); // 获取寻路组件
+        rb = GetComponent<Rigidbody2D>(); // 获取刚体组件
+        animator = GetComponent<Animator>(); // 获取动画组件
+        physicalCollider = GetComponent<Collider2D>(); // 获取物理碰撞器组件
+        spriteRenderer = GetComponent<SpriteRenderer>(); // 获取精灵渲染器组件
+
+        // 实例化敌人状态
+        states.Add(ZombieStateType.Idle, new ZombieIdleState(this)); // 待机状态字典
+        states.Add(ZombieStateType.Chase, new ZombieChaseState(this)); // 追击状态字典
+        states.Add(ZombieStateType.Attack, new ZombieAttackState(this)); // 攻击状态字典
+        states.Add(ZombieStateType.Hurt, new ZombieHurtState(this)); // 受伤状态字典  
+        states.Add(ZombieStateType.Dead, new ZombieDeadState(this)); // 死亡状态字典
+
+        // 设置默认状态为Idle
+        transitionState(ZombieStateType.Idle);
+    }
+    // 用于切换状态函数
+    public void transitionState(ZombieStateType type)
+    {
+        // 当前状态是否为空
+        // 当前状态不为空，退出当前状态
+        if (currentState != null)
+        {
+            currentState.OnExit();
+        }
+        // 通过字典的键找到对应的状态
+        currentState = states[type];
+        currentState.OnEnter();
     }
 
-    void FixedUpdate()
+    private void Update()
     {
-        if (isDead) return; // 如果已死亡，直接退出，不再执行任何逻辑
+        currentState.OnUpdate();
+        // 调试语句
+        Debug.Log("当且距离" + distance);
+    }
+    private void FixedUpdate()
+    {
+        currentState.OnFixedUpdate();
+    }
 
-        if (player == null)
-            return;
-        float distance = Vector2.Distance(transform.position, player.position);
-        if (distance < ChaseDistance)
+    // 判断玩家是否在敌人追击范围内
+    public void GetPlayerTransform()
+    {
+        Collider2D[] chaseCollider = Physics2D.OverlapCircleAll(transform.position, chaseRange, playerMask);
+        if (chaseCollider.Length > 0) // 如果长度大于0，则说明有玩家在范围内
         {
-            Autopath();
-            if (PathPointList == null)
-                return;
-
-            if (distance < AttackDistance)
+            player = chaseCollider[0].transform; // 获取玩家
+            if (player != null)
             {
-                // 攻击
-                OnMovement?.Invoke(Vector2.zero);// 停止移动
-                OnAttack?.Invoke();
-            }
-            else
-            {
-                // 追击
-                //Vector2 direction = (player.position - transform.position).normalized;
-                Vector2 direction = (PathPointList[currentIndex] - transform.position).normalized;
-                OnMovement?.Invoke(direction);// 触发移动事件
-                OnStopAttack?.Invoke();
+                distance = Vector2.Distance(player.position, transform.position); // 玩家在追击范围内
             }
         }
         else
         {
-            OnMovement?.Invoke(Vector2.zero);
-            OnStopAttack?.Invoke();
+            player = null; // 玩家在追击范围外
         }
-
     }
 
-    private void Autopath()
+    #region 自动寻路
+    // 自动寻路
+    public void Autopath()
     {
         // 计时器间隔修改，实时修改路径
         PathGenerateTimer += Time.deltaTime;
@@ -103,17 +165,52 @@ public class Zombie : MonoBehaviour
             PathPointList = Path.vectorPath; // 列表记录A*路径点
         }); // 起点、终点、回调函数
     }
-
-    public void TakeDamage(int damage)
+    #endregion
+    #region 受伤事件
+    public void ZombieHurt()
     {
-        health -= damage;
-        OnHurt?.Invoke(); // 触发受伤动画
-
-        if (health <= 0)
+        isHurt = true; // 受伤
+    }
+    public bool isHurting
+    {
+        get => _isHurt;
+        set
         {
-            OnDie?.Invoke(); // 触发死亡事件
+            if (_isHurt != value)
+            {
+                _isHurt = value;
+                OnHurt.Invoke(_isHurt);  // 统一事件触发
+            }
         }
     }
 
+    public void TakeDamage(int damage, Vector2 hitDirection)
+    {
+        // 这里可以添加实际的血量扣除逻辑
+        // currentHealth -= damage;
+
+        // 设置击退方向（通过公共属性访问）
+        KnockBackDirection = hitDirection.normalized;
+
+        // 触发受伤状态（通过公共属性访问触发setter）
+        isHurt = true;  // ✅ 关键修改：使用属性而非直接修改私有字段
+
+        // 可选：记录最后一次受击方向用于朝向调整
+        currentHorizontalDirection = Mathf.Sign(hitDirection.x);
+    }
+    #endregion
+    #region 攻击冷却
+    public void AttackColdown()
+    {
+        StartCoroutine(nameof(AttackCooldown));
+    }
+
+    //攻击冷却时间
+    public IEnumerator AttackCooldown()
+    {
+        yield return new WaitForSeconds(AttackCooldownDuration);
+        isAttack = true;
+    }
+    #endregion
 
 }

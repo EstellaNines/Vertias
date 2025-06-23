@@ -49,30 +49,19 @@ public class Bullet : MonoBehaviour
         // 修改碰撞体检测条件：排除所有触发器（isTrigger = true 的碰撞体）
         if (!collision.isTrigger)
         {
-            // 判断子弹来源
-            bool isPlayerBullet = shooter.CompareTag("Player");
-            bool isEnemyBullet = shooter.CompareTag("Enemy");
-
-            // 优先尝试获取 ZombieHealth
-            ZombieHealth zombieHealth = collision.GetComponent<ZombieHealth>();
-            if (zombieHealth != null)
+            Zombie zombie = collision.GetComponent<Zombie>();
+            if (zombie != null)
             {
-                Debug.Log($"[子弹命中] 敌人: {collision.name} | 伤害: {BulletDamage} | 来源: {(isPlayerBullet ? "玩家" : isEnemyBullet ? "敌人" : "未知")}", this);
-                zombieHealth.TakeDamage(BulletDamage);
+                Debug.Log($"[子弹命中] 敌人: {collision.name} | 伤害: {BulletDamage} | 来源: 玩家", this);
+
+                // 获取子弹当前运动方向作为击退方向
+                Vector2 hitDirection = RB2D.velocity.normalized;
+                // 调用伤害处理方法
+                zombie.TakeDamage(BulletDamage, hitDirection);
             }
             else
             {
-                // 回退到 Zombie（兼容旧逻辑）
-                Zombie zombie = collision.GetComponent<Zombie>();
-                if (zombie != null)
-                {
-                    Debug.Log($"[子弹命中] 兼容模式敌人: {collision.name} | 伤害: {BulletDamage} | 来源: {(isPlayerBullet ? "玩家" : isEnemyBullet ? "敌人" : "未知")}", this);
-                    zombie.TakeDamage(BulletDamage);
-                }
-                else
-                {
-                    Debug.LogWarning($"[无命中] 碰撞到非敌人对象: {collision.name} | 来源: {(isPlayerBullet ? "玩家" : isEnemyBullet ? "敌人" : "未知")}", this);
-                }
+                Debug.LogWarning($"[无命中] 碰撞到非敌人对象: {collision.name}", this);
             }
 
             BulletPool bulletPool = FindObjectOfType<BulletPool>();
