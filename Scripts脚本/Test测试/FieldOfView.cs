@@ -4,10 +4,10 @@ using UnityEngine;
 
 public class FieldOfView : MonoBehaviour
 {
-    public LayerMask obstacleLayer; // ÕÚµ²²ãmask
-    [Range(10, 100)] public int rayCount = 50; // ÉäÏßÊıÁ¿
-    [Range(1, 20)] public float viewDistance = 10f; // ÊÓ¾à
-    [Range(10, 120)] public float fieldOfViewAngle = 90f; // ÊÓÒ°½Ç¶È
+    public LayerMask obstacleLayer; // é®æŒ¡å±‚mask
+    [Range(10, 100)] public int rayCount = 50; // å°„çº¿æ•°é‡
+    [Range(1, 20)] public float viewDistance = 10f; // è§†è·
+    [Range(10, 120)] public float fieldOfViewAngle = 90f; // è§†é‡è§’åº¦
 
     private Mesh mesh;
     private Vector3[] vertices;
@@ -28,7 +28,7 @@ public class FieldOfView : MonoBehaviour
 
     void InitializeMesh()
     {
-        // ³õÊ¼»¯¶¥µãºÍÈı½ÇĞÎÊı×é
+        // åˆå§‹åŒ–é¡¶ç‚¹å’Œä¸‰è§’å½¢æ•°ç»„
         vertices = new Vector3[rayCount + 2];
         uv = new Vector2[vertices.Length];
         triangles = new int[rayCount * 3];
@@ -38,7 +38,7 @@ public class FieldOfView : MonoBehaviour
     {
         float angleIncrement = fieldOfViewAngle / rayCount;
 
-        // ÉèÖÃ³õÊ¼¶¥µã£¨Ô­µã£©
+        // è®¾ç½®åˆå§‹é¡¶ç‚¹ï¼ˆåŸç‚¹ï¼‰
         vertices[0] = Vector3.zero;
 
         int vertexIndex = 1;
@@ -49,10 +49,10 @@ public class FieldOfView : MonoBehaviour
             float angle = i * angleIncrement - fieldOfViewAngle / 2;
             Vector3 direction = AngleToVector3(angle);
 
-            // ·¢ÉäÉäÏß¼ì²âÕÏ°­Îï
+            // å‘å°„å°„çº¿æ£€æµ‹éšœç¢ç‰©
             RaycastHit2D hit = Physics2D.Raycast(transform.position, direction, viewDistance, obstacleLayer);
 
-            // ¸ù¾İÊÇ·ñ¼ì²âµ½ÕÏ°­ÎïÈ·¶¨¶¥µãÎ»ÖÃ
+            // æ ¹æ®æ˜¯å¦æ£€æµ‹åˆ°éšœç¢ç‰©ç¡®å®šé¡¶ç‚¹ä½ç½®
             if (hit.collider != null)
             {
                 vertices[vertexIndex] = hit.point - (Vector2)transform.position; ;
@@ -62,7 +62,7 @@ public class FieldOfView : MonoBehaviour
                 vertices[vertexIndex] = direction * viewDistance;
             }
 
-            // ¹¹½¨Èı½ÇĞÎ
+            // æ„å»ºä¸‰è§’å½¢
             if (i > 0)
             {
                 triangles[triangleIndex] = 0;
@@ -74,7 +74,7 @@ public class FieldOfView : MonoBehaviour
             vertexIndex++;
         }
 
-        // ¸üĞÂÍø¸ñÊı¾İ
+        // æ›´æ–°ç½‘æ ¼æ•°æ®
         mesh.vertices = vertices;
         mesh.triangles = triangles;
         mesh.uv = uv;

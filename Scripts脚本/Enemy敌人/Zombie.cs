@@ -15,15 +15,18 @@ public enum ZombieStateType
 
 public class Zombie : MonoBehaviour
 {
+    // 追击对象
     [Header("目标")]
     public Transform player; // 玩家对象
+    // ————————————————————————————————
+
     [Header("移动追击")]
     [FieldLabel("追击距离")] public float ChaseDistance = 5f; // 追击距离
     [FieldLabel("攻击距离")] public float AttackDistance = 1.5f; // 攻击距离
-
     [FieldLabel("追击范围")] public float chaseRange = 5f; // 追击范围
     [HideInInspector] public Vector2 MovementInput { get; set; }
     [FieldLabel("当前速度")] public float CurrentSpeed = 0; // 当前速度
+    // ————————————————————————————————
 
     // A*寻路调用
     [Header("A*寻路")]
@@ -31,14 +34,17 @@ public class Zombie : MonoBehaviour
     [HideInInspector] public List<Vector3> PathPointList; // 路径点列表
     [HideInInspector] public int currentIndex = 0; // 路径点索引
     [FieldLabel("路径生成间隔")] public float PathGenerateInterval = 0.5f; // 路径生成间隔
-    [FieldLabel("计时器")] public float PathGenerateTimer = 0f; // 计时器
+    [HideInInspector] public float PathGenerateTimer = 0f; // 计时器
+    // —————————————————————————————————
 
     // 攻击
     [Header("攻击")]
+    [HideInInspector] public bool isAttack = true; // 攻击状态确认
     [FieldLabel("伤害")] public float ZombieAttackDamage; // 丧尸攻击伤害
     [HideInInspector] public float distance; // 丧尸攻击范围
     [FieldLabel("玩家图层")] public LayerMask playerMask; // 玩家图层
     [FieldLabel("攻击冷却时间")] public float AttackCooldownDuration = 2f; // 攻击冷却时间
+    // ——————————————————————————————————
 
     // 受伤
     [Header("受伤")]
@@ -52,9 +58,20 @@ public class Zombie : MonoBehaviour
 
     // 受伤事件（true=受伤开始, false=受伤结束）
     public UnityEvent<bool> OnHurt = new UnityEvent<bool>();
+    // ———————————————————————————————————
 
-    [HideInInspector] public bool isAttack = true; // 攻击状态确认
-    [HideInInspector] public bool isDead = false; // 丧尸死亡状态确认
+    // 死亡状态参数
+    [Header("死亡")]
+    [HideInInspector] public float currentHorizontalDirection; // 缓存最后一次水平方向
+    public UnityEvent OnDead = new UnityEvent(); // 死亡事件
+    // —————————————————————————————————————
+
+    // 生命值
+    [FieldLabel("最大生命值")] public float MaxHealth = 100f; // 最大生命值
+    public float currentHealth; // 当前生命值
+
+    // 内部属性
+
     private IState currentState; // 当前状态
     // 字典
     private Dictionary<ZombieStateType, IState> states = new Dictionary<ZombieStateType, IState>();
@@ -62,13 +79,6 @@ public class Zombie : MonoBehaviour
     [HideInInspector] public Rigidbody2D rb; // 刚体
     [HideInInspector] public Animator animator; // 动画器
     [HideInInspector] public SpriteRenderer spriteRenderer; // 精灵渲染器
-
-
-    [Header("死亡视觉效果")]
-    public Sprite deadSpriteLeft;  // 左方向死亡精灵
-    public Sprite deadSpriteRight; // 右方向死亡精灵
-    private float currentHorizontalDirection; // 缓存最后一次水平方向
-
 
 
     private void Awake()
@@ -85,6 +95,8 @@ public class Zombie : MonoBehaviour
         states.Add(ZombieStateType.Attack, new ZombieAttackState(this)); // 攻击状态字典
         states.Add(ZombieStateType.Hurt, new ZombieHurtState(this)); // 受伤状态字典  
         states.Add(ZombieStateType.Dead, new ZombieDeadState(this)); // 死亡状态字典
+
+        currentHealth = MaxHealth; // 初始化当前生命值
 
         // 设置默认状态为Idle
         transitionState(ZombieStateType.Idle);
@@ -186,17 +198,29 @@ public class Zombie : MonoBehaviour
 
     public void TakeDamage(int damage, Vector2 hitDirection)
     {
-        // 这里可以添加实际的血量扣除逻辑
-        // currentHealth -= damage;
+        // 血量扣除逻辑
+        currentHealth -= damage;
+
+        // 添加死亡检测
+        if (currentHealth <= 0)
+        {
+            zombieDie();
+            return;
+        }
 
         // 设置击退方向（通过公共属性访问）
         KnockBackDirection = hitDirection.normalized;
+        isHurt = true; // 触发受伤状态
 
-        // 触发受伤状态（通过公共属性访问触发setter）
-        isHurt = true;  // ✅ 关键修改：使用属性而非直接修改私有字段
-
-        // 可选：记录最后一次受击方向用于朝向调整
+        // 记录最后一次受击方向用于朝向调整
         currentHorizontalDirection = Mathf.Sign(hitDirection.x);
+    }
+    #endregion
+    #region 死亡
+    public void zombieDie()
+    {
+        transitionState(ZombieStateType.Dead); // 触发死亡状态
+
     }
     #endregion
     #region 攻击冷却

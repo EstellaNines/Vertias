@@ -65,7 +65,10 @@ public class ZombieHurtState : IState
         {
             Timer = 0;
             zombie.isHurt = false;
-            zombie.transitionState(ZombieStateType.Idle);
+            if (zombie.currentHealth > 0)
+            {
+                zombie.transitionState(ZombieStateType.Idle);
+            }
         }
     }
 
