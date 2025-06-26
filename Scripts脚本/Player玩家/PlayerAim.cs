@@ -1,20 +1,20 @@
-// µ¼Èë±ØÒªµÄÃüÃû¿Õ¼ä
+// å¯¼å…¥å¿…è¦çš„å‘½åç©ºé—´
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-// ¶¨ÒåPlayerAimÀà£¬¼Ì³Ğ×ÔMonoBehaviour
+// å®šä¹‰PlayerAimç±»ï¼Œç»§æ‰¿è‡ªMonoBehaviour
 public class PlayerAim : MonoBehaviour
 {
-    // ¹«ÓĞTransform±äÁ¿£¬ÓÃÓÚÖ¸ÏòÍæ¼Ò¿ØÖÆµÄÃé×¼ÎïÌå
+    // å…¬æœ‰Transformå˜é‡ï¼Œç”¨äºæŒ‡å‘ç©å®¶æ§åˆ¶çš„ç„å‡†ç‰©ä½“
     public Transform hand;
 
-    // UpdateÃ¿Ö¡µ÷ÓÃÒ»´Î£¬´¦ÀíÊµÊ±Âß¼­
+    // Updateæ¯å¸§è°ƒç”¨ä¸€æ¬¡ï¼Œå¤„ç†å®æ—¶é€»è¾‘
     void Update()
     {
-        // »ñÈ¡Êó±êÆÁÄ»×ø±ê²¢×ª»»ÎªÊÀ½ç×ø±ê£¨zÖáÄ¬ÈÏÎªÏà»ú¾àÀë£©
+        // è·å–é¼ æ ‡å±å¹•åæ ‡å¹¶è½¬æ¢ä¸ºä¸–ç•Œåæ ‡ï¼ˆzè½´é»˜è®¤ä¸ºç›¸æœºè·ç¦»ï¼‰
         var pos = Camera.main.ScreenToWorldPoint(Mouse.current.position.ReadValue());
 
-        // ¼ÆËã´ÓÊÖ²¿Î»ÖÃµ½Êó±êÎ»ÖÃµÄ·½ÏòÏòÁ¿²¢¹éÒ»»¯£¬ÉèÖÃÎªÊÖ²¿µÄÓÒ²à·½Ïò
+        // è®¡ç®—ä»æ‰‹éƒ¨ä½ç½®åˆ°é¼ æ ‡ä½ç½®çš„æ–¹å‘å‘é‡å¹¶å½’ä¸€åŒ–ï¼Œè®¾ç½®ä¸ºæ‰‹éƒ¨çš„å³ä¾§æ–¹å‘
         hand.right = (Vector2)(pos - hand.position).normalized;
 
     }

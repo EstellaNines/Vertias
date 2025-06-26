@@ -25,7 +25,7 @@ public class ZombieChaseState : IState
 
     public void OnFixedUpdate()
     {
-        move();
+        zombie.move();
     }
 
     public void OnUpdate()
@@ -63,21 +63,4 @@ public class ZombieChaseState : IState
         }
     }
 
-    // 重现移动函数
-    void move()
-    {
-        // 检查 rb 是否存在且未死亡
-        if (zombie.MovementInput.magnitude > 0.1f && zombie.CurrentSpeed >= 0)
-        {
-            zombie.rb.velocity = zombie.MovementInput * zombie.CurrentSpeed; // 移动
-            // 方向控制逻辑
-            float horizontal = zombie.MovementInput.x > 0 ? 1f : 0f;
-            zombie.animator.SetFloat("Horizontial", horizontal);
-
-        }
-        else
-        {
-            zombie.rb.velocity = Vector2.zero;
-        }
-    }
 }

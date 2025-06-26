@@ -6,11 +6,12 @@ using Pathfinding;
 // 敌人状态枚举
 public enum ZombieStateType
 {
-    Idle,
-    Chase,
-    Attack,
-    Hurt,
-    Dead
+    Idle, // 待机
+    Patrol, // 巡逻
+    Chase, // 追击
+    Attack, // 攻击
+    Hurt, // 受伤
+    Dead // 死亡
 }
 
 public class Zombie : MonoBehaviour
@@ -18,7 +19,7 @@ public class Zombie : MonoBehaviour
     // 追击对象
     [Header("目标")]
     public Transform player; // 玩家对象
-    // ————————————————————————————————
+
 
     [Header("移动追击")]
     [FieldLabel("追击距离")] public float ChaseDistance = 5f; // 追击距离
@@ -26,7 +27,7 @@ public class Zombie : MonoBehaviour
     [FieldLabel("追击范围")] public float chaseRange = 5f; // 追击范围
     [HideInInspector] public Vector2 MovementInput { get; set; }
     [FieldLabel("当前速度")] public float CurrentSpeed = 0; // 当前速度
-    // ————————————————————————————————
+
 
     // A*寻路调用
     [Header("A*寻路")]
@@ -35,7 +36,12 @@ public class Zombie : MonoBehaviour
     [HideInInspector] public int currentIndex = 0; // 路径点索引
     [FieldLabel("路径生成间隔")] public float PathGenerateInterval = 0.5f; // 路径生成间隔
     [HideInInspector] public float PathGenerateTimer = 0f; // 计时器
-    // —————————————————————————————————
+
+    // 巡逻    
+    [Header("待机巡逻")]
+    public float IdleDuration; // 待机时间
+    public Transform[] PatrolPoints; // 巡逻点
+    public int targetPointsIndex = 0; // 巡逻点索引
 
     // 攻击
     [Header("攻击")]
@@ -44,7 +50,7 @@ public class Zombie : MonoBehaviour
     [HideInInspector] public float distance; // 丧尸攻击范围
     [FieldLabel("玩家图层")] public LayerMask playerMask; // 玩家图层
     [FieldLabel("攻击冷却时间")] public float AttackCooldownDuration = 2f; // 攻击冷却时间
-    // ——————————————————————————————————
+
 
     // 受伤
     [Header("受伤")]
@@ -58,20 +64,19 @@ public class Zombie : MonoBehaviour
 
     // 受伤事件（true=受伤开始, false=受伤结束）
     public UnityEvent<bool> OnHurt = new UnityEvent<bool>();
-    // ———————————————————————————————————
+
 
     // 死亡状态参数
     [Header("死亡")]
     [HideInInspector] public float currentHorizontalDirection; // 缓存最后一次水平方向
     public UnityEvent OnDead = new UnityEvent(); // 死亡事件
-    // —————————————————————————————————————
+
 
     // 生命值
     [FieldLabel("最大生命值")] public float MaxHealth = 100f; // 最大生命值
     public float currentHealth; // 当前生命值
 
     // 内部属性
-
     private IState currentState; // 当前状态
     // 字典
     private Dictionary<ZombieStateType, IState> states = new Dictionary<ZombieStateType, IState>();
@@ -95,6 +100,7 @@ public class Zombie : MonoBehaviour
         states.Add(ZombieStateType.Attack, new ZombieAttackState(this)); // 攻击状态字典
         states.Add(ZombieStateType.Hurt, new ZombieHurtState(this)); // 受伤状态字典  
         states.Add(ZombieStateType.Dead, new ZombieDeadState(this)); // 死亡状态字典
+        states.Add(ZombieStateType.Patrol, new ZombiePatrolState(this)); // 巡逻状态字典
 
         currentHealth = MaxHealth; // 初始化当前生命值
 
@@ -143,6 +149,25 @@ public class Zombie : MonoBehaviour
             player = null; // 玩家在追击范围外
         }
     }
+    #region 移动
+    public void move()
+    {
+        // 检查 rb 是否存在且未死亡
+        if (MovementInput.magnitude > 0.1f && CurrentSpeed >= 0)
+        {
+            rb.velocity = MovementInput * CurrentSpeed; // 移动
+            // 方向控制逻辑
+            float horizontal = MovementInput.x > 0 ? 1f : 0f;
+            animator.SetFloat("Horizontial", horizontal);
+
+        }
+        else
+        {
+            rb.velocity = Vector2.zero;
+        }
+    }
+    #endregion
+
 
     #region 自动寻路
     // 自动寻路

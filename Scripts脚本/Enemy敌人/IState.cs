@@ -4,15 +4,15 @@ using UnityEngine;
 
 public interface IState
 {
-    // ½øÈë×´Ì¬
+    // è¿›å…¥çŠ¶æ€
     void OnEnter();
 
-    // ¸üĞÂ×´Ì¬
+    // æ›´æ–°çŠ¶æ€
     void OnUpdate();
 
-    // ¹Ì¶¨¸üĞÂ×´Ì¬
+    // å›ºå®šæ›´æ–°çŠ¶æ€
     void OnFixedUpdate();
 
-    // ÍË³ö×´Ì¬
+    // é€€å‡ºçŠ¶æ€
     void OnExit();
 }
