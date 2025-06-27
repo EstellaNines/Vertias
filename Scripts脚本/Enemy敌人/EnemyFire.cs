@@ -4,69 +4,80 @@ using UnityEngine;
 
 public class EnemyFire : MonoBehaviour
 {
-    [Header("×Óµ¯³ØÒıÓÃ")]
-    public EnemyBulletPool enemyBulletPool; // ÒıÓÃµĞÈË×Óµ¯³Ø
+    [Header("å­å¼¹æ± å¼•ç”¨")]
+    public EnemyBulletPool enemyBulletPool; // å¼•ç”¨æ•Œäººå­å¼¹æ± 
 
-    [Header("·¢ÉäÅäÖÃ")]
-    [SerializeField] private Transform muzzle; // Í¨¹ıInspector¹ÒÔØµÄ·¢Éäµã
-    public float fireRate = 0.5f; // Éä»÷¼ä¸ôÊ±¼ä
-    private float nextFireTime; // ÏÂ´ÎÉä»÷Ê±¼ä
-
-    [Header("¼ì²â·¶Î§")]
-    [Range(0, 20)] public float detectRange = 5f; // ¼ì²â°ë¾¶
-    [SerializeField] private LayerMask playerLayerMask; // Íæ¼Ò²ãÑÚÂë
-    private bool isPlayerInRange = false; // Íæ¼ÒÊÇ·ñÔÚ·¶Î§ÄÚ
+    [Header("å‘å°„é…ç½®")]
+    [SerializeField] private Transform muzzle; // é€šè¿‡InspectoræŒ‚è½½çš„å‘å°„ç‚¹
+    [SerializeField] private Transform weapon; // æ­¦å™¨å­å¯¹è±¡å¼•ç”¨ï¼ˆç”¨äºç‹¬ç«‹ç„å‡†ï¼‰
+    public float fireRate = 0.5f; // å°„å‡»é—´éš”æ—¶é—´
+    private float nextFireTime; // ä¸‹æ¬¡å°„å‡»æ—¶é—´
 
     void Awake()
     {
         if (muzzle == null)
         {
-            Debug.LogError("ÇëÔÚInspectorÖĞ¹ÒÔØMuzzle·¢Éäµã");
-        }
-
-        if (playerLayerMask == LayerMask.GetMask("Ignore Raycast"))
-        {
-            Debug.LogWarning("¼ì²â²ãÎ´ÉèÖÃ£¬½¨ÒéÉèÖÃÎªPlayer²ã");
+            Debug.LogError("è¯·åœ¨Inspectorä¸­æŒ‚è½½Muzzleå‘å°„ç‚¹");
         }
     }
 
     void Update()
     {
-        // ÊµÊ±¼ì²âÍæ¼ÒÊÇ·ñÔÚ·¶Î§ÄÚ
-        DetectPlayer();
+        // æŒç»­ç„å‡†ç©å®¶
+        AimAtPlayer();
 
-        // ¼ì²éÉä»÷ÀäÈ´Ê±¼ä²¢ÅĞ¶Ï·¶Î§Ìõ¼ş
-        if (Time.time >= nextFireTime && isPlayerInRange)
+        // æ£€æŸ¥å°„å‡»å†·å´æ—¶é—´
+        if (Time.time >= nextFireTime)
         {
             Shoot();
             nextFireTime = Time.time + fireRate;
         }
     }
 
-    void DetectPlayer()
+    /// <summary>
+    /// ç‹¬ç«‹ç„å‡†é€»è¾‘ï¼Œç¡®ä¿æ­¦å™¨å§‹ç»ˆæœå‘ç©å®¶ä½ç½®
+    /// </summary>
+    void AimAtPlayer()
     {
-        // Ê¹ÓÃÔ²ĞÎ¼ì²â£¨2D³¡¾°£©
-        Collider2D player = Physics2D.OverlapCircle(
-            transform.position,
-            detectRange,
-            playerLayerMask
-        );
+        RaycastFOV fov = GetComponentInParent<RaycastFOV>();
+        if (fov == null || weapon == null || !fov.IsPlayerDetected())
+        {
+            return;
+        }
 
-        isPlayerInRange = player != null;
+        Vector2 playerPosition = fov.GetPlayerPosition();
+        Vector2 aimDirection = playerPosition - (Vector2)weapon.position;
+        float angle = Mathf.Atan2(aimDirection.y, aimDirection.x) * Mathf.Rad2Deg;
 
-        // ¿ÉÊÓ»¯¼ì²â·¶Î§£¨½öÔÚSceneÊÓÍ¼ÏÔÊ¾£©
-        DebugExtension.DebugCircle(
-            transform.position,
-            Color.yellow,
-            detectRange,
-            false,
-            0.1f
-        );
+        // ä»…è°ƒæ•´Zè½´æ—‹è½¬
+        weapon.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
     }
 
     void Shoot()
     {
-        GameObject bullet = enemyBulletPool.GetBullet(muzzle.position, muzzle.rotation);
+        RaycastFOV fov = GetComponentInParent<RaycastFOV>();
+        if (fov == null)
+        {
+            Debug.LogWarning("æœªæ‰¾åˆ°RaycastFOVç»„ä»¶");
+            return;
+        }
+
+        bool playerDetected = fov.IsPlayerDetected();
+        PlayerCrouch playerCrouch = fov.GetPlayerCrouch();
+
+        // ä»…å½“ç©å®¶è¢«æ£€æµ‹åˆ°ä¸”æœªæ½œè¡Œæ—¶å°„å‡»
+        if (!playerDetected || (playerCrouch != null && playerCrouch.IsCrouching()))
+        {
+            return;
+        }
+
+        Vector2 playerPosition = fov.GetPlayerPosition();
+        Vector2 shootDirection = playerPosition - (Vector2)muzzle.position;
+        float angle = Mathf.Atan2(shootDirection.y, shootDirection.x) * Mathf.Rad2Deg;
+
+        // åˆ›å»ºå­å¼¹å¹¶è®¾ç½®æ—‹è½¬
+        Quaternion bulletRotation = Quaternion.AngleAxis(angle, Vector3.forward);
+        GameObject bullet = enemyBulletPool.GetBullet(muzzle.position, bulletRotation);
 
         if (bullet != null)
         {
@@ -74,38 +85,12 @@ public class EnemyFire : MonoBehaviour
             if (bulletComponent != null)
             {
                 bulletComponent.enabled = true;
-                // ÉèÖÃ×Óµ¯·¢ÉäÕßÎªµĞÈË
                 bulletComponent.shooter = this.transform;
-                Debug.Log($"[µĞÈË¿ª»ğ] ·¢ÉäÕß: {gameObject.name}");
+                Debug.Log($"[æ•Œäººå¼€ç«] å‘å°„è€…: {gameObject.name}");
             }
             else
             {
-                Debug.LogWarning("×Óµ¯È±ÉÙBullet×é¼ş");
-            }
-        }
-    }
-
-    // ¿ÉÊÓ»¯À©Õ¹·½·¨£¨½öÔÚSceneÊÓÍ¼ÏÔÊ¾£©
-    private static class DebugExtension
-    {
-        public static void DebugCircle(Vector3 position, Color color, float radius, bool filled = false, float duration = 0f)
-        {
-            int segments = 36;
-            Vector3[] points = new Vector3[segments + 1];
-
-            for (int i = 0; i <= segments; i++)
-            {
-                float angle = i * 2f * Mathf.PI / segments;
-                points[i] = position + new Vector3(Mathf.Cos(angle), Mathf.Sin(angle), 0) * radius;
-            }
-
-            for (int i = 0; i < segments; i++)
-            {
-                Debug.DrawLine(points[i], points[i + 1], color, duration);
-                if (filled && i < segments - 1)
-                {
-                    Debug.DrawLine(position, points[i], color * 0.5f, duration);
-                }
+                Debug.LogWarning("å­å¼¹ç¼ºå°‘Bulletç»„ä»¶");
             }
         }
     }

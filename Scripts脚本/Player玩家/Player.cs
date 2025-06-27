@@ -28,10 +28,10 @@ public class Player : MonoBehaviour
     [FieldLabel("攻击时移动速度")] public float FireSpeed = 1f; // 攻击时移动速度
 
     // --- 拾取 ---
-    [Header("拾取参数")]
-    [FieldLabel("手部")] public Transform handTransform; // 手部位置的Transform
-    [HideInInspector] public ItemBase currentPickedItem; // 当前已拾取的物品
-    [HideInInspector] public ItemBase nearbyItem; // 附近可拾取的物品
+    // [Header("拾取参数")]
+    // [FieldLabel("手部")] public Transform handTransform; // 手部位置的Transform
+    // [HideInInspector] public ItemBase currentPickedItem; // 当前已拾取的物品
+    // [HideInInspector] public ItemBase nearbyItem; // 附近可拾取的物品
 
     // --- 闪避 ---
     [Header("闪避参数")]

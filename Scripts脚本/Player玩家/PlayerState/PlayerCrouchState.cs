@@ -4,9 +4,9 @@ using UnityEngine;
 
 public class PlayerCrouchState : IState
 {
-    // --- »ñÈ¡Íæ¼Ò×é¼ş ---
+    // --- è·å–ç©å®¶ç»„ä»¶ ---
     public Player player;
-    // ¹¹Ôìº¯Êı
+    // æ„é€ å‡½æ•°
     public PlayerCrouchState(Player player)
     {
         this.player = player;

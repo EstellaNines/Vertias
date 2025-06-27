@@ -4,21 +4,21 @@ using UnityEngine;
 
 public class EnemyPerspectiveChange : MonoBehaviour
 {
-    [Header("ÎäÆ÷ÉèÖÃ")]
-    [SerializeField] private Transform weapon; // ÎäÆ÷ÒıÓÃ£¨ĞèÔÚ¼ì²éÆ÷ÖĞ¹ÒÔØ£©
-    [SerializeField] private float flipAngleThreshold = 90f; // ·­×ªãĞÖµ½Ç¶È
+    [Header("æ­¦å™¨è®¾ç½®")]
+    [SerializeField] private Transform weapon; // æ­¦å™¨å¼•ç”¨ï¼ˆéœ€åœ¨æ£€æŸ¥å™¨ä¸­æŒ‚è½½ï¼‰
+    [SerializeField] private float flipAngleThreshold = 90f; // ç¿»è½¬é˜ˆå€¼è§’åº¦
 
-    private bool isWeaponFlipped = false; // ÎäÆ÷ÊÇ·ñÒÑ·­×ª
-    private EnemyAim enemyAim; // µĞÈËÃé×¼×é¼şÒıÓÃ
+    private bool isWeaponFlipped = false; // æ­¦å™¨æ˜¯å¦å·²ç¿»è½¬
+    private EnemyAim enemyAim; // æ•Œäººç„å‡†ç»„ä»¶å¼•ç”¨
 
     void Awake()
     {
-        enemyAim = GetComponent<EnemyAim>(); // »ñÈ¡µĞÈËÃé×¼×é¼şÒıÓÃ
+        enemyAim = GetComponent<EnemyAim>(); // è·å–æ•Œäººç„å‡†ç»„ä»¶å¼•ç”¨
     }
 
     void Update()
     {
-        // ¸ù¾İÃé×¼×´Ì¬Ö´ĞĞ²»Í¬Âß¼­
+        // æ ¹æ®ç„å‡†çŠ¶æ€æ‰§è¡Œä¸åŒé€»è¾‘
         if (enemyAim != null && enemyAim.isAiming)
         {
             CheckFlipState();
@@ -33,19 +33,19 @@ public class EnemyPerspectiveChange : MonoBehaviour
     {
         if (weapon == null) return;
 
-        // »ñÈ¡ÎäÆ÷ÔÚ±¾µØ×ø±êÏµÏÂµÄĞı×ª½Ç¶È
-        float weaponAngle = weapon.localEulerAngles.z;
+        // è·å–æ­¦å™¨åœ¨ä¸–ç•Œåæ ‡ç³»ä¸‹çš„æ—‹è½¬è§’åº¦
+        float weaponAngle = weapon.eulerAngles.z;
 
-        // ´¦ÀíÅ·À­½ÇµÄ»·ÈÆÎÊÌâ£¨-180~180¶È£©
+        // æ ‡å‡†åŒ–è§’åº¦åˆ°-180~180èŒƒå›´
         if (weaponAngle > 180)
         {
             weaponAngle -= 360;
         }
 
-        // ÅĞ¶ÏÊÇ·ñ³¬¹ıãĞÖµ
-        bool shouldFlip = weaponAngle > flipAngleThreshold || weaponAngle < -flipAngleThreshold;
+        // ç»Ÿä¸€ä½¿ç”¨Â±90åº¦ä½œä¸ºè¾¹ç•Œåˆ¤æ–­
+        bool shouldFlip = weaponAngle > 90 || weaponAngle < -90;
 
-        // Èç¹û×´Ì¬±ä»¯ÔòÖ´ĞĞ·­×ª
+        // å¦‚æœçŠ¶æ€å˜åŒ–åˆ™æ‰§è¡Œç¿»è½¬
         if (shouldFlip != isWeaponFlipped)
         {
             FlipWeapon(shouldFlip);
@@ -57,10 +57,10 @@ public class EnemyPerspectiveChange : MonoBehaviour
     {
         if (weapon == null) return;
 
-        // ÖØÖÃÎäÆ÷Ğı×ª
+        // é‡ç½®æ­¦å™¨æ—‹è½¬
         weapon.rotation = Quaternion.Euler(0, 0, 0);
 
-        // Èç¹ûÒÑ¾­·­×ªÔò»Ö¸´
+        // å¦‚æœå·²ç»ç¿»è½¬åˆ™æ¢å¤
         if (isWeaponFlipped)
         {
             FlipWeapon(false);
@@ -70,7 +70,7 @@ public class EnemyPerspectiveChange : MonoBehaviour
 
     void FlipWeapon(bool shouldFlip)
     {
-        // ½ö·­×ªÎäÆ÷×ÔÉíµÄYÖáËõ·Å
+        // ä»…ç¿»è½¬æ­¦å™¨è‡ªèº«çš„Yè½´ç¼©æ”¾
         Vector3 scale = weapon.localScale;
         scale.y = shouldFlip ? -Mathf.Abs(scale.y) : Mathf.Abs(scale.y);
         weapon.localScale = scale;
