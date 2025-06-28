@@ -2,17 +2,33 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class EnemyHurtState : MonoBehaviour
+public class EnemyHurtState : IState
 {
-    // Start is called before the first frame update
-    void Start()
+    // --- 控制器引用 ---
+    Enemy enemy;
+    // --- 构造函数 --- 
+    public EnemyHurtState(Enemy enemy)
     {
-        
+        this.enemy = enemy;
+    }
+    // --- 状态方法 ---
+    public void OnEnter()
+    {
+
     }
 
-    // Update is called once per frame
-    void Update()
+    public void OnExit()
     {
-        
+
+    }
+
+    public void OnFixedUpdate()
+    {
+
+    }
+
+    public void OnUpdate()
+    {
+
     }
 }
