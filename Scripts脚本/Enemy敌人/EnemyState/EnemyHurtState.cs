@@ -4,14 +4,14 @@ using UnityEngine;
 
 public class EnemyHurtState : IState
 {
-    // --- ¿ØÖÆÆ÷ÒıÓÃ ---
+    // --- æ§åˆ¶å™¨å¼•ç”¨ ---
     Enemy enemy;
-    // --- ¹¹Ôìº¯Êı --- 
+    // --- æ„é€ å‡½æ•° --- 
     public EnemyHurtState(Enemy enemy)
     {
         this.enemy = enemy;
     }
-    // --- ×´Ì¬·½·¨ ---
+    // --- çŠ¶æ€æ–¹æ³• ---
     public void OnEnter()
     {
 

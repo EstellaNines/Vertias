@@ -23,6 +23,15 @@ public class Bullet : MonoBehaviour
         StartPos = transform.position;
     }
 
+    // 添加Initialize方法，用于Enemy类调用
+    public void Initialize(Vector2 direction, float speed)
+    {
+        // 设置子弹速度和方向
+        BulletSpeed = speed;
+        RB2D.velocity = direction * BulletSpeed;
+        StartPos = transform.position;
+    }
+
     void Update()
     {
         BulletFire();
