@@ -13,7 +13,14 @@ public class PlayerMoveState : IState
     }
     public void OnEnter()
     {
-        player.AIMTOR.Play("Walk");
+        if (player.isWeaponInHand)
+        {
+            player.AIMTOR.Play("Shoot_Walk");
+        }
+        else
+        {
+            player.AIMTOR.Play("Walk");
+        }
     }
 
     public void OnExit()
@@ -29,19 +36,39 @@ public class PlayerMoveState : IState
 
     public void OnUpdate()
     {
-        // 更新视角方向
+        // 视角变化始终存在
         player.UpdateLookDirection();
-
+        
+        // 拾取切换
+        if (player.isPickingUp)
+        {
+            player.transitionState(PlayerStateType.PickUp);
+            return;
+        }
+        
+        // 如果开启跑步状态，切换到跑步状态
+        if (player.isRunning && player.InputDirection != Vector2.zero)
+        {
+            player.transitionState(PlayerStateType.Run);
+            return;
+        }
+        
         // 当没有输入或速度接近静止时切换到待机状态
         if (player.InputDirection == Vector2.zero || player.CurrentSpeed < 0.1f)
         {
             player.transitionState(PlayerStateType.Idle);
+            return;
         }
-        // 翻滚切换
+        if (player.isCrouching)
+        {
+            player.transitionState(PlayerStateType.Crouch);
+            return;
+        }
+        // 闪避切换
         if (player.isDodged)
         {
-            player.transitionState(PlayerStateType.Dodge); // 翻滚切换
-
+            player.transitionState(PlayerStateType.Dodge);
+            return;
         }
     }
 }

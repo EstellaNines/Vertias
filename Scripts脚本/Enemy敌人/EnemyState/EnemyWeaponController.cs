@@ -9,7 +9,6 @@ public class EnemyWeaponController : MonoBehaviour
     
     [Header("目标设置")]
     [SerializeField] private LayerMask targetLayer; // 目标层（玩家所在层）
-    [SerializeField] private float detectionRadius = 10f; // 检测半径
     
     private Transform playerTransform; // 玩家Transform引用
     private bool isWeaponFlipped = false; // 武器是否已翻转

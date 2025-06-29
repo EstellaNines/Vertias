@@ -21,26 +21,40 @@ public class Player : MonoBehaviour
     [FieldLabel("行走速度")] public float WalkSpeed = 3f; // 移动速度
     [HideInInspector] public float CurrentSpeed; // 当前移动速度
 
+    // --- 跑步 ---
+    [Header("跑步参数")]
+    [FieldLabel("跑步速度")] public float RunSpeed = 5f; // 跑步速度
+    [HideInInspector] public bool isRunning = false; // 是否正在跑步
 
     // --- 攻击 ---
     [Header("攻击参数")]
-    [HideInInspector] public bool isFiring = false; // 射击状态变量
     [FieldLabel("攻击时移动速度")] public float FireSpeed = 1f; // 攻击时移动速度
-
-    // --- 拾取 ---
-    // [Header("拾取参数")]
-    // [FieldLabel("手部")] public Transform handTransform; // 手部位置的Transform
-    // [HideInInspector] public ItemBase currentPickedItem; // 当前已拾取的物品
-    // [HideInInspector] public ItemBase nearbyItem; // 附近可拾取的物品
+    [FieldLabel("手部位置")] public Transform Hand; // 手部位置
+    [HideInInspector] public bool isWeaponInHand = false; // 武器是否在手部
+    [HideInInspector] public bool isFiring = false; // 射击状态变量
 
     // --- 闪避 ---
     [Header("闪避参数")]
-    [HideInInspector] public bool isDodged = false;// 闪避
     [FieldLabel("翻滚推力")] public float DdogeForce = 5f;
     [FieldLabel("翻滚持续时间")] public float DodgeDuration = 0.3f;
     [HideInInspector] public float DodgeTimer = 0f;
     [FieldLabel("翻滚冷却时间")] public float DodgeCooldown = 1f;
     [HideInInspector] public bool isDodgeCoolDownEnd = true;
+    [HideInInspector] public bool isDodged = false;// 闪避
+
+    // --- 潜行 ---
+    [Header("潜行参数")]
+    [FieldLabel("潜行颜色")] public Color crouchColor = Color.green; // 潜行时的颜色
+    [FieldLabel("潜行透明度")] [Range(0, 1)] public float crouchAlpha = 0.5f; // 潜行时的透明度
+    [HideInInspector] public bool isCrouching = false; // 潜行状态标志位
+    [HideInInspector] public SpriteRenderer spriteRenderer; // 精灵渲染器
+    [HideInInspector] public Color originalColor; // 原始颜色
+
+    // --- 拾取 ---
+    [Header("拾取参数")]
+    [HideInInspector] public ItemBase currentPickedItem; // 当前已拾取的物品
+    [HideInInspector] public ItemBase nearbyItem; // 附近可拾取的物品
+    [HideInInspector] public bool isPickingUp = false; // 是否正在拾取
 
     // --- 视角参数 ---
     private float screenCenterX; // 屏幕中心X坐标
@@ -63,6 +77,13 @@ public class Player : MonoBehaviour
         PlayerRB2D = GetComponent<Rigidbody2D>();
         AIMTOR = GetComponent<Animator>();
         collider2D = GetComponent<Collider2D>();
+        Hand = transform.Find("Hand"); // 初始化手部位置
+        // 获取SpriteRenderer组件并保存原始颜色
+        spriteRenderer = GetComponent<SpriteRenderer>();
+        if (spriteRenderer != null)
+        {
+            originalColor = spriteRenderer.color;
+        }
 
         // 初始化屏幕中心坐标
         screenCenterX = Screen.width / 2f;
@@ -117,6 +138,7 @@ public class Player : MonoBehaviour
 
     private void Update()
     {
+        WeaponInHand();
         currentState.OnUpdate();
     }
     private void FixedUpdate()
@@ -130,8 +152,8 @@ public class Player : MonoBehaviour
         playerInputController.onFire += Fire;
         playerInputController.onDodge += Dodge;
         playerInputController.onPickup += PickUp;
-        playerInputController.onRun += Run;
-        playerInputController.onCrouch += Crouch;
+        playerInputController.onRun += Run; // 修改为接收bool参数
+        playerInputController.onCrouch += Crouch; // 修改为接收bool参数
         playerInputController.onReload += Reload;
     }
     private void OnDisable() // 取关事件
@@ -146,7 +168,6 @@ public class Player : MonoBehaviour
     }
 
     // --- 功能函数 --- 
-
     #region 移动
     public void Move(Vector2 moveInput)
     {
@@ -168,6 +189,18 @@ public class Player : MonoBehaviour
     }
     #endregion
     #region 射击
+    // 获取武器
+    public void WeaponInHand()
+    {
+        if(Hand.childCount > 0)
+        {
+            isWeaponInHand = true; // 武器已装备
+        }
+        else
+        {
+            isWeaponInHand = false; // 武器未装备
+        }
+    }
     public void Fire()
     {
         Debug.Log("射击输入触发");
@@ -177,9 +210,10 @@ public class Player : MonoBehaviour
     // 闪避动作
     public void Dodge()
     {
-        if (!isDodged && !isDodgeCoolDownEnd)
+        if (!isDodged && isDodgeCoolDownEnd)  // 冷却结束时才能闪避
         {
             isDodged = true; // 开始闪避
+            Debug.Log("闪避输入触发");
         }
     }
     public void DodgeOnCoolDown()
@@ -191,20 +225,40 @@ public class Player : MonoBehaviour
     public IEnumerator DodgeOnCoolDownCoroutine()
     {
         yield return new WaitForSeconds(DodgeCooldown);
-        isDodgeCoolDownEnd = false;
+        isDodgeCoolDownEnd = true; // 冷却结束，设置为true
         Debug.Log("闪避冷却结束");
     }
     #endregion
     #region 拾取
     public void PickUp()
     {
-        Debug.Log("拾取输入触发");
+        if (nearbyItem != null)
+        {
+            isPickingUp = true;
+            Debug.Log("拾取输入触发");
+        }
+    }
+    
+    // 注册可拾取物品（由物品脚本调用）
+    public void RegisterItem(ItemBase item)
+    {
+        nearbyItem = item;
+    }
+    
+    // 取消注册离开触发器的物品（由物品脚本调用）
+    public void UnregisterItem(ItemBase item)
+    {
+        if (nearbyItem == item)
+        {
+            nearbyItem = null;
+        }
     }
     #endregion
     #region 奔跑
-    public void Run()
+    public void Run(bool isRunPressed) // 修改为接收bool参数
     {
-        Debug.Log("奔跑输入触发");
+        isRunning = isRunPressed;
+        Debug.Log($"奔跑状态: {(isRunning ? "开启" : "关闭")}");
     }
     #endregion
     #region 换弹
@@ -214,9 +268,39 @@ public class Player : MonoBehaviour
     }
     #endregion
     #region 潜行
-    public void Crouch()
+    public void Crouch(bool isCrouchPressed)
     {
-        Debug.Log("潜行输入触发");
+        isCrouching = isCrouchPressed;
+        Debug.Log($"潜行状态: {(isCrouching ? "开启" : "关闭")}");
+    }
+    
+    // 应用潜行视觉效果
+    public void ApplyCrouchVisual()
+    {
+        if (spriteRenderer != null)
+        {
+            spriteRenderer.color = new Color(
+                crouchColor.r,
+                crouchColor.g,
+                crouchColor.b,
+                crouchAlpha
+            );
+        }
+    }
+    
+    // 恢复原始视觉效果
+    public void RestoreOriginalVisual()
+    {
+        if (spriteRenderer != null)
+        {
+            spriteRenderer.color = originalColor;
+        }
+    }
+    
+    // 外部访问潜行状态
+    public bool IsCrouching()
+    {
+        return isCrouching;
     }
     #endregion
 }

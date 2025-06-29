@@ -13,7 +13,14 @@ public class PlayerIdleState : IState
     }
     public void OnEnter()
     {
-        player.AIMTOR.Play("Idle");
+        if (player.isWeaponInHand)
+        {
+            player.AIMTOR.Play("Shoot_Idle");
+        }
+        else
+        {
+            player.AIMTOR.Play("Idle");
+        }
     }
 
     public void OnExit()
@@ -28,18 +35,40 @@ public class PlayerIdleState : IState
 
     public void OnUpdate()
     {
-        // 更新视角方向
+        // 视角变化始终存在
         player.UpdateLookDirection();
-        // 移动切换
+        
+        // 拾取切换
+        if (player.isPickingUp)
+        {
+            player.transitionState(PlayerStateType.PickUp);
+            return;
+        }
+        
+        // 移动切换 - 根据是否跑步决定状态
         if (player.InputDirection != Vector2.zero)
         {
-            player.transitionState(PlayerStateType.Move); // 切换移动状态
+            if (player.isRunning)
+            {
+                player.transitionState(PlayerStateType.Run);
+            }
+            else
+            {
+                player.transitionState(PlayerStateType.Move);
+            }
+            return;
         }
+        if (player.isCrouching)
+        {
+            player.transitionState(PlayerStateType.Crouch);
+            return;
+        }
+        
         // 翻滚切换
         if (player.isDodged)
         {
-            player.transitionState(PlayerStateType.Dodge); // 翻滚切换
-        
+            player.transitionState(PlayerStateType.Dodge);
+            return;
         }
     }
 }

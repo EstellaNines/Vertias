@@ -9,10 +9,10 @@ public class PlayerInputController : ScriptableObject, PlayerInputAction.IGamePl
     public event UnityAction<Vector2> onMovement; // 移动事件
     public event UnityAction onFire; // 攻击事件
     public event UnityAction onDodge; // 闪避事件
-    public event UnityAction onCrouch; //潜行事件
+    public event UnityAction<bool> onCrouch; // 潜行事件 - 修改为传递bool参数
     public event UnityAction onReload; // 换弹事件
     public event UnityAction onPickup; // 拾取事件
-    public event UnityAction onRun; // 跑动事件
+    public event UnityAction<bool> onRun; // 跑动事件
     // 引用属性
     PlayerInputAction playerinputAction;
 
@@ -76,14 +76,22 @@ public class PlayerInputController : ScriptableObject, PlayerInputAction.IGamePl
     {
         if (context.started) // 按下一刻
         {
-            onRun?.Invoke();
+            onRun?.Invoke(true); // 开始跑步
+        }
+        else if (context.canceled) // 松开按键
+        {
+            onRun?.Invoke(false); // 停止跑步
         }
     }
     public void OnCrouch(InputAction.CallbackContext context) // 潜行
     {
         if (context.started) // 按下一刻
         {
-            onCrouch?.Invoke();
+            onCrouch?.Invoke(true); // 开始潜行
+        }
+        else if (context.canceled) // 松开按键
+        {
+            onCrouch?.Invoke(false); // 停止潜行
         }
     }
 

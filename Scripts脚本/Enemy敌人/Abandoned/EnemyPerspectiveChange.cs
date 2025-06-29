@@ -1,78 +1,78 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+// using System.Collections;
+// using System.Collections.Generic;
+// using UnityEngine;
 
-public class EnemyPerspectiveChange : MonoBehaviour
-{
-    [Header("武器设置")]
-    [SerializeField] private Transform weapon; // 武器引用（需在检查器中挂载）
-    [SerializeField] private float flipAngleThreshold = 90f; // 翻转阈值角度
+// public class EnemyPerspectiveChange : MonoBehaviour
+// {
+//     [Header("武器设置")]
+//     [SerializeField] private Transform weapon; // 武器引用（需在检查器中挂载）
+//     [SerializeField] private float flipAngleThreshold = 90f; // 翻转阈值角度
 
-    private bool isWeaponFlipped = false; // 武器是否已翻转
-    private EnemyAim enemyAim; // 敌人瞄准组件引用
+//     private bool isWeaponFlipped = false; // 武器是否已翻转
+//     private EnemyAim enemyAim; // 敌人瞄准组件引用
 
-    void Awake()
-    {
-        enemyAim = GetComponent<EnemyAim>(); // 获取敌人瞄准组件引用
-    }
+//     void Awake()
+//     {
+//         enemyAim = GetComponent<EnemyAim>(); // 获取敌人瞄准组件引用
+//     }
 
-    void Update()
-    {
-        // 根据瞄准状态执行不同逻辑
-        if (enemyAim != null && enemyAim.isAiming)
-        {
-            CheckFlipState();
-        }
-        else
-        {
-            ResetWeaponState();
-        }
-    }
+//     void Update()
+//     {
+//         // 根据瞄准状态执行不同逻辑
+//         if (enemyAim != null && enemyAim.isAiming)
+//         {
+//             CheckFlipState();
+//         }
+//         else
+//         {
+//             ResetWeaponState();
+//         }
+//     }
 
-    void CheckFlipState()
-    {
-        if (weapon == null) return;
+//     void CheckFlipState()
+//     {
+//         if (weapon == null) return;
 
-        // 获取武器在世界坐标系下的旋转角度
-        float weaponAngle = weapon.eulerAngles.z;
+//         // 获取武器在世界坐标系下的旋转角度
+//         float weaponAngle = weapon.eulerAngles.z;
 
-        // 标准化角度到-180~180范围
-        if (weaponAngle > 180)
-        {
-            weaponAngle -= 360;
-        }
+//         // 标准化角度到-180~180范围
+//         if (weaponAngle > 180)
+//         {
+//             weaponAngle -= 360;
+//         }
 
-        // 统一使用±90度作为边界判断
-        bool shouldFlip = weaponAngle > 90 || weaponAngle < -90;
+//         // 统一使用±90度作为边界判断
+//         bool shouldFlip = weaponAngle > 90 || weaponAngle < -90;
 
-        // 如果状态变化则执行翻转
-        if (shouldFlip != isWeaponFlipped)
-        {
-            FlipWeapon(shouldFlip);
-            isWeaponFlipped = shouldFlip;
-        }
-    }
+//         // 如果状态变化则执行翻转
+//         if (shouldFlip != isWeaponFlipped)
+//         {
+//             FlipWeapon(shouldFlip);
+//             isWeaponFlipped = shouldFlip;
+//         }
+//     }
 
-    void ResetWeaponState()
-    {
-        if (weapon == null) return;
+//     void ResetWeaponState()
+//     {
+//         if (weapon == null) return;
 
-        // 重置武器旋转
-        weapon.rotation = Quaternion.Euler(0, 0, 0);
+//         // 重置武器旋转
+//         weapon.rotation = Quaternion.Euler(0, 0, 0);
 
-        // 如果已经翻转则恢复
-        if (isWeaponFlipped)
-        {
-            FlipWeapon(false);
-            isWeaponFlipped = false;
-        }
-    }
+//         // 如果已经翻转则恢复
+//         if (isWeaponFlipped)
+//         {
+//             FlipWeapon(false);
+//             isWeaponFlipped = false;
+//         }
+//     }
 
-    void FlipWeapon(bool shouldFlip)
-    {
-        // 仅翻转武器自身的Y轴缩放
-        Vector3 scale = weapon.localScale;
-        scale.y = shouldFlip ? -Mathf.Abs(scale.y) : Mathf.Abs(scale.y);
-        weapon.localScale = scale;
-    }
-}
+//     void FlipWeapon(bool shouldFlip)
+//     {
+//         // 仅翻转武器自身的Y轴缩放
+//         Vector3 scale = weapon.localScale;
+//         scale.y = shouldFlip ? -Mathf.Abs(scale.y) : Mathf.Abs(scale.y);
+//         weapon.localScale = scale;
+//     }
+// }

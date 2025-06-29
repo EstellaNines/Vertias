@@ -47,7 +47,6 @@ public class Enemy : MonoBehaviour
     [FieldLabel("射线检测颜色")] public Color RayDetectionColor = Color.red; // 自定义可视化颜色
     [HideInInspector] public bool playerDetected = false; // 是否检测到玩家
     [HideInInspector] public GameObject player; // 玩家引用
-    private PlayerCrouch playerCrouch; // 玩家潜行组件
     [HideInInspector] public Vector2 lastKnownPlayerPosition; // 玩家最后已知位置
     [HideInInspector] public bool wasFollowingPath = false; // 是否之前正在跟随路径
 
@@ -69,7 +68,7 @@ public class Enemy : MonoBehaviour
 
     // --- 函数 ---
     private void Awake()
-    {        
+    {
         // 组件引用
         RB = GetComponent<Rigidbody2D>();
         animator = GetComponent<Animator>();
@@ -80,11 +79,8 @@ public class Enemy : MonoBehaviour
         if (player == null)
         {            
             player = GameObject.FindGameObjectWithTag("Player");
-            if (player != null)
-            {
-                playerCrouch = player.GetComponent<PlayerCrouch>();
-            }
-            else
+            // 移除PlayerCrouch组件的获取，因为现在使用状态机
+            if (player == null)
             {
                 Debug.LogWarning("未找到玩家对象");
             }
@@ -185,9 +181,13 @@ public class Enemy : MonoBehaviour
     // 检查玩家是否在潜行状态
     public bool IsPlayerCrouching()
     {
-        if (playerCrouch != null)
+        if (player != null)
         {
-            return playerCrouch.IsCrouching();
+            Player playerComponent = player.GetComponent<Player>();
+            if (playerComponent != null)
+            {
+                return playerComponent.IsCrouching();
+            }
         }
         return false;
     }
@@ -308,26 +308,43 @@ public class Enemy : MonoBehaviour
                 // 发射射线检查是否有障碍物阻挡
                 RaycastHit2D hit = Physics2D.Raycast(rayOrigin, directionToPlayer, distanceToPlayer, obstacleLayer);
                 
-                // 如果没有障碍物阻挡且玩家未潜行
-                if (hit.collider == null && !IsPlayerCrouching())
+                // 如果没有障碍物阻挡
+                if (hit.collider == null)
                 {
-                    playerDetected = true;
-                    lastKnownPlayerPosition = playerPosition; // 记录玩家最后已知位置
-                    
-                    // 如果当前状态是巡逻或移动，记录正在跟随路径
-                    EnemyState currentState = GetCurrentState();
-                    if (currentState == EnemyState.Patrol || currentState == EnemyState.Move)
+                    // 如果玩家未潜行，正常检测和攻击
+                    if (!IsPlayerCrouching())
                     {
-                        wasFollowingPath = true;
+                        playerDetected = true;
+                        lastKnownPlayerPosition = playerPosition; // 记录玩家最后已知位置
+                        
+                        // 如果当前状态是巡逻或移动，记录正在跟随路径
+                        EnemyState currentState = GetCurrentState();
+                        if (currentState == EnemyState.Patrol || currentState == EnemyState.Move)
+                        {
+                            wasFollowingPath = true;
+                        }
+                        
+                        // 立即切换到瞄准状态
+                        if (currentState != EnemyState.Aim && currentState != EnemyState.Attack)
+                        {
+                            transitionState(EnemyState.Aim);
+                        }
+                        
+                        return;
                     }
-                    
-                    // 立即切换到瞄准状态
-                    if (currentState != EnemyState.Aim && currentState != EnemyState.Attack)
+                    // 如果玩家潜行，敌人检测到但不攻击，继续巡逻
+                    else
                     {
-                        transitionState(EnemyState.Aim);
+                        // 确保敌人不会因为检测到潜行玩家而改变状态
+                        // 如果当前在攻击或瞄准状态，返回巡逻状态
+                        EnemyState currentState = GetCurrentState();
+                        if (currentState == EnemyState.Aim || currentState == EnemyState.Attack)
+                        {
+                            shouldPatrol = true;
+                            transitionState(EnemyState.Patrol);
+                        }
+                        return;
                     }
-                    
-                    return;
                 }
             }
         }
@@ -430,14 +447,22 @@ public class Enemy : MonoBehaviour
                 float angleToPlayer = Vector2.Angle(direction, directionToPlayer);
                 float distanceToPlayer = Vector2.Distance(rayOrigin, playerPosition);
                 
-                // 如果射线方向接近玩家方向，且玩家在视野范围内，且玩家未潜行
-                if (angleToPlayer < 5f && distanceToPlayer <= viewRadius && !IsPlayerCrouching())
+                // 如果射线方向接近玩家方向，且玩家在视野范围内
+                if (angleToPlayer < 5f && distanceToPlayer <= viewRadius)
                 {
                     // 检查是否有障碍物阻挡
                     RaycastHit2D playerHit = Physics2D.Raycast(rayOrigin, directionToPlayer, distanceToPlayer, obstacleLayer);
                     if (playerHit.collider == null)
                     {
-                        rayColor = Color.green; // 检测到非潜行玩家时的颜色
+                        // 根据玩家是否潜行设置不同颜色
+                        if (IsPlayerCrouching())
+                        {
+                            rayColor = Color.black; // 检测到潜行玩家时的颜色
+                        }
+                        else
+                        {
+                            rayColor = Color.green; // 检测到非潜行玩家时的颜色
+                        }
                     }
                 }
             }

@@ -14,12 +14,12 @@ public class PlayerDodgeState : IState
     }
     public void OnEnter()
     {
-
+        player.isDodgeCoolDownEnd = false; // 进入闪避状态时设置为冷却中
     }
 
     public void OnExit()
     {
-
+        DodgeTimer = 0; // 退出时重置计时器
     }
 
     public void OnFixedUpdate()
@@ -36,26 +36,21 @@ public class PlayerDodgeState : IState
         {
             player.transitionState(PlayerStateType.Idle);// 切换为待机状态 
         }
+        
     }
-
+    // 翻滚功能
     void Dodge()
     {
-        if (!player.isDodgeCoolDownEnd)
+        if (DodgeTimer <= player.DodgeDuration)
         {
-            if (DodgeTimer <= player.DodgeDuration)
-            {
-                player.PlayerRB2D.AddForce(player.InputDirection * player.DdogeForce, ForceMode2D.Impulse);
-                DodgeTimer += Time.fixedDeltaTime;
-            }
-            else
-            {
-                player.isDodged = false;
-                player.isDodgeCoolDownEnd = true;
-                player.DodgeOnCoolDown();
-                DodgeTimer = 0;
-
-            }
+            player.PlayerRB2D.AddForce(player.InputDirection * player.DdogeForce, ForceMode2D.Impulse);
+            DodgeTimer += Time.fixedDeltaTime;
         }
-        
+        else
+        {
+            player.isDodged = false;
+            player.DodgeOnCoolDown();
+            DodgeTimer = 0;
+        }
     }
 }
