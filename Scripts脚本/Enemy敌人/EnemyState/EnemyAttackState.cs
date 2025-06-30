@@ -48,6 +48,15 @@ public class EnemyAttackState : IState
 
     public void OnUpdate()
     {
+        // 检查玩家是否已死亡
+        if (enemy.IsPlayerDead())
+        {
+            Debug.Log("玩家已死亡，敌人停止攻击");
+            enemy.shouldPatrol = true;
+            enemy.transitionState(EnemyState.Patrol);
+            return;
+        }
+        
         // 如果玩家不再被检测到或者进入潜行状态，返回巡逻状态
         if (!enemy.IsPlayerDetected() || enemy.IsPlayerCrouching())
         {

@@ -1,88 +1,83 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 public class WeaponTrigger : MonoBehaviour
 {
-    // å¼•ç”¨è¾“å…¥åŠ¨ä½œç±»
-    PlayerInputAction inputActions;
-
-    // å­å¼¹å‘å°„å£ä½ç½®
+    // ×Óµ¯·¢Éä¿ÚÎ»ÖÃ
     public Transform Muzzle;
 
-    // å­å¼¹æ± 
+    // ×Óµ¯³Ø
     public BulletPool bulletPool;
 
-    // æ˜¯å¦æ­£åœ¨å°„å‡»æ ‡å¿—
-    bool isFiring;
+    // ÊÇ·ñÕıÔÚÉä»÷±êÖ¾
+    private bool isFiring;
 
-    // å°„å‡»é—´éš”æ—¶é—´
+    // Éä»÷¼ä¸ôÊ±¼ä
     public float ShootInterval;
 
-    // è®¡æ—¶å™¨ï¼Œç”¨äºæ§åˆ¶å°„å‡»é¢‘ç‡
+    // ¼ÆÊ±Æ÷£¬ÓÃÓÚ¿ØÖÆÉä»÷ÆµÂÊ
     private float Timer;
 
-    //æ•£å¸ƒè§’åº¦å­—æ®µ
+    //É¢²¼½Ç¶È×Ö¶Î
     public float spreadAngle = 5f;
 
-    // åœ¨è„šæœ¬å®ä¾‹åŒ–æ—¶è°ƒç”¨
-
-    // å¤„ç†å°„å‡»è¾“å…¥äº‹ä»¶
-    private void FireInput(InputAction.CallbackContext context)
+    // Íâ²¿ÉèÖÃÉä»÷×´Ì¬µÄ½Ó¿Ú
+    public void SetFiring(bool firing)
     {
-        // æ ¹æ®è¾“å…¥çŠ¶æ€æ›´æ–°å°„å‡»æ ‡å¿—
-        isFiring = !context.canceled;
-        //Debug.Log(context);
+        isFiring = firing;
     }
 
-    // æ¯å¸§è°ƒç”¨ä¸€æ¬¡
+    // Ã¿Ö¡µ÷ÓÃÒ»´Î
     void Update()
     {
-        // è®¡æ—¶å™¨é€’å¢
+        // ¼ÆÊ±Æ÷µİÔö
         Timer += Time.deltaTime;
 
-        // å¦‚æœæ­£åœ¨å°„å‡»ä¸”è®¡æ—¶å™¨è¾¾åˆ°å°„å‡»é—´éš”
+        // Èç¹ûÕıÔÚÉä»÷ÇÒ¼ÆÊ±Æ÷´ïµ½Éä»÷¼ä¸ô
         if (isFiring && Timer >= ShootInterval)
         {
-            // é‡ç½®è®¡æ—¶å™¨
+            // ÖØÖÃ¼ÆÊ±Æ÷
             Timer = 0;
 
-            // æ‰§è¡Œå°„å‡»
+            // Ö´ĞĞÉä»÷
             Fire();
         }
     }
 
-    // å°„å‡»é€»è¾‘
+    // Éä»÷Âß¼­
     private void Fire()
     {
-        // ä»æ± ä¸­è·å–ä¸€ä¸ªå­å¼¹
+        // ´Ó³ØÖĞ»ñÈ¡Ò»¸ö×Óµ¯
         GameObject bulletObj = bulletPool.GetBullet();
+        if (bulletObj == null) return;
 
-        // è®¾ç½®å­å¼¹ä½ç½®å’Œæ—‹è½¬
+        // ÉèÖÃ×Óµ¯Î»ÖÃºÍĞı×ª
         bulletObj.transform.position = Muzzle.position;
         bulletObj.transform.rotation = Muzzle.rotation;
 
-        // æ·»åŠ éšæœºæ•£å¸ƒåç§»
+        // Ìí¼ÓËæ»úÉ¢²¼Æ«ÒÆ
         float randomAngle = Random.Range(-spreadAngle, spreadAngle);
         bulletObj.transform.rotation = Muzzle.rotation * Quaternion.Euler(0, 0, randomAngle);
 
-        // è·å–å­å¼¹ç»„ä»¶
+        // »ñÈ¡×Óµ¯×é¼ş
         Bullet bullet = bulletObj.GetComponent<Bullet>();
+        if (bullet != null)
+        {
+            // ÉèÖÃ×Óµ¯µÄ³õÊ¼Î»ÖÃ
+            bullet.StartPos = Muzzle.position;
 
-        // è®¾ç½®å­å¼¹çš„é€Ÿåº¦
-        //bullet.BulletSpeed = bullet.BulletSpeed; 
+            // ÉèÖÃ×Óµ¯·¢ÉäÕßÎªÍæ¼Ò
+            bullet.shooter = this.transform.parent; // ÎäÆ÷µÄ¸¸¶ÔÏó£¨Íæ¼Ò£©
+            Debug.Log($"[Íæ¼Ò¿ª»ğ] ·¢ÉäÕß: {bullet.shooter.name}");
 
-        // è®¾ç½®å­å¼¹çš„åˆå§‹ä½ç½®
-        bullet.StartPos = Muzzle.position;
+            // ÉèÖÃ×Óµ¯µÄÔË¶¯·½Ïò
+            Rigidbody2D rb = bulletObj.GetComponent<Rigidbody2D>();
+            if (rb != null)
+            {
+                rb.velocity = bulletObj.transform.right * bullet.BulletSpeed;
+            }
+        }
 
-        // è®¾ç½®å­å¼¹å‘å°„è€…ä¸ºç©å®¶
-        bullet.shooter = this.transform;
-        Debug.Log($"[ç©å®¶å¼€ç«] å‘å°„è€…: {gameObject.name}");
-
-        // è®¾ç½®å­å¼¹çš„è¿åŠ¨æ–¹å‘
-        Rigidbody2D rb = bulletObj.GetComponent<Rigidbody2D>();
-        rb.velocity = bulletObj.transform.right * bullet.BulletSpeed;
-
-        // å¯ç”¨å­å¼¹
+        // ÆôÓÃ×Óµ¯
         bulletObj.SetActive(true);
     }
 }

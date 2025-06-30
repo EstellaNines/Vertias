@@ -11,6 +11,17 @@ public enum PlayerStateType
 public class Player : MonoBehaviour
 {
     // 属性
+    // --- 生命值系统 ---
+    [Header("生命值系统")]
+    [FieldLabel("最大生命值")] public float MaxHealth = 100f; // 最大生命值
+    [HideInInspector] public float CurrentHealth; // 当前生命值
+    [FieldLabel("最大饱食度")] public float MaxHunger = 100f; // 最大饱食度
+    [HideInInspector] public float CurrentHunger; // 当前饱食度
+    [FieldLabel("最大精神值")] public float MaxMental = 100f; // 最大精神值
+    [HideInInspector] public float CurrentMental; // 当前精神值
+    [HideInInspector] public bool isHurt = false; // 是否受伤
+    [HideInInspector] public bool isDead = false; // 是否死亡
+
     // --- 输入系统 ---
     [Header("获取玩家输入系统")]
     [FieldLabel("输入系统获取")] public PlayerInputController playerInputController; // 获取玩家输入系统
@@ -32,6 +43,12 @@ public class Player : MonoBehaviour
     [FieldLabel("手部位置")] public Transform Hand; // 手部位置
     [HideInInspector] public bool isWeaponInHand = false; // 武器是否在手部
     [HideInInspector] public bool isFiring = false; // 射击状态变量
+    [HideInInspector] public bool isAttacking = false; // 是否正在攻击状态
+    [HideInInspector] public WeaponTrigger currentWeapon; // 当前武器引用
+    [HideInInspector] public float fireTimer = 0f; // 射击计时器
+    [HideInInspector] public Vector3 aimDirection; // 瞄准方向
+    [HideInInspector] public Vector3 worldMousePosition; // 世界鼠标位置
+    [HideInInspector] public Camera playerCamera; // 玩家摄像机
 
     // --- 闪避 ---
     [Header("闪避参数")]
@@ -78,6 +95,7 @@ public class Player : MonoBehaviour
         AIMTOR = GetComponent<Animator>();
         collider2D = GetComponent<Collider2D>();
         Hand = transform.Find("Hand"); // 初始化手部位置
+        playerCamera = Camera.main; // 获取主摄像机
         // 获取SpriteRenderer组件并保存原始颜色
         spriteRenderer = GetComponent<SpriteRenderer>();
         if (spriteRenderer != null)
@@ -88,6 +106,11 @@ public class Player : MonoBehaviour
         // 初始化屏幕中心坐标
         screenCenterX = Screen.width / 2f;
         CurrentSpeed = WalkSpeed; // 设置初始速度为行走速度
+
+        // 初始化生命值系统
+        CurrentHealth = MaxHealth;
+        CurrentHunger = MaxHunger;
+        CurrentMental = MaxMental;
 
         // 获取状态机
         InitializeStateMachine();
@@ -114,10 +137,91 @@ public class Player : MonoBehaviour
     // 更新视角方向
     public void UpdateLookDirection()
     {
+        // 如果处于死亡状态，不更新视角方向
+        if (currentState is PlayerDieState)
+        {
+            return;
+        }
+        
         var mousePos = Mouse.current.position.ReadValue();
         // 根据鼠标位置更新动画器方向参数（0为左，1为右）
         float horizontalDirection = (mousePos.x < screenCenterX) ? 0f : 1f;
         AIMTOR.SetFloat("Horizontial", horizontalDirection);
+    }
+
+    // 更新瞄准方向（移除层级和距离限制）
+    public void UpdateAiming()
+    {
+        if (playerCamera == null) return;
+        
+        // 获取鼠标屏幕位置
+        Vector3 mouseScreenPosition = Mouse.current.position.ReadValue();
+        mouseScreenPosition.z = playerCamera.nearClipPlane;
+        
+        // 转换为世界坐标
+        worldMousePosition = playerCamera.ScreenToWorldPoint(mouseScreenPosition);
+        
+        // 计算瞄准方向（无距离限制）
+        aimDirection = (worldMousePosition - transform.position).normalized;
+        
+        // 更新Hand的旋转
+        UpdateHandRotation();
+    }
+
+    // 更新Hand旋转
+    public void UpdateHandRotation()
+    {
+        if (Hand == null) return;
+        
+        // 计算Hand应该指向的角度
+        float angle = Mathf.Atan2(aimDirection.y, aimDirection.x) * Mathf.Rad2Deg;
+        
+        // 设置Hand旋转
+        Hand.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
+        
+        // 如果有武器，处理武器翻转
+        if (isWeaponInHand && currentWeapon != null)
+        {
+            UpdateWeaponFlip(angle);
+        }
+    }
+
+    // 更新武器翻转
+    public void UpdateWeaponFlip(float handAngle)
+    {
+        if (currentWeapon == null) return;
+        
+        Vector3 weaponScale = currentWeapon.transform.localScale;
+        
+        // 当Hand旋转角度大于90度或小于-90度时，翻转武器Y轴
+        if (handAngle > 90f || handAngle < -90f)
+        {
+            weaponScale.y = -Mathf.Abs(weaponScale.y); // 翻转Y轴
+        }
+        else
+        {
+            weaponScale.y = Mathf.Abs(weaponScale.y); // 保持正常
+        }
+        
+        currentWeapon.transform.localScale = weaponScale;
+    }
+
+    // 更新武器朝向（修改为仅处理武器翻转）
+    public void UpdateWeaponOrientation()
+    {
+        if (currentWeapon == null || !isWeaponInHand) return;
+        
+        // 获取当前Hand的旋转角度
+        float handAngle = Hand.eulerAngles.z;
+        
+        // 将角度转换为-180到180的范围
+        if (handAngle > 180f)
+        {
+            handAngle -= 360f;
+        }
+        
+        // 更新武器翻转
+        UpdateWeaponFlip(handAngle);
     }
 
     // --- 常规函数 ---
@@ -138,6 +242,15 @@ public class Player : MonoBehaviour
 
     private void Update()
     {
+        // 清空控制台并显示当前状态
+        Debug.ClearDeveloperConsole();
+        Debug.Log($"当前状态机: {currentState.GetType().Name}");
+        
+        if (currentState is PlayerDieState)
+        {
+            currentState.OnUpdate();
+            return; // 直接返回，不执行其他逻辑
+        }
         WeaponInHand();
         currentState.OnUpdate();
     }
@@ -167,12 +280,38 @@ public class Player : MonoBehaviour
         playerInputController.onReload -= Reload;
     }
 
+    // 完整瞄准更新（用于攻击状态）
+    public void UpdateFullAiming()
+    {
+        UpdateAiming();
+        UpdateLookDirection();
+    }
+
+    // 基础瞄准更新（用于所有状态）
+    public void UpdateBasicAiming()
+    {
+        UpdateAiming();
+        UpdateLookDirection();
+    }
+
     // --- 功能函数 --- 
     #region 移动
     public void Move(Vector2 moveInput)
     {
+        // 检查是否处于死亡状态，如果是则不处理移动
+        if (currentState is PlayerDieState)
+        {
+            return; // 完全不处理任何逻辑
+        }
+        
         // 直接应用输入方向
         InputDirection = moveInput;
+
+        // 如果处于受伤状态，让受伤状态自己处理移动逻辑
+        if (currentState is PlayerHurtState)
+        {
+            return; // 受伤状态自己处理移动
+        }
 
         // 立即停止移动
         CurrentSpeed = (InputDirection != Vector2.zero && !isFiring) ? WalkSpeed : 0f;
@@ -190,20 +329,86 @@ public class Player : MonoBehaviour
     #endregion
     #region 射击
     // 获取武器
+    // 获取武器
     public void WeaponInHand()
     {
         if(Hand.childCount > 0)
         {
             isWeaponInHand = true; // 武器已装备
+            
+            // 获取武器的WeaponTrigger组件
+            Transform weaponTransform = Hand.GetChild(0);
+            WeaponTrigger newWeapon = weaponTransform.GetComponent<WeaponTrigger>();
+            
+            // 如果武器发生变化，更新当前武器引用
+            if (currentWeapon != newWeapon)
+            {
+                currentWeapon = newWeapon;
+                Debug.Log($"切换武器: {weaponTransform.name}");
+                
+                // 确保新武器的发射口已正确设置
+                if (currentWeapon != null && currentWeapon.Muzzle != null)
+                {
+                    Debug.Log($"武器发射口已识别: {currentWeapon.Muzzle.name}");
+                }
+                else
+                {
+                    Debug.LogWarning($"武器 {weaponTransform.name} 缺少发射口或WeaponTrigger组件！");
+                }
+            }
         }
         else
         {
+            if (isWeaponInHand) // 只在状态改变时输出日志
+            {
+                Debug.Log("武器已卸下");
+            }
             isWeaponInHand = false; // 武器未装备
+            currentWeapon = null;
         }
     }
-    public void Fire()
+
+    public void Fire(bool isPressed)
     {
-        Debug.Log("射击输入触发");
+        isFiring = isPressed;
+        
+        // 将射击状态传递给当前武器
+        if (currentWeapon != null)
+        {
+            // 确保武器有发射口
+            if (currentWeapon.Muzzle != null)
+            {
+                currentWeapon.SetFiring(isFiring);
+                
+                if (isFiring)
+                {
+                    Debug.Log($"开始射击 - 使用武器: {currentWeapon.name}, 发射口: {currentWeapon.Muzzle.name}");
+                }
+            }
+            else
+            {
+                Debug.LogWarning($"武器 {currentWeapon.name} 没有设置发射口，无法射击！");
+                return;
+            }
+        }
+        else if (isFiring)
+        {
+            Debug.LogWarning("没有装备武器，无法射击！");
+            return;
+        }
+        
+        // 如果开始射击且有武器，切换到攻击状态
+        if (isFiring && isWeaponInHand && !isAttacking)
+        {
+            isAttacking = true;
+            Debug.Log("开始射击，切换到攻击状态");
+        }
+        // 如果停止射击，标记攻击结束
+        else if (!isFiring && isAttacking)
+        {
+            isAttacking = false;
+            Debug.Log("停止射击");
+        }
     }
     #endregion
     #region 闪避
@@ -301,6 +506,78 @@ public class Player : MonoBehaviour
     public bool IsCrouching()
     {
         return isCrouching;
+    }
+    #endregion
+    #region 受伤
+    public void TakeDamage(float damage)
+    {
+        if (isDead) return; // 只有死亡状态才完全免疫伤害
+        
+        CurrentHealth -= damage;
+        CurrentHealth = Mathf.Clamp(CurrentHealth, 0, MaxHealth);
+        
+        Debug.Log($"玩家受到 {damage} 点伤害，当前生命值: {CurrentHealth}");
+        
+        if (CurrentHealth <= 0)
+        {
+            // 死亡 - 无论当前是什么状态都要死亡
+            isDead = true;
+            isHurt = false; // 重置受伤状态
+            // 设置动画器参数触发死亡动画
+            AIMTOR.SetBool("isDying?", true);
+            AIMTOR.SetBool("isHurting?", false); // 停止受伤动画
+            transitionState(PlayerStateType.Die);
+        }
+        else if (!isHurt) // 只有在非受伤状态下才进入受伤状态
+        {
+            // 受伤
+            isHurt = true;
+            AIMTOR.SetBool("isHurting?", true);
+            transitionState(PlayerStateType.Hurt);
+        }
+        // 如果已经在受伤状态，只扣血不重复进入受伤状态
+    }
+    
+    // 恢复生命值
+    public void RestoreHealth(float amount)
+    {
+        CurrentHealth += amount;
+        CurrentHealth = Mathf.Clamp(CurrentHealth, 0, MaxHealth);
+        Debug.Log($"玩家恢复 {amount} 点生命值，当前生命值: {CurrentHealth}");
+    }
+    
+    // 检查是否有武器在手
+    public bool HasWeaponInHand()
+    {
+        return Hand != null && Hand.childCount > 0;
+    }
+    
+    // 受伤状态结束
+    public void EndHurtState()
+    {
+        isHurt = false;
+        AIMTOR.SetBool("isHurting?", false);
+    }
+    #endregion
+    #region 死亡
+    // 检查玩家是否已死亡
+    public bool IsDead()
+    {
+        return isDead;
+    }
+    
+    // 检查玩家是否处于死亡状态
+    public bool IsInDeathState()
+    {
+        return currentState is PlayerDieState;
+    }
+
+    public void OnDeathAnimationFinished()
+    {
+        if (currentState is PlayerDieState dieState)
+        {
+            dieState.OnDeathAnimationFinished();
+        }
     }
     #endregion
 }

@@ -4,9 +4,9 @@ using UnityEngine;
 
 public class PlayerRunState : IState
 {
-    // --- „1¤7„1¤70§0„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7 ---
+    // --- çŽ©å®¶è·‘æ­¥çŠ¶æ€ç±» ---
     public Player player;
-    // „1¤7„1¤7„1¤7ƒ4Õ4„1¤7„1¤7
+    // æž„é€ å‡½æ•°
     public PlayerRunState(Player player)
     {
         this.player = player;
@@ -14,11 +14,11 @@ public class PlayerRunState : IState
     
     public void OnEnter()
     {
-        // „1¤7„1¤7„1¤7„1¤7„1¤71ž6„1¤7„1¤71‹8„1¤7
+        // è®¾ç½®çŽ©å®¶å½“å‰é€Ÿåº¦ä¸ºè·‘æ­¥é€Ÿåº¦
         player.CurrentSpeed = player.RunSpeed;
-        player.AIMTOR.SetFloat("Speed", player.CurrentSpeed); // „1¤7„1¤7„1¤70‹2„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7
+        player.AIMTOR.SetFloat("Speed", player.CurrentSpeed); // è®¾ç½®åŠ¨ç”»å™¨é€Ÿåº¦å‚æ•°
         
-        // „1¤7„1¤7„1¤7„1¤7„1¤70¢9„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70–8„1¤70á8„1¤7„1¤7„1¤7„1¤7
+        // æ ¹æ®æ˜¯å¦æŒæœ‰æ­¦å™¨æ’­æ”¾å¯¹åº”çš„è·‘æ­¥åŠ¨ç”»
         if (player.isWeaponInHand)
         {
             player.AIMTOR.Play("Shoot_Run");
@@ -31,50 +31,56 @@ public class PlayerRunState : IState
 
     public void OnExit()
     {
-        // „1¤70»3„1¤70µ2„1¤70ö8„1¤7„1¤7„1¤7„1¤7„1¤7„1¤71‹8„1¤7
+        // é€€å‡ºæ—¶æ¢å¤ä¸ºè¡Œèµ°é€Ÿåº¦
         player.CurrentSpeed = player.WalkSpeed;
     }
 
     public void OnFixedUpdate()
     {
-        // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70µ20á8„1¤7„1¤7„1¤71‹8„1¤7
+        // åœ¨ç‰©ç†æ›´æ–°ä¸­å¤„ç†çŽ©å®¶ç§»åŠ¨
         player.PlayerRB2D.velocity = player.InputDirection * player.CurrentSpeed;
     }
 
     public void OnUpdate()
     {
-        // „1¤70ä10¢3£0¶3„1¤70ð0„1¤7„1¤7„1¤7
-        player.UpdateLookDirection();
+        // åŸºç¡€çž„å‡†åŠŸèƒ½ï¼ˆè§†è§’å’Œçž„å‡†æ–¹å‘æ›´æ–°ï¼‰
+        player.UpdateBasicAiming();
         
-        // 0µ10§0„1¤7§Ý„1¤7
+        // æ‹¾å–çŠ¶æ€æ£€æµ‹
         if (player.isPickingUp)
         {
             player.transitionState(PlayerStateType.PickUp);
             return;
         }
+        // å°„å‡»çŠ¶æ€æ£€æµ‹
+        if (player.isFiring && player.isWeaponInHand)
+        {
+            player.transitionState(PlayerStateType.Attack);
+            return;
+        }
         
-        // „1¤7„1¤7„1¤7„1¤70°2„1¤7„1¤71ž6„1¤7„1¤7„1¤7„1¤7„1¤70‹4„1¤7„1¤7„1¤7„1¤7„1¤7ƒ0 3„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7§Ý„1¤70ü80Á0
+        // æ£€æµ‹æ˜¯å¦åœæ­¢è·‘æ­¥ï¼Œå¦‚æžœåœæ­¢åˆ™åˆ‡æ¢åˆ°ç§»åŠ¨æˆ–å¾…æœºçŠ¶æ€
         if (!player.isRunning)
         {
             if (player.InputDirection != Vector2.zero)
             {
-                player.transitionState(PlayerStateType.Move); // „1¤7§Ý„1¤7„1¤7„1¤7„1¤702„1¤70ü80Á0
+                player.transitionState(PlayerStateType.Move); // åˆ‡æ¢åˆ°ç§»åŠ¨çŠ¶æ€
             }
             else
             {
-                player.transitionState(PlayerStateType.Idle); // „1¤7§Ý„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70ü80Á0
+                player.transitionState(PlayerStateType.Idle); // åˆ‡æ¢åˆ°å¾…æœºçŠ¶æ€
             }
             return;
         }
         
-        // „1¤7„1¤70‹4„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70µ2„1¤7§Ý„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70ü80Á0
+        // å¦‚æžœæ²¡æœ‰è¾“å…¥æ–¹å‘åˆ™åˆ‡æ¢åˆ°å¾…æœºçŠ¶æ€
         if (player.InputDirection == Vector2.zero)
         {
             player.transitionState(PlayerStateType.Idle);
             return;
         }
         
-        // „1¤7„1¤7„1¤7„1¤7„1¤7§Ý„1¤7
+        // é—ªé¿çŠ¶æ€æ£€æµ‹
         if (player.isDodged)
         {
             player.transitionState(PlayerStateType.Dodge);

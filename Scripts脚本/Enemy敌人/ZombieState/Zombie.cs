@@ -138,7 +138,18 @@ public class Zombie : MonoBehaviour
         Collider2D[] chaseCollider = Physics2D.OverlapCircleAll(transform.position, chaseRange, playerMask);
         if (chaseCollider.Length > 0) // 如果长度大于0，则说明有玩家在范围内
         {
-            player = chaseCollider[0].transform; // 获取玩家
+            Transform potentialPlayer = chaseCollider[0].transform;
+            Player playerComponent = potentialPlayer.GetComponent<Player>();
+            
+            // 检查玩家是否已死亡
+            if (playerComponent != null && playerComponent.IsDead())
+            {
+                player = null; // 玩家已死亡，不再追击
+                Debug.Log("玩家已死亡，丧尸停止追击");
+                return;
+            }
+            
+            player = potentialPlayer; // 获取玩家
             if (player != null)
             {
                 distance = Vector2.Distance(player.position, transform.position); // 玩家在追击范围内

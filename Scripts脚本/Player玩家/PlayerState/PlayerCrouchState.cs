@@ -46,8 +46,8 @@ public class PlayerCrouchState : IState
 
     public void OnUpdate()
     {
-        // 视角变化始终存在
-        player.UpdateLookDirection();
+        // 基础瞄准功能（视角和瞄准方向更新）
+        player.UpdateBasicAiming();
         
         // 潜行状态下的特殊逻辑
         if (player.isCrouching)

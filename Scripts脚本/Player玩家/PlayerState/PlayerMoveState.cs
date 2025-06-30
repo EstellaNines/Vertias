@@ -4,9 +4,9 @@ using UnityEngine;
 
 public class PlayerMoveState : IState
 {
-    // --- »ñÈ¡Íæ¼Ò×é¼ş ---
+    // --- ???? ---
     public Player player;
-    // ¹¹Ôìº¯Êı
+    // ????
     public PlayerMoveState(Player player)
     {
         this.player = player;
@@ -30,41 +30,48 @@ public class PlayerMoveState : IState
 
     public void OnFixedUpdate()
     {
-        // ½öµ±ÓĞÊäÈëÊ±Ó¦ÓÃËÙ¶È
+        // ç‰©ç†æ›´æ–°è¡ŒåŠ¨é€Ÿåº¦
         player.PlayerRB2D.velocity = player.InputDirection * player.CurrentSpeed;
     }
 
     public void OnUpdate()
     {
-        // ÊÓ½Ç±ä»¯Ê¼ÖÕ´æÔÚ
-        player.UpdateLookDirection();
+        // åŸºç¡€ç„å‡†åŠŸèƒ½ï¼ˆè§†è§’å’Œç„å‡†æ–¹å‘æ›´æ–°ï¼‰
+        player.UpdateBasicAiming();
         
-        // Ê°È¡ÇĞ»»
+        // æ‹¾å–
         if (player.isPickingUp)
         {
             player.transitionState(PlayerStateType.PickUp);
             return;
         }
+        // å°„å‡»
+        if (player.isFiring && player.isWeaponInHand)
+        {
+            player.transitionState(PlayerStateType.Attack);
+            return;
+        }
         
-        // Èç¹û¿ªÆôÅÜ²½×´Ì¬£¬ÇĞ»»µ½ÅÜ²½×´Ì¬
+        // è·‘åŠ¨
         if (player.isRunning && player.InputDirection != Vector2.zero)
         {
             player.transitionState(PlayerStateType.Run);
             return;
         }
         
-        // µ±Ã»ÓĞÊäÈë»òËÙ¶È½Ó½ü¾²Ö¹Ê±ÇĞ»»µ½´ı»ú×´Ì¬
+        // å¾…æœº
         if (player.InputDirection == Vector2.zero || player.CurrentSpeed < 0.1f)
         {
             player.transitionState(PlayerStateType.Idle);
             return;
         }
+        // æ½œè¡Œ
         if (player.isCrouching)
         {
             player.transitionState(PlayerStateType.Crouch);
             return;
         }
-        // ÉÁ±ÜÇĞ»»
+        // ç¿»æ»š
         if (player.isDodged)
         {
             player.transitionState(PlayerStateType.Dodge);

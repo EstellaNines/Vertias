@@ -13,14 +13,54 @@ public class ZombieAttackState : IState
     }
     public void OnEnter()
     {
+        // 检查玩家是否已死亡，如果死亡则不攻击
+        if (zombie.player != null)
+        {
+            Player playerComponent = zombie.player.GetComponent<Player>();
+            if (playerComponent != null && playerComponent.IsDead())
+            {
+                Debug.Log("玩家已死亡，丧尸停止攻击");
+                zombie.transitionState(ZombieStateType.Idle);
+                return;
+            }
+        }
+        
         // 判断是否可以攻击
         if (zombie.isAttack)
         {
             zombie.animator.Play("Attack"); // 播放攻击动画
             zombie.isAttack = false;
+            
+            // 检查攻击范围内是否有玩家
+            CheckPlayerInAttackRange();
         }
         // 调试
-        Debug.Log("打你");
+        Debug.Log("丧尸攻击玩家");
+    }
+
+    // 检查攻击范围内的玩家并造成伤害
+    private void CheckPlayerInAttackRange()
+    {
+        if (zombie.player != null)
+        {
+            Player playerComponent = zombie.player.GetComponent<Player>();
+            
+            // 如果玩家已死亡，不造成伤害
+            if (playerComponent != null && playerComponent.IsDead())
+            {
+                Debug.Log("玩家已死亡，丧尸不造成伤害");
+                return;
+            }
+            
+            float distanceToPlayer = Vector2.Distance(zombie.transform.position, zombie.player.position);
+            
+            // 如果玩家在攻击范围内且未死亡
+            if (distanceToPlayer <= zombie.AttackDistance && playerComponent != null)
+            {
+                playerComponent.TakeDamage(10f); // 丧尸攻击造成10点伤害
+                Debug.Log("丧尸成功攻击玩家，造成10点伤害");
+            }
+        }
     }
 
     public void OnExit()

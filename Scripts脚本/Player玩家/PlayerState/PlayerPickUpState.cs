@@ -4,11 +4,11 @@ using UnityEngine;
 
 public class PlayerPickUpState : IState
 {
-    // --- ��ȡ������ ---
+    // --- 玩家拾取状态类 ---
     public Player player;
     private bool hasProcessedPickup = false;
     
-    // ���캯��
+    // 构造函数
     public PlayerPickUpState(Player player)
     {
         this.player = player;
@@ -17,9 +17,9 @@ public class PlayerPickUpState : IState
     public void OnEnter()
     {
         hasProcessedPickup = false;
-        Debug.Log("����ʰȡ״̬");
+        Debug.Log("进入拾取状态");
         
-        // ����ִ��ʰȡ�߼�
+        // 立即处理拾取逻辑
         ProcessPickup();
     }
     
@@ -27,21 +27,21 @@ public class PlayerPickUpState : IState
     {
         player.isPickingUp = false;
         hasProcessedPickup = false;
-        Debug.Log("�˳�ʰȡ״̬");
+        Debug.Log("退出拾取状态");
     }
     
     public void OnFixedUpdate()
     {
-        // ��ʰȡ״̬��ֹͣ�ƶ�
+        // 拾取状态下停止移动
         player.PlayerRB2D.velocity = Vector2.zero;
     }
     
     public void OnUpdate()
     {
-        // �ӽǱ仯ʼ�մ���
-        player.UpdateLookDirection();
+        // 基础瞄准功能（视角和瞄准方向更新）
+        player.UpdateBasicAiming();
 
-        // ʰȡ��ɺ�������������״̬�л�
+        // 拾取处理完成后根据输入切换状态
         if (hasProcessedPickup)
         {
             if (player.InputDirection != Vector2.zero)
@@ -59,33 +59,33 @@ public class PlayerPickUpState : IState
     {
         if (player.nearbyItem != null)
         {
-            // ����Ѿ�����Ʒ���ȷ���
+            // 如果当前已经持有物品，先丢弃当前物品
             if (player.currentPickedItem != null)
             {
                 DropCurrentItem();
             }
             
-            // ʰȡ����Ʒ
+            // 拾取新物品
             PickUpItem(player.nearbyItem);
-            player.nearbyItem = null; // ���������Ʒ����
+            player.nearbyItem = null; // 清空附近物品引用
         }
         
         hasProcessedPickup = true;
     }
     
-    // ʰȡ��Ʒ����
+    // 拾取物品方法
     private void PickUpItem(ItemBase item)
     {
         player.currentPickedItem = item;
         
-        // ����Tag����������
+        // 根据物品Tag设置父级变换
         Transform parentTransform = item.CompareTag("Weapon") ? player.Hand : player.Hand;
         
         item.transform.SetParent(parentTransform);
         item.transform.localPosition = Vector3.zero;
         item.transform.localRotation = Quaternion.Euler(Vector3.zero);
         
-        // ������ײ���͸����ֹ��������
+        // 禁用物理组件和碰撞器
         Rigidbody2D rb = item.GetComponent<Rigidbody2D>();
         if (rb != null)
         {
@@ -98,10 +98,10 @@ public class PlayerPickUpState : IState
             collider.enabled = false;
         }
         
-        Debug.Log($"ʰȡ����Ʒ: {item.name}");
+        Debug.Log($"成功拾取物品: {item.name}");
     }
     
-    // ������ǰ��Ʒ����
+    // 丢弃当前持有的物品
     private void DropCurrentItem()
     {
         if (player.currentPickedItem == null) return;
@@ -111,7 +111,7 @@ public class PlayerPickUpState : IState
         itemTransform.rotation = Quaternion.Euler(Vector3.zero);
         itemTransform.localScale = Vector3.one;
         
-        // ������Ʒλ��Ϊ��ҵ�ǰλ�ã�������ƫ��λ��
+        // 设置物品位置为玩家位置
         itemTransform.position = player.transform.position;
         
         Rigidbody2D rb = itemTransform.GetComponent<Rigidbody2D>();
@@ -129,7 +129,7 @@ public class PlayerPickUpState : IState
             collider.enabled = true;
         }
         
-        Debug.Log($"��������Ʒ: {player.currentPickedItem.name}");
+        Debug.Log($"丢弃物品: {player.currentPickedItem.name}");
         player.currentPickedItem = null;
     }
 }
