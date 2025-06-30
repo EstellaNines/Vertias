@@ -4,12 +4,12 @@ using UnityEngine;
 
 public class PlayerDieState : IState
 {
-    // --- »ñÈ¡Íæ¼Ò×é¼ş ---
+    // --- è·å–ç©å®¶ç»„ä»¶ ---
     public Player player;
-    private bool deathAnimationFinished = false; // ËÀÍö¶¯»­ÊÇ·ñÍê³É
-    private string currentDeathAnimation; // µ±Ç°²¥·ÅµÄËÀÍö¶¯»­Ãû³Æ
+    private bool deathAnimationFinished = false; // æ­»äº¡åŠ¨ç”»æ˜¯å¦å®Œæˆ
+    private string currentDeathAnimation; // å½“å‰æ’­æ”¾çš„æ­»äº¡åŠ¨ç”»åç§°
     
-    // ¹¹Ôìº¯Êı
+    // æ„é€ å‡½æ•°
     public PlayerDieState(Player player)
     {
         this.player = player;
@@ -17,37 +17,37 @@ public class PlayerDieState : IState
     
     public void OnEnter()
     {
-        Debug.Log("½øÈëËÀÍö×´Ì¬");
+        Debug.Log("è¿›å…¥æ­»äº¡çŠ¶æ€");
         
-        // Í£Ö¹ËùÓĞÒÆ¶¯
+        // åœæ­¢æ‰€æœ‰ç§»åŠ¨
         if (player.PlayerRB2D != null)
         {
             player.PlayerRB2D.velocity = Vector2.zero;
         }
         
-        // ½ûÓÃÍæ¼ÒÅö×²Ìå
+        // ç¦ç”¨ç©å®¶ç¢°æ’ä½“
         if (player.collider2D != null)
         {
             player.collider2D.enabled = false;
-            Debug.Log("Íæ¼ÒÅö×²ÌåÒÑ½ûÓÃ");
+            Debug.Log("ç©å®¶ç¢°æ’ä½“å·²ç¦ç”¨");
         }
         
-        // ¼ì²éHandÊÇ·ñÓĞ×Ó¶ÔÏó£¬Èç¹ûÓĞÔòµôÂäÎäÆ÷
+        // æ£€æŸ¥Handæ˜¯å¦æœ‰å­å¯¹è±¡ï¼Œå¦‚æœæœ‰åˆ™æ‰è½æ­¦å™¨
         if (player.Hand != null && player.Hand.childCount > 0)
         {
             DropWeaponAtFeet();
         }
         
-        // ÉèÖÃËÀÍö¶¯»­²ÎÊı£¬ÈÃ¶¯»­Æ÷×Ô¶¯¹ı¶Éµ½ËÀÍö¶¯»­
+        // è®¾ç½®æ­»äº¡åŠ¨ç”»å‚æ•°ï¼Œè®©åŠ¨ç”»å™¨è‡ªåŠ¨è¿‡æ¸¡åˆ°æ­»äº¡åŠ¨ç”»
         player.AIMTOR.SetBool("isDying?", true);
         
-        // ÎŞÂÛÊÇ·ñÓĞÎäÆ÷¶¼²¥·ÅDeath¶¯»­
+        // æ— è®ºæ˜¯å¦æœ‰æ­¦å™¨éƒ½æ’­æ”¾DeathåŠ¨ç”»
         currentDeathAnimation = "Death";
-        Debug.Log("ÉèÖÃisDying?Îªtrue£¬½«²¥·ÅÆÕÍ¨ËÀÍö¶¯»­");
+        Debug.Log("è®¾ç½®isDying?ä¸ºtrueï¼Œå°†æ’­æ”¾æ™®é€šæ­»äº¡åŠ¨ç”»");
         
         deathAnimationFinished = false;
         
-        // ½ûÓÃÍæ¼ÒÊäÈë
+        // ç¦ç”¨ç©å®¶è¾“å…¥
         if (player.playerInputController != null)
         {
             player.playerInputController.DisableGameplayInput();
@@ -56,22 +56,22 @@ public class PlayerDieState : IState
 
     public void OnExit()
     {
-        Debug.Log("ÍË³öËÀÍö×´Ì¬");
+        Debug.Log("é€€å‡ºæ­»äº¡çŠ¶æ€");
         
-        // ÖØĞÂÆôÓÃÍæ¼ÒÅö×²Ìå£¨Èç¹ûĞèÒª¸´»î¹¦ÄÜ£©
+        // é‡æ–°å¯ç”¨ç©å®¶ç¢°æ’ä½“ï¼ˆå¦‚æœéœ€è¦å¤æ´»åŠŸèƒ½ï¼‰
         if (player.collider2D != null)
         {
             player.collider2D.enabled = true;
-            Debug.Log("Íæ¼ÒÅö×²ÌåÒÑÖØĞÂÆôÓÃ");
+            Debug.Log("ç©å®¶ç¢°æ’ä½“å·²é‡æ–°å¯ç”¨");
         }
         
-        // ÖØÖÃËÀÍö¶¯»­²ÎÊı
+        // é‡ç½®æ­»äº¡åŠ¨ç”»å‚æ•°
         player.AIMTOR.SetBool("isDying?", false);
     }
 
     public void OnFixedUpdate()
     {
-        // ËÀÍö×´Ì¬ÏÂÍêÈ«¾²Ö¹
+        // æ­»äº¡çŠ¶æ€ä¸‹å®Œå…¨é™æ­¢
         if (player.PlayerRB2D != null)
         {
             player.PlayerRB2D.velocity = Vector2.zero;
@@ -80,57 +80,57 @@ public class PlayerDieState : IState
 
     public void OnUpdate()
     {
-        // ¼ì²éËÀÍö¶¯»­ÊÇ·ñ²¥·ÅÍê³É
+        // æ£€æŸ¥æ­»äº¡åŠ¨ç”»æ˜¯å¦æ’­æ”¾å®Œæˆ
         if (!deathAnimationFinished)
         {
             AnimatorStateInfo currentStateInfo = player.AIMTOR.GetCurrentAnimatorStateInfo(0);
             
-            // ¼ì²éÊÇ·ñÔÚ²¥·Å¶ÔÓ¦µÄËÀÍö¶¯»­ÇÒ¶¯»­ÒÑ²¥·ÅÍê³É
+            // æ£€æŸ¥æ˜¯å¦åœ¨æ’­æ”¾å¯¹åº”çš„æ­»äº¡åŠ¨ç”»ä¸”åŠ¨ç”»å·²æ’­æ”¾å®Œæˆ
             if (currentStateInfo.IsName(currentDeathAnimation) && currentStateInfo.normalizedTime >= 1.0f)
             {
                 OnDeathAnimationFinished();
             }
         }
         
-        // ËÀÍö×´Ì¬ÏÂ²»½øĞĞÈÎºÎ×´Ì¬ÇĞ»»£¬ÓÀÔ¶±£³ÖËÀÍö×´Ì¬
+        // æ­»äº¡çŠ¶æ€ä¸‹ä¸è¿›è¡Œä»»ä½•çŠ¶æ€åˆ‡æ¢ï¼Œæ°¸è¿œä¿æŒæ­»äº¡çŠ¶æ€
     }
     
-    // ËÀÍö¶¯»­²¥·ÅÍê³ÉºóµÄ´¦Àí
+    // æ­»äº¡åŠ¨ç”»æ’­æ”¾å®Œæˆåçš„å¤„ç†
     public void OnDeathAnimationFinished()
     {
         if (!deathAnimationFinished)
         {
             deathAnimationFinished = true;
             
-            // ÉèÖÃisDying?Îªfalse£¬ÈÃ¶¯»­Æ÷¹ı¶Éµ½Exit×´Ì¬
+            // è®¾ç½®isDying?ä¸ºfalseï¼Œè®©åŠ¨ç”»å™¨è¿‡æ¸¡åˆ°ExitçŠ¶æ€
             player.AIMTOR.SetBool("isDying?", false);
             
-            Debug.Log($"ËÀÍö¶¯»­ {currentDeathAnimation} ²¥·ÅÍê³É£¬ÉèÖÃisDying?Îªfalse");
+            Debug.Log($"æ­»äº¡åŠ¨ç”» {currentDeathAnimation} æ’­æ”¾å®Œæˆï¼Œè®¾ç½®isDying?ä¸ºfalse");
             
-            // Íæ¼Ò×´Ì¬»úÈÔÈ»±£³ÖÔÚËÀÍö×´Ì¬
+            // ç©å®¶çŠ¶æ€æœºä»ç„¶ä¿æŒåœ¨æ­»äº¡çŠ¶æ€
         }
     }
     
-    // µôÂäÎäÆ÷µ½Íæ¼Ò½ÅÏÂ
+    // æ‰è½æ­¦å™¨åˆ°ç©å®¶è„šä¸‹
     private void DropWeaponAtFeet()
     {
         if (player.Hand == null || player.Hand.childCount == 0) return;
         
-        // »ñÈ¡ÎäÆ÷¶ÔÏó
+        // è·å–æ­¦å™¨å¯¹è±¡
         Transform weaponTransform = player.Hand.GetChild(0);
         
-        // ´ÓHandÖĞÒÆ³ıÎäÆ÷
+        // ä»Handä¸­ç§»é™¤æ­¦å™¨
         weaponTransform.SetParent(null);
         weaponTransform.rotation = Quaternion.Euler(Vector3.zero);
         weaponTransform.localScale = Vector3.one;
         
-        // ÉèÖÃÎäÆ÷Î»ÖÃÎªÍæ¼Ò½ÅÏÂ£¨ÉÔÎ¢Æ«ÒÆ±ÜÃâÖØµş£©
+        // è®¾ç½®æ­¦å™¨ä½ç½®ä¸ºç©å®¶è„šä¸‹ï¼ˆç¨å¾®åç§»é¿å…é‡å ï¼‰
         Vector3 dropPosition = player.transform.position;
-        dropPosition.y -= 0.5f; // ÏòÏÂÆ«ÒÆ0.5µ¥Î»µ½½ÅÏÂ
-        dropPosition.x += Random.Range(-0.3f, 0.3f); // Ëæ»úË®Æ½Æ«ÒÆ
+        dropPosition.y -= 0.5f; // å‘ä¸‹åç§»0.5å•ä½åˆ°è„šä¸‹
+        dropPosition.x += Random.Range(-0.3f, 0.3f); // éšæœºæ°´å¹³åç§»
         weaponTransform.position = dropPosition;
         
-        // »Ö¸´ÎäÆ÷µÄÎïÀíÊôĞÔ
+        // æ¢å¤æ­¦å™¨çš„ç‰©ç†å±æ€§
         Rigidbody2D rb = weaponTransform.GetComponent<Rigidbody2D>();
         if (rb == null)
         {
@@ -140,17 +140,17 @@ public class PlayerDieState : IState
         rb.velocity = Vector2.zero;
         rb.angularVelocity = 0f;
         
-        // ÆôÓÃÅö×²Æ÷
+        // å¯ç”¨ç¢°æ’å™¨
         Collider2D collider = weaponTransform.GetComponent<Collider2D>();
         if (collider != null)
         {
             collider.enabled = true;
         }
         
-        // ÖØÖÃÍæ¼ÒµÄÎäÆ÷×´Ì¬
+        // é‡ç½®ç©å®¶çš„æ­¦å™¨çŠ¶æ€
         player.isWeaponInHand = false;
         player.currentWeapon = null;
         
-        Debug.Log($"ÎäÆ÷ {weaponTransform.name} ÒÑµôÂäµ½Íæ¼Ò½ÅÏÂ");
+        Debug.Log($"æ­¦å™¨ {weaponTransform.name} å·²æ‰è½åˆ°ç©å®¶è„šä¸‹");
     }
 }

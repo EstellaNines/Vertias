@@ -4,14 +4,14 @@ using UnityEngine;
 
 public class PlayerHurtState : IState
 {
-    // --- »ñÈ¡Íæ¼ÒÒıÓÃ ---
+    // --- è·å–ç©å®¶å¼•ç”¨ ---
     public Player player;
-    private AnimatorStateInfo animInfo; // ¶¯»­×´Ì¬ĞÅÏ¢
-    private bool animationStarted = false; // ¶¯»­ÊÇ·ñÒÑ¿ªÊ¼
-    private float hurtWalkSpeed = 0.5f; // ÊÜÉËÊ±µÄĞĞ×ßËÙ¶È
-    private string currentHurtAnimation = ""; // µ±Ç°²¥·ÅµÄÊÜÉË¶¯»­Ãû³Æ
+    private AnimatorStateInfo animInfo; // åŠ¨ç”»çŠ¶æ€ä¿¡æ¯
+    private bool animationStarted = false; // åŠ¨ç”»æ˜¯å¦å·²å¼€å§‹
+    private float hurtWalkSpeed = 0.5f; // å—ä¼¤æ—¶çš„è¡Œèµ°é€Ÿåº¦
+    private string currentHurtAnimation = ""; // å½“å‰æ’­æ”¾çš„å—ä¼¤åŠ¨ç”»åç§°
     
-    // ¹¹Ôìº¯Êı
+    // æ„é€ å‡½æ•°
     public PlayerHurtState(Player player)
     {
         this.player = player;
@@ -19,12 +19,12 @@ public class PlayerHurtState : IState
     
     public void OnEnter()
     {
-        Debug.Log("½øÈëÍæ¼ÒÊÜÉË×´Ì¬");
+        Debug.Log("è¿›å…¥ç©å®¶å—ä¼¤çŠ¶æ€");
         
-        // ÉèÖÃ¶¯»­Æ÷²ÎÊı
+        // è®¾ç½®åŠ¨ç”»å™¨å‚æ•°
         player.AIMTOR.SetBool("isHurting?", true);
         
-        // ¸ù¾İµ±Ç°ÊäÈë×´Ì¬ºÍÎäÆ÷×´Ì¬¾ö¶¨²¥·ÅÄÄ¸ö¶¯»­
+        // æ ¹æ®å½“å‰è¾“å…¥çŠ¶æ€å’Œæ­¦å™¨çŠ¶æ€å†³å®šæ’­æ”¾å“ªä¸ªåŠ¨ç”»
         UpdateHurtAnimation();
         
         animationStarted = true;
@@ -32,9 +32,9 @@ public class PlayerHurtState : IState
 
     public void OnExit()
     {
-        Debug.Log("ÍË³öÊÜÉË×´Ì¬");
+        Debug.Log("é€€å‡ºå—ä¼¤çŠ¶æ€");
         
-        // ÖØÖÃ¶¯»­Æ÷²ÎÊı
+        // é‡ç½®åŠ¨ç”»å™¨å‚æ•°
         player.AIMTOR.SetBool("isHurting?", false);
         
         player.EndHurtState();
@@ -43,43 +43,43 @@ public class PlayerHurtState : IState
 
     public void OnFixedUpdate()
     {
-        // ´¦ÀíÊÜÉË×´Ì¬ÏÂµÄÒÆ¶¯
+        // å¤„ç†å—ä¼¤çŠ¶æ€ä¸‹çš„ç§»åŠ¨
         HandleHurtMovement();
     }
 
     public void OnUpdate()
     {
-        // ¼ì²éËÀÍö×´Ì¬ - ÓÅÏÈ¼ì²éisDead±êÖ¾
+        // æ£€æŸ¥æ­»äº¡çŠ¶æ€ - ä¼˜å…ˆæ£€æŸ¥isDeadæ ‡å¿—
         if (player.isDead)
         {
             player.transitionState(PlayerStateType.Die);
             return;
         }
         
-        // ¶îÍâ¼ì²é£ºÈç¹ûÉúÃüÖµ¹é0µ«isDeadÎ´ÉèÖÃ£¬Ç¿ÖÆÉèÖÃËÀÍö×´Ì¬
+        // é¢å¤–æ£€æŸ¥ï¼šå¦‚æœç”Ÿå‘½å€¼å½’0ä½†isDeadæœªè®¾ç½®ï¼Œå¼ºåˆ¶è®¾ç½®æ­»äº¡çŠ¶æ€
         if (player.CurrentHealth <= 0)
         {
             player.isDead = true;
-            // ÉèÖÃ¶¯»­Æ÷²ÎÊı´¥·¢ËÀÍö¶¯»­
+            // è®¾ç½®åŠ¨ç”»å™¨å‚æ•°è§¦å‘æ­»äº¡åŠ¨ç”»
             player.AIMTOR.SetBool("isDying?", true);
             player.transitionState(PlayerStateType.Die);
             return;
         }
         
-        // ¸ù¾İÊäÈë×´Ì¬¸üĞÂÊÜÉË¶¯»­
+        // æ ¹æ®è¾“å…¥çŠ¶æ€æ›´æ–°å—ä¼¤åŠ¨ç”»
         UpdateHurtAnimation();
         
-        // ¼ì²é¶¯»­ÊÇ·ñ²¥·ÅÍê³É
+        // æ£€æŸ¥åŠ¨ç”»æ˜¯å¦æ’­æ”¾å®Œæˆ
         if (animationStarted)
         {
             animInfo = player.AIMTOR.GetCurrentAnimatorStateInfo(0);
             
-            // µ±¶¯»­²¥·ÅÍê³ÉÊ±£¬·µ»Ø¶ÔÓ¦×´Ì¬
+            // å½“åŠ¨ç”»æ’­æ”¾å®Œæˆæ—¶ï¼Œè¿”å›å¯¹åº”çŠ¶æ€
             if (animInfo.normalizedTime >= 1.0f && 
                 (animInfo.IsName("Hurt") || animInfo.IsName("Shoot_Hurt") || 
                  animInfo.IsName("HurtWalk") || animInfo.IsName("Shoot_HurtWalk")))
             {
-                // ¸ù¾İµ±Ç°×´Ì¬¾ö¶¨ÏÂÒ»¸ö×´Ì¬
+                // æ ¹æ®å½“å‰çŠ¶æ€å†³å®šä¸‹ä¸€ä¸ªçŠ¶æ€
                 if (player.InputDirection != Vector2.zero)
                 {
                     player.transitionState(PlayerStateType.Move);
@@ -92,66 +92,66 @@ public class PlayerHurtState : IState
         }
     }
     
-    // ¸ù¾İÊäÈë×´Ì¬ºÍÎäÆ÷×´Ì¬¸üĞÂÊÜÉË¶¯»­
+    // æ ¹æ®è¾“å…¥çŠ¶æ€å’Œæ­¦å™¨çŠ¶æ€æ›´æ–°å—ä¼¤åŠ¨ç”»
     private void UpdateHurtAnimation()
     {
         string targetAnimation = "";
         
-        // ¸ù¾İÊäÈë×´Ì¬ºÍÎäÆ÷×´Ì¬¾ö¶¨¶¯»­
+        // æ ¹æ®è¾“å…¥çŠ¶æ€å’Œæ­¦å™¨çŠ¶æ€å†³å®šåŠ¨ç”»
         if (player.InputDirection != Vector2.zero)
         {
-            // ÓĞÊäÈë - ²¥·ÅĞĞ×ßÊÜÉË¶¯»­
+            // æœ‰è¾“å…¥ - æ’­æ”¾è¡Œèµ°å—ä¼¤åŠ¨ç”»
             if (player.HasWeaponInHand())
             {
-                targetAnimation = "Shoot_HurtWalk"; // ³ÖÎäÆ÷ĞĞ×ßÊÜÉË
+                targetAnimation = "Shoot_HurtWalk"; // æŒæ­¦å™¨è¡Œèµ°å—ä¼¤
             }
             else
             {
-                targetAnimation = "HurtWalk"; // ÎŞÎäÆ÷ĞĞ×ßÊÜÉË
+                targetAnimation = "HurtWalk"; // æ— æ­¦å™¨è¡Œèµ°å—ä¼¤
             }
         }
         else
         {
-            // ÎŞÊäÈë - ²¥·Å´ı»úÊÜÉË¶¯»­
+            // æ— è¾“å…¥ - æ’­æ”¾å¾…æœºå—ä¼¤åŠ¨ç”»
             if (player.HasWeaponInHand())
             {
-                targetAnimation = "Shoot_Hurt"; // ³ÖÎäÆ÷´ı»úÊÜÉË
+                targetAnimation = "Shoot_Hurt"; // æŒæ­¦å™¨å¾…æœºå—ä¼¤
             }
             else
             {
-                targetAnimation = "Hurt"; // ÎŞÎäÆ÷´ı»úÊÜÉË
+                targetAnimation = "Hurt"; // æ— æ­¦å™¨å¾…æœºå—ä¼¤
             }
         }
         
-        // Ö»ÓĞµ±Ä¿±ê¶¯»­Óëµ±Ç°¶¯»­²»Í¬Ê±²ÅÇĞ»»
+        // åªæœ‰å½“ç›®æ ‡åŠ¨ç”»ä¸å½“å‰åŠ¨ç”»ä¸åŒæ—¶æ‰åˆ‡æ¢
         if (targetAnimation != currentHurtAnimation)
         {
             currentHurtAnimation = targetAnimation;
             player.AIMTOR.Play(currentHurtAnimation);
-            Debug.Log($"²¥·ÅÊÜÉË¶¯»­: {currentHurtAnimation}");
+            Debug.Log($"æ’­æ”¾å—ä¼¤åŠ¨ç”»: {currentHurtAnimation}");
         }
     }
     
-    // ´¦ÀíÊÜÉË×´Ì¬ÏÂµÄÒÆ¶¯Âß¼­
+    // å¤„ç†å—ä¼¤çŠ¶æ€ä¸‹çš„ç§»åŠ¨é€»è¾‘
     private void HandleHurtMovement()
     {
         if (player.PlayerRB2D != null)
         {
-            // Èç¹ûÓĞÊäÈë£¬ÒÔÊÜÉËËÙ¶ÈÒÆ¶¯£»·ñÔòÍ£Ö¹
+            // å¦‚æœæœ‰è¾“å…¥ï¼Œä»¥å—ä¼¤é€Ÿåº¦ç§»åŠ¨ï¼›å¦åˆ™åœæ­¢
             if (player.InputDirection != Vector2.zero)
             {
                 player.PlayerRB2D.velocity = player.InputDirection * hurtWalkSpeed;
                 
-                // ¸üĞÂÊÓ½Ç·½Ïò
+                // æ›´æ–°è§†è§’æ–¹å‘
                 player.UpdateLookDirection();
                 
-                // ¸üĞÂËÙ¶È¶¯»­²ÎÊı£¨»ùÓÚÊÜÉËĞĞ×ßËÙ¶È£©
+                // æ›´æ–°é€Ÿåº¦åŠ¨ç”»å‚æ•°ï¼ˆåŸºäºå—ä¼¤è¡Œèµ°é€Ÿåº¦ï¼‰
                 float speedMagnitude = player.InputDirection.sqrMagnitude * (hurtWalkSpeed / player.WalkSpeed);
                 player.AIMTOR.SetFloat("Speed", speedMagnitude);
             }
             else
             {
-                // ÎŞÊäÈëÊ±Í£Ö¹ÒÆ¶¯
+                // æ— è¾“å…¥æ—¶åœæ­¢ç§»åŠ¨
                 player.PlayerRB2D.velocity = Vector2.zero;
                 player.AIMTOR.SetFloat("Speed", 0f);
             }
