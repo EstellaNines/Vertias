@@ -4,9 +4,9 @@ using UnityEngine;
 
 public class PlayerIdleState : IState
 {
-    // --- ç©å®¶å¾…æœºçŠ¶æ€ç±» ---
+    // --- Íæ¼Ò´ı»ú×´Ì¬Àà ---
     public Player player;
-    // æ„é€ å‡½æ•°
+    // ¹¹Ôìº¯Êı
     public PlayerIdleState(Player player)
     {
         this.player = player;
@@ -35,23 +35,23 @@ public class PlayerIdleState : IState
 
     public void OnUpdate()
     {
-        // åŸºç¡€ç„å‡†åŠŸèƒ½ï¼ˆä»…è§†è§’æ›´æ–°ï¼‰
+        // »ù´¡Ãé×¼¹¦ÄÜ£¨½öÊÓ½Ç¸üĞÂ£©
         player.UpdateBasicAiming();
         
-        // æ‹¾å–çŠ¶æ€æ£€æµ‹
+        // Ê°È¡×´Ì¬¼ì²â
         if (player.isPickingUp)
         {
             player.transitionState(PlayerStateType.PickUp);
             return;
         }
-        // å°„å‡»çŠ¶æ€æ£€æµ‹
+        // Éä»÷×´Ì¬¼ì²â
         if (player.isFiring && player.isWeaponInHand)
         {
             player.transitionState(PlayerStateType.Attack);
             return;
         }
         
-        // ç§»åŠ¨çŠ¶æ€æ£€æµ‹ - æ ¹æ®æ˜¯å¦æŒ‰ä½è·‘æ­¥é”®å†³å®šçŠ¶æ€
+        // ÒÆ¶¯×´Ì¬¼ì²â - ¸ù¾İÊÇ·ñ°´×¡ÅÜ²½¼ü¾ö¶¨×´Ì¬
         if (player.InputDirection != Vector2.zero)
         {
             if (player.isRunning)
@@ -70,7 +70,7 @@ public class PlayerIdleState : IState
             return;
         }
         
-        // é—ªé¿çŠ¶æ€æ£€æµ‹
+        // ÉÁ±Ü×´Ì¬¼ì²â
         if (player.isDodged)
         {
             player.transitionState(PlayerStateType.Dodge);

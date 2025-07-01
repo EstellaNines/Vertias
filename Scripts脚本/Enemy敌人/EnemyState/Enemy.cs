@@ -2,152 +2,152 @@ using System.Collections.Generic;
 using UnityEngine;
 using Pathfinding;
 
-// µĞÈË×´Ì¬Ã¶¾Ù
+// æ•ŒäººçŠ¶æ€æšä¸¾
 public enum EnemyState
 {
-    Idle/*´ı»ú*/, Move/*ÒÆ¶¯*/, Attack/*¹¥»÷*/, Hurt/*ÊÜÉË*/, Dead/*ËÀÍö*/, Patrol/*Ñ²Âß*/, Aim/*Ãé×¼*/
+    Idle/*å¾…æœº*/, Move/*ç§»åŠ¨*/, Attack/*æ”»å‡»*/, Hurt/*å—ä¼¤*/, Dead/*æ­»äº¡*/, Patrol/*å·¡é€»*/, Aim/*ç„å‡†*/
 }
 public class Enemy : MonoBehaviour
 {
-    // --- »ù´¡ÊôĞÔ ---
-    [Header("ÒÆ¶¯")]
-    [FieldLabel("ÒÆ¶¯ËÙ¶È")] public float MoveSpeed = 3f; // ÒÆ¶¯ËÙ¶È
-    [HideInInspector] public float currentSpeed; // µ±Ç°ËÙ¶È
+    // --- åŸºç¡€å±æ€§ ---
+    [Header("ç§»åŠ¨")]
+    [FieldLabel("ç§»åŠ¨é€Ÿåº¦")] public float MoveSpeed = 3f; // ç§»åŠ¨é€Ÿåº¦
+    [HideInInspector] public float currentSpeed; // å½“å‰é€Ÿåº¦
 
-    // --- Ñ²ÂßÏà¹ØÊôĞÔ ---
-    [Header("Ñ²Âß")]
-    [FieldLabel("Ñ²Âßµã")] public Transform[] PatrolPoints; // Ñ²ÂßµãÊı×é
-    [FieldLabel("Ñ²ÂßµãË÷Òı")] public int currentPatrolIndex = 0; // µ±Ç°Ñ²ÂßµãË÷Òı
-    [FieldLabel("Â·¾¶¸üĞÂ¼ä¸ô")] public float pathUpdateInterval = 0.5f; // Â·¾¶¸üĞÂ¼ä¸ô
-    [FieldLabel("µ½´ï¾àÀë")] public float reachDistance = 0.5f; // µ½´ïÄ¿±êµãµÄ¾àÀëãĞÖµ
-    [FieldLabel("´ı»úÊ±¼ä")] public float idleTime = 4f; // µ½´ïÑ²ÂßµãºóµÄ´ı»úÊ±¼ä
-    [HideInInspector] public Path currentPath; // µ±Ç°Â·¾¶
-    [HideInInspector] public int currentWaypoint = 0; // µ±Ç°Â·¾¶µãË÷Òı
-    [HideInInspector] public bool reachedEndOfPath = false; // ÊÇ·ñµ½´ïÂ·¾¶ÖÕµã
-    [HideInInspector] public bool shouldPatrol = true; // ÊÇ·ñÓ¦¸Ã¼ÌĞøÑ²Âß
+    // --- å·¡é€»ç›¸å…³å±æ€§ ---
+    [Header("å·¡é€»")]
+    [FieldLabel("å·¡é€»ç‚¹")] public Transform[] PatrolPoints; // å·¡é€»ç‚¹æ•°ç»„
+    [FieldLabel("å·¡é€»ç‚¹ç´¢å¼•")] public int currentPatrolIndex = 0; // å½“å‰å·¡é€»ç‚¹ç´¢å¼•
+    [FieldLabel("è·¯å¾„æ›´æ–°é—´éš”")] public float pathUpdateInterval = 0.5f; // è·¯å¾„æ›´æ–°é—´éš”
+    [FieldLabel("åˆ°è¾¾è·ç¦»")] public float reachDistance = 0.5f; // åˆ°è¾¾ç›®æ ‡ç‚¹çš„è·ç¦»é˜ˆå€¼
+    [FieldLabel("å¾…æœºæ—¶é—´")] public float idleTime = 4f; // åˆ°è¾¾å·¡é€»ç‚¹åçš„å¾…æœºæ—¶é—´
+    [HideInInspector] public Path currentPath; // å½“å‰è·¯å¾„
+    [HideInInspector] public int currentWaypoint = 0; // å½“å‰è·¯å¾„ç‚¹ç´¢å¼•
+    [HideInInspector] public bool reachedEndOfPath = false; // æ˜¯å¦åˆ°è¾¾è·¯å¾„ç»ˆç‚¹
+    [HideInInspector] public bool shouldPatrol = true; // æ˜¯å¦åº”è¯¥ç»§ç»­å·¡é€»
 
-    // --- Éä»÷Ïà¹ØÊôĞÔ ---
-    [Header("Éä»÷")]
-    [FieldLabel("×Óµ¯Ô¤ÖÆÌå")] public GameObject bulletPrefab; // ×Óµ¯Ô¤ÖÆÌå
-    [FieldLabel("Éä»÷µã")] public Transform firePoint; // Éä»÷µã
-    [FieldLabel("ÎäÆ÷¶ÔÏó")] public Transform weapon; // ÎäÆ÷¶ÔÏó£¬ÓÃÓÚ¶ÀÁ¢Ãé×¼
-    [FieldLabel("Éä»÷¼ä¸ô")] public float fireRate = 0.33f; // Éä»÷¼ä¸ô£¬µ¥Î»ÎªÃë£¬±íÊ¾Á½´ÎÉä»÷Ö®¼äµÄÊ±¼ä
-    [HideInInspector] public float nextFireTime = 0f; // ÏÂ´ÎÉä»÷Ê±¼ä
-    [FieldLabel("×Óµ¯¶ÔÏó³Ø")] public EnemyBulletPool bulletPool; // ×Óµ¯¶ÔÏó³ØÒıÓÃ
+    // --- å°„å‡»ç›¸å…³å±æ€§ ---
+    [Header("å°„å‡»")]
+    [FieldLabel("å­å¼¹é¢„åˆ¶ä½“")] public GameObject bulletPrefab; // å­å¼¹é¢„åˆ¶ä½“
+    [FieldLabel("å°„å‡»ç‚¹")] public Transform firePoint; // å°„å‡»ç‚¹
+    [FieldLabel("æ­¦å™¨å¯¹è±¡")] public Transform weapon; // æ­¦å™¨å¯¹è±¡ï¼Œç”¨äºç‹¬ç«‹ç„å‡†
+    [FieldLabel("å°„å‡»é—´éš”")] public float fireRate = 0.33f; // å°„å‡»é—´éš”ï¼Œå•ä½ä¸ºç§’ï¼Œè¡¨ç¤ºä¸¤æ¬¡å°„å‡»ä¹‹é—´çš„æ—¶é—´
+    [HideInInspector] public float nextFireTime = 0f; // ä¸‹æ¬¡å°„å‡»æ—¶é—´
+    [FieldLabel("å­å¼¹å¯¹è±¡æ± ")] public EnemyBulletPool bulletPool; // å­å¼¹å¯¹è±¡æ± å¼•ç”¨
 
-    // --- ÊÓÒ°¼ì²âÏà¹ØÊôĞÔ ---
-    [Header("ÊÓÒ°¼ì²â")]
-    [FieldLabel("ÊÓÒ°°ë¾¶")] public float viewRadius = 5f; // ÊÓÒ°°ë¾¶
-    [FieldLabel("ÊÓÒ°½Ç¶È")] [Range(0, 180)] public float viewHalfAngle = 90f; // ÊÓÒ°°ë½Ç¶È
-    [FieldLabel("ÉÈĞÎ±ßÊı")] public int viewAngleStep = 20; // ÊÓÒ°ÉÈĞÎ»®·ÖµÄ²½Êı
-    [FieldLabel("Ä¿±ê²ã")] public LayerMask targetLayer; // Ä¿±ê²ã
-    [FieldLabel("ÕÏ°­Îï²ã")] public LayerMask obstacleLayer; // ÕÏ°­Îï²ã
-    [FieldLabel("ÊÓÒ°Æğµã")] public GameObject eyePoint; // ÊÓÒ°Æğµã
-    [FieldLabel("Íæ¼Ò¼ì²â°ë¾¶")] public float playerDetectionRadius = 10f; // Íæ¼Ò¼ì²â·¶Î§
-    [FieldLabel("ÉäÏß¼ì²âÑÕÉ«")] public Color RayDetectionColor = Color.red; // ×Ô¶¨Òå¿ÉÊÓ»¯ÑÕÉ«
-    [HideInInspector] public bool playerDetected = false; // ÊÇ·ñ¼ì²âµ½Íæ¼Ò
-    [HideInInspector] public GameObject player; // Íæ¼ÒÒıÓÃ
-    [HideInInspector] public Vector2 lastKnownPlayerPosition; // Íæ¼Ò×îºóÒÑÖªÎ»ÖÃ
-    [HideInInspector] public bool wasFollowingPath = false; // ÊÇ·ñÖ®Ç°ÕıÔÚ¸úËæÂ·¾¶
+    // --- è§†é‡æ£€æµ‹ç›¸å…³å±æ€§ ---
+    [Header("è§†é‡æ£€æµ‹")]
+    [FieldLabel("è§†é‡åŠå¾„")] public float viewRadius = 5f; // è§†é‡åŠå¾„
+    [FieldLabel("è§†é‡è§’åº¦")] [Range(0, 180)] public float viewHalfAngle = 90f; // è§†é‡åŠè§’åº¦
+    [FieldLabel("æ‰‡å½¢è¾¹æ•°")] public int viewAngleStep = 20; // è§†é‡æ‰‡å½¢åˆ’åˆ†çš„æ­¥æ•°
+    [FieldLabel("ç›®æ ‡å±‚")] public LayerMask targetLayer; // ç›®æ ‡å±‚
+    [FieldLabel("éšœç¢ç‰©å±‚")] public LayerMask obstacleLayer; // éšœç¢ç‰©å±‚
+    [FieldLabel("è§†é‡èµ·ç‚¹")] public GameObject eyePoint; // è§†é‡èµ·ç‚¹
+    [FieldLabel("ç©å®¶æ£€æµ‹åŠå¾„")] public float playerDetectionRadius = 10f; // ç©å®¶æ£€æµ‹èŒƒå›´
+    [FieldLabel("å°„çº¿æ£€æµ‹é¢œè‰²")] public Color RayDetectionColor = Color.red; // è‡ªå®šä¹‰å¯è§†åŒ–é¢œè‰²
+    [HideInInspector] public bool playerDetected = false; // æ˜¯å¦æ£€æµ‹åˆ°ç©å®¶
+    [HideInInspector] public GameObject player; // ç©å®¶å¼•ç”¨
+    [HideInInspector] public Vector2 lastKnownPlayerPosition; // ç©å®¶æœ€åå·²çŸ¥ä½ç½®
+    [HideInInspector] public bool wasFollowingPath = false; // æ˜¯å¦ä¹‹å‰æ­£åœ¨è·Ÿéšè·¯å¾„
 
-    // --- ·½Ïò¿ØÖÆÏà¹ØÊôĞÔ ---
-    [Header("·½Ïò¿ØÖÆ")]
-    [FieldLabel("·½Ïò±ä»¯ãĞÖµ")] public float directionThreshold = 0.1f; // ·½Ïò±ä»¯µÄ×îĞ¡ËÙ¶ÈãĞÖµ
-    private Vector2 currentDirection = Vector2.right; // µ±Ç°ÒÆ¶¯·½Ïò
-    private Vector2 lastVelocityDirection = Vector2.right; // ÉÏÒ»Ö¡µÄËÙ¶È·½Ïò
-    private bool useManualDirection = false; // ÊÇ·ñÊ¹ÓÃÊÖ¶¯·½Ïò¿ØÖÆ
-    private Vector2 manualDirection = Vector2.right; // ÊÖ¶¯ÉèÖÃµÄ·½ÏòÏòÁ¿
+    // --- æ–¹å‘æ§åˆ¶ç›¸å…³å±æ€§ ---
+    [Header("æ–¹å‘æ§åˆ¶")]
+    [FieldLabel("æ–¹å‘å˜åŒ–é˜ˆå€¼")] public float directionThreshold = 0.1f; // æ–¹å‘å˜åŒ–çš„æœ€å°é€Ÿåº¦é˜ˆå€¼
+    private Vector2 currentDirection = Vector2.right; // å½“å‰ç§»åŠ¨æ–¹å‘
+    private Vector2 lastVelocityDirection = Vector2.right; // ä¸Šä¸€å¸§çš„é€Ÿåº¦æ–¹å‘
+    private bool useManualDirection = false; // æ˜¯å¦ä½¿ç”¨æ‰‹åŠ¨æ–¹å‘æ§åˆ¶
+    private Vector2 manualDirection = Vector2.right; // æ‰‹åŠ¨è®¾ç½®çš„æ–¹å‘å‘é‡
 
-    // --- ÄÚ²¿ÊôĞÔ --- 
-    [HideInInspector] public Rigidbody2D RB; // ¸ÕÌå
-    [HideInInspector] public Animator animator; // ¶¯»­Æ÷
-    [HideInInspector] public Collider2D Collider; // Åö×²Æ÷
-    [HideInInspector] public Seeker seeker; // Ñ°Â·
-    private IState currentState; // µ±Ç°×´Ì¬
-    [HideInInspector] public Dictionary<EnemyState, IState> states = new Dictionary<EnemyState, IState>(); // ×´Ì¬×Öµä£¨¸ÄÎªpublic£©
+    // --- å†…éƒ¨å±æ€§ --- 
+    [HideInInspector] public Rigidbody2D RB; // åˆšä½“
+    [HideInInspector] public Animator animator; // åŠ¨ç”»å™¨
+    [HideInInspector] public Collider2D Collider; // ç¢°æ’å™¨
+    [HideInInspector] public Seeker seeker; // å¯»è·¯
+    private IState currentState; // å½“å‰çŠ¶æ€
+    [HideInInspector] public Dictionary<EnemyState, IState> states = new Dictionary<EnemyState, IState>(); // çŠ¶æ€å­—å…¸ï¼ˆæ”¹ä¸ºpublicï¼‰
 
-    // --- º¯Êı ---
+    // --- å‡½æ•° ---
     private void Awake()
     {
-        // ×é¼şÒıÓÃ
+        // ç»„ä»¶å¼•ç”¨
         RB = GetComponent<Rigidbody2D>();
         animator = GetComponent<Animator>();
         Collider = GetComponent<Collider2D>();
         seeker = GetComponent<Seeker>();
 
-        // ²éÕÒÍæ¼Ò
+        // æŸ¥æ‰¾ç©å®¶
         if (player == null)
         {            
             player = GameObject.FindGameObjectWithTag("Player");
-            // ÒÆ³ıPlayerCrouch×é¼şµÄ»ñÈ¡£¬ÒòÎªÏÖÔÚÊ¹ÓÃ×´Ì¬»ú
+            // ç§»é™¤PlayerCrouchç»„ä»¶çš„è·å–ï¼Œå› ä¸ºç°åœ¨ä½¿ç”¨çŠ¶æ€æœº
             if (player == null)
             {
-                Debug.LogWarning("Î´ÕÒµ½Íæ¼Ò¶ÔÏó");
+                Debug.LogWarning("æœªæ‰¾åˆ°ç©å®¶å¯¹è±¡");
             }
         }
 
-        // È·±£Éä»÷µã´æÔÚ
+        // ç¡®ä¿å°„å‡»ç‚¹å­˜åœ¨
         if (firePoint == null)
         {
-            Debug.LogWarning("Î´ÉèÖÃÉä»÷µã£¬½«Ê¹ÓÃµĞÈËÎ»ÖÃ×÷ÎªÉä»÷µã");
-            // ¿ÉÒÔÔÚÕâÀï´´½¨Ò»¸öÉä»÷µã
+            Debug.LogWarning("æœªè®¾ç½®å°„å‡»ç‚¹ï¼Œå°†ä½¿ç”¨æ•Œäººä½ç½®ä½œä¸ºå°„å‡»ç‚¹");
+            // å¯ä»¥åœ¨è¿™é‡Œåˆ›å»ºä¸€ä¸ªå°„å‡»ç‚¹
         }
 
-        InitalStateMachine(); // ³õÊ¼»¯×´Ì¬»ú
-        transitionState(EnemyState.Patrol); // Ä¬ÈÏÎªÑ²Âß×´Ì¬
+        InitalStateMachine(); // åˆå§‹åŒ–çŠ¶æ€æœº
+        transitionState(EnemyState.Patrol); // é»˜è®¤ä¸ºå·¡é€»çŠ¶æ€
     }
     
-    // ³õÊ¼»¯×´Ì¬
+    // åˆå§‹åŒ–çŠ¶æ€
     private void InitalStateMachine()
     {
-        // ´´½¨×´Ì¬
-        states.Add(EnemyState.Idle, new EnemyIdleState(this)); // ´ı»ú×´Ì¬
-        states.Add(EnemyState.Move, new EnemyMoveState(this)); // ÒÆ¶¯×´Ì¬
-        states.Add(EnemyState.Attack, new EnemyAttackState(this)); // ¹¥»÷×´Ì¬
-        states.Add(EnemyState.Hurt, new EnemyHurtState(this)); // ÊÜÉË×´Ì¬
-        states.Add(EnemyState.Dead, new EnemyDeathState(this)); // ËÀÍö×´Ì¬
-        states.Add(EnemyState.Patrol, new EnemyPatrolState(this)); // Ñ²Âß×´Ì¬
-        states.Add(EnemyState.Aim, new EnemyAimState(this)); // Ãé×¼×´Ì¬
+        // åˆ›å»ºçŠ¶æ€
+        states.Add(EnemyState.Idle, new EnemyIdleState(this)); // å¾…æœºçŠ¶æ€
+        states.Add(EnemyState.Move, new EnemyMoveState(this)); // ç§»åŠ¨çŠ¶æ€
+        states.Add(EnemyState.Attack, new EnemyAttackState(this)); // æ”»å‡»çŠ¶æ€
+        states.Add(EnemyState.Hurt, new EnemyHurtState(this)); // å—ä¼¤çŠ¶æ€
+        states.Add(EnemyState.Dead, new EnemyDeathState(this)); // æ­»äº¡çŠ¶æ€
+        states.Add(EnemyState.Patrol, new EnemyPatrolState(this)); // å·¡é€»çŠ¶æ€
+        states.Add(EnemyState.Aim, new EnemyAimState(this)); // ç„å‡†çŠ¶æ€
     }
     
-    // ×´Ì¬×ª»»
+    // çŠ¶æ€è½¬æ¢
     public void transitionState(EnemyState type)
     {
-        // µ±Ç°×´Ì¬²»Îª¿Õ£¬ÍË³öµ±Ç°×´Ì¬
+        // å½“å‰çŠ¶æ€ä¸ä¸ºç©ºï¼Œé€€å‡ºå½“å‰çŠ¶æ€
         if (currentState != null)
         {
             currentState.OnExit();
         }
-        // Í¨¹ı×ÖµäµÄ¼üÕÒµ½¶ÔÓ¦µÄ×´Ì¬
+        // é€šè¿‡å­—å…¸çš„é”®æ‰¾åˆ°å¯¹åº”çš„çŠ¶æ€
         currentState = states[type];
         currentState.OnEnter();
     }
 
-    // Éä»÷·½·¨
+    // å°„å‡»æ–¹æ³•
     public void Shoot()
     {
         if (Time.time >= nextFireTime && firePoint != null)
         {
-            nextFireTime = Time.time + fireRate; // Ö±½ÓÊ¹ÓÃfireRate×÷ÎªÁ½´ÎÉä»÷Ö®¼äµÄÊ±¼ä¼ä¸ô
+            nextFireTime = Time.time + fireRate; // ç›´æ¥ä½¿ç”¨fireRateä½œä¸ºä¸¤æ¬¡å°„å‡»ä¹‹é—´çš„æ—¶é—´é—´éš”
             
-            // Ê¹ÓÃ×Óµ¯¶ÔÏó³Ø»ñÈ¡×Óµ¯
+            // ä½¿ç”¨å­å¼¹å¯¹è±¡æ± è·å–å­å¼¹
             if (bulletPool != null)
             {
                 GameObject bullet = bulletPool.GetBullet(firePoint.position, firePoint.rotation);
                 
-                // ÉèÖÃÉä»÷Õß
+                // è®¾ç½®å°„å‡»è€…
                 if (bullet != null)
                 {
                     Bullet bulletComponent = bullet.GetComponent<Bullet>();
                     if (bulletComponent != null)
                     {
                         bulletComponent.enabled = true;
-                        bulletComponent.shooter = this.transform; // ÉèÖÃÉä»÷Õß
-                        Debug.Log($"[µĞÈË¿ª»ğ] ·¢ÉäÕß: {gameObject.name}");
+                        bulletComponent.shooter = this.transform; // è®¾ç½®å°„å‡»è€…
+                        Debug.Log($"[æ•Œäººå¼€ç«] å‘å°„è€…: {gameObject.name}");
                     }
                 }
             }
-            // Èç¹ûÃ»ÓĞÕÒµ½×Óµ¯³Ø£¬ÔòÊ¹ÓÃ¾É·½·¨ÊµÀı»¯×Óµ¯£¨×÷Îª±¸Ñ¡£©
+            // å¦‚æœæ²¡æœ‰æ‰¾åˆ°å­å¼¹æ± ï¼Œåˆ™ä½¿ç”¨æ—§æ–¹æ³•å®ä¾‹åŒ–å­å¼¹ï¼ˆä½œä¸ºå¤‡é€‰ï¼‰
             else if (bulletPrefab != null)
             {
                 GameObject bullet = Instantiate(bulletPrefab, firePoint.position, firePoint.rotation);
@@ -156,19 +156,19 @@ public class Enemy : MonoBehaviour
                 {
                     bulletComponent.enabled = true;
                     bulletComponent.shooter = this.transform;
-                    Debug.Log($"[µĞÈË¿ª»ğ] ·¢ÉäÕß: {gameObject.name}");
+                    Debug.Log($"[æ•Œäººå¼€ç«] å‘å°„è€…: {gameObject.name}");
                 }
             }
         }
     }
 
-    // ¼ì²éÍæ¼ÒÊÇ·ñ±»¼ì²âµ½
+    // æ£€æŸ¥ç©å®¶æ˜¯å¦è¢«æ£€æµ‹åˆ°
     public bool IsPlayerDetected()
     {
         return playerDetected;
     }
 
-    // »ñÈ¡Íæ¼ÒÎ»ÖÃ
+    // è·å–ç©å®¶ä½ç½®
     public Vector2 GetPlayerPosition()
     {
         if (player != null)
@@ -178,7 +178,7 @@ public class Enemy : MonoBehaviour
         return Vector2.zero;
     }
 
-    // ¼ì²éÍæ¼ÒÊÇ·ñÔÚÇ±ĞĞ×´Ì¬
+    // æ£€æŸ¥ç©å®¶æ˜¯å¦åœ¨æ½œè¡ŒçŠ¶æ€
     public bool IsPlayerCrouching()
     {
         if (player != null)
@@ -192,7 +192,7 @@ public class Enemy : MonoBehaviour
         return false;
     }
 
-    // ²¥·Å¶¯»­
+    // æ’­æ”¾åŠ¨ç”»
     public void PlayAnimation(string animName)
     {
         if (animator != null)
@@ -201,21 +201,21 @@ public class Enemy : MonoBehaviour
         }
     }
 
-    // ÉèÖÃ·½Ïò
+    // è®¾ç½®æ–¹å‘
     public void SetDirection(Vector2 direction)
     {
         useManualDirection = true;
         manualDirection = direction.normalized;
         currentDirection = manualDirection;
         
-        // Èç¹ûÓĞÎäÆ÷¶ÔÏó£¬Ğı×ªÎäÆ÷³¯ÏòÄ¿±ê
+        // å¦‚æœæœ‰æ­¦å™¨å¯¹è±¡ï¼Œæ—‹è½¬æ­¦å™¨æœå‘ç›®æ ‡
         if (weapon != null)
         {
             float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
             weapon.rotation = Quaternion.Euler(0, 0, angle);
         }
         
-        // Èç¹ûÓĞÉä»÷µãÇÒÃ»ÓĞÎäÆ÷¶ÔÏó£¬Ğı×ªÉä»÷µã
+        // å¦‚æœæœ‰å°„å‡»ç‚¹ä¸”æ²¡æœ‰æ­¦å™¨å¯¹è±¡ï¼Œæ—‹è½¬å°„å‡»ç‚¹
         else if (firePoint != null)
         {
             float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
@@ -223,27 +223,27 @@ public class Enemy : MonoBehaviour
         }
     }
 
-    // »Ö¸´×Ô¶¯·½Ïò¼ì²â
+    // æ¢å¤è‡ªåŠ¨æ–¹å‘æ£€æµ‹
     public void ResetToAutoDetection()
     {
         useManualDirection = false;
     }
 
-    // »ñÈ¡µ±Ç°·½Ïò
+    // è·å–å½“å‰æ–¹å‘
     public Vector2 GetCurrentDirection()
     {
         return currentDirection;
     }
 
-    // ¸üĞÂ·½Ïò
+    // æ›´æ–°æ–¹å‘
     private void UpdateDirection()
     {
         if (useManualDirection)
         {
-            // Ê¹ÓÃÊÖ¶¯ÉèÖÃµÄ·½Ïò
+            // ä½¿ç”¨æ‰‹åŠ¨è®¾ç½®çš„æ–¹å‘
             currentDirection = manualDirection.normalized;
 
-            // Èç¹û·½ÏòÏòÁ¿ÓĞĞ§£¨·ÇÁã£©£¬¸üĞÂlastVelocityDirection
+            // å¦‚æœæ–¹å‘å‘é‡æœ‰æ•ˆï¼ˆéé›¶ï¼‰ï¼Œæ›´æ–°lastVelocityDirection
             if (currentDirection.sqrMagnitude > 0)
             {
                 lastVelocityDirection = currentDirection;
@@ -251,43 +251,43 @@ public class Enemy : MonoBehaviour
         }
         else if (RB != null)
         {
-            // »ñÈ¡µ±Ç°ËÙ¶È·½ÏòµÄ¹éÒ»»¯ÏòÁ¿
+            // è·å–å½“å‰é€Ÿåº¦æ–¹å‘çš„å½’ä¸€åŒ–å‘é‡
             Vector2 velocity = RB.velocity;
             Vector2 velocityDirection = velocity.normalized;
 
-            // Ö»ÓĞµ±ËÙ¶È³¬¹ıãĞÖµÊ±²Å¸üĞÂ·½Ïò
+            // åªæœ‰å½“é€Ÿåº¦è¶…è¿‡é˜ˆå€¼æ—¶æ‰æ›´æ–°æ–¹å‘
             if (velocity.sqrMagnitude > directionThreshold * directionThreshold)
             {
-                // Ë®Æ½·½ÏòÅĞ¶Ï£ºÈç¹ûË®Æ½ËÙ¶È·ÖÁ¿³¬¹ıãĞÖµ£¬¸üĞÂË®Æ½·½Ïò
+                // æ°´å¹³æ–¹å‘åˆ¤æ–­ï¼šå¦‚æœæ°´å¹³é€Ÿåº¦åˆ†é‡è¶…è¿‡é˜ˆå€¼ï¼Œæ›´æ–°æ°´å¹³æ–¹å‘
                 if (Mathf.Abs(velocityDirection.x) > directionThreshold)
                 {
                     currentDirection.x = Mathf.Sign(velocityDirection.x);
                 }
 
-                // ´¹Ö±·½ÏòÅĞ¶Ï£ºÈç¹û´¹Ö±ËÙ¶È·ÖÁ¿³¬¹ıãĞÖµ£¬¸üĞÂ´¹Ö±·½Ïò
+                // å‚ç›´æ–¹å‘åˆ¤æ–­ï¼šå¦‚æœå‚ç›´é€Ÿåº¦åˆ†é‡è¶…è¿‡é˜ˆå€¼ï¼Œæ›´æ–°å‚ç›´æ–¹å‘
                 if (Mathf.Abs(velocityDirection.y) > directionThreshold)
                 {
                     currentDirection.y = Mathf.Sign(velocityDirection.y);
                 }
 
-                // ¼ÇÂ¼µ±Ç°ÓĞĞ§·½Ïò
+                // è®°å½•å½“å‰æœ‰æ•ˆæ–¹å‘
                 lastVelocityDirection = currentDirection;
             }
             else
             {
-                // ËÙ¶ÈÎªÁãÊ±£¬±£³Ö×îºóµÄÓĞĞ§·½Ïò
+                // é€Ÿåº¦ä¸ºé›¶æ—¶ï¼Œä¿æŒæœ€åçš„æœ‰æ•ˆæ–¹å‘
                 currentDirection = lastVelocityDirection;
             }
         }
 
-        // È·±£·½ÏòÏòÁ¿Îª¹éÒ»»¯ÏòÁ¿£¨³¤¶ÈÎª1£©
+        // ç¡®ä¿æ–¹å‘å‘é‡ä¸ºå½’ä¸€åŒ–å‘é‡ï¼ˆé•¿åº¦ä¸º1ï¼‰
         if (currentDirection.sqrMagnitude > 0)
         {
             currentDirection.Normalize();
         }
     }
 
-    // ¼ì²éÍæ¼ÒÊÇ·ñÒÑËÀÍö
+    // æ£€æŸ¥ç©å®¶æ˜¯å¦å·²æ­»äº¡
     public bool IsPlayerDead()
     {
         if (player != null)
@@ -295,29 +295,29 @@ public class Enemy : MonoBehaviour
             Player playerComponent = player.GetComponent<Player>();
             if (playerComponent != null)
             {
-                return playerComponent.IsDead();
+                return playerComponent.isDead;
             }
         }
         return false;
     }
     
-    // ÊÓÒ°¼ì²â
+    // è§†é‡æ£€æµ‹
     private void DetectPlayer()
     {
         if (player == null) return;
         
-        // ¼ì²éÍæ¼ÒÊÇ·ñÒÑËÀÍö
+        // æ£€æŸ¥ç©å®¶æ˜¯å¦å·²æ­»äº¡
         if (IsPlayerDead())
         {
             playerDetected = false;
-            // Èç¹ûµ±Ç°ÔÚ¹¥»÷»òÃé×¼×´Ì¬£¬ÇĞ»»»ØÑ²Âß
+            // å¦‚æœå½“å‰åœ¨æ”»å‡»æˆ–ç„å‡†çŠ¶æ€ï¼Œåˆ‡æ¢å›å·¡é€»
             EnemyState currentState = GetCurrentState();
             if (currentState == EnemyState.Aim || currentState == EnemyState.Attack)
             {
                 shouldPatrol = true;
                 transitionState(EnemyState.Patrol);
             }
-            Debug.Log("Íæ¼ÒÒÑËÀÍö£¬µĞÈËÍ£Ö¹¼ì²â");
+            Debug.Log("ç©å®¶å·²æ­»äº¡ï¼Œæ•Œäººåœæ­¢æ£€æµ‹");
             return;
         }
         
@@ -325,35 +325,35 @@ public class Enemy : MonoBehaviour
         Vector2 playerPosition = player.transform.position;
         float distanceToPlayer = Vector2.Distance(rayOrigin, playerPosition);
         
-        // ¼ì²éÍæ¼ÒÊÇ·ñÔÚ¼ì²â·¶Î§ÄÚ
+        // æ£€æŸ¥ç©å®¶æ˜¯å¦åœ¨æ£€æµ‹èŒƒå›´å†…
         if (distanceToPlayer <= playerDetectionRadius)
         {
             Vector2 directionToPlayer = (playerPosition - rayOrigin).normalized;
             float angleToPlayer = Vector2.Angle(GetCurrentDirection(), directionToPlayer);
             
-            // ¼ì²éÍæ¼ÒÊÇ·ñÔÚÊÓÒ°½Ç¶ÈÄÚ
+            // æ£€æŸ¥ç©å®¶æ˜¯å¦åœ¨è§†é‡è§’åº¦å†…
             if (angleToPlayer <= viewHalfAngle)
             {
-                // ·¢ÉäÉäÏß¼ì²éÊÇ·ñÓĞÕÏ°­Îï×èµ²
+                // å‘å°„å°„çº¿æ£€æŸ¥æ˜¯å¦æœ‰éšœç¢ç‰©é˜»æŒ¡
                 RaycastHit2D hit = Physics2D.Raycast(rayOrigin, directionToPlayer, distanceToPlayer, obstacleLayer);
                 
-                // Èç¹ûÃ»ÓĞÕÏ°­Îï×èµ²
+                // å¦‚æœæ²¡æœ‰éšœç¢ç‰©é˜»æŒ¡
                 if (hit.collider == null)
                 {
-                    // Èç¹ûÍæ¼ÒÎ´Ç±ĞĞ£¬Õı³£¼ì²âºÍ¹¥»÷
+                    // å¦‚æœç©å®¶æœªæ½œè¡Œï¼Œæ­£å¸¸æ£€æµ‹å’Œæ”»å‡»
                     if (!IsPlayerCrouching())
                     {
                         playerDetected = true;
-                        lastKnownPlayerPosition = playerPosition; // ¼ÇÂ¼Íæ¼Ò×îºóÒÑÖªÎ»ÖÃ
+                        lastKnownPlayerPosition = playerPosition; // è®°å½•ç©å®¶æœ€åå·²çŸ¥ä½ç½®
                         
-                        // Èç¹ûµ±Ç°×´Ì¬ÊÇÑ²Âß»òÒÆ¶¯£¬¼ÇÂ¼ÕıÔÚ¸úËæÂ·¾¶
+                        // å¦‚æœå½“å‰çŠ¶æ€æ˜¯å·¡é€»æˆ–ç§»åŠ¨ï¼Œè®°å½•æ­£åœ¨è·Ÿéšè·¯å¾„
                         EnemyState currentState = GetCurrentState();
                         if (currentState == EnemyState.Patrol || currentState == EnemyState.Move)
                         {
                             wasFollowingPath = true;
                         }
                         
-                        // Á¢¼´ÇĞ»»µ½Ãé×¼×´Ì¬
+                        // ç«‹å³åˆ‡æ¢åˆ°ç„å‡†çŠ¶æ€
                         if (currentState != EnemyState.Aim && currentState != EnemyState.Attack)
                         {
                             transitionState(EnemyState.Aim);
@@ -361,11 +361,11 @@ public class Enemy : MonoBehaviour
                         
                         return;
                     }
-                    // Èç¹ûÍæ¼ÒÇ±ĞĞ£¬µĞÈË¼ì²âµ½µ«²»¹¥»÷£¬¼ÌĞøÑ²Âß
+                    // å¦‚æœç©å®¶æ½œè¡Œï¼Œæ•Œäººæ£€æµ‹åˆ°ä½†ä¸æ”»å‡»ï¼Œç»§ç»­å·¡é€»
                     else
                     {
-                        // È·±£µĞÈË²»»áÒòÎª¼ì²âµ½Ç±ĞĞÍæ¼Ò¶ø¸Ä±ä×´Ì¬
-                        // Èç¹ûµ±Ç°ÔÚ¹¥»÷»òÃé×¼×´Ì¬£¬·µ»ØÑ²Âß×´Ì¬
+                        // ç¡®ä¿æ•Œäººä¸ä¼šå› ä¸ºæ£€æµ‹åˆ°æ½œè¡Œç©å®¶è€Œæ”¹å˜çŠ¶æ€
+                        // å¦‚æœå½“å‰åœ¨æ”»å‡»æˆ–ç„å‡†çŠ¶æ€ï¼Œè¿”å›å·¡é€»çŠ¶æ€
                         EnemyState currentState = GetCurrentState();
                         if (currentState == EnemyState.Aim || currentState == EnemyState.Attack)
                         {
@@ -378,31 +378,31 @@ public class Enemy : MonoBehaviour
             }
         }
         
-        // Èç¹ûÖ®Ç°¼ì²âµ½Íæ¼Ò£¬µ«ÏÖÔÚÃ»ÓĞ¼ì²âµ½£¬ÇÒµ±Ç°×´Ì¬ÊÇÃé×¼»ò¹¥»÷
+        // å¦‚æœä¹‹å‰æ£€æµ‹åˆ°ç©å®¶ï¼Œä½†ç°åœ¨æ²¡æœ‰æ£€æµ‹åˆ°ï¼Œä¸”å½“å‰çŠ¶æ€æ˜¯ç„å‡†æˆ–æ”»å‡»
         if (playerDetected)
         {
             playerDetected = false;
             
-            // Èç¹ûµ±Ç°×´Ì¬ÊÇÃé×¼»ò¹¥»÷£¬ÇÒÖ®Ç°ÕıÔÚ¸úËæÂ·¾¶£¬·µ»Øµ½Ñ²Âß×´Ì¬
+            // å¦‚æœå½“å‰çŠ¶æ€æ˜¯ç„å‡†æˆ–æ”»å‡»ï¼Œä¸”ä¹‹å‰æ­£åœ¨è·Ÿéšè·¯å¾„ï¼Œè¿”å›åˆ°å·¡é€»çŠ¶æ€
             EnemyState currentState = GetCurrentState();
             if ((currentState == EnemyState.Aim || currentState == EnemyState.Attack) && wasFollowingPath)
             {
-                shouldPatrol = true; // ÉèÖÃ¿ÉÒÔ¼ÌĞøÑ²Âß
+                shouldPatrol = true; // è®¾ç½®å¯ä»¥ç»§ç»­å·¡é€»
                 transitionState(EnemyState.Patrol);
-                wasFollowingPath = false; // ÖØÖÃ±êÖ¾
+                wasFollowingPath = false; // é‡ç½®æ ‡å¿—
             }
         }
     }
 
     private void Update()
     {
-        // ¸üĞÂ·½Ïò
+        // æ›´æ–°æ–¹å‘
         UpdateDirection();
         
-        // ¼ì²âÍæ¼Ò
+        // æ£€æµ‹ç©å®¶
         DetectPlayer();
         
-        // ¸üĞÂµ±Ç°×´Ì¬
+        // æ›´æ–°å½“å‰çŠ¶æ€
         if (currentState != null)
         {
             currentState.OnUpdate();
@@ -417,10 +417,10 @@ public class Enemy : MonoBehaviour
         }
     }
 
-    // »ñÈ¡µ±Ç°×´Ì¬
+    // è·å–å½“å‰çŠ¶æ€
     public EnemyState GetCurrentState()
     {
-        // ±éÀú×´Ì¬×Öµä£¬²éÕÒµ±Ç°×´Ì¬¶ÔÓ¦µÄÃ¶¾ÙÖµ
+        // éå†çŠ¶æ€å­—å…¸ï¼ŒæŸ¥æ‰¾å½“å‰çŠ¶æ€å¯¹åº”çš„æšä¸¾å€¼
         foreach (var pair in states)
         {
             if (pair.Value == currentState)
@@ -429,46 +429,46 @@ public class Enemy : MonoBehaviour
             }
         }
         
-        // Ä¬ÈÏ·µ»ØIdle×´Ì¬
+        // é»˜è®¤è¿”å›IdleçŠ¶æ€
         return EnemyState.Idle;
     }
     
-    // ÔÚUnity±à¼­Æ÷ÖĞ¿ÉÊÓ»¯µ÷ÊÔĞÅÏ¢
+    // åœ¨Unityç¼–è¾‘å™¨ä¸­å¯è§†åŒ–è°ƒè¯•ä¿¡æ¯
     void OnDrawGizmos()
     {
-        // »æÖÆ·½Ïò¼ıÍ·
+        // ç»˜åˆ¶æ–¹å‘ç®­å¤´
         Gizmos.color = Color.cyan;
         Gizmos.DrawLine(
             transform.position,
             transform.position + (Vector3)currentDirection * 0.5f
         );
         
-        // »æÖÆÊÓÒ°·¶Î§
+        // ç»˜åˆ¶è§†é‡èŒƒå›´
         if (eyePoint == null) return;
         
-        // ¼ÆËãÉÈĞÎµÄÆğÊ¼ºÍ½áÊø½Ç¶È
+        // è®¡ç®—æ‰‡å½¢çš„èµ·å§‹å’Œç»“æŸè§’åº¦
         float startAngle = -viewHalfAngle;
         float endAngle = viewHalfAngle;
         
-        // ¼ÆËãÃ¿Ìõ±ßÏßÖ®¼äµÄ½Ç¶ÈÔöÁ¿
+        // è®¡ç®—æ¯æ¡è¾¹çº¿ä¹‹é—´çš„è§’åº¦å¢é‡
         float angleStep = (endAngle - startAngle) / 50f;
         
         Vector2 rayOrigin = (Vector2)eyePoint.transform.position;
         
-        // »æÖÆÉÈĞÎµÄ±ßÏß
+        // ç»˜åˆ¶æ‰‡å½¢çš„è¾¹çº¿
         for (int i = 0; i <= 50; i++)
         {
             float angle = startAngle + angleStep * i;
             Vector3 direction = DirectionFromAngle(angle, false);
             
-            // ¼ì²âÕÏ°­Îï
+            // æ£€æµ‹éšœç¢ç‰©
             RaycastHit2D hit = Physics2D.Raycast(rayOrigin, direction, viewRadius, obstacleLayer);
             
-            // È·¶¨ÉäÏßÖÕµãºÍÑÕÉ«
+            // ç¡®å®šå°„çº¿ç»ˆç‚¹å’Œé¢œè‰²
             float rayDistance = viewRadius;
-            Color rayColor = RayDetectionColor; // Ä¬ÈÏÑÕÉ«
+            Color rayColor = RayDetectionColor; // é»˜è®¤é¢œè‰²
             
-            // ¼ì²âÊÇ·ñÓĞÍæ¼ÒÔÚÕâ¸ö·½ÏòÉÏ
+            // æ£€æµ‹æ˜¯å¦æœ‰ç©å®¶åœ¨è¿™ä¸ªæ–¹å‘ä¸Š
             if (player != null)
             {
                 Vector2 playerPosition = player.transform.position;
@@ -476,64 +476,64 @@ public class Enemy : MonoBehaviour
                 float angleToPlayer = Vector2.Angle(direction, directionToPlayer);
                 float distanceToPlayer = Vector2.Distance(rayOrigin, playerPosition);
                 
-                // Èç¹ûÉäÏß·½Ïò½Ó½üÍæ¼Ò·½Ïò£¬ÇÒÍæ¼ÒÔÚÊÓÒ°·¶Î§ÄÚ
+                // å¦‚æœå°„çº¿æ–¹å‘æ¥è¿‘ç©å®¶æ–¹å‘ï¼Œä¸”ç©å®¶åœ¨è§†é‡èŒƒå›´å†…
                 if (angleToPlayer < 5f && distanceToPlayer <= viewRadius)
                 {
-                    // ¼ì²éÊÇ·ñÓĞÕÏ°­Îï×èµ²
+                    // æ£€æŸ¥æ˜¯å¦æœ‰éšœç¢ç‰©é˜»æŒ¡
                     RaycastHit2D playerHit = Physics2D.Raycast(rayOrigin, directionToPlayer, distanceToPlayer, obstacleLayer);
                     if (playerHit.collider == null)
                     {
-                        // ¸ù¾İÍæ¼ÒÊÇ·ñÇ±ĞĞÉèÖÃ²»Í¬ÑÕÉ«
+                        // æ ¹æ®ç©å®¶æ˜¯å¦æ½œè¡Œè®¾ç½®ä¸åŒé¢œè‰²
                         if (IsPlayerCrouching())
                         {
-                            rayColor = Color.black; // ¼ì²âµ½Ç±ĞĞÍæ¼ÒÊ±µÄÑÕÉ«
+                            rayColor = Color.black; // æ£€æµ‹åˆ°æ½œè¡Œç©å®¶æ—¶çš„é¢œè‰²
                         }
                         else
                         {
-                            rayColor = Color.green; // ¼ì²âµ½·ÇÇ±ĞĞÍæ¼ÒÊ±µÄÑÕÉ«
+                            rayColor = Color.green; // æ£€æµ‹åˆ°éæ½œè¡Œç©å®¶æ—¶çš„é¢œè‰²
                         }
                     }
                 }
             }
             
-            // Èç¹û¼ì²âµ½ÕÏ°­Îï£¬µ÷ÕûÉäÏß³¤¶ÈºÍÑÕÉ«
+            // å¦‚æœæ£€æµ‹åˆ°éšœç¢ç‰©ï¼Œè°ƒæ•´å°„çº¿é•¿åº¦å’Œé¢œè‰²
             if (hit.collider != null)
             {
                 rayDistance = hit.distance;
-                rayColor = Color.yellow; // ¼ì²âµ½ÕÏ°­ÎïÊ±µÄÑÕÉ«
+                rayColor = Color.yellow; // æ£€æµ‹åˆ°éšœç¢ç‰©æ—¶çš„é¢œè‰²
             }
             
             Vector3 rayEndPoint = rayOrigin + (Vector2)(direction * rayDistance);
             
-            // ÉèÖÃµ±Ç°ÉäÏßÑÕÉ«
+            // è®¾ç½®å½“å‰å°„çº¿é¢œè‰²
             Gizmos.color = rayColor;
             
-            // »æÖÆ´ÓÊÓÒ°Æğµãµ½ÉäÏßÖÕµãµÄÏß
+            // ç»˜åˆ¶ä»è§†é‡èµ·ç‚¹åˆ°å°„çº¿ç»ˆç‚¹çš„çº¿
             Gizmos.DrawLine(rayOrigin, rayEndPoint);
             
-            // Èç¹û²»ÊÇµÚÒ»ÌõÏß£¬»æÖÆÓëÉÏÒ»ÌõÏßµÄÁ¬½Ó
+            // å¦‚æœä¸æ˜¯ç¬¬ä¸€æ¡çº¿ï¼Œç»˜åˆ¶ä¸ä¸Šä¸€æ¡çº¿çš„è¿æ¥
             if (i > 0)
             {
                 Vector3 previousDirection = DirectionFromAngle(startAngle + angleStep * (i - 1), false);
                 
-                // ¼ì²âÉÏÒ»ÌõÉäÏßµÄÕÏ°­Îï
+                // æ£€æµ‹ä¸Šä¸€æ¡å°„çº¿çš„éšœç¢ç‰©
                 RaycastHit2D prevHit = Physics2D.Raycast(rayOrigin, previousDirection, viewRadius, obstacleLayer);
                 float prevRayDistance = prevHit.collider != null ? prevHit.distance : viewRadius;
                 
                 Vector3 previousEndPoint = rayOrigin + (Vector2)(previousDirection * prevRayDistance);
                 
-                // »æÖÆÉÈĞÎ±ßÔµµÄÏß
+                // ç»˜åˆ¶æ‰‡å½¢è¾¹ç¼˜çš„çº¿
                 Gizmos.DrawLine(previousEndPoint, rayEndPoint);
             }
         }
     }
     
-    // ¸¨Öú·½·¨£º´Ó½Ç¶È»ñÈ¡·½ÏòÏòÁ¿
+    // è¾…åŠ©æ–¹æ³•ï¼šä»è§’åº¦è·å–æ–¹å‘å‘é‡
     private Vector3 DirectionFromAngle(float angleInDegrees, bool angleIsGlobal)
     {
         if (!angleIsGlobal)
         {
-            // »ùÓÚµ±Ç°³¯Ïò¼ÆËã½Ç¶È
+            // åŸºäºå½“å‰æœå‘è®¡ç®—è§’åº¦
             float currentAngle = Mathf.Atan2(currentDirection.y, currentDirection.x) * Mathf.Rad2Deg;
             angleInDegrees += currentAngle;
         }

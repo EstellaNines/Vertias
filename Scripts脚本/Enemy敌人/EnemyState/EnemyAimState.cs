@@ -2,39 +2,39 @@ using UnityEngine;
 
 public class EnemyAimState : IState
 {
-    // --- æ§åˆ¶å™¨å¼•ç”¨ ---
+    // --- ¿ØÖÆÆ÷ÒıÓÃ ---
     Enemy enemy;
     private float aimTime = 0f;
-    private float maxAimTime = 0.05f; // ç„å‡†æ—¶é—´ä»0.5ç§’å‡å°‘åˆ°0.2ç§’ï¼Œæé«˜ååº”é€Ÿåº¦
-    private float cooldownTime = 0.5f; // æ”»å‡»åçš„å†·å´æ—¶é—´
-    private float cooldownTimer = 0f; // å†·å´è®¡æ—¶å™¨
-    private bool inCooldown = false; // æ˜¯å¦åœ¨å†·å´ä¸­
+    private float maxAimTime = 0.05f; // Ãé×¼Ê±¼ä´Ó0.5Ãë¼õÉÙµ½0.2Ãë£¬Ìá¸ß·´Ó¦ËÙ¶È
+    private float cooldownTime = 0.5f; // ¹¥»÷ºóµÄÀäÈ´Ê±¼ä
+    private float cooldownTimer = 0f; // ÀäÈ´¼ÆÊ±Æ÷
+    private bool inCooldown = false; // ÊÇ·ñÔÚÀäÈ´ÖĞ
     
-    // --- æ„é€ å‡½æ•° --- 
+    // --- ¹¹Ôìº¯Êı --- 
     public EnemyAimState(Enemy enemy)
     {
         this.enemy = enemy;
     }
     
-    // --- çŠ¶æ€æ–¹æ³• ---
+    // --- ×´Ì¬·½·¨ ---
     public void OnEnter()
     {
-        // åœæ­¢ç§»åŠ¨
+        // Í£Ö¹ÒÆ¶¯
         if (enemy.RB != null)
         {
             enemy.RB.velocity = Vector2.zero;
         }
         
-        // æ’­æ”¾å¾…æœºåŠ¨ç”»
+        // ²¥·Å´ı»ú¶¯»­
         if (enemy.animator != null)
         {
             enemy.animator.Play("Idle");
         }
         
-        // é‡ç½®ç„å‡†æ—¶é—´
+        // ÖØÖÃÃé×¼Ê±¼ä
         aimTime = 0f;
         
-        // æ£€æŸ¥æ˜¯å¦éœ€è¦è¿›å…¥å†·å´
+        // ¼ì²éÊÇ·ñĞèÒª½øÈëÀäÈ´
         EnemyAttackState attackState = GetAttackState();
         if (attackState != null && attackState.GetShotsFired() >= 30)
         {
@@ -45,40 +45,40 @@ public class EnemyAimState : IState
 
     public void OnExit()
     {
-        // é€€å‡ºç„å‡†çŠ¶æ€
+        // ÍË³öÃé×¼×´Ì¬
     }
 
     public void OnFixedUpdate()
     {
-        // ç‰©ç†æ›´æ–°
+        // ÎïÀí¸üĞÂ
     }
 
     public void OnUpdate()
     {
-        // æ£€æŸ¥ç©å®¶æ˜¯å¦å·²æ­»äº¡
+        // ¼ì²éÍæ¼ÒÊÇ·ñÒÑËÀÍö
         if (enemy.IsPlayerDead())
         {
-            Debug.Log("ç©å®¶å·²æ­»äº¡ï¼Œæ•Œäººåœæ­¢ç„å‡†");
+            Debug.Log("Íæ¼ÒÒÑËÀÍö£¬µĞÈËÍ£Ö¹Ãé×¼");
             enemy.shouldPatrol = true;
             enemy.transitionState(EnemyState.Patrol);
             return;
         }
         
-        // å¦‚æœç©å®¶ä¸å†è¢«æ£€æµ‹åˆ°æˆ–è€…è¿›å…¥æ½œè¡ŒçŠ¶æ€ï¼Œè¿”å›å·¡é€»çŠ¶æ€
+        // Èç¹ûÍæ¼Ò²»ÔÙ±»¼ì²âµ½»òÕß½øÈëÇ±ĞĞ×´Ì¬£¬·µ»ØÑ²Âß×´Ì¬
         if (!enemy.IsPlayerDetected() || enemy.IsPlayerCrouching())
         {
-            enemy.shouldPatrol = true; // è®¾ç½®å¯ä»¥ç»§ç»­å·¡é€»
+            enemy.shouldPatrol = true; // ÉèÖÃ¿ÉÒÔ¼ÌĞøÑ²Âß
             enemy.transitionState(EnemyState.Patrol);
             return;
         }
         
-        // å¦‚æœåœ¨å†·å´ä¸­ï¼Œå¤„ç†å†·å´é€»è¾‘
+        // Èç¹ûÔÚÀäÈ´ÖĞ£¬´¦ÀíÀäÈ´Âß¼­
         if (inCooldown)
         {
             cooldownTimer += Time.deltaTime;
             if (cooldownTimer >= cooldownTime)
             {
-                // å†·å´ç»“æŸï¼Œé‡ç½®å°„å‡»è®¡æ•°å¹¶é€€å‡ºå†·å´çŠ¶æ€
+                // ÀäÈ´½áÊø£¬ÖØÖÃÉä»÷¼ÆÊı²¢ÍË³öÀäÈ´×´Ì¬
                 EnemyAttackState attackState = GetAttackState();
                 if (attackState != null)
                 {
@@ -86,13 +86,13 @@ public class EnemyAimState : IState
                 }
                 inCooldown = false;
             }
-            return; // åœ¨å†·å´ä¸­ä¸è¿›è¡Œç„å‡†å’Œæ”»å‡»
+            return; // ÔÚÀäÈ´ÖĞ²»½øĞĞÃé×¼ºÍ¹¥»÷
         }
         
-        // ç„å‡†ç©å®¶
+        // Ãé×¼Íæ¼Ò
         AimAtPlayer();
         
-        // ç„å‡†ä¸€æ®µæ—¶é—´ååˆ‡æ¢åˆ°æ”»å‡»çŠ¶æ€
+        // Ãé×¼Ò»¶ÎÊ±¼äºóÇĞ»»µ½¹¥»÷×´Ì¬
         aimTime += Time.deltaTime;
         if (aimTime >= maxAimTime)
         {
@@ -100,20 +100,20 @@ public class EnemyAimState : IState
         }
     }
     
-    // ç„å‡†ç©å®¶
+    // Ãé×¼Íæ¼Ò
     private void AimAtPlayer()
     {
         if (enemy.player == null) return;
         
-        // è®¡ç®—æœå‘ç©å®¶çš„æ–¹å‘
+        // ¼ÆËã³¯ÏòÍæ¼ÒµÄ·½Ïò
         Vector2 playerPosition = enemy.GetPlayerPosition();
         Vector2 direction = (playerPosition - (Vector2)enemy.transform.position).normalized;
         
-        // ä½¿ç”¨Enemyç±»ä¸­çš„SetDirectionæ–¹æ³•è®¾ç½®æ–¹å‘
+        // Ê¹ÓÃEnemyÀàÖĞµÄSetDirection·½·¨ÉèÖÃ·½Ïò
         enemy.SetDirection(direction);
     }
     
-    // è·å–æ”»å‡»çŠ¶æ€ç»„ä»¶
+    // »ñÈ¡¹¥»÷×´Ì¬×é¼ş
     private EnemyAttackState GetAttackState()
     {
         if (enemy != null && enemy.states != null && enemy.states.TryGetValue(EnemyState.Attack, out IState state))

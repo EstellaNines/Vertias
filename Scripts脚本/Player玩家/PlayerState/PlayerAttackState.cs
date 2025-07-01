@@ -4,10 +4,10 @@ using UnityEngine;
 
 public class PlayerAttackState : IState
 {
-    // --- è·å–ç©å®¶ç»„ä»¶ ---
+    // --- »ñÈ¡Íæ¼Ò×é¼ş ---
     public Player player;
     
-    // æ„é€ å‡½æ•°
+    // ¹¹Ôìº¯Êı
     public PlayerAttackState(Player player)
     {
         this.player = player;
@@ -15,70 +15,70 @@ public class PlayerAttackState : IState
     
     public void OnEnter()
     {
-        // è®¾ç½®æ”»å‡»æ—¶çš„ç§»åŠ¨é€Ÿåº¦
+        // ÉèÖÃ¹¥»÷Ê±µÄÒÆ¶¯ËÙ¶È
         player.CurrentSpeed = player.FireSpeed;
         
-        // æ’­æ”¾å°„å‡»åŠ¨ç”»
+        // ²¥·ÅÉä»÷¶¯»­
         if (player.isWeaponInHand)
         {
             player.AIMTOR.Play("Shoot_Idle");
             
-            // éªŒè¯å½“å‰æ­¦å™¨çš„å‘å°„å£
+            // ÑéÖ¤µ±Ç°ÎäÆ÷µÄ·¢Éä¿Ú
             if (player.currentWeapon != null && player.currentWeapon.Muzzle != null)
             {
-                Debug.Log($"è¿›å…¥æ”»å‡»çŠ¶æ€ - å½“å‰æ­¦å™¨: {player.currentWeapon.name}, å‘å°„å£: {player.currentWeapon.Muzzle.name}");
+                Debug.Log($"½øÈë¹¥»÷×´Ì¬ - µ±Ç°ÎäÆ÷: {player.currentWeapon.name}, ·¢Éä¿Ú: {player.currentWeapon.Muzzle.name}");
             }
             else
             {
-                Debug.LogWarning("è¿›å…¥æ”»å‡»çŠ¶æ€ä½†æ­¦å™¨æˆ–å‘å°„å£æœªæ­£ç¡®è®¾ç½®ï¼");
+                Debug.LogWarning("½øÈë¹¥»÷×´Ì¬µ«ÎäÆ÷»ò·¢Éä¿ÚÎ´ÕıÈ·ÉèÖÃ£¡");
             }
         }
         
-        Debug.Log("è¿›å…¥æ”»å‡»çŠ¶æ€");
+        Debug.Log("½øÈë¹¥»÷×´Ì¬");
     }
 
     public void OnExit()
     {
-        // æ¢å¤æ­£å¸¸ç§»åŠ¨é€Ÿåº¦
+        // »Ö¸´Õı³£ÒÆ¶¯ËÙ¶È
         player.CurrentSpeed = player.WalkSpeed;
         
-        // åœæ­¢å°„å‡»
+        // Í£Ö¹Éä»÷
         player.isFiring = false;
         player.isAttacking = false;
         
-        // ç¡®ä¿æ­¦å™¨åœæ­¢å°„å‡»
+        // È·±£ÎäÆ÷Í£Ö¹Éä»÷
         if (player.currentWeapon != null)
         {
             player.currentWeapon.SetFiring(false);
         }
         
-        Debug.Log("é€€å‡ºæ”»å‡»çŠ¶æ€");
+        Debug.Log("ÍË³ö¹¥»÷×´Ì¬");
     }
 
     public void OnFixedUpdate()
     {
-        // æ”»å‡»çŠ¶æ€ä¸‹çš„ç‰©ç†æ›´æ–°
-        // å¯ä»¥ç§»åŠ¨ä½†é€Ÿåº¦è¾ƒæ…¢
+        // ¹¥»÷×´Ì¬ÏÂµÄÎïÀí¸üĞÂ
+        // ¿ÉÒÔÒÆ¶¯µ«ËÙ¶È½ÏÂı
         player.PlayerRB2D.velocity = player.InputDirection * player.CurrentSpeed;
     }
 
     public void OnUpdate()
     {
-        // å®Œæ•´ç„å‡†åŠŸèƒ½ï¼ˆåŒ…æ‹¬æ­¦å™¨æœå‘ï¼‰
+        // ÍêÕûÃé×¼¹¦ÄÜ£¨°üÀ¨ÎäÆ÷³¯Ïò£©
         player.UpdateFullAiming();
         
-        // å¤„ç†å°„å‡»åŠ¨ç”»
+        // ´¦ÀíÉä»÷¶¯»­
         if (player.isFiring && player.isWeaponInHand)
         {
-            // éªŒè¯æ­¦å™¨å’Œå‘å°„å£
+            // ÑéÖ¤ÎäÆ÷ºÍ·¢Éä¿Ú
             if (player.currentWeapon == null || player.currentWeapon.Muzzle == null)
             {
-                Debug.LogError("æ”»å‡»çŠ¶æ€ä¸‹æ­¦å™¨æˆ–å‘å°„å£ä¸¢å¤±ï¼Œé€€å‡ºæ”»å‡»çŠ¶æ€");
+                Debug.LogError("¹¥»÷×´Ì¬ÏÂÎäÆ÷»ò·¢Éä¿Ú¶ªÊ§£¬ÍË³ö¹¥»÷×´Ì¬");
                 player.transitionState(PlayerStateType.Idle);
                 return;
             }
             
-            // æ’­æ”¾å°„å‡»åŠ¨ç”»
+            // ²¥·ÅÉä»÷¶¯»­
             if (player.InputDirection != Vector2.zero)
             {
                 player.AIMTOR.Play("Shoot_Walk");
@@ -89,21 +89,21 @@ public class PlayerAttackState : IState
             }
         }
         
-        // æ‹¾å–åˆ‡æ¢ï¼ˆæ”»å‡»æ—¶ä¹Ÿå¯ä»¥æ‹¾å–ï¼‰
+        // Ê°È¡ÇĞ»»£¨¹¥»÷Ê±Ò²¿ÉÒÔÊ°È¡£©
         if (player.isPickingUp)
         {
             player.transitionState(PlayerStateType.PickUp);
             return;
         }
         
-        // é—ªé¿åˆ‡æ¢ï¼ˆæ”»å‡»æ—¶ä¹Ÿå¯ä»¥é—ªé¿ï¼‰
+        // ÉÁ±ÜÇĞ»»£¨¹¥»÷Ê±Ò²¿ÉÒÔÉÁ±Ü£©
         if (player.isDodged)
         {
             player.transitionState(PlayerStateType.Dodge);
             return;
         }
         
-        // å¦‚æœåœæ­¢å°„å‡»ï¼Œæ ¹æ®å½“å‰çŠ¶æ€åˆ‡æ¢
+        // Èç¹ûÍ£Ö¹Éä»÷£¬¸ù¾İµ±Ç°×´Ì¬ÇĞ»»
         if (!player.isFiring || !player.isWeaponInHand)
         {
             if (player.InputDirection != Vector2.zero)

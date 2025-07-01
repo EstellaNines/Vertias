@@ -2,73 +2,73 @@ using UnityEngine;
 
 public class EnemyAttackState : IState
 {
-    // --- æ§åˆ¶å™¨å¼•ç”¨ ---
+    // --- ¿ØÖÆÆ÷ÒıÓÃ ---
     Enemy enemy;
     private float attackTime = 0f;
-    private float maxAttackTime = 5f; // æ”»å‡»æŒç»­æ—¶é—´ä»3ç§’å¢åŠ åˆ°5ç§’
-    private int shotsFired = 0; // å·²å‘å°„å­å¼¹æ•°é‡
-    private int maxShots = 30; // æœ€å¤§å‘å°„å­å¼¹æ•°é‡
-    private float lastShotTime = 0f; // ä¸Šæ¬¡å°„å‡»æ—¶é—´
+    private float maxAttackTime = 5f; // ¹¥»÷³ÖĞøÊ±¼ä´Ó3ÃëÔö¼Óµ½5Ãë
+    private int shotsFired = 0; // ÒÑ·¢Éä×Óµ¯ÊıÁ¿
+    private int maxShots = 30; // ×î´ó·¢Éä×Óµ¯ÊıÁ¿
+    private float lastShotTime = 0f; // ÉÏ´ÎÉä»÷Ê±¼ä
     
-    // --- æ„é€ å‡½æ•° --- 
+    // --- ¹¹Ôìº¯Êı --- 
     public EnemyAttackState(Enemy enemy)
     {
         this.enemy = enemy;
     }
     
-    // --- çŠ¶æ€æ–¹æ³• ---
+    // --- ×´Ì¬·½·¨ ---
     public void OnEnter()
     {
-        // åœæ­¢ç§»åŠ¨
+        // Í£Ö¹ÒÆ¶¯
         if (enemy.RB != null)
         {
             enemy.RB.velocity = Vector2.zero;
         }
         
-        // æ’­æ”¾å¾…æœºåŠ¨ç”»
+        // ²¥·Å´ı»ú¶¯»­
         if (enemy.animator != null)
         {
             enemy.animator.Play("Idle");
         }
         
-        // é‡ç½®æ”»å‡»æ—¶é—´
+        // ÖØÖÃ¹¥»÷Ê±¼ä
         attackTime = 0f;
-        // ä¸é‡ç½®shotsFiredï¼Œè®©å®ƒåœ¨çŠ¶æ€åˆ‡æ¢ä¹‹é—´ä¿æŒ
+        // ²»ÖØÖÃshotsFired£¬ÈÃËüÔÚ×´Ì¬ÇĞ»»Ö®¼ä±£³Ö
     }
 
     public void OnExit()
     {
-        // é€€å‡ºæ”»å‡»çŠ¶æ€
+        // ÍË³ö¹¥»÷×´Ì¬
     }
 
     public void OnFixedUpdate()
     {
-        // ç‰©ç†æ›´æ–°
+        // ÎïÀí¸üĞÂ
     }
 
     public void OnUpdate()
     {
-        // æ£€æŸ¥ç©å®¶æ˜¯å¦å·²æ­»äº¡
+        // ¼ì²éÍæ¼ÒÊÇ·ñÒÑËÀÍö
         if (enemy.IsPlayerDead())
         {
-            Debug.Log("ç©å®¶å·²æ­»äº¡ï¼Œæ•Œäººåœæ­¢æ”»å‡»");
+            Debug.Log("Íæ¼ÒÒÑËÀÍö£¬µĞÈËÍ£Ö¹¹¥»÷");
             enemy.shouldPatrol = true;
             enemy.transitionState(EnemyState.Patrol);
             return;
         }
         
-        // å¦‚æœç©å®¶ä¸å†è¢«æ£€æµ‹åˆ°æˆ–è€…è¿›å…¥æ½œè¡ŒçŠ¶æ€ï¼Œè¿”å›å·¡é€»çŠ¶æ€
+        // Èç¹ûÍæ¼Ò²»ÔÙ±»¼ì²âµ½»òÕß½øÈëÇ±ĞĞ×´Ì¬£¬·µ»ØÑ²Âß×´Ì¬
         if (!enemy.IsPlayerDetected() || enemy.IsPlayerCrouching())
         {
-            enemy.shouldPatrol = true; // è®¾ç½®å¯ä»¥ç»§ç»­å·¡é€»
+            enemy.shouldPatrol = true; // ÉèÖÃ¿ÉÒÔ¼ÌĞøÑ²Âß
             enemy.transitionState(EnemyState.Patrol);
             return;
         }
         
-        // ç„å‡†ç©å®¶
+        // Ãé×¼Íæ¼Ò
         AimAtPlayer();
         
-        // å°„å‡»ï¼Œå¹¶è®¡æ•°
+        // Éä»÷£¬²¢¼ÆÊı
         if (Time.time >= enemy.nextFireTime && shotsFired < maxShots)
         {
             enemy.Shoot();
@@ -76,7 +76,7 @@ public class EnemyAttackState : IState
             lastShotTime = Time.time;
         }
         
-        // æ”»å‡»ä¸€æ®µæ—¶é—´åæˆ–è¾¾åˆ°æœ€å¤§å°„å‡»æ¬¡æ•°ååˆ‡æ¢å›ç„å‡†çŠ¶æ€
+        // ¹¥»÷Ò»¶ÎÊ±¼äºó»ò´ïµ½×î´óÉä»÷´ÎÊıºóÇĞ»»»ØÃé×¼×´Ì¬
         attackTime += Time.deltaTime;
         if (attackTime >= maxAttackTime || shotsFired >= maxShots)
         {
@@ -84,26 +84,26 @@ public class EnemyAttackState : IState
         }
     }
     
-    // ç„å‡†ç©å®¶
+    // Ãé×¼Íæ¼Ò
     private void AimAtPlayer()
     {
         if (enemy.player == null) return;
         
-        // è®¡ç®—æœå‘ç©å®¶çš„æ–¹å‘
+        // ¼ÆËã³¯ÏòÍæ¼ÒµÄ·½Ïò
         Vector2 playerPosition = enemy.GetPlayerPosition();
         Vector2 direction = (playerPosition - (Vector2)enemy.transform.position).normalized;
         
-        // ä½¿ç”¨Enemyç±»ä¸­çš„SetDirectionæ–¹æ³•è®¾ç½®æ–¹å‘
+        // Ê¹ÓÃEnemyÀàÖĞµÄSetDirection·½·¨ÉèÖÃ·½Ïò
         enemy.SetDirection(direction);
     }
     
-    // è·å–å·²å‘å°„å­å¼¹æ•°é‡
+    // »ñÈ¡ÒÑ·¢Éä×Óµ¯ÊıÁ¿
     public int GetShotsFired()
     {
         return shotsFired;
     }
     
-    // é‡ç½®å·²å‘å°„å­å¼¹æ•°é‡
+    // ÖØÖÃÒÑ·¢Éä×Óµ¯ÊıÁ¿
     public void ResetShotsFired()
     {
         shotsFired = 0;

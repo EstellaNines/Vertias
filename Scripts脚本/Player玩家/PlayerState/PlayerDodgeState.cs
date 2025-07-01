@@ -4,22 +4,22 @@ using UnityEngine;
 
 public class PlayerDodgeState : IState
 {
-    // --- è·å–ç©å®¶ç»„ä»¶ ---
+    // --- »ñÈ¡Íæ¼Ò×é¼ş ---
     public Player player;
     private float DodgeTimer = 0;
-    // æ„é€ å‡½æ•°
+    // ¹¹Ôìº¯Êı
     public PlayerDodgeState(Player player)
     {
         this.player = player;
     }
     public void OnEnter()
     {
-        player.isDodgeCoolDownEnd = false; // è¿›å…¥é—ªé¿çŠ¶æ€æ—¶è®¾ç½®ä¸ºå†·å´ä¸­
+        player.isDodgeCoolDownEnd = false; // ½øÈëÉÁ±Ü×´Ì¬Ê±ÉèÖÃÎªÀäÈ´ÖĞ
     }
 
     public void OnExit()
     {
-        DodgeTimer = 0; // é€€å‡ºæ—¶é‡ç½®è®¡æ—¶å™¨
+        DodgeTimer = 0; // ÍË³öÊ±ÖØÖÃ¼ÆÊ±Æ÷
     }
 
     public void OnFixedUpdate()
@@ -34,11 +34,11 @@ public class PlayerDodgeState : IState
 
         if (player.isDodged == false)
         {
-            player.transitionState(PlayerStateType.Idle);// åˆ‡æ¢ä¸ºå¾…æœºçŠ¶æ€ 
+            player.transitionState(PlayerStateType.Idle);// ÇĞ»»Îª´ı»ú×´Ì¬ 
         }
         
     }
-    // ç¿»æ»šåŠŸèƒ½
+    // ·­¹ö¹¦ÄÜ
     void Dodge()
     {
         if (DodgeTimer <= player.DodgeDuration)

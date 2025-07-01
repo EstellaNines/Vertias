@@ -2,13 +2,13 @@ using UnityEngine;
 
 public class Bullet : MonoBehaviour
 {
-    [Header("å­å¼¹å±æ€§")]
+    [Header("×Óµ¯ÊôĞÔ")]
     public float BulletSpeed;
     public int BulletDamage;
     public float BulletDistance;
     public Vector3 StartPos;
 
-    public Transform shooter; // å‘å°„è€…
+    public Transform shooter; // ·¢ÉäÕß
     private Rigidbody2D RB2D;
 
     void Awake()
@@ -18,15 +18,15 @@ public class Bullet : MonoBehaviour
 
     void OnEnable()
     {
-        // é‡ç½®å­å¼¹çŠ¶æ€
+        // ÖØÖÃ×Óµ¯×´Ì¬
         RB2D.velocity = transform.right * BulletSpeed;
         StartPos = transform.position;
     }
 
-    // æ·»åŠ Initializeæ–¹æ³•ï¼Œç”¨äºEnemyç±»è°ƒç”¨
+    // Ìí¼ÓInitialize·½·¨£¬ÓÃÓÚEnemyÀàµ÷ÓÃ
     public void Initialize(Vector2 direction, float speed)
     {
-        // è®¾ç½®å­å¼¹é€Ÿåº¦å’Œæ–¹å‘
+        // ÉèÖÃ×Óµ¯ËÙ¶ÈºÍ·½Ïò
         BulletSpeed = speed;
         RB2D.velocity = direction * BulletSpeed;
         StartPos = transform.position;
@@ -39,10 +39,10 @@ public class Bullet : MonoBehaviour
 
     void BulletFire()
     {
-        // è®¡ç®—å­å¼¹ä¸åˆå§‹ä½ç½®çš„è·ç¦»
+        // ¼ÆËã×Óµ¯Óë³õÊ¼Î»ÖÃµÄ¾àÀë
         float distance = (transform.position - StartPos).sqrMagnitude;
 
-        // å¦‚æœè·ç¦»è¶…è¿‡å°„ç¨‹ï¼Œè¿”å›å¯¹è±¡æ± 
+        // Èç¹û¾àÀë³¬¹ıÉä³Ì£¬·µ»Ø¶ÔÏó³Ø
         if (distance > BulletDistance * BulletDistance)
         {
             BulletPool bulletPool = FindObjectOfType<BulletPool>();
@@ -55,17 +55,27 @@ public class Bullet : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D collision)
     {
-        // ä¿®æ”¹ç¢°æ’ä½“æ£€æµ‹æ¡ä»¶ï¼šæ’é™¤æ‰€æœ‰è§¦å‘å™¨ï¼ˆisTrigger = true çš„ç¢°æ’ä½“ï¼‰
+        // ĞŞ¸ÄÅö×²Ìå¼ì²âÌõ¼ş£ºÅÅ³ıËùÓĞ´¥·¢Æ÷£¨isTrigger = true µÄÅö×²Ìå£©
         if (!collision.isTrigger)
         {
-            BulletPool bulletPool = FindObjectOfType<BulletPool>(); // åœ¨æ–¹æ³•å¼€å§‹æ—¶å£°æ˜ä¸€æ¬¡
+            BulletPool bulletPool = FindObjectOfType<BulletPool>(); // ÔÚ·½·¨¿ªÊ¼Ê±ÉùÃ÷Ò»´Î
             
-            // æ£€æŸ¥æ˜¯å¦å‡»ä¸­ç©å®¶
+            // ¼ì²éÊÇ·ñ»÷ÖĞÍæ¼Ò
             Player player = collision.GetComponent<Player>();
-            if (player != null && shooter != player.transform) // ç¡®ä¿ä¸æ˜¯ç©å®¶è‡ªå·±çš„å­å¼¹
+            if (player != null && shooter != player.transform) // È·±£²»ÊÇ×Ô¼ºµÄ×Óµ¯
             {
-                Debug.Log($"[å­å¼¹å‘½ä¸­] ç©å®¶å—åˆ°ä¼¤å®³: {BulletDamage}", this);
-                player.TakeDamage(BulletDamage);
+                Debug.Log($"[×Óµ¯ÃüÖĞ] Íæ¼ÒÊÜµ½ÉËº¦: {BulletDamage}", this);
+                
+                // Ö±½Ó¼õÉÙÍæ¼ÒÉúÃüÖµ²¢ÉèÖÃÊÜÉË×´Ì¬
+                player.CurrentHealth -= BulletDamage;
+                player.isHurt = true;
+                
+                // ¼ì²éÊÇ·ñËÀÍö
+                if (player.CurrentHealth <= 0)
+                {
+                    player.CurrentHealth = 0;
+                    player.isDead = true;
+                }
                 
                 if (bulletPool != null)
                 {
@@ -74,20 +84,20 @@ public class Bullet : MonoBehaviour
                 return;
             }
             
-            // æ£€æŸ¥æ˜¯å¦å‡»ä¸­æ•Œäºº
+            // ¼ì²éÊÇ·ñ»÷ÖĞµĞÈË
             Zombie zombie = collision.GetComponent<Zombie>();
             if (zombie != null)
             {
-                Debug.Log($"[å­å¼¹å‘½ä¸­] æ•Œäºº: {collision.name} | ä¼¤å®³: {BulletDamage} | æ¥æº: ç©å®¶", this);
+                Debug.Log($"[×Óµ¯ÃüÖĞ] µĞÈË: {collision.name} | ÉËº¦: {BulletDamage} | À´Ô´: Íæ¼Ò", this);
     
-                // è·å–å­å¼¹å½“å‰è¿åŠ¨æ–¹å‘ä½œä¸ºå‡»é€€æ–¹å‘
+                // »ñÈ¡×Óµ¯µ±Ç°ÔË¶¯·½Ïò×÷Îª»÷ÍË·½Ïò
                 Vector2 hitDirection = RB2D.velocity.normalized;
-                // è°ƒç”¨ä¼¤å®³å¤„ç†æ–¹æ³•
+                // µ÷ÓÃÉËº¦´¦Àí·½·¨
                 zombie.TakeDamage(BulletDamage, hitDirection);
             }
             else
             {
-                Debug.LogWarning($"[æ— å‘½ä¸­] ç¢°æ’åˆ°éæ•Œäººå¯¹è±¡: {collision.name}", this);
+                Debug.LogWarning($"[ÎŞÃüÖĞ] Åö×²µ½·ÇµĞÈË¶ÔÏó: {collision.name}", this);
             }
     
             if (bulletPool != null)

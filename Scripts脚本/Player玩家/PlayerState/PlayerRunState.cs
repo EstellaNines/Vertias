@@ -4,9 +4,9 @@ using UnityEngine;
 
 public class PlayerRunState : IState
 {
-    // --- ç©å®¶è·‘æ­¥çŠ¶æ€ç±» ---
+    // --- Íæ¼ÒÅÜ²½×´Ì¬Àà ---
     public Player player;
-    // æ„é€ å‡½æ•°
+    // ¹¹Ôìº¯Êı
     public PlayerRunState(Player player)
     {
         this.player = player;
@@ -14,11 +14,11 @@ public class PlayerRunState : IState
     
     public void OnEnter()
     {
-        // è®¾ç½®ç©å®¶å½“å‰é€Ÿåº¦ä¸ºè·‘æ­¥é€Ÿåº¦
+        // ÉèÖÃÍæ¼Òµ±Ç°ËÙ¶ÈÎªÅÜ²½ËÙ¶È
         player.CurrentSpeed = player.RunSpeed;
-        player.AIMTOR.SetFloat("Speed", player.CurrentSpeed); // è®¾ç½®åŠ¨ç”»å™¨é€Ÿåº¦å‚æ•°
+        player.AIMTOR.SetFloat("Speed", player.CurrentSpeed); // ÉèÖÃ¶¯»­Æ÷ËÙ¶È²ÎÊı
         
-        // æ ¹æ®æ˜¯å¦æŒæœ‰æ­¦å™¨æ’­æ”¾å¯¹åº”çš„è·‘æ­¥åŠ¨ç”»
+        // ¸ù¾İÊÇ·ñ³ÖÓĞÎäÆ÷²¥·Å¶ÔÓ¦µÄÅÜ²½¶¯»­
         if (player.isWeaponInHand)
         {
             player.AIMTOR.Play("Shoot_Run");
@@ -31,56 +31,56 @@ public class PlayerRunState : IState
 
     public void OnExit()
     {
-        // é€€å‡ºæ—¶æ¢å¤ä¸ºè¡Œèµ°é€Ÿåº¦
+        // ÍË³öÊ±»Ö¸´ÎªĞĞ×ßËÙ¶È
         player.CurrentSpeed = player.WalkSpeed;
     }
 
     public void OnFixedUpdate()
     {
-        // åœ¨ç‰©ç†æ›´æ–°ä¸­å¤„ç†ç©å®¶ç§»åŠ¨
+        // ÔÚÎïÀí¸üĞÂÖĞ´¦ÀíÍæ¼ÒÒÆ¶¯
         player.PlayerRB2D.velocity = player.InputDirection * player.CurrentSpeed;
     }
 
     public void OnUpdate()
     {
-        // åŸºç¡€ç„å‡†åŠŸèƒ½ï¼ˆè§†è§’å’Œç„å‡†æ–¹å‘æ›´æ–°ï¼‰
+        // »ù´¡Ãé×¼¹¦ÄÜ£¨ÊÓ½ÇºÍÃé×¼·½Ïò¸üĞÂ£©
         player.UpdateBasicAiming();
         
-        // æ‹¾å–çŠ¶æ€æ£€æµ‹
+        // Ê°È¡×´Ì¬¼ì²â
         if (player.isPickingUp)
         {
             player.transitionState(PlayerStateType.PickUp);
             return;
         }
-        // å°„å‡»çŠ¶æ€æ£€æµ‹
+        // Éä»÷×´Ì¬¼ì²â
         if (player.isFiring && player.isWeaponInHand)
         {
             player.transitionState(PlayerStateType.Attack);
             return;
         }
         
-        // æ£€æµ‹æ˜¯å¦åœæ­¢è·‘æ­¥ï¼Œå¦‚æœåœæ­¢åˆ™åˆ‡æ¢åˆ°ç§»åŠ¨æˆ–å¾…æœºçŠ¶æ€
+        // ¼ì²âÊÇ·ñÍ£Ö¹ÅÜ²½£¬Èç¹ûÍ£Ö¹ÔòÇĞ»»µ½ÒÆ¶¯»ò´ı»ú×´Ì¬
         if (!player.isRunning)
         {
             if (player.InputDirection != Vector2.zero)
             {
-                player.transitionState(PlayerStateType.Move); // åˆ‡æ¢åˆ°ç§»åŠ¨çŠ¶æ€
+                player.transitionState(PlayerStateType.Move); // ÇĞ»»µ½ÒÆ¶¯×´Ì¬
             }
             else
             {
-                player.transitionState(PlayerStateType.Idle); // åˆ‡æ¢åˆ°å¾…æœºçŠ¶æ€
+                player.transitionState(PlayerStateType.Idle); // ÇĞ»»µ½´ı»ú×´Ì¬
             }
             return;
         }
         
-        // å¦‚æœæ²¡æœ‰è¾“å…¥æ–¹å‘åˆ™åˆ‡æ¢åˆ°å¾…æœºçŠ¶æ€
+        // Èç¹ûÃ»ÓĞÊäÈë·½ÏòÔòÇĞ»»µ½´ı»ú×´Ì¬
         if (player.InputDirection == Vector2.zero)
         {
             player.transitionState(PlayerStateType.Idle);
             return;
         }
         
-        // é—ªé¿çŠ¶æ€æ£€æµ‹
+        // ÉÁ±Ü×´Ì¬¼ì²â
         if (player.isDodged)
         {
             player.transitionState(PlayerStateType.Dodge);

@@ -137,12 +137,6 @@ public class Player : MonoBehaviour
     // 更新视角方向
     public void UpdateLookDirection()
     {
-        // 如果处于死亡状态，不更新视角方向
-        if (currentState is PlayerDieState)
-        {
-            return;
-        }
-        
         var mousePos = Mouse.current.position.ReadValue();
         // 根据鼠标位置更新动画器方向参数（0为左，1为右）
         float horizontalDirection = (mousePos.x < screenCenterX) ? 0f : 1f;
@@ -246,11 +240,6 @@ public class Player : MonoBehaviour
         Debug.ClearDeveloperConsole();
         Debug.Log($"当前状态机: {currentState.GetType().Name}");
         
-        if (currentState is PlayerDieState)
-        {
-            currentState.OnUpdate();
-            return; // 直接返回，不执行其他逻辑
-        }
         WeaponInHand();
         currentState.OnUpdate();
     }
@@ -298,20 +287,8 @@ public class Player : MonoBehaviour
     #region 移动
     public void Move(Vector2 moveInput)
     {
-        // 检查是否处于死亡状态，如果是则不处理移动
-        if (currentState is PlayerDieState)
-        {
-            return; // 完全不处理任何逻辑
-        }
-        
         // 直接应用输入方向
         InputDirection = moveInput;
-
-        // 如果处于受伤状态，让受伤状态自己处理移动逻辑
-        if (currentState is PlayerHurtState)
-        {
-            return; // 受伤状态自己处理移动
-        }
 
         // 立即停止移动
         CurrentSpeed = (InputDirection != Vector2.zero && !isFiring) ? WalkSpeed : 0f;
@@ -328,7 +305,6 @@ public class Player : MonoBehaviour
     }
     #endregion
     #region 射击
-    // 获取武器
     // 获取武器
     public void WeaponInHand()
     {
@@ -506,78 +482,6 @@ public class Player : MonoBehaviour
     public bool IsCrouching()
     {
         return isCrouching;
-    }
-    #endregion
-    #region 受伤
-    public void TakeDamage(float damage)
-    {
-        if (isDead) return; // 只有死亡状态才完全免疫伤害
-        
-        CurrentHealth -= damage;
-        CurrentHealth = Mathf.Clamp(CurrentHealth, 0, MaxHealth);
-        
-        Debug.Log($"玩家受到 {damage} 点伤害，当前生命值: {CurrentHealth}");
-        
-        if (CurrentHealth <= 0)
-        {
-            // 死亡 - 无论当前是什么状态都要死亡
-            isDead = true;
-            isHurt = false; // 重置受伤状态
-            // 设置动画器参数触发死亡动画
-            AIMTOR.SetBool("isDying?", true);
-            AIMTOR.SetBool("isHurting?", false); // 停止受伤动画
-            transitionState(PlayerStateType.Die);
-        }
-        else if (!isHurt) // 只有在非受伤状态下才进入受伤状态
-        {
-            // 受伤
-            isHurt = true;
-            AIMTOR.SetBool("isHurting?", true);
-            transitionState(PlayerStateType.Hurt);
-        }
-        // 如果已经在受伤状态，只扣血不重复进入受伤状态
-    }
-    
-    // 恢复生命值
-    public void RestoreHealth(float amount)
-    {
-        CurrentHealth += amount;
-        CurrentHealth = Mathf.Clamp(CurrentHealth, 0, MaxHealth);
-        Debug.Log($"玩家恢复 {amount} 点生命值，当前生命值: {CurrentHealth}");
-    }
-    
-    // 检查是否有武器在手
-    public bool HasWeaponInHand()
-    {
-        return Hand != null && Hand.childCount > 0;
-    }
-    
-    // 受伤状态结束
-    public void EndHurtState()
-    {
-        isHurt = false;
-        AIMTOR.SetBool("isHurting?", false);
-    }
-    #endregion
-    #region 死亡
-    // 检查玩家是否已死亡
-    public bool IsDead()
-    {
-        return isDead;
-    }
-    
-    // 检查玩家是否处于死亡状态
-    public bool IsInDeathState()
-    {
-        return currentState is PlayerDieState;
-    }
-
-    public void OnDeathAnimationFinished()
-    {
-        if (currentState is PlayerDieState dieState)
-        {
-            dieState.OnDeathAnimationFinished();
-        }
     }
     #endregion
 }
