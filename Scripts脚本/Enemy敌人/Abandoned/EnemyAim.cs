@@ -2,28 +2,28 @@ using UnityEngine;
 
 public class EnemyAim : MonoBehaviour
 {
-    [Header("¼ì²âÉèÖÃ")]
-    public float DetectionRdaius = 5f; //¼ì²â·¶Î§
-    public LayerMask layerMask; //¼ì²âÍ¼²ã
+    [Header("æ£€æµ‹è®¾ç½®")]
+    public float DetectionRdaius = 5f; //æ£€æµ‹èŒƒå›´
+    public LayerMask layerMask; //æ£€æµ‹å›¾å±‚
 
-    [Header("ÎäÆ÷ÉèÖÃ")]
-    [SerializeField] private Transform weapon; // ÎäÆ÷ÒıÓÃ
-    [SerializeField] private Transform targetPlayer; // Íæ¼ÒÒıÓÃ
-    private bool isDetecting = true; // ¼ì²â×´Ì¬ÇĞ»»
-    public bool isAiming = false; // Ãé×¼×´Ì¬ÇĞ»»
+    [Header("æ­¦å™¨è®¾ç½®")]
+    [SerializeField] private Transform weapon; // æ­¦å™¨å¼•ç”¨
+    [SerializeField] private Transform targetPlayer; // ç©å®¶å¼•ç”¨
+    private bool isDetecting = true; // æ£€æµ‹çŠ¶æ€åˆ‡æ¢
+    public bool isAiming = false; // ç„å‡†çŠ¶æ€åˆ‡æ¢
     private void Awake()
     {
         CircleCollider2D circleCollider2D = GetComponent<CircleCollider2D>();
         if (circleCollider2D != null)
         {
-            circleCollider2D.radius = DetectionRdaius; // ÉèÖÃ°ë¾¶Îª¼ì²â·¶Î§°ë¾¶
-            circleCollider2D.isTrigger = true; // ÉèÖÃÎª´¥·¢Æ÷
+            circleCollider2D.radius = DetectionRdaius; // è®¾ç½®åŠå¾„ä¸ºæ£€æµ‹èŒƒå›´åŠå¾„
+            circleCollider2D.isTrigger = true; // è®¾ç½®ä¸ºè§¦å‘å™¨
         }
     }
 
     private void Update()
     {
-        // Èç¹ûÓĞÄ¿±êÍæ¼ÒÇÒÎäÆ÷´æÔÚ£¬³ÖĞøÃé×¼
+        // å¦‚æœæœ‰ç›®æ ‡ç©å®¶ä¸”æ­¦å™¨å­˜åœ¨ï¼ŒæŒç»­ç„å‡†
         if (targetPlayer != null && weapon != null)
         {
             AimAtPlayer();
@@ -34,9 +34,9 @@ public class EnemyAim : MonoBehaviour
     {
         if (isDetecting && layerMask.value == (layerMask.value | (1 << other.gameObject.layer)))
         {
-            Debug.Log("½øÈë·¶Î§");
-            targetPlayer = other.transform; // ¼ÇÂ¼Íæ¼ÒÒıÓÃ
-            isAiming = true; // ÆôÓÃÃé×¼×´Ì¬
+            Debug.Log("è¿›å…¥èŒƒå›´");
+            targetPlayer = other.transform; // è®°å½•ç©å®¶å¼•ç”¨
+            isAiming = true; // å¯ç”¨ç„å‡†çŠ¶æ€
         }
     }
 
@@ -44,13 +44,13 @@ public class EnemyAim : MonoBehaviour
     {
         if (isDetecting && layerMask.value == (layerMask.value | (1 << other.gameObject.layer)))
         {
-            Debug.Log("Àë¿ª·¶Î§");
-            targetPlayer = null; // Çå³ıÍæ¼ÒÒıÓÃ
-            isAiming = false; // Í£Ö¹Ãé×¼
+            Debug.Log("ç¦»å¼€èŒƒå›´");
+            targetPlayer = null; // æ¸…é™¤ç©å®¶å¼•ç”¨
+            isAiming = false; // åœæ­¢ç„å‡†
         }
     }
 
-    // Ãé×¼·½·¨
+    // ç„å‡†æ–¹æ³•
     private void AimAtPlayer()
     {
         Vector2 direction = targetPlayer.position - weapon.position;

@@ -23,14 +23,14 @@ public class PlayerAttackState : IState
         {
             player.AIMTOR.Play("Shoot_Idle");
             
-            // 验证当前武器的发射口
-            if (player.currentWeapon != null && player.currentWeapon.Muzzle != null)
+            // 验证当前武器控制器
+            if (player.currentWeaponController != null)
             {
-                Debug.Log($"进入攻击状态 - 当前武器: {player.currentWeapon.name}, 发射口: {player.currentWeapon.Muzzle.name}");
+                Debug.Log($"进入攻击状态 - 当前武器: {player.currentWeaponController.GetWeaponName()}");
             }
             else
             {
-                Debug.LogWarning("进入攻击状态但武器或发射口未正确设置！");
+                Debug.LogWarning("进入攻击状态但武器控制器未正确设置！");
             }
         }
         
@@ -47,9 +47,9 @@ public class PlayerAttackState : IState
         player.isAttacking = false;
         
         // 确保武器停止射击
-        if (player.currentWeapon != null)
+        if (player.currentWeaponController != null)
         {
-            player.currentWeapon.SetFiring(false);
+            player.currentWeaponController.SetFiring(false);
         }
         
         Debug.Log("退出攻击状态");
@@ -70,10 +70,10 @@ public class PlayerAttackState : IState
         // 处理射击动画
         if (player.isFiring && player.isWeaponInHand)
         {
-            // 验证武器和发射口
-            if (player.currentWeapon == null || player.currentWeapon.Muzzle == null)
+            // 验证武器控制器
+            if (player.currentWeaponController == null)
             {
-                Debug.LogError("攻击状态下武器或发射口丢失，退出攻击状态");
+                Debug.LogError("攻击状态下武器控制器丢失，退出攻击状态");
                 player.transitionState(PlayerStateType.Idle);
                 return;
             }
@@ -95,7 +95,11 @@ public class PlayerAttackState : IState
             player.transitionState(PlayerStateType.PickUp);
             return;
         }
-        
+        // 受伤
+        if(player.isHurt)
+        {
+            player.transitionState(PlayerStateType.Hurt);
+        }
         // 闪避切换（攻击时也可以闪避）
         if (player.isDodged)
         {

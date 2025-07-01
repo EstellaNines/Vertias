@@ -60,7 +60,12 @@ public class PlayerCrouchState : IState
             player.transitionState(PlayerStateType.PickUp);
             return;
         }
-        
+        // 受伤
+        if(player.isHurt)
+        {
+            player.transitionState(PlayerStateType.Hurt);
+        }
+
         // 如果松开潜行键，根据当前输入状态切换
         if (!player.isCrouching)
         {

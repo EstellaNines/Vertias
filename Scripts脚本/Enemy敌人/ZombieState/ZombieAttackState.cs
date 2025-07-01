@@ -57,18 +57,10 @@ public class ZombieAttackState : IState
             // 如果玩家在攻击范围内且未死亡
             if (distanceToPlayer <= zombie.AttackDistance && playerComponent != null)
             {
-                // 直接减少玩家生命值
-                playerComponent.CurrentHealth -= 10f;
-                playerComponent.isHurt = true; // 设置玩家为受伤状态
+                // 调用玩家的受伤处理方法，使用Zombie脚本中设置的伤害值
+                playerComponent.TakeDamage(zombie.ZombieAttackDamage);
                 
-                // 检查玩家是否死亡
-                if (playerComponent.CurrentHealth <= 0)
-                {
-                    playerComponent.CurrentHealth = 0;
-                    playerComponent.isDead = true;
-                }
-                
-                Debug.Log("丧尸成功攻击玩家，造成10点伤害");
+                Debug.Log($"丧尸成功攻击玩家，造成{zombie.ZombieAttackDamage}点伤害");
             }
         }
     }
@@ -109,8 +101,8 @@ public class ZombieAttackState : IState
         // 检测动画是否播放完毕
         if (info.normalizedTime >= 1.0f && !zombie.isAttack)
         {
-            // 启动攻击冷却协程
-            zombie.StartCoroutine(zombie.AttackCooldown());
+            // 启动攻击冷却
+            zombie.AttackCooldown();
             // 状态切换回待机
             zombie.transitionState(ZombieStateType.Idle);
         }

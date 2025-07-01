@@ -51,6 +51,11 @@ public class PlayerIdleState : IState
             return;
         }
         
+        // 受伤
+        if(player.isHurt)
+        {
+            player.transitionState(PlayerStateType.Hurt);
+        }
         // 跑动&行走
         if (player.InputDirection != Vector2.zero)
         {

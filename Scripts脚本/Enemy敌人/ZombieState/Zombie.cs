@@ -260,13 +260,13 @@ public class Zombie : MonoBehaviour
     #endregion
     
     #region 攻击冷却
-    public void AttackColdown()
+    public void AttackCooldown()
     {
-        StartCoroutine(nameof(AttackCooldown));
+        StartCoroutine(AttackCooldownCoroutine());
     }
 
-    //攻击冷却时间
-    public IEnumerator AttackCooldown()
+    //攻击冷却时间协程
+    private IEnumerator AttackCooldownCoroutine()
     {
         yield return new WaitForSeconds(AttackCooldownDuration);
         isAttack = true;

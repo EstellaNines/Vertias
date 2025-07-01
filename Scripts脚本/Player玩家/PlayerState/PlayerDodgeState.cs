@@ -32,6 +32,11 @@ public class PlayerDodgeState : IState
     {
         player.AIMTOR.SetBool("isDodging?", player.isDodged);
 
+        // 受伤
+        if(player.isHurt)
+        {
+            player.transitionState(PlayerStateType.Hurt);
+        }
         if (player.isDodged == false)
         {
             player.transitionState(PlayerStateType.Idle);// 切换为待机状态 

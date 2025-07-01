@@ -58,6 +58,11 @@ public class PlayerRunState : IState
             player.transitionState(PlayerStateType.Attack);
             return;
         }
+        // 受伤
+        if(player.isHurt)
+        {
+            player.transitionState(PlayerStateType.Hurt);
+        }
         
         // 检测是否停止跑步，如果停止则切换到移动或待机状态
         if (!player.isRunning)

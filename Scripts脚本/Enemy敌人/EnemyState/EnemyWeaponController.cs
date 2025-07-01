@@ -15,6 +15,7 @@ public class EnemyWeaponController : MonoBehaviour
     private RaycastFOV fov; // 视野检测组件引用
     private Enemy enemyComponent; // 敌人组件引用
     private EnemyState currentEnemyState; // 当前敌人状态
+    private WeaponManager weaponManager; // 武器管理器引用
     
     void Awake()
     {
@@ -43,10 +44,19 @@ public class EnemyWeaponController : MonoBehaviour
                 playerTransform = player.transform;
             }
         }
+        
+        // 获取武器管理器组件
+        weaponManager = GetComponent<WeaponManager>();
     }
     
     void Update()
     {
+        // 检查武器是否仍然属于敌人
+        if (!IsWeaponOwnedByEnemy())
+        {
+            return; // 如果武器不属于敌人，则不控制旋转
+        }
+        
         // 获取当前敌人状态
         if (enemyComponent != null)
         {
@@ -64,6 +74,24 @@ public class EnemyWeaponController : MonoBehaviour
         {
             ResetWeaponRotation();
         }
+    }
+    
+    // 检查武器是否仍然属于敌人
+    private bool IsWeaponOwnedByEnemy()
+    {
+        // 方法1：检查武器管理器的持有者
+        if (weaponManager != null)
+        {
+            return weaponManager.GetCurrentOwner() == enemyComponent.transform;
+        }
+        
+        // 方法2：检查武器是否仍然是敌人的子对象
+        if (enemyComponent != null)
+        {
+            return transform.IsChildOf(enemyComponent.transform);
+        }
+        
+        return false;
     }
     
     // 判断是否应该旋转武器

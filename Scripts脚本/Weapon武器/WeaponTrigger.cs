@@ -5,8 +5,14 @@ public class WeaponTrigger : MonoBehaviour
     // 子弹发射点
     public Transform Muzzle;
 
-    // 子弹池
-    public BulletPool bulletPool;
+    // 玩家子弹池
+    public BulletPool playerBulletPool;
+    
+    // 敌人子弹池
+    public EnemyBulletPool enemyBulletPool;
+    
+    // 当前使用的是否为玩家子弹池
+    private bool usePlayerPool = true;
 
     // 是否正在射击
     private bool isFiring;
@@ -19,6 +25,19 @@ public class WeaponTrigger : MonoBehaviour
 
     // 子弹散射角度
     public float spreadAngle = 5f;
+
+    // 设置子弹池类型
+    public void SetBulletPool(BulletPool playerPool, bool isPlayer)
+    {
+        playerBulletPool = playerPool;
+        usePlayerPool = isPlayer;
+    }
+    
+    public void SetBulletPool(EnemyBulletPool enemyPool, bool isPlayer)
+    {
+        enemyBulletPool = enemyPool;
+        usePlayerPool = isPlayer;
+    }
 
     // 设置是否开始射击的方法
     public void SetFiring(bool firing)
@@ -46,8 +65,18 @@ public class WeaponTrigger : MonoBehaviour
     // 发射子弹方法
     private void Fire()
     {
-        // 从子弹池获取子弹对象
-        GameObject bulletObj = bulletPool.GetBullet();
+        GameObject bulletObj = null;
+        
+        // 根据当前设置选择合适的子弹池
+        if (usePlayerPool && playerBulletPool != null)
+        {
+            bulletObj = playerBulletPool.GetBullet();
+        }
+        else if (!usePlayerPool && enemyBulletPool != null)
+        {
+            bulletObj = enemyBulletPool.GetBullet(Muzzle.position, Muzzle.rotation);
+        }
+        
         if (bulletObj == null) return;
 
         // 设置子弹位置和旋转

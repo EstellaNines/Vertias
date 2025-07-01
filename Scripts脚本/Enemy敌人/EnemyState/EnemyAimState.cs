@@ -55,6 +55,18 @@ public class EnemyAimState : IState
 
     public void OnUpdate()
     {
+        // 检查是否死亡 - 最高优先级
+        if (enemy.isDead)
+        {
+            enemy.transitionState(EnemyState.Dead);
+            return;
+        }
+        
+        if (enemy.isHurt)
+        {
+            enemy.transitionState(EnemyState.Hurt); // 进入受伤状态
+        }
+
         // 检查玩家是否已死亡
         if (enemy.IsPlayerDead())
         {

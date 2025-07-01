@@ -55,6 +55,18 @@ public class EnemyMoveState : IState
 
     public void OnUpdate()
     {
+        // 检查是否死亡 - 最高优先级
+        if (enemy.isDead)
+        {
+            enemy.transitionState(EnemyState.Dead);
+            return;
+        }
+        
+        if (enemy.isHurt)
+        {
+            enemy.transitionState(EnemyState.Hurt); // 进入受伤状态
+        }
+
         // 检测玩家 - 提高优先级
         if (enemy.IsPlayerDetected() && !enemy.IsPlayerCrouching())
         {

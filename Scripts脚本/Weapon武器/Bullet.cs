@@ -10,6 +10,19 @@ public class Bullet : MonoBehaviour
 
     public Transform shooter; // 发射者
     private Rigidbody2D RB2D;
+    
+    // 添加属性以兼容WeaponManager
+    public float Range 
+    { 
+        get { return BulletDistance; } 
+        set { BulletDistance = value; } 
+    }
+    
+    public float Damage 
+    { 
+        get { return BulletDamage; } 
+        set { BulletDamage = (int)value; } 
+    }
 
     void Awake()
     {
@@ -66,16 +79,8 @@ public class Bullet : MonoBehaviour
             {
                 Debug.Log($"[子弹命中] 玩家受到伤害: {BulletDamage}", this);
                 
-                // 直接减少玩家生命值并设置受伤状态
-                player.CurrentHealth -= BulletDamage;
-                player.isHurt = true;
-                
-                // 检查是否死亡
-                if (player.CurrentHealth <= 0)
-                {
-                    player.CurrentHealth = 0;
-                    player.isDead = true;
-                }
+                // 调用玩家的受伤处理方法
+                player.TakeDamage(BulletDamage);
                 
                 if (bulletPool != null)
                 {
@@ -84,21 +89,42 @@ public class Bullet : MonoBehaviour
                 return;
             }
             
-            // 检查是否击中敌人
+            // 检查是否击中Enemy（不需要击退）
+            Enemy enemy = collision.GetComponent<Enemy>();
+            if (enemy != null)
+            {
+                Debug.Log($"[子弹命中] 敌人: {collision.name} | 伤害: {BulletDamage} | 来源: 玩家", this);
+                
+                // 调用Enemy的受伤处理方法（不带击退参数）
+                enemy.TakeDamage(BulletDamage);
+                
+                if (bulletPool != null)
+                {
+                    bulletPool.ReturnBullet(gameObject);
+                }
+                return;
+            }
+            
+            // 检查是否击中Zombie（需要击退）
             Zombie zombie = collision.GetComponent<Zombie>();
             if (zombie != null)
             {
-                Debug.Log($"[子弹命中] 敌人: {collision.name} | 伤害: {BulletDamage} | 来源: 玩家", this);
+                Debug.Log($"[子弹命中] 僵尸: {collision.name} | 伤害: {BulletDamage} | 来源: 玩家", this);
     
                 // 获取子弹当前运动方向作为击退方向
                 Vector2 hitDirection = RB2D.velocity.normalized;
-                // 调用伤害处理方法
+                // 调用Zombie的受伤处理方法（带击退参数）
                 zombie.TakeDamage(BulletDamage, hitDirection);
+                
+                if (bulletPool != null)
+                {
+                    bulletPool.ReturnBullet(gameObject);
+                }
+                return;
             }
-            else
-            {
-                Debug.LogWarning($"[无命中] 碰撞到非敌人对象: {collision.name}", this);
-            }
+            
+            // 如果都没有命中，记录警告
+            Debug.LogWarning($"[无命中] 碰撞到非目标对象: {collision.name}", this);
     
             if (bulletPool != null)
             {
