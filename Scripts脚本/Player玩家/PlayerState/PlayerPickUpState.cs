@@ -4,11 +4,11 @@ using UnityEngine;
 
 public class PlayerPickUpState : IState
 {
-    // --- „1¤7„1¤7„1¤70µ10§00ü80Á0„1¤7„1¤7 ---
+    // --- æ‹¾å–çŠ¶æ€ç›¸å…³å˜é‡ ---
     public Player player;
     private bool hasProcessedPickup = false;
     
-    // „1¤7„1¤7„1¤7ƒ4Õ4„1¤7„1¤7
+    // æž„é€ å‡½æ•°
     public PlayerPickUpState(Player player)
     {
         this.player = player;
@@ -17,9 +17,9 @@ public class PlayerPickUpState : IState
     public void OnEnter()
     {
         hasProcessedPickup = false;
-        Debug.Log("„1¤7„1¤7„1¤7„1¤70µ10§00ü80Á0");
+        Debug.Log("è¿›å…¥æ‹¾å–çŠ¶æ€");
         
-        // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70µ10§0„1¤71²8„1¤7
+        // ç«‹å³å¤„ç†æ‹¾å–é€»è¾‘
         ProcessPickup();
     }
     
@@ -27,21 +27,21 @@ public class PlayerPickUpState : IState
     {
         player.isPickingUp = false;
         hasProcessedPickup = false;
-        Debug.Log("„1¤70»3„1¤70µ10§00ü80Á0");
+        Debug.Log("é€€å‡ºæ‹¾å–çŠ¶æ€");
     }
     
     public void OnFixedUpdate()
     {
-        // 0µ10§00ü80Á0„1¤7„1¤70Æ50ö9„1¤702„1¤7
+        // æ‹¾å–çŠ¶æ€ä¸‹åœæ­¢ç§»åŠ¨
         player.PlayerRB2D.velocity = Vector2.zero;
     }
     
     public void OnUpdate()
     {
-        // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤70ý6„1¤7„1¤7„1¤711„1¤7„1¤70ä10£1„1¤7„1¤7„1¤70ý6„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70„5„1¤7
+        // ä¿æŒåŸºç¡€çž„å‡†åŠŸèƒ½ï¼Œå…è®¸çŽ©å®¶åœ¨æ‹¾å–æ—¶è°ƒæ•´è§†è§’
         player.UpdateBasicAiming();
 
-        // 0µ10§0„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70¯7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7§Ý„1¤70ü80Á0
+        // æ‹¾å–å¤„ç†å®ŒæˆåŽï¼Œæ ¹æ®è¾“å…¥åˆ‡æ¢çŠ¶æ€
         if (hasProcessedPickup)
         {
             if (player.InputDirection != Vector2.zero)
@@ -59,33 +59,33 @@ public class PlayerPickUpState : IState
     {
         if (player.nearbyItem != null)
         {
-            // „1¤7„1¤7„1¤7„1¤7„1¤70¢2„1¤70×4„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤703„1¤7„1¤7„1¤70©1„1¤7„1¤7„1¤7„1¤7„1¤70¢2„1¤7„1¤703
+            // å¦‚æžœçŽ©å®¶å·²ç»æŒæœ‰ç‰©å“ï¼Œå…ˆä¸¢å¼ƒå½“å‰ç‰©å“
             if (player.currentPickedItem != null)
             {
                 DropCurrentItem();
             }
             
-            // 0µ10§0„1¤7„1¤7„1¤7„1¤703
+            // æ‹¾å–æ–°ç‰©å“
             PickUpItem(player.nearbyItem);
-            player.nearbyItem = null; // „1¤7„1¤70ð4„1¤7„1¤7„1¤7„1¤7„1¤703„1¤7„1¤7„1¤7„1¤7
+            player.nearbyItem = null; // æ¸…ç©ºé™„è¿‘ç‰©å“å¼•ç”¨
         }
         
         hasProcessedPickup = true;
     }
     
-    // 0µ10§0„1¤7„1¤703„1¤7„1¤7„1¤7„1¤7
+    // æ‹¾å–ç‰©å“æ–¹æ³•
     private void PickUpItem(ItemBase item)
     {
         player.currentPickedItem = item;
         
-        // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤703Tag„1¤7„1¤7„1¤70‹3„1¤7„1¤7„1¤7„1¤7ÈÎ
+        // æ ¹æ®ç‰©å“Tagè®¾ç½®çˆ¶å¯¹è±¡ä½ç½®
         Transform parentTransform = item.CompareTag("Weapon") ? player.Hand : player.Hand;
         
         item.transform.SetParent(parentTransform);
         item.transform.localPosition = Vector3.zero;
         item.transform.localRotation = Quaternion.Euler(Vector3.zero);
         
-        // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70ü6„1¤7„1¤7
+        // ç¦ç”¨ç‰©ç†ç»„ä»¶ï¼Œé˜²æ­¢å¹²æ‰°
         Rigidbody2D rb = item.GetComponent<Rigidbody2D>();
         if (rb != null)
         {
@@ -98,10 +98,10 @@ public class PlayerPickUpState : IState
             collider.enabled = false;
         }
         
-        Debug.Log($"„1¤70¯6„1¤70µ10§0„1¤7„1¤703: {item.name}");
+        Debug.Log($"æˆåŠŸæ‹¾å–ç‰©å“: {item.name}");
     }
     
-    // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤70¢2„1¤7„1¤7„1¤7§Ö„1¤7„1¤7„1¤703
+    // ä¸¢å¼ƒå½“å‰æŒæœ‰çš„ç‰©å“
     private void DropCurrentItem()
     {
         if (player.currentPickedItem == null) return;
@@ -111,7 +111,7 @@ public class PlayerPickUpState : IState
         itemTransform.rotation = Quaternion.Euler(Vector3.zero);
         itemTransform.localScale = Vector3.one;
         
-        // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤703¦Ë„1¤7„1¤70Ë2„1¤7„1¤7„1¤7¦Ë„1¤7„1¤7
+        // å°†ç‰©å“æ”¾ç½®åœ¨çŽ©å®¶ä½ç½®
         itemTransform.position = player.transform.position;
         
         Rigidbody2D rb = itemTransform.GetComponent<Rigidbody2D>();
@@ -129,7 +129,7 @@ public class PlayerPickUpState : IState
             collider.enabled = true;
         }
         
-        Debug.Log($"„1¤7„1¤7„1¤7„1¤7„1¤7„1¤703: {player.currentPickedItem.name}");
+        Debug.Log($"ä¸¢å¼ƒç‰©å“: {player.currentPickedItem.name}");
         player.currentPickedItem = null;
     }
 }

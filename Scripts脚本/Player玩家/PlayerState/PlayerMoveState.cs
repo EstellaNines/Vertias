@@ -30,48 +30,48 @@ public class PlayerMoveState : IState
 
     public void OnFixedUpdate()
     {
-        // ÎïÀí¸üĞÂĞĞ¶¯ËÙ¶È
+        // ç‰©ç†æ›´æ–°è¡ŒåŠ¨é€Ÿåº¦
         player.PlayerRB2D.velocity = player.InputDirection * player.CurrentSpeed;
     }
 
     public void OnUpdate()
     {
-        // »ù´¡Ãé×¼¹¦ÄÜ£¨ÊÓ½ÇºÍÃé×¼·½Ïò¸üĞÂ£©
+        // åŸºç¡€ç„å‡†åŠŸèƒ½ï¼ˆè§†è§’å’Œç„å‡†æ–¹å‘æ›´æ–°ï¼‰
         player.UpdateBasicAiming();
         
-        // Ê°È¡
+        // æ‹¾å–
         if (player.isPickingUp)
         {
             player.transitionState(PlayerStateType.PickUp);
             return;
         }
-        // Éä»÷
+        // å°„å‡»
         if (player.isFiring && player.isWeaponInHand)
         {
             player.transitionState(PlayerStateType.Attack);
             return;
         }
         
-        // ÅÜ¶¯
+        // è·‘åŠ¨
         if (player.isRunning && player.InputDirection != Vector2.zero)
         {
             player.transitionState(PlayerStateType.Run);
             return;
         }
         
-        // ´ı»ú
+        // å¾…æœº
         if (player.InputDirection == Vector2.zero || player.CurrentSpeed < 0.1f)
         {
             player.transitionState(PlayerStateType.Idle);
             return;
         }
-        // Ç±ĞĞ
+        // æ½œè¡Œ
         if (player.isCrouching)
         {
             player.transitionState(PlayerStateType.Crouch);
             return;
         }
-        // ·­¹ö
+        // ç¿»æ»š
         if (player.isDodged)
         {
             player.transitionState(PlayerStateType.Dodge);

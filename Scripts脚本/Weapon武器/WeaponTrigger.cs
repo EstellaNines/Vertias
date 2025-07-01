@@ -2,74 +2,74 @@ using UnityEngine;
 
 public class WeaponTrigger : MonoBehaviour
 {
-    // „1¤70ã3„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7¦Ë„1¤7„1¤7
+    // å­å¼¹å‘å°„ç‚¹
     public Transform Muzzle;
 
-    // „1¤70ã3„1¤7„1¤7„1¤7
+    // å­å¼¹æ± 
     public BulletPool bulletPool;
 
-    // „1¤70¢9„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70÷4
+    // æ˜¯å¦æ­£åœ¨å°„å‡»
     private bool isFiring;
 
-    // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤70µ2„1¤7„1¤7
+    // å°„å‡»é—´éš”æ—¶é—´
     public float ShootInterval;
 
-    // „1¤7„1¤70µ2„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤71“1„1¤7„1¤7„1¤7„1¤7„1¤7„1¤701„1¤7„1¤7
+    // å°„å‡»è®¡æ—¶å™¨ï¼Œç”¨äºŽæŽ§åˆ¶å°„å‡»é—´éš”
     private float Timer;
 
-    //0­3„1¤7„1¤7„1¤70¢8„1¤7„1¤70ö6„1¤7
+    // å­å¼¹æ•£å°„è§’åº¦
     public float spreadAngle = 5f;
 
-    // „1¤78Ð9„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70ü80Á0„1¤70‘50ä3„1¤7
+    // è®¾ç½®æ˜¯å¦å¼€å§‹å°„å‡»çš„æ–¹æ³•
     public void SetFiring(bool firing)
     {
         isFiring = firing;
     }
 
-    // 0‹70ô5„1¤7„1¤7„1¤7„1¤70Ý5„1¤7„1¤7
+    // æ¯å¸§æ›´æ–°æ–¹æ³•
     void Update()
     {
-        // „1¤7„1¤70µ2„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7
+        // æ›´æ–°è®¡æ—¶å™¨
         Timer += Time.deltaTime;
 
-        // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70Ý6„1¤70µ2„1¤7„1¤7„1¤7„0ñ9„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7
+        // å¦‚æžœæ­£åœ¨å°„å‡»ä¸”è¾¾åˆ°å°„å‡»é—´éš”æ—¶é—´
         if (isFiring && Timer >= ShootInterval)
         {
-            // „1¤7„1¤7„1¤7¨¹„1¤70µ2„1¤7„1¤7
+            // é‡ç½®è®¡æ—¶å™¨
             Timer = 0;
 
-            // 0ö4„1¤7„1¤7„1¤7„1¤7„1¤7
+            // å‘å°„å­å¼¹
             Fire();
         }
     }
 
-    // „1¤7„1¤7„1¤7„1¤71²8„1¤7
+    // å‘å°„å­å¼¹æ–¹æ³•
     private void Fire()
     {
-        // „1¤70ã1„1¤7„1¤7§Ý„1¤70§00Ý5„1¤7„1¤7„1¤70ã3„1¤7
+        // ä»Žå­å¼¹æ± èŽ·å–å­å¼¹å¯¹è±¡
         GameObject bulletObj = bulletPool.GetBullet();
         if (bulletObj == null) return;
 
-        // „1¤7„1¤7„1¤7„1¤7„1¤70ã3„1¤7¦Ë„1¤7¨²„1¤7„1¤7„1¤70û8
+        // è®¾ç½®å­å¼¹ä½ç½®å’Œæ—‹è½¬
         bulletObj.transform.position = Muzzle.position;
         bulletObj.transform.rotation = Muzzle.rotation;
 
-        // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70­3„1¤7„1¤70œ1„1¤7„1¤7
+        // æ·»åŠ éšæœºæ•£å°„è§’åº¦
         float randomAngle = Random.Range(-spreadAngle, spreadAngle);
         bulletObj.transform.rotation = Muzzle.rotation * Quaternion.Euler(0, 0, randomAngle);
 
-        // „1¤7„1¤70§0„1¤70ã3„1¤7„1¤7„1¤7„1¤7
+        // èŽ·å–å­å¼¹ç»„ä»¶
         Bullet bullet = bulletObj.GetComponent<Bullet>();
         if (bullet != null)
         {
-            // „1¤7„1¤7„1¤7„1¤7„1¤70ã3„1¤7„1¤705„1¤70¶3¦Ë„1¤7„1¤7
+            // è®¾ç½®å­å¼¹èµ·å§‹ä½ç½®
             bullet.StartPos = Muzzle.position;
 
-            // „1¤7„1¤7„1¤7„1¤7„1¤70ã3„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70Ë2„1¤7„1¤7„1¤7
-            bullet.shooter = this.transform.parent; // „1¤7„1¤7„1¤7„1¤7„1¤70‘0„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70Û1„1¤7
-            Debug.Log($"[„1¤7„1¤70Ý9„1¤7„1¤7„1¤7] „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7: {bullet.shooter.name}");
+            // è®¾ç½®å­å¼¹å‘å°„è€…ä¸ºæ­¦å™¨çš„çˆ¶å¯¹è±¡
+            bullet.shooter = this.transform.parent; // æ­¦å™¨çš„çˆ¶å¯¹è±¡é€šå¸¸æ˜¯çŽ©å®¶æˆ–æ•Œäºº
+            Debug.Log($"[æ­¦å™¨å‘å°„] å‘å°„è€…: {bullet.shooter.name}");
 
-            // „1¤7„1¤7„1¤7„1¤7„1¤70ã3„1¤7„1¤7„1¤7„1¤70»6„1¤7„1¤7„1¤7„1¤7„1¤7
+            // è®¾ç½®å­å¼¹é€Ÿåº¦
             Rigidbody2D rb = bulletObj.GetComponent<Rigidbody2D>();
             if (rb != null)
             {
@@ -77,7 +77,7 @@ public class WeaponTrigger : MonoBehaviour
             }
         }
 
-        // „1¤7„1¤7„1¤7„1¤7„1¤70ã3„1¤7
+        // æ¿€æ´»å­å¼¹å¯¹è±¡
         bulletObj.SetActive(true);
     }
 }

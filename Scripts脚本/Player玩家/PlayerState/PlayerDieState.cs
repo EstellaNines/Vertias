@@ -4,10 +4,10 @@ using UnityEngine;
 
 public class PlayerDieState : IState
 {
-    // --- »ñÈ¡Íæ¼ÒÒıÓÃ ---
+    // --- è·å–ç©å®¶å¼•ç”¨ ---
     public Player player;
     
-    // ¹¹Ôìº¯Êı
+    // æ„é€ å‡½æ•°
     public PlayerDieState(Player player)
     {
         this.player = player;
@@ -15,30 +15,30 @@ public class PlayerDieState : IState
     
     public void OnEnter()
     {
-        Debug.Log("½øÈëÍæ¼ÒËÀÍö×´Ì¬ - »ù±¾¿ò¼Ü");
-        // TODO: ÊµÏÖËÀÍö×´Ì¬½øÈëÂß¼­
+        Debug.Log("è¿›å…¥ç©å®¶æ­»äº¡çŠ¶æ€ - åŸºæœ¬æ¡†æ¶");
+        // TODO: å®ç°æ­»äº¡çŠ¶æ€è¿›å…¥é€»è¾‘
     }
 
     public void OnExit()
     {
-        Debug.Log("ÍË³öËÀÍö×´Ì¬ - »ù±¾¿ò¼Ü");
-        // TODO: ÊµÏÖËÀÍö×´Ì¬ÍË³öÂß¼­
+        Debug.Log("é€€å‡ºæ­»äº¡çŠ¶æ€ - åŸºæœ¬æ¡†æ¶");
+        // TODO: å®ç°æ­»äº¡çŠ¶æ€é€€å‡ºé€»è¾‘
     }
 
     public void OnFixedUpdate()
     {
-        // TODO: ÊµÏÖËÀÍö×´Ì¬ÎïÀí¸üĞÂÂß¼­
+        // TODO: å®ç°æ­»äº¡çŠ¶æ€ç‰©ç†æ›´æ–°é€»è¾‘
     }
 
     public void OnUpdate()
     {
-        // TODO: ÊµÏÖËÀÍö×´Ì¬¸üĞÂÂß¼­
+        // TODO: å®ç°æ­»äº¡çŠ¶æ€æ›´æ–°é€»è¾‘
     }
     
-    // ËÀÍö¶¯»­Íê³É´¦Àí - »ù±¾½Ó¿Ú
+    // æ­»äº¡åŠ¨ç”»å®Œæˆå¤„ç† - åŸºæœ¬æ¥å£
     public void OnDeathAnimationFinished()
     {
-        Debug.Log("ËÀÍö¶¯»­Íê³É - »ù±¾¿ò¼Ü");
-        // TODO: ÊµÏÖËÀÍö¶¯»­Íê³ÉÂß¼­
+        Debug.Log("æ­»äº¡åŠ¨ç”»å®Œæˆ - åŸºæœ¬æ¡†æ¶");
+        // TODO: å®ç°æ­»äº¡åŠ¨ç”»å®Œæˆé€»è¾‘
     }
 }

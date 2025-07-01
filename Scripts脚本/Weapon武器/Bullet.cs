@@ -2,13 +2,13 @@ using UnityEngine;
 
 public class Bullet : MonoBehaviour
 {
-    [Header("×Óµ¯ÊôĞÔ")]
+    [Header("å­å¼¹å±æ€§")]
     public float BulletSpeed;
     public int BulletDamage;
     public float BulletDistance;
     public Vector3 StartPos;
 
-    public Transform shooter; // ·¢ÉäÕß
+    public Transform shooter; // å‘å°„è€…
     private Rigidbody2D RB2D;
 
     void Awake()
@@ -18,15 +18,15 @@ public class Bullet : MonoBehaviour
 
     void OnEnable()
     {
-        // ÖØÖÃ×Óµ¯×´Ì¬
+        // é‡ç½®å­å¼¹çŠ¶æ€
         RB2D.velocity = transform.right * BulletSpeed;
         StartPos = transform.position;
     }
 
-    // Ìí¼ÓInitialize·½·¨£¬ÓÃÓÚEnemyÀàµ÷ÓÃ
+    // æ·»åŠ Initializeæ–¹æ³•ï¼Œç”¨äºEnemyç±»è°ƒç”¨
     public void Initialize(Vector2 direction, float speed)
     {
-        // ÉèÖÃ×Óµ¯ËÙ¶ÈºÍ·½Ïò
+        // è®¾ç½®å­å¼¹é€Ÿåº¦å’Œæ–¹å‘
         BulletSpeed = speed;
         RB2D.velocity = direction * BulletSpeed;
         StartPos = transform.position;
@@ -39,10 +39,10 @@ public class Bullet : MonoBehaviour
 
     void BulletFire()
     {
-        // ¼ÆËã×Óµ¯Óë³õÊ¼Î»ÖÃµÄ¾àÀë
+        // è®¡ç®—å­å¼¹ä¸åˆå§‹ä½ç½®çš„è·ç¦»
         float distance = (transform.position - StartPos).sqrMagnitude;
 
-        // Èç¹û¾àÀë³¬¹ıÉä³Ì£¬·µ»Ø¶ÔÏó³Ø
+        // å¦‚æœè·ç¦»è¶…è¿‡å°„ç¨‹ï¼Œè¿”å›å¯¹è±¡æ± 
         if (distance > BulletDistance * BulletDistance)
         {
             BulletPool bulletPool = FindObjectOfType<BulletPool>();
@@ -55,22 +55,22 @@ public class Bullet : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D collision)
     {
-        // ĞŞ¸ÄÅö×²Ìå¼ì²âÌõ¼ş£ºÅÅ³ıËùÓĞ´¥·¢Æ÷£¨isTrigger = true µÄÅö×²Ìå£©
+        // ä¿®æ”¹ç¢°æ’ä½“æ£€æµ‹æ¡ä»¶ï¼šæ’é™¤æ‰€æœ‰è§¦å‘å™¨ï¼ˆisTrigger = true çš„ç¢°æ’ä½“ï¼‰
         if (!collision.isTrigger)
         {
-            BulletPool bulletPool = FindObjectOfType<BulletPool>(); // ÔÚ·½·¨¿ªÊ¼Ê±ÉùÃ÷Ò»´Î
+            BulletPool bulletPool = FindObjectOfType<BulletPool>(); // åœ¨æ–¹æ³•å¼€å§‹æ—¶å£°æ˜ä¸€æ¬¡
             
-            // ¼ì²éÊÇ·ñ»÷ÖĞÍæ¼Ò
+            // æ£€æŸ¥æ˜¯å¦å‡»ä¸­ç©å®¶
             Player player = collision.GetComponent<Player>();
-            if (player != null && shooter != player.transform) // È·±£²»ÊÇ×Ô¼ºµÄ×Óµ¯
+            if (player != null && shooter != player.transform) // ç¡®ä¿ä¸æ˜¯è‡ªå·±çš„å­å¼¹
             {
-                Debug.Log($"[×Óµ¯ÃüÖĞ] Íæ¼ÒÊÜµ½ÉËº¦: {BulletDamage}", this);
+                Debug.Log($"[å­å¼¹å‘½ä¸­] ç©å®¶å—åˆ°ä¼¤å®³: {BulletDamage}", this);
                 
-                // Ö±½Ó¼õÉÙÍæ¼ÒÉúÃüÖµ²¢ÉèÖÃÊÜÉË×´Ì¬
+                // ç›´æ¥å‡å°‘ç©å®¶ç”Ÿå‘½å€¼å¹¶è®¾ç½®å—ä¼¤çŠ¶æ€
                 player.CurrentHealth -= BulletDamage;
                 player.isHurt = true;
                 
-                // ¼ì²éÊÇ·ñËÀÍö
+                // æ£€æŸ¥æ˜¯å¦æ­»äº¡
                 if (player.CurrentHealth <= 0)
                 {
                     player.CurrentHealth = 0;
@@ -84,20 +84,20 @@ public class Bullet : MonoBehaviour
                 return;
             }
             
-            // ¼ì²éÊÇ·ñ»÷ÖĞµĞÈË
+            // æ£€æŸ¥æ˜¯å¦å‡»ä¸­æ•Œäºº
             Zombie zombie = collision.GetComponent<Zombie>();
             if (zombie != null)
             {
-                Debug.Log($"[×Óµ¯ÃüÖĞ] µĞÈË: {collision.name} | ÉËº¦: {BulletDamage} | À´Ô´: Íæ¼Ò", this);
+                Debug.Log($"[å­å¼¹å‘½ä¸­] æ•Œäºº: {collision.name} | ä¼¤å®³: {BulletDamage} | æ¥æº: ç©å®¶", this);
     
-                // »ñÈ¡×Óµ¯µ±Ç°ÔË¶¯·½Ïò×÷Îª»÷ÍË·½Ïò
+                // è·å–å­å¼¹å½“å‰è¿åŠ¨æ–¹å‘ä½œä¸ºå‡»é€€æ–¹å‘
                 Vector2 hitDirection = RB2D.velocity.normalized;
-                // µ÷ÓÃÉËº¦´¦Àí·½·¨
+                // è°ƒç”¨ä¼¤å®³å¤„ç†æ–¹æ³•
                 zombie.TakeDamage(BulletDamage, hitDirection);
             }
             else
             {
-                Debug.LogWarning($"[ÎŞÃüÖĞ] Åö×²µ½·ÇµĞÈË¶ÔÏó: {collision.name}", this);
+                Debug.LogWarning($"[æ— å‘½ä¸­] ç¢°æ’åˆ°éæ•Œäººå¯¹è±¡: {collision.name}", this);
             }
     
             if (bulletPool != null)

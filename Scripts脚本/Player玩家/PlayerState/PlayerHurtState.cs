@@ -4,10 +4,10 @@ using UnityEngine;
 
 public class PlayerHurtState : IState
 {
-    // --- »ñÈ¡Íæ¼ÒÒıÓÃ ---
+    // --- è·å–ç©å®¶å¼•ç”¨ ---
     public Player player;
     
-    // ¹¹Ôìº¯Êı
+    // æ„é€ å‡½æ•°
     public PlayerHurtState(Player player)
     {
         this.player = player;
@@ -15,23 +15,23 @@ public class PlayerHurtState : IState
     
     public void OnEnter()
     {
-        Debug.Log("½øÈëÍæ¼ÒÊÜÉË×´Ì¬ - »ù±¾¿ò¼Ü");
-        // TODO: ÊµÏÖÊÜÉË×´Ì¬½øÈëÂß¼­
+        Debug.Log("è¿›å…¥ç©å®¶å—ä¼¤çŠ¶æ€ - åŸºæœ¬æ¡†æ¶");
+        // TODO: å®ç°å—ä¼¤çŠ¶æ€è¿›å…¥é€»è¾‘
     }
 
     public void OnExit()
     {
-        Debug.Log("ÍË³öÊÜÉË×´Ì¬ - »ù±¾¿ò¼Ü");
-        // TODO: ÊµÏÖÊÜÉË×´Ì¬ÍË³öÂß¼­
+        Debug.Log("é€€å‡ºå—ä¼¤çŠ¶æ€ - åŸºæœ¬æ¡†æ¶");
+        // TODO: å®ç°å—ä¼¤çŠ¶æ€é€€å‡ºé€»è¾‘
     }
 
     public void OnFixedUpdate()
     {
-        // TODO: ÊµÏÖÊÜÉË×´Ì¬ÎïÀí¸üĞÂÂß¼­
+        // TODO: å®ç°å—ä¼¤çŠ¶æ€ç‰©ç†æ›´æ–°é€»è¾‘
     }
 
     public void OnUpdate()
     {
-        // TODO: ÊµÏÖÊÜÉË×´Ì¬¸üĞÂÂß¼­
+        // TODO: å®ç°å—ä¼¤çŠ¶æ€æ›´æ–°é€»è¾‘
     }
 }

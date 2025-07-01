@@ -4,10 +4,10 @@ using UnityEngine;
 
 public class PlayerCrouchState : IState
 {
-    // --- »ñÈ¡Íæ¼Ò×é¼ş ---
+    // --- è·å–ç©å®¶ç»„ä»¶ ---
     public Player player;
     
-    // ¹¹Ôìº¯Êı
+    // æ„é€ å‡½æ•°
     public PlayerCrouchState(Player player)
     {
         this.player = player;
@@ -15,7 +15,7 @@ public class PlayerCrouchState : IState
     
     public void OnEnter()
     {
-        // Ó¦ÓÃÇ±ĞĞÊÓ¾õĞ§¹û
+        // åº”ç”¨æ½œè¡Œè§†è§‰æ•ˆæœ
         player.ApplyCrouchVisual();
         
         if (player.isWeaponInHand)
@@ -27,41 +27,41 @@ public class PlayerCrouchState : IState
             player.AIMTOR.Play("Walk"); 
         }
         
-        Debug.Log("½øÈëÇ±ĞĞ×´Ì¬");
+        Debug.Log("è¿›å…¥æ½œè¡ŒçŠ¶æ€");
     }
 
     public void OnExit()
     {
-        // »Ö¸´Ô­Ê¼ÊÓ¾õĞ§¹û
+        // æ¢å¤åŸå§‹è§†è§‰æ•ˆæœ
         player.RestoreOriginalVisual();
-        Debug.Log("ÍË³öÇ±ĞĞ×´Ì¬");
+        Debug.Log("é€€å‡ºæ½œè¡ŒçŠ¶æ€");
     }
 
     public void OnFixedUpdate()
     {
-        // Ç±ĞĞÊ±¿ÉÄÜĞèÒª½µµÍÒÆ¶¯ËÙ¶È
-        float crouchSpeed = player.WalkSpeed * 0.5f; // Ç±ĞĞËÙ¶ÈÎªĞĞ×ßËÙ¶ÈµÄÒ»°ë
+        // æ½œè¡Œæ—¶å¯èƒ½éœ€è¦é™ä½ç§»åŠ¨é€Ÿåº¦
+        float crouchSpeed = player.WalkSpeed * 0.5f; // æ½œè¡Œé€Ÿåº¦ä¸ºè¡Œèµ°é€Ÿåº¦çš„ä¸€åŠ
         player.PlayerRB2D.velocity = player.InputDirection * crouchSpeed;
     }
 
     public void OnUpdate()
     {
-        // »ù´¡Ãé×¼¹¦ÄÜ£¨ÊÓ½ÇºÍÃé×¼·½Ïò¸üĞÂ£©
+        // åŸºç¡€ç„å‡†åŠŸèƒ½ï¼ˆè§†è§’å’Œç„å‡†æ–¹å‘æ›´æ–°ï¼‰
         player.UpdateBasicAiming();
         
-        // Ç±ĞĞ×´Ì¬ÏÂµÄÌØÊâÂß¼­
+        // æ½œè¡ŒçŠ¶æ€ä¸‹çš„ç‰¹æ®Šé€»è¾‘
         if (player.isCrouching)
         {
         }
         
-        // Ê°È¡ÇĞ»»
+        // æ‹¾å–åˆ‡æ¢
         if (player.isPickingUp)
         {
             player.transitionState(PlayerStateType.PickUp);
             return;
         }
         
-        // Èç¹ûËÉ¿ªÇ±ĞĞ¼ü£¬¸ù¾İµ±Ç°ÊäÈë×´Ì¬ÇĞ»»
+        // å¦‚æœæ¾å¼€æ½œè¡Œé”®ï¼Œæ ¹æ®å½“å‰è¾“å…¥çŠ¶æ€åˆ‡æ¢
         if (!player.isCrouching)
         {
             if (player.InputDirection != Vector2.zero)
@@ -82,7 +82,7 @@ public class PlayerCrouchState : IState
             return;
         }
         
-        // ÉÁ±ÜÇĞ»»£¨Ç±ĞĞÊ±Ò²¿ÉÒÔÉÁ±Ü£©
+        // é—ªé¿åˆ‡æ¢ï¼ˆæ½œè¡Œæ—¶ä¹Ÿå¯ä»¥é—ªé¿ï¼‰
         if (player.isDodged)
         {
             player.transitionState(PlayerStateType.Dodge);

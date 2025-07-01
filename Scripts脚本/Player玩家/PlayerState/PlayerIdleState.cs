@@ -4,9 +4,9 @@ using UnityEngine;
 
 public class PlayerIdleState : IState
 {
-    // --- Íæ¼Ò´ı»ú×´Ì¬Àà ---
+    // --- ÃÃ¦Â¼Ã’Â´Ã½Â»ÃºÃ—Â´ÃŒÂ¬Ã€Ã  ---
     public Player player;
-    // ¹¹Ôìº¯Êı
+    // Â¹Â¹Ã”Ã¬ÂºÂ¯ÃŠÃ½
     public PlayerIdleState(Player player)
     {
         this.player = player;
@@ -35,23 +35,23 @@ public class PlayerIdleState : IState
 
     public void OnUpdate()
     {
-        // »ù´¡Ãé×¼¹¦ÄÜ£¨½öÊÓ½Ç¸üĞÂ£©
+        // è§†è§’çŠ¶æ€æ›´æ–°
         player.UpdateBasicAiming();
         
-        // Ê°È¡×´Ì¬¼ì²â
+        // æ‹¾å–
         if (player.isPickingUp)
         {
             player.transitionState(PlayerStateType.PickUp);
             return;
         }
-        // Éä»÷×´Ì¬¼ì²â
+        // æ”»å‡»
         if (player.isFiring && player.isWeaponInHand)
         {
             player.transitionState(PlayerStateType.Attack);
             return;
         }
         
-        // ÒÆ¶¯×´Ì¬¼ì²â - ¸ù¾İÊÇ·ñ°´×¡ÅÜ²½¼ü¾ö¶¨×´Ì¬
+        // è·‘åŠ¨&è¡Œèµ°
         if (player.InputDirection != Vector2.zero)
         {
             if (player.isRunning)
@@ -64,13 +64,14 @@ public class PlayerIdleState : IState
             }
             return;
         }
+        // æ½œè¡Œ
         if (player.isCrouching)
         {
             player.transitionState(PlayerStateType.Crouch);
             return;
         }
         
-        // ÉÁ±Ü×´Ì¬¼ì²â
+        // é—ªé¿
         if (player.isDodged)
         {
             player.transitionState(PlayerStateType.Dodge);
