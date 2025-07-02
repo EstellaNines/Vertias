@@ -4,10 +4,10 @@ using UnityEngine;
 
 public class BulletPool : MonoBehaviour
 {
-    // 子弹池容器
-    private Queue<GameObject> bulletPool = new Queue<GameObject>();
+    // 子弹池容器 - 使用字典来存储不同预制体的池
+    private Dictionary<GameObject, Queue<GameObject>> bulletPools = new Dictionary<GameObject, Queue<GameObject>>();
 
-    // 子弹预制体
+    // 默认子弹预制体（向后兼容）
     public GameObject bulletPrefab;
 
     // 池的初始大小
@@ -19,60 +19,166 @@ public class BulletPool : MonoBehaviour
     // 在脚本实例化时调用
     private void Awake()
     {
-        // 初始化池
-        InitializePool();
-    }
-
-    // 初始化池
-    private void InitializePool()
-    {
-        // 实例化初始子弹并放入池中
-        for (int i = 0; i < initialPoolSize; i++)
+        // 如果有默认预制体，初始化默认池
+        if (bulletPrefab != null)
         {
-            CreateBullet();
+            InitializePoolForPrefab(bulletPrefab);
         }
     }
 
-    // 创建并返回一个子弹实例
-    private void CreateBullet()
+    // 为特定预制体初始化池
+    private void InitializePoolForPrefab(GameObject prefab)
     {
-        // 如果池中的子弹数量已经达到最大值，直接返回
-        if (bulletPool.Count >= maxPoolSize)
+        if (prefab == null) return;
+        
+        // 如果该预制体的池已存在，跳过
+        if (bulletPools.ContainsKey(prefab)) return;
+        
+        // 创建新的池
+        Queue<GameObject> newPool = new Queue<GameObject>();
+        bulletPools[prefab] = newPool;
+        
+        // 实例化初始子弹并放入池中
+        for (int i = 0; i < initialPoolSize; i++)
         {
-            Debug.LogWarning("塞满了塞满了");
+            CreateBulletForPrefab(prefab);
+        }
+        
+        Debug.Log($"为预制体 {prefab.name} 初始化了子弹池，初始大小: {initialPoolSize}");
+    }
+
+    // 为特定预制体创建子弹实例
+    private void CreateBulletForPrefab(GameObject prefab)
+    {
+        if (prefab == null || !bulletPools.ContainsKey(prefab)) return;
+        
+        Queue<GameObject> pool = bulletPools[prefab];
+        
+        // 如果池中的子弹数量已经达到最大值，直接返回
+        if (pool.Count >= maxPoolSize)
+        {
+            Debug.LogWarning($"预制体 {prefab.name} 的子弹池已满");
             return;
         }
 
         // 实例化一个子弹
-        GameObject bulletInstance = Instantiate(bulletPrefab);
+        GameObject bulletInstance = Instantiate(prefab);
         bulletInstance.SetActive(false);
         bulletInstance.transform.SetParent(transform);
 
-        // 将新创建的子弹加入池
-        bulletPool.Enqueue(bulletInstance);
+        // 将新创建的子弹加入对应的池
+        pool.Enqueue(bulletInstance);
     }
 
-    // 从池中获取一个子弹
-    public GameObject GetBullet()
+    // 从池中获取指定预制体的子弹
+    public GameObject GetBullet(GameObject prefab = null)
     {
-        // 如果池中有可用子弹，则返回
-        if (bulletPool.Count > 0)
+        // 如果没有指定预制体，使用默认预制体
+        if (prefab == null)
         {
-            GameObject bullet = bulletPool.Dequeue();
+            prefab = bulletPrefab;
+        }
+        
+        if (prefab == null)
+        {
+            Debug.LogWarning("没有指定子弹预制体且没有默认预制体");
+            return null;
+        }
+        
+        // 确保该预制体的池已初始化
+        if (!bulletPools.ContainsKey(prefab))
+        {
+            InitializePoolForPrefab(prefab);
+        }
+        
+        Queue<GameObject> pool = bulletPools[prefab];
+        
+        // 如果池中有可用子弹，则返回
+        if (pool.Count > 0)
+        {
+            GameObject bullet = pool.Dequeue();
             bullet.SetActive(true);
             return bullet;
         }
 
-        // 如果池中没有可用子弹，直接返回 null
-        Debug.LogWarning("一滴也没有");
+        // 如果池中没有可用子弹，尝试创建新的
+        CreateBulletForPrefab(prefab);
+        
+        if (pool.Count > 0)
+        {
+            GameObject bullet = pool.Dequeue();
+            bullet.SetActive(true);
+            return bullet;
+        }
+        
+        Debug.LogWarning($"无法获取预制体 {prefab.name} 的子弹");
         return null;
     }
 
-    // 将子弹返回到池中
+    // 将子弹返回到对应的池中
     public void ReturnBullet(GameObject bullet)
     {
-        bullet.transform.SetParent(transform);
-        bullet.SetActive(false);
-        bulletPool.Enqueue(bullet);
+        if (bullet == null) return;
+        
+        // 查找该子弹属于哪个预制体的池
+        GameObject originalPrefab = FindOriginalPrefab(bullet);
+        
+        if (originalPrefab != null && bulletPools.ContainsKey(originalPrefab))
+        {
+            bullet.transform.SetParent(transform);
+            bullet.SetActive(false);
+            bulletPools[originalPrefab].Enqueue(bullet);
+        }
+        else
+        {
+            // 如果找不到对应的池，销毁子弹
+            Debug.LogWarning($"找不到子弹 {bullet.name} 对应的池，将销毁该子弹");
+            Destroy(bullet);
+        }
+    }
+    
+    // 查找子弹的原始预制体
+    private GameObject FindOriginalPrefab(GameObject bullet)
+    {
+        string bulletName = bullet.name.Replace("(Clone)", "").Trim();
+        
+        foreach (var kvp in bulletPools)
+        {
+            if (kvp.Key.name == bulletName)
+            {
+                return kvp.Key;
+            }
+        }
+        
+        return null;
+    }
+    
+    // 清理特定预制体的池
+    public void ClearPoolForPrefab(GameObject prefab)
+    {
+        if (prefab == null || !bulletPools.ContainsKey(prefab)) return;
+        
+        Queue<GameObject> pool = bulletPools[prefab];
+        while (pool.Count > 0)
+        {
+            GameObject bullet = pool.Dequeue();
+            if (bullet != null)
+            {
+                Destroy(bullet);
+            }
+        }
+        
+        bulletPools.Remove(prefab);
+        Debug.Log($"已清理预制体 {prefab.name} 的子弹池");
+    }
+    
+    // 获取池的状态信息
+    public void LogPoolStatus()
+    {
+        Debug.Log($"当前共有 {bulletPools.Count} 个子弹池:");
+        foreach (var kvp in bulletPools)
+        {
+            Debug.Log($"- {kvp.Key.name}: {kvp.Value.Count} 个可用子弹");
+        }
     }
 }

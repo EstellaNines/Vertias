@@ -11,6 +11,11 @@ public class WeaponManager : MonoBehaviour
     [FieldLabel("子弹速度")] public float bulletSpeed = 10f;
     [FieldLabel("射程")] public float range = 15f;
     [FieldLabel("伤害")] public float damage = 25f;
+    
+    [Header("子弹预制体配置")]
+    [FieldLabel("玩家子弹预制体")] public GameObject playerBulletPrefab;
+    [FieldLabel("敌人子弹预制体")] public GameObject enemyBulletPrefab;
+    [FieldLabel("通用子弹预制体")] public GameObject bulletPrefab;
 
     [Header("武器组件")]
     [FieldLabel("枪口位置")] public Transform muzzle;
@@ -35,6 +40,7 @@ public class WeaponManager : MonoBehaviour
     {
         InitializeWeaponComponents();
         SetupWeaponTag();
+        ValidateBulletPrefabs();
     }
 
     private void Start()
@@ -50,6 +56,83 @@ public class WeaponManager : MonoBehaviour
         {
             Fire();
             nextFireTime = Time.time + fireRate;
+        }
+    }
+
+    // 验证子弹预制体配置
+    private void ValidateBulletPrefabs()
+    {
+        // 如果没有设置专用预制体，使用通用预制体
+        if (playerBulletPrefab == null && bulletPrefab != null)
+        {
+            if (HasTag(bulletPrefab, "PlayerBullets"))
+            {
+                playerBulletPrefab = bulletPrefab;
+            }
+        }
+        
+        if (enemyBulletPrefab == null && bulletPrefab != null)
+        {
+            if (HasTag(bulletPrefab, "EnemyBullets"))
+            {
+                enemyBulletPrefab = bulletPrefab;
+            }
+        }
+        
+        // 验证标签
+        if (playerBulletPrefab != null && !HasTag(playerBulletPrefab, "PlayerBullets"))
+        {
+            Debug.LogWarning($"玩家子弹预制体 {playerBulletPrefab.name} 没有 'PlayerBullets' 标签");
+        }
+        
+        if (enemyBulletPrefab != null && !HasTag(enemyBulletPrefab, "EnemyBullets"))
+        {
+            Debug.LogWarning($"敌人子弹预制体 {enemyBulletPrefab.name} 没有 'EnemyBullets' 标签");
+        }
+    }
+    
+    // 检查游戏对象是否有指定标签
+    private bool HasTag(GameObject obj, string tag)
+    {
+        return obj != null && obj.CompareTag(tag);
+    }
+    
+    // 根据标签获取正确的子弹预制体
+    private GameObject GetCorrectBulletPrefab(bool forPlayer)
+    {
+        if (forPlayer)
+        {
+            // 优先使用玩家专用预制体
+            if (playerBulletPrefab != null && HasTag(playerBulletPrefab, "PlayerBullets"))
+            {
+                return playerBulletPrefab;
+            }
+            
+            // 如果通用预制体有玩家标签，也可以使用
+            if (bulletPrefab != null && HasTag(bulletPrefab, "PlayerBullets"))
+            {
+                return bulletPrefab;
+            }
+            
+            Debug.LogWarning("没有找到合适的玩家子弹预制体");
+            return null;
+        }
+        else
+        {
+            // 优先使用敌人专用预制体
+            if (enemyBulletPrefab != null && HasTag(enemyBulletPrefab, "EnemyBullets"))
+            {
+                return enemyBulletPrefab;
+            }
+            
+            // 如果通用预制体有敌人标签，也可以使用
+            if (bulletPrefab != null && HasTag(bulletPrefab, "EnemyBullets"))
+            {
+                return bulletPrefab;
+            }
+            
+            Debug.LogWarning("没有找到合适的敌人子弹预制体");
+            return null;
         }
     }
 
@@ -258,16 +341,43 @@ public class WeaponManager : MonoBehaviour
     {
         if (weaponTrigger == null || muzzle == null) return;
 
+        // 根据武器持有者获取正确的子弹预制体
+        GameObject correctBulletPrefab = GetCorrectBulletPrefab(isPlayerWeapon);
+        
+        if (correctBulletPrefab == null)
+        {
+            Debug.LogError($"武器 {weaponName} 无法获取正确的子弹预制体");
+            return;
+        }
+
         // 使用当前配置的子弹池
         GameObject bullet = null;
 
         if (isPlayerWeapon && playerBulletPool != null)
         {
-            bullet = playerBulletPool.GetBullet();
+            // 确保使用带有PlayerBullets标签的子弹预制体
+            if (HasTag(correctBulletPrefab, "PlayerBullets"))
+            {
+                bullet = playerBulletPool.GetBullet(correctBulletPrefab);
+            }
+            else
+            {
+                Debug.LogError($"尝试在玩家子弹池中使用非玩家子弹预制体: {correctBulletPrefab.name}");
+                return;
+            }
         }
         else if (!isPlayerWeapon && enemyBulletPool != null)
         {
-            bullet = enemyBulletPool.GetBullet(muzzle.position, muzzle.rotation);
+            // 确保使用带有EnemyBullets标签的子弹预制体
+            if (HasTag(correctBulletPrefab, "EnemyBullets"))
+            {
+                bullet = enemyBulletPool.GetBullet(correctBulletPrefab, muzzle.position, muzzle.rotation);
+            }
+            else
+            {
+                Debug.LogError($"尝试在敌人子弹池中使用非敌人子弹预制体: {correctBulletPrefab.name}");
+                return;
+            }
         }
 
         if (bullet != null)
@@ -300,8 +410,46 @@ public class WeaponManager : MonoBehaviour
             }
 
             bullet.SetActive(true);
-            Debug.Log($"[{weaponName}] 发射者: {(currentOwner ? currentOwner.name : "无持有者")}");
+            Debug.Log($"[{weaponName}] 发射者: {(currentOwner ? currentOwner.name : "无持有者")} 使用子弹: {correctBulletPrefab.name} (标签: {correctBulletPrefab.tag})");
         }
+    }
+
+    // 新增：获取玩家子弹预制体
+    public GameObject GetPlayerBulletPrefab() => playerBulletPrefab;
+    
+    // 新增：获取敌人子弹预制体
+    public GameObject GetEnemyBulletPrefab() => enemyBulletPrefab;
+
+    // 新增：设置玩家子弹预制体
+    public void SetPlayerBulletPrefab(GameObject newPlayerBulletPrefab)
+    {
+        if (newPlayerBulletPrefab != null && !HasTag(newPlayerBulletPrefab, "PlayerBullets"))
+        {
+            Debug.LogWarning($"设置的玩家子弹预制体 {newPlayerBulletPrefab.name} 没有 'PlayerBullets' 标签");
+        }
+        playerBulletPrefab = newPlayerBulletPrefab;
+        Debug.Log($"武器 {weaponName} 的玩家子弹预制体已更改为: {(playerBulletPrefab ? playerBulletPrefab.name : "无")}");
+    }
+    
+    // 新增：设置敌人子弹预制体
+    public void SetEnemyBulletPrefab(GameObject newEnemyBulletPrefab)
+    {
+        if (newEnemyBulletPrefab != null && !HasTag(newEnemyBulletPrefab, "EnemyBullets"))
+        {
+            Debug.LogWarning($"设置的敌人子弹预制体 {newEnemyBulletPrefab.name} 没有 'EnemyBullets' 标签");
+        }
+        enemyBulletPrefab = newEnemyBulletPrefab;
+        Debug.Log($"武器 {weaponName} 的敌人子弹预制体已更改为: {(enemyBulletPrefab ? enemyBulletPrefab.name : "无")}");
+    }
+
+    // 新增：获取武器的子弹预制体（向后兼容）
+    public GameObject GetBulletPrefab() => bulletPrefab;
+
+    // 新增：设置武器的子弹预制体（向后兼容）
+    public void SetBulletPrefab(GameObject newBulletPrefab)
+    {
+        bulletPrefab = newBulletPrefab;
+        Debug.Log($"武器 {weaponName} 的通用子弹预制体已更改为: {(bulletPrefab ? bulletPrefab.name : "无")}");
     }
 
     // 获取武器属性

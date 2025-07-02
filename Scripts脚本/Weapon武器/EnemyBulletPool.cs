@@ -3,87 +3,188 @@ using System.Collections.Generic;
 
 public class EnemyBulletPool : MonoBehaviour // 敌人子弹对象池管理类
 {
+    // 子弹池容器 - 使用字典来存储不同预制体的池
+    private Dictionary<GameObject, Queue<GameObject>> bulletPools = new Dictionary<GameObject, Queue<GameObject>>();
+    
+    // 默认子弹预制体（向后兼容）
     [SerializeField] private GameObject bulletPrefab; // 子弹预制体模板
     [SerializeField] private int initialPoolSize = 20; // 初始池容量
     [SerializeField] private int maxPoolSize = 100; // 最大池容量
     [SerializeField] private bool expandable = true; // 是否允许扩容
 
-    private Queue<GameObject> bulletPool = new Queue<GameObject>(); // 使用队列实现对象池
-
     void Awake() // 初始化方法
     {
-        InitializePool(); // 调用初始化方法
-    }
-
-    // 初始化对象池
-    private void InitializePool()
-    {
-        // 创建初始数量的子弹对象
-        for (int i = 0; i < initialPoolSize; i++)
+        // 如果有默认预制体，初始化默认池
+        if (bulletPrefab != null)
         {
-            CreateNewBullet(); // 创建单个子弹
+            InitializePoolForPrefab(bulletPrefab);
         }
     }
 
-    // 创建新子弹
-    private void CreateNewBullet()
+    // 为特定预制体初始化池
+    private void InitializePoolForPrefab(GameObject prefab)
     {
-        // 达到上限时阻止创建
-        if (bulletPool.Count >= maxPoolSize)
+        if (prefab == null) return;
+        
+        // 如果该预制体的池已存在，跳过
+        if (bulletPools.ContainsKey(prefab)) return;
+        
+        // 创建新的池
+        Queue<GameObject> newPool = new Queue<GameObject>();
+        bulletPools[prefab] = newPool;
+        
+        // 实例化初始子弹并放入池中
+        for (int i = 0; i < initialPoolSize; i++)
         {
-            Debug.LogWarning("敌人子弹池已满"); // 容量警告
+            CreateBulletForPrefab(prefab);
+        }
+        
+        Debug.Log($"为敌人预制体 {prefab.name} 初始化了子弹池，初始大小: {initialPoolSize}");
+    }
+
+    // 为特定预制体创建子弹实例
+    private void CreateBulletForPrefab(GameObject prefab)
+    {
+        if (prefab == null || !bulletPools.ContainsKey(prefab)) return;
+        
+        Queue<GameObject> pool = bulletPools[prefab];
+        
+        // 如果池中的子弹数量已经达到最大值，直接返回
+        if (pool.Count >= maxPoolSize)
+        {
+            Debug.LogWarning($"敌人预制体 {prefab.name} 的子弹池已满");
             return;
         }
 
-        // 实例化子弹并初始化
-        GameObject bullet = Instantiate(bulletPrefab, transform);
-        bullet.SetActive(false); // 设置为非激活状态
-        bulletPool.Enqueue(bullet); // 加入对象池队列
+        // 实例化一个子弹
+        GameObject bulletInstance = Instantiate(prefab);
+        bulletInstance.SetActive(false);
+        bulletInstance.transform.SetParent(transform);
+
+        // 将新创建的子弹加入对应的池
+        pool.Enqueue(bulletInstance);
     }
 
-    // 获取可用子弹
-    public GameObject GetBullet(Vector3 position, Quaternion rotation)
+    // 获取指定预制体的子弹（新方法）
+    public GameObject GetBullet(GameObject prefab, Vector3 position, Quaternion rotation)
     {
-        // 池中有可用子弹时
-        if (bulletPool.Count > 0)
+        // 如果没有指定预制体，使用默认预制体
+        if (prefab == null)
         {
-            GameObject bullet = bulletPool.Dequeue(); // 从队列取出
-            bullet.transform.position = position; // 设置生成位置
-            bullet.transform.rotation = rotation; // 设置旋转角度
-            bullet.SetActive(true); // 激活对象
-            return bullet; // 返回可用子弹
+            prefab = bulletPrefab;
+        }
+        
+        if (prefab == null)
+        {
+            Debug.LogWarning("没有指定敌人子弹预制体且没有默认预制体");
+            return null;
+        }
+        
+        // 确保该预制体的池已初始化
+        if (!bulletPools.ContainsKey(prefab))
+        {
+            InitializePoolForPrefab(prefab);
+        }
+        
+        Queue<GameObject> pool = bulletPools[prefab];
+        
+        // 如果池中有可用子弹，则返回
+        if (pool.Count > 0)
+        {
+            GameObject bullet = pool.Dequeue();
+            bullet.transform.position = position;
+            bullet.transform.rotation = rotation;
+            bullet.SetActive(true);
+            return bullet;
         }
 
-        // 可扩容时创建新子弹
+        // 如果池中没有可用子弹且可扩容，尝试创建新的
         if (expandable)
         {
-            CreateNewBullet(); // 创建新子弹
-            return GetBullet(position, rotation); // 递归获取
+            CreateBulletForPrefab(prefab);
+            
+            if (pool.Count > 0)
+            {
+                GameObject bullet = pool.Dequeue();
+                bullet.transform.position = position;
+                bullet.transform.rotation = rotation;
+                bullet.SetActive(true);
+                return bullet;
+            }
         }
-
-        return null; // 无可用子弹时返回null
+        
+        Debug.LogWarning($"无法获取敌人预制体 {prefab.name} 的子弹");
+        return null;
     }
 
-    // 回收子弹到池中
+    // 获取可用子弹（保持向后兼容）
+    public GameObject GetBullet(Vector3 position, Quaternion rotation)
+    {
+        return GetBullet(bulletPrefab, position, rotation);
+    }
+
+    // 将子弹返回到对应的池中
     public void ReturnBullet(GameObject bullet)
     {
-        bullet.transform.SetParent(transform); // 重置父对象
-        bullet.SetActive(false); // 设置为非激活状态
-        bulletPool.Enqueue(bullet); // 放回对象池队列
+        if (bullet == null) return;
+        
+        // 查找该子弹属于哪个预制体的池
+        GameObject originalPrefab = FindOriginalPrefab(bullet);
+        
+        if (originalPrefab != null && bulletPools.ContainsKey(originalPrefab))
+        {
+            bullet.transform.SetParent(transform);
+            bullet.SetActive(false);
+            bulletPools[originalPrefab].Enqueue(bullet);
+        }
+        else
+        {
+            // 如果找不到对应的池，销毁子弹
+            Debug.LogWarning($"找不到敌人子弹 {bullet.name} 对应的池，将销毁该子弹");
+            Destroy(bullet);
+        }
+    }
+    
+    // 查找子弹的原始预制体
+    private GameObject FindOriginalPrefab(GameObject bullet)
+    {
+        string bulletName = bullet.name.Replace("(Clone)", "").Trim();
+        
+        foreach (var kvp in bulletPools)
+        {
+            if (kvp.Key.name == bulletName)
+            {
+                return kvp.Key;
+            }
+        }
+        
+        return null;
     }
 
     private void Update() // 每帧更新
     {
-        // 遍历所有池中子弹
-        foreach (GameObject bullet in bulletPool)
+        // 遍历所有池中的子弹
+        foreach (var poolPair in bulletPools)
         {
-            if (bullet.activeInHierarchy) // 仅处理激活状态的子弹
+            Queue<GameObject> pool = poolPair.Value;
+            List<GameObject> bulletsToReturn = new List<GameObject>();
+            
+            foreach (GameObject bullet in pool)
             {
-                // 检测是否超出屏幕范围
-                if (IsBulletOffScreen(bullet))
+                if (bullet.activeInHierarchy) // 仅处理激活状态的子弹
                 {
-                    ReturnBullet(bullet); // 回收屏幕外的子弹
+                    // 检测是否超出屏幕范围
+                    if (IsBulletOffScreen(bullet))
+                    {
+                        bulletsToReturn.Add(bullet);
+                    }
                 }
+            }
+            
+            // 回收屏幕外的子弹
+            foreach (GameObject bullet in bulletsToReturn)
+            {
+                ReturnBullet(bullet);
             }
         }
     }
@@ -96,5 +197,15 @@ public class EnemyBulletPool : MonoBehaviour // 敌人子弹对象池管理类
         // 判断是否超出屏幕边界（含0.1容差）
         return screenPos.x < -0.1f || screenPos.x > 1.1f ||
                screenPos.y < -0.1f || screenPos.y > 1.1f;
+    }
+    
+    // 获取池的状态信息
+    public void LogPoolStatus()
+    {
+        Debug.Log($"敌人子弹池当前共有 {bulletPools.Count} 个子弹池:");
+        foreach (var kvp in bulletPools)
+        {
+            Debug.Log($"- {kvp.Key.name}: {kvp.Value.Count} 个可用子弹");
+        }
     }
 }

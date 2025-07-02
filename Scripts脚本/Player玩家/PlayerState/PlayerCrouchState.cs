@@ -15,8 +15,6 @@ public class PlayerCrouchState : IState
     
     public void OnEnter()
     {
-        // 应用潜行视觉效果
-        player.ApplyCrouchVisual();
         
         if (player.isWeaponInHand)
         {
@@ -42,12 +40,15 @@ public class PlayerCrouchState : IState
         // 潜行时可能需要降低移动速度
         float crouchSpeed = player.WalkSpeed * 0.5f; // 潜行速度为行走速度的一半
         player.PlayerRB2D.velocity = player.InputDirection * crouchSpeed;
+
     }
 
     public void OnUpdate()
     {
         // 基础瞄准功能（视角和瞄准方向更新）
         player.UpdateBasicAiming();
+        // 应用潜行视觉效果
+        player.ApplyCrouchVisual();
         
         // 潜行状态下的特殊逻辑
         if (player.isCrouching)

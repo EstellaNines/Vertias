@@ -316,19 +316,7 @@ public class Enemy : MonoBehaviour
         manualDirection = direction.normalized;
         currentDirection = manualDirection;
 
-        // 如果有武器对象，旋转武器朝向目标
-        if (weapon != null)
-        {
-            float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
-            weapon.rotation = Quaternion.Euler(0, 0, angle);
-        }
-
-        // 如果有射击点且没有武器对象，旋转射击点
-        else if (firePoint != null)
-        {
-            float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
-            firePoint.rotation = Quaternion.Euler(0, 0, angle);
-        }
+        // 不再在这里控制武器旋转，武器旋转由EnemyWeaponController处理
     }
 
     // 恢复自动方向检测

@@ -77,8 +77,7 @@ public class EnemyAttackState : IState
             return;
         }
         
-        // 瞄准玩家
-        AimAtPlayer();
+        // 武器会自动通过EnemyWeaponController瞄准玩家，这里不需要手动设置方向
         
         // 射击，并计数
         if (Time.time >= enemy.nextFireTime && shotsFired < maxShots)
@@ -94,19 +93,6 @@ public class EnemyAttackState : IState
         {
             enemy.transitionState(EnemyState.Aim);
         }
-    }
-    
-    // 瞄准玩家
-    private void AimAtPlayer()
-    {
-        if (enemy.player == null) return;
-        
-        // 计算朝向玩家的方向
-        Vector2 playerPosition = enemy.GetPlayerPosition();
-        Vector2 direction = (playerPosition - (Vector2)enemy.transform.position).normalized;
-        
-        // 使用Enemy类中的SetDirection方法设置方向
-        enemy.SetDirection(direction);
     }
     
     // 获取已发射子弹数量

@@ -23,17 +23,8 @@ public class EnemyWeaponController : MonoBehaviour
         fov = GetComponentInParent<RaycastFOV>();
         enemyComponent = GetComponentInParent<Enemy>();
         
-        // 如果没有手动设置武器Transform，尝试自动查找
-        if (weaponTransform == null)
-        {
-            weaponTransform = transform;
-        }
-        
-        // 如果没有手动设置武器SpriteRenderer，尝试从武器对象获取
-        if (weaponSprite == null && weaponTransform != null)
-        {
-            weaponSprite = weaponTransform.GetComponent<SpriteRenderer>();
-        }
+        // 自动查找敌人的子对象中的武器
+        FindWeaponInEnemyChildren();
         
         // 查找玩家
         if (playerTransform == null)
@@ -45,8 +36,42 @@ public class EnemyWeaponController : MonoBehaviour
             }
         }
         
-        // 获取武器管理器组件
-        weaponManager = GetComponent<WeaponManager>();
+        // 获取武器管理器组件（从找到的武器对象获取）
+        if (weaponTransform != null)
+        {
+            weaponManager = weaponTransform.GetComponent<WeaponManager>();
+        }
+    }
+    
+    // 新增方法：在敌人的子对象中查找武器
+    private void FindWeaponInEnemyChildren()
+    {
+        if (enemyComponent == null) return;
+        
+        // 如果已经手动设置了武器Transform，则不自动查找
+        if (weaponTransform != null) return;
+        
+        // 在敌人的所有子对象中查找包含WeaponManager组件的对象
+        WeaponManager[] weaponManagers = enemyComponent.GetComponentsInChildren<WeaponManager>();
+        
+        if (weaponManagers.Length > 0)
+        {
+            // 使用第一个找到的武器
+            WeaponManager foundWeapon = weaponManagers[0];
+            weaponTransform = foundWeapon.transform;
+            
+            // 自动获取武器的SpriteRenderer组件
+            if (weaponSprite == null)
+            {
+                weaponSprite = weaponTransform.GetComponent<SpriteRenderer>();
+            }
+            
+            Debug.Log($"EnemyWeaponController: 自动找到武器 {weaponTransform.name}");
+        }
+        else
+        {
+            Debug.LogWarning($"EnemyWeaponController: 在敌人 {enemyComponent.name} 的子对象中未找到武器（WeaponManager组件）");
+        }
     }
     
     void Update()
@@ -124,29 +149,25 @@ public class EnemyWeaponController : MonoBehaviour
         // 计算旋转角度
         float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
         
-        // 应用旋转
+        // 应用旋转到武器对象
         weaponTransform.rotation = Quaternion.Euler(0, 0, angle);
         
-        // 检查是否需要翻转Sprite
-        CheckAndFlipSprite(angle);
+        // 检查是否需要翻转武器Sprite
+        CheckAndFlipWeaponSprite(angle);
         
-        // 如果敌人有方向组件，同步更新敌人朝向
-        if (enemyComponent != null)
-        {
-            enemyComponent.SetDirection(direction);
-        }
+        // 不再设置敌人方向，只控制武器旋转
     }
     
-    // 检查并翻转Sprite
-    private void CheckAndFlipSprite(float angle)
+    // 检查并翻转武器Sprite
+    private void CheckAndFlipWeaponSprite(float angle)
     {
         if (weaponSprite == null) return;
         
         // 标准化角度到-180~180范围
         if (angle > 180) angle -= 360;
         
-        // 判断是否需要翻转
-        bool shouldFlip = (angle > flipAngleThreshold || angle < -flipAngleThreshold);
+        // 判断是否需要翻转武器（当角度大于90度或小于-90度时）
+        bool shouldFlip = (angle > 90f || angle < -90f);
         
         // 如果翻转状态改变，则执行翻转
         if (shouldFlip != isWeaponFlipped)
@@ -161,7 +182,7 @@ public class EnemyWeaponController : MonoBehaviour
     {
         if (weaponSprite == null) return;
         
-        // 翻转Y轴
+        // 翻转武器的Y轴
         Vector3 scale = weaponSprite.transform.localScale;
         scale.y = flip ? -Mathf.Abs(scale.y) : Mathf.Abs(scale.y);
         weaponSprite.transform.localScale = scale;
@@ -182,5 +203,4 @@ public class EnemyWeaponController : MonoBehaviour
             isWeaponFlipped = false;
         }
     }
-    
 }
