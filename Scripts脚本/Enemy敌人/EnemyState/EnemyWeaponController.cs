@@ -5,7 +5,7 @@ public class EnemyWeaponController : MonoBehaviour
     [Header("武器设置")]
     [SerializeField] private Transform weaponTransform; // 武器Transform引用
     [SerializeField] private SpriteRenderer weaponSprite; // 武器的SpriteRenderer组件
-    [SerializeField] private float flipAngleThreshold = 90f; // 翻转阈值角度，默认90度
+    // [SerializeField] private float flipAngleThreshold = 90f; // 翻转阈值角度，默认90度
     
     [Header("目标设置")]
     [SerializeField] private LayerMask targetLayer; // 目标层（玩家所在层）

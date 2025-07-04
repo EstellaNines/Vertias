@@ -12,6 +12,13 @@ public class WeaponManager : MonoBehaviour
     [FieldLabel("射程")] public float range = 15f;
     [FieldLabel("伤害")] public float damage = 25f;
     
+    [Header("弹夹系统")]
+    [FieldLabel("弹夹容量")] public int magazineCapacity = 30;
+    [FieldLabel("换弹时间")] public float reloadTime = 2f;
+    [HideInInspector] public int currentAmmo;
+    [HideInInspector] public bool isReloading = false;
+    [HideInInspector] public float reloadStartTime; // 记录换弹开始时间
+    
     [Header("子弹预制体配置")]
     [FieldLabel("玩家子弹预制体")] public GameObject playerBulletPrefab;
     [FieldLabel("敌人子弹预制体")] public GameObject enemyBulletPrefab;
@@ -41,6 +48,9 @@ public class WeaponManager : MonoBehaviour
         InitializeWeaponComponents();
         SetupWeaponTag();
         ValidateBulletPrefabs();
+        
+        // 初始化弹药
+        currentAmmo = magazineCapacity;
     }
 
     private void Start()
@@ -339,6 +349,13 @@ public class WeaponManager : MonoBehaviour
     // 射击方法
     private void Fire()
     {
+        // 检查是否有弹药
+        if (currentAmmo <= 0 || isReloading)
+        {
+            Debug.Log($"武器 {weaponName} 无弹药或正在换弹，无法射击");
+            return;
+        }
+        
         if (weaponTrigger == null || muzzle == null) return;
 
         // 根据武器持有者获取正确的子弹预制体
@@ -382,6 +399,9 @@ public class WeaponManager : MonoBehaviour
 
         if (bullet != null)
         {
+            // 消耗弹药
+            currentAmmo--;
+            
             // 设置子弹位置和旋转
             bullet.transform.position = muzzle.position;
             bullet.transform.rotation = muzzle.rotation;
@@ -410,9 +430,51 @@ public class WeaponManager : MonoBehaviour
             }
 
             bullet.SetActive(true);
-            Debug.Log($"[{weaponName}] 发射者: {(currentOwner ? currentOwner.name : "无持有者")} 使用子弹: {correctBulletPrefab.name} (标签: {correctBulletPrefab.tag})");
+            Debug.Log($"[{weaponName}] 发射者: {(currentOwner ? currentOwner.name : "无持有者")} 使用子弹: {correctBulletPrefab.name} (标签: {correctBulletPrefab.tag}) 剩余弹药: {currentAmmo}");
         }
     }
+    
+    // 换弹方法
+    public void StartReload()
+    {
+        if (isReloading || currentAmmo >= magazineCapacity)
+        {
+            return;
+        }
+        
+        StartCoroutine(ReloadCoroutine());
+    }
+    
+    private System.Collections.IEnumerator ReloadCoroutine()
+    {
+        isReloading = true;
+        reloadStartTime = Time.time; // 记录换弹开始时间
+        Debug.Log($"武器 {weaponName} 开始换弹，换弹时间: {reloadTime}秒");
+        
+        yield return new WaitForSeconds(reloadTime);
+        
+        currentAmmo = magazineCapacity;
+        isReloading = false;
+        Debug.Log($"武器 {weaponName} 换弹完成，当前弹药: {currentAmmo}");
+    }
+    
+    // 检查是否需要换弹
+    public bool NeedsReload()
+    {
+        return currentAmmo <= 0 && !isReloading;
+    }
+    
+    // 检查是否可以射击
+    public bool CanFire()
+    {
+        return currentAmmo > 0 && !isReloading;
+    }
+    
+    // 获取弹药信息
+    public int GetCurrentAmmo() => currentAmmo;
+    public int GetMagazineCapacity() => magazineCapacity;
+    public float GetReloadTime() => reloadTime;
+    public bool IsReloading() => isReloading;
 
     // 新增：获取玩家子弹预制体
     public GameObject GetPlayerBulletPrefab() => playerBulletPrefab;
@@ -471,5 +533,13 @@ public class WeaponManager : MonoBehaviour
     public void OnDropped()
     {
         SetAsDroppedWeapon();
+    }
+
+    public float GetReloadProgress()
+    {
+        if (!isReloading) return 1f;
+        
+        float elapsedTime = Time.time - reloadStartTime;
+        return Mathf.Clamp01(elapsedTime / reloadTime);
     }
 }

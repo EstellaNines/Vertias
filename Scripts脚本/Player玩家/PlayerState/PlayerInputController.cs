@@ -3,7 +3,7 @@ using UnityEngine.Events;
 using UnityEngine.InputSystem;
 
 [CreateAssetMenu(fileName = "PlayerInpurController")]
-public class PlayerInputController : ScriptableObject, PlayerInputAction.IGamePlayActions
+public class PlayerInputController : ScriptableObject, PlayerInputAction.IGamePlayActions, PlayerInputAction.IUIActions
 {
     // 事件
     public event UnityAction<Vector2> onMovement; // 移动事件
@@ -13,9 +13,11 @@ public class PlayerInputController : ScriptableObject, PlayerInputAction.IGamePl
     public event UnityAction onReload; // 换弹事件
     public event UnityAction onPickup; // 拾取事件
     public event UnityAction<bool> onRun; // 跑动事件
+    public event UnityAction onOperate; // UI操作事件
+    public event UnityAction onWeaponInspection; // 武器检视事件
+    
     // 引用属性
     PlayerInputAction playerinputAction;
-
 
     // 函数
     private void OnEnable()
@@ -23,6 +25,7 @@ public class PlayerInputController : ScriptableObject, PlayerInputAction.IGamePl
         playerinputAction = new PlayerInputAction(); // 创建输入系统
         // playerinput继承了这个接入口，并传入this将playerinput注册为回调函数接收者
         playerinputAction.GamePlay.SetCallbacks(this);
+        playerinputAction.UI.SetCallbacks(this); // 新增UI回调
     }
 
     public void EnabledGameplayInput()
@@ -30,10 +33,20 @@ public class PlayerInputController : ScriptableObject, PlayerInputAction.IGamePl
         playerinputAction.GamePlay.Enable(); // 启用gameplay输入
     }
     
+    public void EnabledUIInput()
+    {
+        playerinputAction.UI.Enable(); // 启用UI输入
+    }
+    
     // 添加禁用输入的方法
     public void DisableGameplayInput()
     {
         playerinputAction.GamePlay.Disable(); // 禁用gameplay输入
+    }
+    
+    public void DisableUIInput()
+    {
+        playerinputAction.UI.Disable(); // 禁用UI输入
     }
 
     // 接口
@@ -109,5 +122,21 @@ public class PlayerInputController : ScriptableObject, PlayerInputAction.IGamePl
     {
 
     }
+    
+    // UI操作接口实现
+    public void OnOperate(InputAction.CallbackContext context) // UI操作（F键）
+    {
+        if (context.started) // 按下一刻
+        {
+            onOperate?.Invoke();
+        }
+    }
 
+    public void OnWeaponInspection(InputAction.CallbackContext context) // 武器检视（H键）
+    {
+        if (context.started) // 按下一刻
+        {
+            onWeaponInspection?.Invoke();
+        }
+    }
 }

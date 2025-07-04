@@ -67,6 +67,14 @@ public class PlayerAttackState : IState
         // 完整瞄准功能（包括武器朝向）
         player.UpdateFullAiming();
         
+        // 检查武器弹药
+        if (player.currentWeaponController != null && player.currentWeaponController.NeedsReload())
+        {
+            Debug.Log("弹药用尽，自动切换到换弹状态");
+            player.transitionState(PlayerStateType.Reload);
+            return;
+        }
+        
         // 处理射击动画
         if (player.isFiring && player.isWeaponInHand)
         {
@@ -74,6 +82,14 @@ public class PlayerAttackState : IState
             if (player.currentWeaponController == null)
             {
                 Debug.LogError("攻击状态下武器控制器丢失，退出攻击状态");
+                player.transitionState(PlayerStateType.Idle);
+                return;
+            }
+            
+            // 检查是否可以继续射击
+            if (!player.currentWeaponController.CanFire())
+            {
+                Debug.Log("无法继续射击，退出攻击状态");
                 player.transitionState(PlayerStateType.Idle);
                 return;
             }

@@ -224,7 +224,19 @@ MonoBehaviour:
   directionThreshold: 0.1
   OnHurt:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 3200119837445088091}
+        m_TargetAssemblyTypeName: Enemy, Assembly-CSharp
+        m_MethodName: enemyHurt
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
   isHurt: 0
   OnDeath:
     m_PersistentCalls:
@@ -248,7 +260,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   weaponTransform: {fileID: 0}
   weaponSprite: {fileID: 0}
-  flipAngleThreshold: 90
   targetLayer:
     serializedVersion: 2
     m_Bits: 768

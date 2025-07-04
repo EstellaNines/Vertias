@@ -34,12 +34,19 @@ public class EnemyAimState : IState
         // 重置瞄准时间
         aimTime = 0f;
         
-        // 检查是否需要进入冷却
+        // 检查攻击状态是否正在换弹
         EnemyAttackState attackState = GetAttackState();
-        if (attackState != null && attackState.GetShotsFired() >= 30)
+        if (attackState != null && attackState.IsReloading())
         {
             inCooldown = true;
             cooldownTimer = 0f;
+            cooldownTime = 1.5f; // 等待换弹完成
+        }
+        else if (attackState != null && attackState.GetShotsFired() >= 30)
+        {
+            inCooldown = true;
+            cooldownTimer = 0f;
+            cooldownTime = 0.5f; // 正常冷却时间
         }
     }
 
@@ -71,6 +78,15 @@ public class EnemyAimState : IState
         if (enemy.IsPlayerDead())
         {
             Debug.Log("玩家已死亡，敌人停止瞄准");
+            enemy.shouldPatrol = true;
+            enemy.transitionState(EnemyState.Patrol);
+            return;
+        }
+        
+        // 检查玩家是否超出攻击范围
+        if (!IsPlayerInAttackRange())
+        {
+            Debug.Log("玩家超出攻击范围，敌人停止瞄准");
             enemy.shouldPatrol = true;
             enemy.transitionState(EnemyState.Patrol);
             return;
@@ -133,5 +149,18 @@ public class EnemyAimState : IState
             return state as EnemyAttackState;
         }
         return null;
+    }
+
+    // 检查玩家是否在攻击范围内
+    private bool IsPlayerInAttackRange()
+    {
+        if (enemy.player == null) return false;
+        
+        Vector2 enemyPosition = enemy.eyePoint ? (Vector2)enemy.eyePoint.transform.position : (Vector2)enemy.transform.position;
+        Vector2 playerPosition = enemy.player.transform.position;
+        float distanceToPlayer = Vector2.Distance(enemyPosition, playerPosition);
+        
+        // 检查距离是否在检测范围内
+        return distanceToPlayer <= enemy.playerDetectionRadius;
     }
 }

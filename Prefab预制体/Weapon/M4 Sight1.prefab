@@ -25,7 +25,7 @@ Transform:
   m_GameObject: {fileID: 6305558609003834104}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.67, y: 0, z: 0}
+  m_LocalPosition: {x: 0.732, y: 0.128, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -211,6 +211,11 @@ MonoBehaviour:
   bulletSpeed: 50
   range: 50
   damage: 15
+  magazineCapacity: 30
+  reloadTime: 0.8
+  currentAmmo: 0
+  isReloading: 0
+  reloadStartTime: 0
   playerBulletPrefab: {fileID: 2965606263880691008, guid: 7d628be2d48fbc04997864f324daed06, type: 3}
   enemyBulletPrefab: {fileID: 2965606263880691008, guid: eb65c448a7caf5f48a035eb88a0adbd6, type: 3}
   bulletPrefab: {fileID: 0}

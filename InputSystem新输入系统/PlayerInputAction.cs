@@ -265,6 +265,54 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
                     ""isPartOfComposite"": false
                 }
             ]
+        },
+        {
+            ""name"": ""UI"",
+            ""id"": ""50083b40-92be-4c26-b8ed-d3e321c5ad97"",
+            ""actions"": [
+                {
+                    ""name"": ""Operate"",
+                    ""type"": ""Button"",
+                    ""id"": ""15c83643-81ec-4cec-9b64-8965c749f3cd"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""WeaponInspection"",
+                    ""type"": ""Button"",
+                    ""id"": ""081c7cdf-96f6-4c1f-b733-577662542150"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                }
+            ],
+            ""bindings"": [
+                {
+                    ""name"": """",
+                    ""id"": ""034eb9e5-ad95-4100-b4fc-7284169974f0"",
+                    ""path"": ""<Keyboard>/f"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Operate"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""c4f68c02-ab1b-4836-bc9f-a654e3ada600"",
+                    ""path"": ""<Keyboard>/h"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""WeaponInspection"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                }
+            ]
         }
     ],
     ""controlSchemes"": [
@@ -286,11 +334,16 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
         m_GamePlay_Dodge = m_GamePlay.FindAction("Dodge", throwIfNotFound: true);
         m_GamePlay_Crouch = m_GamePlay.FindAction("Crouch", throwIfNotFound: true);
         m_GamePlay_Crawl = m_GamePlay.FindAction("Crawl", throwIfNotFound: true);
+        // UI
+        m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
+        m_UI_Operate = m_UI.FindAction("Operate", throwIfNotFound: true);
+        m_UI_WeaponInspection = m_UI.FindAction("WeaponInspection", throwIfNotFound: true);
     }
 
     ~@PlayerInputAction()
     {
         UnityEngine.Debug.Assert(!m_GamePlay.enabled, "This will cause a leak and performance issues, PlayerInputAction.GamePlay.Disable() has not been called.");
+        UnityEngine.Debug.Assert(!m_UI.enabled, "This will cause a leak and performance issues, PlayerInputAction.UI.Disable() has not been called.");
     }
 
     public void Dispose()
@@ -458,6 +511,60 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
         }
     }
     public GamePlayActions @GamePlay => new GamePlayActions(this);
+
+    // UI
+    private readonly InputActionMap m_UI;
+    private List<IUIActions> m_UIActionsCallbackInterfaces = new List<IUIActions>();
+    private readonly InputAction m_UI_Operate;
+    private readonly InputAction m_UI_WeaponInspection;
+    public struct UIActions
+    {
+        private @PlayerInputAction m_Wrapper;
+        public UIActions(@PlayerInputAction wrapper) { m_Wrapper = wrapper; }
+        public InputAction @Operate => m_Wrapper.m_UI_Operate;
+        public InputAction @WeaponInspection => m_Wrapper.m_UI_WeaponInspection;
+        public InputActionMap Get() { return m_Wrapper.m_UI; }
+        public void Enable() { Get().Enable(); }
+        public void Disable() { Get().Disable(); }
+        public bool enabled => Get().enabled;
+        public static implicit operator InputActionMap(UIActions set) { return set.Get(); }
+        public void AddCallbacks(IUIActions instance)
+        {
+            if (instance == null || m_Wrapper.m_UIActionsCallbackInterfaces.Contains(instance)) return;
+            m_Wrapper.m_UIActionsCallbackInterfaces.Add(instance);
+            @Operate.started += instance.OnOperate;
+            @Operate.performed += instance.OnOperate;
+            @Operate.canceled += instance.OnOperate;
+            @WeaponInspection.started += instance.OnWeaponInspection;
+            @WeaponInspection.performed += instance.OnWeaponInspection;
+            @WeaponInspection.canceled += instance.OnWeaponInspection;
+        }
+
+        private void UnregisterCallbacks(IUIActions instance)
+        {
+            @Operate.started -= instance.OnOperate;
+            @Operate.performed -= instance.OnOperate;
+            @Operate.canceled -= instance.OnOperate;
+            @WeaponInspection.started -= instance.OnWeaponInspection;
+            @WeaponInspection.performed -= instance.OnWeaponInspection;
+            @WeaponInspection.canceled -= instance.OnWeaponInspection;
+        }
+
+        public void RemoveCallbacks(IUIActions instance)
+        {
+            if (m_Wrapper.m_UIActionsCallbackInterfaces.Remove(instance))
+                UnregisterCallbacks(instance);
+        }
+
+        public void SetCallbacks(IUIActions instance)
+        {
+            foreach (var item in m_Wrapper.m_UIActionsCallbackInterfaces)
+                UnregisterCallbacks(item);
+            m_Wrapper.m_UIActionsCallbackInterfaces.Clear();
+            AddCallbacks(instance);
+        }
+    }
+    public UIActions @UI => new UIActions(this);
     private int m_KeyboardMouseSchemeIndex = -1;
     public InputControlScheme KeyboardMouseScheme
     {
@@ -478,5 +585,10 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
         void OnDodge(InputAction.CallbackContext context);
         void OnCrouch(InputAction.CallbackContext context);
         void OnCrawl(InputAction.CallbackContext context);
+    }
+    public interface IUIActions
+    {
+        void OnOperate(InputAction.CallbackContext context);
+        void OnWeaponInspection(InputAction.CallbackContext context);
     }
 }
