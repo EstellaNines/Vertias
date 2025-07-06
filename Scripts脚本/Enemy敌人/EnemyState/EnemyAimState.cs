@@ -2,67 +2,67 @@ using UnityEngine;
 
 public class EnemyAimState : IState
 {
-    // --- 控制器引用 ---
+    // --- ���������� ---
     Enemy enemy;
     private float aimTime = 0f;
-    private float maxAimTime = 0.05f; // 瞄准时间从0.5秒减少到0.2秒，提高反应速度
-    private float cooldownTime = 0.5f; // 攻击后的冷却时间
-    private float cooldownTimer = 0f; // 冷却计时器
-    private bool inCooldown = false; // 是否在冷却中
+    private float maxAimTime = 0.05f; // ��׼ʱ���0.5����ٵ�0.2�룬��߷�Ӧ�ٶ�
+    private float cooldownTime = 0.5f; // ���������ȴʱ��
+    private float cooldownTimer = 0f; // ��ȴ��ʱ��
+    private bool inCooldown = false; // �Ƿ�����ȴ��
     
-    // --- 构造函数 --- 
+    // --- ���캯�� --- 
     public EnemyAimState(Enemy enemy)
     {
         this.enemy = enemy;
     }
     
-    // --- 状态方法 ---
+    // --- ״̬���� ---
     public void OnEnter()
     {
-        // 停止移动
+        // ֹͣ�ƶ�
         if (enemy.RB != null)
         {
             enemy.RB.velocity = Vector2.zero;
         }
         
-        // 播放待机动画
+        // ���Ŵ�������
         if (enemy.animator != null)
         {
             enemy.animator.Play("Idle");
         }
         
-        // 重置瞄准时间
+        // ������׼ʱ��
         aimTime = 0f;
         
-        // 检查攻击状态是否正在换弹
+        // ��鹥��״̬�Ƿ����ڻ���
         EnemyAttackState attackState = GetAttackState();
         if (attackState != null && attackState.IsReloading())
         {
             inCooldown = true;
             cooldownTimer = 0f;
-            cooldownTime = 1.5f; // 等待换弹完成
+            cooldownTime = 1.5f; // �ȴ��������
         }
         else if (attackState != null && attackState.GetShotsFired() >= 30)
         {
             inCooldown = true;
             cooldownTimer = 0f;
-            cooldownTime = 0.5f; // 正常冷却时间
+            cooldownTime = 0.5f; // ������ȴʱ��
         }
     }
 
     public void OnExit()
     {
-        // 退出瞄准状态
+        // �˳���׼״̬
     }
 
     public void OnFixedUpdate()
     {
-        // 物理更新
+        // ��������
     }
 
     public void OnUpdate()
     {
-        // 检查是否死亡 - 最高优先级
+        // ����Ƿ����� - ������ȼ�
         if (enemy.isDead)
         {
             enemy.transitionState(EnemyState.Dead);
@@ -71,42 +71,42 @@ public class EnemyAimState : IState
         
         if (enemy.isHurt)
         {
-            enemy.transitionState(EnemyState.Hurt); // 进入受伤状态
+            enemy.transitionState(EnemyState.Hurt); // ��������״̬
         }
 
-        // 检查玩家是否已死亡
+        // �������Ƿ�������
         if (enemy.IsPlayerDead())
         {
-            Debug.Log("玩家已死亡，敌人停止瞄准");
+            Debug.Log("���������������ֹͣ��׼");
             enemy.shouldPatrol = true;
             enemy.transitionState(EnemyState.Patrol);
             return;
         }
         
-        // 检查玩家是否超出攻击范围
+        // �������Ƿ񳬳�������Χ
         if (!IsPlayerInAttackRange())
         {
-            Debug.Log("玩家超出攻击范围，敌人停止瞄准");
+            Debug.Log("��ҳ���������Χ������ֹͣ��׼");
             enemy.shouldPatrol = true;
             enemy.transitionState(EnemyState.Patrol);
             return;
         }
         
-        // 如果玩家不再被检测到或者进入潜行状态，返回巡逻状态
+        // �����Ҳ��ٱ���⵽���߽���Ǳ��״̬������Ѳ��״̬
         if (!enemy.IsPlayerDetected() || enemy.IsPlayerCrouching())
         {
-            enemy.shouldPatrol = true; // 设置可以继续巡逻
+            enemy.shouldPatrol = true; // ���ÿ��Լ���Ѳ��
             enemy.transitionState(EnemyState.Patrol);
             return;
         }
         
-        // 如果在冷却中，处理冷却逻辑
+        // �������ȴ�У�������ȴ�߼�
         if (inCooldown)
         {
             cooldownTimer += Time.deltaTime;
             if (cooldownTimer >= cooldownTime)
             {
-                // 冷却结束，重置射击计数并退出冷却状态
+                // ��ȴ��������������������˳���ȴ״̬
                 EnemyAttackState attackState = GetAttackState();
                 if (attackState != null)
                 {
@@ -114,13 +114,13 @@ public class EnemyAimState : IState
                 }
                 inCooldown = false;
             }
-            return; // 在冷却中不进行瞄准和攻击
+            return; // ����ȴ�в�������׼�͹���
         }
         
-        // 瞄准玩家
+        // ��׼���
         AimAtPlayer();
         
-        // 瞄准一段时间后切换到攻击状态
+        // ��׼һ��ʱ����л�������״̬
         aimTime += Time.deltaTime;
         if (aimTime >= maxAimTime)
         {
@@ -128,20 +128,20 @@ public class EnemyAimState : IState
         }
     }
     
-    // 瞄准玩家
+    // ��׼���
     private void AimAtPlayer()
     {
         if (enemy.player == null) return;
         
-        // 计算朝向玩家的方向
+        // ���㳯����ҵķ���
         Vector2 playerPosition = enemy.GetPlayerPosition();
         Vector2 direction = (playerPosition - (Vector2)enemy.transform.position).normalized;
         
-        // 使用Enemy类中的SetDirection方法设置方向
+        // ʹ��Enemy���е�SetDirection�������÷���
         enemy.SetDirection(direction);
     }
     
-    // 获取攻击状态组件
+    // ��ȡ����״̬���
     private EnemyAttackState GetAttackState()
     {
         if (enemy != null && enemy.states != null && enemy.states.TryGetValue(EnemyState.Attack, out IState state))
@@ -151,7 +151,7 @@ public class EnemyAimState : IState
         return null;
     }
 
-    // 检查玩家是否在攻击范围内
+    // �������Ƿ��ڹ�����Χ��
     private bool IsPlayerInAttackRange()
     {
         if (enemy.player == null) return false;
@@ -160,7 +160,7 @@ public class EnemyAimState : IState
         Vector2 playerPosition = enemy.player.transform.position;
         float distanceToPlayer = Vector2.Distance(enemyPosition, playerPosition);
         
-        // 检查距离是否在检测范围内
+        // �������Ƿ��ڼ�ⷶΧ��
         return distanceToPlayer <= enemy.playerDetectionRadius;
     }
 }

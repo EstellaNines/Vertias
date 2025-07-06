@@ -6,64 +6,64 @@ using TMPro;
 
 public class WeaponNotice : MonoBehaviour
 {
-    [Header("UI组件")]
-    [FieldLabel("武器图标显示")] public Image weaponIcon; // 武器图标UI控件
-    [FieldLabel("弹药信息显示")] public TextMeshProUGUI ammoInfoText; // 弹药信息文本
+    [Header("UI���")]
+    [FieldLabel("����ͼ����ʾ")] public Image weaponIcon; // ����ͼ��UI�ؼ�
+    [FieldLabel("��ҩ��Ϣ��ʾ")] public TextMeshProUGUI ammoInfoText; // ��ҩ��Ϣ�ı�
 
-    [Header("玩家引用")]
-    [FieldLabel("玩家对象")] public Player player; // 玩家引用
-    [FieldLabel("输入控制器")] public PlayerInputController inputController; // 输入控制器引用
+    [Header("�������")]
+    [FieldLabel("��Ҷ���")] public Player player; // �������
+    [FieldLabel("���������")] public PlayerInputController inputController; // �������������
 
-    [Header("设置")]
-    [FieldLabel("默认透明度")][Range(0f, 1f)] public float defaultAlpha = 1f; // 有武器时的透明度
-    [FieldLabel("无武器时隐藏")] public bool hideWhenNoWeapon = true; // 无武器时是否隐藏图标
+    [Header("����")]
+    [FieldLabel("Ĭ��͸����")][Range(0f, 1f)] public float defaultAlpha = 1f; // ������ʱ��͸����
+    [FieldLabel("������ʱ����")] public bool hideWhenNoWeapon = true; // ������ʱ�Ƿ�����ͼ��
 
-    // 私有变量
+    // ˽�б���
     private WeaponManager currentWeapon;
     private SpriteRenderer currentWeaponSprite;
-    private bool isAmmoInfoVisible = false; // 弹药信息是否可见
+    private bool isAmmoInfoVisible = false; // ��ҩ��Ϣ�Ƿ�ɼ�
 
     void Start()
     {
-        // 如果没有手动分配玩家引用，尝试自动查找
+        // ���û���ֶ�����������ã������Զ�����
         if (player == null)
         {
             player = FindObjectOfType<Player>();
             if (player == null)
             {
-                Debug.LogError("WeaponNotice: 找不到Player对象！请手动分配Player引用。");
+                Debug.LogError("WeaponNotice: �Ҳ���Player�������ֶ�����Player���á�");
                 return;
             }
         }
 
-        // 如果没有手动分配输入控制器，尝试自动查找
+        // ���û���ֶ���������������������Զ�����
         if (inputController == null)
         {
             inputController = FindObjectOfType<PlayerInputController>();
             if (inputController == null)
             {
-                Debug.LogError("WeaponNotice: 找不到PlayerInputController对象！请手动分配输入控制器引用。");
+                Debug.LogError("WeaponNotice: �Ҳ���PlayerInputController�������ֶ�����������������á�");
                 return;
             }
         }
 
-        // 验证UI组件
+        // ��֤UI���
         if (weaponIcon == null)
         {
-            Debug.LogError("WeaponNotice: 请分配武器图标UI组件！");
+            Debug.LogError("WeaponNotice: ���������ͼ��UI�����");
             return;
         }
 
         if (ammoInfoText == null)
         {
-            Debug.LogError("WeaponNotice: 请分配弹药信息文本组件！");
+            Debug.LogError("WeaponNotice: ����䵯ҩ��Ϣ�ı������");
             return;
         }
 
-        // 初始化UI状态
+        // ��ʼ��UI״̬
         InitializeUI();
 
-        // 订阅武器检视输入事件
+        // �����������������¼�
         SubscribeToWeaponInspectionInput();
     }
 
@@ -73,7 +73,7 @@ public class WeaponNotice : MonoBehaviour
         {
             UpdateWeaponIcon();
 
-            // 如果弹药信息可见，实时更新内容
+            // �����ҩ��Ϣ�ɼ���ʵʱ��������
             if (isAmmoInfoVisible)
             {
                 UpdateAmmoInfoDisplay();
@@ -83,11 +83,11 @@ public class WeaponNotice : MonoBehaviour
 
     void OnDestroy()
     {
-        // 取消订阅输入事件
+        // ȡ�����������¼�
         UnsubscribeFromWeaponInspectionInput();
     }
 
-    // 订阅武器检视输入事件
+    // �����������������¼�
     private void SubscribeToWeaponInspectionInput()
     {
         if (inputController != null)
@@ -96,7 +96,7 @@ public class WeaponNotice : MonoBehaviour
         }
     }
 
-    // 取消订阅武器检视输入事件
+    // ȡ�������������������¼�
     private void UnsubscribeFromWeaponInspectionInput()
     {
         if (inputController != null)
@@ -105,27 +105,27 @@ public class WeaponNotice : MonoBehaviour
         }
     }
 
-    // 武器检视处理
+    // �������Ӵ���
     private void OnWeaponInspection()
     {
-        // 直接更新弹药信息显示，不切换显示状态
+        // ֱ�Ӹ��µ�ҩ��Ϣ��ʾ�����л���ʾ״̬
         UpdateAmmoInfoDisplay();
 
-        // 确保弹药信息始终可见
+        // ȷ����ҩ��Ϣʼ�տɼ�
         if (ammoInfoText != null && !ammoInfoText.gameObject.activeInHierarchy)
         {
             ammoInfoText.gameObject.SetActive(true);
         }
 
-        Debug.Log("武器检视: 更新弹药信息");
+        Debug.Log("��������: ���µ�ҩ��Ϣ");
     }
 
-    // 初始化UI状态
+    // ��ʼ��UI״̬
     private void InitializeUI()
     {
         if (weaponIcon != null)
         {
-            // 初始状态下隐藏图标
+            // ��ʼ״̬������ͼ��
             if (hideWhenNoWeapon)
             {
                 weaponIcon.gameObject.SetActive(false);
@@ -138,27 +138,27 @@ public class WeaponNotice : MonoBehaviour
             }
         }
 
-        // 初始化弹药信息文本 - 设置为始终显示
+        // ��ʼ����ҩ��Ϣ�ı� - ����Ϊʼ����ʾ
         if (ammoInfoText != null)
         {
             ammoInfoText.gameObject.SetActive(true);
-            UpdateAmmoInfoDisplay(); // 初始化时更新一次显示内容
+            UpdateAmmoInfoDisplay(); // ��ʼ��ʱ����һ����ʾ����
         }
 
-        isAmmoInfoVisible = true; // 设置为始终可见
+        isAmmoInfoVisible = true; // ����Ϊʼ�տɼ�
     }
 
-    // 公共方法：手动更新武器图标
+    // �����������ֶ���������ͼ��
     public void RefreshWeaponIcon()
     {
         if (player != null)
         {
-            currentWeapon = null; // 强制刷新
+            currentWeapon = null; // ǿ��ˢ��
             UpdateWeaponIcon();
         }
     }
 
-    // 公共方法：设置图标透明度
+    // ��������������ͼ��͸����
     public void SetIconAlpha(float alpha)
     {
         defaultAlpha = Mathf.Clamp01(alpha);
@@ -171,23 +171,23 @@ public class WeaponNotice : MonoBehaviour
         }
     }
 
-    // 公共方法：获取当前武器信息
+    // ������������ȡ��ǰ������Ϣ
     public string GetCurrentWeaponName()
     {
         if (currentWeapon != null)
         {
             return currentWeapon.GetWeaponName();
         }
-        return "无武器";
+        return "������";
     }
 
-    // 公共方法：手动触发武器检视
+    // �����������ֶ�������������
     public void TriggerWeaponInspection()
     {
         OnWeaponInspection();
     }
 
-    // 公共方法：立即隐藏弹药信息
+    // �����������������ص�ҩ��Ϣ
     public void HideAmmoInfo()
     {
         if (ammoInfoText != null)
@@ -198,7 +198,7 @@ public class WeaponNotice : MonoBehaviour
         isAmmoInfoVisible = false;
     }
 
-    // 公共方法：强制显示弹药信息
+    // ����������ǿ����ʾ��ҩ��Ϣ
     public void ForceShowAmmoInfo()
     {
         isAmmoInfoVisible = true;
@@ -207,7 +207,7 @@ public class WeaponNotice : MonoBehaviour
 
 
 
-    // 更新弹药信息显示内容
+    // ���µ�ҩ��Ϣ��ʾ����
     private void UpdateAmmoInfoDisplay()
     {
         if (ammoInfoText == null) return;
@@ -217,55 +217,55 @@ public class WeaponNotice : MonoBehaviour
             int currentAmmo = currentWeapon.GetCurrentAmmo();
             string ammoStatusText = GetAmmoStatusText(currentAmmo);
 
-            // 显示弹药信息
+            // ��ʾ��ҩ��Ϣ
             ammoInfoText.text = $"{ammoStatusText}";
         }
         else
         {
-            ammoInfoText.text = "当前没有持有武器";
+            ammoInfoText.text = "��ǰû�г�������";
         }
     }
 
-    // 根据弹药数量获取状态文字
+    // ���ݵ�ҩ������ȡ״̬����
     private string GetAmmoStatusText(int ammoCount)
     {
         if (ammoCount == 0)
         {
-            return "无弹药";
+            return "�޵�ҩ";
         }
         else if (ammoCount > 25)
         {
-            return "还有很多";
+            return "���кܶ�";
         }
         else if (ammoCount > 20)
         {
-            return "子弹较多";
+            return "�ӵ��϶�";
         }
         else if (ammoCount >= 14 && ammoCount <= 16)
         {
-            return "还剩一半";
+            return "��ʣһ��";
         }
         else if (ammoCount < 10)
         {
-            return "所剩无几";
+            return "��ʣ�޼�";
         }
         else
         {
-            return "弹药适中";
+            return "��ҩ����";
         }
     }
 
-    // 更新武器图标
+    // ��������ͼ��
     private void UpdateWeaponIcon()
     {
-        // 检查玩家是否持有武器
+        // �������Ƿ��������
         if (player.isWeaponInHand && player.Hand != null && player.Hand.childCount > 0)
         {
-            // 获取Hand子对象中的武器
+            // ��ȡHand�Ӷ����е�����
             Transform weaponTransform = player.Hand.GetChild(0);
             WeaponManager weaponManager = weaponTransform.GetComponent<WeaponManager>();
 
-            // 如果武器发生变化，更新图标
+            // ������������仯������ͼ��
             if (weaponManager != currentWeapon)
             {
                 currentWeapon = weaponManager;
@@ -274,7 +274,7 @@ public class WeaponNotice : MonoBehaviour
         }
         else
         {
-            // 没有武器时隐藏图标
+            // û������ʱ����ͼ��
             if (currentWeapon != null)
             {
                 currentWeapon = null;
@@ -284,73 +284,73 @@ public class WeaponNotice : MonoBehaviour
         }
     }
 
-    // 更新武器精灵
+    // ������������
     private void UpdateWeaponSprite(Transform weaponTransform)
     {
         if (weaponTransform == null || weaponIcon == null) return;
 
-        // 获取武器的SpriteRenderer组件
+        // ��ȡ������SpriteRenderer���
         SpriteRenderer weaponSpriteRenderer = weaponTransform.GetComponent<SpriteRenderer>();
 
         if (weaponSpriteRenderer != null && weaponSpriteRenderer.sprite != null)
         {
             currentWeaponSprite = weaponSpriteRenderer;
 
-            // 将武器的精灵图片同步到UI图标
+            // �������ľ���ͼƬͬ����UIͼ��
             weaponIcon.sprite = weaponSpriteRenderer.sprite;
 
-            // 显示图标
+            // ��ʾͼ��
             ShowWeaponIcon();
 
-            Debug.Log($"WeaponNotice: 更新武器图标 - {weaponTransform.name}");
+            Debug.Log($"WeaponNotice: ��������ͼ�� - {weaponTransform.name}");
         }
         else
         {
-            Debug.LogWarning($"WeaponNotice: 武器 {weaponTransform.name} 没有SpriteRenderer组件或精灵图片！");
+            Debug.LogWarning($"WeaponNotice: ���� {weaponTransform.name} û��SpriteRenderer�������ͼƬ��");
             HideWeaponIcon();
         }
     }
 
-    // 显示武器图标
+    // ��ʾ����ͼ��
     private void ShowWeaponIcon()
     {
         if (weaponIcon == null) return;
 
-        // 激活图标GameObject
+        // ����ͼ��GameObject
         if (!weaponIcon.gameObject.activeInHierarchy)
         {
             weaponIcon.gameObject.SetActive(true);
         }
 
-        // 设置透明度
+        // ����͸����
         Color iconColor = weaponIcon.color;
         iconColor.a = defaultAlpha;
         weaponIcon.color = iconColor;
     }
 
-    // 隐藏武器图标
+    // ��������ͼ��
     private void HideWeaponIcon()
     {
         if (weaponIcon == null) return;
 
         if (hideWhenNoWeapon)
         {
-            // 完全隐藏GameObject
+            // ��ȫ����GameObject
             weaponIcon.gameObject.SetActive(false);
         }
         else
         {
-            // 只设置为透明
+            // ֻ����Ϊ͸��
             Color iconColor = weaponIcon.color;
             iconColor.a = 0f;
             weaponIcon.color = iconColor;
         }
 
-        // 清空精灵
+        // ��վ���
         weaponIcon.sprite = null;
     }
 
-    // 显示弹药信息
+    // ��ʾ��ҩ��Ϣ
     private void ShowAmmoInfo()
     {
         if (ammoInfoText == null) return;
@@ -358,6 +358,6 @@ public class WeaponNotice : MonoBehaviour
         UpdateAmmoInfoDisplay();
         ammoInfoText.gameObject.SetActive(true);
 
-        Debug.Log("武器检视: 显示弹药信息");
+        Debug.Log("��������: ��ʾ��ҩ��Ϣ");
     }
 }

@@ -4,43 +4,43 @@ using System.Collections;
 
 public class FillLine : MonoBehaviour
 {
-    [Header("UIå¼•ç”¨")]
-    public Image FillHealthLine; // è¡€æ¡
-    public Image FillHungerLine; // åƒé¥­æ¡
-    public Image FillMentalLine; // çŒç¡æ¡
+    [Header("UIÒıÓÃ")]
+    public Image FillHealthLine; // ÑªÌõ
+    public Image FillHungerLine; // ³Ô·¹Ìõ
+    public Image FillMentalLine; // î§Ë¯Ìõ
     
-    [Header("æ¢å¼¹UI")]
-    public Image ReloadCircleBackground; // æ¢å¼¹åœ†ç¯åº•å±‚ï¼ˆé»‘è‰²ï¼‰
-    public Image ReloadCircle; // æ¢å¼¹åœ†ç¯ä¸Šå±‚ï¼ˆå¯å¡«å……ï¼‰
-    public CanvasGroup ReloadCanvasGroup; // ç”¨äºæ§åˆ¶é€æ˜åº¦çš„CanvasGroup
-    [Range(0.5f, 3f)] public float fadeOutDuration = 1f; // æ·¡å‡ºæŒç»­æ—¶é—´
-    [Range(0.5f, 2f)] public float showDuration = 1f; // æ˜¾ç¤ºæŒç»­æ—¶é—´
+    [Header("»»µ¯UI")]
+    public Image ReloadCircleBackground; // »»µ¯Ô²»·µ×²ã£¨ºÚÉ«£©
+    public Image ReloadCircle; // »»µ¯Ô²»·ÉÏ²ã£¨¿ÉÌî³ä£©
+    public CanvasGroup ReloadCanvasGroup; // ÓÃÓÚ¿ØÖÆÍ¸Ã÷¶ÈµÄCanvasGroup
+    [Range(0.5f, 3f)] public float fadeOutDuration = 1f; // µ­³ö³ÖĞøÊ±¼ä
+    [Range(0.5f, 2f)] public float showDuration = 1f; // ÏÔÊ¾³ÖĞøÊ±¼ä
 
-    [Header("ç©å®¶å¼•ç”¨")]
-    public Player player; // ç©å®¶å¼•ç”¨
+    [Header("Íæ¼ÒÒıÓÃ")]
+    public Player player; // Íæ¼ÒÒıÓÃ
 
-    [Header("æ•°å€¼")]
-    public float Health; // è¡€é‡
-    public float Hunger; // åƒä¸œè¥¿
-    public float Mental; // çŒç¡
+    [Header("ÊıÖµ")]
+    public float Health; // ÑªÁ¿
+    public float Hunger; // ³Ô¶«Î÷
+    public float Mental; // î§Ë¯
     
-    // æ¢å¼¹ç›¸å…³ç§æœ‰å˜é‡
+    // »»µ¯Ïà¹ØË½ÓĞ±äÁ¿
     private bool isReloadUIActive = false;
     private Coroutine fadeOutCoroutine;
     
     private void Start()
     {
-        // å¦‚æœæ²¡æœ‰æ‰‹åŠ¨åˆ†é…ç©å®¶å¼•ç”¨ï¼Œå°è¯•è‡ªåŠ¨æŸ¥æ‰¾
+        // Èç¹ûÃ»ÓĞÊÖ¶¯·ÖÅäÍæ¼ÒÒıÓÃ£¬³¢ÊÔ×Ô¶¯²éÕÒ
         if (player == null)
         {
             player = FindObjectOfType<Player>();
             if (player == null)
             {
-                Debug.LogError("FillLine: æ‰¾ä¸åˆ°Playerå¯¹è±¡ï¼è¯·æ‰‹åŠ¨åˆ†é…Playerå¼•ç”¨ã€‚");
+                Debug.LogError("FillLine: ÕÒ²»µ½Player¶ÔÏó£¡ÇëÊÖ¶¯·ÖÅäPlayerÒıÓÃ¡£");
             }
         }
         
-        // åˆå§‹åŒ–æ¢å¼¹UI
+        // ³õÊ¼»¯»»µ¯UI
         InitializeReloadUI();
     }
     
@@ -48,36 +48,36 @@ public class FillLine : MonoBehaviour
     {
         if (player != null)
         {
-            // è·å–ç©å®¶å½“å‰æ•°å€¼
+            // »ñÈ¡Íæ¼Òµ±Ç°ÊıÖµ
             Health = player.CurrentHealth;
             Hunger = player.CurrentHunger;
             Mental = player.CurrentMental;
             
-            // æ›´æ–°UIå¡«å……
+            // ¸üĞÂUIÌî³ä
             BarFiller();
             
-            // æ›´æ–°æ¢å¼¹UI
+            // ¸üĞÂ»»µ¯UI
             UpdateReloadUI();
         }
     }
 
     private void BarFiller()
     {
-        // æ›´æ–°ç”Ÿå‘½å€¼æ¡
+        // ¸üĞÂÉúÃüÖµÌõ
         if (FillHealthLine != null && player != null)
         {
             float healthRatio = Health / player.MaxHealth;
             FillHealthLine.fillAmount = Mathf.Clamp01(healthRatio);
         }
         
-        // æ›´æ–°é¥±é£Ÿåº¦æ¡
+        // ¸üĞÂ±¥Ê³¶ÈÌõ
         if (FillHungerLine != null && player != null)
         {
             float hungerRatio = Hunger / player.MaxHunger;
             FillHungerLine.fillAmount = Mathf.Clamp01(hungerRatio);
         }
         
-        // æ›´æ–°ç²¾ç¥å€¼æ¡
+        // ¸üĞÂ¾«ÉñÖµÌõ
         if (FillMentalLine != null && player != null)
         {
             float mentalRatio = Mental / player.MaxMental;
@@ -85,16 +85,16 @@ public class FillLine : MonoBehaviour
         }
     }
     
-    // åˆå§‹åŒ–æ¢å¼¹UI
+    // ³õÊ¼»¯»»µ¯UI
     private void InitializeReloadUI()
     {
-        // åˆå§‹åŒ–åº•å±‚åœ†ç¯
+        // ³õÊ¼»¯µ×²ãÔ²»·
         if (ReloadCircleBackground != null)
         {
             ReloadCircleBackground.gameObject.SetActive(false);
         }
         
-        // åˆå§‹åŒ–ä¸Šå±‚åœ†ç¯
+        // ³õÊ¼»¯ÉÏ²ãÔ²»·
         if (ReloadCircle != null)
         {
             ReloadCircle.fillAmount = 0f;
@@ -109,7 +109,7 @@ public class FillLine : MonoBehaviour
         isReloadUIActive = false;
     }
     
-    // æ›´æ–°æ¢å¼¹UI
+    // ¸üĞÂ»»µ¯UI
     private void UpdateReloadUI()
     {
         if (player.currentWeaponController == null) return;
@@ -117,44 +117,44 @@ public class FillLine : MonoBehaviour
         bool needsReload = player.currentWeaponController.NeedsReload();
         bool isReloading = player.currentWeaponController.IsReloading();
         
-        // æ£€æŸ¥æ˜¯å¦éœ€è¦æ˜¾ç¤ºæ¢å¼¹UI
+        // ¼ì²éÊÇ·ñĞèÒªÏÔÊ¾»»µ¯UI
         if (needsReload || isReloading)
         {
             ShowReloadUI();
             
             if (isReloading)
             {
-                // æ›´æ–°æ¢å¼¹è¿›åº¦
+                // ¸üĞÂ»»µ¯½ø¶È
                 float reloadProgress = player.currentWeaponController.GetReloadProgress();
                 UpdateReloadProgress(reloadProgress);
             }
             else if (needsReload)
             {
-                // éœ€è¦æ¢å¼¹ä½†è¿˜æ²¡å¼€å§‹ï¼Œæ˜¾ç¤ºç©ºåœ†ç¯
+                // ĞèÒª»»µ¯µ«»¹Ã»¿ªÊ¼£¬ÏÔÊ¾¿ÕÔ²»·
                 UpdateReloadProgress(0f);
             }
         }
         else if (isReloadUIActive && !isReloading)
         {
-            // æ¢å¼¹å®Œæˆï¼Œå¼€å§‹æ·¡å‡º
+            // »»µ¯Íê³É£¬¿ªÊ¼µ­³ö
             StartFadeOut();
         }
     }
     
-    // æ˜¾ç¤ºæ¢å¼¹UI
+    // ÏÔÊ¾»»µ¯UI
     private void ShowReloadUI()
     {
         if (!isReloadUIActive)
         {
             isReloadUIActive = true;
             
-            // æ˜¾ç¤ºåº•å±‚åœ†ç¯
+            // ÏÔÊ¾µ×²ãÔ²»·
             if (ReloadCircleBackground != null)
             {
                 ReloadCircleBackground.gameObject.SetActive(true);
             }
             
-            // æ˜¾ç¤ºä¸Šå±‚åœ†ç¯
+            // ÏÔÊ¾ÉÏ²ãÔ²»·
             if (ReloadCircle != null)
             {
                 ReloadCircle.gameObject.SetActive(true);
@@ -165,7 +165,7 @@ public class FillLine : MonoBehaviour
                 ReloadCanvasGroup.alpha = 1f;
             }
             
-            // åœæ­¢ä»»ä½•æ­£åœ¨è¿›è¡Œçš„æ·¡å‡ºåç¨‹
+            // Í£Ö¹ÈÎºÎÕıÔÚ½øĞĞµÄµ­³öĞ­³Ì
             if (fadeOutCoroutine != null)
             {
                 StopCoroutine(fadeOutCoroutine);
@@ -174,7 +174,7 @@ public class FillLine : MonoBehaviour
         }
     }
     
-    // æ›´æ–°æ¢å¼¹è¿›åº¦
+    // ¸üĞÂ»»µ¯½ø¶È
     private void UpdateReloadProgress(float progress)
     {
         if (ReloadCircle != null)
@@ -183,7 +183,7 @@ public class FillLine : MonoBehaviour
         }
     }
     
-    // å¼€å§‹æ·¡å‡º
+    // ¿ªÊ¼µ­³ö
     private void StartFadeOut()
     {
         if (fadeOutCoroutine == null)
@@ -192,14 +192,14 @@ public class FillLine : MonoBehaviour
         }
     }
     
-    // æ·¡å‡ºåç¨‹
+    // µ­³öĞ­³Ì
     private IEnumerator FadeOutCoroutine()
     {
-        // å…ˆæ˜¾ç¤ºå®Œæ•´åœ†ç¯ä¸€æ®µæ—¶é—´
+        // ÏÈÏÔÊ¾ÍêÕûÔ²»·Ò»¶ÎÊ±¼ä
         UpdateReloadProgress(1f);
         yield return new WaitForSeconds(showDuration);
         
-        // å¼€å§‹æ·¡å‡º
+        // ¿ªÊ¼µ­³ö
         float elapsedTime = 0f;
         float startAlpha = ReloadCanvasGroup != null ? ReloadCanvasGroup.alpha : 1f;
         
@@ -216,19 +216,19 @@ public class FillLine : MonoBehaviour
             yield return null;
         }
         
-        // æ·¡å‡ºå®Œæˆï¼Œéšè—UI
+        // µ­³öÍê³É£¬Òş²ØUI
         if (ReloadCanvasGroup != null)
         {
             ReloadCanvasGroup.alpha = 0f;
         }
         
-        // éšè—åº•å±‚åœ†ç¯
+        // Òş²Øµ×²ãÔ²»·
         if (ReloadCircleBackground != null)
         {
             ReloadCircleBackground.gameObject.SetActive(false);
         }
         
-        // éšè—ä¸Šå±‚åœ†ç¯
+        // Òş²ØÉÏ²ãÔ²»·
         if (ReloadCircle != null)
         {
             ReloadCircle.gameObject.SetActive(false);
@@ -238,7 +238,7 @@ public class FillLine : MonoBehaviour
         fadeOutCoroutine = null;
     }
     
-    // å¯é€‰ï¼šæ‰‹åŠ¨æ›´æ–°UIçš„å…¬å…±æ–¹æ³•
+    // ¿ÉÑ¡£ºÊÖ¶¯¸üĞÂUIµÄ¹«¹²·½·¨
     public void UpdateUI()
     {
         if (player != null)
@@ -250,7 +250,7 @@ public class FillLine : MonoBehaviour
         }
     }
     
-    // å¼ºåˆ¶éšè—æ¢å¼¹UIï¼ˆå¯é€‰ï¼Œç”¨äºç‰¹æ®Šæƒ…å†µï¼‰
+    // Ç¿ÖÆÒş²Ø»»µ¯UI£¨¿ÉÑ¡£¬ÓÃÓÚÌØÊâÇé¿ö£©
     public void ForceHideReloadUI()
     {
         if (fadeOutCoroutine != null)

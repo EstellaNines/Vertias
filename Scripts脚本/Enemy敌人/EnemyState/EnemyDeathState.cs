@@ -129,7 +129,6 @@ public class EnemyDeathState : IState
             {
                 // 如果没有武器控制器，添加一个
                 weaponController = enemy.weapon.gameObject.AddComponent<WeaponManager>();
-                weaponController.enemyBulletPool = enemy.bulletPool;
                 weaponController.OnDropped();
             }
             

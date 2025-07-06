@@ -4,11 +4,11 @@ using UnityEngine;
 
 public class PlayerPickUpState : IState
 {
-    // --- æ‹¾å–çŠ¶æ€ç›¸å…³å˜é‡ ---
+    // --- Ê°È¡×´Ì¬Ïà¹Ø±äÁ¿ ---
     public Player player;
     private bool hasProcessedPickup = false;
 
-    // æ„é€ å‡½æ•°
+    // ¹¹Ôìº¯Êı
     public PlayerPickUpState(Player player)
     {
         this.player = player;
@@ -17,9 +17,9 @@ public class PlayerPickUpState : IState
     public void OnEnter()
     {
         hasProcessedPickup = false;
-        Debug.Log("è¿›å…¥æ‹¾å–çŠ¶æ€");
+        Debug.Log("½øÈëÊ°È¡×´Ì¬");
 
-        // ç«‹å³å¤„ç†æ‹¾å–é€»è¾‘
+        // Á¢¼´´¦ÀíÊ°È¡Âß¼­
         ProcessPickup();
     }
 
@@ -27,26 +27,26 @@ public class PlayerPickUpState : IState
     {
         player.isPickingUp = false;
         hasProcessedPickup = false;
-        Debug.Log("é€€å‡ºæ‹¾å–çŠ¶æ€");
+        Debug.Log("ÍË³öÊ°È¡×´Ì¬");
     }
 
     public void OnFixedUpdate()
     {
-        // æ‹¾å–çŠ¶æ€ä¸‹åœæ­¢ç§»åŠ¨
+        // Ê°È¡×´Ì¬ÏÂÍ£Ö¹ÒÆ¶¯
         player.PlayerRB2D.velocity = Vector2.zero;
     }
 
     public void OnUpdate()
     {
-        // ä¿æŒåŸºç¡€ç„å‡†åŠŸèƒ½ï¼Œå…è®¸ç©å®¶åœ¨æ‹¾å–æ—¶è°ƒæ•´è§†è§’
+        // ±£³Ö»ù´¡Ãé×¼¹¦ÄÜ£¬ÔÊĞíÍæ¼ÒÔÚÊ°È¡Ê±µ÷ÕûÊÓ½Ç
         player.UpdateBasicAiming();
 
-        // å—ä¼¤
+        // ÊÜÉË
         if (player.isHurt)
         {
             player.transitionState(PlayerStateType.Hurt);
         }
-        // æ‹¾å–å¤„ç†å®Œæˆåï¼Œæ ¹æ®è¾“å…¥åˆ‡æ¢çŠ¶æ€
+        // Ê°È¡´¦ÀíÍê³Éºó£¬¸ù¾İÊäÈëÇĞ»»×´Ì¬
         if (hasProcessedPickup)
         {
             if (player.InputDirection != Vector2.zero)
@@ -64,33 +64,33 @@ public class PlayerPickUpState : IState
     {
         if (player.nearbyItem != null)
         {
-            // å¦‚æœç©å®¶å·²ç»æŒæœ‰ç‰©å“ï¼Œå…ˆä¸¢å¼ƒå½“å‰ç‰©å“
+            // Èç¹ûÍæ¼ÒÒÑ¾­³ÖÓĞÎïÆ·£¬ÏÈ¶ªÆúµ±Ç°ÎïÆ·
             if (player.currentPickedItem != null)
             {
                 DropCurrentItem();
             }
 
-            // æ‹¾å–æ–°ç‰©å“
+            // Ê°È¡ĞÂÎïÆ·
             PickUpItem(player.nearbyItem);
-            player.nearbyItem = null; // æ¸…ç©ºé™„è¿‘ç‰©å“å¼•ç”¨
+            player.nearbyItem = null; // Çå¿Õ¸½½üÎïÆ·ÒıÓÃ
         }
 
         hasProcessedPickup = true;
     }
 
-    // æ‹¾å–ç‰©å“æ–¹æ³•
+    // Ê°È¡ÎïÆ··½·¨
     private void PickUpItem(ItemBase item)
     {
         player.currentPickedItem = item;
 
-        // æ ¹æ®ç‰©å“Tagè®¾ç½®çˆ¶å¯¹è±¡ä½ç½®
+        // ¸ù¾İÎïÆ·TagÉèÖÃ¸¸¶ÔÏóÎ»ÖÃ
         Transform parentTransform = item.CompareTag("Weapon") ? player.Hand : player.Hand;
 
         item.transform.SetParent(parentTransform);
         item.transform.localPosition = Vector3.zero;
         item.transform.localRotation = Quaternion.Euler(Vector3.zero);
 
-        // å¦‚æœæ˜¯æ­¦å™¨ï¼Œé€šçŸ¥WeaponController
+        // Èç¹ûÊÇÎäÆ÷£¬Í¨ÖªWeaponController
         if (item.CompareTag("Weapon"))
         {
             WeaponManager weaponController = item.GetComponent<WeaponManager>();
@@ -100,7 +100,7 @@ public class PlayerPickUpState : IState
             }
         }
 
-        // ç¦ç”¨ç‰©ç†ç»„ä»¶ï¼Œé˜²æ­¢å¹²æ‰°
+        // ½ûÓÃÎïÀí×é¼ş£¬·ÀÖ¹¸ÉÈÅ
         Rigidbody2D rb = item.GetComponent<Rigidbody2D>();
         if (rb != null)
         {
@@ -113,17 +113,20 @@ public class PlayerPickUpState : IState
             collider.enabled = false;
         }
 
-        Debug.Log($"æˆåŠŸæ‹¾å–ç‰©å“: {item.name}");
+        // Á¢¼´´¥·¢UIÏÔÊ¾ÊÂ¼ş
+        PickUPTextNotice.OnItemPickedUp?.Invoke(item);
+
+        Debug.Log($"³É¹¦Ê°È¡ÎïÆ·: {item.name}");
     }
 
-    // ä¿®æ”¹ä¸¢å¼ƒç‰©å“æ–¹æ³•
+    // ĞŞ¸Ä¶ªÆúÎïÆ··½·¨
     private void DropCurrentItem()
     {
         if (player.currentPickedItem == null) return;
 
         Transform itemTransform = player.currentPickedItem.transform;
 
-        // å¦‚æœæ˜¯æ­¦å™¨ï¼Œé€šçŸ¥WeaponController
+        // Èç¹ûÊÇÎäÆ÷£¬Í¨ÖªWeaponController
         if (player.currentPickedItem.CompareTag("Weapon"))
         {
             WeaponManager weaponController = player.currentPickedItem.GetComponent<WeaponManager>();
@@ -137,7 +140,7 @@ public class PlayerPickUpState : IState
         itemTransform.rotation = Quaternion.Euler(Vector3.zero);
         itemTransform.localScale = Vector3.one;
 
-        // å°†ç‰©å“æ”¾ç½®åœ¨ç©å®¶ä½ç½®
+        // ½«ÎïÆ··ÅÖÃÔÚÍæ¼ÒÎ»ÖÃ
         itemTransform.position = player.transform.position;
 
         Rigidbody2D rb = itemTransform.GetComponent<Rigidbody2D>();
@@ -155,7 +158,7 @@ public class PlayerPickUpState : IState
             collider.enabled = true;
         }
 
-        Debug.Log($"ä¸¢å¼ƒç‰©å“: {player.currentPickedItem.name}");
+        Debug.Log($"¶ªÆúÎïÆ·: {player.currentPickedItem.name}");
         player.currentPickedItem = null;
     }
 }

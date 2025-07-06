@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class BulletPool : MonoBehaviour
 {
+    // 单例实例
+    public static BulletPool Instance { get; private set; }
+    
     // 子弹池容器 - 使用字典来存储不同预制体的池
     private Dictionary<GameObject, Queue<GameObject>> bulletPools = new Dictionary<GameObject, Queue<GameObject>>();
 
@@ -19,10 +22,24 @@ public class BulletPool : MonoBehaviour
     // 在脚本实例化时调用
     private void Awake()
     {
-        // 如果有默认预制体，初始化默认池
-        if (bulletPrefab != null)
+        // 单例模式实现
+        if (Instance == null)
         {
-            InitializePoolForPrefab(bulletPrefab);
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+            
+            // 如果有默认预制体，初始化默认池
+            if (bulletPrefab != null)
+            {
+                InitializePoolForPrefab(bulletPrefab);
+            }
+            
+            Debug.Log("玩家子弹池单例已创建并设置为跨场景持久化");
+        }
+        else
+        {
+            Debug.Log("检测到重复的玩家子弹池实例，销毁当前对象");
+            Destroy(gameObject);
         }
     }
 
