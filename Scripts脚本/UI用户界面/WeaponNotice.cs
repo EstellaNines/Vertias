@@ -6,64 +6,64 @@ using TMPro;
 
 public class WeaponNotice : MonoBehaviour
 {
-    [Header("UI„1¤7„1¤7„1¤7")]
-    [FieldLabel("„1¤7„1¤7„1¤7„1¤70É0„1¤7„1¤7„1¤7„1¤70¶5")] public Image weaponIcon; // „1¤7„1¤7„1¤7„1¤70É0„1¤7„1¤7UI„1¤71†0„1¤7
-    [FieldLabel("„1¤7„1¤70Û7„1¤7„1¤70Î4„1¤7„1¤70¶5")] public TextMeshProUGUI ammoInfoText; // „1¤7„1¤70Û7„1¤7„1¤70Î4„1¤703„1¤7
+    [Header("UIç»„ä»¶")]
+    [FieldLabel("æ­¦å™¨å›¾æ ‡")] public Image weaponIcon; // æ­¦å™¨å›¾æ ‡UIç»„ä»¶
+    [FieldLabel("å¼¹è¯ä¿¡æ¯æ–‡æœ¬")] public TextMeshProUGUI ammoInfoText; // å¼¹è¯ä¿¡æ¯æ–‡æœ¬
 
-    [Header("„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7")]
-    [FieldLabel("„1¤7„1¤70Ý0„1¤7„1¤7„1¤7")] public Player player; // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7
-    [FieldLabel("„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7")] public PlayerInputController inputController; // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7
+    [Header("å¼•ç”¨ç»„ä»¶")]
+    [FieldLabel("çŽ©å®¶")] public Player player; // çŽ©å®¶å¼•ç”¨
+    [FieldLabel("è¾“å…¥æŽ§åˆ¶å™¨")] public PlayerInputController inputController; // çŽ©å®¶è¾“å…¥æŽ§åˆ¶å™¨
 
-    [Header("„1¤7„1¤7„1¤7„1¤7")]
-    [FieldLabel("08„1¤7„1¤70È6„1¤7„1¤7„1¤7„1¤7")][Range(0f, 1f)] public float defaultAlpha = 1f; // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤70µ2„1¤7„1¤70È6„1¤7„1¤7„1¤7„1¤7
-    [FieldLabel("„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70µ2„1¤7„1¤7„1¤7„1¤7")] public bool hideWhenNoWeapon = true; // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤70µ2„1¤70¢9„1¤7„1¤7„1¤7„1¤7„1¤70É0„1¤7„1¤7
+    [Header("è®¾ç½®")]
+    [FieldLabel("é»˜è®¤é€æ˜Žåº¦")][Range(0f, 1f)] public float defaultAlpha = 1f; // æ­¦å™¨å›¾æ ‡é»˜è®¤é€æ˜Žåº¦
+    [FieldLabel("æ— æ­¦å™¨æ—¶éšè—")] public bool hideWhenNoWeapon = true; // æ— æ­¦å™¨æ—¶éšè—æ­¦å™¨å›¾æ ‡
 
-    // 0¼3„1¤7§Ò„1¤7„1¤7„1¤7
+    // å†…éƒ¨çŠ¶æ€
     private WeaponManager currentWeapon;
     private SpriteRenderer currentWeaponSprite;
-    private bool isAmmoInfoVisible = false; // „1¤7„1¤70Û7„1¤7„1¤70Î4„1¤70¢9„1¤70¯9„1¤7
+    private bool isAmmoInfoVisible = false; // å¼¹è¯ä¿¡æ¯æ˜¯å¦å¯è§
 
     void Start()
     {
-        // „1¤7„1¤7„1¤70‹4„1¤7„1¤7„1¤70ö6„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70Š0„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70é8„1¤7„1¤7„1¤7„1¤7„1¤7
+        // è‡ªåŠ¨æŸ¥æ‰¾çŽ©å®¶ç»„ä»¶ï¼ˆå¦‚æžœæœªæ‰‹åŠ¨åˆ†é…ï¼‰
         if (player == null)
         {
             player = FindObjectOfType<Player>();
             if (player == null)
             {
-                Debug.LogError("WeaponNotice: „1¤70Ü6„1¤7„1¤7„1¤7Player„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70ö6„1¤7„1¤7„1¤7„1¤7„1¤7Player„1¤7„1¤7„1¤7¨¢„1¤7");
+                Debug.LogError("WeaponNotice: æœªæ‰¾åˆ°Playerç»„ä»¶ï¼Œè¯·ç¡®ä¿åœºæ™¯ä¸­æœ‰Playerå¯¹è±¡");
                 return;
             }
         }
 
-        // „1¤7„1¤7„1¤70‹4„1¤7„1¤7„1¤70ö6„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70é8„1¤7„1¤7„1¤7„1¤7„1¤7
+        // è‡ªåŠ¨æŸ¥æ‰¾è¾“å…¥æŽ§åˆ¶å™¨ç»„ä»¶ï¼ˆå¦‚æžœæœªæ‰‹åŠ¨åˆ†é…ï¼‰
         if (inputController == null)
         {
             inputController = FindObjectOfType<PlayerInputController>();
             if (inputController == null)
             {
-                Debug.LogError("WeaponNotice: „1¤70Ü6„1¤7„1¤7„1¤7PlayerInputController„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70ö6„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7¨¢„1¤7");
+                Debug.LogError("WeaponNotice: æœªæ‰¾åˆ°PlayerInputControllerç»„ä»¶ï¼Œè¯·ç¡®ä¿åœºæ™¯ä¸­æœ‰è¾“å…¥æŽ§åˆ¶å™¨å¯¹è±¡");
                 return;
             }
         }
 
-        // „1¤7„1¤70ô8UI„1¤7„1¤7„1¤7
+        // éªŒè¯UIç»„ä»¶
         if (weaponIcon == null)
         {
-            Debug.LogError("WeaponNotice: „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70É0„1¤7„1¤7UI„1¤7„1¤7„1¤7„1¤7„1¤7");
+            Debug.LogError("WeaponNotice: æ­¦å™¨å›¾æ ‡UIç»„ä»¶æœªåˆ†é…");
             return;
         }
 
         if (ammoInfoText == null)
         {
-            Debug.LogError("WeaponNotice: „1¤7„1¤7„1¤7„1¤7‚4þ90Û7„1¤7„1¤70Î4„1¤703„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7");
+            Debug.LogError("WeaponNotice: å¼¹è¯ä¿¡æ¯æ–‡æœ¬ç»„ä»¶æœªåˆ†é…");
             return;
         }
 
-        // „1¤7„1¤70¶3„1¤7„1¤7UI0ü80Á0
+        // åˆå§‹åŒ–UIçŠ¶æ€
         InitializeUI();
 
-        // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70†4„1¤7
+        // è®¢é˜…æ­¦å™¨æ£€æŸ¥è¾“å…¥äº‹ä»¶
         SubscribeToWeaponInspectionInput();
     }
 
@@ -73,7 +73,7 @@ public class WeaponNotice : MonoBehaviour
         {
             UpdateWeaponIcon();
 
-            // „1¤7„1¤7„1¤7„1¤7„1¤70Û7„1¤7„1¤70Î4„1¤70¯9„1¤7„1¤7„1¤70µ60µ2„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7
+            // å¦‚æžœå¼¹è¯ä¿¡æ¯å¯è§ï¼Œåˆ™æ›´æ–°æ˜¾ç¤º
             if (isAmmoInfoVisible)
             {
                 UpdateAmmoInfoDisplay();
@@ -83,11 +83,11 @@ public class WeaponNotice : MonoBehaviour
 
     void OnDestroy()
     {
-        // 0§0„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70†4„1¤7
+        // å–æ¶ˆè®¢é˜…æ­¦å™¨æ£€æŸ¥è¾“å…¥äº‹ä»¶
         UnsubscribeFromWeaponInspectionInput();
     }
 
-    // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70†4„1¤7
+    // è®¢é˜…æ­¦å™¨æ£€æŸ¥è¾“å…¥äº‹ä»¶
     private void SubscribeToWeaponInspectionInput()
     {
         if (inputController != null)
@@ -96,7 +96,7 @@ public class WeaponNotice : MonoBehaviour
         }
     }
 
-    // 0§0„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70†4„1¤7
+    // å–æ¶ˆè®¢é˜…æ­¦å™¨æ£€æŸ¥è¾“å…¥äº‹ä»¶
     private void UnsubscribeFromWeaponInspectionInput()
     {
         if (inputController != null)
@@ -105,27 +105,27 @@ public class WeaponNotice : MonoBehaviour
         }
     }
 
-    // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70ã2„1¤7„1¤7„1¤7
+    // æ­¦å™¨æ£€æŸ¥å›žè°ƒ
     private void OnWeaponInspection()
     {
-        // 0ö1„1¤70ã6„1¤7„1¤70…8„1¤70Û7„1¤7„1¤70Î4„1¤7„1¤70¶5„1¤7„1¤7„1¤7„1¤7„1¤7§Ý„1¤7„1¤7„1¤70¶50ü80Á0
+        // ç«‹å³æ›´æ–°å¼¹è¯ä¿¡æ¯æ˜¾ç¤ºçŠ¶æ€
         UpdateAmmoInfoDisplay();
 
-        // 0©2„1¤7„1¤7„1¤7„1¤70Û7„1¤7„1¤70Î40¶3„1¤70ñ10¯9„1¤7
+        // ç¡®ä¿å¼¹è¯ä¿¡æ¯æ–‡æœ¬å¤„äºŽæ¿€æ´»çŠ¶æ€
         if (ammoInfoText != null && !ammoInfoText.gameObject.activeInHierarchy)
         {
             ammoInfoText.gameObject.SetActive(true);
         }
 
-        Debug.Log("„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7: „1¤7„1¤7„1¤70…8„1¤70Û7„1¤7„1¤70Î4");
+        Debug.Log("æ­¦å™¨é€šçŸ¥: æ˜¾ç¤ºå¼¹è¯ä¿¡æ¯");
     }
 
-    // „1¤7„1¤70¶3„1¤7„1¤7UI0ü80Á0
+    // åˆå§‹åŒ–UIçŠ¶æ€
     private void InitializeUI()
     {
         if (weaponIcon != null)
         {
-            // „1¤7„1¤70¶30ü80Á0„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70É0„1¤7„1¤7
+            // åˆå§‹çŠ¶æ€éšè—æ­¦å™¨å›¾æ ‡
             if (hideWhenNoWeapon)
             {
                 weaponIcon.gameObject.SetActive(false);
@@ -138,27 +138,27 @@ public class WeaponNotice : MonoBehaviour
             }
         }
 
-        // „1¤7„1¤70¶3„1¤7„1¤7„1¤7„1¤70Û7„1¤7„1¤70Î4„1¤703„1¤7 - „1¤7„1¤7„1¤7„1¤70Ë20¶3„1¤7„1¤7„1¤7„1¤70¶5
+        // åˆå§‹åŒ–å¼¹è¯ä¿¡æ¯æ–‡æœ¬ - é»˜è®¤æ¿€æ´»æ˜¾ç¤º
         if (ammoInfoText != null)
         {
             ammoInfoText.gameObject.SetActive(true);
-            UpdateAmmoInfoDisplay(); // „1¤7„1¤70¶3„1¤7„1¤70µ2„1¤7„1¤7„1¤7„1¤70Ý5„1¤7„1¤7„1¤7„1¤70¶5„1¤7„1¤7„1¤7„1¤7
+            UpdateAmmoInfoDisplay(); // åˆå§‹åŒ–æ—¶æ›´æ–°ä¸€æ¬¡æ˜¾ç¤ºå†…å®¹
         }
 
-        isAmmoInfoVisible = true; // „1¤7„1¤7„1¤7„1¤70Ë20¶3„1¤70ñ10¯9„1¤7
+        isAmmoInfoVisible = true; // é»˜è®¤æ¿€æ´»å¯è§
     }
 
-    // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70ö6„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70É0„1¤7„1¤7
+    // åˆ·æ–°æ­¦å™¨å›¾æ ‡ï¼ˆå¤–éƒ¨è°ƒç”¨ï¼‰
     public void RefreshWeaponIcon()
     {
         if (player != null)
         {
-            currentWeapon = null; // 0£6„1¤7„1¤70¹6„1¤7„1¤7
+            currentWeapon = null; // é‡ç½®ç¼“å­˜
             UpdateWeaponIcon();
         }
     }
 
-    // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70É0„1¤7„1¤70È6„1¤7„1¤7„1¤7„1¤7
+    // è®¾ç½®æ­¦å™¨å›¾æ ‡é€æ˜Žåº¦
     public void SetIconAlpha(float alpha)
     {
         defaultAlpha = Mathf.Clamp01(alpha);
@@ -171,23 +171,23 @@ public class WeaponNotice : MonoBehaviour
         }
     }
 
-    // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70§0„1¤7„1¤70¢2„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70Î4
+    // èŽ·å–å½“å‰æ­¦å™¨åç§°
     public string GetCurrentWeaponName()
     {
         if (currentWeapon != null)
         {
             return currentWeapon.GetWeaponName();
         }
-        return "„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7";
+        return "æ— æ­¦å™¨";
     }
 
-    // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70ö6„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7
+    // è§¦å‘æ­¦å™¨æ£€æŸ¥ï¼ˆå¤–éƒ¨è°ƒç”¨ï¼‰
     public void TriggerWeaponInspection()
     {
         OnWeaponInspection();
     }
 
-    // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤71…3„1¤70Û7„1¤7„1¤70Î4
+    // éšè—å¼¹è¯ä¿¡æ¯
     public void HideAmmoInfo()
     {
         if (ammoInfoText != null)
@@ -198,16 +198,14 @@ public class WeaponNotice : MonoBehaviour
         isAmmoInfoVisible = false;
     }
 
-    // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70£6„1¤7„1¤7„1¤7„1¤70¶5„1¤7„1¤70Û7„1¤7„1¤70Î4
+    // å¼ºåˆ¶æ˜¾ç¤ºå¼¹è¯ä¿¡æ¯
     public void ForceShowAmmoInfo()
     {
         isAmmoInfoVisible = true;
         ShowAmmoInfo();
     }
 
-
-
-    // „1¤7„1¤7„1¤70…8„1¤70Û7„1¤7„1¤70Î4„1¤7„1¤70¶5„1¤7„1¤7„1¤7„1¤7
+    // æ›´æ–°å¼¹è¯ä¿¡æ¯æ˜¾ç¤º
     private void UpdateAmmoInfoDisplay()
     {
         if (ammoInfoText == null) return;
@@ -217,55 +215,60 @@ public class WeaponNotice : MonoBehaviour
             int currentAmmo = currentWeapon.GetCurrentAmmo();
             string ammoStatusText = GetAmmoStatusText(currentAmmo);
 
-            // „1¤7„1¤70¶5„1¤7„1¤70Û7„1¤7„1¤70Î4
+            // è®¾ç½®å¼¹è¯ä¿¡æ¯
             ammoInfoText.text = $"{ammoStatusText}";
         }
         else
         {
-            ammoInfoText.text = "„1¤7„1¤70¢20‹4„1¤7§Ô„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7";
+            ammoInfoText.text = "æœªè£…å¤‡æ­¦å™¨";
         }
     }
 
-    // „1¤7„1¤7„1¤71¥3„1¤70Û7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70§00ü80Á0„1¤7„1¤7„1¤7„1¤7
+    // æ ¹æ®å¼¹è¯æ•°é‡èŽ·å–çŠ¶æ€æ–‡æœ¬
     private string GetAmmoStatusText(int ammoCount)
     {
+        // èŽ·å–å½“å‰æ­¦å™¨çš„æœ€å¤§å¼¹å¤¹å®¹é‡
+        int maxCapacity = currentWeapon != null ? currentWeapon.GetMagazineCapacity() : 30;
+        
         if (ammoCount == 0)
         {
-            return "„1¤71«7„1¤70Û7";
+            return "Empty";
         }
-        else if (ammoCount > 25)
+        else if (ammoCount == maxCapacity)
         {
-            return "„1¤7„1¤7„1¤7§Ü1Ÿ0„1¤7";
+            return "Full";
         }
-        else if (ammoCount > 20)
+        else if (ammoCount > maxCapacity * 0.83f) // å¤§äºŽ83%å®¹é‡
         {
-            return "„1¤70ã3„1¤7„1¤70Ð4„1¤7";
+            return "Nearly Full";
         }
-        else if (ammoCount >= 14 && ammoCount <= 16)
+        else if (ammoCount > maxCapacity * 0.5f && ammoCount < maxCapacity * 0.83f) // 50%-83%
         {
-            return "„1¤7„1¤70³80Ý5„1¤7„1¤7";
+            return "About Half";
         }
-        else if (ammoCount < 10)
+        else if (ammoCount < maxCapacity * 0.5f && ammoCount >= maxCapacity * 0.17f) // 17%-50%
         {
-            return "„1¤7„1¤70³8„1¤71¬4„1¤7";
+            return "less than half";
         }
-        else
+        else if (ammoCount < maxCapacity * 0.17f) // å°äºŽ17%å®¹é‡
         {
-            return "„1¤7„1¤70Û7„1¤7„1¤7„1¤7„1¤7";
+            return "Almost Empty";
         }
+        
+        return ""; // é»˜è®¤ä¸æ˜¾ç¤ºä»»ä½•æ–‡æœ¬
     }
 
-    // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70É0„1¤7„1¤7
+    // æ›´æ–°æ­¦å™¨å›¾æ ‡
     private void UpdateWeaponIcon()
     {
-        // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70¢9„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7
+        // æ£€æŸ¥çŽ©å®¶æ˜¯å¦æŒæœ‰æ­¦å™¨
         if (player.isWeaponInHand && player.Hand != null && player.Hand.childCount > 0)
         {
-            // „1¤7„1¤70§0Hand„1¤70ã4„1¤7„1¤7„1¤7„1¤7§Ö„1¤7„1¤7„1¤7„1¤7„1¤7
+            // èŽ·å–Handå­å¯¹è±¡ä¸­çš„æ­¦å™¨
             Transform weaponTransform = player.Hand.GetChild(0);
             WeaponManager weaponManager = weaponTransform.GetComponent<WeaponManager>();
 
-            // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7£„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70É0„1¤7„1¤7
+            // å¦‚æžœæ­¦å™¨å‘ç”Ÿå˜åŒ–ï¼Œæ›´æ–°å›¾æ ‡
             if (weaponManager != currentWeapon)
             {
                 currentWeapon = weaponManager;
@@ -274,7 +277,7 @@ public class WeaponNotice : MonoBehaviour
         }
         else
         {
-            // 0‹4„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70µ2„1¤7„1¤7„1¤7„1¤70É0„1¤7„1¤7
+            // çŽ©å®¶æ²¡æœ‰æ­¦å™¨æ—¶éšè—å›¾æ ‡
             if (currentWeapon != null)
             {
                 currentWeapon = null;
@@ -284,73 +287,73 @@ public class WeaponNotice : MonoBehaviour
         }
     }
 
-    // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7
+    // æ›´æ–°æ­¦å™¨ç²¾çµå›¾åƒ
     private void UpdateWeaponSprite(Transform weaponTransform)
     {
         if (weaponTransform == null || weaponIcon == null) return;
 
-        // „1¤7„1¤70§0„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7SpriteRenderer„1¤7„1¤7„1¤7
+        // èŽ·å–æ­¦å™¨çš„SpriteRendererç»„ä»¶
         SpriteRenderer weaponSpriteRenderer = weaponTransform.GetComponent<SpriteRenderer>();
 
         if (weaponSpriteRenderer != null && weaponSpriteRenderer.sprite != null)
         {
             currentWeaponSprite = weaponSpriteRenderer;
 
-            // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70‘6„1¤7„1¤7„1¤70É00œ20Ç4„1¤7„1¤7„1¤7„1¤7UI0É0„1¤7„1¤7
+            // å°†æ­¦å™¨ç²¾çµèµ‹å€¼ç»™UIå›¾æ ‡
             weaponIcon.sprite = weaponSpriteRenderer.sprite;
 
-            // „1¤7„1¤70¶50É0„1¤7„1¤7
+            // æ˜¾ç¤ºå›¾æ ‡
             ShowWeaponIcon();
 
-            Debug.Log($"WeaponNotice: „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70É0„1¤7„1¤7 - {weaponTransform.name}");
+            Debug.Log($"WeaponNotice: æ›´æ–°æ­¦å™¨å›¾æ ‡ - {weaponTransform.name}");
         }
         else
         {
-            Debug.LogWarning($"WeaponNotice: „1¤7„1¤7„1¤7„1¤7 {weaponTransform.name} 0‹4„1¤7„1¤7SpriteRenderer„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70É00œ2„1¤7„1¤7");
+            Debug.LogWarning($"WeaponNotice: æ­¦å™¨ {weaponTransform.name} æ²¡æœ‰SpriteRendereræˆ–ç²¾çµå›¾åƒ");
             HideWeaponIcon();
         }
     }
 
-    // „1¤7„1¤70¶5„1¤7„1¤7„1¤7„1¤70É0„1¤7„1¤7
+    // æ˜¾ç¤ºæ­¦å™¨å›¾æ ‡
     private void ShowWeaponIcon()
     {
         if (weaponIcon == null) return;
 
-        // „1¤7„1¤7„1¤7„1¤70É0„1¤7„1¤7GameObject
+        // æ¿€æ´»å›¾æ ‡GameObject
         if (!weaponIcon.gameObject.activeInHierarchy)
         {
             weaponIcon.gameObject.SetActive(true);
         }
 
-        // „1¤7„1¤7„1¤7„1¤70È6„1¤7„1¤7„1¤7„1¤7
+        // è®¾ç½®é€æ˜Žåº¦
         Color iconColor = weaponIcon.color;
         iconColor.a = defaultAlpha;
         weaponIcon.color = iconColor;
     }
 
-    // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70É0„1¤7„1¤7
+    // éšè—æ­¦å™¨å›¾æ ‡
     private void HideWeaponIcon()
     {
         if (weaponIcon == null) return;
 
         if (hideWhenNoWeapon)
         {
-            // „1¤7„1¤70¨0„1¤7„1¤7„1¤7„1¤7GameObject
+            // ç¦ç”¨GameObject
             weaponIcon.gameObject.SetActive(false);
         }
         else
         {
-            // 0÷1„1¤7„1¤7„1¤7„1¤70Ë20È6„1¤7„1¤7
+            // ä»…è®¾ç½®é€æ˜Žåº¦ä¸º0
             Color iconColor = weaponIcon.color;
             iconColor.a = 0f;
             weaponIcon.color = iconColor;
         }
 
-        // „1¤7„1¤70ñ0„1¤7„1¤7„1¤7
+        // æ¸…ç©ºç²¾çµ
         weaponIcon.sprite = null;
     }
 
-    // „1¤7„1¤70¶5„1¤7„1¤70Û7„1¤7„1¤70Î4
+    // æ˜¾ç¤ºå¼¹è¯ä¿¡æ¯
     private void ShowAmmoInfo()
     {
         if (ammoInfoText == null) return;
@@ -358,6 +361,6 @@ public class WeaponNotice : MonoBehaviour
         UpdateAmmoInfoDisplay();
         ammoInfoText.gameObject.SetActive(true);
 
-        Debug.Log("„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7: „1¤7„1¤70¶5„1¤7„1¤70Û7„1¤7„1¤70Î4");
+        Debug.Log("æ­¦å™¨é€šçŸ¥: æ˜¾ç¤ºå¼¹è¯ä¿¡æ¯");
     }
 }

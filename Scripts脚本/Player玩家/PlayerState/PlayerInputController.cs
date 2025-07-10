@@ -5,60 +5,60 @@ using UnityEngine.InputSystem;
 [CreateAssetMenu(fileName = "PlayerInpurController")]
 public class PlayerInputController : ScriptableObject, PlayerInputAction.IGamePlayActions, PlayerInputAction.IUIActions
 {
-    // ÊÂ¼ş
-    public event UnityAction<Vector2> onMovement; // ÒÆ¶¯ÊÂ¼ş
-    public event UnityAction<bool> onFire; // Éä»÷ÊÂ¼ş
-    public event UnityAction onDodge; // ÉÁ±ÜÊÂ¼ş
-    public event UnityAction<bool> onCrouch; // Ç±ĞĞÊÂ¼ş - ĞŞ¸ÄÎª´«µİbool²ÎÊı
-    public event UnityAction onReload; // »»µ¯ÊÂ¼ş
-    public event UnityAction onPickup; // Ê°È¡ÊÂ¼ş
-    public event UnityAction<bool> onRun; // ÅÜ¶¯ÊÂ¼ş
-    public event UnityAction onOperate; // UI²Ù×÷ÊÂ¼ş
-    public event UnityAction onWeaponInspection; // ÎäÆ÷¼ìÊÓÊÂ¼ş
+    // äº‹ä»¶
+    public event UnityAction<Vector2> onMovement; // ç§»åŠ¨äº‹ä»¶
+    public event UnityAction<bool> onFire; // å°„å‡»äº‹ä»¶
+    public event UnityAction onDodge; // é—ªé¿äº‹ä»¶
+    public event UnityAction<bool> onCrouch; // æ½œè¡Œäº‹ä»¶ - ä¿®æ”¹ä¸ºä¼ é€’boolå‚æ•°
+    public event UnityAction onReload; // æ¢å¼¹äº‹ä»¶
+    public event UnityAction onPickup; // æ‹¾å–äº‹ä»¶
+    public event UnityAction<bool> onRun; // è·‘åŠ¨äº‹ä»¶
+    public event UnityAction onOperate; // UIæ“ä½œäº‹ä»¶
+    public event UnityAction onWeaponInspection; // æ­¦å™¨æ£€è§†äº‹ä»¶
     
-    // ÒıÓÃÊôĞÔ
+    // å¼•ç”¨å±æ€§
     PlayerInputAction playerinputAction;
 
-    // º¯Êı
+    // å‡½æ•°
     private void OnEnable()
     {
-        playerinputAction = new PlayerInputAction(); // ´´½¨ÊäÈëÏµÍ³
-        // playerinput¼Ì³ĞÁËÕâ¸ö½ÓÈë¿Ú£¬²¢´«Èëthis½«playerinput×¢²áÎª»Øµ÷º¯Êı½ÓÊÕÕß
+        playerinputAction = new PlayerInputAction(); // åˆ›å»ºè¾“å…¥ç³»ç»Ÿ
+        // playerinputç»§æ‰¿äº†è¿™ä¸ªæ¥å…¥å£ï¼Œå¹¶ä¼ å…¥thiså°†playerinputæ³¨å†Œä¸ºå›è°ƒå‡½æ•°æ¥æ”¶è€…
         playerinputAction.GamePlay.SetCallbacks(this);
-        playerinputAction.UI.SetCallbacks(this); // ĞÂÔöUI»Øµ÷
+        playerinputAction.UI.SetCallbacks(this); // æ–°å¢UIå›è°ƒ
     }
 
     public void EnabledGameplayInput()
     {
-        playerinputAction.GamePlay.Enable(); // ÆôÓÃgameplayÊäÈë
+        playerinputAction.GamePlay.Enable(); // å¯ç”¨gameplayè¾“å…¥
     }
     
     public void EnabledUIInput()
     {
-        playerinputAction.UI.Enable(); // ÆôÓÃUIÊäÈë
+        playerinputAction.UI.Enable(); // å¯ç”¨UIè¾“å…¥
     }
     
-    // Ìí¼Ó½ûÓÃÊäÈëµÄ·½·¨
+    // æ·»åŠ ç¦ç”¨è¾“å…¥çš„æ–¹æ³•
     public void DisableGameplayInput()
     {
-        playerinputAction.GamePlay.Disable(); // ½ûÓÃgameplayÊäÈë
+        playerinputAction.GamePlay.Disable(); // ç¦ç”¨gameplayè¾“å…¥
     }
     
     public void DisableUIInput()
     {
-        playerinputAction.UI.Disable(); // ½ûÓÃUIÊäÈë
+        playerinputAction.UI.Disable(); // ç¦ç”¨UIè¾“å…¥
     }
 
-    // ½Ó¿Ú
-    public void OnMove(InputAction.CallbackContext context) // ÒÆ¶¯
+    // æ¥å£
+    public void OnMove(InputAction.CallbackContext context) // ç§»åŠ¨
     {
-        if (context.performed) // ³ÖĞø°´ÏÂ
+        if (context.performed) // æŒç»­æŒ‰ä¸‹
         {
             onMovement?.Invoke(context.ReadValue<Vector2>());
         }
-        else if (context.canceled) // ËÉ¿ª°´¼ü
+        else if (context.canceled) // æ¾å¼€æŒ‰é”®
         {
-            onMovement?.Invoke(Vector2.zero); // ´¥·¢ÁãÏòÁ¿ÒÆ¶¯
+            onMovement?.Invoke(Vector2.zero); // è§¦å‘é›¶å‘é‡ç§»åŠ¨
         }
     }
 
@@ -68,75 +68,85 @@ public class PlayerInputController : ScriptableObject, PlayerInputAction.IGamePl
         onFire?.Invoke(isPressed);
     }
     
-    public void OnPickUp(InputAction.CallbackContext context) // Ê°È¡
+    public void OnPickUp(InputAction.CallbackContext context) // æ‹¾å–
     {
-        if (context.started) // °´ÏÂÒ»¿Ì
+        if (context.started) // æŒ‰ä¸‹ä¸€åˆ»
         {
             onPickup?.Invoke();
         }
     }
-    public void OnDodge(InputAction.CallbackContext context) // ÉÁ±Ü
+    public void OnDodge(InputAction.CallbackContext context) // é—ªé¿
     {
-        if (context.started) // °´ÏÂÒ»¿Ì
+        if (context.started) // æŒ‰ä¸‹ä¸€åˆ»
         {
             onDodge?.Invoke();
         }
     }
-    public void OnReload(InputAction.CallbackContext context) // ×°µ¯
+    public void OnReload(InputAction.CallbackContext context) // è£…å¼¹
     {
-        if (context.started) // °´ÏÂÒ»¿Ì
+        if (context.started) // æŒ‰ä¸‹ä¸€åˆ»
         {
             onReload?.Invoke();
         }
     }
 
-    public void OnRun(InputAction.CallbackContext context) // ÅÜ¶¯
+    public void OnRun(InputAction.CallbackContext context) // è·‘åŠ¨
     {
-        if (context.started) // °´ÏÂÒ»¿Ì
+        if (context.started) // æŒ‰ä¸‹ä¸€åˆ»
         {
-            onRun?.Invoke(true); // ¿ªÊ¼ÅÜ²½
+            onRun?.Invoke(true); // å¼€å§‹è·‘æ­¥
         }
-        else if (context.canceled) // ËÉ¿ª°´¼ü
+        else if (context.canceled) // æ¾å¼€æŒ‰é”®
         {
-            onRun?.Invoke(false); // Í£Ö¹ÅÜ²½
+            onRun?.Invoke(false); // åœæ­¢è·‘æ­¥
         }
     }
-    public void OnCrouch(InputAction.CallbackContext context) // Ç±ĞĞ
+    public void OnCrouch(InputAction.CallbackContext context) // æ½œè¡Œ
     {
-        if (context.started) // °´ÏÂÒ»¿Ì
+        if (context.started) // æŒ‰ä¸‹ä¸€åˆ»
         {
-            onCrouch?.Invoke(true); // ¿ªÊ¼Ç±ĞĞ
+            onCrouch?.Invoke(true); // å¼€å§‹æ½œè¡Œ
         }
-        else if (context.canceled) // ËÉ¿ª°´¼ü
+        else if (context.canceled) // æ¾å¼€æŒ‰é”®
         {
-            onCrouch?.Invoke(false); // Í£Ö¹Ç±ĞĞ
+            onCrouch?.Invoke(false); // åœæ­¢æ½œè¡Œ
         }
     }
 
-    // ²»³£ÓÃ²Ù×÷
-    public void OnLook(InputAction.CallbackContext context) // ÊÓ½Ç±ä»¯
+    // ä¸å¸¸ç”¨æ“ä½œ
+    public void OnLook(InputAction.CallbackContext context) // è§†è§’å˜åŒ–
     {
 
     }
-    public void OnCrawl(InputAction.CallbackContext context) // ÅÀĞĞ
+    public void OnCrawl(InputAction.CallbackContext context) // çˆ¬è¡Œ
     {
 
     }
     
-    // UI²Ù×÷½Ó¿ÚÊµÏÖ
-    public void OnOperate(InputAction.CallbackContext context) // UI²Ù×÷£¨F¼ü£©
+    // UIæ“ä½œæ¥å£å®ç°
+    public void OnOperate(InputAction.CallbackContext context) // UIæ“ä½œï¼ˆFé”®ï¼‰
     {
-        if (context.started) // °´ÏÂÒ»¿Ì
+        if (context.started) // æŒ‰ä¸‹ä¸€åˆ»
         {
             onOperate?.Invoke();
         }
     }
 
-    public void OnWeaponInspection(InputAction.CallbackContext context) // ÎäÆ÷¼ìÊÓ£¨H¼ü£©
+    public void OnWeaponInspection(InputAction.CallbackContext context) // æ­¦å™¨æ£€è§†ï¼ˆHé”®ï¼‰
     {
-        if (context.started) // °´ÏÂÒ»¿Ì
+        if (context.started) // æŒ‰ä¸‹ä¸€åˆ»
         {
             onWeaponInspection?.Invoke();
+        }
+    }
+    
+    // OnNewactionæ–¹æ³•å®ç°
+    public void OnNewaction(InputAction.CallbackContext context) // æ–°åŠ¨ä½œ
+    {
+        if (context.started) // æŒ‰ä¸‹ä¸€åˆ»
+        {
+            // è¿™é‡Œå¯ä»¥æ·»åŠ æ–°åŠ¨ä½œçš„é€»è¾‘ï¼Œç›®å‰ç•™ç©º
+            // å¦‚æœéœ€è¦äº‹ä»¶ï¼Œå¯ä»¥æ·»åŠ ç›¸åº”çš„UnityActionäº‹ä»¶
         }
     }
 }

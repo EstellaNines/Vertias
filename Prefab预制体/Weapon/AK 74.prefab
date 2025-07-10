@@ -215,13 +215,12 @@ MonoBehaviour:
   reloadTime: 0.8
   currentAmmo: 0
   isReloading: 0
+  reloadStartTime: 0
   playerBulletPrefab: {fileID: 2965606263880691008, guid: 7d628be2d48fbc04997864f324daed06, type: 3}
   enemyBulletPrefab: {fileID: 2965606263880691008, guid: eb65c448a7caf5f48a035eb88a0adbd6, type: 3}
   bulletPrefab: {fileID: 0}
   muzzle: {fileID: 8937763311924154140}
   weaponTrigger: {fileID: 2246327397471981040}
-  playerBulletPool: {fileID: 3157106577110325384, guid: 394fe17366ae42b4d802f92eba25ef61, type: 3}
-  enemyBulletPool: {fileID: 4486792669352974183, guid: c02e66c648f30bb4c8f55f00e57d983a, type: 3}
 --- !u!114 &2246327397471981040
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -235,8 +234,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Muzzle: {fileID: 8937763311924154140}
-  playerBulletPool: {fileID: 3157106577110325384, guid: 394fe17366ae42b4d802f92eba25ef61, type: 3}
-  enemyBulletPool: {fileID: 4486792669352974183, guid: c02e66c648f30bb4c8f55f00e57d983a, type: 3}
   ShootInterval: 50
   spreadAngle: 12
 --- !u!114 &8217834225770914471
@@ -251,3 +248,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f5f9561747f829f4e8bed5bc11553a0a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  itemDisplayName: 
+  defaultMaterial: {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
+  highlightMaterial: {fileID: 2100000, guid: f29438b9de862ac4fa14b8f8d8c7b1ce, type: 2}

@@ -5,17 +5,17 @@ using TMPro;
 
 public class PickUPTextNotice : MonoBehaviour
 {
-    [Header("UI×é¼şÒıÓÃ")]
-    [SerializeField] private Image backgroundImage;     // ±³¾°Í¼Ïñ×é¼ş
-    [SerializeField] private Image itemIcon;           // ÎïÆ·Í¼±ê×é¼ş
-    [SerializeField] private TextMeshProUGUI itemNameText; // ÎïÆ·Ãû³ÆÎÄ±¾×é¼ş
+    [Header("UIç»„ä»¶å¼•ç”¨")]
+    [SerializeField] private Image backgroundImage;     // èƒŒæ™¯å›¾åƒç»„ä»¶
+    [SerializeField] private Image itemIcon;           // ç‰©å“å›¾æ ‡ç»„ä»¶
+    [SerializeField] private TextMeshProUGUI itemNameText; // ç‰©å“åç§°æ–‡æœ¬ç»„ä»¶
     
-    [Header("ÏÔÊ¾ÉèÖÃ")]
-    [SerializeField] private float displayDuration = 2f;   // ÏÔÊ¾³ÖĞøÊ±¼ä
-    [SerializeField] private float fadeOutDuration = 1f;   // µ­³ö³ÖĞøÊ±¼ä
+    [Header("æ˜¾ç¤ºè®¾ç½®")]
+    [SerializeField] private float displayDuration = 2f;   // æ˜¾ç¤ºæŒç»­æ—¶é—´
+    [SerializeField] private float fadeOutDuration = 1f;   // æ·¡å‡ºæŒç»­æ—¶é—´
     
-    [Header("Íæ¼ÒÒıÓÃ")]
-    [SerializeField] private Player player;             // Íæ¼ÒÒıÓÃ
+    [Header("ç©å®¶å¼•ç”¨")]
+    [SerializeField] private Player player;             // ç©å®¶å¼•ç”¨
     
     private CanvasGroup canvasGroup;
     private Coroutine fadeCoroutine;
@@ -23,17 +23,17 @@ public class PickUPTextNotice : MonoBehaviour
     
     private void Awake()
     {
-        // »ñÈ¡»òÌí¼ÓCanvasGroup×é¼şÓÃÓÚµ­Èëµ­³öĞ§¹û
+        // è·å–æˆ–æ·»åŠ CanvasGroupç»„ä»¶ç”¨äºæ·¡å…¥æ·¡å‡ºæ•ˆæœ
         canvasGroup = GetComponent<CanvasGroup>();
         if (canvasGroup == null)
         {
             canvasGroup = gameObject.AddComponent<CanvasGroup>();
         }
         
-        // ³õÊ¼»¯Ê±Òş²ØUI
+        // åˆå§‹åŒ–æ—¶éšè—UI
         canvasGroup.alpha = 0f;
         
-        // Èç¹ûÃ»ÓĞÖ¸¶¨Íæ¼Ò£¬³¢ÊÔ×Ô¶¯²éÕÒ
+        // å¦‚æœæ²¡æœ‰æŒ‡å®šç©å®¶ï¼Œå°è¯•è‡ªåŠ¨æŸ¥æ‰¾
         if (player == null)
         {
             player = FindObjectOfType<Player>();
@@ -42,27 +42,27 @@ public class PickUPTextNotice : MonoBehaviour
     
     private void Start()
     {
-        // ÑéÖ¤±ØÒªµÄ×é¼ş
+        // éªŒè¯å¿…è¦çš„ç»„ä»¶
         ValidateComponents();
     }
     
-    // Ìí¼Ó¾²Ì¬ÊÂ¼ş£¬ÓÃÓÚ¼´Ê±Í¨ÖªÊ°È¡
+    // æ·»åŠ é™æ€äº‹ä»¶ï¼Œç”¨äºå³æ—¶é€šçŸ¥æ‹¾å–
     public static System.Action<ItemBase> OnItemPickedUp;
     
     private void OnEnable()
     {
-        // ¶©ÔÄÊ°È¡ÊÂ¼ş
+        // è®¢é˜…æ‹¾å–äº‹ä»¶
         OnItemPickedUp += ShowPickupInfo;
-        Debug.Log("PickUPTextNotice: ÊÂ¼ş¶©ÔÄ³É¹¦");
+        Debug.Log("PickUPTextNotice: äº‹ä»¶è®¢é˜…æˆåŠŸ");
     }
     
     private void OnDisable()
     {
-        // È¡Ïû¶©ÔÄÊ°È¡ÊÂ¼ş
+        // å–æ¶ˆè®¢é˜…æ‹¾å–äº‹ä»¶
         OnItemPickedUp -= ShowPickupInfo;
-        Debug.Log("PickUPTextNotice: ÊÂ¼şÈ¡Ïû¶©ÔÄ");
+        Debug.Log("PickUPTextNotice: äº‹ä»¶å–æ¶ˆè®¢é˜…");
         
-        // ÇåÀíĞ­³Ì
+        // æ¸…ç†åç¨‹
         if (fadeCoroutine != null)
         {
             StopCoroutine(fadeCoroutine);
@@ -71,36 +71,36 @@ public class PickUPTextNotice : MonoBehaviour
     }
     
     /// <summary>
-    /// ÑéÖ¤±ØÒªµÄUI×é¼şÊÇ·ñÒÑ·ÖÅä
+    /// éªŒè¯å¿…è¦çš„UIç»„ä»¶æ˜¯å¦å·²åˆ†é…
     /// </summary>
     private void ValidateComponents()
     {
         if (backgroundImage == null)
-            Debug.LogWarning("PickUPTextNotice: ±³¾°Í¼Ïñ×é¼şÎ´·ÖÅä£¡");
+            Debug.LogWarning("PickUPTextNotice: èƒŒæ™¯å›¾åƒç»„ä»¶æœªåˆ†é…ï¼");
             
         if (itemIcon == null)
-            Debug.LogWarning("PickUPTextNotice: ÎïÆ·Í¼±ê×é¼şÎ´·ÖÅä£¡");
+            Debug.LogWarning("PickUPTextNotice: ç‰©å“å›¾æ ‡ç»„ä»¶æœªåˆ†é…ï¼");
             
         if (itemNameText == null)
-            Debug.LogWarning("PickUPTextNotice: ÎïÆ·Ãû³ÆÎÄ±¾×é¼şÎ´·ÖÅä£¡");
+            Debug.LogWarning("PickUPTextNotice: ç‰©å“åç§°æ–‡æœ¬ç»„ä»¶æœªåˆ†é…ï¼");
             
         if (player == null)
-            Debug.LogError("PickUPTextNotice: Íæ¼ÒÒıÓÃÎ´ÕÒµ½£¡");
+            Debug.LogError("PickUPTextNotice: ç©å®¶å¼•ç”¨æœªæ‰¾åˆ°ï¼");
     }
     
     /// <summary>
-    /// ¼ì²éÍæ¼ÒÊÇ·ñÊ°È¡ÁËĞÂÎïÆ·
+    /// æ£€æŸ¥ç©å®¶æ˜¯å¦æ‹¾å–äº†æ–°ç‰©å“
     /// </summary>
     private void CheckForPickedItem()
     {
         if (player == null) return;
         
-        // ¼ì²éÍæ¼Òµ±Ç°Ê°È¡µÄÎïÆ·ÊÇ·ñ·¢Éú±ä»¯
+        // æ£€æŸ¥ç©å®¶å½“å‰æ‹¾å–çš„ç‰©å“æ˜¯å¦å‘ç”Ÿå˜åŒ–
         if (player.currentPickedItem != lastPickedItem)
         {
             lastPickedItem = player.currentPickedItem;
             
-            // Èç¹ûÊ°È¡ÁËĞÂÎïÆ·£¬ÏÔÊ¾ĞÅÏ¢
+            // å¦‚æœæ‹¾å–äº†æ–°ç‰©å“ï¼Œæ˜¾ç¤ºä¿¡æ¯
             if (lastPickedItem != null)
             {
                 ShowPickupInfo(lastPickedItem);
@@ -109,68 +109,68 @@ public class PickUPTextNotice : MonoBehaviour
     }
     
     /// <summary>
-    /// ÏÔÊ¾Ê°È¡ÎïÆ·ĞÅÏ¢
+    /// æ˜¾ç¤ºæ‹¾å–ç‰©å“ä¿¡æ¯
     /// </summary>
-    /// <param name="item">Ê°È¡µÄÎïÆ·</param>
+    /// <param name="item">æ‹¾å–çš„ç‰©å“</param>
     public void ShowPickupInfo(ItemBase item)
     {
-        Debug.Log($"PickUPTextNotice: ÊÕµ½Ê°È¡ÊÂ¼ş£¬ÎïÆ·: {(item != null ? item.name : "null")}");
+        Debug.Log($"PickUPTextNotice: æ”¶åˆ°æ‹¾å–äº‹ä»¶ï¼Œç‰©å“: {(item != null ? item.name : "null")}");
         
         if (item == null) 
         {
-            Debug.LogWarning("PickUPTextNotice: ÎïÆ·Îª¿Õ£¬ÎŞ·¨ÏÔÊ¾");
+            Debug.LogWarning("PickUPTextNotice: ç‰©å“ä¸ºç©ºï¼Œæ— æ³•æ˜¾ç¤º");
             return;
         }
         
-        // ¼ì²é×é¼şÊÇ·ñ´æÔÚ
+        // æ£€æŸ¥ç»„ä»¶æ˜¯å¦å­˜åœ¨
         if (canvasGroup == null)
         {
-            Debug.LogError("PickUPTextNotice: CanvasGroup×é¼şÈ±Ê§");
+            Debug.LogError("PickUPTextNotice: CanvasGroupç»„ä»¶ç¼ºå¤±");
             return;
         }
         
-        // Í£Ö¹Ö®Ç°µÄµ­³öĞ­³Ì
+        // åœæ­¢ä¹‹å‰çš„æ·¡å‡ºåç¨‹
         if (fadeCoroutine != null)
         {
             StopCoroutine(fadeCoroutine);
         }
         
-        // ¸üĞÂUIÄÚÈİ
+        // æ›´æ–°UIå†…å®¹
         UpdateUIContent(item);
         
-        // ÏÔÊ¾UI
+        // æ˜¾ç¤ºUI
         gameObject.SetActive(true);
         canvasGroup.alpha = 1f;
         
-        Debug.Log($"PickUPTextNotice: UIÒÑ¼¤»î£¬Í¸Ã÷¶ÈÉèÖÃÎª1");
+        Debug.Log($"PickUPTextNotice: UIå·²æ¿€æ´»ï¼Œé€æ˜åº¦è®¾ç½®ä¸º1");
         
-        // ¿ªÊ¼µ­³ö¼ÆÊ±
+        // å¼€å§‹æ·¡å‡ºè®¡æ—¶
         fadeCoroutine = StartCoroutine(FadeOutAfterDelay());
         
-        Debug.Log($"ÏÔÊ¾Ê°È¡ĞÅÏ¢: {item.name}");
+        Debug.Log($"æ˜¾ç¤ºæ‹¾å–ä¿¡æ¯: {item.name}");
     }
     
     /// <summary>
-    /// ¸üĞÂUIÄÚÈİ
+    /// æ›´æ–°UIå†…å®¹
     /// </summary>
-    /// <param name="item">ÎïÆ·¶ÔÏó</param>
+    /// <param name="item">ç‰©å“å¯¹è±¡</param>
     private void UpdateUIContent(ItemBase item)
     {
-        Debug.Log($"PickUPTextNotice: ¿ªÊ¼¸üĞÂUIÄÚÈİ£¬ÎïÆ·: {item.name}");
+        Debug.Log($"PickUPTextNotice: å¼€å§‹æ›´æ–°UIå†…å®¹ï¼Œç‰©å“: {item.name}");
         
-        // ¸üĞÂÎïÆ·Ãû³Æ
+        // æ›´æ–°ç‰©å“åç§°
         if (itemNameText != null)
         {
             string displayName = GetItemDisplayName(item);
             itemNameText.text = displayName;
-            Debug.Log($"PickUPTextNotice: ÉèÖÃÎïÆ·Ãû³Æ: {displayName}");
+            Debug.Log($"PickUPTextNotice: è®¾ç½®ç‰©å“åç§°: {displayName}");
         }
         else
         {
-            Debug.LogWarning("PickUPTextNotice: itemNameText×é¼şÎ´·ÖÅä");
+            Debug.LogWarning("PickUPTextNotice: itemNameTextç»„ä»¶æœªåˆ†é…");
         }
         
-        // ¸üĞÂÎïÆ·Í¼±ê
+        // æ›´æ–°ç‰©å“å›¾æ ‡
         if (itemIcon != null)
         {
             Sprite itemSprite = GetItemSprite(item);
@@ -178,31 +178,31 @@ public class PickUPTextNotice : MonoBehaviour
             {
                 itemIcon.sprite = itemSprite;
                 itemIcon.enabled = true;
-                Debug.Log($"PickUPTextNotice: ÉèÖÃÎïÆ·Í¼±ê: {itemSprite.name}");
+                Debug.Log($"PickUPTextNotice: è®¾ç½®ç‰©å“å›¾æ ‡: {itemSprite.name}");
             }
             else
             {
                 itemIcon.enabled = false;
-                Debug.LogWarning($"ÎïÆ· {item.name} Ã»ÓĞÕÒµ½¾«ÁéÍ¼Æ¬");
+                Debug.LogWarning($"ç‰©å“ {item.name} æ²¡æœ‰æ‰¾åˆ°ç²¾çµå›¾ç‰‡");
             }
         }
         else
         {
-            Debug.LogWarning("PickUPTextNotice: itemIcon×é¼şÎ´·ÖÅä");
+            Debug.LogWarning("PickUPTextNotice: itemIconç»„ä»¶æœªåˆ†é…");
         }
     }
     
     /// <summary>
-    /// »ñÈ¡ÎïÆ·ÏÔÊ¾Ãû³Æ
+    /// è·å–ç‰©å“æ˜¾ç¤ºåç§°
     /// </summary>
-    /// <param name="item">ÎïÆ·¶ÔÏó</param>
-    /// <returns>ÏÔÊ¾Ãû³Æ</returns>
+    /// <param name="item">ç‰©å“å¯¹è±¡</param>
+    /// <returns>æ˜¾ç¤ºåç§°</returns>
     private string GetItemDisplayName(ItemBase item)
     {
-        // ÓÅÏÈÊ¹ÓÃÎïÆ·µÄÏÔÊ¾Ãû³Æ£¬Èç¹ûÃ»ÓĞÔòÊ¹ÓÃGameObjectÃû³Æ
+        // ä¼˜å…ˆä½¿ç”¨ç‰©å“çš„æ˜¾ç¤ºåç§°ï¼Œå¦‚æœæ²¡æœ‰åˆ™ä½¿ç”¨GameObjectåç§°
         string displayName = item.name;
         
-        // ÒÆ³ıGameObjectÃû³ÆÖĞµÄ"(Clone)"ºó×º
+        // ç§»é™¤GameObjectåç§°ä¸­çš„"(Clone)"åç¼€
         if (displayName.Contains("(Clone)"))
         {
             displayName = displayName.Replace("(Clone)", "").Trim();
@@ -212,34 +212,34 @@ public class PickUPTextNotice : MonoBehaviour
     }
     
     /// <summary>
-    /// »ñÈ¡ÎïÆ·µÄ¾«ÁéÍ¼Æ¬
+    /// è·å–ç‰©å“çš„ç²¾çµå›¾ç‰‡
     /// </summary>
-    /// <param name="item">ÎïÆ·¶ÔÏó</param>
-    /// <returns>ÎïÆ·¾«ÁéÍ¼Æ¬</returns>
+    /// <param name="item">ç‰©å“å¯¹è±¡</param>
+    /// <returns>ç‰©å“ç²¾çµå›¾ç‰‡</returns>
     private Sprite GetItemSprite(ItemBase item)
     {
-        // ³¢ÊÔ´ÓSpriteRenderer»ñÈ¡¾«ÁéÍ¼Æ¬
+        // å°è¯•ä»SpriteRendererè·å–ç²¾çµå›¾ç‰‡
         SpriteRenderer spriteRenderer = item.GetComponent<SpriteRenderer>();
         if (spriteRenderer != null && spriteRenderer.sprite != null)
         {
             return spriteRenderer.sprite;
         }
         
-        // ³¢ÊÔ´Ó×Ó¶ÔÏóÖĞ²éÕÒSpriteRenderer
+        // å°è¯•ä»å­å¯¹è±¡ä¸­æŸ¥æ‰¾SpriteRenderer
         SpriteRenderer childSpriteRenderer = item.GetComponentInChildren<SpriteRenderer>();
         if (childSpriteRenderer != null && childSpriteRenderer.sprite != null)
         {
             return childSpriteRenderer.sprite;
         }
         
-        // Èç¹ûÊÇÎäÆ÷£¬³¢ÊÔ´ÓWeaponManager»ñÈ¡¾«Áé
+        // å¦‚æœæ˜¯æ­¦å™¨ï¼Œå°è¯•ä»WeaponManagerè·å–ç²¾çµ
         if (item.CompareTag("Weapon"))
         {
             WeaponManager weaponManager = item.GetComponent<WeaponManager>();
             if (weaponManager != null)
             {
-                // ÕâÀï¿ÉÒÔ¸ù¾İWeaponManagerµÄ¾ßÌåÊµÏÖÀ´»ñÈ¡ÎäÆ÷Í¼±ê
-                // ÔİÊ±Ê¹ÓÃSpriteRenderer×÷Îª±¸Ñ¡·½°¸
+                // è¿™é‡Œå¯ä»¥æ ¹æ®WeaponManagerçš„å…·ä½“å®ç°æ¥è·å–æ­¦å™¨å›¾æ ‡
+                // æš‚æ—¶ä½¿ç”¨SpriteRendererä½œä¸ºå¤‡é€‰æ–¹æ¡ˆ
                 return spriteRenderer?.sprite;
             }
         }
@@ -248,23 +248,23 @@ public class PickUPTextNotice : MonoBehaviour
     }
     
     /// <summary>
-    /// ÑÓ³Ùºóµ­³öµÄĞ­³Ì
+    /// å»¶è¿Ÿåæ·¡å‡ºçš„åç¨‹
     /// </summary>
     /// <returns></returns>
     private IEnumerator FadeOutAfterDelay()
     {
-        // µÈ´ıÏÔÊ¾Ê±¼ä
+        // ç­‰å¾…æ˜¾ç¤ºæ—¶é—´
         yield return new WaitForSeconds(displayDuration);
         
-        // ¿ªÊ¼µ­³ö
+        // å¼€å§‹æ·¡å‡º
         yield return StartCoroutine(FadeOut());
 
-        // µ­³öÍê³ÉºóÒş²ØGameObject
+        // æ·¡å‡ºå®Œæˆåéšè—GameObject
         canvasGroup.alpha = 0f;
     }
     
     /// <summary>
-    /// µ­³öĞ§¹ûĞ­³Ì
+    /// æ·¡å‡ºæ•ˆæœåç¨‹
     /// </summary>
     /// <returns></returns>
     private IEnumerator FadeOut()
@@ -284,7 +284,7 @@ public class PickUPTextNotice : MonoBehaviour
     }
     
     /// <summary>
-    /// Á¢¼´Òş²ØUI
+    /// ç«‹å³éšè—UI
     /// </summary>
     public void HideImmediately()
     {
@@ -299,18 +299,18 @@ public class PickUPTextNotice : MonoBehaviour
     }
     
     /// <summary>
-    /// ÊÖ¶¯ÏÔÊ¾Ö¸¶¨ÎïÆ·ĞÅÏ¢£¨¿ÉÓÃÓÚ²âÊÔ£©
+    /// æ‰‹åŠ¨æ˜¾ç¤ºæŒ‡å®šç‰©å“ä¿¡æ¯ï¼ˆå¯ç”¨äºæµ‹è¯•ï¼‰
     /// </summary>
-    /// <param name="item">ÒªÏÔÊ¾µÄÎïÆ·</param>
+    /// <param name="item">è¦æ˜¾ç¤ºçš„ç‰©å“</param>
     public void ManualShowPickupInfo(ItemBase item)
     {
         ShowPickupInfo(item);
     }
     
-    // ¿ÉÒÔ±£ÁôUpdate·½·¨×÷Îª±¸ÓÃ¼ì²â»úÖÆ
+    // å¯ä»¥ä¿ç•™Updateæ–¹æ³•ä½œä¸ºå¤‡ç”¨æ£€æµ‹æœºåˆ¶
     private void Update()
     {
-        // ±£ÁôÔ­ÓĞµÄÂÖÑ¯¼ì²â×÷Îª±¸ÓÃ
+        // ä¿ç•™åŸæœ‰çš„è½®è¯¢æ£€æµ‹ä½œä¸ºå¤‡ç”¨
         CheckForPickedItem();
     }
 }

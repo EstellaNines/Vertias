@@ -22,7 +22,7 @@ public class TipDisplay : MonoBehaviour
     private void OnDisable()
     {
         // 停止所有协程
-        StopAllCoroutines();
+        StopAllActiveCoroutines();
     }
 
     // 开始显示所有UI对象
@@ -92,7 +92,7 @@ public class TipDisplay : MonoBehaviour
     // 立即隐藏所有UI
     public void HideAllImmediately()
     {
-        StopAllCoroutines();
+        StopAllActiveCoroutines();
 
         foreach (GameObject uiObj in uiObjects)
         {
@@ -108,8 +108,8 @@ public class TipDisplay : MonoBehaviour
         }
     }
 
-    // 停止所有协程
-    private void StopAllCoroutines()
+    // 停止所有活动的协程
+    private void StopAllActiveCoroutines()
     {
         foreach (Coroutine coroutine in activeCoroutines)
         {
