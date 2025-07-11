@@ -289,7 +289,7 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
                     ""initialStateCheck"": false
                 },
                 {
-                    ""name"": ""New action"",
+                    ""name"": ""BackPack"",
                     ""type"": ""Button"",
                     ""id"": ""3aa3b05a-d2b3-4cc4-95f3-3dfe928f7a4c"",
                     ""expectedControlType"": """",
@@ -324,11 +324,11 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
                 {
                     ""name"": """",
                     ""id"": ""55709752-0ccf-4eac-8787-d7ce056830c8"",
-                    ""path"": """",
+                    ""path"": ""<Keyboard>/tab"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""New action"",
+                    ""action"": ""BackPack"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -358,7 +358,7 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
         m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
         m_UI_Operate = m_UI.FindAction("Operate", throwIfNotFound: true);
         m_UI_WeaponInspection = m_UI.FindAction("WeaponInspection", throwIfNotFound: true);
-        m_UI_Newaction = m_UI.FindAction("New action", throwIfNotFound: true);
+        m_UI_BackPack = m_UI.FindAction("BackPack", throwIfNotFound: true);
     }
 
     ~@PlayerInputAction()
@@ -538,14 +538,14 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
     private List<IUIActions> m_UIActionsCallbackInterfaces = new List<IUIActions>();
     private readonly InputAction m_UI_Operate;
     private readonly InputAction m_UI_WeaponInspection;
-    private readonly InputAction m_UI_Newaction;
+    private readonly InputAction m_UI_BackPack;
     public struct UIActions
     {
         private @PlayerInputAction m_Wrapper;
         public UIActions(@PlayerInputAction wrapper) { m_Wrapper = wrapper; }
         public InputAction @Operate => m_Wrapper.m_UI_Operate;
         public InputAction @WeaponInspection => m_Wrapper.m_UI_WeaponInspection;
-        public InputAction @Newaction => m_Wrapper.m_UI_Newaction;
+        public InputAction @BackPack => m_Wrapper.m_UI_BackPack;
         public InputActionMap Get() { return m_Wrapper.m_UI; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -561,9 +561,9 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
             @WeaponInspection.started += instance.OnWeaponInspection;
             @WeaponInspection.performed += instance.OnWeaponInspection;
             @WeaponInspection.canceled += instance.OnWeaponInspection;
-            @Newaction.started += instance.OnNewaction;
-            @Newaction.performed += instance.OnNewaction;
-            @Newaction.canceled += instance.OnNewaction;
+            @BackPack.started += instance.OnBackPack;
+            @BackPack.performed += instance.OnBackPack;
+            @BackPack.canceled += instance.OnBackPack;
         }
 
         private void UnregisterCallbacks(IUIActions instance)
@@ -574,9 +574,9 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
             @WeaponInspection.started -= instance.OnWeaponInspection;
             @WeaponInspection.performed -= instance.OnWeaponInspection;
             @WeaponInspection.canceled -= instance.OnWeaponInspection;
-            @Newaction.started -= instance.OnNewaction;
-            @Newaction.performed -= instance.OnNewaction;
-            @Newaction.canceled -= instance.OnNewaction;
+            @BackPack.started -= instance.OnBackPack;
+            @BackPack.performed -= instance.OnBackPack;
+            @BackPack.canceled -= instance.OnBackPack;
         }
 
         public void RemoveCallbacks(IUIActions instance)
@@ -619,6 +619,6 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
     {
         void OnOperate(InputAction.CallbackContext context);
         void OnWeaponInspection(InputAction.CallbackContext context);
-        void OnNewaction(InputAction.CallbackContext context);
+        void OnBackPack(InputAction.CallbackContext context);
     }
 }

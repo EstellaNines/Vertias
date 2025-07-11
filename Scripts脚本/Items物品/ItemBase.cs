@@ -2,15 +2,15 @@ using UnityEngine;
 
 public class ItemBase : MonoBehaviour
 {
-    [Header("物品设置")]
+    [Header("物品基本信息")]
     [Tooltip("物品显示名称")]
     public string itemDisplayName;
     
     [Header("材质设置")]
-    [Tooltip("默认精灵材质")]
+    [Tooltip("默认材质")]
     public Material defaultMaterial;
     
-    [Tooltip("高亮精灵材质（玩家进入触发器时使用）")]
+    [Tooltip("高亮材质（当玩家靠近时使用，用于提示可拾取）")]
     public Material highlightMaterial;
     
     private SpriteRenderer spriteRenderer;
@@ -20,13 +20,13 @@ public class ItemBase : MonoBehaviour
         // 获取精灵渲染器组件
         spriteRenderer = GetComponent<SpriteRenderer>();
         
-        // 如果没有设置显示名称，使用GameObject的名称
+        // 如果没有设置显示名称，使用GameObject名称
         if (string.IsNullOrEmpty(itemDisplayName))
         {
             itemDisplayName = gameObject.name;
         }
         
-        // 如果没有设置默认材质，使用当前材质作为默认材质
+        // 如果没有设置默认材质，尝试从精灵渲染器获取当前材质
         if (defaultMaterial == null && spriteRenderer != null)
         {
             defaultMaterial = spriteRenderer.material;
@@ -41,9 +41,9 @@ public class ItemBase : MonoBehaviour
             if (player != null)
             {
                 player.RegisterItem(this);
-                Debug.Log($"可以拾取: {gameObject.name}");
+                Debug.Log($"玩家接近物品: {gameObject.name}");
                 
-                // 显示拾取提示UI（不传递物品名称）
+                // 显示拾取提示UI（显示拾取按钮和物品名称）
                 PickUpButtonNotice.ShowPickUpNotice();
                 
                 // 切换到高亮材质
@@ -60,7 +60,7 @@ public class ItemBase : MonoBehaviour
             if (player != null)
             {
                 player.UnregisterItem(this);
-                Debug.Log($"离开拾取范围: {gameObject.name}");
+                Debug.Log($"玩家离开物品范围: {gameObject.name}");
                 
                 // 隐藏拾取提示UI
                 PickUpButtonNotice.HidePickUpNotice();
@@ -71,7 +71,7 @@ public class ItemBase : MonoBehaviour
         }
     }
     
-    // 当物品被拾取时调用（可以由Player脚本调用）
+    // 当物品被拾取时调用（由Player类调用）
     public virtual void OnPickedUp()
     {
         // 隐藏拾取提示
@@ -87,7 +87,7 @@ public class ItemBase : MonoBehaviour
         if (spriteRenderer != null && highlightMaterial != null)
         {
             spriteRenderer.material = highlightMaterial;
-            Debug.Log($"物品 {gameObject.name} 切换到高亮材质");
+            Debug.Log($"为 {gameObject.name} 切换到高亮材质");
         }
     }
     
@@ -97,7 +97,7 @@ public class ItemBase : MonoBehaviour
         if (spriteRenderer != null && defaultMaterial != null)
         {
             spriteRenderer.material = defaultMaterial;
-            Debug.Log($"物品 {gameObject.name} 恢复默认材质");
+            Debug.Log($"为 {gameObject.name} 恢复默认材质");
         }
     }
 }

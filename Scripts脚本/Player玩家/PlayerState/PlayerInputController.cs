@@ -15,6 +15,7 @@ public class PlayerInputController : ScriptableObject, PlayerInputAction.IGamePl
     public event UnityAction<bool> onRun; // 跑动事件
     public event UnityAction onOperate; // UI操作事件
     public event UnityAction onWeaponInspection; // 武器检视事件
+    public event UnityAction onBackPack; // 背包事件
     
     // 引用属性
     PlayerInputAction playerinputAction;
@@ -25,7 +26,7 @@ public class PlayerInputController : ScriptableObject, PlayerInputAction.IGamePl
         playerinputAction = new PlayerInputAction(); // 创建输入系统
         // playerinput继承了这个接入口，并传入this将playerinput注册为回调函数接收者
         playerinputAction.GamePlay.SetCallbacks(this);
-        playerinputAction.UI.SetCallbacks(this); // 新增UI回调
+        playerinputAction.UI.SetCallbacks(this); // UI回调
     }
 
     public void EnabledGameplayInput()
@@ -140,13 +141,20 @@ public class PlayerInputController : ScriptableObject, PlayerInputAction.IGamePl
         }
     }
     
+    public void OnBackPack(InputAction.CallbackContext context) // 背包操作（Tab键）
+    {
+        if (context.started) // 按下一刻
+        {
+            onBackPack?.Invoke();
+        }
+    }
+    
     // OnNewaction方法实现
     public void OnNewaction(InputAction.CallbackContext context) // 新动作
     {
         if (context.started) // 按下一刻
         {
-            // 这里可以添加新动作的逻辑，目前留空
-            // 如果需要事件，可以添加相应的UnityAction事件
+
         }
     }
 }

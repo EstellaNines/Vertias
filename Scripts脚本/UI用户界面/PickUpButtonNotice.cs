@@ -5,18 +5,18 @@ using TMPro;
 
 public class PickUpButtonNotice : MonoBehaviour
 {
-    [Header("Ê°È¡ÌáÊ¾ÉèÖÃ")]
-    [Tooltip("Ê°È¡ÌáÊ¾ÎÄ±¾×é¼ş")]
+    [Header("æ‹¾å–æç¤ºUIç»„ä»¶")]
+    [Tooltip("æ‹¾å–æç¤ºæ–‡æœ¬ç»„ä»¶")]
     public TextMeshProUGUI pickUpText;
     
-    [Tooltip("ÌáÊ¾ÎÄ±¾ÄÚÈİ")]
-    public string pickUpMessage = "¡¤ PickUp";
+    [Tooltip("æ‹¾å–æç¤ºæ¶ˆæ¯")]
+    public string pickUpMessage = "æŒ‰ä¸‹ PickUp";
     
     private static PickUpButtonNotice instance;
     
     void Awake()
     {
-        // ÉèÖÃµ¥Àı
+        // å•ä¾‹æ¨¡å¼è®¾ç½®
         if (instance == null)
         {
             instance = this;
@@ -27,7 +27,7 @@ public class PickUpButtonNotice : MonoBehaviour
             return;
         }
         
-        // ³õÊ¼»¯ÎÄ±¾Í¸Ã÷¶ÈÎª0
+        // åˆå§‹åŒ–æ–‡æœ¬é€æ˜åº¦ä¸º0
         if (pickUpText != null)
         {
             Color textColor = pickUpText.color;
@@ -36,34 +36,34 @@ public class PickUpButtonNotice : MonoBehaviour
         }
     }
     
-    // ÏÔÊ¾Ê°È¡ÌáÊ¾
+    // æ˜¾ç¤ºæ‹¾å–æç¤º
     public static void ShowPickUpNotice()
     {
         if (instance != null && instance.pickUpText != null)
         {
-            // ÉèÖÃ¹Ì¶¨µÄÎÄ±¾ÄÚÈİ
+            // è®¾ç½®å›ºå®šçš„æ‹¾å–æç¤ºæ–‡æœ¬
             instance.pickUpText.text = instance.pickUpMessage;
             
-            // ÉèÖÃÍ¸Ã÷¶ÈÎª255 (1.0f)
+            // è®¾ç½®é€æ˜åº¦ä¸º255 (1.0f)
             Color textColor = instance.pickUpText.color;
             textColor.a = 1f;
             instance.pickUpText.color = textColor;
             
-            Debug.Log($"ÏÔÊ¾Ê°È¡ÌáÊ¾: {instance.pickUpText.text}");
+            Debug.Log($"æ˜¾ç¤ºæ‹¾å–æç¤º: {instance.pickUpText.text}");
         }
     }
     
-    // Òş²ØÊ°È¡ÌáÊ¾
+    // éšè—æ‹¾å–æç¤º
     public static void HidePickUpNotice()
     {
         if (instance != null && instance.pickUpText != null)
         {
-            // ÉèÖÃÍ¸Ã÷¶ÈÎª0
+            // è®¾ç½®é€æ˜åº¦ä¸º0
             Color textColor = instance.pickUpText.color;
             textColor.a = 0f;
             instance.pickUpText.color = textColor;
             
-            Debug.Log("Òş²ØÊ°È¡ÌáÊ¾");
+            Debug.Log("éšè—æ‹¾å–æç¤º");
         }
     }
     

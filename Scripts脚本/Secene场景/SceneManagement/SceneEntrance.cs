@@ -6,17 +6,17 @@ using TMPro;
 
 public class SceneEntrance : MonoBehaviour
 {
-    [Tooltip("需要过渡到新场景的名称")]
+    [Tooltip("需要切换到的目标场景名称")]
     public string NewSceneName;
     
-    [Tooltip("是否只能触发一次")]
+    [Tooltip("是否只能使用一次")]
     public bool oneTimeUse = true;
     
     [Header("确认UI设置")]
-    [Tooltip("确认提示文本（可选）")]
+    [Tooltip("确认提示文本组件")]
     public TextMeshProUGUI confirmText;
     
-    [Tooltip("确认提示画布（可选）")]
+    [Tooltip("确认提示画布对象")]
     public GameObject confirmCanvas;
     
     [Tooltip("提示文本内容")]
@@ -32,7 +32,7 @@ public class SceneEntrance : MonoBehaviour
         // 初始化输入系统
         inputActions = new PlayerInputAction();
         
-        // 初始化文本透明度为0
+        // 初始化文本透明度
         if (confirmText != null)
         {
             Color textColor = confirmText.color;
@@ -57,18 +57,18 @@ public class SceneEntrance : MonoBehaviour
     {
         if (collision.CompareTag("Player"))
         {
-            // 检查是否已经触发过（如果设置为一次性使用）
+            // 如果是一次性使用且已经触发过，则不再响应
             if (oneTimeUse && hasTriggered)
                 return;
                 
             // 检查场景名称是否有效
             if (string.IsNullOrEmpty(NewSceneName))
             {
-                Debug.LogWarning("场景名称为空，无法切换场景！");
+                Debug.LogWarning("场景名称不能为空，无法切换场景");
                 return;
             }
             
-            // 如果已经在等待确认，不重复触发
+            // 如果已经在等待确认状态，则不重复处理
             if (isWaitingForConfirm)
                 return;
             
@@ -81,7 +81,7 @@ public class SceneEntrance : MonoBehaviour
     {
         if (collision.CompareTag("Player"))
         {
-            // 玩家离开触发器，取消等待确认
+            // 玩家离开触发区域，停止等待确认
             StopWaitingForConfirm();
         }
     }
@@ -96,7 +96,7 @@ public class SceneEntrance : MonoBehaviour
             confirmCanvas.SetActive(true);
         }
         
-        // 设置文本内容并恢复透明度到255
+        // 设置文本内容并设置透明度为255
         if (confirmText != null)
         {
             confirmText.text = promptMessage;
@@ -121,7 +121,7 @@ public class SceneEntrance : MonoBehaviour
             confirmCanvas.SetActive(false);
         }
         
-        // 将文本透明度设置为0
+        // 设置文本透明度为0
         if (confirmText != null)
         {
             Color textColor = confirmText.color;
@@ -129,7 +129,7 @@ public class SceneEntrance : MonoBehaviour
             confirmText.color = textColor;
         }
         
-        Debug.Log("取消场景切换确认");
+        Debug.Log("停止等待场景切换确认");
     }
     
     private void OnOperatePressed(InputAction.CallbackContext context)
@@ -138,7 +138,7 @@ public class SceneEntrance : MonoBehaviour
         if (!isWaitingForConfirm)
             return;
             
-        Debug.Log("玩家按下F键，确认场景切换");
+        Debug.Log("玩家按下F键，确认进行场景切换");
         
         // 标记为已触发
         hasTriggered = true;
@@ -146,11 +146,11 @@ public class SceneEntrance : MonoBehaviour
         // 停止等待确认
         StopWaitingForConfirm();
         
-        // 调用场景切换
+        // 执行场景切换
         TransitionInternal();
     }
 
-    // 调用场景切换函数
+    // 执行场景切换的内部方法
     public void TransitionInternal()
     {
         if (SceneLoader.instance != null)
@@ -159,7 +159,7 @@ public class SceneEntrance : MonoBehaviour
         }
         else
         {
-            Debug.LogError("SceneLoader实例不存在！请确保场景中有SceneLoader对象。");
+            Debug.LogError("SceneLoader实例不存在，请确保场景中存在SceneLoader对象");
         }
     }
     

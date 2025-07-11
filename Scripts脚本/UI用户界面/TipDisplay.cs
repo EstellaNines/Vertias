@@ -6,10 +6,10 @@ public class TipDisplay : MonoBehaviour
 {
     [Header("显示设置")]
     [SerializeField] private float displayDuration = 3f;    // 显示持续时间（秒）
-    [SerializeField] private float fadeOutDuration = 1f;    // 淡出持续时间（秒）
+    [SerializeField] private float fadeOutDuration = 1f;    // 淡出动画时间（秒）
 
-    [Header("UI管理")]
-    [SerializeField] private List<GameObject> uiObjects = new List<GameObject>(); // 需要管理的UI对象列表
+    [Header("UI对象")]
+    [SerializeField] private List<GameObject> uiObjects = new List<GameObject>(); // 需要控制显示的UI对象列表
 
     private List<Coroutine> activeCoroutines = new List<Coroutine>();
 
@@ -41,7 +41,7 @@ public class TipDisplay : MonoBehaviour
     {
         if (uiObject == null) return;
 
-        // 确保对象是激活的
+        // 确保对象处于激活状态
         uiObject.SetActive(true);
 
         // 获取或添加CanvasGroup组件
@@ -68,7 +68,7 @@ public class TipDisplay : MonoBehaviour
         // 开始淡出
         yield return StartCoroutine(FadeOut(canvasGroup));
 
-        // 淡出完成后隐藏对象
+        // 淡出完成后禁用对象
         uiObject.SetActive(false);
     }
 
@@ -108,7 +108,7 @@ public class TipDisplay : MonoBehaviour
         }
     }
 
-    // 停止所有活动的协程
+    // 停止所有活跃的协程
     private void StopAllActiveCoroutines()
     {
         foreach (Coroutine coroutine in activeCoroutines)
@@ -145,7 +145,7 @@ public class TipDisplay : MonoBehaviour
         displayDuration = Mathf.Max(0f, duration);
     }
 
-    // 设置淡出持续时间
+    // 设置淡出动画时间
     public void SetFadeOutDuration(float duration)
     {
         fadeOutDuration = Mathf.Max(0.1f, duration);
