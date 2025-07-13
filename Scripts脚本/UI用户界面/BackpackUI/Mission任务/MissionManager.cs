@@ -55,14 +55,8 @@ public class MissionManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI missionPublisherText; // 任务发布者文本（TMP组件）
 
     [Header("任务奖励显示设置")]
-    [SerializeField] private TextMeshProUGUI moneyRewardText; // 资金奖励文本（TMP组件）
-    [SerializeField] private TextMeshProUGUI weaponRewardText; // 武器奖励文本（TMP组件）
-    [SerializeField] private TextMeshProUGUI foodRewardText; // 食物奖励文本（TMP组件）
-    [SerializeField] private TextMeshProUGUI intelligenceRewardText; // 情报奖励文本（TMP组件）
-    [SerializeField] private Image moneyRewardIcon; // 资金奖励图标
-    [SerializeField] private Image weaponRewardIcon; // 武器奖励图标
-    [SerializeField] private Image foodRewardIcon; // 食物奖励图标
-    [SerializeField] private Image intelligenceRewardIcon; // 情报奖励图标
+    [SerializeField] private RawImage rewardContainer; // 奖励容器（包含Vertical Layout Group）
+    [SerializeField] private GameObject rewardItemPrefab; // 通用奖励项预制体
 
     [Header("任务数据设置")]
     [SerializeField] private string missionDataFileName = "MissionData"; // JSON文件名（不包含扩展名）
@@ -76,6 +70,9 @@ public class MissionManager : MonoBehaviour
 
     // 存储已生成的任务条实例
     private List<GameObject> generatedMissionItems = new List<GameObject>();
+
+    // 存储动态生成的奖励项实例
+    private List<GameObject> generatedRewardItems = new List<GameObject>();
 
     // 任务栏的Vertical Layout Group组件
     private VerticalLayoutGroup layoutGroup;
@@ -165,21 +162,14 @@ public class MissionManager : MonoBehaviour
     private void CheckUIComponents()
     {
         if (missionNameText == null) Debug.LogWarning("MissionManager: 任务名称文本组件（TMP）未设置");
-        // 移除任务类型文本组件检查 - 改为使用图标代表类型
         if (missionIconImage == null) Debug.LogWarning("MissionManager: 任务图标组件未设置（用于代表任务类型）");
         if (missionLegendImage == null) Debug.LogWarning("MissionManager: 任务图例组件未设置");
         if (missionDescriptionText == null) Debug.LogWarning("MissionManager: 任务描述文本组件（TMP）未设置");
         if (missionPublisherText == null) Debug.LogWarning("MissionManager: 任务发布者文本组件（TMP）未设置");
 
         // 检查奖励相关组件
-        if (moneyRewardText == null) Debug.LogWarning("MissionManager: 资金奖励文本组件（TMP）未设置");
-        if (weaponRewardText == null) Debug.LogWarning("MissionManager: 武器奖励文本组件（TMP）未设置");
-        if (foodRewardText == null) Debug.LogWarning("MissionManager: 食物奖励文本组件（TMP）未设置");
-        if (intelligenceRewardText == null) Debug.LogWarning("MissionManager: 情报奖励文本组件（TMP）未设置");
-        if (moneyRewardIcon == null) Debug.LogWarning("MissionManager: 资金奖励图标组件未设置");
-        if (weaponRewardIcon == null) Debug.LogWarning("MissionManager: 武器奖励图标组件未设置");
-        if (foodRewardIcon == null) Debug.LogWarning("MissionManager: 食物奖励图标组件未设置");
-        if (intelligenceRewardIcon == null) Debug.LogWarning("MissionManager: 情报奖励图标组件未设置");
+        if (rewardContainer == null) Debug.LogWarning("MissionManager: 奖励容器（RawImage）未设置");
+        if (rewardItemPrefab == null) Debug.LogWarning("MissionManager: 奖励项预制体未设置");
     }
 
     // 验证任务类型是否有效
@@ -218,7 +208,6 @@ public class MissionManager : MonoBehaviour
     {
         // 更新文本内容
         if (missionNameText != null) missionNameText.text = missionData.name;
-        // 移除任务类型文本更新 - 改为使用图标代表类型
         if (missionDescriptionText != null) missionDescriptionText.text = missionData.description;
         if (missionPublisherText != null) missionPublisherText.text = missionData.publisher;
 
@@ -232,27 +221,92 @@ public class MissionManager : MonoBehaviour
         UpdateRewardDisplay(missionData.reward);
     }
 
-    // 更新奖励显示
-    // 更新奖励显示
+    // 更新奖励显示 - 动态生成奖励项
     private void UpdateRewardDisplay(MissionReward reward)
     {
-        if (reward == null) return;
+        if (reward == null)
+        {
+            Debug.LogWarning("MissionManager: 奖励数据为空");
+            return;
+        }
 
-        // 更新奖励文本 - 使用"类型 x数量"的格式
-        if (moneyRewardText != null)
-            moneyRewardText.text = reward.money > 0 ? $"funds x{reward.money}" : "funds x0";
-        if (weaponRewardText != null)
-            weaponRewardText.text = reward.weapon > 0 ? $"weapon x{reward.weapon}" : "weapon x0";
-        if (foodRewardText != null)
-            foodRewardText.text = reward.food > 0 ? $"food x{reward.food}" : "food x0";
-        if (intelligenceRewardText != null)
-            intelligenceRewardText.text = reward.intelligence > 0 ? $"intelligence x{reward.intelligence}" : "intelligence x0";
+        // 清除之前生成的奖励项
+        ClearRewardItems();
+        Debug.Log($"MissionManager: 开始更新奖励显示 - Money:{reward.money}, Weapon:{reward.weapon}, Food:{reward.food}, Intelligence:{reward.intelligence}");
 
-        // 加载并设置奖励图标
-        LoadAndSetSprite(reward.moneyIconPath, moneyRewardIcon);
-        LoadAndSetSprite(reward.weaponIconPath, weaponRewardIcon);
-        LoadAndSetSprite(reward.foodIconPath, foodRewardIcon);
-        LoadAndSetSprite(reward.intelligenceIconPath, intelligenceRewardIcon);
+        // 定义奖励类型数据，包含中文名称
+        var rewardTypes = new[]
+        {
+            new { name = "Funds", amount = reward.money, iconPath = reward.moneyIconPath },
+            new { name = "Random Weapon", amount = reward.weapon, iconPath = reward.weaponIconPath },
+            new { name = "Food", amount = reward.food, iconPath = reward.foodIconPath },
+            new { name = "Intelligence", amount = reward.intelligence, iconPath = reward.intelligenceIconPath }
+        };
+
+        // 只为数量大于0的奖励类型创建UI项
+        int createdCount = 0;
+        foreach (var rewardType in rewardTypes)
+        {
+            Debug.Log($"MissionManager: 检查奖励类型 {rewardType.name}, 数量: {rewardType.amount}");
+            if (rewardType.amount > 0)
+            {
+                Debug.Log($"MissionManager: 创建奖励项 - {rewardType.name}, 数量: {rewardType.amount}");
+                CreateRewardItem(rewardType.name, rewardType.amount, rewardType.iconPath);
+                createdCount++;
+            }
+            else
+            {
+                Debug.Log($"MissionManager: 跳过奖励项 - {rewardType.name}, 数量为0");
+            }
+        }
+
+        Debug.Log($"MissionManager: 奖励显示更新完成，共创建 {createdCount} 个奖励项");
+    }
+
+    // 创建单个奖励项
+    private void CreateRewardItem(string itemName, int num, string iconPath)
+    {
+        if (rewardItemPrefab == null || rewardContainer == null)
+        {
+            Debug.LogWarning($"MissionManager: 无法创建{itemName}奖励项，缺少预制体或容器");
+            return;
+        }
+
+        // 实例化奖励预制体
+        GameObject rewardItem = Instantiate(rewardItemPrefab, rewardContainer.transform);
+        generatedRewardItems.Add(rewardItem);
+
+        // 设置奖励项名称
+        rewardItem.name = $"{itemName}RewardItem";
+
+        // 查找预制体中的所有TextMeshProUGUI组件
+        TextMeshProUGUI[] textComponents = rewardItem.GetComponentsInChildren<TextMeshProUGUI>();
+
+        foreach (TextMeshProUGUI textComponent in textComponents)
+        {
+            // 根据组件名称设置对应的文本内容
+            if (textComponent.name == "ItemName")
+            {
+                textComponent.text = itemName; // 设置物品名称（从JSON读取）
+            }
+            else if (textComponent.name == "num")
+            {
+                textComponent.text = num.ToString(); // 设置数量（从JSON读取）
+            }
+        }
+
+        // 查找并设置奖励图标
+        Image rewardIcon = rewardItem.GetComponentInChildren<Image>();
+        if (rewardIcon != null && !string.IsNullOrEmpty(iconPath))
+        {
+            LoadAndSetSprite(iconPath, rewardIcon);
+        }
+        else if (rewardIcon == null)
+        {
+            Debug.LogWarning($"MissionManager: 在{itemName}奖励预制体中未找到Image组件");
+        }
+
+        Debug.Log($"MissionManager: 创建{itemName}奖励项，数量: {num}（来自JSON文件）");
     }
 
     // 加载并设置精灵图片
@@ -284,6 +338,19 @@ public class MissionManager : MonoBehaviour
         }
     }
 
+    // 清除所有动态生成的奖励项
+    private void ClearRewardItems()
+    {
+        foreach (GameObject item in generatedRewardItems)
+        {
+            if (item != null)
+            {
+                DestroyImmediate(item);
+            }
+        }
+        generatedRewardItems.Clear();
+    }
+
     // 隐藏任务描述面板
     public void HideMissionDescription()
     {
@@ -291,6 +358,10 @@ public class MissionManager : MonoBehaviour
         {
             missionDescriptionPanel.SetActive(false);
         }
+
+        // 隐藏面板时也清除奖励项
+        ClearRewardItems();
+
         Debug.Log("MissionManager: 隐藏任务描述面板");
     }
 
