@@ -31,6 +31,7 @@ public class MapImageDragController : MonoBehaviour, IPointerDownHandler, IPoint
     private Coroutine longPressCoroutine;
     private Coroutine inertiaCoroutine;
     private CanvasGroup canvasGroup;
+    private Canvas parentCanvas;
 
     // 边界计算相关
     private Vector2 minPosition;
@@ -68,6 +69,9 @@ public class MapImageDragController : MonoBehaviour, IPointerDownHandler, IPoint
             boundaryRect = mapContainer.parent as RectTransform;
         }
 
+        // 获取父Canvas用于坐标转换
+        parentCanvas = GetComponentInParent<Canvas>();
+
         // 获取或添加CanvasGroup组件用于视觉反馈
         if (enableVisualFeedback)
         {
@@ -94,16 +98,14 @@ public class MapImageDragController : MonoBehaviour, IPointerDownHandler, IPoint
         Vector2 containerSize = mapContainer.rect.size;
         Vector2 boundarySize = boundaryRect.rect.size;
 
-        // 计算最大和最小位置
-        float maxX = (containerSize.x - boundarySize.x) * 0.5f - boundaryPadding.x;
-        float maxY = (containerSize.y - boundarySize.y) * 0.5f - boundaryPadding.y;
+        // 计算最大和最小位置（修正边界计算逻辑）
+        float maxX = Mathf.Max(0, (containerSize.x - boundarySize.x) * 0.5f - boundaryPadding.x);
+        float maxY = Mathf.Max(0, (containerSize.y - boundarySize.y) * 0.5f - boundaryPadding.y);
 
         minPosition = new Vector2(-maxX, -maxY);
         maxPosition = new Vector2(maxX, maxY);
 
-        // 确保边界值合理
-        if (maxX < 0) minPosition.x = maxPosition.x = 0;
-        if (maxY < 0) minPosition.y = maxPosition.y = 0;
+        Debug.Log($"地图边界计算: 容器尺寸={containerSize}, 边界尺寸={boundarySize}, 移动范围=({minPosition}, {maxPosition})");
     }
 
     private void SetupVisualFeedback()
@@ -120,11 +122,14 @@ public class MapImageDragController : MonoBehaviour, IPointerDownHandler, IPoint
         if (eventData.button != PointerEventData.InputButton.Left)
             return;
 
+        Debug.Log("开始按下地图");
+
         // 停止惯性移动
         StopInertia();
 
-        // 记录初始位置
-        lastPointerPosition = eventData.position;
+        // 记录初始位置（转换为本地坐标）
+        RectTransformUtility.ScreenPointToLocalPointInRectangle(
+            mapContainer, eventData.position, eventData.pressEventCamera, out lastPointerPosition);
 
         // 开始长按检测
         longPressCoroutine = StartCoroutine(LongPressDetection());
@@ -135,6 +140,8 @@ public class MapImageDragController : MonoBehaviour, IPointerDownHandler, IPoint
         // 只响应左键
         if (eventData.button != PointerEventData.InputButton.Left)
             return;
+
+        Debug.Log("松开地图");
 
         // 停止长按检测
         StopLongPressDetection();
@@ -151,11 +158,10 @@ public class MapImageDragController : MonoBehaviour, IPointerDownHandler, IPoint
 
     public void OnBeginDrag(PointerEventData eventData)
     {
-        // 只有在长按状态下才允许开始拖动
-        if (!isLongPressing)
-            return;
-
+        // 移除长按限制，直接允许拖动
         isDragging = true;
+
+        Debug.Log("开始拖动地图");
 
         // 应用视觉反馈
         ApplyVisualFeedback(true);
@@ -170,8 +176,12 @@ public class MapImageDragController : MonoBehaviour, IPointerDownHandler, IPoint
         if (!isDragging)
             return;
 
+        // 转换屏幕坐标到本地坐标
+        Vector2 currentPointerPosition;
+        RectTransformUtility.ScreenPointToLocalPointInRectangle(
+            mapContainer, eventData.position, eventData.pressEventCamera, out currentPointerPosition);
+
         // 计算拖动偏移
-        Vector2 currentPointerPosition = eventData.position;
         Vector2 deltaPosition = (currentPointerPosition - lastPointerPosition) * dragSensitivity;
 
         // 更新速度（用于惯性）
@@ -199,6 +209,8 @@ public class MapImageDragController : MonoBehaviour, IPointerDownHandler, IPoint
     {
         isDragging = false;
 
+        Debug.Log("结束拖动地图");
+
         // 恢复视觉反馈
         ApplyVisualFeedback(false);
 
@@ -216,6 +228,7 @@ public class MapImageDragController : MonoBehaviour, IPointerDownHandler, IPoint
     {
         yield return new WaitForSeconds(longPressTime);
         isLongPressing = true;
+        Debug.Log("检测到长按");
     }
 
     private void StopLongPressDetection()

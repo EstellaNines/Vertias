@@ -2,118 +2,118 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro; // „1¤7„1¤7„1¤7„1¤7TMPro„1¤7„1¤7„1¤7„1¤7„1¤70ð8„1¤7
+using TMPro; // å¼•ç”¨TMProå‘½åç©ºé—´
 using System;
 
 [System.Serializable]
 public class MissionData
 {
-    public int id;                    // „1¤7„1¤7„1¤7„1¤7¦·0Ý5„1¤7„1¤70µ7„1¤7„1¤7
-    public string name;               // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7
-    public string type;               // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70Æ5„1¤7"0Â7„1¤7„1¤7"„1¤7„1¤7"0ð9„1¤7„1¤7"„1¤7„1¤7"„1¤7„1¤70Â2" „1¤7„1¤7„1¤70ö90Â0„1¤7„1¤7„1¤7„1¤7„1¤7
-    public string iconPath;           // „1¤7„1¤7„1¤7„1¤70É0„1¤7„1¤7¡¤„1¤7„1¤7„1¤7„1¤7Resources„1¤70‘4„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7¡¤„1¤7„1¤7„1¤7„1¤7
-    public string legendPath;         // „1¤7„1¤7„1¤7„1¤70É0„1¤7„1¤7¡¤„1¤7„1¤7„1¤7„1¤7Resources„1¤70‘4„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7¡¤„1¤7„1¤7„1¤7„1¤7
-    public string description;        // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤70Ð6„1¤7„1¤7„1¤7„1¤7
-    public MissionReward reward;      // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70Î4
-    public string publisher;          // „1¤7„1¤7„1¤7±6Ì4„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70›3„1¤7„1¤7„1¤70Ë20÷1„1¤7„1¤7„1¤7„1¤7„1¤70›3„1¤7
+    public int id;                    // ä»»åŠ¡å”¯ä¸€æ ‡è¯†ç¬¦
+    public string name;               // ä»»åŠ¡åç§°
+    public string type;               // ä»»åŠ¡ç±»åž‹ï¼š"æŽ¢ç´¢"ã€"æˆ˜æ–—"ã€"å¯¹è¯" ç­‰ç±»åž‹
+    public string iconPath;           // ä»»åŠ¡å›¾æ ‡è·¯å¾„ï¼ˆç›¸å¯¹äºŽResourcesæ–‡ä»¶å¤¹çš„è·¯å¾„ï¼‰
+    public string legendPath;         // ä»»åŠ¡å›¾ä¾‹è·¯å¾„ï¼ˆç›¸å¯¹äºŽResourcesæ–‡ä»¶å¤¹çš„è·¯å¾„ï¼‰
+    public string description;        // ä»»åŠ¡æè¿°ä¿¡æ¯
+    public MissionReward reward;      // ä»»åŠ¡å¥–åŠ±æ•°æ®
+    public string publisher;          // ä»»åŠ¡å‘å¸ƒè€…ï¼ˆä¾‹å¦‚ï¼š"æ”¿åºœ"ã€"å•†äºº"ç­‰ï¼‰
 }
 
 [System.Serializable]
 public class MissionReward
 {
-    public int money;                 // „1¤70¶4„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7
-    public int weapon;                // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7
-    public int food;                  // 0µ4„1¤7„1—3„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7
-    public int intelligence;          // „1¤7÷l„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7
-    public string moneyIconPath;      // „1¤70¶4„1¤70É0„1¤7„1¤7¡¤„1¤7„1¤7
-    public string weaponIconPath;     // „1¤7„1¤7„1¤7„1¤70É0„1¤7„1¤7¡¤„1¤7„1¤7
-    public string foodIconPath;       // 0µ4„1¤7„1¤70É0„1¤7„1¤7¡¤„1¤7„1¤7
-    public string intelligenceIconPath; // „1¤7÷l0É0„1¤7„1¤7¡¤„1¤7„1¤7
+    public int money;                 // é‡‘é’±å¥–åŠ±æ•°é‡
+    public int weapon;                // æ­¦å™¨å¥–åŠ±æ•°é‡
+    public int food;                  // é£Ÿç‰©å¥–åŠ±æ•°é‡
+    public int intelligence;          // æƒ…æŠ¥å¥–åŠ±æ•°é‡
+    public string moneyIconPath;      // é‡‘é’±å›¾æ ‡è·¯å¾„
+    public string weaponIconPath;     // æ­¦å™¨å›¾æ ‡è·¯å¾„
+    public string foodIconPath;       // é£Ÿç‰©å›¾æ ‡è·¯å¾„
+    public string intelligenceIconPath; // æƒ…æŠ¥å›¾æ ‡è·¯å¾„
 }
 
 [System.Serializable]
 public class MissionDataCollection
 {
-    public List<MissionData> missions; // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7§Ò„1¤7
+    public List<MissionData> missions; // ä»»åŠ¡æ•°æ®åˆ—è¡¨
 }
 
 public class MissionManager : MonoBehaviour
 {
-    // ---------- „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7 ----------
-    [Header("„1¤7„1¤7„1¤7„1¤70Ô5„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7")]
-    [SerializeField] public int currentMissionCount = 0; // „1¤7„1¤70¢2„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7
-    [SerializeField] private GameObject missionItemPrefab; // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤70è0„1¤7„1¤7„1¤7„1¤7
-    [SerializeField] private RawImage missionContainer; // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7RawImage„1¤7„1¤7„1¤7„1¤7„1¤7
+    // ---------- ä»»åŠ¡ç”Ÿæˆç›¸å…³è®¾ç½® ----------
+    [Header("ä»»åŠ¡ç”Ÿæˆè®¾ç½®")]
+    [SerializeField] public int currentMissionCount = 0; // å½“å‰ä»»åŠ¡æ•°é‡ï¼ˆå¯åœ¨Inspectorä¸­è°ƒæ•´ï¼‰
+    [SerializeField] private GameObject missionItemPrefab; // ä»»åŠ¡é¡¹é¢„åˆ¶ä½“
+    [SerializeField] private RawImage missionContainer; // ä»»åŠ¡å®¹å™¨ï¼ˆå¸¦æœ‰RawImageç»„ä»¶ï¼‰
 
-    // ---------- „1¤70Ü6„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7 ----------
-    [Header("„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70¶5„1¤7„1¤7„1¤7„1¤7")]
-    [SerializeField] private GameObject missionDescriptionPanel; // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7
-    [SerializeField] private TextMeshProUGUI missionNameText; // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤703„1¤7„1¤7„1¤7TMP„1¤7„1¤7„1¤7„1¤7„1¤7
-    [SerializeField] private Image missionIconImage; // „1¤7„1¤7„1¤7„1¤70É0„1¤7‚6þ3„1¤7„1¤7„1¤71’0„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70Æ5„1¤7
-    [SerializeField] private Image missionLegendImage; // „1¤7„1¤7„1¤7„1¤70É0„1¤7„1¤7
-    [SerializeField] private TextMeshProUGUI missionDescriptionText; // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤703„1¤7„1¤7„1¤7TMP„1¤7„1¤7„1¤7„1¤7„1¤7
-    [SerializeField] private TextMeshProUGUI missionPublisherText; // „1¤7„1¤7„1¤7±6Ì4„1¤7„1¤7„1¤7„1¤703„1¤7„1¤7„1¤7TMP„1¤7„1¤7„1¤7„1¤7„1¤7
+    // ---------- ä»»åŠ¡è¯¦æƒ…æ˜¾ç¤ºç›¸å…³ ----------
+    [Header("ä»»åŠ¡è¯¦æƒ…æ˜¾ç¤ºè®¾ç½®")]
+    [SerializeField] private GameObject missionDescriptionPanel; // ä»»åŠ¡è¯¦æƒ…é¢æ¿
+    [SerializeField] private TextMeshProUGUI missionNameText; // ä»»åŠ¡åç§°æ–‡æœ¬ï¼ˆTMPç»„ä»¶ï¼‰
+    [SerializeField] private Image missionIconImage; // ä»»åŠ¡å›¾æ ‡æ˜¾ç¤ºï¼ˆImageç»„ä»¶ï¼‰
+    [SerializeField] private Image missionLegendImage; // ä»»åŠ¡å›¾ä¾‹å›¾æ ‡
+    [SerializeField] private TextMeshProUGUI missionDescriptionText; // ä»»åŠ¡æè¿°æ–‡æœ¬ï¼ˆTMPç»„ä»¶ï¼‰
+    [SerializeField] private TextMeshProUGUI missionPublisherText; // ä»»åŠ¡å‘å¸ƒè€…æ–‡æœ¬ï¼ˆTMPç»„ä»¶ï¼‰
 
-    [Header("„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70¶5„1¤7„1¤7„1¤7„1¤7")]
-    [SerializeField] private RawImage rewardContainer; // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7Vertical Layout Group„1¤7„1¤7
-    [SerializeField] private GameObject rewardItemPrefab; // 0Ç0„1¤70‹5„1¤7„1¤7„1¤7„1¤7„1¤70è0„1¤7„1¤7„1¤7„1¤7
+    [Header("å¥–åŠ±æ˜¾ç¤ºè®¾ç½®")]
+    [SerializeField] private RawImage rewardContainer; // å¥–åŠ±å®¹å™¨ï¼ˆéœ€è¦æœ‰Vertical Layout Groupç»„ä»¶ï¼‰
+    [SerializeField] private GameObject rewardItemPrefab; // å•ä¸ªå¥–åŠ±é¡¹é¢„åˆ¶ä½“
 
-    [Header("„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7")]
-    [SerializeField] private string missionDataFileName = "MissionData"; // JSON„1¤70‘4„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70ð5„1¤7„1¤7„1¤7„1¤7
+    [Header("æ•°æ®æ–‡ä»¶è®¾ç½®")]
+    [SerializeField] private string missionDataFileName = "MissionData"; // JSONæ–‡ä»¶åï¼ˆä¸åŒ…å«æ‰©å±•åï¼‰
 
-    // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7
+    // å†…éƒ¨æ•°æ®å­˜å‚¨
     private MissionDataCollection missionDataCollection;
     private Dictionary<int, MissionData> missionDataDict = new Dictionary<int, MissionData>();
 
-    [Header("„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7")]
-    [SerializeField] private bool autoGenerateOnStart = true; // „1¤70¢9„1¤7„1¤71“1„1¤70¶30µ2„1¤70é8„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7
+    [Header("è‡ªåŠ¨ç”Ÿæˆè®¾ç½®")]
+    [SerializeField] private bool autoGenerateOnStart = true; // æ˜¯å¦åœ¨Startæ—¶è‡ªåŠ¨ç”Ÿæˆä»»åŠ¡é¡¹
 
-    // „1¤7›¥„1¤7„1¤7„1¤7„1¤7„1¤70¯2„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70µ6„1¤7„1¤7
+    // å­˜å‚¨ç”Ÿæˆçš„ä»»åŠ¡é¡¹å¯¹è±¡
     private List<GameObject> generatedMissionItems = new List<GameObject>();
 
-    // „1¤7›¥„1¤7„1¤70Á0„1¤7„1¤7„1¤70¯20‘5„1¤7„1¤7„1¤7„1¤7„1¤70µ6„1¤7„1¤7
+    // å­˜å‚¨ç”Ÿæˆçš„å¥–åŠ±é¡¹å¯¹è±¡
     private List<GameObject> generatedRewardItems = new List<GameObject>();
 
-    // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7Vertical Layout Group„1¤7„1¤7„1¤7
+    // å¸ƒå±€ç»„ä»¶Vertical Layout Groupå¼•ç”¨
     private VerticalLayoutGroup layoutGroup;
 
-    // „1¤7„1¤70¢20Ô5„1¤7§Ö„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7-1„1¤7„1¤70¶50‹4„1¤7„1¤70Ô5„1¤7§µ„1¤7
+    // å½“å‰é€‰ä¸­çš„ä»»åŠ¡ç´¢å¼•ï¼ˆ-1è¡¨ç¤ºæ²¡æœ‰é€‰ä¸­ï¼‰
     private int currentSelectedIndex = -1;
 
-    // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70È1„1¤7„1¤7„1¤7
+    // ä»»åŠ¡ç±»åž‹å¸¸é‡å®šä¹‰
     public static readonly string[] MISSION_TYPES = { "explore", "combat", "talk" };
 
     void Start()
     {
-        // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7
+        // åŠ è½½ä»»åŠ¡æ•°æ®
         LoadMissionData();
 
-        // „1¤7„1¤70¶3„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7
+        // åˆå§‹åŒ–ç»„ä»¶å¼•ç”¨
         InitializeComponents();
 
-        // „1¤7„1¤70¶3„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7
+        // åˆå§‹åŒ–ä»»åŠ¡è¯¦æƒ…é¢æ¿
         InitializeMissionDescriptionPanel();
 
-        // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70é8„1¤7„1¤7„1¤7„1¤70­4„1¤7„1¤7„1¤7„1¤7„1¤71¥3„1¤70¢2„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7
+        // å¦‚æžœå¯ç”¨äº†è‡ªåŠ¨ç”Ÿæˆï¼Œåˆ™åœ¨å¼€å§‹æ—¶ç”Ÿæˆä»»åŠ¡é¡¹
         if (autoGenerateOnStart)
         {
             GenerateMissionItems();
         }
     }
 
-    // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤71¥2„1¤7JSON„1¤70‘4„1¤7
+    // ä»ŽResourcesæ–‡ä»¶å¤¹åŠ è½½JSONæ•°æ®
     private void LoadMissionData()
     {
         try
         {
-            // „1¤7„1¤7Resources„1¤70‘4„1¤7„1¤7§Þ„1¤7„1¤7„1¤7JSON„1¤70‘4„1¤7
+            // ä»ŽResourcesæ–‡ä»¶å¤¹åŠ è½½JSONæ–‡ä»¶
             TextAsset jsonFile = Resources.Load<TextAsset>(missionDataFileName);
             if (jsonFile != null)
             {
                 string jsonContent = jsonFile.text;
                 missionDataCollection = JsonUtility.FromJson<MissionDataCollection>(jsonContent);
 
-                // „1¤7„1¤7„1¤7„1¤7„1¤71¥2›¥„1¤7„1¤7„1¤70ö5„1¤7„1¤7„1¤7„1¤70é3„1¤7„1¤7„1¤71‹4„1¤7„1¤7„1¤7
+                // æž„å»ºå­—å…¸ä»¥ä¾¿å¿«é€ŸæŸ¥æ‰¾
                 missionDataDict.Clear();
                 if (missionDataCollection != null && missionDataCollection.missions != null)
                 {
@@ -121,120 +121,120 @@ public class MissionManager : MonoBehaviour
                     {
                         missionDataDict[mission.id] = mission;
                     }
-                    Debug.Log($"MissionManager: „1¤70¯6„1¤7„1¤7„1¤7„1¤7„1¤7 {missionDataCollection.missions.Count} „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7");
+                    Debug.Log($"MissionManager: æˆåŠŸåŠ è½½ {missionDataCollection.missions.Count} ä¸ªä»»åŠ¡æ•°æ®");
                 }
                 else
                 {
-                    Debug.LogWarning("MissionManager: JSON„1¤70‘4„1¤7„1¤7„1¤70¶4„1¤7„1¤7„1¤7„1¤7„1¤70Ë2„1¤7„1¤7");
+                    Debug.LogWarning("MissionManager: JSONæ–‡ä»¶æ ¼å¼é”™è¯¯æˆ–ä¸ºç©º");
                 }
             }
             else
             {
-                Debug.LogError($"MissionManager: „1¤71«9„1¤7„1¤70Ü9„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70‘4„1¤7 {missionDataFileName}.json„1¤7„1¤7„1¤7„1¤70©2„1¤7„1¤7„1¤70‘4„1¤7¦Ë„1¤7„1¤7Resources„1¤70‘4„1¤7„1¤7„1¤7„1¤7„1¤7");
+                Debug.LogError($"MissionManager: æ— æ³•æ‰¾åˆ°æ–‡ä»¶ {missionDataFileName}.jsonï¼Œè¯·ç¡®ä¿æ–‡ä»¶ä½äºŽResourcesæ–‡ä»¶å¤¹ä¸­");
             }
         }
         catch (Exception e)
         {
-            Debug.LogError($"MissionManager: „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70µ2„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7: {e.Message}");
+            Debug.LogError($"MissionManager: åŠ è½½ä»»åŠ¡æ•°æ®æ—¶å‘ç”Ÿé”™è¯¯: {e.Message}");
         }
     }
 
-    // „1¤7„1¤70¶3„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7
+    // åˆå§‹åŒ–ä»»åŠ¡è¯¦æƒ…é¢æ¿
     private void InitializeMissionDescriptionPanel()
     {
-        // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70¢9„1¤7„1¤7„1¤7„1¤7„1¤7
+        // ç¡®ä¿ä»»åŠ¡è¯¦æƒ…é¢æ¿åœ¨å¼€å§‹æ—¶æ˜¯éšè—çš„
         if (missionDescriptionPanel == null)
         {
-            Debug.LogWarning("MissionManager: „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7¦Ä„1¤7„1¤7„1¤7„1¤7");
+            Debug.LogWarning("MissionManager: ä»»åŠ¡è¯¦æƒ…é¢æ¿æœªåˆ†é…");
         }
 
-        // „1¤7„1¤70¶30µ2„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7
+        // åˆå§‹æ—¶éšè—ä»»åŠ¡è¯¦æƒ…é¢æ¿
         if (missionDescriptionPanel != null)
         {
             missionDescriptionPanel.SetActive(false);
         }
 
-        // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7UI„1¤7„1¤7„1¤7
+        // æ£€æŸ¥UIç»„ä»¶
         CheckUIComponents();
     }
 
-    // „1¤7„1¤7„1¤7UI„1¤7„1¤7„1¤7„1¤70¢9„1¤7„1¤7„1¤70©2„1¤7„1¤7„1¤7„1¤7
+    // æ£€æŸ¥UIç»„ä»¶æ˜¯å¦æ­£ç¡®åˆ†é…
     private void CheckUIComponents()
     {
-        if (missionNameText == null) Debug.LogWarning("MissionManager: „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤703„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7TMP„1¤7„1¤7¦Ä„1¤7„1¤7„1¤7„1¤7");
-        if (missionIconImage == null) Debug.LogWarning("MissionManager: „1¤7„1¤7„1¤7„1¤70É0„1¤7„1¤7„1¤7„1¤7„1¤7¦Ä„1¤7„1¤7„1¤70Š0„1¤7„1¤7„1¤7„1¤71’0„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70Æ5„1¤7");
-        if (missionLegendImage == null) Debug.LogWarning("MissionManager: „1¤7„1¤7„1¤7„1¤70É0„1¤7„1¤7„1¤7„1¤7„1¤7¦Ä„1¤7„1¤7„1¤7„1¤7");
-        if (missionDescriptionText == null) Debug.LogWarning("MissionManager: „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤703„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7TMP„1¤7„1¤7¦Ä„1¤7„1¤7„1¤7„1¤7");
-        if (missionPublisherText == null) Debug.LogWarning("MissionManager: „1¤7„1¤7„1¤7±6Ì4„1¤7„1¤7„1¤7„1¤703„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7TMP„1¤7„1¤7¦Ä„1¤7„1¤7„1¤7„1¤7");
+        if (missionNameText == null) Debug.LogWarning("MissionManager: ä»»åŠ¡åç§°æ–‡æœ¬ï¼ˆTMPç»„ä»¶ï¼‰æœªåˆ†é…");
+        if (missionIconImage == null) Debug.LogWarning("MissionManager: ä»»åŠ¡å›¾æ ‡æ˜¾ç¤ºï¼ˆImageç»„ä»¶ï¼‰æœªåˆ†é…");
+        if (missionLegendImage == null) Debug.LogWarning("MissionManager: ä»»åŠ¡å›¾ä¾‹å›¾æ ‡æœªåˆ†é…");
+        if (missionDescriptionText == null) Debug.LogWarning("MissionManager: ä»»åŠ¡æè¿°æ–‡æœ¬ï¼ˆTMPç»„ä»¶ï¼‰æœªåˆ†é…");
+        if (missionPublisherText == null) Debug.LogWarning("MissionManager: ä»»åŠ¡å‘å¸ƒè€…æ–‡æœ¬ï¼ˆTMPç»„ä»¶ï¼‰æœªåˆ†é…");
 
-        // „1¤7„1¤7ýw„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7
-        if (rewardContainer == null) Debug.LogWarning("MissionManager: „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7RawImage„1¤7„1¤7¦Ä„1¤7„1¤7„1¤7„1¤7");
-        if (rewardItemPrefab == null) Debug.LogWarning("MissionManager: „1¤7„1¤7„1¤7„1¤7„1¤7„1¤70è0„1¤7„1¤7„1¤7„1¤7¦Ä„1¤7„1¤7„1¤7„1¤7");
+        // æ£€æŸ¥å¥–åŠ±ç›¸å…³ç»„ä»¶
+        if (rewardContainer == null) Debug.LogWarning("MissionManager: å¥–åŠ±å®¹å™¨ï¼ˆRawImageç»„ä»¶ï¼‰æœªåˆ†é…");
+        if (rewardItemPrefab == null) Debug.LogWarning("MissionManager: å¥–åŠ±é¡¹é¢„åˆ¶ä½“æœªåˆ†é…");
     }
 
-    // „1¤7„1¤70ô8„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70¢9„1¤7„1¤7„1¤7§¹
+    // éªŒè¯ä»»åŠ¡ç±»åž‹æ˜¯å¦æœ‰æ•ˆ
     public bool IsValidMissionType(string type)
     {
         return System.Array.Exists(MISSION_TYPES, t => t == type);
     }
 
-    // „1¤7„1¤70¶50ö8„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70Î4
+    // æ˜¾ç¤ºæŒ‡å®šä»»åŠ¡çš„è¯¦ç»†ä¿¡æ¯
     public void ShowMissionDescription(int missionIndex)
     {
-        // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70¢9„1¤7„1¤7„1¤7„1¤7
+        // æ£€æŸ¥ä»»åŠ¡ç´¢å¼•æ˜¯å¦æœ‰æ•ˆ
         if (!missionDataDict.ContainsKey(missionIndex))
         {
-            Debug.LogWarning($"MissionManager: „1¤70Ü6„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70Ë2 {missionIndex} „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7");
+            Debug.LogWarning($"MissionManager: ä»»åŠ¡ç´¢å¼• {missionIndex} ä¸å­˜åœ¨");
             HideMissionDescription();
             return;
         }
 
         MissionData missionData = missionDataDict[missionIndex];
 
-        // „1¤7„1¤70¶5„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7
+        // æ˜¾ç¤ºä»»åŠ¡è¯¦æƒ…é¢æ¿
         if (missionDescriptionPanel != null)
         {
             missionDescriptionPanel.SetActive(true);
         }
 
-        // „1¤7„1¤7„1¤70†0„1¤7„1¤7„1¤7UI„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7
+        // æ›´æ–°UIæ˜¾ç¤ºå†…å®¹
         UpdateMissionUI(missionData);
 
-        Debug.Log($"MissionManager: „1¤7„1¤70¶5„1¤7„1¤7„1¤7„1¤7 {missionIndex} „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70Î4");
+        Debug.Log($"MissionManager: æ˜¾ç¤ºä»»åŠ¡ {missionIndex} çš„è¯¦ç»†ä¿¡æ¯");
     }
 
-    // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7UI„1¤7„1¤70¶5
+    // æ›´æ–°ä»»åŠ¡UIæ˜¾ç¤º
     private void UpdateMissionUI(MissionData missionData)
     {
-        // „1¤7„1¤7„1¤7„1¤7„1¤703„1¤7„1¤7„1¤7„1¤7„1¤7
+        // æ›´æ–°æ–‡æœ¬å†…å®¹
         if (missionNameText != null) missionNameText.text = missionData.name;
         if (missionDescriptionText != null) missionDescriptionText.text = missionData.description;
         if (missionPublisherText != null) missionPublisherText.text = missionData.publisher;
 
-        // „1¤7„1¤7„1¤71…0„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70É0„1¤7‚6þ3„1¤7„1¤7„1¤71’0„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70Æ5„1¤7
+        // åŠ è½½å¹¶è®¾ç½®ä»»åŠ¡å›¾æ ‡ï¼ˆImageç»„ä»¶ï¼‰
         LoadAndSetSprite(missionData.iconPath, missionIconImage);
 
-        // „1¤7„1¤7„1¤71…0„1¤7„1¤7„1¤7„1¤7„1¤70É0„1¤7„1¤7
+        // åŠ è½½å¹¶è®¾ç½®ä»»åŠ¡å›¾ä¾‹
         LoadAndSetSprite(missionData.legendPath, missionLegendImage);
 
-        // „1¤7„1¤7„1¤70†5„1¤7„1¤7„1¤7„1¤7„1¤70¶5
+        // æ›´æ–°å¥–åŠ±æ˜¾ç¤º
         UpdateRewardDisplay(missionData.reward);
     }
 
-    // „1¤7„1¤7„1¤70†5„1¤7„1¤7„1¤7„1¤7„1¤70¶5 - 0¶0„1¤7„1¤7GridLayoutGroup0µ6„1¤7„1¤7„1¤7„1¤7„1¤7§Ó„1¤7„1¤7„1¤7
+    // æ›´æ–°å¥–åŠ±æ˜¾ç¤º - ä½¿ç”¨GridLayoutGroupå¸ƒå±€
     private void UpdateRewardDisplay(MissionReward reward)
     {
         if (reward == null)
         {
-            Debug.LogWarning("MissionManager: „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70Ë2„1¤7„1¤7");
+            Debug.LogWarning("MissionManager: å¥–åŠ±æ•°æ®ä¸ºç©º");
             return;
         }
 
-        // „1¤7„1¤7„1¤70õ80¢2„1¤7„1¤7„1¤70¯20‘5„1¤7„1¤7„1¤7„1¤7„1¤7
+        // æ¸…é™¤ä¹‹å‰çš„å¥–åŠ±é¡¹
         ClearRewardItems();
-        Debug.Log($"MissionManager: „1¤7„1¤70¶3„1¤7„1¤7„1¤70†5„1¤7„1¤7„1¤7„1¤7„1¤70¶5 - Money:{reward.money}, Weapon:{reward.weapon}, Food:{reward.food}, Intelligence:{reward.intelligence}");
+        Debug.Log($"MissionManager: å¼€å§‹æ˜¾ç¤ºå¥–åŠ± - Money:{reward.money}, Weapon:{reward.weapon}, Food:{reward.food}, Intelligence:{reward.intelligence}");
 
-        // „1¤7„1¤7„1¤7Ó°„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7
+        // å®šä¹‰å¥–åŠ±ç±»åž‹æ•°ç»„
         var rewardTypes = new[]
         {
             new { name = "Funds", amount = reward.money, iconPath = reward.moneyIconPath },
@@ -243,54 +243,54 @@ public class MissionManager : MonoBehaviour
             new { name = "Intelligence", amount = reward.intelligence, iconPath = reward.intelligenceIconPath }
         };
 
-        // 0÷10Ë2„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70„1¤70‘5„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70È2„1¤7„1¤7„1¤7UI„1¤7„1¤7
+        // åªä¸ºæ•°é‡å¤§äºŽ0çš„å¥–åŠ±åˆ›å»ºUIå…ƒç´ 
         int createdCount = 0;
         foreach (var rewardType in rewardTypes)
         {
             if (rewardType.amount > 0)
             {
-                Debug.Log($"MissionManager: „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7 - {rewardType.name}, „1¤7„1¤7„1¤7„1¤7: {rewardType.amount}");
+                Debug.Log($"MissionManager: åˆ›å»ºå¥–åŠ±é¡¹ - {rewardType.name}, æ•°é‡: {rewardType.amount}");
                 CreateRewardItem(rewardType.name, rewardType.amount, rewardType.iconPath);
                 createdCount++;
             }
         }
 
-        Debug.Log($"MissionManager: „1¤7„1¤7„1¤7„1¤7„1¤7„1¤70¶5„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70­4„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7 {createdCount} „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7");
+        Debug.Log($"MissionManager: å¥–åŠ±æ˜¾ç¤ºå®Œæˆï¼Œå…±åˆ›å»º {createdCount} ä¸ªå¥–åŠ±é¡¹");
     }
 
-    // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7
+    // åˆ›å»ºå•ä¸ªå¥–åŠ±é¡¹UI
     private void CreateRewardItem(string itemName, int num, string iconPath)
     {
         if (rewardItemPrefab == null || rewardContainer == null)
         {
-            Debug.LogWarning($"MissionManager: „1¤71«9„1¤7„1¤7„1¤7„1¤7„1¤7{itemName}„1¤7„1¤7„1¤7„1¤7„1¤7ƒ6Ý50¨6„1¤7„1¤70è0„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7");
+            Debug.LogWarning($"MissionManager: æ— æ³•åˆ›å»º{itemName}å¥–åŠ±é¡¹ï¼Œç¼ºå°‘å¿…è¦ç»„ä»¶");
             return;
         }
 
-        // 0µ6„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70è0„1¤7„1¤7„1¤7„1¤7
+        // å®žä¾‹åŒ–å¥–åŠ±é¡¹é¢„åˆ¶ä½“
         GameObject rewardItem = Instantiate(rewardItemPrefab, rewardContainer.transform);
         generatedRewardItems.Add(rewardItem);
 
-        // „1¤7„1¤7„1¤70‹5„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7
+        // è®¾ç½®å¥–åŠ±é¡¹åç§°
         rewardItem.name = $"{itemName}RewardItem";
 
-        // „1¤7„1¤7„1¤7„1¤70è0„1¤7„1¤7„1¤7„1¤7„1¤7§Ö„1¤7„1¤7„1¤7„1¤7„1¤7TextMeshProUGUI„1¤7„1¤7„1¤7
+        // æŸ¥æ‰¾å¹¶è®¾ç½®TextMeshProUGUIç»„ä»¶
         TextMeshProUGUI[] textComponents = rewardItem.GetComponentsInChildren<TextMeshProUGUI>();
 
         foreach (TextMeshProUGUI textComponent in textComponents)
         {
-            // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70‹2„1¤70á8„1¤7„1¤7„1¤703„1¤7„1¤7„1¤7„1¤7„1¤7
+            // æ ¹æ®ç»„ä»¶åç§°è®¾ç½®å¯¹åº”çš„æ–‡æœ¬å†…å®¹
             if (textComponent.name == "ItemName")
             {
-                textComponent.text = itemName; // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤703„1¤7„1¤7„1¤70›3„1¤7„1¤7„1¤7JSON„1¤7„1¤70§0„1¤7„1¤7
+                textComponent.text = itemName; // è®¾ç½®å¥–åŠ±åç§°ï¼ˆæ¥è‡ªJSONæ•°æ®ï¼‰
             }
             else if (textComponent.name == "num")
             {
-                textComponent.text = num.ToString(); // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7JSON„1¤7„1¤70§0„1¤7„1¤7
+                textComponent.text = num.ToString(); // è®¾ç½®å¥–åŠ±æ•°é‡ï¼ˆæ¥è‡ªJSONæ•°æ®ï¼‰
             }
         }
 
-        // „1¤7„1¤7„1¤70Ü6„1¤7„1¤7„1¤7„1¤70‹5„1¤7„1¤7„1¤70É0„1¤7„1¤7
+        // è®¾ç½®å¥–åŠ±å›¾æ ‡
         Image rewardIcon = rewardItem.GetComponentInChildren<Image>();
         if (rewardIcon != null && !string.IsNullOrEmpty(iconPath))
         {
@@ -298,13 +298,13 @@ public class MissionManager : MonoBehaviour
         }
         else if (rewardIcon == null)
         {
-            Debug.LogWarning($"MissionManager: „1¤7„1¤7{itemName}„1¤7„1¤7„1¤7„1¤70è0„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7¦Ä„1¤70Ü9„1¤7Image„1¤7„1¤7„1¤7");
+            Debug.LogWarning($"MissionManager: {itemName}å¥–åŠ±é¡¹ä¸­æœªæ‰¾åˆ°Imageç»„ä»¶");
         }
 
-        Debug.Log($"MissionManager: „1¤7„1¤7„1¤7„1¤7{itemName}„1¤7„1¤7„1¤7„1¤7„1¤7ƒ6Ý5„1¤7„1¤7„1¤7„1¤7: {num}„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7JSON„1¤70‘4„1¤7„1¤7„1¤7");
+        Debug.Log($"MissionManager: æˆåŠŸåˆ›å»º{itemName}å¥–åŠ±é¡¹ï¼Œæ•°é‡: {num}ï¼ˆæ¥è‡ªJSONæ•°æ®ï¼‰");
     }
 
-    // „1¤7„1¤7„1¤71…0„1¤7„1¤7„1¤7„1¤70‹6„1¤7„1¤7„1¤70É00œ2
+    // åŠ è½½å¹¶è®¾ç½®ç²¾çµå›¾ç‰‡
     private void LoadAndSetSprite(string spritePath, Image targetImage)
     {
         if (targetImage == null || string.IsNullOrEmpty(spritePath))
@@ -322,18 +322,18 @@ public class MissionManager : MonoBehaviour
             }
             else
             {
-                Debug.LogWarning($"MissionManager: „1¤71«9„1¤7„1¤7„1¤7„1¤71†2„1¤7„1¤7„1¤70É00œ2: {spritePath}");
+                Debug.LogWarning($"MissionManager: æ— æ³•åŠ è½½ç²¾çµå›¾ç‰‡: {spritePath}");
                 targetImage.gameObject.SetActive(false);
             }
         }
         catch (Exception e)
         {
-            Debug.LogError($"MissionManager: „1¤7„1¤7„1¤71†2„1¤7„1¤7„1¤70É00œ20µ2„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7: {e.Message}");
+            Debug.LogError($"MissionManager: åŠ è½½ç²¾çµå›¾ç‰‡æ—¶å‘ç”Ÿé”™è¯¯: {e.Message}");
             targetImage.gameObject.SetActive(false);
         }
     }
 
-    // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7§Ø„1¤70Á0„1¤7„1¤7„1¤70¯20‘5„1¤7„1¤7„1¤7„1¤7„1¤7
+    // æ¸…é™¤æ‰€æœ‰å¥–åŠ±é¡¹
     private void ClearRewardItems()
     {
         foreach (GameObject item in generatedRewardItems)
@@ -346,7 +346,7 @@ public class MissionManager : MonoBehaviour
         generatedRewardItems.Clear();
     }
 
-    // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7
+    // éšè—ä»»åŠ¡è¯¦æƒ…é¢æ¿
     public void HideMissionDescription()
     {
         if (missionDescriptionPanel != null)
@@ -354,13 +354,13 @@ public class MissionManager : MonoBehaviour
             missionDescriptionPanel.SetActive(false);
         }
 
-        // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70µ20Ü6„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7
+        // åŒæ—¶æ¸…é™¤å¥–åŠ±æ˜¾ç¤º
         ClearRewardItems();
 
-        Debug.Log("MissionManager: „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7");
+        Debug.Log("MissionManager: éšè—ä»»åŠ¡è¯¦æƒ…é¢æ¿");
     }
 
-    // „1¤7„1¤70§00ö8„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7
+    // èŽ·å–æŒ‡å®šç´¢å¼•çš„ä»»åŠ¡æ•°æ®
     public MissionData GetMissionData(int missionIndex)
     {
         if (missionDataDict.ContainsKey(missionIndex))
@@ -370,133 +370,133 @@ public class MissionManager : MonoBehaviour
         return null;
     }
 
-    // „1¤7„1¤7„1¤70†4„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤71£5„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70µ2„1¤7„1¤7„1¤70„5„1¤7
+    // é‡æ–°åŠ è½½ä»»åŠ¡æ•°æ®ï¼ˆç”¨äºŽè¿è¡Œæ—¶æ›´æ–°æ•°æ®ï¼‰
     public void ReloadMissionData()
     {
         LoadMissionData();
 
-        // „1¤7„1¤7„1¤7„1¤7„1¤70¢2„1¤7„1¤70Ô5„1¤7§Ö„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70¶5„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7
+        // å¦‚æžœå½“å‰æœ‰é€‰ä¸­çš„ä»»åŠ¡ï¼Œé‡æ–°æ˜¾ç¤ºå…¶è¯¦æƒ…
         if (currentSelectedIndex != -1)
         {
             ShowMissionDescription(currentSelectedIndex);
         }
     }
 
-    // „1¤7„1¤70¶3„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7
+    // åˆå§‹åŒ–ç»„ä»¶å¼•ç”¨
     private void InitializeComponents()
     {
-        // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70¢9„1¤7„1¤7„1¤7„1¤7„1¤7
+        // æ£€æŸ¥ä»»åŠ¡å®¹å™¨æ˜¯å¦æ­£ç¡®åˆ†é…
         if (missionContainer == null)
         {
-            Debug.LogError("MissionManager: „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7RawImage„1¤7„1¤7¦Ä„1¤7„1¤7„1¤70Š0„1¤7„1¤7„1¤7„1¤7„1¤7Inspector„1¤7„1¤7„1¤7„1¤70û5RawImage„1¤7„1¤7„1¤7");
+            Debug.LogError("MissionManager: ä»»åŠ¡å®¹å™¨ï¼ˆRawImageç»„ä»¶ï¼‰æœªåˆ†é…ï¼Œè¯·åœ¨Inspectorä¸­åˆ†é…RawImageç»„ä»¶");
             return;
         }
 
-        // „1¤7„1¤70§0Vertical Layout Group„1¤7„1¤7„1¤7
+        // èŽ·å–Vertical Layout Groupç»„ä»¶
         layoutGroup = missionContainer.GetComponent<VerticalLayoutGroup>();
         if (layoutGroup == null)
         {
-            Debug.LogError("MissionManager: „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7¦Ä„1¤70Ü9„1¤7Vertical Layout Group„1¤7„1¤7„1¤7„1¤7„1¤7");
+            Debug.LogError("MissionManager: ä»»åŠ¡å®¹å™¨æœªæ‰¾åˆ°Vertical Layout Groupç»„ä»¶");
         }
 
-        // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70è0„1¤7„1¤7„1¤7„1¤7„1¤70¢9„1¤7„1¤7„1¤7„1¤7„1¤7
+        // æ£€æŸ¥ä»»åŠ¡é¡¹é¢„åˆ¶ä½“æ˜¯å¦åˆ†é…
         if (missionItemPrefab == null)
         {
-            Debug.LogError("MissionManager: „1¤7„1¤7„1¤7„1¤7„1¤7„1¤70è0„1¤7„1¤7„1¤7„1¤7¦Ä„1¤7„1¤7„1¤70Š0„1¤7„1¤7„1¤7„1¤7„1¤7Inspector„1¤7„1¤7„1¤7„1¤70û50è0„1¤7„1¤7„1¤7„1¤7");
+            Debug.LogError("MissionManager: ä»»åŠ¡é¡¹é¢„åˆ¶ä½“æœªåˆ†é…ï¼Œè¯·åœ¨Inspectorä¸­åˆ†é…é¢„åˆ¶ä½“");
         }
     }
 
-    // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7
+    // ç”ŸæˆæŒ‡å®šæ•°é‡çš„ä»»åŠ¡é¡¹
     public void GenerateMissionItems()
     {
         if (missionContainer == null || missionItemPrefab == null)
         {
-            Debug.LogWarning("MissionManager: „1¤71«9„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70¨6„1¤71‹3„1¤70Û8„1¤7„1¤7„1¤7");
+            Debug.LogWarning("MissionManager: æ— æ³•ç”Ÿæˆä»»åŠ¡é¡¹ï¼Œç¼ºå°‘å¿…è¦ç»„ä»¶");
             return;
         }
 
-        // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7§Ö„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7
+        // æ¸…é™¤çŽ°æœ‰çš„ä»»åŠ¡é¡¹
         ClearAllMissionItems();
 
-        // „1¤7„1¤7„1¤7„1¤70Ô5„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7
+        // é‡ç½®é€‰ä¸­ç´¢å¼•
         currentSelectedIndex = -1;
 
-        // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70…8„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7
+        // æ ¹æ®å½“å‰ä»»åŠ¡æ•°é‡ç”Ÿæˆä»»åŠ¡é¡¹
         for (int i = 0; i < currentMissionCount; i++)
         {
             CreateMissionItem(i);
         }
 
-        Debug.Log($"MissionManager: „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7 {currentMissionCount} „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7");
+        Debug.Log($"MissionManager: ç”Ÿæˆäº† {currentMissionCount} ä¸ªä»»åŠ¡é¡¹");
     }
 
-    // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7
+    // åˆ›å»ºå•ä¸ªä»»åŠ¡é¡¹
     private void CreateMissionItem(int missionIndex)
     {
-        // 0µ6„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70è0„1¤7„1¤7„1¤7„1¤7
+        // å®žä¾‹åŒ–ä»»åŠ¡é¡¹é¢„åˆ¶ä½“
         GameObject missionItem = Instantiate(missionItemPrefab, missionContainer.transform);
 
-        // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7
+        // è®¾ç½®ä»»åŠ¡é¡¹åç§°
         missionItem.name = $"MissionItem_{missionIndex}";
 
-        // „1¤7„1¤7„1¤70ã3„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7§Ò„1¤7
+        // æ·»åŠ åˆ°ç”Ÿæˆåˆ—è¡¨
         generatedMissionItems.Add(missionItem);
 
-        // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7MissionSection„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7
+        // èŽ·å–å¹¶é…ç½®MissionSectionç»„ä»¶
         MissionSection missionSection = missionItem.GetComponent<MissionSection>();
         if (missionSection != null)
         {
-            // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70È7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7
+            // è®¾ç½®ä»»åŠ¡ç´¢å¼•å’Œç®¡ç†å™¨å¼•ç”¨
             missionSection.SetMissionIndex(missionIndex);
             missionSection.SetMissionManager(this);
 
-            Debug.Log($"MissionManager: „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7 {missionIndex} „1¤7„1¤7MissionSection„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7");
+            Debug.Log($"MissionManager: ä¸ºä»»åŠ¡ {missionIndex} é…ç½®MissionSectionç»„ä»¶");
         }
 
-        Debug.Log($"MissionManager: „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7 {missionIndex}");
+        Debug.Log($"MissionManager: åˆ›å»ºä»»åŠ¡é¡¹ {missionIndex}");
     }
 
-    // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70µ2„1¤7„1¤7„1¤70Š0„1¤7„1¤7„1¤7MissionSection„1¤7„1¤7„1¤70Š0„1¤7
+    // å¤„ç†ä»»åŠ¡é¡¹ç‚¹å‡»äº‹ä»¶ï¼ˆç”±MissionSectionè°ƒç”¨ï¼‰
     public void OnMissionItemClicked(int missionIndex)
     {
-        // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70¢9„1¤7„1¤7„1¤7„1¤70
+        // æ£€æŸ¥å½“å‰ä»»åŠ¡æ•°é‡æ˜¯å¦å¤§äºŽ0
         if (currentMissionCount <= 0)
         {
-            Debug.LogWarning("MissionManager: „1¤7„1¤70¢20‹4„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤71«9„1¤70Ô5„1¤7„1¤7");
+            Debug.LogWarning("MissionManager: å½“å‰æ²¡æœ‰å¯ç”¨ä»»åŠ¡");
             return;
         }
 
-        // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70¢9„1¤7„1¤7„1¤7§¹
+        // æ£€æŸ¥ä»»åŠ¡ç´¢å¼•æ˜¯å¦æœ‰æ•ˆ
         if (missionIndex < 0 || missionIndex >= generatedMissionItems.Count)
         {
-            Debug.LogWarning($"MissionManager: „1¤7„1¤7§¹„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7: {missionIndex}");
+            Debug.LogWarning($"MissionManager: æ— æ•ˆçš„ä»»åŠ¡ç´¢å¼•: {missionIndex}");
             return;
         }
 
-        // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70¢7„1¤70¢20Ô5„1¤7§Ö„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70§0„1¤7„1¤70Ô5„1¤7„1¤7
+        // å¦‚æžœç‚¹å‡»çš„æ˜¯å½“å‰é€‰ä¸­çš„ä»»åŠ¡ï¼Œåˆ™å–æ¶ˆé€‰æ‹©
         if (currentSelectedIndex == missionIndex)
         {
             DeselectCurrentMission();
             return;
         }
 
-        // 0§0„1¤7„1¤70õ80¢20Ô5„1¤7§Ö„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7
+        // å–æ¶ˆä¹‹å‰é€‰ä¸­çš„ä»»åŠ¡
         if (currentSelectedIndex != -1)
         {
             SetMissionConfirmedState(currentSelectedIndex, false);
         }
 
-        // 0Ô5„1¤7„1¤7„1¤70…8„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7
+        // é€‰ä¸­æ–°çš„ä»»åŠ¡
         SetMissionConfirmedState(missionIndex, true);
         currentSelectedIndex = missionIndex;
 
-        // „1¤7„1¤70¶50Ô5„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70Î4
+        // æ˜¾ç¤ºä»»åŠ¡è¯¦ç»†ä¿¡æ¯
         ShowMissionDescription(missionIndex);
 
-        Debug.Log($"MissionManager: 0Ô5„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7 {missionIndex}");
+        Debug.Log($"MissionManager: é€‰ä¸­ä»»åŠ¡ {missionIndex}");
     }
 
-    // 0§0„1¤7„1¤7„1¤7„1¤70¢20Ô5„1¤7§Ö„1¤7„1¤7„1¤7„1¤7„1¤7
+    // å–æ¶ˆå½“å‰é€‰ä¸­çš„ä»»åŠ¡
     public void DeselectCurrentMission()
     {
         if (currentSelectedIndex != -1)
@@ -504,14 +504,14 @@ public class MissionManager : MonoBehaviour
             SetMissionConfirmedState(currentSelectedIndex, false);
             currentSelectedIndex = -1;
 
-            // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7
+            // éšè—ä»»åŠ¡è¯¦æƒ…é¢æ¿
             HideMissionDescription();
 
-            Debug.Log("MissionManager: 0§0„1¤7„1¤70Ô5„1¤7§Ö„1¤70¢2„1¤7„1¤7„1¤7„1¤7");
+            Debug.Log("MissionManager: å–æ¶ˆé€‰ä¸­ä»»åŠ¡");
         }
     }
 
-    // „1¤7„1¤7„1¤7„1¤70ö8„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70©2„1¤7„1¤70ü80Á0
+    // è®¾ç½®ä»»åŠ¡çš„ç¡®è®¤çŠ¶æ€ï¼ˆé€‰ä¸­/æœªé€‰ä¸­ï¼‰
     private void SetMissionConfirmedState(int missionIndex, bool confirmed)
     {
         if (missionIndex >= 0 && missionIndex < generatedMissionItems.Count)
@@ -528,19 +528,19 @@ public class MissionManager : MonoBehaviour
         }
     }
 
-    // „1¤7„1¤70§0„1¤7„1¤70¢20Ô5„1¤7§Ö„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7
+    // èŽ·å–å½“å‰é€‰ä¸­çš„ä»»åŠ¡ç´¢å¼•
     public int GetCurrentSelectedIndex()
     {
         return currentSelectedIndex;
     }
 
-    // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7
+    // æ¸…é™¤æ‰€æœ‰ä»»åŠ¡é¡¹
     public void ClearAllMissionItems()
     {
-        // „1¤7„1¤7„1¤7„1¤70Ô5„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7
+        // é‡ç½®é€‰ä¸­ç´¢å¼•
         currentSelectedIndex = -1;
 
-        // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70¯2„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7
+        // é”€æ¯æ‰€æœ‰ç”Ÿæˆçš„ä»»åŠ¡é¡¹
         foreach (GameObject item in generatedMissionItems)
         {
             if (item != null)
@@ -549,26 +549,26 @@ public class MissionManager : MonoBehaviour
             }
         }
 
-        // „1¤7„1¤7„1¤7„1¤7§Ò„1¤7
+        // æ¸…ç©ºåˆ—è¡¨
         generatedMissionItems.Clear();
 
-        Debug.Log("MissionManager: „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7");
+        Debug.Log("MissionManager: æ¸…é™¤æ‰€æœ‰ä»»åŠ¡é¡¹");
     }
 
-    // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70¯3„1¤70á8„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7
+    // æ·»åŠ ä¸€ä¸ªæ–°ä»»åŠ¡é¡¹ï¼ˆè¿è¡Œæ—¶åŠ¨æ€æ·»åŠ ï¼‰
     public void AddMission()
     {
         currentMissionCount++;
         CreateMissionItem(currentMissionCount - 1);
-        Debug.Log($"MissionManager: „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7«2Œ7„1¤70¢2„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7: {currentMissionCount}");
+        Debug.Log($"MissionManager: æ·»åŠ ä»»åŠ¡ï¼Œå½“å‰ä»»åŠ¡æ•°é‡: {currentMissionCount}");
     }
 
-    // „1¤70œ9„1¤7„1¤7„1¤7„1¤7«1ñ8„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70œ9„1¤7„1¤7„1¤70á8„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7
+    // ç§»é™¤æœ€åŽä¸€ä¸ªä»»åŠ¡é¡¹ï¼ˆè¿è¡Œæ—¶åŠ¨æ€ç§»é™¤ï¼‰
     public void RemoveMission()
     {
         if (currentMissionCount > 0 && generatedMissionItems.Count > 0)
         {
-            // „1¤7„1¤7„1¤70Û8„1¤70œ9„1¤7„1¤7„1¤7„1¤70¢7„1¤70¢20Ô5„1¤7§Ö„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70Ô5„1¤7„1¤70ü80Á0
+            // å¦‚æžœç§»é™¤çš„æ˜¯å½“å‰é€‰ä¸­çš„ä»»åŠ¡ï¼Œåˆ™é‡ç½®é€‰ä¸­çŠ¶æ€
             if (currentSelectedIndex == currentMissionCount - 1)
             {
                 currentSelectedIndex = -1;
@@ -578,7 +578,7 @@ public class MissionManager : MonoBehaviour
                 currentSelectedIndex = -1;
             }
 
-            // „1¤70œ9„1¤7„1¤7„1¤7„1¤70Ý5„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7
+            // ç§»é™¤æœ€åŽä¸€ä¸ªä»»åŠ¡é¡¹
             GameObject lastItem = generatedMissionItems[generatedMissionItems.Count - 1];
             generatedMissionItems.RemoveAt(generatedMissionItems.Count - 1);
 
@@ -588,16 +588,16 @@ public class MissionManager : MonoBehaviour
             }
 
             currentMissionCount--;
-            Debug.Log($"MissionManager: „1¤70œ9„1¤7„1¤7„1¤7„1¤7«2Œ7„1¤70¢2„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7: {currentMissionCount}");
+            Debug.Log($"MissionManager: ç§»é™¤ä»»åŠ¡ï¼Œå½“å‰ä»»åŠ¡æ•°é‡: {currentMissionCount}");
         }
     }
 
-    // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7
+    // è®¾ç½®ä»»åŠ¡æ•°é‡ï¼ˆä¼šé‡æ–°ç”Ÿæˆæ‰€æœ‰ä»»åŠ¡é¡¹ï¼‰
     public void SetMissionCount(int count)
     {
         if (count < 0)
         {
-            Debug.LogWarning("MissionManager: „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70Ë2„1¤7„1¤7„1¤7„1¤7");
+            Debug.LogWarning("MissionManager: ä»»åŠ¡æ•°é‡ä¸èƒ½ä¸ºè´Ÿæ•°");
             return;
         }
 
@@ -605,13 +605,13 @@ public class MissionManager : MonoBehaviour
         GenerateMissionItems();
     }
 
-    // „1¤7„1¤70§0„1¤7„1¤70¢2„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7
+    // èŽ·å–å½“å‰ä»»åŠ¡æ•°é‡
     public int GetMissionCount()
     {
         return currentMissionCount;
     }
 
-    // „1¤7„1¤70§00ö8„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7
+    // èŽ·å–æŒ‡å®šç´¢å¼•çš„ä»»åŠ¡é¡¹GameObject
     public GameObject GetMissionItem(int index)
     {
         if (index >= 0 && index < generatedMissionItems.Count)
@@ -621,16 +621,16 @@ public class MissionManager : MonoBehaviour
         return null;
     }
 
-    // „1¤7„1¤70§0„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7
+    // èŽ·å–æ‰€æœ‰ä»»åŠ¡é¡¹çš„å‰¯æœ¬
     public List<GameObject> GetAllMissionItems()
     {
         return new List<GameObject>(generatedMissionItems);
     }
 
-    // „1¤7„1¤7Inspector„1¤7„1¤70ö5„1¤703„1¤70µ2„1¤7„1¤7„1¤70Š0„1¤7„1¤7„1¤7„1¤71‘72ì9„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7§¹„1¤7„1¤7
+    // Inspectorä¸­å€¼æ”¹å˜æ—¶çš„éªŒè¯æ–¹æ³•
     private void OnValidate()
     {
-        // 0©2„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70Ë2„1¤7„1¤7„1¤7„1¤7
+        // ç¡®ä¿ä»»åŠ¡æ•°é‡ä¸ä¸ºè´Ÿæ•°
         if (currentMissionCount < 0)
         {
             currentMissionCount = 0;

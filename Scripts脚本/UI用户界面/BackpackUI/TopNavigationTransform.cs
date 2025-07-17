@@ -5,20 +5,20 @@ using UnityEngine.EventSystems;
 
 public class TopNavigationTransform : MonoBehaviour
 {
-    [Header("Image„1¤7„1¤7„1¤7„1¤7")]
-    [Header("Sprite0Ý50Ý5„1¤7„1¤70á8")]
-    [SerializeField][FieldLabel("„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70•2„1¤7„1¤7„1¤7")] private Image[] navigationImages; // „1¤7„1¤7„1¤7„1¤7Image„1¤7„1¤7„1¤7„1¤7
-    [SerializeField][FieldLabel("„1¤7„1¤7„1¤7„1¤70ü80Á0„1¤7„1¤7„1¤7„1¤70É00œ2")] private Sprite[] normalSprites; // „1¤7„1¤7„1¤7„1¤70ü80Á0Sprite
-    [SerializeField][FieldLabel("„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70É00œ2")] private Sprite[] clickedSprites; // „1¤7„1¤7„1¤7„1¤7„1¤7Sprite
+    [Header("Imageç»„ä»¶è®¾ç½®")]
+    [Header("Spriteç²¾çµè®¾ç½®")]
+    [SerializeField][FieldLabel("å¯¼èˆªæ å›¾ç‰‡ç»„ä»¶æ•°ç»„")] private Image[] navigationImages; // å¯¼èˆªæ Imageç»„ä»¶
+    [SerializeField][FieldLabel("æ­£å¸¸çŠ¶æ€ç²¾çµæ•°ç»„")] private Sprite[] normalSprites; // æ­£å¸¸çŠ¶æ€Sprite
+    [SerializeField][FieldLabel("ç‚¹å‡»çŠ¶æ€ç²¾çµæ•°ç»„")] private Sprite[] clickedSprites; // ç‚¹å‡»çŠ¶æ€Sprite
 
-    [Header("„1¤71„9„1¤7Image„1¤7„1¤7„1¤7„1¤7")]
-    [SerializeField][FieldLabel("„1¤71„90ï6„1¤70•2Image„1¤7„1¤7„1¤7")] private Image closeImage; // „1¤71„9„1¤7Image„1¤7„1¤7„1¤7
-    [SerializeField][FieldLabel("„1¤71„90ï6„1¤70•2„1¤7„1¤7„1¤7„1¤70ü80Á0„1¤7„1¤7„1¤7„1¤70É00œ2")] private Sprite closeNormalSprite; // „1¤71„9„1¤7„1¤7„1¤7„1¤7„1¤70ü80Á0Sprite
-    [SerializeField][FieldLabel("„1¤71„90ï6„1¤70•2„1¤7„1¤7„1¤70ü80Á0„1¤7„1¤7„1¤7„1¤70É00œ2")] private Sprite closeClickedSprite; // „1¤71„90ð1„1¤7„1¤70ü80Á0Sprite
+    [Header("å…³é—­Imageç»„ä»¶è®¾ç½®")]
+    [SerializeField][FieldLabel("å…³é—­æŒ‰é’®Imageç»„ä»¶")] private Image closeImage; // å…³é—­Imageç»„ä»¶
+    [SerializeField][FieldLabel("å…³é—­æŒ‰é’®æ­£å¸¸çŠ¶æ€ç²¾çµ")] private Sprite closeNormalSprite; // å…³é—­æŒ‰é’®æ­£å¸¸çŠ¶æ€Sprite
+    [SerializeField][FieldLabel("å…³é—­æŒ‰é’®ç‚¹å‡»çŠ¶æ€ç²¾çµ")] private Sprite closeClickedSprite; // å…³é—­æŒ‰é’®ç‚¹å‡»çŠ¶æ€Sprite
 
-    [Header("„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7")]
-    [SerializeField] private RawImage[] panels; // „1¤7„1¤70á8„1¤7„1¤7„1¤7
-    [SerializeField] private Canvas backpackCanvas; // „1¤7„1¤7„1¤7„1¤7Canvas
+    [Header("é¢æ¿å’Œç”»å¸ƒè®¾ç½®")]
+    [SerializeField] private RawImage[] panels; // é¢æ¿æ•°ç»„
+    [SerializeField] private Canvas backpackCanvas; // èƒŒåŒ…Canvas
 
     private int currentSelectedIndex = -1;
     private bool isBackpackOpen = false;
@@ -41,7 +41,7 @@ public class TopNavigationTransform : MonoBehaviour
 
             navigationImages[i].sprite = normalSprites[i];
         }
-        // 08„1¤7„1¤7„1¤7„1¤70¶5„1¤7„1¤70Ý5„1¤7„1¤7„1¤7„1¤7„1¤7
+        // é»˜è®¤æ˜¾ç¤ºç¬¬ä¸€ä¸ªé¢æ¿
         if (panels.Length > 0) panels[0].gameObject.SetActive(true);
     }
 
@@ -77,10 +77,10 @@ public class TopNavigationTransform : MonoBehaviour
     {
         if (closeImage != null)
         {
-            closeImage.sprite = closeClickedSprite; // „1¤7„1¤7„1¤7„1¤7„1¤7§Ý„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70ü80Á0Sprite„1¤7„1¤70Ë2„1¤7„1¤7„1¤7„1¤7
-            StartCoroutine(ResetCloseSprite()); // „1¤70ã11Œ30ö8„1¤7
+            closeImage.sprite = closeClickedSprite; // ç‚¹å‡»æ—¶åˆ‡æ¢åˆ°ç‚¹å‡»çŠ¶æ€Spriteä½œä¸ºè§†è§‰åé¦ˆ
+            StartCoroutine(ResetCloseSprite()); // çŸ­æš‚å»¶è¿ŸåŽæ¢å¤
         }
-        CloseBackpack(); // 0ö1„1¤70ã71„90ï7„1¤7„1¤7„1¤7
+        CloseBackpack(); // ç›´æŽ¥å…³é—­èƒŒåŒ…
     }
 
     private void CloseBackpack()
@@ -89,13 +89,13 @@ public class TopNavigationTransform : MonoBehaviour
         {
             isBackpackOpen = false;
             backpackCanvas.gameObject.SetActive(false);
-            // „1¤70ö8„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7
+            // é‡ç½®é€‰ä¸­çŠ¶æ€
         }
     }
 
     private IEnumerator ResetCloseSprite()
     {
-        yield return new WaitForSeconds(0.2f); // „1¤7„1¤7„1¤7„1¤7„1¤70ã1„1¤7
+        yield return new WaitForSeconds(0.2f); // ç­‰å¾…çŸ­æš‚æ—¶é—´
         if (closeImage != null)
         {
             closeImage.sprite = closeNormalSprite;
@@ -108,14 +108,14 @@ public class TopNavigationTransform : MonoBehaviour
         backpackCanvas.gameObject.SetActive(isBackpackOpen);
         if (isBackpackOpen)
         {
-            // 08„1¤7„1¤70Ô5„1¤7§Ö„1¤70Ý5„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7ƒ6Ý1backpack„1¤7„1¤7„1¤7—¥
+            // é»˜è®¤æ˜¾ç¤ºç¬¬ä¸€ä¸ªé¢æ¿ï¼ˆå‡è®¾ä¸ºbackpackç•Œé¢ï¼‰
             OnNavigationClicked(0);
-            // Open„1¤71²8„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70Ð5„1¤7„1¤7„1¤7ƒ0 3„1¤7„1¤7„1¤7„1¤7UI„1¤7„1¤7„1¤7ƒ0 3„1¤7„1¤70¶5„1¤7„1¤7„1¤7„1¤7
-            // „1¤70¯1„1¤7BackpackState0¡4„1¤702„1¤7„1¤7„1¤7
+            // æ‰“å¼€èƒŒåŒ…æ—¶ç¡®ä¿æ˜¾ç¤ºç¬¬ä¸€ä¸ªé¢æ¿ï¼Œæä¾›ä¸€è‡´çš„UIä½“éªŒ
+            // è°ƒç”¨BackpackStateä¸­çš„æ–¹æ³•
         }
         else
         {
-            // Close„1¤71²8„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70Ð5„1¤7„1¤7„1¤7„1¤7„1¤7
+            // å…³é—­èƒŒåŒ…æ—¶çš„å…¶ä»–é€»è¾‘
         }
     }
 }

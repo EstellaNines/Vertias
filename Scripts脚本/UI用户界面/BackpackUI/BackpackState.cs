@@ -5,48 +5,48 @@ using UnityEngine.UI;
 
 public class BackpackState : MonoBehaviour
 {
-    [Header("„1¤7„1¤7„1¤7„1¤7UI„1¤7„1¤7„1¤7")]
-    [SerializeField] private Canvas backpackCanvas; // „1¤7„1¤7„1¤7„1¤7Canvas„1¤7„1¤7„1¤7
-    [SerializeField] private PlayerInputController playerInputController; // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7
-    [SerializeField] private ButtonOpenPlatform buttonOpenPlatform; // „1¤7„1¤70•2090À6„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7
-    [SerializeField] private TopNavigationTransform topNav; // TopNavigationTransform„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7
+    [Header("èƒŒåŒ…UIç»„ä»¶")]
+    [SerializeField] private Canvas backpackCanvas; // èƒŒåŒ…Canvasç»„ä»¶
+    [SerializeField] private PlayerInputController playerInputController; // çŽ©å®¶è¾“å…¥æŽ§åˆ¶å™¨ç»„ä»¶
+    [SerializeField] private ButtonOpenPlatform buttonOpenPlatform; // æŒ‰é’®å¼€å¯å¹³å°ç»„ä»¶
+    [SerializeField] private TopNavigationTransform topNav; // TopNavigationTransformç»„ä»¶å¼•ç”¨
 
-    [Header("0ü80Á0„1¤7„1¤7„1¤7„1¤7")]
-    private bool isBackpackOpen = false; // „1¤7„1¤7„1¤7„1¤7„1¤70¢9„1¤7„1¤7
-    private bool isInitialized = false; // „1¤70¢9„1¤7„1¤70Ö3„1¤70¶3„1¤7„1¤7
+    [Header("çŠ¶æ€å˜é‡")]
+    private bool isBackpackOpen = false; // èƒŒåŒ…æ˜¯å¦æ‰“å¼€
+    private bool isInitialized = false; // æ˜¯å¦å·²åˆå§‹åŒ–
 
     private void Start()
     {
         InitializeBackpack();
     }
 
-    // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤71“1¼T„1¤7„1¤7„1¤7„1¤7
+    // è®¾ç½®çŽ©å®¶è¾“å…¥æŽ§åˆ¶å™¨ï¼Œè¿™ä¸ªæ–¹æ³•å¯ä»¥è¢«å¤–éƒ¨è°ƒç”¨æ¥åŠ¨æ€è®¾ç½®è¾“å…¥æŽ§åˆ¶å™¨
     public void SetPlayerInputController(PlayerInputController controller)
     {
-        // „1¤7„1¤7„1¤7„1¤7„1¤70¯2„1¤7„1¤70†4„1¤7„1¤7„1¤7„1¤7„1¤7
+        // å…ˆè§£é™¤æ—§çš„äº‹ä»¶ç»‘å®š
         if (playerInputController != null)
         {
             playerInputController.onBackPack -= ToggleBackpack;
-            Debug.Log("BackpackState: „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70¯2„1¤7„1¤70†4„1¤7„1¤7„1¤7„1¤7„1¤7");
+            Debug.Log("BackpackState: å·²è§£é™¤æ—§çš„äº‹ä»¶ç»‘å®š");
         }
 
         playerInputController = controller;
 
-        // „1¤7„1¤7„1¤70…6„1¤70¶3„1¤7„1¤7
-        isInitialized = false; // „1¤7„1¤7„1¤7¨®„1¤70¶3„1¤7„1¤7„1¤7„1¤70÷4
+        // é‡æ–°åˆå§‹åŒ–
+        isInitialized = false; // é‡ç½®åˆå§‹åŒ–æ ‡å¿—
         InitializeBackpack();
     }
 
-    // „1¤7„1¤70¶3„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70Ð30È1
+    // åˆå§‹åŒ–èƒŒåŒ…ç³»ç»Ÿ
     private void InitializeBackpack()
     {
         if (isInitialized)
         {
-            Debug.Log("BackpackState: „1¤70×4„1¤7„1¤7„1¤70¶3„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤71…6„1¤7„1¤7„1¤70¶3„1¤7„1¤7");
+            Debug.Log("BackpackState: å·²ç»åˆå§‹åŒ–è¿‡äº†ï¼Œè·³è¿‡é‡å¤åˆå§‹åŒ–");
             return;
         }
 
-        // „1¤7„1¤70¶3„1¤7„1¤70µ2„1¤71„90ï7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7
+        // åˆå§‹åŒ–æ—¶ç¡®ä¿èƒŒåŒ…æ˜¯å…³é—­çŠ¶æ€
         if (backpackCanvas != null)
         {
             backpackCanvas.gameObject.SetActive(false);
@@ -54,86 +54,83 @@ public class BackpackState : MonoBehaviour
         }
         else
         {
-            Debug.LogError("BackpackState: „1¤7„1¤7„1¤7„1¤7Canvas¦Ä„1¤7„1¤7„1¤70Š0„1¤7„1¤7„1¤7„1¤7„1¤7Inspector„1¤7„1¤7„1¤7„1¤70û5Canvas„1¤7„1¤7„1¤7");
+            Debug.LogError("BackpackState: èƒŒåŒ…Canvasæœªè®¾ç½®ï¼è¯·åœ¨Inspectorä¸­è®¾ç½®Canvasç»„ä»¶");
             return;
         }
 
-        // „1¤70œ9„1¤7„1¤71„90ï6„1¤70•2„1¤7„1¤71…1„1¤70¶3„1¤7„1¤7
-        // if (closeButton != null) { ... }
-
-        // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70†4„1¤7„1¤7„1¤7„1¤7„1¤7
+        // ç»‘å®šçŽ©å®¶è¾“å…¥äº‹ä»¶ï¼ˆå¦‚æžœè¾“å…¥æŽ§åˆ¶å™¨å­˜åœ¨ï¼‰
         if (playerInputController != null)
         {
-            // 0©2„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤71…6„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70†4„1¤7„1¤7„1¤7„1¤7„1¤7
-            playerInputController.onBackPack -= ToggleBackpack; // „1¤7„1¤7„1¤70œ9„1¤7
-            playerInputController.onBackPack += ToggleBackpack;  // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7
-            playerInputController.EnabledUIInput();
+            // å…ˆè§£é™¤å¯èƒ½å­˜åœ¨çš„é‡å¤ç»‘å®š
+            playerInputController.onBackPack -= ToggleBackpack; // å…ˆè§£é™¤
+            playerInputController.onBackPack += ToggleBackpack;  // å†ç»‘å®š
+            playerInputController.EnabledUIInput(); // ä¿®å¤æ–¹æ³•å
 
             isInitialized = true;
-            Debug.Log("BackpackState: „1¤7„1¤7„1¤7„1¤70Ð30È1„1¤7„1¤70¶3„1¤7„1¤7„1¤7„1¤7„1¤7");
+            Debug.Log("BackpackState: èƒŒåŒ…ç³»ç»Ÿåˆå§‹åŒ–å®Œæˆ");
         }
         else
         {
-            Debug.LogWarning("BackpackState: PlayerInputController¦Ä„1¤7„1¤7„1¤70Š0„1¤7„1¤70¨9„1¤7„1¤7¼T„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7");
+            Debug.LogWarning("BackpackState: PlayerInputControlleræœªè®¾ç½®ï¼Œæ— æ³•ç»‘å®šè¾“å…¥äº‹ä»¶");
         }
     }
 
-    // „1¤7§Ý„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70ü80Á0
+    // åˆ‡æ¢èƒŒåŒ…å¼€å…³çŠ¶æ€
     private void ToggleBackpack()
     {
         if (topNav != null)
         {
-            topNav.ToggleBackpack(); // „1¤7„1¤7„1¤7„1¤70¡4„1¤706„1¤7„1¤7ToggleBackpack
+            topNav.ToggleBackpack(); // å§”æ‰˜ç»™TopNavigationTransformå¤„ç†
         }
     }
 
-    // „1¤7É1ˆ7„1¤7„1¤7„1¤7
+    // æ‰“å¼€èƒŒåŒ…
     private void OpenBackpack()
     {
-        // „1¤7É1ˆ7„1¤7„1¤7„1¤7UI0µ2„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70Ð5„1¤7„1¤7„1¤7ƒ0 3„1¤7„1¤7„1¤7„1¤7UI„1¤7„1¤7„1¤7„1¤7
+        // æ‰“å¼€èƒŒåŒ…UIæ—¶ï¼Œç¦ç”¨æ¸¸æˆçŽ©æ³•è¾“å…¥ï¼Œå¯ç”¨UIè¾“å…¥
         if (playerInputController != null)
         {
             playerInputController.DisableGameplayInput();
-            playerInputController.EnabledUIInput();
+            playerInputController.EnabledUIInput(); // ä¿®å¤æ–¹æ³•å
         }
 
-        // „1¤7„1¤70¶5„1¤7„1¤7„1¤7„1¤7„1¤7
+        // æ˜¾ç¤ºé¼ æ ‡å…‰æ ‡
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
 
-        // „1¤7„1¤70¶508„1¤7„1¤7„1¤7„1¤7„1¤7
+        // æ˜¾ç¤ºé»˜è®¤é¢æ¿
         ShowDefaultPanel();
     }
 
-    // „1¤71„90ï7„1¤7„1¤7„1¤7
+    // å…³é—­èƒŒåŒ…
     private void CloseBackpack()
     {
-        // „1¤71„90ï7„1¤7„1¤7„1¤70µ2„1¤70ö8„1¤7„1¤7„1¤70Ð5„1¤7„1¤7„1¤7ƒ0 3„1¤7„1¤7„1¤7„1¤7UI„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70é3„1¤7„1¤7„1¤70á8Tab„1¤7„1¤7
+        // å…³é—­èƒŒåŒ…æ—¶ï¼Œæ¢å¤æ¸¸æˆçŽ©æ³•è¾“å…¥ï¼Œä¿æŒUIè¾“å…¥å¯ç”¨ä»¥æ”¯æŒå…¶ä»–UIå’ŒTabé”®
         if (playerInputController != null)
         {
             playerInputController.EnabledGameplayInput();
-            // „1¤7„1¤7„1¤7„1¤7UI„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70é3„1¤7„1¤7„1¤70á8Tab„1¤7„1¤7
+            // ä¿æŒUIè¾“å…¥å¯ç”¨ä»¥æ”¯æŒå…¶ä»–UIå’ŒTabé”®
         }
 
-        // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70¯9„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70ü80Á0
+        // æ ¹æ®æ¸¸æˆéœ€è¦å†³å®šæ˜¯å¦éšè—å…‰æ ‡ï¼Œè¿™é‡Œä¿æŒæ˜¾ç¤ºçŠ¶æ€
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
 
-        // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7
+        // éšè—æ‰€æœ‰é¢æ¿
         HideAllPanels();
     }
 
-    // „1¤7„1¤70¶508„1¤7„1¤7„1¤7„1¤7„1¤7
+    // æ˜¾ç¤ºé»˜è®¤é¢æ¿
     private void ShowDefaultPanel()
     {
         if (buttonOpenPlatform != null)
         {
-            // 08„1¤7„1¤70Ô5„1¤7§Ö„1¤70„1¤7„1¤7„1¤7„1¤70•2„1¤7„1¤7„1¤7„1¤70¶5„1¤7„1¤70á8„1¤707„1¤70„1¤7„1¤7RawImage
+            // é»˜è®¤æ˜¾ç¤ºç¬¬ä¸€ä¸ªæŒ‰é’®å¯¹åº”çš„é¢æ¿ï¼Œé€šå¸¸æ˜¯èƒŒåŒ…ä¸»ç•Œé¢çš„RawImage
             buttonOpenPlatform.SelectButton(0);
         }
     }
 
-    // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7
+    // éšè—æ‰€æœ‰é¢æ¿
     private void HideAllPanels()
     {
         if (buttonOpenPlatform != null)
@@ -142,7 +139,7 @@ public class BackpackState : MonoBehaviour
         }
     }
 
-    // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70£6„1¤7051„90ï7„1¤7„1¤7„1¤7
+    // å¼ºåˆ¶å…³é—­èƒŒåŒ…ï¼ˆå¤–éƒ¨è°ƒç”¨ï¼‰
     public void ForceCloseBackpack()
     {
         if (isBackpackOpen)
@@ -156,7 +153,7 @@ public class BackpackState : MonoBehaviour
         }
     }
 
-    // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70£6„1¤700É1ˆ7„1¤7„1¤7„1¤7
+    // å¼ºåˆ¶æ‰“å¼€èƒŒåŒ…ï¼ˆå¤–éƒ¨è°ƒç”¨ï¼‰
     public void ForceOpenBackpack()
     {
         if (!isBackpackOpen)
@@ -170,7 +167,7 @@ public class BackpackState : MonoBehaviour
         }
     }
 
-    // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70§0„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70ü80Á0
+    // èŽ·å–èƒŒåŒ…æ˜¯å¦æ‰“å¼€çš„çŠ¶æ€
     public bool IsBackpackOpen()
     {
         return isBackpackOpen;
@@ -178,15 +175,15 @@ public class BackpackState : MonoBehaviour
 
     private void OnDestroy()
     {
-        // „1¤7„1¤7„1¤7„1¤7„1¤70†4„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70é9„1¤70ö9„1¤71’0„1¤7§Û0„8
+        // ç»„ä»¶é”€æ¯æ—¶è§£é™¤äº‹ä»¶ç»‘å®šï¼Œé˜²æ­¢å†…å­˜æ³„æ¼
         if (playerInputController != null)
         {
             playerInputController.onBackPack -= ToggleBackpack;
         }
     }
 
-        // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70…6„1¤70¶3„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤71“1¼T„1¤7„1¤7„1¤7„1¤7
-        public void ReInitialize()
+    // é‡æ–°åˆå§‹åŒ–æ–¹æ³•ï¼ˆå¤–éƒ¨è°ƒç”¨ï¼‰
+    public void ReInitialize()
     {
         isInitialized = false;
         InitializeBackpack();
