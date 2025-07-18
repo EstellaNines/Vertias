@@ -2,42 +2,42 @@ using UnityEngine;
 
 public class EnemyAttackState : IState
 {
-    // --- ¿ØÖÆÆ÷ÒıÓÃ ---
+    // --- æ§åˆ¶å™¨å¼•ç”¨ ---
     Enemy enemy;
     private float attackTime = 0f;
     private float maxAttackTime = 5f;
     private int shotsFired = 0;
-    private int maxShots = 30; // Õâ¸öÖµÓ¦¸Ã´ÓÎäÆ÷µÄµ¯¼ĞÈİÁ¿»ñÈ¡
+    private int maxShots = 30; // è¿™ä¸ªå€¼åº”è¯¥ä»æ­¦å™¨çš„å¼¹å¤¹å®¹é‡è·å–
     private float lastShotTime = 0f;
     private bool isReloading = false;
     private float reloadStartTime = 0f;
-    private float reloadDuration = 1.5f; // µĞÈË¹Ì¶¨»»µ¯Ê±¼ä
+    private float reloadDuration = 1.5f; // æ•Œäººå›ºå®šæ¢å¼¹æ—¶é—´
 
-    // --- ¹¹Ôìº¯Êı --- 
+    // --- æ„é€ å‡½æ•° --- 
     public EnemyAttackState(Enemy enemy)
     {
         this.enemy = enemy;
     }
 
-    // --- ×´Ì¬·½·¨ ---
+    // --- çŠ¶æ€æ–¹æ³• ---
     public void OnEnter()
     {
-        // Í£Ö¹ÒÆ¶¯
+        // åœæ­¢ç§»åŠ¨
         if (enemy.RB != null)
         {
             enemy.RB.velocity = Vector2.zero;
         }
 
-        // ²¥·Å´ı»ú¶¯»­
+        // æ’­æ”¾å¾…æœºåŠ¨ç”»
         if (enemy.animator != null)
         {
             enemy.animator.Play("Idle");
         }
 
-        // ÖØÖÃ¹¥»÷Ê±¼ä
+        // é‡ç½®æ”»å‡»æ—¶é—´
         attackTime = 0f;
 
-        // »ñÈ¡ÎäÆ÷µ¯¼ĞÈİÁ¿
+        // è·å–æ­¦å™¨å¼¹å¤¹å®¹é‡
         if (enemy.weaponController != null)
         {
             maxShots = enemy.weaponController.GetMagazineCapacity();
@@ -46,50 +46,50 @@ public class EnemyAttackState : IState
 
     public void OnExit()
     {
-        // ÍË³ö¹¥»÷×´Ì¬
+        // é€€å‡ºæ”»å‡»çŠ¶æ€
         isReloading = false;
     }
 
     public void OnFixedUpdate()
     {
-        // ÎïÀí¸üĞÂ
+        // ç‰©ç†æ›´æ–°
     }
 
     public void OnUpdate()
     {
-        // ¼ì²éÊÇ·ñËÀÍö - ×î¸ßÓÅÏÈ¼¶
+        // æ£€æŸ¥æ˜¯å¦æ­»äº¡ - æœ€é«˜ä¼˜å…ˆçº§
         if (enemy.isDead)
         {
             enemy.transitionState(EnemyState.Dead);
             return;
         }
 
-        // ÅĞ¶ÏÊÇ·ñÊÜÉË
+        // åˆ¤æ–­æ˜¯å¦å—ä¼¤
         if (enemy.isHurt)
         {
             enemy.transitionState(EnemyState.Hurt);
             return;
         }
 
-        // ¼ì²éÍæ¼ÒÊÇ·ñÒÑËÀÍö
+        // æ£€æŸ¥ç©å®¶æ˜¯å¦å·²æ­»äº¡
         if (enemy.IsPlayerDead())
         {
-            Debug.Log("Íæ¼ÒÒÑËÀÍö£¬µĞÈËÍ£Ö¹¹¥»÷");
+            Debug.Log("ç©å®¶å·²æ­»äº¡ï¼Œæ•Œäººåœæ­¢æ”»å‡»");
             enemy.shouldPatrol = true;
             enemy.transitionState(EnemyState.Patrol);
             return;
         }
 
-        // ¼ì²éÍæ¼ÒÊÇ·ñ³¬³ö¹¥»÷·¶Î§
+        // æ£€æŸ¥ç©å®¶æ˜¯å¦è¶…å‡ºæ”»å‡»èŒƒå›´
         if (!IsPlayerInAttackRange())
         {
-            Debug.Log("Íæ¼Ò³¬³ö¹¥»÷·¶Î§£¬µĞÈËÍ£Ö¹¹¥»÷");
+            Debug.Log("ç©å®¶è¶…å‡ºæ”»å‡»èŒƒå›´ï¼Œæ•Œäººåœæ­¢æ”»å‡»");
             enemy.shouldPatrol = true;
             enemy.transitionState(EnemyState.Patrol);
             return;
         }
 
-        // Èç¹ûÍæ¼Ò²»ÔÙ±»¼ì²âµ½»òÕß½øÈëÇ±ĞĞ×´Ì¬£¬·µ»ØÑ²Âß×´Ì¬
+        // å¦‚æœç©å®¶ä¸å†è¢«æ£€æµ‹åˆ°æˆ–è€…è¿›å…¥æ½œè¡ŒçŠ¶æ€ï¼Œè¿”å›å·¡é€»çŠ¶æ€
         if (!enemy.IsPlayerDetected() || enemy.IsPlayerCrouching())
         {
             enemy.shouldPatrol = true;
@@ -97,40 +97,40 @@ public class EnemyAttackState : IState
             return;
         }
 
-        // ´¦Àí»»µ¯Âß¼­
+        // å¤„ç†æ¢å¼¹é€»è¾‘
         if (isReloading)
         {
             if (Time.time >= reloadStartTime + reloadDuration)
             {
-                // »»µ¯Íê³É
+                // æ¢å¼¹å®Œæˆ
                 isReloading = false;
-                shotsFired = 0; // ÖØÖÃÉä»÷¼ÆÊı
-                Debug.Log("µĞÈË»»µ¯Íê³É");
+                shotsFired = 0; // é‡ç½®å°„å‡»è®¡æ•°
+                Debug.Log("æ•Œäººæ¢å¼¹å®Œæˆ");
 
-                // Èç¹ûÓĞÎäÆ÷¿ØÖÆÆ÷£¬ÖØÖÃÆäµ¯Ò©
+                // å¦‚æœæœ‰æ­¦å™¨æ§åˆ¶å™¨ï¼Œé‡ç½®å…¶å¼¹è¯
                 if (enemy.weaponController != null)
                 {
-                    // ÕâÀïĞèÒªÔÚWeaponManagerÖĞÌí¼ÓÒ»¸öÖØÖÃµ¯Ò©µÄ·½·¨
+                    // è¿™é‡Œéœ€è¦åœ¨WeaponManagerä¸­æ·»åŠ ä¸€ä¸ªé‡ç½®å¼¹è¯çš„æ–¹æ³•
                     enemy.weaponController.currentAmmo = enemy.weaponController.GetMagazineCapacity();
                 }
             }
             else
             {
-                // »»µ¯ÖĞ£¬²»½øĞĞÉä»÷
+                // æ¢å¼¹ä¸­ï¼Œä¸è¿›è¡Œå°„å‡»
                 return;
             }
         }
 
-        // ¼ì²éÊÇ·ñĞèÒª»»µ¯
+        // æ£€æŸ¥æ˜¯å¦éœ€è¦æ¢å¼¹
         if (shotsFired >= maxShots && !isReloading)
         {
-            Debug.Log("µĞÈË¿ªÊ¼»»µ¯");
+            Debug.Log("æ•Œäººå¼€å§‹æ¢å¼¹");
             isReloading = true;
             reloadStartTime = Time.time;
             return;
         }
 
-        // Éä»÷£¬²¢¼ÆÊı
+        // å°„å‡»ï¼Œå¹¶è®¡æ•°
         if (Time.time >= enemy.nextFireTime && shotsFired < maxShots && !isReloading)
         {
             enemy.Shoot();
@@ -138,7 +138,7 @@ public class EnemyAttackState : IState
             lastShotTime = Time.time;
         }
 
-        // ¹¥»÷Ò»¶ÎÊ±¼äºóÇĞ»»»ØÃé×¼×´Ì¬
+        // æ”»å‡»ä¸€æ®µæ—¶é—´ååˆ‡æ¢å›ç„å‡†çŠ¶æ€
         attackTime += Time.deltaTime;
         if (attackTime >= maxAttackTime)
         {
@@ -146,24 +146,24 @@ public class EnemyAttackState : IState
         }
     }
 
-    // »ñÈ¡ÒÑ·¢Éä×Óµ¯ÊıÁ¿
+    // è·å–å·²å‘å°„å­å¼¹æ•°é‡
     public int GetShotsFired()
     {
         return shotsFired;
     }
 
-    // ÖØÖÃÒÑ·¢Éä×Óµ¯ÊıÁ¿
+    // é‡ç½®å·²å‘å°„å­å¼¹æ•°é‡
     public void ResetShotsFired()
     {
         shotsFired = 0;
     }
 
-    // ¼ì²éÊÇ·ñÕıÔÚ»»µ¯
+    // æ£€æŸ¥æ˜¯å¦æ­£åœ¨æ¢å¼¹
     public bool IsReloading()
     {
         return isReloading;
     }
-    // ¼ì²éÍæ¼ÒÊÇ·ñÔÚ¹¥»÷·¶Î§ÄÚ
+    // æ£€æŸ¥ç©å®¶æ˜¯å¦åœ¨æ”»å‡»èŒƒå›´å†…
     private bool IsPlayerInAttackRange()
     {
         if (enemy.player == null) return false;
@@ -172,7 +172,7 @@ public class EnemyAttackState : IState
         Vector2 playerPosition = enemy.player.transform.position;
         float distanceToPlayer = Vector2.Distance(enemyPosition, playerPosition);
 
-        // ¼ì²é¾àÀëÊÇ·ñÔÚ¼ì²â·¶Î§ÄÚ
+        // æ£€æŸ¥è·ç¦»æ˜¯å¦åœ¨æ£€æµ‹èŒƒå›´å†…
         return distanceToPlayer <= enemy.playerDetectionRadius;
     }
 }

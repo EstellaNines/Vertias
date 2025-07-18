@@ -12,13 +12,13 @@ public class PlayerInputController : ScriptableObject, PlayerInputAction.IGamePl
     [Header("游戏玩法事件")]
     public UnityAction<Vector2> onMovement; // 移动事件
     public UnityAction<Vector2> onLook; // 视角事件
-    public UnityAction onAttack; // 攻击事件
+    public UnityAction<bool> onFire; // 统一的开火事件（true=按下，false=释放）
     public UnityAction onDodge; // 闪避事件
     public UnityAction onReload; // 重新装弹事件
-    public UnityAction onRun; // 奔跑事件
-    public UnityAction onCrouch; // 蹲下事件
+    public UnityAction<bool> onRun; // 奔跑事件
+    public UnityAction<bool> onCrouch; // 蹲下事件
     public UnityAction onCrawl; // 爬行事件
-    public UnityAction onPickUp; // 拾取事件
+    public UnityAction onPickup; // 拾取事件
 
     // UI相关事件
     [Header("UI相关事件")]
@@ -31,7 +31,7 @@ public class PlayerInputController : ScriptableObject, PlayerInputAction.IGamePl
     [Header("状态变量")]
     public bool isRunPressed = false; // 是否按下奔跑
     public bool isCrouchPressed = false; // 是否按下蹲下
-    public bool isAttackPressed = false; // 是否按下攻击
+    public bool isFirePressed = false; // 是否按下开火
 
     private void OnEnable()
     {
@@ -110,18 +110,22 @@ public class PlayerInputController : ScriptableObject, PlayerInputAction.IGamePl
         onLook?.Invoke(lookVector);
     }
 
-    // 攻击输入
+    // 统一的开火输入处理
     public void OnFire(InputAction.CallbackContext context)
     {
-        if (context.performed)
+        if (context.started)
         {
-            isAttackPressed = true;
-            onAttack?.Invoke();
-            Debug.Log("攻击按下");
+            // 按键开始按下
+            isFirePressed = true;
+            onFire?.Invoke(true);
+            Debug.Log("开火按键按下");
         }
         else if (context.canceled)
         {
-            isAttackPressed = false;
+            // 按键释放
+            isFirePressed = false;
+            onFire?.Invoke(false);
+            Debug.Log("开火按键释放");
         }
     }
 
@@ -151,12 +155,13 @@ public class PlayerInputController : ScriptableObject, PlayerInputAction.IGamePl
         if (context.performed)
         {
             isRunPressed = true;
-            onRun?.Invoke();
+            onRun?.Invoke(true);
             Debug.Log("奔跑按下");
         }
         else if (context.canceled)
         {
             isRunPressed = false;
+            onRun?.Invoke(false);
             Debug.Log("奔跑释放");
         }
     }
@@ -167,7 +172,7 @@ public class PlayerInputController : ScriptableObject, PlayerInputAction.IGamePl
         if (context.performed)
         {
             isCrouchPressed = !isCrouchPressed; // 切换状态
-            onCrouch?.Invoke();
+            onCrouch?.Invoke(isCrouchPressed);
             Debug.Log($"蹲下状态: {isCrouchPressed}");
         }
     }
@@ -187,7 +192,7 @@ public class PlayerInputController : ScriptableObject, PlayerInputAction.IGamePl
     {
         if (context.performed)
         {
-            onPickUp?.Invoke();
+            onPickup?.Invoke();
             Debug.Log("拾取触发");
         }
     }
@@ -248,7 +253,7 @@ public class PlayerInputController : ScriptableObject, PlayerInputAction.IGamePl
     {
         isRunPressed = false;
         isCrouchPressed = false;
-        isAttackPressed = false;
+        isFirePressed = false;
         Debug.Log("输入状态已重置");
     }
 

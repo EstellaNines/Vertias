@@ -2,111 +2,111 @@ using UnityEngine;
 
 public class EnemyAimState : IState
 {
-    // --- „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7 ---
+    // --- æ•Œäººçž„å‡†çŠ¶æ€ ---
     Enemy enemy;
     private float aimTime = 0f;
-    private float maxAimTime = 0.05f; // „1¤7„1¤70ý60µ2„1¤7„1¤7„1¤70.5„1¤7„1¤7„1¤7„1¤71‹7„1¤70.2„1¤7ƒ0 3„1¤7„1¤71²3„1¤70á8„1¤71‹8„1¤7
-    private float cooldownTime = 0.5f; // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70¨90µ2„1¤7„1¤7
-    private float cooldownTimer = 0f; // „1¤7„1¤70¨9„1¤7„1¤70µ2„1¤7„1¤7
-    private bool inCooldown = false; // „1¤70¢9„1¤7„1¤7„1¤7„1¤7„1¤70¨9„1¤7„1¤7
-    
-    // --- „1¤7„1¤7„1¤7ƒ4Õ4„1¤7„1¤7 --- 
+    private float maxAimTime = 0.05f; // çž„å‡†æ—¶é—´ï¼Œå¯ä»¥è°ƒæ•´è¿™ä¸ªå€¼æ¥æŽ§åˆ¶çž„å‡†é€Ÿåº¦
+    private float cooldownTime = 0.5f; // å°„å‡»å†·å´æ—¶é—´
+    private float cooldownTimer = 0f; // å†·å´è®¡æ—¶å™¨
+    private bool inCooldown = false; // æ˜¯å¦åœ¨å†·å´ä¸­
+
+    // --- æž„é€ å‡½æ•° --- 
     public EnemyAimState(Enemy enemy)
     {
         this.enemy = enemy;
     }
-    
-    // --- 0ü80Á0„1¤7„1¤7„1¤7„1¤7 ---
+
+    // --- è¿›å…¥çŠ¶æ€ ---
     public void OnEnter()
     {
-        // 0Æ50ö9„1¤702„1¤7
+        // åœæ­¢ç§»åŠ¨
         if (enemy.RB != null)
         {
             enemy.RB.velocity = Vector2.zero;
         }
-        
-        // „1¤7„1¤7„1¤70–6„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7
+
+        // æ’­æ”¾å¾…æœºåŠ¨ç”»
         if (enemy.animator != null)
         {
             enemy.animator.Play("Idle");
         }
-        
-        // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤70ý60µ2„1¤7„1¤7
+
+        // é‡ç½®çž„å‡†æ—¶é—´
         aimTime = 0f;
-        
-        // „1¤7„1¤7ûp„1¤7„1¤70ü80Á0„1¤70¢9„1¤7„1¤7„1¤7„1¤71’7„1¤7„1¤7„1¤7
+
+        // æ£€æŸ¥æ”»å‡»çŠ¶æ€æ˜¯å¦åœ¨é‡æ–°è£…å¼¹
         EnemyAttackState attackState = GetAttackState();
         if (attackState != null && attackState.IsReloading())
         {
             inCooldown = true;
             cooldownTimer = 0f;
-            cooldownTime = 1.5f; // „1¤70¨9„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7
+            cooldownTime = 1.5f; // é‡è£…å¼¹å†·å´æ—¶é—´
         }
         else if (attackState != null && attackState.GetShotsFired() >= 30)
         {
             inCooldown = true;
             cooldownTimer = 0f;
-            cooldownTime = 0.5f; // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤70¨90µ2„1¤7„1¤7
+            cooldownTime = 0.5f; // å°„å‡»å†·å´æ—¶é—´
         }
     }
 
     public void OnExit()
     {
-        // „1¤70»3„1¤7„1¤7„1¤70ý60ü80Á0
+        // æ¸…ç†çž„å‡†çŠ¶æ€
     }
 
     public void OnFixedUpdate()
     {
-        // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7
+        // ç‰©ç†æ›´æ–°
     }
 
     public void OnUpdate()
     {
-        // „1¤7„1¤7„1¤7„1¤70¢9„1¤7„1¤7„1¤7„1¤7„1¤7 - „1¤7„1¤7„1¤7„1¤7„1¤7„1¤70©7„1¤7
+        // ä¼˜å…ˆæ£€æŸ¥æ­»äº¡çŠ¶æ€ - æœ€é«˜ä¼˜å…ˆçº§
         if (enemy.isDead)
         {
             enemy.transitionState(EnemyState.Dead);
             return;
         }
-        
+
         if (enemy.isHurt)
         {
-            enemy.transitionState(EnemyState.Hurt); // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70ü80Á0
+            enemy.transitionState(EnemyState.Hurt); // å—ä¼¤çŠ¶æ€
         }
 
-        // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70¢9„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7
+        // æ£€æŸ¥çŽ©å®¶æ˜¯å¦æ­»äº¡
         if (enemy.IsPlayerDead())
         {
-            Debug.Log("„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70Æ50ö9„1¤7„1¤70ý6");
+            Debug.Log("çŽ©å®¶å·²æ­»äº¡ï¼Œæ•Œäººåœæ­¢æ”»å‡»");
             enemy.shouldPatrol = true;
             enemy.transitionState(EnemyState.Patrol);
             return;
         }
-        
-        // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70¢9°4Ž1„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7¦¶
+
+        // æ£€æŸ¥çŽ©å®¶æ˜¯å¦è¿˜åœ¨æ”»å‡»èŒƒå›´å†…
         if (!IsPlayerInAttackRange())
         {
-            Debug.Log("„1¤7„1¤70Ü7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7¦¶„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70Æ50ö9„1¤7„1¤70ý6");
+            Debug.Log("çŽ©å®¶ä¸åœ¨æ”»å‡»èŒƒå›´å†…ï¼Œæ•Œäººåœæ­¢æ”»å‡»");
             enemy.shouldPatrol = true;
             enemy.transitionState(EnemyState.Patrol);
             return;
         }
-        
-        // „1¤7„1¤7„1¤7„1¤7„1¤70Ü6„1¤7„1¤71‹3„1¤7„1¤7„1¤78ã9„1¤7„1¤7„1¤71²9„1¤7„1¤7„1¤70¢3„1¤7„1¤70ü80Á0„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70Ö2„1¤7„1¤70ü80Á0
+
+        // æ£€æŸ¥çŽ©å®¶æ˜¯å¦è¢«æ£€æµ‹åˆ°æˆ–è€…çŽ©å®¶æ˜¯å¦åœ¨è¹²ä¼çŠ¶æ€
         if (!enemy.IsPlayerDetected() || enemy.IsPlayerCrouching())
         {
-            enemy.shouldPatrol = true; // „1¤7„1¤7„1¤70‹7„1¤7„1¤70ê4„1¤7„1¤7„1¤70Ö2„1¤7„1¤7
+            enemy.shouldPatrol = true; // é‡æ–°å¼€å§‹å·¡é€»çŠ¶æ€
             enemy.transitionState(EnemyState.Patrol);
             return;
         }
-        
-        // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70¨9„1¤7§µ„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70¨9„1¤71²8„1¤7
+
+        // å¤„ç†å°„å‡»å†·å´ï¼Œå¦‚æžœåœ¨å†·å´ä¸­åˆ™ç­‰å¾…
         if (inCooldown)
         {
             cooldownTimer += Time.deltaTime;
             if (cooldownTimer >= cooldownTime)
             {
-                // „1¤7„1¤70¨9„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70»3„1¤7„1¤7„1¤70¨90ü80Á0
+                // å†·å´ç»“æŸï¼Œé‡ç½®å°„å‡»è®¡æ•°å™¨
                 EnemyAttackState attackState = GetAttackState();
                 if (attackState != null)
                 {
@@ -114,34 +114,34 @@ public class EnemyAimState : IState
                 }
                 inCooldown = false;
             }
-            return; // „1¤7„1¤7„1¤7„1¤70¨9„1¤7§Ó„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70ý6„1¤70È7„1¤7„1¤7„1¤7
+            return; // åœ¨å†·å´æœŸé—´ä¸è¿›è¡Œçž„å‡†
         }
-        
-        // „1¤7„1¤70ý6„1¤7„1¤7„1¤7
+
+        // çž„å‡†çŽ©å®¶
         AimAtPlayer();
-        
-        // „1¤7„1¤70ý60Ý5„1¤7„1¤70µ2„1¤7„1¤7„1¤7„1¤7§Ý„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70ü80Á0
+
+        // çž„å‡†è®¡æ—¶ï¼Œè¾¾åˆ°æ—¶é—´åŽåˆ‡æ¢åˆ°æ”»å‡»çŠ¶æ€
         aimTime += Time.deltaTime;
         if (aimTime >= maxAimTime)
         {
             enemy.transitionState(EnemyState.Attack);
         }
     }
-    
-    // „1¤7„1¤70ý6„1¤7„1¤7„1¤7
+
+    // çž„å‡†çŽ©å®¶
     private void AimAtPlayer()
     {
         if (enemy.player == null) return;
-        
-        // „1¤7„1¤7„1¤7‚1Ö2„1¤7„1¤7„1¤7„1¤70Ü909„1¤7„1¤7„1¤7
+
+        // è®¡ç®—çŽ©å®¶æ–¹å‘
         Vector2 playerPosition = enemy.GetPlayerPosition();
         Vector2 direction = (playerPosition - (Vector2)enemy.transform.position).normalized;
-        
-        // 0¶0„1¤7„1¤7Enemy„1¤7„1¤7„1¤7§Ö„1¤7SetDirection„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7¡Â„1¤7„1¤7„1¤7
+
+        // è°ƒç”¨Enemyçš„SetDirectionæ–¹æ³•æ¥è®¾ç½®æ–¹å‘
         enemy.SetDirection(direction);
     }
-    
-    // „1¤7„1¤70§0„1¤7„1¤7„1¤7„1¤70ü80Á0„1¤7„1¤7„1¤7
+
+    // èŽ·å–æ”»å‡»çŠ¶æ€
     private EnemyAttackState GetAttackState()
     {
         if (enemy != null && enemy.states != null && enemy.states.TryGetValue(EnemyState.Attack, out IState state))
@@ -151,16 +151,16 @@ public class EnemyAimState : IState
         return null;
     }
 
-    // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70¢9„1¤7„1¤71’5„1¤7„1¤7„1¤7„1¤7„1¤7¦¶„1¤7„1¤7
+    // æ£€æŸ¥çŽ©å®¶æ˜¯å¦åœ¨æ”»å‡»èŒƒå›´å†…
     private bool IsPlayerInAttackRange()
     {
         if (enemy.player == null) return false;
-        
+
         Vector2 enemyPosition = enemy.eyePoint ? (Vector2)enemy.eyePoint.transform.position : (Vector2)enemy.transform.position;
         Vector2 playerPosition = enemy.player.transform.position;
         float distanceToPlayer = Vector2.Distance(enemyPosition, playerPosition);
-        
-        // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70¢9„1¤7„1¤71’8„1¤78ð0¦¶„1¤7„1¤7
+
+        // æ£€æŸ¥çŽ©å®¶æ˜¯å¦åœ¨æ£€æµ‹èŒƒå›´å†…
         return distanceToPlayer <= enemy.playerDetectionRadius;
     }
 }

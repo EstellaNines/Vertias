@@ -4,13 +4,13 @@ using UnityEngine;
 
 public class PlayerReloadState : IState
 {
-    // --- »ñÈ¡Íæ¼Ò×é¼ş ---
+    // --- è·å–ç©å®¶ç»„ä»¶ ---
     public Player player;
     private bool reloadStarted = false;
-    private float reloadTimer = 0f; // Ìí¼Ó±¾µØ¼ÆÊ±Æ÷
-    private float reloadDuration = 0f; // Ìí¼Ó»»µ¯³ÖĞøÊ±¼ä
+    private float reloadTimer = 0f; // æ·»åŠ æœ¬åœ°è®¡æ—¶å™¨
+    private float reloadDuration = 0f; // æ·»åŠ æ¢å¼¹æŒç»­æ—¶é—´
 
-    // ¹¹Ôìº¯Êı
+    // æ„é€ å‡½æ•°
     public PlayerReloadState(Player player)
     {
         this.player = player;
@@ -18,20 +18,20 @@ public class PlayerReloadState : IState
 
     public void OnEnter()
     {
-        Debug.Log("½øÈë»»µ¯×´Ì¬");
+        Debug.Log("è¿›å…¥æ¢å¼¹çŠ¶æ€");
         reloadStarted = false;
 
-        // Í£Ö¹Éä»÷
+        // åœæ­¢å°„å‡»
         player.isFiring = false;
         player.isAttacking = false;
 
-        // È·±£ÎäÆ÷Í£Ö¹Éä»÷
+        // ç¡®ä¿æ­¦å™¨åœæ­¢å°„å‡»
         if (player.currentWeaponController != null)
         {
             player.currentWeaponController.SetFiring(false);
         }
 
-        // ²¥·Å»»µ¯¶¯»­£¨Èç¹ûÓĞµÄ»°£©
+        // æ’­æ”¾æ¢å¼¹åŠ¨ç”»ï¼ˆå¦‚æœæœ‰çš„è¯ï¼‰
         if (player.AIMTOR != null)
         {
             player.AIMTOR.Play("Shoot_Idle");
@@ -40,54 +40,54 @@ public class PlayerReloadState : IState
 
     public void OnExit()
     {
-        Debug.Log("ÍË³ö»»µ¯×´Ì¬");
+        Debug.Log("é€€å‡ºæ¢å¼¹çŠ¶æ€");
         reloadStarted = false;
 
-        // Í£Ö¹»»µ¯UI¶¯»­
+        // åœæ­¢æ¢å¼¹UIåŠ¨ç”»
         player.TriggerReloadStopped();
     }
 
     public void OnFixedUpdate()
     {
-        // »»µ¯×´Ì¬ÏÂ¿ÉÒÔÒÆ¶¯µ«ËÙ¶È½ÏÂı
+        // æ¢å¼¹çŠ¶æ€ä¸‹å¯ä»¥ç§»åŠ¨ä½†é€Ÿåº¦è¾ƒæ…¢
         player.PlayerRB2D.velocity = player.InputDirection * (player.WalkSpeed * 0.5f);
     }
 
     public void OnUpdate()
     {
-        // »ù´¡Ãé×¼¸üĞÂ
+        // åŸºç¡€ç„å‡†æ›´æ–°
         player.UpdateBasicAiming();
 
-        // ¼ì²éÊÇ·ñÓĞÎäÆ÷
+        // æ£€æŸ¥æ˜¯å¦æœ‰æ­¦å™¨
         if (!player.isWeaponInHand || player.currentWeaponController == null)
         {
-            Debug.Log("Ã»ÓĞÎäÆ÷£¬ÍË³ö»»µ¯×´Ì¬");
+            Debug.Log("æ²¡æœ‰æ­¦å™¨ï¼Œé€€å‡ºæ¢å¼¹çŠ¶æ€");
             player.transitionState(PlayerStateType.Idle);
             return;
         }
 
-        // ÊÜÉË¼ì²é
+        // å—ä¼¤æ£€æŸ¥
         if (player.isHurt)
         {
             player.transitionState(PlayerStateType.Hurt);
             return;
         }
 
-        // ÉÁ±Ü¼ì²é
+        // é—ªé¿æ£€æŸ¥
         if (player.isDodged)
         {
             player.transitionState(PlayerStateType.Dodge);
             return;
         }
 
-        // Ê°È¡¼ì²é
+        // æ‹¾å–æ£€æŸ¥
         if (player.isPickingUp)
         {
             player.transitionState(PlayerStateType.PickUp);
             return;
         }
 
-        // ¼ì²éÊÇ·ñ°´ÏÂR¼ü¿ªÊ¼»»µ¯
+        // æ£€æŸ¥æ˜¯å¦æŒ‰ä¸‹Ré”®å¼€å§‹æ¢å¼¹
         if (!reloadStarted && player.playerInputController != null)
         {
             if (Input.GetKeyDown(KeyCode.R))
@@ -96,32 +96,32 @@ public class PlayerReloadState : IState
             }
         }
 
-        // Ê¹ÓÃ±¾µØ¼ÆÊ±Æ÷¼ì²é»»µ¯ÊÇ·ñÍê³É£¬¶ø²»ÊÇÒÀÀµÎäÆ÷µÄIsReloading×´Ì¬
+        // ä½¿ç”¨æœ¬åœ°è®¡æ—¶å™¨æ£€æŸ¥æ¢å¼¹æ˜¯å¦å®Œæˆï¼Œè€Œä¸æ˜¯ä¾èµ–æ­¦å™¨çš„IsReloadingçŠ¶æ€
         if (reloadStarted)
         {
             reloadTimer += Time.deltaTime;
             
-            // µ±±¾µØ¼ÆÊ±Æ÷´ïµ½»»µ¯Ê±¼äÊ±£¬²ÅÈÏÎª»»µ¯Íê³É
+            // å½“æœ¬åœ°è®¡æ—¶å™¨è¾¾åˆ°æ¢å¼¹æ—¶é—´æ—¶ï¼Œæ‰è®¤ä¸ºæ¢å¼¹å®Œæˆ
             if (reloadTimer >= reloadDuration)
             {
-                Debug.Log("»»µ¯Íê³É");
+                Debug.Log("æ¢å¼¹å®Œæˆ");
                 reloadStarted = false;
                 reloadTimer = 0f;
-                // »»µ¯Íê³Éºó£¬¸ù¾İµ±Ç°ÊäÈë×´Ì¬¾ö¶¨ÏÂÒ»¸ö×´Ì¬
+                // æ¢å¼¹å®Œæˆåï¼Œæ ¹æ®å½“å‰è¾“å…¥çŠ¶æ€å†³å®šä¸‹ä¸€ä¸ªçŠ¶æ€
                 DetermineNextStateBasedOnInput();
                 return;
             }
         }
 
-        // Èç¹ûÃ»ÓĞ¿ªÊ¼»»µ¯ÇÒÎäÆ÷²»ĞèÒª»»µ¯£¬ÍË³ö×´Ì¬
+        // å¦‚æœæ²¡æœ‰å¼€å§‹æ¢å¼¹ä¸”æ­¦å™¨ä¸éœ€è¦æ¢å¼¹ï¼Œé€€å‡ºçŠ¶æ€
         if (!reloadStarted && !player.currentWeaponController.NeedsReload())
         {
-            Debug.Log("ÎäÆ÷²»ĞèÒª»»µ¯£¬ÍË³ö»»µ¯×´Ì¬");
+            Debug.Log("æ­¦å™¨ä¸éœ€è¦æ¢å¼¹ï¼Œé€€å‡ºæ¢å¼¹çŠ¶æ€");
             DetermineNextStateBasedOnInput();
             return;
         }
 
-        // ÔÚ»»µ¯¹ı³ÌÖĞ£¬ÔÊĞíÍæ¼Ò¸ù¾İÊäÈëÇĞ»»ÒÆ¶¯×´Ì¬
+        // åœ¨æ¢å¼¹è¿‡ç¨‹ä¸­ï¼Œå…è®¸ç©å®¶æ ¹æ®è¾“å…¥åˆ‡æ¢ç§»åŠ¨çŠ¶æ€
         if (reloadStarted)
         {
             HandleMovementDuringReload();
@@ -129,29 +129,29 @@ public class PlayerReloadState : IState
     }
 
     /// <summary>
-    /// ¿ªÊ¼»»µ¯¹ı³Ì£¨°üÀ¨ÎäÆ÷»»µ¯ºÍUI¶¯»­£©
+    /// å¼€å§‹æ¢å¼¹è¿‡ç¨‹ï¼ˆåŒ…æ‹¬æ­¦å™¨æ¢å¼¹å’ŒUIåŠ¨ç”»ï¼‰
     /// </summary>
     private void StartReloadProcess()
     {
-        // ¿ªÊ¼ÎäÆ÷»»µ¯
+        // å¼€å§‹æ­¦å™¨æ¢å¼¹
         player.currentWeaponController.StartReload();
         reloadStarted = true;
-        reloadTimer = 0f; // ÖØÖÃ±¾µØ¼ÆÊ±Æ÷
+        reloadTimer = 0f; // é‡ç½®æœ¬åœ°è®¡æ—¶å™¨
 
-        // »ñÈ¡»»µ¯Ê±¼ä²¢Æô¶¯UI¶¯»­
+        // è·å–æ¢å¼¹æ—¶é—´å¹¶å¯åŠ¨UIåŠ¨ç”»
         reloadDuration = player.currentWeaponController.GetReloadTime();
         player.TriggerReloadStarted(reloadDuration);
 
-        Debug.Log($"¿ªÊ¼»»µ¯£¬Ô¤¼ÆÊ±¼ä: {reloadDuration}Ãë");
+        Debug.Log($"å¼€å§‹æ¢å¼¹ï¼Œé¢„è®¡æ—¶é—´: {reloadDuration}ç§’");
     }
 
-    // ´¦Àí»»µ¯ÆÚ¼äµÄÒÆ¶¯×´Ì¬ÇĞ»»
+    // å¤„ç†æ¢å¼¹æœŸé—´çš„ç§»åŠ¨çŠ¶æ€åˆ‡æ¢
     private void HandleMovementDuringReload()
     {
-        // ¼ì²éÒÆ¶¯ÊäÈë
+        // æ£€æŸ¥ç§»åŠ¨è¾“å…¥
         if (player.InputDirection != Vector2.zero)
         {
-            // ÓĞÒÆ¶¯ÊäÈëÊ±£¬¸ù¾İÒÆ¶¯ÀàĞÍÇĞ»»×´Ì¬
+            // æœ‰ç§»åŠ¨è¾“å…¥æ—¶ï¼Œæ ¹æ®ç§»åŠ¨ç±»å‹åˆ‡æ¢çŠ¶æ€
             if (player.isRunning)
             {
                 player.transitionState(PlayerStateType.Run);
@@ -167,12 +167,12 @@ public class PlayerReloadState : IState
         }
         else
         {
-            // Ã»ÓĞÒÆ¶¯ÊäÈëÊ±£¬ÇĞ»»µ½´ı»ú×´Ì¬
+            // æ²¡æœ‰ç§»åŠ¨è¾“å…¥æ—¶ï¼Œåˆ‡æ¢åˆ°å¾…æœºçŠ¶æ€
             player.transitionState(PlayerStateType.Idle);
         }
     }
 
-    // ¸ù¾İµ±Ç°ÊäÈë×´Ì¬¾ö¶¨ÏÂÒ»¸ö×´Ì¬
+    // æ ¹æ®å½“å‰è¾“å…¥çŠ¶æ€å†³å®šä¸‹ä¸€ä¸ªçŠ¶æ€
     private void DetermineNextStateBasedOnInput()
     {
         if (player.InputDirection != Vector2.zero)

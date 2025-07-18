@@ -7,26 +7,26 @@ using TMPro;
 
 public class OutsideTransform : MonoBehaviour
 {
-    [Header("´«ËÍµ½ÄÚ²¿ÉèÖÃ")]
-    [FieldLabel("ÄÚ²¿Íæ¼ÒÄ¿±êÎ»ÖÃ")] public Transform insideTargetPosition; // ÄÚ²¿Íæ¼Ò´«ËÍÎ»ÖÃ
-    [FieldLabel("ÄÚ²¿ÉãÏñ»úÄ¿±êÎ»ÖÃ")] public Transform insideCameraTargetPosition; // ÄÚ²¿ÉãÏñ»úÄ¿±êÎ»ÖÃ
-    [FieldLabel("ÄÚ²¿Åö×²ÏŞÖÆÇø")] public Collider2D insideConfinerCollider; // ÄÚ²¿Åö×²ÏŞÖÆÇøÓò
-    
-    [Header("Í¨ÓÃÉèÖÃ")]
-    [FieldLabel("ĞéÄâÉãÏñ»ú")] public CinemachineVirtualCamera virtualCamera; // ĞéÄâÉãÏñ»ú¶ÔÏó
-    [FieldLabel("Íæ¼ÒÊäÈë¿ØÖÆÆ÷")] public PlayerInputController playerInputController; // Íæ¼ÒÊäÈë¿ØÖÆÆ÷
-    
-    [Header("UIÉèÖÃ")]
-    [FieldLabel("ÌáÊ¾UI¶ÔÏó")] public GameObject promptUI; // ÌáÊ¾UI¶ÔÏó
-    [FieldLabel("ÌáÊ¾ÎÄ±¾×é¼ş")] public TextMeshProUGUI promptText; // ÌáÊ¾ÎÄ±¾×é¼ş£¨¿ÉÑ¡£¬Èç¹ûUIÖĞÓĞÎÄ±¾£©
-    [FieldLabel("ÌáÊ¾ÎÄ±¾ÄÚÈİ")] public string promptMessage = "°´F¼ü½øÈë·¿¼ä"; // ÌáÊ¾ÎÄ±¾ÄÚÈİ
-    
-    private bool playerInRange = false; // Íæ¼ÒÊÇ·ñÔÚ·¶Î§ÄÚ
-    private GameObject playerInTrigger; // ÔÚ´¥·¢Æ÷ÄÚµÄÍæ¼Ò¶ÔÏó
+    [Header("ä¼ é€åˆ°å†…éƒ¨è®¾ç½®")]
+    [FieldLabel("å†…éƒ¨ç©å®¶ç›®æ ‡ä½ç½®")] public Transform insideTargetPosition; // å†…éƒ¨ç©å®¶ä¼ é€ä½ç½®
+    [FieldLabel("å†…éƒ¨æ‘„åƒæœºç›®æ ‡ä½ç½®")] public Transform insideCameraTargetPosition; // å†…éƒ¨æ‘„åƒæœºç›®æ ‡ä½ç½®
+    [FieldLabel("å†…éƒ¨ç¢°æ’é™åˆ¶åŒº")] public Collider2D insideConfinerCollider; // å†…éƒ¨ç¢°æ’é™åˆ¶åŒºåŸŸ
+
+    [Header("é€šç”¨è®¾ç½®")]
+    [FieldLabel("è™šæ‹Ÿæ‘„åƒæœº")] public CinemachineVirtualCamera virtualCamera; // è™šæ‹Ÿæ‘„åƒæœºå¯¹è±¡
+    [FieldLabel("ç©å®¶è¾“å…¥æ§åˆ¶å™¨")] public PlayerInputController playerInputController; // ç©å®¶è¾“å…¥æ§åˆ¶å™¨
+
+    [Header("UIè®¾ç½®")]
+    [FieldLabel("æç¤ºUIå¯¹è±¡")] public GameObject promptUI; // æç¤ºUIå¯¹è±¡
+    [FieldLabel("æç¤ºæ–‡æœ¬ç»„ä»¶")] public TextMeshProUGUI promptText; // æç¤ºæ–‡æœ¬ç»„ä»¶ï¼ˆå¯é€‰ï¼Œå¦‚æœUIä¸­æœ‰æ–‡æœ¬ï¼‰
+    [FieldLabel("æç¤ºæ–‡æœ¬å†…å®¹")] public string promptMessage = "æŒ‰Fé”®è¿›å…¥æˆ¿é—´"; // æç¤ºæ–‡æœ¬å†…å®¹
+
+    private bool playerInRange = false; // ç©å®¶æ˜¯å¦åœ¨èŒƒå›´å†…
+    private GameObject playerInTrigger; // åœ¨è§¦å‘å™¨å†…çš„ç©å®¶å¯¹è±¡
 
     void Start()
     {
-        // Èç¹ûÃ»ÓĞÊÖ¶¯·ÖÅäÊäÈë¿ØÖÆÆ÷£¬³¢ÊÔ´ÓÍæ¼Ò¶ÔÏó»ñÈ¡
+        // å¦‚æœæ²¡æœ‰æ‰‹åŠ¨åˆ†é…è¾“å…¥æ§åˆ¶å™¨ï¼Œå°è¯•ä»ç©å®¶å¯¹è±¡è·å–
         if (playerInputController == null)
         {
             Player player = FindObjectOfType<Player>();
@@ -35,37 +35,37 @@ public class OutsideTransform : MonoBehaviour
                 playerInputController = player.playerInputController;
             }
         }
-        
-        // ¶©ÔÄF¼ü²Ù×÷ÊÂ¼ş
+
+        // è®¢é˜…Fé”®æ“ä½œäº‹ä»¶
         if (playerInputController != null)
         {
             playerInputController.onOperate += OnOperatePressed;
-            playerInputController.EnabledUIInput(); // ÆôÓÃUIÊäÈë
+            playerInputController.EnabledUIInput(); // å¯ç”¨UIè¾“å…¥
         }
-        
-        // ³õÊ¼»¯Ê±Òş²ØUI
+
+        // åˆå§‹åŒ–æ—¶éšè—UI
         if (promptUI != null)
         {
             promptUI.SetActive(false);
         }
-        
-        // ÉèÖÃÌáÊ¾ÎÄ±¾ÄÚÈİ
+
+        // è®¾ç½®æç¤ºæ–‡æœ¬å†…å®¹
         if (promptText != null)
         {
             promptText.text = promptMessage;
         }
     }
-    
+
     void OnDestroy()
     {
-        // È¡Ïû¶©ÔÄÊÂ¼ş
+        // å–æ¶ˆè®¢é˜…äº‹ä»¶
         if (playerInputController != null)
         {
             playerInputController.onOperate -= OnOperatePressed;
         }
     }
-    
-    // F¼ü°´ÏÂÊ±µÄ´¦Àí
+
+    // Fé”®æŒ‰ä¸‹æ—¶çš„å¤„ç†
     void OnOperatePressed()
     {
         if (playerInRange && playerInTrigger != null)
@@ -73,72 +73,72 @@ public class OutsideTransform : MonoBehaviour
             TeleportToInside(playerInTrigger);
         }
     }
-    
-    // ´«ËÍµ½ÄÚ²¿µÄ·½·¨
+
+    // ä¼ é€åˆ°å†…éƒ¨çš„æ–¹æ³•
     void TeleportToInside(GameObject player)
     {
-        // ¼ì²éÄ¿±êÎ»ÖÃÊÇ·ñÉèÖÃ
+        // æ£€æŸ¥ç›®æ ‡ä½ç½®æ˜¯å¦è®¾ç½®
         if (insideTargetPosition == null)
         {
-            Debug.LogWarning("´«ËÍÊ§°Ü£ºÄÚ²¿Ä¿±êÎ»ÖÃÎ´ÉèÖÃ£¡");
+            Debug.LogWarning("ä¼ é€å¤±è´¥ï¼šå†…éƒ¨ç›®æ ‡ä½ç½®æœªè®¾ç½®ï¼");
             return;
         }
-        
-        // Òş²ØUI£¨´«ËÍÇ°£©
+
+        // éšè—UIï¼ˆä¼ é€å‰ï¼‰
         HidePromptUI();
-        
-        // Íæ¼Ò´«ËÍÂß¼­
+
+        // ç©å®¶ä¼ é€é€»è¾‘
         player.transform.position = insideTargetPosition.position;
 
-        // ÉãÏñ»úÍ¬²½Âß¼­
+        // æ‘„åƒæœºåŒæ­¥é€»è¾‘
         if (virtualCamera != null && insideCameraTargetPosition != null)
         {
-            // »ñÈ¡ĞéÄâÉãÏñ»úµÄCinemachineConfiner2D×é¼ş
+            // è·å–è™šæ‹Ÿæ‘„åƒæœºçš„CinemachineConfiner2Dç»„ä»¶
             CinemachineConfiner2D confiner = virtualCamera.GetComponent<CinemachineConfiner2D>();
 
-            // ÒÆ¶¯ÉãÏñ»úÎ»ÖÃ
+            // ç§»åŠ¨æ‘„åƒæœºä½ç½®
             virtualCamera.transform.position = insideCameraTargetPosition.position;
 
-            // ¸üĞÂÅö×²ÇøÓò£¨Ö±½ÓÉèÖÃBounding Shape2D£©
+            // æ›´æ–°ç¢°æ’åŒºåŸŸï¼ˆç›´æ¥è®¾ç½®Bounding Shape2Dï¼‰
             if (confiner != null && insideConfinerCollider != null)
             {
                 confiner.m_BoundingShape2D = insideConfinerCollider;
-                Debug.Log("ÉãÏñ»úÒÑÍ¬²½ÖÁÄÚ²¿Î»ÖÃ²¢¸üĞÂÅö×²ÇøÓò");
+                Debug.Log("æ‘„åƒæœºå·²åŒæ­¥è‡³å†…éƒ¨ä½ç½®å¹¶æ›´æ–°ç¢°æ’åŒºåŸŸ");
             }
         }
 
-        Debug.Log("Íæ¼ÒÒÑ´ÓÍâ²¿´«ËÍÖÁÄÚ²¿");
+        Debug.Log("ç©å®¶å·²ä»å¤–éƒ¨ä¼ é€è‡³å†…éƒ¨");
     }
-    
-    // ÏÔÊ¾ÌáÊ¾UI
+
+    // æ˜¾ç¤ºæç¤ºUI
     void ShowPromptUI()
     {
         if (promptUI != null)
         {
             promptUI.SetActive(true);
-            Debug.Log("ÏÔÊ¾½øÈë·¿¼äÌáÊ¾UI");
+            Debug.Log("æ˜¾ç¤ºè¿›å…¥æˆ¿é—´æç¤ºUI");
         }
     }
-    
-    // Òş²ØÌáÊ¾UI
+
+    // éšè—æç¤ºUI
     void HidePromptUI()
     {
         if (promptUI != null)
         {
             promptUI.SetActive(false);
-            Debug.Log("Òş²Ø½øÈë·¿¼äÌáÊ¾UI");
+            Debug.Log("éšè—è¿›å…¥æˆ¿é—´æç¤ºUI");
         }
     }
 
     void OnTriggerEnter2D(Collider2D collision)
     {
-        // ¼ì²éÅö×²¶ÔÏóÊÇ·ñ´øÓĞ"Player"±êÇ©
+        // æ£€æŸ¥ç¢°æ’å¯¹è±¡æ˜¯å¦å¸¦æœ‰"Player"æ ‡ç­¾
         if (collision.CompareTag("Player"))
         {
             playerInRange = true;
             playerInTrigger = collision.gameObject;
-            ShowPromptUI(); // ÏÔÊ¾UI
-            Debug.Log("Íæ¼Ò½øÈëÍâ²¿´«ËÍÇøÓò£¬°´F¼ü½øÈëÄÚ²¿");
+            ShowPromptUI(); // æ˜¾ç¤ºUI
+            Debug.Log("ç©å®¶è¿›å…¥å¤–éƒ¨ä¼ é€åŒºåŸŸï¼ŒæŒ‰Fé”®è¿›å…¥å†…éƒ¨");
         }
     }
 
@@ -148,8 +148,8 @@ public class OutsideTransform : MonoBehaviour
         {
             playerInRange = false;
             playerInTrigger = null;
-            HidePromptUI(); // Òş²ØUI
-            Debug.Log("Íæ¼ÒÀë¿ªÍâ²¿´«ËÍÇøÓò");
+            HidePromptUI(); // éšè—UI
+            Debug.Log("ç©å®¶ç¦»å¼€å¤–éƒ¨ä¼ é€åŒºåŸŸ");
         }
     }
 }

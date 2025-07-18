@@ -544,4 +544,27 @@ public class WeaponManager : MonoBehaviour
         float elapsedTime = Time.time - reloadStartTime;
         return Mathf.Clamp01(elapsedTime / reloadTime);
     }
+
+    // 单次开火的方法
+    public void FireSingle()
+    {
+        // 检查是否可以射击
+        if (!CanFire())
+        {
+            Debug.Log($"武器 {weaponName} 无法射击：弹药不足或正在换弹");
+            return;
+        }
+        
+        // 检查射击间隔
+        if (Time.time < nextFireTime)
+        {
+            return;
+        }
+        
+        // 执行射击
+        Fire();
+        
+        // 更新下次射击时间
+        nextFireTime = Time.time + fireRate;
+    }
 }

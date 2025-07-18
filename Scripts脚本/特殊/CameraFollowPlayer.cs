@@ -3,15 +3,15 @@ using Cinemachine;
 
 public class CameraFollowPlayer : MonoBehaviour
 {
-    Player player; // Íæ¼Ò
+    Player player; // ç©å®¶
 
     private void Awake()
     {
         CinemachineVirtualCamera camera = GetComponent<Cinemachine.CinemachineVirtualCamera>();
-        player = FindObjectOfType<Player>(); // »ñÈ¡Íæ¼Ò
+        player = FindObjectOfType<Player>(); // è·å–ç©å®¶
         if (player != null)
         {
-            camera.Follow = player.transform; // ÉèÖÃÉãÏñ»ú¸úËæÍæ¼Ò
+            camera.Follow = player.transform; // è®¾ç½®æ‘„åƒæœºè·Ÿéšç©å®¶
         }
     }
 }
