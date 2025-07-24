@@ -4,38 +4,38 @@ using UnityEngine;
 
 public class WeaponManager : MonoBehaviour
 {
-    [Header("æ­¦å™¨åŸºç¡€å±æ€§")]
-    [FieldLabel("æ­¦å™¨åç§°")] public string weaponName = "é»˜è®¤æ­¦å™¨";
-    [FieldLabel("å°„å‡»é—´éš”")] public float fireRate = 0.33f;
-    [FieldLabel("å­å¼¹æ•£å°„è§’åº¦")] public float spreadAngle = 5f;
-    [FieldLabel("å­å¼¹é€Ÿåº¦")] public float bulletSpeed = 10f;
-    [FieldLabel("å°„ç¨‹")] public float range = 15f;
-    [FieldLabel("ä¼¤å®³")] public float damage = 25f;
+    [Header("ÎäÆ÷»ù´¡ÊôĞÔ")]
+    [FieldLabel("ÎäÆ÷Ãû³Æ")] public string weaponName = "Ä¬ÈÏÎäÆ÷";
+    [FieldLabel("Éä»÷¼ä¸ô")] public float fireRate = 0.33f;
+    [FieldLabel("×Óµ¯É¢Éä½Ç¶È")] public float spreadAngle = 5f;
+    [FieldLabel("×Óµ¯ËÙ¶È")] public float bulletSpeed = 10f;
+    [FieldLabel("Éä³Ì")] public float range = 15f;
+    [FieldLabel("ÉËº¦")] public float damage = 25f;
 
-    [Header("å¼¹å¤¹ç³»ç»Ÿ")]
-    [FieldLabel("å¼¹å¤¹å®¹é‡")] public int magazineCapacity = 30;
-    [FieldLabel("æ¢å¼¹æ—¶é—´")] public float reloadTime = 2f;
+    [Header("µ¯¼ĞÏµÍ³")]
+    [FieldLabel("µ¯¼ĞÈİÁ¿")] public int magazineCapacity = 30;
+    [FieldLabel("»»µ¯Ê±¼ä")] public float reloadTime = 2f;
     [HideInInspector] public int currentAmmo;
     [HideInInspector] public bool isReloading = false;
-    [HideInInspector] public float reloadStartTime; // è®°å½•æ¢å¼¹å¼€å§‹æ—¶é—´
+    [HideInInspector] public float reloadStartTime; // ¼ÇÂ¼»»µ¯¿ªÊ¼Ê±¼ä
 
-    [Header("å­å¼¹é¢„åˆ¶ä½“é…ç½®")]
-    [FieldLabel("ç©å®¶å­å¼¹é¢„åˆ¶ä½“")] public GameObject playerBulletPrefab;
-    [FieldLabel("æ•Œäººå­å¼¹é¢„åˆ¶ä½“")] public GameObject enemyBulletPrefab;
-    [FieldLabel("é€šç”¨å­å¼¹é¢„åˆ¶ä½“")] public GameObject bulletPrefab;
+    [Header("×Óµ¯Ô¤ÖÆÌåÅäÖÃ")]
+    [FieldLabel("Íæ¼Ò×Óµ¯Ô¤ÖÆÌå")] public GameObject playerBulletPrefab;
+    [FieldLabel("µĞÈË×Óµ¯Ô¤ÖÆÌå")] public GameObject enemyBulletPrefab;
+    [FieldLabel("Í¨ÓÃ×Óµ¯Ô¤ÖÆÌå")] public GameObject bulletPrefab;
 
-    [Header("æ­¦å™¨ç»„ä»¶")]
-    [FieldLabel("æªå£ä½ç½®")] public Transform muzzle;
-    [FieldLabel("æ­¦å™¨è§¦å‘å™¨")] public WeaponTrigger weaponTrigger;
+    [Header("ÎäÆ÷×é¼ş")]
+    [FieldLabel("Ç¹¿ÚÎ»ÖÃ")] public Transform muzzle;
+    [FieldLabel("ÎäÆ÷´¥·¢Æ÷")] public WeaponTrigger weaponTrigger;
 
-    // å†…éƒ¨çŠ¶æ€
-    private Transform currentOwner; // å½“å‰æŒæœ‰è€…
-    private bool isPlayerWeapon = false; // æ˜¯å¦ä¸ºç©å®¶æ­¦å™¨
+    // ÄÚ²¿×´Ì¬
+    private Transform currentOwner; // µ±Ç°³ÖÓĞÕß
+    private bool isPlayerWeapon = false; // ÊÇ·ñÎªÍæ¼ÒÎäÆ÷
     private float nextFireTime = 0f;
     private Rigidbody2D weaponRB;
     private Collider2D weaponCollider;
 
-    // å°„å‡»çŠ¶æ€
+    // Éä»÷×´Ì¬
     private bool isFiring = false;
 
     private void Awake()
@@ -44,19 +44,19 @@ public class WeaponManager : MonoBehaviour
         SetupWeaponTag();
         ValidateBulletPrefabs();
 
-        // åˆå§‹åŒ–å¼¹è¯
+        // ³õÊ¼»¯µ¯Ò©
         currentAmmo = magazineCapacity;
     }
 
     private void Start()
     {
-        // æ£€æµ‹åˆå§‹æŒæœ‰è€…
+        // ¼ì²â³õÊ¼³ÖÓĞÕß
         DetectOwner();
     }
 
     private void Update()
     {
-        // æ›´æ–°å°„å‡»é€»è¾‘
+        // ¸üĞÂÉä»÷Âß¼­
         if (isFiring && Time.time >= nextFireTime)
         {
             Fire();
@@ -64,10 +64,10 @@ public class WeaponManager : MonoBehaviour
         }
     }
 
-    // éªŒè¯å­å¼¹é¢„åˆ¶ä½“é…ç½®
+    // ÑéÖ¤×Óµ¯Ô¤ÖÆÌåÅäÖÃ
     private void ValidateBulletPrefabs()
     {
-        // å¦‚æœæ²¡æœ‰è®¾ç½®ä¸“ç”¨é¢„åˆ¶ä½“ï¼Œä½¿ç”¨é€šç”¨é¢„åˆ¶ä½“
+        // Èç¹ûÃ»ÓĞÉèÖÃ×¨ÓÃÔ¤ÖÆÌå£¬Ê¹ÓÃÍ¨ÓÃÔ¤ÖÆÌå
         if (playerBulletPrefab == null && bulletPrefab != null)
         {
             if (HasTag(bulletPrefab, "PlayerBullets"))
@@ -84,67 +84,67 @@ public class WeaponManager : MonoBehaviour
             }
         }
 
-        // éªŒè¯æ ‡ç­¾
+        // ÑéÖ¤±êÇ©
         if (playerBulletPrefab != null && !HasTag(playerBulletPrefab, "PlayerBullets"))
         {
-            Debug.LogWarning($"ç©å®¶å­å¼¹é¢„åˆ¶ä½“ {playerBulletPrefab.name} æ²¡æœ‰ 'PlayerBullets' æ ‡ç­¾");
+            Debug.LogWarning($"Íæ¼Ò×Óµ¯Ô¤ÖÆÌå {playerBulletPrefab.name} Ã»ÓĞ 'PlayerBullets' ±êÇ©");
         }
 
         if (enemyBulletPrefab != null && !HasTag(enemyBulletPrefab, "EnemyBullets"))
         {
-            Debug.LogWarning($"æ•Œäººå­å¼¹é¢„åˆ¶ä½“ {enemyBulletPrefab.name} æ²¡æœ‰ 'EnemyBullets' æ ‡ç­¾");
+            Debug.LogWarning($"µĞÈË×Óµ¯Ô¤ÖÆÌå {enemyBulletPrefab.name} Ã»ÓĞ 'EnemyBullets' ±êÇ©");
         }
     }
 
-    // æ£€æŸ¥æ¸¸æˆå¯¹è±¡æ˜¯å¦æœ‰æŒ‡å®šæ ‡ç­¾
+    // ¼ì²éÓÎÏ·¶ÔÏóÊÇ·ñÓĞÖ¸¶¨±êÇ©
     private bool HasTag(GameObject obj, string tag)
     {
         return obj != null && obj.CompareTag(tag);
     }
 
-    // æ ¹æ®æ ‡ç­¾è·å–æ­£ç¡®çš„å­å¼¹é¢„åˆ¶ä½“
+    // ¸ù¾İ±êÇ©»ñÈ¡ÕıÈ·µÄ×Óµ¯Ô¤ÖÆÌå
     private GameObject GetCorrectBulletPrefab(bool forPlayer)
     {
         if (forPlayer)
         {
-            // ä¼˜å…ˆä½¿ç”¨ç©å®¶ä¸“ç”¨é¢„åˆ¶ä½“
+            // ÓÅÏÈÊ¹ÓÃÍæ¼Ò×¨ÓÃÔ¤ÖÆÌå
             if (playerBulletPrefab != null && HasTag(playerBulletPrefab, "PlayerBullets"))
             {
                 return playerBulletPrefab;
             }
 
-            // å¦‚æœé€šç”¨é¢„åˆ¶ä½“æœ‰ç©å®¶æ ‡ç­¾ï¼Œä¹Ÿå¯ä»¥ä½¿ç”¨
+            // Èç¹ûÍ¨ÓÃÔ¤ÖÆÌåÓĞÍæ¼Ò±êÇ©£¬Ò²¿ÉÒÔÊ¹ÓÃ
             if (bulletPrefab != null && HasTag(bulletPrefab, "PlayerBullets"))
             {
                 return bulletPrefab;
             }
 
-            Debug.LogWarning("æ²¡æœ‰æ‰¾åˆ°åˆé€‚çš„ç©å®¶å­å¼¹é¢„åˆ¶ä½“");
+            Debug.LogWarning("Ã»ÓĞÕÒµ½ºÏÊÊµÄÍæ¼Ò×Óµ¯Ô¤ÖÆÌå");
             return null;
         }
         else
         {
-            // ä¼˜å…ˆä½¿ç”¨æ•Œäººä¸“ç”¨é¢„åˆ¶ä½“
+            // ÓÅÏÈÊ¹ÓÃµĞÈË×¨ÓÃÔ¤ÖÆÌå
             if (enemyBulletPrefab != null && HasTag(enemyBulletPrefab, "EnemyBullets"))
             {
                 return enemyBulletPrefab;
             }
 
-            // å¦‚æœé€šç”¨é¢„åˆ¶ä½“æœ‰æ•Œäººæ ‡ç­¾ï¼Œä¹Ÿå¯ä»¥ä½¿ç”¨
+            // Èç¹ûÍ¨ÓÃÔ¤ÖÆÌåÓĞµĞÈË±êÇ©£¬Ò²¿ÉÒÔÊ¹ÓÃ
             if (bulletPrefab != null && HasTag(bulletPrefab, "EnemyBullets"))
             {
                 return bulletPrefab;
             }
 
-            Debug.LogWarning("æ²¡æœ‰æ‰¾åˆ°åˆé€‚çš„æ•Œäººå­å¼¹é¢„åˆ¶ä½“");
+            Debug.LogWarning("Ã»ÓĞÕÒµ½ºÏÊÊµÄµĞÈË×Óµ¯Ô¤ÖÆÌå");
             return null;
         }
     }
 
-    // åˆå§‹åŒ–æ­¦å™¨å¿…éœ€ç»„ä»¶
+    // ³õÊ¼»¯ÎäÆ÷±ØĞè×é¼ş
     private void InitializeWeaponComponents()
     {
-        // ç¡®ä¿æœ‰WeaponTriggerç»„ä»¶
+        // È·±£ÓĞWeaponTrigger×é¼ş
         if (weaponTrigger == null)
         {
             weaponTrigger = GetComponent<WeaponTrigger>();
@@ -154,14 +154,14 @@ public class WeaponManager : MonoBehaviour
             }
         }
 
-        // ç¡®ä¿æœ‰Rigidbody2Dç»„ä»¶
+        // È·±£ÓĞRigidbody2D×é¼ş
         weaponRB = GetComponent<Rigidbody2D>();
         if (weaponRB == null)
         {
             weaponRB = gameObject.AddComponent<Rigidbody2D>();
         }
 
-        // ç¡®ä¿æœ‰BoxCollider2Dè§¦å‘å™¨
+        // È·±£ÓĞBoxCollider2D´¥·¢Æ÷
         weaponCollider = GetComponent<BoxCollider2D>();
         if (weaponCollider == null)
         {
@@ -169,7 +169,7 @@ public class WeaponManager : MonoBehaviour
         }
         weaponCollider.isTrigger = true;
 
-        // æŸ¥æ‰¾æˆ–åˆ›å»ºMuzzle
+        // ²éÕÒ»ò´´½¨Muzzle
         if (muzzle == null)
         {
             muzzle = transform.Find("Muzzle");
@@ -178,11 +178,11 @@ public class WeaponManager : MonoBehaviour
                 GameObject muzzleObj = new GameObject("Muzzle");
                 muzzle = muzzleObj.transform;
                 muzzle.SetParent(transform);
-                muzzle.localPosition = new Vector3(1f, 0f, 0f); // è®¾ç½®åœ¨æ­¦å™¨å‰ç«¯
+                muzzle.localPosition = new Vector3(1f, 0f, 0f); // ÉèÖÃÔÚÎäÆ÷Ç°¶Ë
             }
         }
 
-        // é…ç½®WeaponTrigger
+        // ÅäÖÃWeaponTrigger
         if (weaponTrigger != null)
         {
             weaponTrigger.Muzzle = muzzle;
@@ -191,7 +191,7 @@ public class WeaponManager : MonoBehaviour
         }
     }
 
-    // è®¾ç½®æ­¦å™¨æ ‡ç­¾
+    // ÉèÖÃÎäÆ÷±êÇ©
     private void SetupWeaponTag()
     {
         if (!gameObject.CompareTag("Weapon"))
@@ -199,21 +199,21 @@ public class WeaponManager : MonoBehaviour
             gameObject.tag = "Weapon";
         }
 
-        // ç¡®ä¿æœ‰ItemBaseç»„ä»¶ç”¨äºæ‹¾å–
+        // È·±£ÓĞItemBase×é¼şÓÃÓÚÊ°È¡
         if (GetComponent<ItemBase>() == null)
         {
             gameObject.AddComponent<ItemBase>();
         }
     }
 
-    // æ£€æµ‹å½“å‰æŒæœ‰è€…å¹¶é…ç½®ç›¸åº”çš„å­å¼¹æ± 
+    // ¼ì²âµ±Ç°³ÖÓĞÕß²¢ÅäÖÃÏàÓ¦µÄ×Óµ¯³Ø
     public void DetectOwner()
     {
         Transform parent = transform.parent;
 
         if (parent != null)
         {
-            // æ£€æŸ¥æ˜¯å¦ä¸ºç©å®¶æŒæœ‰
+            // ¼ì²éÊÇ·ñÎªÍæ¼Ò³ÖÓĞ
             Player player = parent.GetComponentInParent<Player>();
             if (player != null)
             {
@@ -221,7 +221,7 @@ public class WeaponManager : MonoBehaviour
                 return;
             }
 
-            // æ£€æŸ¥æ˜¯å¦ä¸ºæ•ŒäººæŒæœ‰
+            // ¼ì²éÊÇ·ñÎªµĞÈË³ÖÓĞ
             Enemy enemy = parent.GetComponentInParent<Enemy>();
             if (enemy != null)
             {
@@ -230,21 +230,21 @@ public class WeaponManager : MonoBehaviour
             }
         }
 
-        // å¦‚æœæ²¡æœ‰æŒæœ‰è€…ï¼Œè®¾ç½®ä¸ºæ‰è½çŠ¶æ€
+        // Èç¹ûÃ»ÓĞ³ÖÓĞÕß£¬ÉèÖÃÎªµôÂä×´Ì¬
         SetAsDroppedWeapon();
     }
 
     /// <summary>
-    /// è®¾ç½®æ­¦å™¨æŒæœ‰è€…
+    /// ÉèÖÃÎäÆ÷³ÖÓĞÕß
     /// </summary>
-    /// <param name="owner">æŒæœ‰è€…Transform</param>
-    /// <param name="isPlayer">æ˜¯å¦ä¸ºç©å®¶</param>
+    /// <param name="owner">³ÖÓĞÕßTransform</param>
+    /// <param name="isPlayer">ÊÇ·ñÎªÍæ¼Ò</param>
     public void SetOwner(Transform owner, bool isPlayer)
     {
         currentOwner = owner;
         isPlayerWeapon = isPlayer;
 
-        // æ ¹æ®æŒæœ‰è€…é…ç½®å­å¼¹æ± ï¼ˆä½¿ç”¨å•ä¾‹ï¼‰
+        // ¸ù¾İ³ÖÓĞÕßÅäÖÃ×Óµ¯³Ø£¨Ê¹ÓÃµ¥Àı£©
         if (isPlayer)
         {
             ConfigureForPlayer();
@@ -254,165 +254,165 @@ public class WeaponManager : MonoBehaviour
             ConfigureForEnemy();
         }
 
-        Debug.Log($"æ­¦å™¨ {weaponName} è¢« {(isPlayer ? "ç©å®¶" : "æ•Œäºº")} {owner.name} æŒæœ‰");
+        Debug.Log($"ÎäÆ÷ {weaponName} ±» {(isPlayer ? "Íæ¼Ò" : "µĞÈË")} {owner.name} ³ÖÓĞ");
     }
 
-    // é…ç½®ä¸ºç©å®¶æ­¦å™¨
+    // ÅäÖÃÎªÍæ¼ÒÎäÆ÷
     private void ConfigureForPlayer()
     {
         if (weaponTrigger != null)
         {
-            // ä½¿ç”¨å•ä¾‹æ¨¡å¼çš„å­å¼¹æ± 
+            // Ê¹ÓÃµ¥ÀıÄ£Ê½µÄ×Óµ¯³Ø
             weaponTrigger.SetBulletPool(BulletPool.Instance, true);
         }
 
-        // è®¾ç½®ç‰©ç†å±æ€§
+        // ÉèÖÃÎïÀíÊôĞÔ
         if (weaponRB != null)
         {
             weaponRB.isKinematic = true;
             weaponRB.gravityScale = 0;
         }
 
-        // ç¦ç”¨ç¢°æ’å™¨
+        // ½ûÓÃÅö×²Æ÷
         if (weaponCollider != null)
         {
             weaponCollider.enabled = false;
         }
     }
 
-    // é…ç½®ä¸ºæ•Œäººæ­¦å™¨
+    // ÅäÖÃÎªµĞÈËÎäÆ÷
     private void ConfigureForEnemy()
     {
         if (weaponTrigger != null)
         {
-            // ä½¿ç”¨å•ä¾‹æ¨¡å¼çš„å­å¼¹æ± 
+            // Ê¹ÓÃµ¥ÀıÄ£Ê½µÄ×Óµ¯³Ø
             weaponTrigger.SetBulletPool(EnemyBulletPool.Instance, false);
         }
 
-        // è®¾ç½®ç‰©ç†å±æ€§
+        // ÉèÖÃÎïÀíÊôĞÔ
         if (weaponRB != null)
         {
             weaponRB.isKinematic = true;
             weaponRB.gravityScale = 0;
         }
 
-        // ç¦ç”¨ç¢°æ’å™¨
+        // ½ûÓÃÅö×²Æ÷
         if (weaponCollider != null)
         {
             weaponCollider.enabled = false;
         }
     }
 
-    // è®¾ç½®ä¸ºæ‰è½æ­¦å™¨çŠ¶æ€
+    // ÉèÖÃÎªµôÂäÎäÆ÷×´Ì¬
     public void SetAsDroppedWeapon()
     {
         currentOwner = null;
         isPlayerWeapon = false;
 
-        // åœæ­¢å°„å‡»
+        // Í£Ö¹Éä»÷
         SetFiring(false);
 
-        // è®¾ç½®ç‰©ç†å±æ€§
+        // ÉèÖÃÎïÀíÊôĞÔ
         if (weaponRB != null)
         {
             weaponRB.isKinematic = false;
-            weaponRB.gravityScale = 0; // 2Dæ¸¸æˆé€šå¸¸ä¸éœ€è¦é‡åŠ›
+            weaponRB.gravityScale = 0; // 2DÓÎÏ·Í¨³£²»ĞèÒªÖØÁ¦
         }
 
-        // å¯ç”¨ç¢°æ’å™¨ç”¨äºæ‹¾å–æ£€æµ‹
+        // ÆôÓÃÅö×²Æ÷ÓÃÓÚÊ°È¡¼ì²â
         if (weaponCollider != null)
         {
             weaponCollider.enabled = true;
         }
 
-        Debug.Log($"æ­¦å™¨ {weaponName} å·²æ‰è½");
+        Debug.Log($"ÎäÆ÷ {weaponName} ÒÑµôÂä");
     }
 
     /// <summary>
-    /// è®¾ç½®å°„å‡»çŠ¶æ€
+    /// ÉèÖÃÉä»÷×´Ì¬
     /// </summary>
-    /// <param name="firing">æ˜¯å¦å°„å‡»</param>
+    /// <param name="firing">ÊÇ·ñÉä»÷</param>
     public void SetFiring(bool firing)
     {
         isFiring = firing;
 
-        // åŒæ—¶è®¾ç½®WeaponTriggerçš„å°„å‡»çŠ¶æ€
+        // Í¬Ê±ÉèÖÃWeaponTriggerµÄÉä»÷×´Ì¬
         if (weaponTrigger != null)
         {
             weaponTrigger.SetFiring(firing);
         }
     }
 
-    // å°„å‡»æ–¹æ³•
+    // Éä»÷·½·¨
     private void Fire()
     {
-        // æ£€æŸ¥æ˜¯å¦æœ‰å¼¹è¯
+        // ¼ì²éÊÇ·ñÓĞµ¯Ò©
         if (currentAmmo <= 0 || isReloading)
         {
-            Debug.Log($"æ­¦å™¨ {weaponName} æ— å¼¹è¯æˆ–æ­£åœ¨æ¢å¼¹ï¼Œæ— æ³•å°„å‡»");
+            Debug.Log($"ÎäÆ÷ {weaponName} ÎŞµ¯Ò©»òÕıÔÚ»»µ¯£¬ÎŞ·¨Éä»÷");
             return;
         }
 
         if (weaponTrigger == null || muzzle == null) return;
 
-        // æ ¹æ®æ­¦å™¨æŒæœ‰è€…è·å–æ­£ç¡®çš„å­å¼¹é¢„åˆ¶ä½“
+        // ¸ù¾İÎäÆ÷³ÖÓĞÕß»ñÈ¡ÕıÈ·µÄ×Óµ¯Ô¤ÖÆÌå
         GameObject correctBulletPrefab = GetCorrectBulletPrefab(isPlayerWeapon);
 
         if (correctBulletPrefab == null)
         {
-            Debug.LogError($"æ­¦å™¨ {weaponName} æ— æ³•è·å–æ­£ç¡®çš„å­å¼¹é¢„åˆ¶ä½“");
+            Debug.LogError($"ÎäÆ÷ {weaponName} ÎŞ·¨»ñÈ¡ÕıÈ·µÄ×Óµ¯Ô¤ÖÆÌå");
             return;
         }
 
-        // ä½¿ç”¨å•ä¾‹æ¨¡å¼çš„å­å¼¹æ± 
+        // Ê¹ÓÃµ¥ÀıÄ£Ê½µÄ×Óµ¯³Ø
         GameObject bullet = null;
 
         if (isPlayerWeapon && BulletPool.Instance != null)
         {
-            // ç¡®ä¿ä½¿ç”¨å¸¦æœ‰PlayerBulletsæ ‡ç­¾çš„å­å¼¹é¢„åˆ¶ä½“
+            // È·±£Ê¹ÓÃ´øÓĞPlayerBullets±êÇ©µÄ×Óµ¯Ô¤ÖÆÌå
             if (HasTag(correctBulletPrefab, "PlayerBullets"))
             {
                 bullet = BulletPool.Instance.GetBullet(correctBulletPrefab);
             }
             else
             {
-                Debug.LogError($"å°è¯•åœ¨ç©å®¶å­å¼¹æ± ä¸­ä½¿ç”¨éç©å®¶å­å¼¹é¢„åˆ¶ä½“: {correctBulletPrefab.name}");
+                Debug.LogError($"³¢ÊÔÔÚÍæ¼Ò×Óµ¯³ØÖĞÊ¹ÓÃ·ÇÍæ¼Ò×Óµ¯Ô¤ÖÆÌå: {correctBulletPrefab.name}");
                 return;
             }
         }
         else if (!isPlayerWeapon && EnemyBulletPool.Instance != null)
         {
-            // ç¡®ä¿ä½¿ç”¨å¸¦æœ‰EnemyBulletsæ ‡ç­¾çš„å­å¼¹é¢„åˆ¶ä½“
+            // È·±£Ê¹ÓÃ´øÓĞEnemyBullets±êÇ©µÄ×Óµ¯Ô¤ÖÆÌå
             if (HasTag(correctBulletPrefab, "EnemyBullets"))
             {
                 bullet = EnemyBulletPool.Instance.GetBullet(correctBulletPrefab, muzzle.position, muzzle.rotation);
             }
             else
             {
-                Debug.LogError($"å°è¯•åœ¨æ•Œäººå­å¼¹æ± ä¸­ä½¿ç”¨éæ•Œäººå­å¼¹é¢„åˆ¶ä½“: {correctBulletPrefab.name}");
+                Debug.LogError($"³¢ÊÔÔÚµĞÈË×Óµ¯³ØÖĞÊ¹ÓÃ·ÇµĞÈË×Óµ¯Ô¤ÖÆÌå: {correctBulletPrefab.name}");
                 return;
             }
         }
         else
         {
-            Debug.LogError($"æ— æ³•è·å– {(isPlayerWeapon ? "ç©å®¶" : "æ•Œäºº")} å­å¼¹æ± å•ä¾‹");
+            Debug.LogError($"ÎŞ·¨»ñÈ¡ {(isPlayerWeapon ? "Íæ¼Ò" : "µĞÈË")} ×Óµ¯³Øµ¥Àı");
             return;
         }
 
         if (bullet != null)
         {
-            // æ¶ˆè€—å¼¹è¯
+            // ÏûºÄµ¯Ò©
             currentAmmo--;
 
-            // è®¾ç½®å­å¼¹ä½ç½®å’Œæ—‹è½¬
+            // ÉèÖÃ×Óµ¯Î»ÖÃºÍĞı×ª
             bullet.transform.position = muzzle.position;
             bullet.transform.rotation = muzzle.rotation;
 
-            // æ·»åŠ æ•£å°„
+            // Ìí¼ÓÉ¢Éä
             float randomAngle = Random.Range(-spreadAngle, spreadAngle);
             bullet.transform.rotation = muzzle.rotation * Quaternion.Euler(0, 0, randomAngle);
 
-            // é…ç½®å­å¼¹ç»„ä»¶
+            // ÅäÖÃ×Óµ¯×é¼ş
             Bullet bulletComponent = bullet.GetComponent<Bullet>();
             if (bulletComponent != null)
             {
@@ -423,7 +423,7 @@ public class WeaponManager : MonoBehaviour
                 bulletComponent.Damage = damage;
                 bulletComponent.enabled = true;
 
-                // è®¾ç½®å­å¼¹é€Ÿåº¦
+                // ÉèÖÃ×Óµ¯ËÙ¶È
                 Rigidbody2D bulletRB = bullet.GetComponent<Rigidbody2D>();
                 if (bulletRB != null)
                 {
@@ -432,11 +432,11 @@ public class WeaponManager : MonoBehaviour
             }
 
             bullet.SetActive(true);
-            Debug.Log($"[{weaponName}] å‘å°„è€…: {(currentOwner ? currentOwner.name : "æ— æŒæœ‰è€…")} ä½¿ç”¨å­å¼¹: {correctBulletPrefab.name} (æ ‡ç­¾: {correctBulletPrefab.tag}) å‰©ä½™å¼¹è¯: {currentAmmo}");
+            Debug.Log($"[{weaponName}] ·¢ÉäÕß: {(currentOwner ? currentOwner.name : "ÎŞ³ÖÓĞÕß")} Ê¹ÓÃ×Óµ¯: {correctBulletPrefab.name} (±êÇ©: {correctBulletPrefab.tag}) Ê£Óàµ¯Ò©: {currentAmmo}");
         }
     }
 
-    // æ¢å¼¹æ–¹æ³•
+    // »»µ¯·½·¨
     public void StartReload()
     {
         if (isReloading || currentAmmo >= magazineCapacity)
@@ -450,73 +450,73 @@ public class WeaponManager : MonoBehaviour
     private System.Collections.IEnumerator ReloadCoroutine()
     {
         isReloading = true;
-        reloadStartTime = Time.time; // è®°å½•æ¢å¼¹å¼€å§‹æ—¶é—´
-        Debug.Log($"æ­¦å™¨ {weaponName} å¼€å§‹æ¢å¼¹ï¼Œæ¢å¼¹æ—¶é—´: {reloadTime}ç§’");
+        reloadStartTime = Time.time; // ¼ÇÂ¼»»µ¯¿ªÊ¼Ê±¼ä
+        Debug.Log($"ÎäÆ÷ {weaponName} ¿ªÊ¼»»µ¯£¬»»µ¯Ê±¼ä: {reloadTime}Ãë");
 
         yield return new WaitForSeconds(reloadTime);
 
         currentAmmo = magazineCapacity;
         isReloading = false;
-        Debug.Log($"æ­¦å™¨ {weaponName} æ¢å¼¹å®Œæˆï¼Œå½“å‰å¼¹è¯: {currentAmmo}");
+        Debug.Log($"ÎäÆ÷ {weaponName} »»µ¯Íê³É£¬µ±Ç°µ¯Ò©: {currentAmmo}");
     }
 
-    // æ£€æŸ¥æ˜¯å¦éœ€è¦æ¢å¼¹
+    // ¼ì²éÊÇ·ñĞèÒª»»µ¯
     public bool NeedsReload()
     {
         return currentAmmo <= 0 && !isReloading;
     }
 
-    // æ£€æŸ¥æ˜¯å¦å¯ä»¥å°„å‡»
+    // ¼ì²éÊÇ·ñ¿ÉÒÔÉä»÷
     public bool CanFire()
     {
         return currentAmmo > 0 && !isReloading;
     }
 
-    // è·å–å¼¹è¯ä¿¡æ¯
+    // »ñÈ¡µ¯Ò©ĞÅÏ¢
     public int GetCurrentAmmo() => currentAmmo;
     public int GetMagazineCapacity() => magazineCapacity;
     public float GetReloadTime() => reloadTime;
     public bool IsReloading() => isReloading;
 
-    // æ–°å¢ï¼šè·å–ç©å®¶å­å¼¹é¢„åˆ¶ä½“
+    // ĞÂÔö£º»ñÈ¡Íæ¼Ò×Óµ¯Ô¤ÖÆÌå
     public GameObject GetPlayerBulletPrefab() => playerBulletPrefab;
 
-    // æ–°å¢ï¼šè·å–æ•Œäººå­å¼¹é¢„åˆ¶ä½“
+    // ĞÂÔö£º»ñÈ¡µĞÈË×Óµ¯Ô¤ÖÆÌå
     public GameObject GetEnemyBulletPrefab() => enemyBulletPrefab;
 
-    // æ–°å¢ï¼šè®¾ç½®ç©å®¶å­å¼¹é¢„åˆ¶ä½“
+    // ĞÂÔö£ºÉèÖÃÍæ¼Ò×Óµ¯Ô¤ÖÆÌå
     public void SetPlayerBulletPrefab(GameObject newPlayerBulletPrefab)
     {
         if (newPlayerBulletPrefab != null && !HasTag(newPlayerBulletPrefab, "PlayerBullets"))
         {
-            Debug.LogWarning($"è®¾ç½®çš„ç©å®¶å­å¼¹é¢„åˆ¶ä½“ {newPlayerBulletPrefab.name} æ²¡æœ‰ 'PlayerBullets' æ ‡ç­¾");
+            Debug.LogWarning($"ÉèÖÃµÄÍæ¼Ò×Óµ¯Ô¤ÖÆÌå {newPlayerBulletPrefab.name} Ã»ÓĞ 'PlayerBullets' ±êÇ©");
         }
         playerBulletPrefab = newPlayerBulletPrefab;
-        Debug.Log($"æ­¦å™¨ {weaponName} çš„ç©å®¶å­å¼¹é¢„åˆ¶ä½“å·²æ›´æ”¹ä¸º: {(playerBulletPrefab ? playerBulletPrefab.name : "æ— ")}");
+        Debug.Log($"ÎäÆ÷ {weaponName} µÄÍæ¼Ò×Óµ¯Ô¤ÖÆÌåÒÑ¸ü¸ÄÎª: {(playerBulletPrefab ? playerBulletPrefab.name : "ÎŞ")}");
     }
 
-    // æ–°å¢ï¼šè®¾ç½®æ•Œäººå­å¼¹é¢„åˆ¶ä½“
+    // ĞÂÔö£ºÉèÖÃµĞÈË×Óµ¯Ô¤ÖÆÌå
     public void SetEnemyBulletPrefab(GameObject newEnemyBulletPrefab)
     {
         if (newEnemyBulletPrefab != null && !HasTag(newEnemyBulletPrefab, "EnemyBullets"))
         {
-            Debug.LogWarning($"è®¾ç½®çš„æ•Œäººå­å¼¹é¢„åˆ¶ä½“ {newEnemyBulletPrefab.name} æ²¡æœ‰ 'EnemyBullets' æ ‡ç­¾");
+            Debug.LogWarning($"ÉèÖÃµÄµĞÈË×Óµ¯Ô¤ÖÆÌå {newEnemyBulletPrefab.name} Ã»ÓĞ 'EnemyBullets' ±êÇ©");
         }
         enemyBulletPrefab = newEnemyBulletPrefab;
-        Debug.Log($"æ­¦å™¨ {weaponName} çš„æ•Œäººå­å¼¹é¢„åˆ¶ä½“å·²æ›´æ”¹ä¸º: {(enemyBulletPrefab ? enemyBulletPrefab.name : "æ— ")}");
+        Debug.Log($"ÎäÆ÷ {weaponName} µÄµĞÈË×Óµ¯Ô¤ÖÆÌåÒÑ¸ü¸ÄÎª: {(enemyBulletPrefab ? enemyBulletPrefab.name : "ÎŞ")}");
     }
 
-    // æ–°å¢ï¼šè·å–æ­¦å™¨çš„å­å¼¹é¢„åˆ¶ä½“ï¼ˆå‘åå…¼å®¹ï¼‰
+    // ĞÂÔö£º»ñÈ¡ÎäÆ÷µÄ×Óµ¯Ô¤ÖÆÌå£¨Ïòºó¼æÈİ£©
     public GameObject GetBulletPrefab() => bulletPrefab;
 
-    // æ–°å¢ï¼šè®¾ç½®æ­¦å™¨çš„å­å¼¹é¢„åˆ¶ä½“ï¼ˆå‘åå…¼å®¹ï¼‰
+    // ĞÂÔö£ºÉèÖÃÎäÆ÷µÄ×Óµ¯Ô¤ÖÆÌå£¨Ïòºó¼æÈİ£©
     public void SetBulletPrefab(GameObject newBulletPrefab)
     {
         bulletPrefab = newBulletPrefab;
-        Debug.Log($"æ­¦å™¨ {weaponName} çš„é€šç”¨å­å¼¹é¢„åˆ¶ä½“å·²æ›´æ”¹ä¸º: {(bulletPrefab ? bulletPrefab.name : "æ— ")}");
+        Debug.Log($"ÎäÆ÷ {weaponName} µÄÍ¨ÓÃ×Óµ¯Ô¤ÖÆÌåÒÑ¸ü¸ÄÎª: {(bulletPrefab ? bulletPrefab.name : "ÎŞ")}");
     }
 
-    // è·å–æ­¦å™¨å±æ€§
+    // »ñÈ¡ÎäÆ÷ÊôĞÔ
     public float GetFireRate() => fireRate;
     public float GetDamage() => damage;
     public float GetRange() => range;
@@ -524,14 +524,14 @@ public class WeaponManager : MonoBehaviour
     public bool IsPlayerWeapon() => isPlayerWeapon;
     public Transform GetCurrentOwner() => currentOwner;
 
-    // å½“æ­¦å™¨è¢«æ‹¾å–æ—¶è°ƒç”¨
+    // µ±ÎäÆ÷±»Ê°È¡Ê±µ÷ÓÃ
     public void OnPickedUp(Transform newOwner)
     {
         bool isPlayer = newOwner.GetComponent<Player>() != null;
         SetOwner(newOwner, isPlayer);
     }
 
-    // å½“æ­¦å™¨è¢«ä¸¢å¼ƒæ—¶è°ƒç”¨
+    // µ±ÎäÆ÷±»¶ªÆúÊ±µ÷ÓÃ
     public void OnDropped()
     {
         SetAsDroppedWeapon();
@@ -545,26 +545,26 @@ public class WeaponManager : MonoBehaviour
         return Mathf.Clamp01(elapsedTime / reloadTime);
     }
 
-    // å•æ¬¡å¼€ç«çš„æ–¹æ³•
+    // µ¥´Î¿ª»ğµÄ·½·¨
     public void FireSingle()
     {
-        // æ£€æŸ¥æ˜¯å¦å¯ä»¥å°„å‡»
+        // ¼ì²éÊÇ·ñ¿ÉÒÔÉä»÷
         if (!CanFire())
         {
-            Debug.Log($"æ­¦å™¨ {weaponName} æ— æ³•å°„å‡»ï¼šå¼¹è¯ä¸è¶³æˆ–æ­£åœ¨æ¢å¼¹");
+            Debug.Log($"ÎäÆ÷ {weaponName} ÎŞ·¨Éä»÷£ºµ¯Ò©²»×ã»òÕıÔÚ»»µ¯");
             return;
         }
         
-        // æ£€æŸ¥å°„å‡»é—´éš”
+        // ¼ì²éÉä»÷¼ä¸ô
         if (Time.time < nextFireTime)
         {
             return;
         }
         
-        // æ‰§è¡Œå°„å‡»
+        // Ö´ĞĞÉä»÷
         Fire();
         
-        // æ›´æ–°ä¸‹æ¬¡å°„å‡»æ—¶é—´
+        // ¸üĞÂÏÂ´ÎÉä»÷Ê±¼ä
         nextFireTime = Time.time + fireRate;
     }
 }

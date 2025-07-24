@@ -28,11 +28,94 @@ public class RandomBackground : MonoBehaviour
         LoadBackgroundSprites();
     }
 
+    [Header("动画效果设置")]
+    [Tooltip("是否启用淡入淡出效果")]
+    public bool enableFadeEffect = true;
+
+    [Tooltip("淡入时间（秒）")]
+    public float fadeInTime = 0.5f;
+
+    [Tooltip("淡出时间（秒）")]
+    public float fadeOutTime = 0.3f;
+
+    private Coroutine fadeCoroutine;
+
+    // 带淡入淡出效果的设置随机背景
+    public void SetRandomBackgroundWithFade()
+    {
+        if (enableFadeEffect)
+        {
+            if (fadeCoroutine != null)
+            {
+                StopCoroutine(fadeCoroutine);
+            }
+            fadeCoroutine = StartCoroutine(FadeToRandomBackground());
+        }
+        else
+        {
+            SetRandomBackground();
+        }
+    }
+
+    private IEnumerator FadeToRandomBackground()
+    {
+        if (backgroundImage == null) yield break;
+
+        // 淡出当前背景
+        yield return StartCoroutine(FadeOut());
+
+        // 设置新的随机背景
+        SetRandomBackground();
+
+        // 淡入新背景
+        yield return StartCoroutine(FadeIn());
+    }
+
+    private IEnumerator FadeOut()
+    {
+        float elapsedTime = 0f;
+        Color startColor = backgroundImage.color;
+
+        while (elapsedTime < fadeOutTime)
+        {
+            elapsedTime += Time.deltaTime;
+            float alpha = Mathf.Lerp(startColor.a, 0f, elapsedTime / fadeOutTime);
+            backgroundImage.color = new Color(startColor.r, startColor.g, startColor.b, alpha);
+            yield return null;
+        }
+
+        backgroundImage.color = new Color(startColor.r, startColor.g, startColor.b, 0f);
+    }
+
+    private IEnumerator FadeIn()
+    {
+        float elapsedTime = 0f;
+        Color startColor = backgroundImage.color;
+
+        while (elapsedTime < fadeInTime)
+        {
+            elapsedTime += Time.deltaTime;
+            float alpha = Mathf.Lerp(0f, 1f, elapsedTime / fadeInTime);
+            backgroundImage.color = new Color(startColor.r, startColor.g, startColor.b, alpha);
+            yield return null;
+        }
+
+        backgroundImage.color = new Color(startColor.r, startColor.g, startColor.b, 1f);
+    }
+
+    // 在OnEnable时调用带淡入效果的方法
     private void OnEnable()
     {
         if (setRandomOnEnable)
         {
-            SetRandomBackground();
+            if (enableFadeEffect)
+            {
+                SetRandomBackgroundWithFade();
+            }
+            else
+            {
+                SetRandomBackground();
+            }
         }
     }
 

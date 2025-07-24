@@ -24,6 +24,11 @@ public class SceneLoader : MonoBehaviour
     [Tooltip("强制最小加载时间（秒）")]
     public float forceLoadingTime = 5f;
 
+    [Header("场景管理设置")]
+    [Tooltip("可切换的场景列表")]
+    public List<string> availableScenes = new List<string>();
+
+    // 添加缺少的isLoading变量
     private bool isLoading = false;
 
     void Awake()
@@ -101,8 +106,8 @@ public class SceneLoader : MonoBehaviour
         // 记录开始时间
         float startTime = Time.time;
 
-        // 异步加载场景
-        AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(NewsceneName);
+        // 异步加载场景 - 使用UnityEngine.SceneManagement.SceneManager
+        AsyncOperation asyncLoad = UnityEngine.SceneManagement.SceneManager.LoadSceneAsync(NewsceneName);
 
         if (asyncLoad == null)
         {
@@ -233,5 +238,30 @@ public class SceneLoader : MonoBehaviour
             DontDestroyOnLoad(loadingCanvas);
             loadingCanvas.SetActive(false);
         }
+    }
+
+    // 通过场景名称切换（支持外部调用，主要用于UI按钮）
+    public static void SwitchScene(string sceneName)
+    {
+        if (instance != null)
+        {
+            instance.TransitionToScene(sceneName);
+        }
+        else
+        {
+            Debug.LogError("SceneLoader实例不存在");
+        }
+    }
+
+    // 检查场景是否在可用列表中
+    public bool IsSceneAvailable(string sceneName)
+    {
+        return availableScenes.Contains(sceneName);
+    }
+
+    // 获取可用场景列表
+    public List<string> GetAvailableScenes()
+    {
+        return new List<string>(availableScenes);
     }
 }

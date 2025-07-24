@@ -3,79 +3,137 @@
         {
             "id":0,
             "name": "Shelter",
+            "thumbnail": "MapImages/Shelter.png",
             "description": "This is a secret safe house arranged by the Secret Service, which has complete equipment, warm beds, and some necessary survival supplies",
-            "items":[],
-            "difficulty":"none"
+            "difficulty": "NONE",
+            "lootLevel": "None",
+            "enemyCount": "0"
         },
         {
             "id":1,
             "name": "North District",
-            "description": "The village, consisting of rows of old apartments, abandoned public amenities, and numerous low rise bungalows, became a stronghold for a large gang after the implementation of the lockdown order"
+            "thumbnail": "MapImages/North District.png",
+            "description": "The village, consisting of rows of old apartments, abandoned public amenities, and numerous low rise bungalows, became a stronghold for a large gang after the implementation of the lockdown order",
+            "difficulty": "EASY",
+            "lootLevel": "NORMAL",
+            "enemyCount": "5-10"
         },
         {
             "id":2,
             "name":"West District",
-            "description": "A large resort village consisting of numerous wooden houses and small villas, which used to have a luxurious vacation destination, has now been transformed into a large safe zone by the remaining residents. There is a trading market where trade takes place every week, providing a place for the many remaining residents to exchange goods"
+            "thumbnail": "MapImages/West District.png",
+            "description": "A large resort village consisting of numerous wooden houses and small villas, which used to have a luxurious vacation destination, has now been transformed into a large safe zone by the remaining residents. There is a trading market where trade takes place every week, providing a place for the many remaining residents to exchange goods",
+            "difficulty": "EASY",
+            "lootLevel": "RICH",
+            "enemyCount": "3-8"
         },
         {
             "id":3,
             "name":"Factory",
-            "description": "Once a large mechanical processing factory, it gradually became abandoned after the crisis broke out, and now there are still a large number of leftover machinery, tools, and vehicles. It is said that there is a large underground tunnel here that leads to the underground area of the customs"
+            "thumbnail": "MapImages/Factory.png",
+            "description": "Once a large mechanical processing factory, it gradually became abandoned after the crisis broke out, and now there are still a large number of leftover machinery, tools, and vehicles. It is said that there is a large underground tunnel here that leads to the underground area of the customs",
+            "difficulty": "NORMAL",
+            "lootLevel": "RICH",
+            "enemyCount": "10-15"
         },
         {
             "id":4,
             "name":"Customs",
-            "description": "A large industrial park located near the factory. This area is equipped with customs stations, fuel storage facilities, offices, dormitories, and other infrastructure. This used to be an inspection station for port and factory import and export trade"
+            "thumbnail": "MapImages/Customs.png",
+            "description": "A large industrial park located near the factory. This area is equipped with customs stations, fuel storage facilities, offices, dormitories, and other infrastructure. This used to be an inspection station for port and factory import and export trade",
+            "difficulty": "NORMAL",
+            "lootLevel": "NORMAL",
+            "enemyCount": "12-18"
         },
         {
             "id":5,
             "name":"Harbor",
-            "description": "A cargo terminal area near the open sea, with several large cargo warehouses and fuel storage areas. Dozens of giant gantry cranes are suspended, and containers are piled up in the loading and unloading area. It is said that several smuggling speedboats often load and unload prohibited goods here"
+            "thumbnail": "MapImages/Harbor.png",
+            "description": "A cargo terminal area near the open sea, with several large cargo warehouses and fuel storage areas. Dozens of giant gantry cranes are suspended, and containers are piled up in the loading and unloading area. It is said that several smuggling speedboats often load and unload prohibited goods here",
+            "difficulty": "HARD",
+            "lootLevel": "RICH",
+            "enemyCount": "18-25"
         },
         {
             "id":6,
             "name":"Shoreline",
-            "description": "A medium-sized cargo distribution port in an offshore area, with medium to large tower cranes set up around the port, a considerable number of berths and loading and unloading warehouses, and dozens of medium-sized fuel storage tanks"
+            "thumbnail": "MapImages/Shoreline.png",
+            "description": "A medium-sized cargo distribution port in an offshore area, with medium to large tower cranes set up around the port, a considerable number of berths and loading and unloading warehouses, and dozens of medium-sized fuel storage tanks",
+            "difficulty": "NORMAL",
+            "lootLevel": "NORMAL",
+            "enemyCount": "15-22"
         },
         {
             "id":7,
             "name":"Lighthouse",
-            "description": "A large lighthouse built on a distant mountain cape, used to guide ships in the direction of entering offshore and inland ports, has now been occupied and converted into a military camp by hostile forces secretly infiltrating"
+            "thumbnail": "MapImages/Lighthouse.png",
+            "description": "A large lighthouse built on a distant mountain cape, used to guide ships in the direction of entering offshore and inland ports, has now been occupied and converted into a military camp by hostile forces secretly infiltrating",
+            "difficulty": "HARD",
+            "lootLevel": "BARREN",
+            "enemyCount": "20-30"
         },
         {
             "id":8,
             "name":"ReserveStation",
-            "description": "The secret base of the Lossovia Military Reserve Bureau. According to urban legends, this place stores enough supplies to sustain for several years, including food, medicine, and other resources, enough for people to survive in a full-scale nuclear war."
+            "thumbnail": "MapImages/ReserveStation.png",
+            "description": "The secret base of the Lossovia Military Reserve Bureau. According to urban legends, this place stores enough supplies to sustain for several years, including food, medicine, and other resources, enough for people to survive in a full-scale nuclear war.",
+            "difficulty": "INSANE",
+            "lootLevel": "RICH",
+            "enemyCount": "30-40"
         },
         {
             "id":9,
             "name":"UN Naval Harbour",
-            "description": "A large inland military port, now provided by the Lossovia government for peacekeeping forces to station and transport supplies. The internal facilities of the military port are well preserved, and the personnel are mixed, seemingly hiding many secrets"
+            "thumbnail": "MapImages/UN Naval Harbour.png",
+            "description": "A large inland military port, now provided by the Lossovia government for peacekeeping forces to station and transport supplies. The internal facilities of the military port are well preserved, and the personnel are mixed, seemingly hiding many secrets",
+            "difficulty": "HARD",
+            "lootLevel": "RICH",
+            "enemyCount": "0-15"
         },
         {
             "id":10,
             "name":"Urban Downtown",
-            "description": "The commercial center of Beijing Bay, this is TerraGroup of Lossovia Headquarters location, this is the beginning of everything"
+            "thumbnail": "MapImages/Urban Downtown.png",
+            "description": "The commercial center of Beijing Bay, this is TerraGroup of Lossovia Headquarters location, this is the beginning of everything",
+            "difficulty": "INSANE",
+            "lootLevel": "RICH",
+            "enemyCount": "35-50"
         },
         {
             "id":11,
             "name":"Shopping Mall",
-            "description": "Located to the south of the overpass area is a giant shopping center, consisting of three levels of various shops. It has a large amount of supplies, medicine, and food, but currently only one floor of the shopping mall is open, while other areas are blocked by debris on the roads"
+            "thumbnail": "MapImages/Shopping Mall.png",
+            "description": "Located to the south of the overpass area is a giant shopping center, consisting of three levels of various shops. It has a large amount of supplies, medicine, and food, but currently only one floor of the shopping mall is open, while other areas are blocked by debris on the roads",
+            "difficulty": "NORMAL",
+            "lootLevel": "RICH",
+            "enemyCount": "8-14"
         },
         {
             "id":12,
             "name":"Laboratory A",
-            "description": "The official biological research institute established by Tianhuan has numerous scientific research institutions and laboratories. According to Xiao Dao Information, after the implementation of the lockdown order, some personnel have not left the research institute and are still studying biochemical drugs at the institute"
+            "thumbnail": "MapImages/Laboratory A.png",
+            "description": "The official biological research institute established by Tianhuan has numerous scientific research institutions and laboratories. According to Xiao Dao Information, after the implementation of the lockdown order, some personnel have not left the research institute and are still studying biochemical drugs at the institute",
+            "difficulty": "HARD",
+            "lootLevel": "NORMAL",
+            "enemyCount": "18-28"
         },
         {
             "id":13,
             "name":"Laboratory B",
-            "description": "complex Terragroup The underground laboratory is a confidential project hidden beneath the city center of North Whale Bay. The official has never acknowledged the existence of this research area, but scattered information shows that it has been used for research and development, testing, and simulation in the fields of biology and high technology"
+            "thumbnail": "MapImages/Laboratory B.png",
+            "description": "complex Terragroup The underground laboratory is a confidential project hidden beneath the city center of North Whale Bay. The official has never acknowledged the existence of this research area, but scattered information shows that it has been used for research and development, testing, and simulation in the fields of biology and high technology",
+            "difficulty": "INSANE",
+            "lootLevel": "NORMAL",
+            "enemyCount": "25-35"
         },
         {
             "id":14,
             "name":"Forest",
-            "description":"Solis Forest District, a medium-sized forest with open areas, small hills, large lakes, and highways passing through, is a dangerous leakage area"
+            "thumbnail": "MapImages/Forest.png",
+            "description":"Solis Forest District, a medium-sized forest with open areas, small hills, large lakes, and highways passing through, is a dangerous leakage area",
+            "difficulty": "EASY",
+            "lootLevel": "BARREN",
+            "enemyCount": "8-15"
         }
     ]
 }

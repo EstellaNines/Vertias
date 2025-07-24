@@ -7,12 +7,10 @@ using TMPro;
 public class MapButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerDownHandler
 {
     [Header("状态精灵")]
-    [FieldLabel("悬停时的精灵")] public Sprite hoverSprite;         // 悬停时的精灵
-
+    [FieldLabel("悬停/按下时的精灵")] public Sprite hoverSprite;         // 悬停/按下时的精灵
     [FieldLabel("按下时的精灵")] public Sprite pressedSprite;       // 按下时的精灵
-
     [FieldLabel("Lock 默认精灵")] public Sprite lockDefaultSprite;   // Lock 默认精灵
-    [FieldLabel("Lock 悬停时的精灵")] public Sprite lockHoverSprite;     // Lock 悬停时的精灵
+    [FieldLabel("Lock 悬停/按下时的精灵")] public Sprite lockHoverSprite;     // Lock 悬停/按下时的精灵
     [FieldLabel("Lock 按下时的精灵")] public Sprite lockPressedSprite;   // Lock 按下时的精灵
 
     [Header("状态颜色")]
@@ -22,10 +20,16 @@ public class MapButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
     [FieldLabel("解锁文本颜色")] public Color unlockedTextColor = Color.green;
 
     [Header("状态控制")]
-    [FieldLabel("是否已解锁地图")] public bool isUnlocked = false;    // 是否已解锁地图（统一控制解锁状态和Lock图标显示）
+    [FieldLabel("是否已解锁地图")] public bool isUnlocked = false;    // 是否已解锁地图
 
     [Header("Lock图标引用")]
     [FieldLabel("Lock图标对象")] public Image lockImage;  // Lock图标的Image组件引用
+
+    [Header("地图信息")]
+    [FieldLabel("地图ID")] public int mapId = 0;  // 当前按钮对应的地图ID
+
+    [Header("显示控制器引用")]
+    [FieldLabel("地图显示控制器")] public MapDisplayController mapDisplayController;  // 地图显示控制器引用
 
     private Image image;
     private Sprite originalSprite;
@@ -36,8 +40,6 @@ public class MapButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
     {
         image = GetComponent<Image>();
         originalSprite = image.sprite;
-
-        // 如果没有手动指定Lock图标，尝试自动获取子对象 Lock
         if (lockImage == null)
         {
             Transform lockTransform = transform.Find("Lock");
@@ -46,21 +48,64 @@ public class MapButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
                 lockImage = lockTransform.GetComponent<Image>();
             }
         }
-
-        // 自动获取子对象 TMP 文字
         textComponent = GetComponentInChildren<TextMeshProUGUI>();
         if (textComponent != null)
         {
             originalTextColor = textComponent.color;
         }
-
+        // 这里恢复为FindObjectOfType
+        if (mapDisplayController == null)
+        {
+            mapDisplayController = FindObjectOfType<MapDisplayController>();
+        }
         UpdateLockState();
         UpdateTextColor();
     }
-
+    
+    public void OnPointerDown(PointerEventData eventData)
+    {
+        if (isUnlocked)
+        {
+            // 解锁状态下的点击效果
+            if (hoverSprite != null)
+            {
+                image.sprite = hoverSprite;
+            }
+            if (textComponent != null)
+            {
+                textComponent.color = pressedTextColor;
+            }
+            
+            Debug.Log($"选择了已解锁的地图: {gameObject.name}, 地图ID: {mapId}");
+        }
+        else
+        {
+            // 未解锁状态下的点击效果
+            if (hoverSprite != null)
+            {
+                image.sprite = hoverSprite;
+                if (lockImage != null && lockHoverSprite != null)
+                {
+                    lockImage.sprite = lockHoverSprite;
+                }
+                if (textComponent != null)
+                {
+                    textComponent.color = pressedTextColor;
+                }
+            }
+            Debug.Log($"选择了未解锁的地图: {gameObject.name}, 地图ID: {mapId}");
+        }
+        
+        // MapButton的主要职责：显示地图信息，不直接切换场景
+        if (mapDisplayController != null)
+        {
+            mapDisplayController.DisplayMapInfo(mapId);
+        }
+    }
+    
     private void OnValidate()
     {
-        // 在Inspector中修改值时自动更新状态（无论是否在运行时）
+        // 在Inspector中修改值时自动更新状态
         UpdateLockState();
         UpdateTextColor();
     }
@@ -97,7 +142,11 @@ public class MapButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
     {
         if (isUnlocked)
         {
-            // 解锁状态下的悬停效果
+            // 解锁状态下的悬停效果 - 添加精灵变化
+            if (hoverSprite != null)
+            {
+                image.sprite = hoverSprite;
+            }
             if (textComponent != null)
             {
                 textComponent.color = hoverTextColor;
@@ -125,7 +174,8 @@ public class MapButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
     {
         if (isUnlocked)
         {
-            // 解锁状态下恢复解锁颜色
+            // 解锁状态下恢复原始精灵和解锁颜色
+            image.sprite = originalSprite;
             if (textComponent != null)
             {
                 textComponent.color = unlockedTextColor;
@@ -143,38 +193,6 @@ public class MapButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
             {
                 textComponent.color = defaultTextColor;
             }
-        }
-    }
-
-    public void OnPointerDown(PointerEventData eventData)
-    {
-        if (isUnlocked)
-        {
-            // 解锁状态下的点击效果 - 可以添加地图跳转逻辑
-            if (textComponent != null)
-            {
-                textComponent.color = pressedTextColor;
-            }
-            // 这里可以添加实际的地图跳转或其他功能
-            Debug.Log($"点击了已解锁的地图按钮: {gameObject.name}");
-        }
-        else
-        {
-            // 未解锁状态下的点击效果
-            if (pressedSprite != null)
-            {
-                image.sprite = pressedSprite;
-                if (lockImage != null && lockPressedSprite != null)
-                {
-                    lockImage.sprite = lockPressedSprite;
-                }
-                if (textComponent != null)
-                {
-                    textComponent.color = pressedTextColor;
-                }
-            }
-            // 可以添加提示信息，告知玩家地图未解锁
-            Debug.Log($"地图未解锁: {gameObject.name}");
         }
     }
 
@@ -212,5 +230,23 @@ public class MapButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
         {
             lockImage.gameObject.SetActive(visible);
         }
+    }
+
+    // 设置地图ID
+    public void SetMapId(int id)
+    {
+        mapId = id;
+    }
+    
+    // 获取地图ID
+    public int GetMapId()
+    {
+        return mapId;
+    }
+    
+    // 设置显示控制器引用
+    public void SetMapDisplayController(MapDisplayController controller)
+    {
+        mapDisplayController = controller;
     }
 }

@@ -1,0 +1,301 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &77172817991309914
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2087575584902906649}
+  - component: {fileID: 831754348882712013}
+  - component: {fileID: 3593065349410492044}
+  - component: {fileID: 2474559703813221194}
+  - component: {fileID: 9177400051476741326}
+  m_Layer: 0
+  m_Name: SceneController
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2087575584902906649
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 77172817991309914}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8647147531161996146}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &831754348882712013
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 77172817991309914}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cafa284585712e140b8facc967a57c71, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sceneMappings: []
+--- !u!114 &3593065349410492044
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 77172817991309914}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bda41053edad45444ac06b76e2f71c26, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  loadingSlider: {fileID: 4239604889201231004}
+  loadingText: {fileID: 6371645682044289149}
+  loadingCanvas: {fileID: 8332005183428105395}
+  forceLoadingTime: 3
+  availableScenes:
+  - Shelter
+  - Mall
+--- !u!114 &2474559703813221194
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 77172817991309914}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d1ae07c17f7e376429b96416faf376e2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sceneManagers: {fileID: 831754348882712013}
+  sceneLoader: {fileID: 3593065349410492044}
+  randomBackground: {fileID: 2216896140210891886}
+--- !u!114 &9177400051476741326
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 77172817991309914}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a161294ab9725b7438c41966e0a13b10, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sceneTransitionController: {fileID: 2474559703813221194}
+  mapButtonManager: {fileID: 0}
+  mapDisplayController: {fileID: 0}
+  mapSceneConfigs:
+  - mapId: 0
+    mapName: Shelter
+    sceneName: Shelter
+    isUnlocked: 1
+  - mapId: 1
+    mapName: North District
+    sceneName: NorthDistrict
+    isUnlocked: 0
+  - mapId: 2
+    mapName: West District
+    sceneName: WestDistrict
+    isUnlocked: 0
+  - mapId: 3
+    mapName: Factory
+    sceneName: Factory
+    isUnlocked: 0
+  - mapId: 4
+    mapName: Customs
+    sceneName: Customs
+    isUnlocked: 0
+  - mapId: 5
+    mapName: Harbor
+    sceneName: Harbor
+    isUnlocked: 0
+  - mapId: 6
+    mapName: Shoreline
+    sceneName: Shoreline
+    isUnlocked: 0
+  - mapId: 7
+    mapName: Lighthouse
+    sceneName: Lighthouse
+    isUnlocked: 0
+  - mapId: 8
+    mapName: ReserveStation
+    sceneName: ReserveStation
+    isUnlocked: 0
+  - mapId: 9
+    mapName: UN Naval Harbour
+    sceneName: UNNavalHarbour
+    isUnlocked: 1
+  - mapId: 10
+    mapName: Urban Downtown
+    sceneName: UrbanDowntown
+    isUnlocked: 0
+  - mapId: 11
+    mapName: ShoppingMall
+    sceneName: Mall
+    isUnlocked: 1
+  - mapId: 12
+    mapName: Laboratory A
+    sceneName: Laboratory A
+    isUnlocked: 0
+  - mapId: 13
+    mapName: Laboratory B
+    sceneName: LaboratoryB
+    isUnlocked: 0
+  - mapId: 14
+    mapName: Forest
+    sceneName: Forest
+    isUnlocked: 0
+--- !u!1 &6094715379098009563
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8647147531161996146}
+  m_Layer: 0
+  m_Name: SceneManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8647147531161996146
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6094715379098009563}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -11.298673, y: -3.8539486, z: -0.08971494}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 2087575584902906649}
+  - {fileID: 8188639885398290360}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1001 &4492376434924800530
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 8647147531161996146}
+    m_Modifications:
+    - target: {fileID: 2141199603352442590, guid: 3a94da4383a707541bd12d8d833e05ed, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4919599988076990861, guid: 3a94da4383a707541bd12d8d833e05ed, type: 3}
+      propertyPath: m_Name
+      value: LoadingUI
+      objectReference: {fileID: 0}
+    - target: {fileID: 5763415685913241002, guid: 3a94da4383a707541bd12d8d833e05ed, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5763415685913241002, guid: 3a94da4383a707541bd12d8d833e05ed, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5763415685913241002, guid: 3a94da4383a707541bd12d8d833e05ed, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5763415685913241002, guid: 3a94da4383a707541bd12d8d833e05ed, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5763415685913241002, guid: 3a94da4383a707541bd12d8d833e05ed, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5763415685913241002, guid: 3a94da4383a707541bd12d8d833e05ed, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5763415685913241002, guid: 3a94da4383a707541bd12d8d833e05ed, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5763415685913241002, guid: 3a94da4383a707541bd12d8d833e05ed, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5763415685913241002, guid: 3a94da4383a707541bd12d8d833e05ed, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5763415685913241002, guid: 3a94da4383a707541bd12d8d833e05ed, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8732961246895233330, guid: 3a94da4383a707541bd12d8d833e05ed, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 3a94da4383a707541bd12d8d833e05ed, type: 3}
+--- !u!114 &2216896140210891886 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2349717765989017212, guid: 3a94da4383a707541bd12d8d833e05ed, type: 3}
+  m_PrefabInstance: {fileID: 4492376434924800530}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3f19285a2d6949d49badaf95745057ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &4239604889201231004 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 328264418378780302, guid: 3a94da4383a707541bd12d8d833e05ed, type: 3}
+  m_PrefabInstance: {fileID: 4492376434924800530}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 67db9e8f0e2ae9c40bc1e2b64352a6b4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &6371645682044289149 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7364653598659152495, guid: 3a94da4383a707541bd12d8d833e05ed, type: 3}
+  m_PrefabInstance: {fileID: 4492376434924800530}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!4 &8188639885398290360 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 5763415685913241002, guid: 3a94da4383a707541bd12d8d833e05ed, type: 3}
+  m_PrefabInstance: {fileID: 4492376434924800530}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &8332005183428105395 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5618550602422640289, guid: 3a94da4383a707541bd12d8d833e05ed, type: 3}
+  m_PrefabInstance: {fileID: 4492376434924800530}
+  m_PrefabAsset: {fileID: 0}
