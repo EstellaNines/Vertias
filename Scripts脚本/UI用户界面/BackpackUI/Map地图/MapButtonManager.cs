@@ -1,369 +1,454 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
 using UnityEngine.EventSystems;
+using System.Collections.Generic;
+using TMPro;
+
+// 地图数据类
+[System.Serializable]
+public class MapData
+{
+    public int id;
+    public string name;
+    public string thumbnail;
+    public string description;
+    public string difficulty;
+    public string lootLevel;
+    public string enemyCount;
+    public bool isUnlocked;
+    public string sceneName;
+}
+
+// 地图数据集合类
+[System.Serializable]
+public class MapDataCollection
+{
+    public List<MapData> Map; // 注意：这里改为"Map"以匹配JSON
+}
 
 public class MapButtonManager : MonoBehaviour
 {
-    public static MapButtonManager Instance { get; private set; }
+    [Header("精灵图片设置")]
+    [SerializeField] private Sprite sprite2;
 
-    [Header("全局精灵配置")]
-    [FieldLabel("悬停/按下时的精灵")] public Sprite hoverSprite;         // 悬停/按下时的精灵
-    [FieldLabel("按下时的精灵")] public Sprite pressedSprite;       // 按下时的精灵
-    [FieldLabel("Lock 默认精灵")] public Sprite lockDefaultSprite;   // Lock 默认精灵
-    [FieldLabel("Lock 悬停/按下时的精灵")] public Sprite lockHoverSprite;     // Lock 悬停/按下时的精灵
-    [FieldLabel("Lock 按下时的精灵")] public Sprite lockPressedSprite;   // Lock 按下时的精灵
-
-    [Header("全局颜色配置")]
-    [FieldLabel("默认文本颜色")] public Color defaultTextColor = Color.white;
-    [FieldLabel("悬停文本颜色")] public Color hoverTextColor = Color.yellow;
-    [FieldLabel("按下文本颜色")] public Color pressedTextColor = Color.red;
-    [FieldLabel("解锁文本颜色")] public Color unlockedTextColor = Color.green;
-
-    [Header("全局解锁控制")]
-    [SerializeField] private bool globalUnlockedState = false;  // 全局解锁状态
+    [Header("字体颜色设置")]
+    [SerializeField] private Color hoverTextColor = Color.white;
+    
+    [Header("锁定图标设置")]
+    [SerializeField] private Sprite lockIconDefault;     // 锁定图标默认精灵
+    [SerializeField] private Sprite lockIconHover;      // 锁定图标悬停精灵
 
     [Header("按钮列表")]
-    [FieldLabel("地图按钮列表")] public List<MapButton> buttons = new List<MapButton>();
+    [SerializeField] private List<Button> mapButtons = new List<Button>();
 
-    [Header("Lock图标引用列表")]
-    [FieldLabel("Lock图标列表")] public List<Image> lockImages = new List<Image>();  // 每个按钮对应的Lock图标引用
+    [Header("地图数据")]
+    [SerializeField] private TextAsset mapDataJson;
 
-    [Header("地图ID配置")]
-    [FieldLabel("按钮对应的地图ID列表")] public List<int> buttonMapIds = new List<int>();  // 每个按钮对应的地图ID
+    private Dictionary<Button, Sprite> originalSprites = new Dictionary<Button, Sprite>();
+    private Dictionary<Button, Color> originalTextColors = new Dictionary<Button, Color>();
+    private Dictionary<Button, MapData> buttonMapData = new Dictionary<Button, MapData>();
+    private Dictionary<int, MapData> mapDataDict = new Dictionary<int, MapData>(); // 按ID索引的地图数据
+    private Dictionary<Button, Image> buttonLockIcons = new Dictionary<Button, Image>(); // 按钮锁定图标
+    private Dictionary<Image, Sprite> originalLockSprites = new Dictionary<Image, Sprite>(); // 锁定图标原始精灵
+    private List<MapData> mapDataList = new List<MapData>();
 
-    private void Awake()
+    void Start()
     {
-        if (Instance == null)
-        {
-            Instance = this;
-        }
-        else if (Instance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
-
-        // 自动收集Lock图标引用
-        CollectLockImageReferences();
-        // 应用配置到所有按钮
-        ApplyConfigurationToAllButtons();
-        // 设置按钮ID
-        SetButtonMapIds();
-
-        // 新增：调试所有按钮状态
-        DebugAllButtonStates();
+        LoadMapData();
+        InitializeButtons();
     }
 
-    private void OnDestroy()
+    // 加载地图数据
+    private void LoadMapData()
     {
-        if (Instance == this) Instance = null;
-    }
+        Debug.Log("开始加载地图数据...");
 
-    // 为所有按钮设置对应的地图ID
-    private void SetButtonMapIds()
-    {
-        for (int i = 0; i < buttons.Count && i < buttonMapIds.Count; i++)
+        if (mapDataJson != null)
         {
-            if (buttons[i] != null)
+            Debug.Log($"JSON文件已设置: {mapDataJson.name}");
+
+            try
             {
-                buttons[i].SetMapId(buttonMapIds[i]);
-                Debug.Log($"按钮 {buttons[i].name} 设置地图ID: {buttonMapIds[i]}");
+                MapDataCollection mapCollection = JsonUtility.FromJson<MapDataCollection>(mapDataJson.text);
+                if (mapCollection != null && mapCollection.Map != null)
+                {
+                    mapDataList = mapCollection.Map;
+                    Debug.Log($"成功加载 {mapDataList.Count} 个地图数据");
+
+                    // 创建ID索引字典
+                    mapDataDict.Clear();
+                    foreach (MapData mapData in mapDataList)
+                    {
+                        mapDataDict[mapData.id] = mapData;
+                        Debug.Log($"地图数据: ID={mapData.id}, 名称={mapData.name}, 场景={mapData.sceneName}, 解锁状态={mapData.isUnlocked}");
+                    }
+                }
+                else
+                {
+                    Debug.LogError("地图数据为空或格式不正确");
+                }
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError($"加载地图数据失败: {e.Message}");
             }
         }
+        else
+        {
+            Debug.LogWarning("未设置地图数据JSON文件");
+        }
     }
 
-    // 添加按钮时同时设置ID
-    public void AddButton(MapButton button, int mapId = 0)
+    // 初始化所有按钮的事件监听
+    private void InitializeButtons()
     {
-        if (!buttons.Contains(button))
+        Debug.Log($"开始初始化按钮，按钮数量: {mapButtons.Count}, 地图数据数量: {mapDataList.Count}");
+
+        foreach (Button button in mapButtons)
         {
-            buttons.Add(button);
-            buttonMapIds.Add(mapId);
-
-            // 添加对应的Lock图标引用
-            Image lockImg = button != null ? button.GetLockImage() : null;
-            lockImages.Add(lockImg);
-
-            // 设置按钮的地图ID
             if (button != null)
             {
-                button.SetMapId(mapId);
-            }
+                // 获取或添加MapButtonID组件
+                MapButtonID buttonID = button.GetComponent<MapButtonID>();
+                if (buttonID == null)
+                {
+                    buttonID = button.gameObject.AddComponent<MapButtonID>();
+                    Debug.LogWarning($"按钮 {button.name} 没有MapButtonID组件，已自动添加");
+                }
 
-            ApplyConfigurationToAllButtons();
+                // 根据按钮ID关联地图数据
+                int mapID = buttonID.MapID;
+                if (mapID >= 0 && mapDataDict.ContainsKey(mapID))
+                {
+                    buttonMapData[button] = mapDataDict[mapID];
+                    Debug.Log($"按钮 {button.name} (ID: {mapID}) 关联地图数据: {mapDataDict[mapID].name}");
+
+                    // 更新按钮文本显示（从JSON自动读取地图名称）
+                    UpdateButtonText(button, mapDataDict[mapID]);
+                    
+                    // 设置锁定图标
+                    SetupLockIcon(button, mapDataDict[mapID]);
+                }
+                else
+                {
+                    Debug.LogWarning($"按钮 {button.name} 的ID ({mapID}) 无效或未找到对应地图数据");
+                }
+
+                // 存储原始精灵图片和颜色
+                SetupButtonEvents(button);
+            }
         }
+
+        Debug.Log($"按钮数据关联完成，关联数量: {buttonMapData.Count}");
     }
-
-    // 移除按钮时同时移除ID（保留这个版本，移除重复的）
-    public void RemoveButton(MapButton button)
+    
+    // 设置锁定图标
+    private void SetupLockIcon(Button button, MapData mapData)
     {
-        int index = buttons.IndexOf(button);
-        if (index >= 0)
+        // 查找按钮下的Image组件（锁定图标）
+        Image[] childImages = button.GetComponentsInChildren<Image>();
+        Image lockIcon = null;
+        
+        // 找到不是按钮本身的Image组件
+        foreach (Image img in childImages)
         {
-            buttons.RemoveAt(index);
-
-            // 移除对应的地图ID
-            if (index < buttonMapIds.Count)
+            if (img.gameObject != button.gameObject)
             {
-                buttonMapIds.RemoveAt(index);
-            }
-
-            // 移除对应的Lock图标引用
-            if (index < lockImages.Count)
-            {
-                lockImages.RemoveAt(index);
+                lockIcon = img;
+                break;
             }
         }
-    }
-
-    // 设置特定按钮的地图ID
-    public void SetButtonMapId(int buttonIndex, int mapId)
-    {
-        if (buttonIndex >= 0 && buttonIndex < buttons.Count && buttons[buttonIndex] != null)
+        
+        if (lockIcon != null)
         {
-            buttons[buttonIndex].SetMapId(mapId);
-
-            // 更新ID列表
-            if (buttonIndex < buttonMapIds.Count)
+            buttonLockIcons[button] = lockIcon;
+            
+            // 设置锁定图标的显示状态
+            if (mapData.isUnlocked)
             {
-                buttonMapIds[buttonIndex] = mapId;
+                // 地图已解锁，隐藏锁定图标
+                lockIcon.gameObject.SetActive(false);
+                Debug.Log($"地图 {mapData.name} 已解锁，隐藏锁定图标");
             }
             else
             {
-                // 如果列表不够长，扩展列表
-                while (buttonMapIds.Count <= buttonIndex)
+                // 地图未解锁，显示锁定图标
+                lockIcon.gameObject.SetActive(true);
+                
+                // 设置默认锁定图标精灵
+                if (lockIconDefault != null)
                 {
-                    buttonMapIds.Add(0);
+                    lockIcon.sprite = lockIconDefault;
+                    originalLockSprites[lockIcon] = lockIconDefault;
                 }
-                buttonMapIds[buttonIndex] = mapId;
+                
+                Debug.Log($"地图 {mapData.name} 未解锁，显示锁定图标");
+            }
+        }
+        else
+        {
+            Debug.LogWarning($"按钮 {button.name} 下未找到锁定图标Image组件");
+        }
+    }
+
+    // 更新按钮文本显示ID和名称（从JSON自动读取）
+    private void UpdateButtonText(Button button, MapData mapData)
+    {
+        if (button != null && mapData != null)
+        {
+            // 优先查找TextMeshPro组件
+            TextMeshProUGUI tmpText = button.GetComponentInChildren<TextMeshProUGUI>();
+            if (tmpText != null)
+            {
+                // 保持原有文本不变
+                string originalText = tmpText.text;
+                tmpText.text = $"{originalText}";
+                return;
             }
         }
     }
 
-    // 获取特定按钮的地图ID
-    public int GetButtonMapId(int buttonIndex)
+    // 设置按钮事件
+    private void SetupButtonEvents(Button button)
     {
-        if (buttonIndex >= 0 && buttonIndex < buttons.Count && buttons[buttonIndex] != null)
+        // 存储原始精灵图片
+        Image buttonImage = button.GetComponent<Image>();
+        if (buttonImage != null)
         {
-            return buttons[buttonIndex].GetMapId();
+            originalSprites[button] = buttonImage.sprite;
+        }
+
+        // 存储原始字体颜色
+        TextMeshProUGUI tmpText = button.GetComponentInChildren<TextMeshProUGUI>();
+        Text normalText = button.GetComponentInChildren<Text>();
+
+        if (tmpText != null)
+        {
+            originalTextColors[button] = tmpText.color;
+        }
+        else if (normalText != null)
+        {
+            originalTextColors[button] = normalText.color;
+        }
+
+        // 添加事件触发器
+        EventTrigger eventTrigger = button.GetComponent<EventTrigger>();
+        if (eventTrigger == null)
+        {
+            eventTrigger = button.gameObject.AddComponent<EventTrigger>();
+        }
+
+        // 清除现有事件
+        eventTrigger.triggers.Clear();
+
+        // 添加鼠标进入事件
+        EventTrigger.Entry pointerEnter = new EventTrigger.Entry();
+        pointerEnter.eventID = EventTriggerType.PointerEnter;
+        pointerEnter.callback.AddListener((data) => { OnButtonHover(button); });
+        eventTrigger.triggers.Add(pointerEnter);
+
+        // 添加鼠标离开事件
+        EventTrigger.Entry pointerExit = new EventTrigger.Entry();
+        pointerExit.eventID = EventTriggerType.PointerExit;
+        pointerExit.callback.AddListener((data) => { OnButtonExit(button); });
+        eventTrigger.triggers.Add(pointerExit);
+
+        // 清除现有点击事件并添加新的
+        button.onClick.RemoveAllListeners();
+        button.onClick.AddListener(() => OnButtonClick(button));
+    }
+
+    // 鼠标悬停在按钮上时调用
+    private void OnButtonHover(Button button)
+    {
+        ChangeButtonSprite(button, sprite2);
+        ChangeButtonTextColor(button, hoverTextColor);
+        
+        // 更改锁定图标精灵
+        if (buttonLockIcons.ContainsKey(button))
+        {
+            Image lockIcon = buttonLockIcons[button];
+            if (lockIcon.gameObject.activeInHierarchy && lockIconHover != null)
+            {
+                lockIcon.sprite = lockIconHover;
+            }
+        }
+    }
+
+    private void OnButtonExit(Button button)
+    {
+        if (originalSprites.ContainsKey(button))
+        {
+            ChangeButtonSprite(button, originalSprites[button]);
+        }
+
+        if (originalTextColors.ContainsKey(button))
+        {
+            ChangeButtonTextColor(button, originalTextColors[button]);
+        }
+        
+        // 恢复锁定图标原始精灵
+        if (buttonLockIcons.ContainsKey(button))
+        {
+            Image lockIcon = buttonLockIcons[button];
+            if (lockIcon.gameObject.activeInHierarchy && originalLockSprites.ContainsKey(lockIcon))
+            {
+                lockIcon.sprite = originalLockSprites[lockIcon];
+            }
+        }
+    }
+
+    private void OnButtonClick(Button button)
+    {
+        ChangeButtonSprite(button, sprite2);
+        ChangeButtonTextColor(button, hoverTextColor);
+        
+        // 更改锁定图标精灵
+        if (buttonLockIcons.ContainsKey(button))
+        {
+            Image lockIcon = buttonLockIcons[button];
+            if (lockIcon.gameObject.activeInHierarchy && lockIconHover != null)
+            {
+                lockIcon.sprite = lockIconHover;
+            }
+        }
+
+        if (buttonMapData.ContainsKey(button))
+        {
+            MapData mapData = buttonMapData[button];
+            Debug.Log($"地图ID: {mapData.id}, 地图名称: {mapData.name}, 场景名称: {mapData.sceneName}");
+            
+            // 通知MapDescription显示地图信息
+            MapDescription mapDescription = FindObjectOfType<MapDescription>();
+            if (mapDescription != null)
+            {
+                mapDescription.ShowMapInfo(mapData.id);
+            }
+            
+            // 发送地图ID到MapConfirmController
+            MapConfirmController mapConfirmController = FindObjectOfType<MapConfirmController>();
+            if (mapConfirmController != null)
+            {
+                mapConfirmController.SendMessage("ReceiveMapID", mapData.id, SendMessageOptions.DontRequireReceiver);
+                Debug.Log($"MapButtonManager: 已发送地图ID {mapData.id} 到MapConfirmController");
+            }
+            else
+            {
+                Debug.LogWarning("MapButtonManager: 未找到MapConfirmController组件");
+            }
+        }
+        else
+        {
+            Debug.Log($"按钮 {button.name} 被点击了！（无关联地图数据）");
+        }
+    }
+
+    private void ChangeButtonSprite(Button button, Sprite newSprite)
+    {
+        if (button != null && newSprite != null)
+        {
+            Image buttonImage = button.GetComponent<Image>();
+            if (buttonImage != null)
+            {
+                buttonImage.sprite = newSprite;
+            }
+        }
+    }
+
+    private void ChangeButtonTextColor(Button button, Color newColor)
+    {
+        if (button != null)
+        {
+            TextMeshProUGUI tmpText = button.GetComponentInChildren<TextMeshProUGUI>();
+            if (tmpText != null)
+            {
+                tmpText.color = newColor;
+                return;
+            }
+
+            Text normalText = button.GetComponentInChildren<Text>();
+            if (normalText != null)
+            {
+                normalText.color = newColor;
+            }
+        }
+    }
+
+    // 公共方法：设置按钮ID（不修改显示文本）
+    public void SetButtonMapID(Button button, int mapID)
+    {
+        if (button != null)
+        {
+            MapButtonID buttonIDComponent = button.GetComponent<MapButtonID>();
+            if (buttonIDComponent == null)
+            {
+                buttonIDComponent = button.gameObject.AddComponent<MapButtonID>();
+            }
+            buttonIDComponent.MapID = mapID;
+
+            // 重新关联数据并自动更新显示文本
+            if (mapDataDict.ContainsKey(mapID))
+            {
+                buttonMapData[button] = mapDataDict[mapID];
+                UpdateButtonText(button, mapDataDict[mapID]); // 自动从JSON读取名称
+                SetupLockIcon(button, mapDataDict[mapID]); // 重新设置锁定图标
+                Debug.Log($"按钮 {button.name} ID设置为: {mapID}, 地图名称: {mapDataDict[mapID].name}");
+            }
+        }
+    }
+
+    // 获取按钮的地图ID
+    public int GetButtonMapID(Button button)
+    {
+        if (button != null)
+        {
+            MapButtonID buttonIDComponent = button.GetComponent<MapButtonID>();
+            if (buttonIDComponent != null)
+            {
+                return buttonIDComponent.MapID;
+            }
         }
         return -1;
     }
 
-    // 根据地图ID查找按钮
-    public MapButton FindButtonByMapId(int mapId)
+    // 获取按钮关联的地图数据
+    public MapData GetButtonMapData(Button button)
     {
-        Debug.Log($"查找地图ID: {mapId}，当前按钮数量: {buttons.Count}");
-
-        for (int i = 0; i < buttons.Count; i++)
+        if (buttonMapData.ContainsKey(button))
         {
-            if (buttons[i] != null)
-            {
-                int buttonMapId = buttons[i].GetMapId();
-                bool isUnlocked = buttons[i].IsUnlocked();
-                Debug.Log($"按钮 {i}: {buttons[i].name}, 地图ID: {buttonMapId}, 解锁状态: {isUnlocked}");
-
-                if (buttonMapId == mapId)
-                {
-                    Debug.Log($"找到匹配的按钮: {buttons[i].name}");
-                    return buttons[i];
-                }
-            }
-        }
-
-        Debug.LogWarning($"未找到地图ID {mapId} 对应的按钮");
-        return null;
-    }
-
-    // 新增：调试所有按钮状态的方法
-    public void DebugAllButtonStates()
-    {
-        Debug.Log("=== 所有按钮状态调试信息 ===");
-        for (int i = 0; i < buttons.Count; i++)
-        {
-            if (buttons[i] != null)
-            {
-                Debug.Log($"按钮 {i}: {buttons[i].name}, 地图ID: {buttons[i].GetMapId()}, 解锁状态: {buttons[i].IsUnlocked()}");
-            }
-            else
-            {
-                Debug.Log($"按钮 {i}: null");
-            }
-        }
-        Debug.Log("=== 调试信息结束 ===");
-    }
-
-    // 验证所有按钮的ID是否有效
-    public void ValidateButtonMapIds()
-    {
-        MapDisplayController displayController = FindObjectOfType<MapDisplayController>();
-        if (displayController != null)
-        {
-            MapData[] allMapData = displayController.GetAllMapData();
-            if (allMapData != null)
-            {
-                HashSet<int> validIds = new HashSet<int>();
-                foreach (var mapData in allMapData)
-                {
-                    validIds.Add(mapData.id);
-                }
-
-                for (int i = 0; i < buttons.Count; i++)
-                {
-                    if (buttons[i] != null)
-                    {
-                        int buttonMapId = buttons[i].GetMapId();
-                        if (!validIds.Contains(buttonMapId))
-                        {
-                            Debug.LogWarning($"按钮 {buttons[i].name} 的地图ID {buttonMapId} 在JSON数据中不存在！");
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    // 自动分配连续的地图ID（从1开始）
-    public void AutoAssignMapIds()
-    {
-        for (int i = 0; i < buttons.Count; i++)
-        {
-            int mapId = i + 1;  // 从1开始分配ID
-            SetButtonMapId(i, mapId);
-        }
-    }
-
-    // 自动收集Lock图标引用
-    private void CollectLockImageReferences()
-    {
-        lockImages.Clear();
-        foreach (var button in buttons)
-        {
-            if (button != null)
-            {
-                Image lockImg = button.GetLockImage();
-                lockImages.Add(lockImg);
-            }
-            else
-            {
-                lockImages.Add(null);
-            }
-        }
-    }
-
-    public void ApplyConfigurationToAllButtons()
-    {
-        foreach (var button in buttons)
-        {
-            if (button != null)
-            {
-                button.hoverSprite = hoverSprite;
-                button.lockDefaultSprite = lockDefaultSprite;
-                button.lockHoverSprite = lockHoverSprite;
-
-                button.defaultTextColor = defaultTextColor;
-                button.hoverTextColor = hoverTextColor;
-                button.pressedTextColor = pressedTextColor;
-                button.unlockedTextColor = unlockedTextColor;
-
-                // 不在这里应用全局解锁状态，避免覆盖Inspector中的设置
-                // button.SetUnlockedState(globalUnlockedState);
-            }
-        }
-    }
-
-    // 设置所有地图的解锁状态
-    public void SetAllMapsUnlockedState(bool unlocked)
-    {
-        globalUnlockedState = unlocked;
-        for (int i = 0; i < buttons.Count; i++)
-        {
-            if (buttons[i] != null)
-            {
-                buttons[i].SetUnlockedState(unlocked);
-            }
-            // 直接控制Lock图标显示
-            if (i < lockImages.Count && lockImages[i] != null)
-            {
-                lockImages[i].gameObject.SetActive(!unlocked);
-            }
-        }
-    }
-
-    // 设置特定地图的解锁状态
-    public void SetSpecificMapUnlockedState(int buttonIndex, bool unlocked)
-    {
-        if (buttonIndex >= 0 && buttonIndex < buttons.Count && buttons[buttonIndex] != null)
-        {
-            buttons[buttonIndex].SetUnlockedState(unlocked);
-            // 直接控制对应Lock图标显示
-            if (buttonIndex < lockImages.Count && lockImages[buttonIndex] != null)
-            {
-                lockImages[buttonIndex].gameObject.SetActive(!unlocked);
-            }
-        }
-    }
-
-    // 获取全局解锁状态
-    public bool GetGlobalUnlockedState()
-    {
-        return globalUnlockedState;
-    }
-
-    // 批量设置多个地图的解锁状态
-    public void SetMultipleMapsUnlockedState(List<int> buttonIndices, bool unlocked)
-    {
-        foreach (int index in buttonIndices)
-        {
-            if (index >= 0 && index < buttons.Count && buttons[index] != null)
-            {
-                buttons[index].SetUnlockedState(unlocked);
-                // 直接控制对应Lock图标显示
-                if (index < lockImages.Count && lockImages[index] != null)
-                {
-                    lockImages[index].gameObject.SetActive(!unlocked);
-                }
-            }
-        }
-    }
-
-    // 直接控制所有Lock图标的显示/隐藏
-    public void SetAllLockImagesVisible(bool visible)
-    {
-        for (int i = 0; i < lockImages.Count; i++)
-        {
-            if (lockImages[i] != null)
-            {
-                lockImages[i].gameObject.SetActive(visible);
-            }
-        }
-    }
-
-    // 直接控制特定Lock图标的显示/隐藏
-    public void SetSpecificLockImageVisible(int index, bool visible)
-    {
-        if (index >= 0 && index < lockImages.Count && lockImages[index] != null)
-        {
-            lockImages[index].gameObject.SetActive(visible);
-        }
-    }
-
-    // 获取特定Lock图标引用
-    public Image GetLockImage(int index)
-    {
-        if (index >= 0 && index < lockImages.Count)
-        {
-            return lockImages[index];
+            return buttonMapData[button];
         }
         return null;
     }
 
-    // 手动刷新Lock图标引用列表
-    public void RefreshLockImageReferences()
+    // 根据地图ID获取地图数据
+    public MapData GetMapDataByID(int mapID)
     {
-        CollectLockImageReferences();
+        if (mapDataDict.ContainsKey(mapID))
+        {
+            return mapDataDict[mapID];
+        }
+        return null;
+    }
+    
+    // 公共方法：更新地图解锁状态
+    public void UpdateMapLockStatus(int mapID, bool isUnlocked)
+    {
+        if (mapDataDict.ContainsKey(mapID))
+        {
+            mapDataDict[mapID].isUnlocked = isUnlocked;
+            
+            // 找到对应的按钮并更新锁定图标
+            foreach (var kvp in buttonMapData)
+            {
+                if (kvp.Value.id == mapID)
+                {
+                    SetupLockIcon(kvp.Key, kvp.Value);
+                    break;
+                }
+            }
+            
+            Debug.Log($"地图 {mapID} 解锁状态已更新为: {isUnlocked}");
+        }
     }
 }

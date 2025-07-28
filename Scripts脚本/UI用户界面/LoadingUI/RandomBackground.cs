@@ -5,20 +5,20 @@ using UnityEngine.UI;
 
 public class RandomBackground : MonoBehaviour
 {
-    [Header("èƒŒæ™¯å›¾ç‰‡è®¾ç½®")]
-    [Tooltip("ç”¨äºŽæ˜¾ç¤ºèƒŒæ™¯å›¾ç‰‡çš„Imageç»„ä»¶")]
+    [Header("„1¤7„1¤7„1¤7„1¤70É00œ2„1¤7„1¤7„1¤7„1¤7")]
+    [Tooltip("„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70¶5„1¤7„1¤7„1¤7„1¤70É00œ2„1¤7„1¤7Image„1¤7„1¤7„1¤7")]
     public Image backgroundImage;
 
-    [Tooltip("Resourcesæ–‡ä»¶å¤¹ä¸­èƒŒæ™¯å›¾ç‰‡çš„è·¯å¾„ï¼Œä¸åŒ…å«æ–‡ä»¶æ‰©å±•å")]
+    [Tooltip("Resources„1¤70‘4„1¤7„1¤7„1¤7„1¤7§Ò„1¤7„1¤7„1¤70É00œ2„1¤7„1¤7¡¤„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70‘4„1¤7„1¤7„1¤70ð5„1¤7„1¤7")]
     public string backgroundFolderPath = "LoadingBackground";
 
-    [Tooltip("æ˜¯å¦åœ¨ç»„ä»¶å¯ç”¨æ—¶è‡ªåŠ¨è®¾ç½®éšæœºèƒŒæ™¯")]
+    [Tooltip("„1¤70¢9„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70µ2„1¤70é8„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7")]
     public bool setRandomOnEnable = true;
 
-    [Tooltip("æ·¡å…¥æ·¡å‡ºè¿‡æ¸¡æ—¶é—´ï¼ˆç§’ï¼‰")]
+    [Tooltip("„1¤7„1¤7„1¤7ƒ1•6„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70µ2„1¤7‚44„1¤7ƒ0 0")]
     public float fadeTransitionTime = 0.5f;
 
-    [Tooltip("æ”¯æŒçš„æ–‡ä»¶ååŽç¼€ï¼Œç”¨äºŽåŠ è½½å¤šä¸ªèƒŒæ™¯å›¾ç‰‡å˜ä½“")]
+    [Tooltip("0õ1„1¤70ö5„1¤7„1¤70‘4„1¤7„1¤7„1¤7„1¤7„1¤70ý4„1¤7„1¤7„1¤7„1¤7„1¤71’8„1¤7„1¤71…4„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70É00œ2„1¤7„1¤7„1¤7„1¤7")]
     public string[] supportedExtensions = { "", "_1", "_2", "_3", "_4", "_5", "_6", "_7", "_8", "_9" };
 
     private List<Sprite> loadedSprites = new List<Sprite>();
@@ -28,19 +28,19 @@ public class RandomBackground : MonoBehaviour
         LoadBackgroundSprites();
     }
 
-    [Header("åŠ¨ç”»æ•ˆæžœè®¾ç½®")]
-    [Tooltip("æ˜¯å¦å¯ç”¨æ·¡å…¥æ·¡å‡ºæ•ˆæžœ")]
+    [Header("„1¤7„1¤7„1¤7„1¤7§¹„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7")]
+    [Tooltip("„1¤70¢9„1¤7„1¤7„1¤7„1¤70‹1„1¤7„1¤7ƒ1•6„1¤7„1¤7§¹„1¤7„1¤7")]
     public bool enableFadeEffect = true;
 
-    [Tooltip("æ·¡å…¥æ—¶é—´ï¼ˆç§’ï¼‰")]
+    [Tooltip("„1¤7„1¤7„1¤7„1¤70µ2„1¤7‚44„1¤7ƒ0 0")]
     public float fadeInTime = 0.5f;
 
-    [Tooltip("æ·¡å‡ºæ—¶é—´ï¼ˆç§’ï¼‰")]
+    [Tooltip("„1¤7„1¤7„1¤7„1¤70µ2„1¤7‚44„1¤7ƒ0 0")]
     public float fadeOutTime = 0.3f;
 
     private Coroutine fadeCoroutine;
 
-    // å¸¦æ·¡å…¥æ·¡å‡ºæ•ˆæžœçš„è®¾ç½®éšæœºèƒŒæ™¯
+    // „1¤7„1¤7„1¤7„1¤7„1¤7ƒ1•6„1¤7„1¤7§¹„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7
     public void SetRandomBackgroundWithFade()
     {
         if (enableFadeEffect)
@@ -61,13 +61,13 @@ public class RandomBackground : MonoBehaviour
     {
         if (backgroundImage == null) yield break;
 
-        // æ·¡å‡ºå½“å‰èƒŒæ™¯
+        // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤70¢2„1¤7„1¤7„1¤7„1¤7
         yield return StartCoroutine(FadeOut());
 
-        // è®¾ç½®æ–°çš„éšæœºèƒŒæ™¯
+        // „1¤7„1¤7„1¤7„1¤7„1¤70…8„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7
         SetRandomBackground();
 
-        // æ·¡å…¥æ–°èƒŒæ™¯
+        // „1¤7„1¤7„1¤7„1¤7„1¤7¡À„1¤7„1¤7„1¤7
         yield return StartCoroutine(FadeIn());
     }
 
@@ -103,7 +103,7 @@ public class RandomBackground : MonoBehaviour
         backgroundImage.color = new Color(startColor.r, startColor.g, startColor.b, 1f);
     }
 
-    // åœ¨OnEnableæ—¶è°ƒç”¨å¸¦æ·¡å…¥æ•ˆæžœçš„æ–¹æ³•
+    // „1¤7„1¤7OnEnable0µ2„1¤7„1¤7„1¤70‹0„1¤7„1¤7„1¤7„1¤7„1¤7§¹„1¤7„1¤7„1¤709„1¤7„1¤7„1¤7
     private void OnEnable()
     {
         if (setRandomOnEnable)
@@ -121,31 +121,31 @@ public class RandomBackground : MonoBehaviour
 
     void Start()
     {
-        // å¦‚æžœæ²¡æœ‰åœ¨OnEnableä¸­è®¾ç½®ï¼Œåˆ™åœ¨Startä¸­è®¾ç½®
+        // „1¤7„1¤7„1¤70‹4„1¤7„1¤7„1¤7„1¤7OnEnable„1¤7„1¤7„1¤7„1¤7„1¤70Š0„1¤7„1¤7„1¤7„1¤7„1¤7Start„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7
         if (!setRandomOnEnable)
         {
             SetRandomBackground();
         }
     }
 
-    // ä»ŽResourcesæ–‡ä»¶å¤¹åŠ è½½èƒŒæ™¯ç²¾çµå›¾ç‰‡
+    // „1¤7„1¤7Resources„1¤70‘4„1¤7„1¤7§Þ„1¤7„1¤71„9„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70É00œ2
     private void LoadBackgroundSprites()
     {
         loadedSprites.Clear();
 
-        // å°è¯•åŠ è½½Resources/LoadingBackgroundæ–‡ä»¶å¤¹ä¸­çš„æ‰€æœ‰ç²¾çµå›¾ç‰‡
+        // „1¤7„1¤7„1¤70ê4„1¤7„1¤7„1¤7Resources/LoadingBackground„1¤70‘4„1¤7„1¤7„1¤7„1¤7§Ö„1¤7„1¤7„1¤7„1¤7§à„1¤7„1¤7„1¤70É00œ2
         Sprite[] sprites = Resources.LoadAll<Sprite>(backgroundFolderPath);
 
         if (sprites != null && sprites.Length > 0)
         {
             loadedSprites.AddRange(sprites);
-            Debug.Log($"RandomBackground: æˆåŠŸä»Ž Resources/{backgroundFolderPath} æ–‡ä»¶å¤¹åŠ è½½äº† {sprites.Length} ä¸ªèƒŒæ™¯ç²¾çµå›¾ç‰‡ã€‚");
+            Debug.Log($"RandomBackground: „1¤70¯6„1¤7„1¤7„1¤7 Resources/{backgroundFolderPath} „1¤70‘4„1¤7„1¤7§Þ„1¤7„1¤7„1¤7„1¤7„1¤7 {sprites.Length} „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70É00œ2„1¤7„1¤7");
         }
         else
         {
-            Debug.LogWarning($"RandomBackground: æ— æ³•ä»Ž Resources/{backgroundFolderPath} æ–‡ä»¶å¤¹åŠ è½½ç²¾çµå›¾ç‰‡ï¼Œå°è¯•å•ç‹¬åŠ è½½ã€‚");
+            Debug.LogWarning($"RandomBackground: „1¤71«9„1¤7„1¤7„1¤7 Resources/{backgroundFolderPath} „1¤70‘4„1¤7„1¤7§Þ„1¤7„1¤71†2„1¤7„1¤7„1¤70É00œ2„1¤7„1¤7„1¤7„1¤7„1¤70é7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤71ƒ3„1¤7");
 
-            // å¦‚æžœæ‰¹é‡åŠ è½½å¤±è´¥ï¼Œå°è¯•æŒ‰ç…§å‘½åè§„åˆ™å•ç‹¬åŠ è½½ï¼šbackground, background_1, background_2ç­‰
+            // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70´2„1¤711„1¤7„1¤7„1¤7„1¤70é2„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7Å8§2„1¤7„1¤7„1¤7„1¤71ƒ5„1¤7background, background_1, background_2„1¤7„1¤7
             for (int i = 0; i < supportedExtensions.Length; i++)
             {
                 string spriteName = $"{backgroundFolderPath}/background{supportedExtensions[i]}";
@@ -153,74 +153,74 @@ public class RandomBackground : MonoBehaviour
                 if (sprite != null)
                 {
                     loadedSprites.Add(sprite);
-                    Debug.Log($"RandomBackground: æˆåŠŸåŠ è½½å•ä¸ªç²¾çµå›¾ç‰‡ - {spriteName}");
+                    Debug.Log($"RandomBackground: „1¤70¯6„1¤7„1¤7„1¤7„1¤71…3„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70É00œ2 - {spriteName}");
                 }
             }
         }
 
         if (loadedSprites.Count == 0)
         {
-            Debug.LogError($"RandomBackground: æ— æ³•åŠ è½½ä»»ä½•èƒŒæ™¯ç²¾çµå›¾ç‰‡ä»Ž Resources/{backgroundFolderPath} è·¯å¾„ã€‚è¯·æ£€æŸ¥æ–‡ä»¶æ˜¯å¦å­˜åœ¨ä¸”è·¯å¾„æ­£ç¡®ã€‚");
+            Debug.LogError($"RandomBackground: „1¤71«9„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7¦Ê¦Á„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70É00œ2„1¤7„1¤7 Resources/{backgroundFolderPath} ¡¤„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70‘4„1¤7„1¤70¢9„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7¡¤„1¤7„1¤7„1¤7„1¤70©2„1¤7„1¤7");
         }
     }
 
-    // è®¾ç½®éšæœºèƒŒæ™¯
+    // „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7
     public void SetRandomBackground()
     {
         if (loadedSprites.Count == 0)
         {
-            Debug.LogWarning("RandomBackground: æ²¡æœ‰å¯ç”¨çš„èƒŒæ™¯ç²¾çµå›¾ç‰‡ã€‚");
+            Debug.LogWarning("RandomBackground: 0‹4„1¤7§á„1¤7„1¤70‹103„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70É00œ2„1¤7„1¤7");
             return;
         }
 
         if (backgroundImage == null)
         {
-            Debug.LogError("RandomBackground: èƒŒæ™¯Imageç»„ä»¶æœªè®¾ç½®ï¼");
+            Debug.LogError("RandomBackground: „1¤7„1¤7„1¤7„1¤7Image„1¤7„1¤7„1¤7¦Ä„1¤7„1¤7„1¤70Š0„1¤7");
             return;
         }
 
-        // éšæœºé€‰æ‹©ä¸€ä¸ªç²¾çµå›¾ç‰‡
+        // „1¤7„1¤7„1¤70Ô5„1¤7„1¤70Ý5„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70É00œ2
         int randomIndex = Random.Range(0, loadedSprites.Count);
         Sprite selectedSprite = loadedSprites[randomIndex];
 
-        // è®¾ç½®èƒŒæ™¯å›¾ç‰‡
+        // „1¤7„1¤7„1¤70Š9„1¤7„1¤7„1¤70É00œ2
         backgroundImage.sprite = selectedSprite;
 
-        Debug.Log($"RandomBackground: è®¾ç½®éšæœºèƒŒæ™¯ - ç´¢å¼•: {randomIndex}, ç²¾çµåç§°: {selectedSprite.name}");
+        Debug.Log($"RandomBackground: „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7 - „1¤7„1¤7„1¤7„1¤7: {randomIndex}, „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7: {selectedSprite.name}");
     }
 
-    // è®¾ç½®æŒ‡å®šç´¢å¼•çš„èƒŒæ™¯
+    // „1¤7„1¤7„1¤7„1¤70ö8„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤703„1¤7„1¤7„1¤7
     public void SetBackgroundByIndex(int index)
     {
         if (loadedSprites.Count == 0)
         {
-            Debug.LogWarning("RandomBackground: æ²¡æœ‰å¯ç”¨çš„èƒŒæ™¯ç²¾çµå›¾ç‰‡ã€‚");
+            Debug.LogWarning("RandomBackground: 0‹4„1¤7§á„1¤7„1¤70‹103„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70É00œ2„1¤7„1¤7");
             return;
         }
 
         if (backgroundImage == null)
         {
-            Debug.LogError("RandomBackground: èƒŒæ™¯Imageç»„ä»¶æœªè®¾ç½®ï¼");
+            Debug.LogError("RandomBackground: „1¤7„1¤7„1¤7„1¤7Image„1¤7„1¤7„1¤7¦Ä„1¤7„1¤7„1¤70Š0„1¤7");
             return;
         }
 
         if (index < 0 || index >= loadedSprites.Count)
         {
-            Debug.LogWarning($"RandomBackground: ç´¢å¼• {index} è¶…å‡ºèŒƒå›´ã€‚å¯ç”¨èŒƒå›´: 0-{loadedSprites.Count - 1}");
+            Debug.LogWarning($"RandomBackground: „1¤7„1¤7„1¤7„1¤7 {index} „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7¦¶„1¤7„1¤7„1¤7„1¤7„1¤7¡Â„1¤7¦¶: 0-{loadedSprites.Count - 1}");
             return;
         }
 
         backgroundImage.sprite = loadedSprites[index];
-        Debug.Log($"RandomBackground: è®¾ç½®èƒŒæ™¯ç´¢å¼• {index} - ç²¾çµåç§°: {loadedSprites[index].name}");
+        Debug.Log($"RandomBackground: „1¤7„1¤7„1¤70Š9„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7 {index} - „1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7: {loadedSprites[index].name}");
     }
 
-    // èŽ·å–åŠ è½½çš„ç²¾çµå›¾ç‰‡æ•°é‡
+    // „1¤7„1¤70§0„1¤7„1¤7„1¤71…30‘6„1¤7„1¤7„1¤70É00œ2„1¤7„1¤7„1¤7„1¤7
     public int GetLoadedSpritesCount()
     {
         return loadedSprites.Count;
     }
 
-    // é‡æ–°åŠ è½½èƒŒæ™¯ç²¾çµå›¾ç‰‡
+    // „1¤7„1¤7„1¤70†4„1¤7„1¤71„9„1¤7„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70É00œ2
     public void ReloadBackgroundSprites()
     {
         LoadBackgroundSprites();
