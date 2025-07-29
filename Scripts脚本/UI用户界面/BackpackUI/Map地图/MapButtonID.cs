@@ -1,15 +1,16 @@
 using UnityEngine;
 using UnityEngine.UI;
+using GlobalMessaging;
 
 // 地图按钮ID组件
 // 挂载在按钮上，用于设置和管理按钮对应的地图ID
 public class MapButtonID : MonoBehaviour
 {
     [Header("地图按钮设置")]
-    [SerializeField] private int mapID = -1;
-    
+    [SerializeField] [FieldLabel("地图ID")]private int mapID = -1;
+
     [Header("调试信息")]
-    [SerializeField] private bool showDebugInfo = true;
+    [SerializeField] [FieldLabel("显示调试信息")]private bool showDebugInfo = true;
 
     // 地图ID属性
     public int MapID
@@ -49,16 +50,26 @@ public class MapButtonID : MonoBehaviour
     {
         if (mapID >= 0)
         {
-            // 发送地图ID到MapConfirmController
-            MapConfirmController mapConfirmController = FindObjectOfType<MapConfirmController>();
-            if (mapConfirmController != null)
+            // 获取地图数据
+            MapButtonManager mapManager = FindObjectOfType<MapButtonManager>();
+            if (mapManager != null)
             {
-                mapConfirmController.SendMessage("ReceiveMapID", mapID, SendMessageOptions.DontRequireReceiver);
-                Debug.Log($"MapButtonID: 已发送地图ID {mapID} 到MapConfirmController");
+                MapData mapData = mapManager.GetMapDataByID(mapID);
+                if (mapData != null)
+                {
+                    // 使用MessagingCenter发送地图ID消息
+                    MapIDSelectedMessage message = new MapIDSelectedMessage(mapData.id, mapData.name, mapData.isUnlocked);
+                    MessagingCenter.Instance.Send(message);
+                    Debug.Log($"MapButtonID: 已通过MessagingCenter发送地图ID {mapID} 消息");
+                }
+                else
+                {
+                    Debug.LogWarning($"MapButtonID: 未找到ID为 {mapID} 的地图数据");
+                }
             }
             else
             {
-                Debug.LogWarning("MapButtonID: 未找到MapConfirmController组件");
+                Debug.LogWarning("MapButtonID: 未找到MapButtonManager组件");
             }
         }
         else
@@ -67,23 +78,23 @@ public class MapButtonID : MonoBehaviour
         }
     }
 
-    // 验证组件设置是否正确
+    // 验证组件设置
     private void ValidateComponent()
     {
         Button button = GetComponent<Button>();
         if (button == null)
         {
-            Debug.LogError($"MapButtonID组件必须挂载在有Button组件的GameObject上！当前对象: {gameObject.name}");
+            Debug.LogError($"MapButtonID组件在GameObject {gameObject.name} 上没有找到Button组件");
             return;
         }
 
         if (mapID < 0)
         {
-            Debug.LogWarning($"按钮 {gameObject.name} 的地图ID未设置或无效 (当前值: {mapID})");
+            Debug.LogWarning($"地图按钮 {gameObject.name} 的地图ID未被设置或无效 (当前值: {mapID})");
         }
         else if (showDebugInfo)
         {
-            Debug.Log($"按钮 {gameObject.name} 地图ID验证通过: {mapID}");
+            Debug.Log($"地图按钮 {gameObject.name} 的地图ID验证通过: {mapID}");
         }
     }
 
@@ -91,18 +102,18 @@ public class MapButtonID : MonoBehaviour
     public void ResetMapID()
     {
         MapID = -1;
-        
+
         if (showDebugInfo)
         {
-            Debug.Log($"按钮 {gameObject.name} 的地图ID已重置");
+            Debug.Log($"地图按钮 {gameObject.name} 的地图ID已被重置");
         }
     }
 
 #if UNITY_EDITOR
-    // 在编辑器中验证设置
+    // 编辑器验证组件设置
     void OnValidate()
     {
-        // 确保地图ID不小于-1
+        // 确保地图ID小于-1
         if (mapID < -1)
         {
             mapID = -1;

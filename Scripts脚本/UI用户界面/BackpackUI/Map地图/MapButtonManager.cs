@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using System.Collections.Generic;
 using TMPro;
+using GlobalMessaging;
 
 // 地图数据类
 [System.Serializable]
@@ -29,20 +30,20 @@ public class MapDataCollection
 public class MapButtonManager : MonoBehaviour
 {
     [Header("精灵图片设置")]
-    [SerializeField] private Sprite sprite2;
+    [SerializeField] [FieldLabel("精灵图片2")]private Sprite sprite2;
 
     [Header("字体颜色设置")]
-    [SerializeField] private Color hoverTextColor = Color.white;
-    
+    [SerializeField] [FieldLabel("悬停字体颜色")]private Color hoverTextColor = Color.white;
+
     [Header("锁定图标设置")]
-    [SerializeField] private Sprite lockIconDefault;     // 锁定图标默认精灵
-    [SerializeField] private Sprite lockIconHover;      // 锁定图标悬停精灵
+    [SerializeField] [FieldLabel("锁定图标默认精灵")]private Sprite lockIconDefault;     // 锁定图标默认精灵
+    [SerializeField] [FieldLabel("锁定图标悬停精灵")]private Sprite lockIconHover;      // 锁定图标悬停精灵
 
     [Header("按钮列表")]
-    [SerializeField] private List<Button> mapButtons = new List<Button>();
+    [SerializeField] [FieldLabel("地图按钮列表")]private List<Button> mapButtons = new List<Button>();
 
     [Header("地图数据")]
-    [SerializeField] private TextAsset mapDataJson;
+    [SerializeField] [FieldLabel("地图数据JSON文件")]private TextAsset mapDataJson;
 
     private Dictionary<Button, Sprite> originalSprites = new Dictionary<Button, Sprite>();
     private Dictionary<Button, Color> originalTextColors = new Dictionary<Button, Color>();
@@ -125,7 +126,7 @@ public class MapButtonManager : MonoBehaviour
 
                     // 更新按钮文本显示（从JSON自动读取地图名称）
                     UpdateButtonText(button, mapDataDict[mapID]);
-                    
+
                     // 设置锁定图标
                     SetupLockIcon(button, mapDataDict[mapID]);
                 }
@@ -141,14 +142,14 @@ public class MapButtonManager : MonoBehaviour
 
         Debug.Log($"按钮数据关联完成，关联数量: {buttonMapData.Count}");
     }
-    
+
     // 设置锁定图标
     private void SetupLockIcon(Button button, MapData mapData)
     {
         // 查找按钮下的Image组件（锁定图标）
         Image[] childImages = button.GetComponentsInChildren<Image>();
         Image lockIcon = null;
-        
+
         // 找到不是按钮本身的Image组件
         foreach (Image img in childImages)
         {
@@ -158,11 +159,11 @@ public class MapButtonManager : MonoBehaviour
                 break;
             }
         }
-        
+
         if (lockIcon != null)
         {
             buttonLockIcons[button] = lockIcon;
-            
+
             // 设置锁定图标的显示状态
             if (mapData.isUnlocked)
             {
@@ -174,14 +175,14 @@ public class MapButtonManager : MonoBehaviour
             {
                 // 地图未解锁，显示锁定图标
                 lockIcon.gameObject.SetActive(true);
-                
+
                 // 设置默认锁定图标精灵
                 if (lockIconDefault != null)
                 {
                     lockIcon.sprite = lockIconDefault;
                     originalLockSprites[lockIcon] = lockIconDefault;
                 }
-                
+
                 Debug.Log($"地图 {mapData.name} 未解锁，显示锁定图标");
             }
         }
@@ -263,7 +264,7 @@ public class MapButtonManager : MonoBehaviour
     {
         ChangeButtonSprite(button, sprite2);
         ChangeButtonTextColor(button, hoverTextColor);
-        
+
         // 更改锁定图标精灵
         if (buttonLockIcons.ContainsKey(button))
         {
@@ -286,7 +287,7 @@ public class MapButtonManager : MonoBehaviour
         {
             ChangeButtonTextColor(button, originalTextColors[button]);
         }
-        
+
         // 恢复锁定图标原始精灵
         if (buttonLockIcons.ContainsKey(button))
         {
@@ -325,17 +326,10 @@ public class MapButtonManager : MonoBehaviour
                 mapDescription.ShowMapInfo(mapData.id);
             }
             
-            // 发送地图ID到MapConfirmController
-            MapConfirmController mapConfirmController = FindObjectOfType<MapConfirmController>();
-            if (mapConfirmController != null)
-            {
-                mapConfirmController.SendMessage("ReceiveMapID", mapData.id, SendMessageOptions.DontRequireReceiver);
-                Debug.Log($"MapButtonManager: 已发送地图ID {mapData.id} 到MapConfirmController");
-            }
-            else
-            {
-                Debug.LogWarning("MapButtonManager: 未找到MapConfirmController组件");
-            }
+            // 使用MessagingCenter发送地图ID消息
+            MapIDSelectedMessage message = new MapIDSelectedMessage(mapData.id, mapData.name, mapData.isUnlocked);
+            MessagingCenter.Instance.Send(message);
+            Debug.Log($"MapButtonManager: 已通过MessagingCenter发送地图ID {mapData.id} 消息");
         }
         else
         {
@@ -430,7 +424,7 @@ public class MapButtonManager : MonoBehaviour
         }
         return null;
     }
-    
+
     // 公共方法：更新地图解锁状态
     public void UpdateMapLockStatus(int mapID, bool isUnlocked)
     {
@@ -438,6 +432,11 @@ public class MapButtonManager : MonoBehaviour
         {
             mapDataDict[mapID].isUnlocked = isUnlocked;
             
+            // 保存到PlayerPrefs
+            string unlockKey = $"Map_{mapID}_Unlocked";
+            PlayerPrefs.SetInt(unlockKey, isUnlocked ? 1 : 0);
+            PlayerPrefs.Save();
+
             // 找到对应的按钮并更新锁定图标
             foreach (var kvp in buttonMapData)
             {
@@ -447,8 +446,37 @@ public class MapButtonManager : MonoBehaviour
                     break;
                 }
             }
-            
-            Debug.Log($"地图 {mapID} 解锁状态已更新为: {isUnlocked}");
+
+            Debug.Log($"地图 {mapID} 解锁状态已更新为: {isUnlocked} 并已保存");
         }
+    }
+    
+    // 公共方法：解锁地图
+    public void UnlockMap(int mapID)
+    {
+        UpdateMapLockStatus(mapID, true);
+    }
+    
+    // 公共方法：锁定地图
+    public void LockMap(int mapID)
+    {
+        UpdateMapLockStatus(mapID, false);
+    }
+    
+    // 公共方法：重置所有地图解锁状态
+    public void ResetAllMapUnlockStatus()
+    {
+        foreach (var mapData in mapDataList)
+        {
+            string unlockKey = $"Map_{mapData.id}_Unlocked";
+            PlayerPrefs.DeleteKey(unlockKey);
+        }
+        PlayerPrefs.Save();
+        
+        // 重新加载数据
+        LoadMapData();
+        InitializeButtons();
+        
+        Debug.Log("所有地图解锁状态已重置");
     }
 }

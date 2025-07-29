@@ -7,27 +7,28 @@ using TMPro;
 public class MapDescription : MonoBehaviour
 {
     [Header("UI组件引用")]
-    [SerializeField] private TextMeshProUGUI mapNameText;        // 地图名称文本
-    [SerializeField] private TextMeshProUGUI mapDescriptionText; // 地图描述文本
-    [SerializeField] private Image mapThumbnailImage;            // 地图缩略图
-    
+    [SerializeField] [FieldLabel("地图名称文本")]private TextMeshProUGUI mapNameText;        // 地图名称文本
+    [SerializeField] [FieldLabel("地图描述文本")]private TextMeshProUGUI mapDescriptionText; // 地图描述文本
+    [SerializeField] [FieldLabel("地图缩略图")]private Image mapThumbnailImage;            // 地图缩略图
+
     [Header("地图属性UI组件")]
-    [SerializeField] private Image difficultyImage;             // 难度图标
-    [SerializeField] private TextMeshProUGUI difficultyText;    // 难度文本
-    [SerializeField] private Image lootLevelImage;              // 资源丰富度图标
-    [SerializeField] private TextMeshProUGUI lootLevelText;     // 资源丰富度文本
-    [SerializeField] private Image enemyCountImage;             // 敌人数量图标
-    [SerializeField] private TextMeshProUGUI enemyCountText;    // 敌人数量文本
-    
+    [SerializeField] [FieldLabel("难度图标")]private Image difficultyImage;             // 难度图标
+
+    [SerializeField] [FieldLabel("难度文本")]private TextMeshProUGUI difficultyText;    // 难度文本
+    [SerializeField] [FieldLabel("资源丰富度图标")]private Image lootLevelImage;              // 资源丰富度图标
+    [SerializeField] [FieldLabel("资源丰富度文本")]private TextMeshProUGUI lootLevelText;     // 资源丰富度文本
+    [SerializeField] [FieldLabel("敌人数量图标")]private Image enemyCountImage;             // 敌人数量图标
+    [SerializeField] [FieldLabel("敌人数量文本")]private TextMeshProUGUI enemyCountText;    // 敌人数量文本
+
     [Header("地图数据")]
-    [SerializeField] private TextAsset mapDataJson;             // JSON数据文件
-    
+    [SerializeField] [FieldLabel("地图数据JSON文件")]private TextAsset mapDataJson;             // JSON数据文件
+
     [Header("调试信息")]
-    [SerializeField] private bool showDebugInfo = true;
-    
+    [SerializeField] [FieldLabel("是否显示调试信息")]private bool showDebugInfo = true;
+
     private Dictionary<int, MapData> mapDataDict = new Dictionary<int, MapData>();
     private MapButtonManager buttonManager;
-    
+
     void Start()
     {
         // 获取MapButtonManager引用
@@ -37,17 +38,17 @@ public class MapDescription : MonoBehaviour
             Debug.LogError("未找到MapButtonManager组件！");
             return;
         }
-        
+
         // 加载地图数据
         LoadMapData();
-        
+
         // 订阅按钮点击事件
         SubscribeToButtonEvents();
-        
+
         // 初始化时隐藏所有图标
         HideAllIcons();
     }
-    
+
     // 加载地图数据
     private void LoadMapData()
     {
@@ -63,7 +64,7 @@ public class MapDescription : MonoBehaviour
                     {
                         mapDataDict[mapData.id] = mapData;
                     }
-                    
+
                     if (showDebugInfo)
                     {
                         Debug.Log($"MapDescription: 成功加载 {mapDataDict.Count} 个地图数据");
@@ -84,7 +85,7 @@ public class MapDescription : MonoBehaviour
             Debug.LogWarning("MapDescription: 未设置地图数据JSON文件");
         }
     }
-    
+
     // 订阅按钮点击事件
     private void SubscribeToButtonEvents()
     {
@@ -99,7 +100,7 @@ public class MapDescription : MonoBehaviour
                 {
                     // 为每个有MapButtonID的按钮添加点击事件
                     button.onClick.AddListener(() => OnMapButtonClicked(button));
-                    
+
                     if (showDebugInfo)
                     {
                         Debug.Log($"MapDescription: 已为按钮 {button.name} 添加点击监听");
@@ -108,7 +109,7 @@ public class MapDescription : MonoBehaviour
             }
         }
     }
-    
+
     // 按钮点击事件处理
     private void OnMapButtonClicked(Button clickedButton)
     {
@@ -117,39 +118,39 @@ public class MapDescription : MonoBehaviour
         {
             int mapID = buttonID.MapID;
             DisplayMapInfo(mapID);
-            
+
             if (showDebugInfo)
             {
                 Debug.Log($"MapDescription: 按钮 {clickedButton.name} 被点击，地图ID: {mapID}");
             }
         }
     }
-    
+
     // 显示地图信息
     public void DisplayMapInfo(int mapID)
     {
         if (mapDataDict.ContainsKey(mapID))
         {
             MapData mapData = mapDataDict[mapID];
-            
+
             // 更新地图名称
             if (mapNameText != null)
             {
                 mapNameText.text = mapData.name;
             }
-            
+
             // 更新地图描述
             if (mapDescriptionText != null)
             {
                 mapDescriptionText.text = mapData.description;
             }
-            
+
             // 更新地图缩略图
             if (mapThumbnailImage != null)
             {
                 LoadMapThumbnail(mapData.thumbnail);
             }
-            
+
             // 显示并更新难度信息
             if (difficultyImage != null)
             {
@@ -159,7 +160,7 @@ public class MapDescription : MonoBehaviour
             {
                 difficultyText.text = mapData.difficulty;
             }
-            
+
             // 显示并更新资源丰富度信息
             if (lootLevelImage != null)
             {
@@ -169,7 +170,7 @@ public class MapDescription : MonoBehaviour
             {
                 lootLevelText.text = mapData.lootLevel;
             }
-            
+
             // 显示并更新敌人数量信息
             if (enemyCountImage != null)
             {
@@ -179,7 +180,7 @@ public class MapDescription : MonoBehaviour
             {
                 enemyCountText.text = mapData.enemyCount;
             }
-            
+
             if (showDebugInfo)
             {
                 Debug.Log($"MapDescription: 已显示地图信息 - ID: {mapData.id}, 名称: {mapData.name}, 难度: {mapData.difficulty}, 资源: {mapData.lootLevel}, 敌人: {mapData.enemyCount}");
@@ -188,18 +189,18 @@ public class MapDescription : MonoBehaviour
         else
         {
             Debug.LogWarning($"MapDescription: 未找到ID为 {mapID} 的地图数据");
-            
+
             // 显示默认信息
             if (mapNameText != null)
             {
                 mapNameText.text = "未知地图";
             }
-            
+
             if (mapDescriptionText != null)
             {
                 mapDescriptionText.text = "暂无描述信息";
             }
-            
+
             // 显示图标并设置默认文本
             if (difficultyImage != null)
             {
@@ -209,7 +210,7 @@ public class MapDescription : MonoBehaviour
             {
                 difficultyText.text = "未知";
             }
-            
+
             if (lootLevelImage != null)
             {
                 lootLevelImage.gameObject.SetActive(true);
@@ -218,7 +219,7 @@ public class MapDescription : MonoBehaviour
             {
                 lootLevelText.text = "未知";
             }
-            
+
             if (enemyCountImage != null)
             {
                 enemyCountImage.gameObject.SetActive(true);
@@ -229,7 +230,7 @@ public class MapDescription : MonoBehaviour
             }
         }
     }
-    
+
     // 加载地图缩略图
     private void LoadMapThumbnail(string thumbnailPath)
     {
@@ -241,7 +242,7 @@ public class MapDescription : MonoBehaviour
             }
             return;
         }
-        
+
         // 从Resources/MapImages文件夹加载图片
         // 移除路径中的"MapImages/"前缀和".png"后缀（如果存在）
         string imageName = thumbnailPath;
@@ -253,15 +254,15 @@ public class MapDescription : MonoBehaviour
         {
             imageName = imageName.Substring(0, imageName.Length - 4);
         }
-        
+
         // 构建完整的Resources路径
         string resourcePath = "MapImages/" + imageName;
         Sprite thumbnailSprite = Resources.Load<Sprite>(resourcePath);
-        
+
         if (thumbnailSprite != null)
         {
             mapThumbnailImage.sprite = thumbnailSprite;
-            
+
             if (showDebugInfo)
             {
                 Debug.Log($"MapDescription: 成功加载缩略图: {resourcePath}");
@@ -272,13 +273,13 @@ public class MapDescription : MonoBehaviour
             Debug.LogWarning($"MapDescription: 无法加载缩略图: {resourcePath}");
         }
     }
-    
+
     // 公共方法：手动显示指定地图信息
     public void ShowMapInfo(int mapID)
     {
         DisplayMapInfo(mapID);
     }
-    
+
     // 公共方法：清空显示内容
     public void ClearDisplay()
     {
@@ -286,41 +287,41 @@ public class MapDescription : MonoBehaviour
         {
             mapNameText.text = "";
         }
-        
+
         if (mapDescriptionText != null)
         {
             mapDescriptionText.text = "";
         }
-        
+
         if (mapThumbnailImage != null)
         {
             mapThumbnailImage.sprite = null;
         }
-        
+
         if (difficultyText != null)
         {
             difficultyText.text = "";
         }
-        
+
         if (lootLevelText != null)
         {
             lootLevelText.text = "";
         }
-        
+
         if (enemyCountText != null)
         {
             enemyCountText.text = "";
         }
-        
+
         // 隐藏所有图标
         HideAllIcons();
-        
+
         if (showDebugInfo)
         {
             Debug.Log("MapDescription: 已清空显示内容并隐藏图标");
         }
     }
-    
+
     // 隐藏所有图标
     private void HideAllIcons()
     {
@@ -328,18 +329,18 @@ public class MapDescription : MonoBehaviour
         {
             difficultyImage.gameObject.SetActive(false);
         }
-        
+
         if (lootLevelImage != null)
         {
             lootLevelImage.gameObject.SetActive(false);
         }
-        
+
         if (enemyCountImage != null)
         {
             enemyCountImage.gameObject.SetActive(false);
         }
     }
-    
+
     // 获取地图数据（供外部调用）
     public MapData GetMapData(int mapID)
     {

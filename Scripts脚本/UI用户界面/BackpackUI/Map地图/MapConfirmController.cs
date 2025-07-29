@@ -3,33 +3,123 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using GlobalMessaging;
+
+// åœ°å›¾IDä¼ é€’æ¶ˆæ¯
+public struct MapIDSelectedMessage : IMessage
+{
+    public int MapID;
+    public string MapName;
+    public bool IsUnlocked;
+
+    public MapIDSelectedMessage(int mapID, string mapName, bool isUnlocked)
+    {
+        MapID = mapID;
+        MapName = mapName;
+        IsUnlocked = isUnlocked;
+    }
+}
 
 public class MapConfirmController : MonoBehaviour
 {
-    [Header("È·ÈÏ°´Å¥¾«ÁéÉèÖÃ")]
-    [SerializeField] private Sprite unlockedSprite;     // µØÍ¼½âËøÊ±ÏÔÊ¾µÄ¾«Áé
-    [SerializeField] private Sprite lockedSprite;       // µØÍ¼Î´½âËøÊ±ÏÔÊ¾µÄ¾«Áé
-    [SerializeField] private Sprite hoverClickSprite;   // ĞüÍ£»òµã»÷Ê±ÏÔÊ¾µÄ¾«Áé
-    
-    [Header("µØÍ¼Êı¾İ")]
-    [SerializeField] private TextAsset mapDataJson;
-    
-    [Header("°´Å¥×é¼ş")]
+    [Header("ç¡®è®¤æŒ‰é’®ç²¾çµè®¾ç½®")]
+    [SerializeField][FieldLabel("åœ°å›¾è§£é”ç²¾çµ")] private Sprite unlockedSprite;     // åœ°å›¾è§£é”æ—¶æ˜¾ç¤ºçš„ç²¾çµ
+    [SerializeField][FieldLabel("åœ°å›¾æœªè§£é”ç²¾çµ")] private Sprite lockedSprite;       // åœ°å›¾æœªè§£é”æ—¶æ˜¾ç¤ºçš„ç²¾çµ
+    [SerializeField][FieldLabel("æ‚¬åœæˆ–ç‚¹å‡»ç²¾çµ")] private Sprite hoverClickSprite;   // æ‚¬åœæˆ–ç‚¹å‡»æ—¶æ˜¾ç¤ºçš„ç²¾çµ
+
+    [Header("åœ°å›¾æ•°æ®")]
+    [SerializeField][FieldLabel("åœ°å›¾æ•°æ®JSONæ–‡ä»¶")] private TextAsset mapDataJson;
+
+    [Header("æŒ‰é’®ç»„ä»¶")]
     [SerializeField] private Button confirmButton;
-    
+
     private Dictionary<int, MapData> mapDataDict = new Dictionary<int, MapData>();
     private int currentMapID = -1;
     private Image buttonImage;
     private Sprite originalSprite;
     private bool isMapUnlocked = false;
-    
+    private bool isLoadingScene = false;  // é˜²æ­¢é‡å¤åŠ è½½
+
     void Start()
     {
         LoadMapData();
         InitializeButton();
     }
-    
-    // ¼ÓÔØµØÍ¼Êı¾İ
+
+    void OnEnable()
+    {
+        // æ³¨å†Œæ¶ˆæ¯ç›‘å¬
+        MessagingCenter.Instance.Register<MapIDSelectedMessage>(OnMapIDSelected);
+        MessagingCenter.Instance.Register<SceneLoadCompleteMessage>(OnSceneLoadComplete);
+        MessagingCenter.Instance.Register<SceneLoadStartMessage>(OnSceneLoadStart);
+
+        // é‡ç½®åŠ è½½çŠ¶æ€ï¼Œé˜²æ­¢çŠ¶æ€æ®‹ç•™
+        ResetLoadingState();
+    }
+
+    void OnDisable()
+    {
+        // å–æ¶ˆæ¶ˆæ¯ç›‘å¬
+        MessagingCenter.Instance.Unregister<MapIDSelectedMessage>(OnMapIDSelected);
+        MessagingCenter.Instance.Unregister<SceneLoadCompleteMessage>(OnSceneLoadComplete);
+        MessagingCenter.Instance.Unregister<SceneLoadStartMessage>(OnSceneLoadStart);
+    }
+
+    // å¤„ç†åœºæ™¯åŠ è½½å¼€å§‹æ¶ˆæ¯
+    private void OnSceneLoadStart(SceneLoadStartMessage message)
+    {
+        isLoadingScene = true;
+        Debug.Log($"MapConfirmController: å¼€å§‹åŠ è½½åœºæ™¯: {message.SceneName}");
+
+        // ç¦ç”¨ç¡®è®¤æŒ‰é’®é˜²æ­¢é‡å¤ç‚¹å‡»
+        if (confirmButton != null)
+        {
+            confirmButton.interactable = false;
+        }
+    }
+
+    // å¤„ç†åœºæ™¯åŠ è½½å®Œæˆæ¶ˆæ¯
+    private void OnSceneLoadComplete(SceneLoadCompleteMessage message)
+    {
+        isLoadingScene = false;
+        Debug.Log($"MapConfirmController: åœºæ™¯åŠ è½½å®Œæˆ - åœºæ™¯: {message.SceneName}, æˆåŠŸ: {message.Success}");
+
+        // é‡æ–°å¯ç”¨ç¡®è®¤æŒ‰é’®
+        if (confirmButton != null)
+        {
+            confirmButton.interactable = true;
+        }
+
+        if (!message.Success)
+        {
+            Debug.LogError($"MapConfirmController: åœºæ™¯ {message.SceneName} åŠ è½½å¤±è´¥");
+        }
+    }
+
+    // å¤„ç†åœ°å›¾IDé€‰æ‹©æ¶ˆæ¯
+    private void OnMapIDSelected(MapIDSelectedMessage message)
+    {
+        currentMapID = message.MapID;
+        Debug.Log($"MapConfirmController: é€šè¿‡MessagingCenteræ¥æ”¶åˆ°åœ°å›¾ID: {message.MapID}, åç§°: {message.MapName}, è§£é”çŠ¶æ€: {message.IsUnlocked}");
+
+        // æ£€æŸ¥åœ°å›¾æ˜¯å¦è§£é”å¹¶æ›´æ–°æŒ‰é’®ç²¾çµ
+        UpdateButtonSprite();
+
+        // è·å–åœ°å›¾ä¿¡æ¯
+        if (mapDataDict.ContainsKey(message.MapID))
+        {
+            MapData mapData = mapDataDict[message.MapID];
+            isMapUnlocked = mapData.isUnlocked;
+            Debug.Log($"MapConfirmController: åœ°å›¾ä¿¡æ¯ - åç§°: {mapData.name}, è§£é”çŠ¶æ€: {mapData.isUnlocked}, åœºæ™¯åç§°: {mapData.sceneName}");
+        }
+        else
+        {
+            Debug.LogWarning($"MapConfirmController: æœªæ‰¾åˆ°IDä¸º {message.MapID} çš„åœ°å›¾æ•°æ®");
+        }
+    }
+
+    // åŠ è½½åœ°å›¾æ•°æ®
+    // åŠ è½½åœ°å›¾æ•°æ®
     private void LoadMapData()
     {
         if (mapDataJson != null)
@@ -42,23 +132,30 @@ public class MapConfirmController : MonoBehaviour
                     mapDataDict.Clear();
                     foreach (MapData mapData in mapCollection.Map)
                     {
+                        // ä»PlayerPrefsåŠ è½½è§£é”çŠ¶æ€
+                        string unlockKey = $"Map_{mapData.id}_Unlocked";
+                        if (PlayerPrefs.HasKey(unlockKey))
+                        {
+                            mapData.isUnlocked = PlayerPrefs.GetInt(unlockKey) == 1;
+                        }
+
                         mapDataDict[mapData.id] = mapData;
                     }
-                    Debug.Log($"MapConfirmController: ³É¹¦¼ÓÔØ {mapDataDict.Count} ¸öµØÍ¼Êı¾İ");
+                    Debug.Log($"MapConfirmController: æˆåŠŸåŠ è½½ {mapDataDict.Count} ä¸ªåœ°å›¾æ•°æ®");
                 }
             }
             catch (System.Exception e)
             {
-                Debug.LogError($"MapConfirmController: ¼ÓÔØµØÍ¼Êı¾İÊ§°Ü: {e.Message}");
+                Debug.LogError($"MapConfirmController: åŠ è½½åœ°å›¾æ•°æ®å¤±è´¥: {e.Message}");
             }
         }
         else
         {
-            Debug.LogWarning("MapConfirmController: Î´ÉèÖÃµØÍ¼Êı¾İJSONÎÄ¼ş");
+            Debug.LogWarning("MapConfirmController: æœªè®¾ç½®åœ°å›¾æ•°æ®JSONæ–‡ä»¶");
         }
     }
-    
-    // ³õÊ¼»¯°´Å¥
+
+    // åˆå§‹åŒ–æŒ‰é’®
     private void InitializeButton()
     {
         if (confirmButton != null)
@@ -68,73 +165,51 @@ public class MapConfirmController : MonoBehaviour
             {
                 originalSprite = buttonImage.sprite;
             }
-            
-            // Ìí¼ÓÊÂ¼ş´¥·¢Æ÷
+
+            // æ·»åŠ äº‹ä»¶è§¦å‘å™¨
             EventTrigger eventTrigger = confirmButton.GetComponent<EventTrigger>();
             if (eventTrigger == null)
             {
                 eventTrigger = confirmButton.gameObject.AddComponent<EventTrigger>();
             }
-            
-            // Çå³ıÏÖÓĞÊÂ¼ş
+
+            // æ¸…é™¤ç°æœ‰äº‹ä»¶
             eventTrigger.triggers.Clear();
-            
-            // Ìí¼ÓÊó±ê½øÈëÊÂ¼ş
+
+            // æ·»åŠ é¼ æ ‡è¿›å…¥äº‹ä»¶
             EventTrigger.Entry pointerEnter = new EventTrigger.Entry();
             pointerEnter.eventID = EventTriggerType.PointerEnter;
             pointerEnter.callback.AddListener((data) => { OnButtonHover(); });
             eventTrigger.triggers.Add(pointerEnter);
-            
-            // Ìí¼ÓÊó±êÀë¿ªÊÂ¼ş
+
+            // æ·»åŠ é¼ æ ‡ç¦»å¼€äº‹ä»¶
             EventTrigger.Entry pointerExit = new EventTrigger.Entry();
             pointerExit.eventID = EventTriggerType.PointerExit;
             pointerExit.callback.AddListener((data) => { OnButtonExit(); });
             eventTrigger.triggers.Add(pointerExit);
-            
-            // Ìí¼Óµã»÷ÊÂ¼ş
+
+            // æ·»åŠ ç‚¹å‡»äº‹ä»¶
             confirmButton.onClick.RemoveAllListeners();
             confirmButton.onClick.AddListener(OnButtonClick);
         }
         else
         {
-            Debug.LogError("MapConfirmController: Î´ÉèÖÃÈ·ÈÏ°´Å¥×é¼ş");
+            Debug.LogError("MapConfirmController: æœªè®¾ç½®ç¡®è®¤æŒ‰é’®ç»„ä»¶");
         }
     }
-    
-    // ½ÓÊÕµØÍ¼IDµÄÏûÏ¢º¯Êı
-    public void ReceiveMapID(int mapID)
-    {
-        currentMapID = mapID;
-        Debug.Log($"MapConfirmController: ½ÓÊÕµ½µØÍ¼ID: {mapID}");
-        
-        // ¼ì²éµØÍ¼ÊÇ·ñ½âËø²¢¸üĞÂ°´Å¥¾«Áé
-        UpdateButtonSprite();
-        
-        // »ñÈ¡µØÍ¼ĞÅÏ¢
-        if (mapDataDict.ContainsKey(mapID))
-        {
-            MapData mapData = mapDataDict[mapID];
-            isMapUnlocked = mapData.isUnlocked;
-            Debug.Log($"MapConfirmController: µØÍ¼ĞÅÏ¢ - Ãû³Æ: {mapData.name}, ½âËø×´Ì¬: {mapData.isUnlocked}, ³¡¾°Ãû³Æ: {mapData.sceneName}");
-        }
-        else
-        {
-            Debug.LogWarning($"MapConfirmController: Î´ÕÒµ½IDÎª {mapID} µÄµØÍ¼Êı¾İ");
-        }
-    }
-    
-    // ¸üĞÂ°´Å¥¾«Áé
+
+    // æ›´æ–°æŒ‰é’®ç²¾çµ
     private void UpdateButtonSprite()
     {
         if (buttonImage == null || currentMapID < 0) return;
-        
+
         if (mapDataDict.ContainsKey(currentMapID))
         {
             MapData mapData = mapDataDict[currentMapID];
-            
+
             if (mapData.isUnlocked)
             {
-                // µØÍ¼ÒÑ½âËø£¬ÏÔÊ¾½âËø¾«Áé
+                // åœ°å›¾å·²è§£é”ï¼Œæ˜¾ç¤ºè§£é”ç²¾çµ
                 if (unlockedSprite != null)
                 {
                     buttonImage.sprite = unlockedSprite;
@@ -143,7 +218,7 @@ public class MapConfirmController : MonoBehaviour
             }
             else
             {
-                // µØÍ¼Î´½âËø£¬ÏÔÊ¾Ëø¶¨¾«Áé
+                // åœ°å›¾æœªè§£é”ï¼Œæ˜¾ç¤ºé”å®šç²¾çµ
                 if (lockedSprite != null)
                 {
                     buttonImage.sprite = lockedSprite;
@@ -152,8 +227,8 @@ public class MapConfirmController : MonoBehaviour
             }
         }
     }
-    
-    // Êó±êĞüÍ£ÊÂ¼ş
+
+    // é¼ æ ‡æ‚¬åœäº‹ä»¶
     private void OnButtonHover()
     {
         if (buttonImage != null && hoverClickSprite != null)
@@ -161,8 +236,8 @@ public class MapConfirmController : MonoBehaviour
             buttonImage.sprite = hoverClickSprite;
         }
     }
-    
-    // Êó±êÀë¿ªÊÂ¼ş
+
+    // é¼ æ ‡ç¦»å¼€äº‹ä»¶
     private void OnButtonExit()
     {
         if (buttonImage != null && originalSprite != null)
@@ -170,33 +245,84 @@ public class MapConfirmController : MonoBehaviour
             buttonImage.sprite = originalSprite;
         }
     }
-    
-    // °´Å¥µã»÷ÊÂ¼ş
+
+    // æŒ‰é’®ç‚¹å‡»äº‹ä»¶
     private void OnButtonClick()
     {
         if (buttonImage != null && hoverClickSprite != null)
         {
             buttonImage.sprite = hoverClickSprite;
         }
-        
+
+        // é˜²æ­¢åœ¨åŠ è½½è¿‡ç¨‹ä¸­é‡å¤ç‚¹å‡»
+        if (isLoadingScene)
+        {
+            Debug.Log("MapConfirmController: æ­£åœ¨åŠ è½½åœºæ™¯ä¸­ï¼Œè¯·ç¨å€™...");
+            return;
+        }
+
         if (currentMapID >= 0 && mapDataDict.ContainsKey(currentMapID))
         {
             MapData mapData = mapDataDict[currentMapID];
-            Debug.Log($"MapConfirmController: È·ÈÏ°´Å¥±»µã»÷ - µØÍ¼ID: {currentMapID}, ½âËø×´Ì¬: {mapData.isUnlocked}");
-            
+            Debug.Log($"MapConfirmController: ç¡®è®¤æŒ‰é’®è¢«ç‚¹å‡» - åœ°å›¾ID: {currentMapID}, è§£é”çŠ¶æ€: {mapData.isUnlocked}");
+
             if (mapData.isUnlocked)
             {
-                Debug.Log($"MapConfirmController: ¿ÉÒÔ½øÈëµØÍ¼ - ³¡¾°Ãû³Æ: {mapData.sceneName}");
-                // ÕâÀï¿ÉÒÔÌí¼Ó³¡¾°ÇĞ»»Âß¼­
+                if (!string.IsNullOrEmpty(mapData.sceneName))
+                {
+                    Debug.Log($"MapConfirmController: å¼€å§‹åŠ è½½åœºæ™¯ - åœºæ™¯åç§°: {mapData.sceneName}");
+
+                    // æ·»åŠ è¶…æ—¶ä¿æŠ¤ï¼Œé˜²æ­¢çŠ¶æ€æ°¸ä¹…é”å®š
+                    StartCoroutine(LoadSceneWithTimeout(mapData.sceneName));
+                }
+                else
+                {
+                    Debug.LogWarning($"MapConfirmController: åœ°å›¾ {mapData.name} çš„åœºæ™¯åç§°ä¸ºç©ºï¼Œæ— æ³•åŠ è½½åœºæ™¯");
+                }
             }
             else
             {
-                Debug.Log("MapConfirmController: µØÍ¼Î´½âËø£¬ÎŞ·¨½øÈë");
+                Debug.Log("MapConfirmController: åœ°å›¾æœªè§£é”ï¼Œæ— æ³•è¿›å…¥");
             }
         }
     }
-    
-    // ¹«¹²·½·¨£º»ñÈ¡µ±Ç°µØÍ¼ĞÅÏ¢
+
+    // å¸¦è¶…æ—¶ä¿æŠ¤çš„åœºæ™¯åŠ è½½
+    private IEnumerator LoadSceneWithTimeout(string sceneName)
+    {
+        // ä½¿ç”¨SceneLoaderå¼‚æ­¥åŠ è½½åœºæ™¯
+        SceneLoader.Instance.LoadSceneAsync(sceneName);
+
+        // è®¾ç½®è¶…æ—¶ä¿æŠ¤ï¼ˆ10ç§’åè‡ªåŠ¨é‡ç½®çŠ¶æ€ï¼‰
+        float timeout = 10f;
+        float elapsed = 0f;
+
+        while (isLoadingScene && elapsed < timeout)
+        {
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        // å¦‚æœè¶…æ—¶ä»åœ¨åŠ è½½çŠ¶æ€ï¼Œå¼ºåˆ¶é‡ç½®
+        if (isLoadingScene && elapsed >= timeout)
+        {
+            Debug.LogWarning("MapConfirmController: åœºæ™¯åŠ è½½è¶…æ—¶ï¼Œå¼ºåˆ¶é‡ç½®çŠ¶æ€");
+            ResetLoadingState();
+        }
+    }
+
+    // é‡ç½®åŠ è½½çŠ¶æ€
+    private void ResetLoadingState()
+    {
+        isLoadingScene = false;
+        if (confirmButton != null)
+        {
+            confirmButton.interactable = true;
+        }
+        Debug.Log("MapConfirmController: åŠ è½½çŠ¶æ€å·²é‡ç½®");
+    }
+
+    // å…¬å…±æ–¹æ³•ï¼šè·å–å½“å‰åœ°å›¾ä¿¡æ¯
     public MapData GetCurrentMapData()
     {
         if (currentMapID >= 0 && mapDataDict.ContainsKey(currentMapID))
@@ -205,16 +331,22 @@ public class MapConfirmController : MonoBehaviour
         }
         return null;
     }
-    
-    // ¹«¹²·½·¨£º»ñÈ¡µ±Ç°µØÍ¼ID
+
+    // å…¬å…±æ–¹æ³•ï¼šè·å–å½“å‰åœ°å›¾ID
     public int GetCurrentMapID()
     {
         return currentMapID;
     }
-    
-    // ¹«¹²·½·¨£º¼ì²éµ±Ç°µØÍ¼ÊÇ·ñ½âËø
+
+    // å…¬å…±æ–¹æ³•ï¼šæ£€æŸ¥å½“å‰åœ°å›¾æ˜¯å¦è§£é”
     public bool IsCurrentMapUnlocked()
     {
         return isMapUnlocked;
+    }
+
+    // å…¬å…±æ–¹æ³•ï¼šæ£€æŸ¥æ˜¯å¦æ­£åœ¨åŠ è½½åœºæ™¯
+    public bool IsLoadingScene()
+    {
+        return isLoadingScene;
     }
 }
