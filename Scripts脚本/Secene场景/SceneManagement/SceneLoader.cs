@@ -44,14 +44,16 @@ public struct SceneLoadProgressMessage : IMessage
 
 public class SceneLoader : MonoBehaviour
 {
-    [Header("加载界面UI预制体")]
-    [SerializeField] private GameObject loadingUIPrefab;        // 加载界面UI预制体
-
-    [Header("加载界面UI组件（可选，如果使用预制体则忽略）")]
+    [Header("加载界面UI组件")]
     [SerializeField] private GameObject loadingPanel;           // 加载界面面板
     [SerializeField] private Slider progressBar;               // 进度条
     [SerializeField] private TextMeshProUGUI loadingText;      // 加载文本
     [SerializeField] private TextMeshProUGUI progressText;     // 进度百分比文本
+    [SerializeField] private LoadingUIController loadingUIController; // 加载UI控制器
+
+    [Header("自定义文本内容")]
+    [SerializeField] private string customLoadingText = "Loading...";     // 自定义加载文本
+    [SerializeField] private string customProgressFormat = "{0}%";        // 自定义进度文本格式，{0}为百分比
 
     [Header("加载设置")]
     [SerializeField] private float minimumLoadTime = 2f;       // 最小加载时间（秒）
@@ -59,10 +61,6 @@ public class SceneLoader : MonoBehaviour
     [SerializeField] private bool forceMinimumLoadTime = true; // 强制最小加载时间
 
     private static SceneLoader instance;
-    private GameObject currentLoadingUI;                        // 当前实例化的加载UI
-    private Slider currentProgressBar;                          // 当前进度条引用
-    private TextMeshProUGUI currentLoadingText;               // 当前加载文本引用
-    private TextMeshProUGUI currentProgressText;              // 当前进度文本引用
 
     public static SceneLoader Instance
     {
@@ -94,6 +92,9 @@ public class SceneLoader : MonoBehaviour
             {
                 minimumLoadTime = 2f;
             }
+
+            // 确保UI界面默认为隐藏状态
+            InitializeUI();
         }
         else if (instance != this)
         {
@@ -123,195 +124,154 @@ public class SceneLoader : MonoBehaviour
     private IEnumerator LoadSceneCoroutine(string sceneName)
     {
         float startTime = Time.time;
-
-        // 创建并显示加载界面
-        CreateLoadingUI();
+        float totalLoadTime = minimumLoadTime; // 使用最小加载时间作为总时间
+    
+        // 显示加载界面
         ShowLoadingUI(true);
-        UpdateLoadingText($"正在加载 {sceneName}...");
-
-        // 开始异步加载场景
-        AsyncOperation asyncOperation = SceneManager.LoadSceneAsync(sceneName);
-
-        if (asyncOperation == null)
+        UpdateLoadingText(customLoadingText);
+        
+        // 显示随机加载内容（图片和描述）
+        if (loadingUIController != null)
         {
-            Debug.LogError($"SceneLoader: 无法加载场景 {sceneName}，请检查场景是否存在于Build Settings中");
-            DestroyLoadingUI();
-            MessagingCenter.Instance.Send(new SceneLoadCompleteMessage(sceneName, false));
-            yield break;
-        }
-
-        // 防止场景自动激活（可选）
-        asyncOperation.allowSceneActivation = allowSceneActivation;
-
-        // 等待场景加载完成
-        while (!asyncOperation.isDone)
-        {
-            // 计算加载进度（0-0.9是加载，0.9-1.0是激活）
-            float progress = Mathf.Clamp01(asyncOperation.progress / 0.9f);
-
-            // 更新进度条和文本
-            UpdateProgressBar(progress);
-            UpdateProgressText(progress);
-
-            // 发送进度消息
-            MessagingCenter.Instance.Send(new SceneLoadProgressMessage(sceneName, progress));
-
-            // 如果加载完成但场景未激活，且达到最小加载时间
-            if (asyncOperation.progress >= 0.9f && !allowSceneActivation)
-            {
-                float elapsedTime = Time.time - startTime;
-                if (elapsedTime >= minimumLoadTime)
-                {
-                    UpdateLoadingText("按任意键继续...");
-
-                    // 等待用户输入
-                    if (Input.anyKeyDown)
-                    {
-                        asyncOperation.allowSceneActivation = true;
-                    }
-                }
-            }
-
-            yield return null;
-        }
-
-        // 强制等待最小加载时间
-        if (forceMinimumLoadTime)
-        {
-            float totalElapsedTime = Time.time - startTime;
-            if (totalElapsedTime < minimumLoadTime)
-            {
-                float remainingTime = minimumLoadTime - totalElapsedTime;
-                UpdateLoadingText($"加载完成，剩余等待时间: {remainingTime:F1}秒");
-
-                // 在剩余时间内继续更新进度为100%
-                while (remainingTime > 0)
-                {
-                    UpdateProgressBar(1f);
-                    UpdateProgressText(1f);
-                    remainingTime -= Time.deltaTime;
-                    yield return null;
-                }
-            }
-        }
-
-        // 销毁加载界面
-        DestroyLoadingUI();
-
-        // 发送加载完成消息
-        MessagingCenter.Instance.Send(new SceneLoadCompleteMessage(sceneName, true));
-
-        Debug.Log($"SceneLoader: 场景 {sceneName} 加载完成");
-    }
-
-    // 创建加载UI
-    private void CreateLoadingUI()
-    {
-        // 如果已存在加载UI，先销毁
-        if (currentLoadingUI != null)
-        {
-            DestroyLoadingUI();
-        }
-
-        // 优先使用预制体
-        if (loadingUIPrefab != null)
-        {
-            currentLoadingUI = Instantiate(loadingUIPrefab);
-            DontDestroyOnLoad(currentLoadingUI);
-
-            // 从预制体中获取组件引用
-            currentProgressBar = currentLoadingUI.GetComponentInChildren<Slider>();
-            currentLoadingText = currentLoadingUI.GetComponentInChildren<TextMeshProUGUI>();
-
-            // 如果有多个TextMeshProUGUI，尝试找到进度文本
-            TextMeshProUGUI[] texts = currentLoadingUI.GetComponentsInChildren<TextMeshProUGUI>();
-            if (texts.Length > 1)
-            {
-                // 假设第一个是加载文本，第二个是进度文本
-                currentLoadingText = texts[0];
-                currentProgressText = texts[1];
-            }
-            else if (texts.Length == 1)
-            {
-                currentLoadingText = texts[0];
-                currentProgressText = null;
-            }
-
-            Debug.Log("SceneLoader: 使用预制体创建加载UI");
+            loadingUIController.DisplayRandomLoadingContent();
         }
         else
         {
-            // 使用原有的组件引用
-            currentProgressBar = progressBar;
-            currentLoadingText = loadingText;
-            currentProgressText = progressText;
-
-            Debug.Log("SceneLoader: 使用现有组件作为加载UI");
+            Debug.LogWarning("SceneLoader: LoadingUIController 引用为空，无法显示随机加载内容");
         }
-    }
-
-    // 销毁加载UI
-    private void DestroyLoadingUI()
-    {
-        if (currentLoadingUI != null)
+    
+        // 开始异步加载场景
+        AsyncOperation asyncOperation = SceneManager.LoadSceneAsync(sceneName);
+    
+        if (asyncOperation == null)
         {
-            Destroy(currentLoadingUI);
-            currentLoadingUI = null;
+            Debug.LogError($"SceneLoader: 无法加载场景 {sceneName}，请检查场景是否存在于Build Settings中");
+            ShowLoadingUI(false);
+            MessagingCenter.Instance.Send(new SceneLoadCompleteMessage(sceneName, false));
+            yield break;
         }
-
-        // 清空组件引用
-        currentProgressBar = null;
-        currentLoadingText = null;
-        currentProgressText = null;
-
-        // 如果使用的是原有组件，隐藏它们
+    
+        // 防止场景自动激活（可选）
+        asyncOperation.allowSceneActivation = allowSceneActivation;
+        
+        bool sceneLoadComplete = false;
+    
+        // 等待场景加载完成或达到最小加载时间
+        while (Time.time - startTime < totalLoadTime)
+        {
+            // 计算基于时间的进度（从0%到100%线性增长）
+            float timeProgress = (Time.time - startTime) / totalLoadTime;
+            timeProgress = Mathf.Clamp01(timeProgress);
+            
+            // 检查场景加载状态
+            if (!sceneLoadComplete && asyncOperation.progress >= 0.9f)
+            {
+                sceneLoadComplete = true;
+                // 如果场景加载完成但不允许激活，在这里激活
+                if (!allowSceneActivation)
+                {
+                    asyncOperation.allowSceneActivation = true;
+                }
+            }
+            
+            // 使用时间进度作为显示进度，确保从0%开始
+            float displayProgress = timeProgress;
+            
+            // 更新进度条和文本
+            UpdateProgressBar(displayProgress);
+            UpdateProgressText(displayProgress);
+    
+            // 发送进度消息
+            MessagingCenter.Instance.Send(new SceneLoadProgressMessage(sceneName, displayProgress));
+    
+            yield return null;
+        }
+    
+        // 确保最终进度为100%
+        UpdateProgressBar(1f);
+        UpdateProgressText(1f);
+        MessagingCenter.Instance.Send(new SceneLoadProgressMessage(sceneName, 1f));
+    
+        // 等待场景完全加载完成
+        while (!asyncOperation.isDone)
+        {
+            yield return null;
+        }
+    
+        // 隐藏加载界面
         ShowLoadingUI(false);
+    
+        // 发送加载完成消息
+        MessagingCenter.Instance.Send(new SceneLoadCompleteMessage(sceneName, true));
+    
+        Debug.Log($"SceneLoader: 场景 {sceneName} 加载完成");
     }
 
     // 显示/隐藏加载界面
     private void ShowLoadingUI(bool show)
     {
-        if (currentLoadingUI != null)
-        {
-            currentLoadingUI.SetActive(show);
-        }
-        else if (loadingPanel != null)
+        if (loadingPanel != null)
         {
             loadingPanel.SetActive(show);
+        }
+        
+        // 如果隐藏加载界面，清空加载内容
+        if (!show && loadingUIController != null)
+        {
+            loadingUIController.ClearLoadingContent();
         }
     }
 
     // 更新加载文本
     private void UpdateLoadingText(string text)
     {
-        if (currentLoadingText != null)
+        if (loadingText != null)
         {
-            currentLoadingText.text = text;
+            loadingText.text = text;
         }
     }
 
     // 更新进度条
     private void UpdateProgressBar(float progress)
     {
-        if (currentProgressBar != null)
+        if (progressBar != null)
         {
-            currentProgressBar.value = progress;
+            progressBar.value = progress;
         }
     }
 
     // 更新进度百分比文本
+    // 更新进度百分比文本
     private void UpdateProgressText(float progress)
     {
-        if (currentProgressText != null)
+        if (progressText != null)
         {
-            currentProgressText.text = $"{Mathf.RoundToInt(progress * 100)}%";
+            try
+            {
+                // 验证自定义格式是否包含占位符
+                if (string.IsNullOrEmpty(customProgressFormat) || !customProgressFormat.Contains("{0}"))
+                {
+                    // 使用默认格式
+                    progressText.text = Mathf.RoundToInt(progress * 100) + "%";
+                    Debug.LogWarning("SceneLoader: customProgressFormat格式无效，使用默认格式");
+                }
+                else
+                {
+                    // 使用自定义格式
+                    progressText.text = string.Format(customProgressFormat, Mathf.RoundToInt(progress * 100));
+                }
+            }
+            catch (System.FormatException e)
+            {
+                // 格式化异常时使用默认格式
+                progressText.text = Mathf.RoundToInt(progress * 100) + "%";
+                Debug.LogError($"SceneLoader: 进度文本格式化错误: {e.Message}，使用默认格式");
+            }
         }
-    }
-
-    // 公共方法：设置加载UI预制体
-    public void SetLoadingUIPrefab(GameObject prefab)
-    {
-        loadingUIPrefab = prefab;
+        else
+        {
+            Debug.LogWarning("SceneLoader: progressText组件引用为空，无法更新进度文本");
+        }
     }
 
     // 公共方法：设置最小加载时间
@@ -334,5 +294,100 @@ public class SceneLoader : MonoBehaviour
         {
             minimumLoadTime = 2f;
         }
+    }
+
+    // 公共方法：设置UI组件引用
+    public void SetUIComponents(GameObject panel, Slider slider, TextMeshProUGUI loadText, TextMeshProUGUI progText)
+    {
+        loadingPanel = panel;
+        progressBar = slider;
+        loadingText = loadText;
+        progressText = progText;
+        
+        // 设置组件后立即初始化UI状态
+        InitializeUI();
+    }
+
+    // 公共方法：设置自定义文本
+    public void SetCustomTexts(string loadingTextContent, string progressFormat)
+    {
+        if (!string.IsNullOrEmpty(loadingTextContent))
+            customLoadingText = loadingTextContent;
+            
+        if (!string.IsNullOrEmpty(progressFormat))
+        {
+            if (IsValidProgressFormat(progressFormat))
+            {
+                customProgressFormat = progressFormat;
+            }
+            else
+            {
+                Debug.LogError($"SceneLoader: 无效的进度格式 '{progressFormat}'，保持原格式");
+            }
+        }
+    }
+
+    // 公共方法：获取当前加载文本
+    public string GetLoadingText()
+    {
+        return customLoadingText;
+    }
+
+    // 公共方法：获取当前进度格式
+    public string GetProgressFormat()
+    {
+        return customProgressFormat;
+    }
+
+    // 验证进度格式字符串
+    private bool IsValidProgressFormat(string format)
+    {
+        if (string.IsNullOrEmpty(format))
+            return false;
+            
+        try
+        {
+            // 测试格式化
+            string test = string.Format(format, 50);
+            return format.Contains("{0}");
+        }
+        catch
+        {
+            return false;
+        }
+    }
+    
+    // 初始化UI状态
+    private void InitializeUI()
+    {
+        // 确保加载界面默认为隐藏状态
+        if (loadingPanel != null)
+        {
+            loadingPanel.SetActive(false);
+            Debug.Log("SceneLoader: 加载界面已初始化为隐藏状态");
+        }
+        
+        // 初始化进度条为0
+        if (progressBar != null)
+        {
+            progressBar.value = 0f;
+        }
+        
+        // 初始化文本内容
+        if (loadingText != null)
+        {
+            loadingText.text = customLoadingText;
+        }
+        
+        if (progressText != null)
+        {
+            progressText.text = string.Format(customProgressFormat, 0);
+        }
+    }
+
+    // 公共方法：设置LoadingUIController引用
+    public void SetLoadingUIController(LoadingUIController controller)
+    {
+        loadingUIController = controller;
     }
 }
