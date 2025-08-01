@@ -1,116 +1,191 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class ItemGrid : MonoBehaviour
 {
-    // ¶¨ÒåÃ¿¸ö¸ñ×ÓµÄ¿í¶ÈºÍ¸ß¶È
-    const float tileSizeWidth = 32 / 2;
-    const float tileSizeHeight = 32 / 2;
+    [SerializeField]
+    [FieldLabel("èƒŒåŒ…æ ¼å­å®½åº¦")] int gridSizeWidth = 10; // ç½‘æ ¼æ€»å®½åº¦ï¼ˆæ ¼å­æ•°ï¼‰
 
-    // ¼ÆËãÔÚ¸ñ×ÓÖĞµÄÎ»ÖÃ
-    Vector2 positionOnTheGrid = new Vector2();
-    Vector2Int tileGridPosition = new Vector2Int();
+    [SerializeField][FieldLabel("èƒŒåŒ…æ ¼å­é«˜åº¦")] int gridSizeHeight = 10; // ç½‘æ ¼æ€»é«˜åº¦ï¼ˆæ ¼å­æ•°ï¼‰
 
-    RectTransform rectTransform;
-    Canvas canvas;
-    
+    [SerializeField]
+    [FieldLabel("ç‰©å“å¼•ç”¨")] private GameObject itemPrefab; // ç‰©å“é¢„åˆ¶ä½“å¼•ç”¨ï¼Œç”¨äºåŠ¨æ€ç”Ÿæˆç‰©å“
+
+    Item[,] itemSlot; // äºŒç»´æ•°ç»„ï¼Œè®°å½•æ¯ä¸ªæ ¼å­é‡Œæ”¾çš„ç‰©å“
+    Item overlapItem;//é‡å ç‰©å“
+
+    // å•ä¸ªæ ¼å­çš„åƒç´ å®½é«˜ï¼ˆ256 åƒç´ å›¾è¢« 4 ç­‰åˆ†ï¼‰
+    public static float tileSizeWidth = 256f / 4f; // æ ¼å­å®½åº¦
+    public static float tileSizeHeight = 256f / 4f;  // æ ¼å­é«˜åº¦
+
+    Vector2 positionOnTheGrid = new Vector2(); // ä¸´æ—¶å˜é‡ï¼šé¼ æ ‡ç›¸å¯¹äºç½‘æ ¼çš„åç§»åæ ‡
+    Vector2Int tileGridPosition = new Vector2Int(); // ä¸´æ—¶å˜é‡ï¼šæœ€ç»ˆè®¡ç®—å‡ºçš„æ ¼å­åæ ‡
+
+    RectTransform rectTransform; // å½“å‰ UI çš„ RectTransform ç»„ä»¶å¼•ç”¨
+    Canvas canvas; // åœºæ™¯ä¸­çš„ Canvasï¼Œç”¨äºè®¡ç®—ç¼©æ”¾å› å­
+
     private void Start()
     {
-        rectTransform = GetComponent<RectTransform>();  
-        canvas = FindObjectOfType<Canvas>();
+        itemSlot = new Item[gridSizeWidth, gridSizeHeight]; // æŒ‰è®¾å®šå®½é«˜åˆ›å»ºäºŒç»´æ•°ç»„
+
+        rectTransform = GetComponent<RectTransform>(); // è·å–è‡ªèº«çš„ RectTransform ç»„ä»¶
+        canvas = FindObjectOfType<Canvas>(); // æŸ¥æ‰¾åœºæ™¯ä¸­çš„ Canvas
+
+        Init(gridSizeWidth, gridSizeHeight); // æ ¹æ®æ ¼å­æ•°åˆå§‹åŒ–ç½‘æ ¼å¤§å°
+
+    }
+
+    void Init(int width, int height)// åˆå§‹åŒ–ç½‘æ ¼å°ºå¯¸
+    {
+        Vector2 size = new Vector2(
+            width * tileSizeWidth, // è®¡ç®—æ€»å®½åº¦
+            height * tileSizeHeight // è®¡ç®—æ€»é«˜åº¦
+        );
+        rectTransform.sizeDelta = size; // è®¾ç½® RectTransform çš„å¤§å°
     }
 
     private void Update()
     {
-        if (Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButtonDown(0)) // å¦‚æœæŒ‰ä¸‹é¼ æ ‡å·¦é”®
         {
-            // Ê×ÏÈ¼ì²éÊó±êÊÇ·ñÔÚimage×é¼şÄÚ²¿
-            if (IsMouseOverImage(Input.mousePosition))
+            // æ‰“å°å½“å‰é¼ æ ‡åœ¨ç½‘æ ¼ä¸­çš„æ ¼å­åæ ‡
+            Debug.Log(GetTileGridPosition(Input.mousePosition));
+        }
+    }
+
+    // æ ¹æ®å±å¹•é¼ æ ‡ä½ç½®ï¼Œè®¡ç®—å¯¹åº”çš„æ ¼å­åæ ‡
+    public Vector2Int GetTileGridPosition(Vector2 mousePosition)
+    {
+        // è®¡ç®—é¼ æ ‡ç›¸å¯¹äºç½‘æ ¼å·¦ä¸‹è§’çš„åç§»é‡
+        positionOnTheGrid.x = mousePosition.x - rectTransform.position.x;
+        positionOnTheGrid.y = rectTransform.position.y - mousePosition.y;
+
+        // é™¤ä»¥å•ä¸ªæ ¼å­å®½é«˜ï¼Œå†é™¤ä»¥ Canvas çš„ç¼©æ”¾å› å­ï¼Œå¾—åˆ°æ•´æ•°æ ¼å­åæ ‡
+        tileGridPosition.x = (int)(positionOnTheGrid.x / tileSizeWidth / canvas.scaleFactor);
+        tileGridPosition.y = (int)(positionOnTheGrid.y / tileSizeHeight / canvas.scaleFactor);
+
+        return tileGridPosition;                      // è¿”å›è®¡ç®—ç»“æœ
+    }
+
+    //æŒ‰æ ¼å­åæ ‡æ·»åŠ ç‰©å“
+    public bool PlaceItem(Item item, int posX, int posY, ref Item overlapItem)
+    {
+        //åˆ¤æ–­ç‰©å“æ˜¯å¦è¶…å‡ºè¾¹ç•Œ
+        if (BoundryCheck(posX, posY, item.itemData.width, item.itemData.height) == false) return false;
+
+        //æ£€æŸ¥æŒ‡å®šä½ç½®å’ŒèŒƒå›´å†…æ˜¯å¦å­˜åœ¨é‡å ç‰©å“ï¼Œæœ‰å¤šä¸ªé‡å ç‰©å“é€€å‡º
+        if (OverlapCheck(posX, posY, item.itemData.width, item.itemData.height, ref overlapItem) == false) return false;
+
+        if (overlapItem) CleanGridReference(overlapItem);
+
+        item.transform.SetParent(transform, false);
+
+        // æŒ‰ç‰©å“å°ºå¯¸å ç”¨å¯¹åº”å¤§å°çš„æ ¼å­
+        for (int ix = 0; ix < item.itemData.width; ix++)
+        {
+            for (int iy = 0; iy < item.itemData.height; iy++)
             {
-                // »ñÈ¡µ±Ç°Êó±êÎ»ÖÃÔÚÍø¸ñÖĞµÄ¸ñ×Ó×ø±ê£¬²¢´òÓ¡µ½¿ØÖÆÌ¨
-                Vector2Int gridPos = GetTileGridPosition(Input.mousePosition);
-                Debug.Log($"¸ñ×Ó×ø±ê: ({gridPos.x}, {gridPos.y})");
+                itemSlot[posX + ix, posY + iy] = item;
+            }
+        }
+        item.onGridPositionX = posX;
+        item.onGridPositionY = posY;
+
+        Vector2 positon = new Vector2();
+        positon.x = posX * tileSizeWidth + tileSizeWidth * item.itemData.width / 2;
+        positon.y = -(posY * tileSizeHeight + tileSizeHeight * item.itemData.height / 2);
+        item.transform.localPosition = positon;
+
+        return true; // æˆåŠŸæ”¾ç½®
+    }
+
+    //æŒ‰æ ¼å­åæ ‡è·å–ç‰©å“
+    public Item PickUpItem(int x, int y)
+    {
+        Item toReturn = itemSlot[x, y];
+
+        if (toReturn == null) return null;
+
+        CleanGridReference(toReturn);
+
+        return toReturn;
+    }
+
+    //æŒ‰ç‰©å“å°ºå¯¸å–æ¶ˆå¯¹åº”å¤§å°çš„æ ¼å­çš„å ç”¨
+    void CleanGridReference(Item item)
+    {
+        for (int ix = 0; ix < item.itemData.width; ix++)
+        {
+            for (int iy = 0; iy < item.itemData.height; iy++)
+            {
+                itemSlot[item.onGridPositionX + ix, item.onGridPositionY + iy] = null;
             }
         }
     }
 
-    // ¼ì²éÊó±êÊÇ·ñÔÚimage×é¼şÄÚ²¿
-    public bool IsMouseOverImage(Vector2 mousePosition)
+    //åˆ¤æ–­ç‰©å“æ˜¯å¦è¶…å‡ºè¾¹ç•Œ
+    public bool BoundryCheck(int posX, int posY, int width, int height)
     {
-        Vector2 localPoint;
-        bool isInside = RectTransformUtility.ScreenPointToLocalPointInRectangle(
-            rectTransform, 
-            mousePosition, 
-            canvas.worldCamera, 
-            out localPoint
-        );
-        
-        if (!isInside) return false;
-        
-        // ¼ì²é±¾µØ×ø±êÊÇ·ñÔÚRectTransformµÄ±ß½çÄÚ
-        Rect rect = rectTransform.rect;
-        return localPoint.x >= rect.xMin && localPoint.x <= rect.xMax &&
-               localPoint.y >= rect.yMin && localPoint.y <= rect.yMax;
+        if (PositionCheck(posX, posY) == false) return false;
+
+        posX += width - 1;
+        posY += height - 1;
+        if (PositionCheck(posX, posY) == false) return false;
+        return true;
     }
 
-    // ¸ù¾İÊó±êÎ»ÖÃ¼ÆËãÔÚ¸ñ×ÓÖĞµÄÎ»ÖÃ
-    public Vector2Int GetTileGridPosition(Vector2 mousePosition)
+    //åˆ¤æ–­æ ¼å­åæ ‡æ˜¯å¦è¶…å‡º
+    bool PositionCheck(int posX, int posY)
     {
-        // Ê¹ÓÃRectTransformUtility½øĞĞ¸ü¾«È·µÄ×ø±ê×ª»»
-        Vector2 localPoint;
-        RectTransformUtility.ScreenPointToLocalPointInRectangle(
-            rectTransform, 
-            mousePosition, 
-            canvas.worldCamera, 
-            out localPoint
-        );
-        
-        // µ÷Õû×ø±êÏµ£¬Ê¹×óÉÏ½ÇÎªÔ­µã(0,0)
-        // RectTransformµÄ±¾µØ×ø±êÏµÖĞĞÄÔÚÖĞÑë£¬ĞèÒª×ª»»Îª×óÉÏ½ÇÎªÔ­µã
-        float adjustedX = localPoint.x + rectTransform.rect.width * 0.5f;
-        float adjustedY = rectTransform.rect.height * 0.5f - localPoint.y;
-        
-        // ¼ÆËã¸ñ×Ó×ø±ê£¬Ê¹ÓÃMathf.FloorToIntÈ·±£ÕûÊı¸ñ×Ó×ø±ê
-        tileGridPosition.x = Mathf.FloorToInt(adjustedX / tileSizeWidth);
-        tileGridPosition.y = Mathf.FloorToInt(adjustedY / tileSizeHeight);
-        
-        // È·±£×ø±ê²»Îª¸ºÊı£¨·ÀÖ¹µã»÷µ½Íø¸ñÍâ²¿Ê±³öÏÖ¸º×ø±ê£©
-        tileGridPosition.x = Mathf.Max(0, tileGridPosition.x);
-        tileGridPosition.y = Mathf.Max(0, tileGridPosition.y);
-        
-        // ÏŞÖÆ×ø±êÔÚÍø¸ñ·¶Î§ÄÚ£¨¿ÉÑ¡£¬¸ù¾İÄãµÄÍø¸ñ´óĞ¡µ÷Õû£©
-        int maxGridX = Mathf.FloorToInt(rectTransform.rect.width / tileSizeWidth) - 1;
-        int maxGridY = Mathf.FloorToInt(rectTransform.rect.height / tileSizeHeight) - 1;
-        
-        tileGridPosition.x = Mathf.Min(tileGridPosition.x, maxGridX);
-        tileGridPosition.y = Mathf.Min(tileGridPosition.y, maxGridY);
+        if (posX < 0 || posY < 0) return false;
 
-        return tileGridPosition;
+        if (posX >= gridSizeWidth || posY >= gridSizeHeight) return false;
+
+        return true;
     }
-    
-    // ¿ÉÑ¡£º¸ù¾İ¸ñ×Ó×ø±ê»ñÈ¡¸Ã¸ñ×ÓµÄÖĞĞÄÊÀ½ç×ø±ê
-    public Vector2 GetGridCenterWorldPosition(Vector2Int gridPosition)
+
+    //æ£€æŸ¥æŒ‡å®šä½ç½®å’ŒèŒƒå›´å†…æ˜¯å¦å­˜åœ¨é‡å ç‰©å“ï¼Œå¹¶overlapItemè¿”å›é‡å ç‰©å“ï¼Œï¼Œæœ‰å¤šä¸ªé‡å ç‰©å“è¿”å›false
+    private bool OverlapCheck(int posX, int posY, int width, int height, ref Item overlapItem)
     {
-        // ¼ÆËã¸ñ×ÓÖĞĞÄµÄ±¾µØ×ø±ê
-        float centerX = (gridPosition.x + 0.5f) * tileSizeWidth - rectTransform.rect.width * 0.5f;
-        float centerY = rectTransform.rect.height * 0.5f - (gridPosition.y + 0.5f) * tileSizeHeight;
-        
-        Vector2 localCenter = new Vector2(centerX, centerY);
-        
-        // ×ª»»ÎªÊÀ½ç×ø±ê
-        Vector3 worldPosition = rectTransform.TransformPoint(localCenter);
-        return worldPosition;
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                // å¦‚æœå½“å‰ä½ç½®æœ‰ç‰©å“
+                if (itemSlot[posX + x, posY + y] != null)
+                {
+                    // å¦‚æœ overlapItem è¿˜æœªè¢«èµ‹å€¼ï¼ˆç¬¬ä¸€æ¬¡æ‰¾åˆ°é‡å ç‰©å“ï¼‰
+                    if (overlapItem == null)
+                    {
+                        overlapItem = itemSlot[posX + x, posY + y];
+                    }
+                    else
+                    {
+                        // å¦‚æœå‘ç°èŒƒå›´æœ‰å¤šä¸ªé‡å ç‰©å“
+                        if (overlapItem != itemSlot[posX + x, posY + y])
+                        {
+                            overlapItem = null;
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
+        // å¦‚æœæ‰€æœ‰è¢«æ£€æŸ¥çš„ä½ç½®éƒ½æœ‰ç›¸åŒçš„é‡å ç‰©å“ï¼Œåˆ™è¿”å› true
+        return true;
     }
-    
-    // ¿ÉÑ¡£º¼ì²é¸ñ×Ó×ø±êÊÇ·ñÔÚÓĞĞ§·¶Î§ÄÚ
-    public bool IsValidGridPosition(Vector2Int gridPosition)
+
+    //æŒ‰æ ¼å­åæ ‡è½¬åŒ–ä¸ºUIåæ ‡ä½ç½®
+    public Vector2 CalculatePositionOnGrid(Item item, int posX, int posY)
     {
-        int maxGridX = Mathf.FloorToInt(rectTransform.rect.width / tileSizeWidth);
-        int maxGridY = Mathf.FloorToInt(rectTransform.rect.height / tileSizeHeight);
-        
-        return gridPosition.x >= 0 && gridPosition.x < maxGridX && 
-               gridPosition.y >= 0 && gridPosition.y < maxGridY;
+        Vector2 position = new Vector2();
+        position.x = posX * tileSizeWidth + tileSizeWidth * item.itemData.width / 2;
+        position.y = -(posY * tileSizeHeight + tileSizeHeight * item.itemData.height / 2);
+        return position;
+    }
+
+    //æŒ‰æ ¼å­åæ ‡è·å–ç‰©å“
+    internal Item GetItem(int x, int y)
+    {
+        return itemSlot[x, y];
     }
 }
