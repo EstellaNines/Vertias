@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 public class ItemGrid : MonoBehaviour
 {
@@ -10,8 +11,8 @@ public class ItemGrid : MonoBehaviour
     [SerializeField]
     [FieldLabel("物品引用")] private GameObject itemPrefab; // 物品预制体引用，用于动态生成物品
 
-    Item[,] itemSlot; // 二维数组，记录每个格子里放的物品
-    Item overlapItem;//重叠物品
+    BaseItem[,] itemSlot; // 二维数组，记录每个格子里放的物品
+    BaseItem overlapItem;//重叠物品
 
     // 单个格子的像素宽高（256 像素图被 4 等分）
     public static float tileSizeWidth = 256f / 4f; // 格子宽度
@@ -25,7 +26,7 @@ public class ItemGrid : MonoBehaviour
 
     private void Start()
     {
-        itemSlot = new Item[gridSizeWidth, gridSizeHeight]; // 按设定宽高创建二维数组
+        itemSlot = new BaseItem[gridSizeWidth, gridSizeHeight]; // 按设定宽高创建二维数组
 
         rectTransform = GetComponent<RectTransform>(); // 获取自身的 RectTransform 组件
         canvas = FindObjectOfType<Canvas>(); // 查找场景中的 Canvas
@@ -67,7 +68,7 @@ public class ItemGrid : MonoBehaviour
     }
 
     //按格子坐标添加物品
-    public bool PlaceItem(Item item, int posX, int posY, ref Item overlapItem)
+    public bool PlaceItem(BaseItem item, int posX, int posY, ref BaseItem overlapItem)
     {
         //判断物品是否超出边界
         if (BoundryCheck(posX, posY, item.itemData.width, item.itemData.height) == false) return false;
@@ -99,9 +100,9 @@ public class ItemGrid : MonoBehaviour
     }
 
     //按格子坐标获取物品
-    public Item PickUpItem(int x, int y)
+    public BaseItem PickUpItem(int x, int y)
     {
-        Item toReturn = itemSlot[x, y];
+        BaseItem toReturn = itemSlot[x, y];
 
         if (toReturn == null) return null;
 
@@ -111,7 +112,7 @@ public class ItemGrid : MonoBehaviour
     }
 
     //按物品尺寸取消对应大小的格子的占用
-    void CleanGridReference(Item item)
+    void CleanGridReference(BaseItem item)
     {
         for (int ix = 0; ix < item.itemData.width; ix++)
         {
@@ -144,7 +145,7 @@ public class ItemGrid : MonoBehaviour
     }
 
     //检查指定位置和范围内是否存在重叠物品，并overlapItem返回重叠物品，，有多个重叠物品返回false
-    private bool OverlapCheck(int posX, int posY, int width, int height, ref Item overlapItem)
+    private bool OverlapCheck(int posX, int posY, int width, int height, ref BaseItem overlapItem)
     {
         for (int x = 0; x < width; x++)
         {
@@ -175,7 +176,7 @@ public class ItemGrid : MonoBehaviour
     }
 
     //按格子坐标转化为UI坐标位置
-    public Vector2 CalculatePositionOnGrid(Item item, int posX, int posY)
+    public Vector2 CalculatePositionOnGrid(BaseItem item, int posX, int posY)
     {
         Vector2 position = new Vector2();
         position.x = posX * tileSizeWidth + tileSizeWidth * item.itemData.width / 2;
@@ -184,8 +185,121 @@ public class ItemGrid : MonoBehaviour
     }
 
     //按格子坐标获取物品
-    internal Item GetItem(int x, int y)
+    internal BaseItem GetItem(int x, int y)
     {
         return itemSlot[x, y];
+    }
+
+    // 尝试在网格中随机放置物品，成功返回true，失败返回false
+
+    // 清空网格状态
+    public void ClearGrid()
+    {
+        if (itemSlot != null)
+        {
+            for (int x = 0; x < gridSizeWidth; x++)
+            {
+                for (int y = 0; y < gridSizeHeight; y++)
+                {
+                    itemSlot[x, y] = null;
+                }
+            }
+        }
+    }
+
+    // 改进的随机放置算法
+    public bool TryPlaceItemRandomly(BaseItem item, int maxAttempts = 100)
+    {
+        int width = item.itemData.width;
+        int height = item.itemData.height;
+
+        // 如果物品尺寸超过网格，直接返回失败
+        if (width > gridSizeWidth || height > gridSizeHeight)
+        {
+            Debug.LogWarning($"物品尺寸({width}x{height})超过网格大小({gridSizeWidth}x{gridSizeHeight})");
+            return false;
+        }
+
+        // 创建可用位置列表
+        List<Vector2Int> availablePositions = new List<Vector2Int>();
+
+        for (int x = 0; x <= gridSizeWidth - width; x++)
+        {
+            for (int y = 0; y <= gridSizeHeight - height; y++)
+            {
+                if (CanPlaceAt(x, y, width, height))
+                {
+                    availablePositions.Add(new Vector2Int(x, y));
+                }
+            }
+        }
+
+        // 如果没有可用位置，返回失败
+        if (availablePositions.Count == 0)
+        {
+            return false;
+        }
+
+        // 随机选择一个可用位置
+        Vector2Int selectedPos = availablePositions[Random.Range(0, availablePositions.Count)];
+
+        BaseItem overlapItem = null;
+        return PlaceItem(item, selectedPos.x, selectedPos.y, ref overlapItem);
+    }
+
+    // 检查指定位置是否可以放置物品
+    private bool CanPlaceAt(int posX, int posY, int width, int height)
+    {
+        // 边界检查
+        if (!BoundryCheck(posX, posY, width, height))
+            return false;
+
+        // 检查是否有重叠
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                if (itemSlot[posX + x, posY + y] != null)
+                {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    // 获取网格尺寸（供外部访问）
+    public int GridSizeWidth { get { return gridSizeWidth; } }
+    public int GridSizeHeight { get { return gridSizeHeight; } }
+
+    // 按顺序放置物品（从左到右，从上到下）
+    public bool TryPlaceItemSequentially(BaseItem item)
+    {
+        int width = item.itemData.width;
+        int height = item.itemData.height;
+
+        // 如果物品尺寸超过网格，直接返回失败
+        if (width > gridSizeWidth || height > gridSizeHeight)
+        {
+            Debug.LogWarning($"物品尺寸({width}x{height})超过网格大小({gridSizeWidth}x{gridSizeHeight})");
+            return false;
+        }
+
+        // 从左到右，从上到下遍历网格
+        for (int y = 0; y <= gridSizeHeight - height; y++)
+        {
+            for (int x = 0; x <= gridSizeWidth - width; x++)
+            {
+                if (CanPlaceAt(x, y, width, height))
+                {
+                    BaseItem overlapItem = null;
+                    return PlaceItem(item, x, y, ref overlapItem);
+                }
+            }
+        }
+
+        // 没有找到合适的位置
+        return false;
     }
 }

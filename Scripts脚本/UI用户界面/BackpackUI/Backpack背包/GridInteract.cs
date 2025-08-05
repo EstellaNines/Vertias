@@ -21,9 +21,9 @@ public class GridInteract : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
         inventoryController.selectedItemGrid = itemGrid;
     }
 
-    // 鼠标退出触发
+    // 鼠标退出触发 - 修改：不立即清空selectedItemGrid
     public void OnPointerExit(PointerEventData eventData)
     {
-        inventoryController.selectedItemGrid = null;
+
     }
 }

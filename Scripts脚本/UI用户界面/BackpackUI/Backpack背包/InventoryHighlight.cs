@@ -2,13 +2,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-//¿ØÖÆ¸ßÁÁ±³¾°ÏÔÊ¾
+//æ§åˆ¶é«˜äº®èƒŒæ™¯æ˜¾ç¤º
 public class InventoryHighlight : MonoBehaviour
 {
     [SerializeField] RectTransform highlighter;
 
-    // ÉèÖÃ¸ßÁÁ¿ò´óĞ¡
-    public void SetSize(Item targetItem)
+    // è®¾ç½®é«˜äº®æ¡†å¤§å°
+    public void SetSize(BaseItem targetItem)
     {
         Vector2 size = new Vector2();
         size.x = targetItem.itemData.width * ItemGrid.tileSizeWidth;
@@ -16,27 +16,27 @@ public class InventoryHighlight : MonoBehaviour
         highlighter.sizeDelta = size;
     }
 
-    // ÉèÖÃ¸ßÁÁ¿òÎ»ÖÃ
-    public void SetPosition(ItemGrid targetGrid, Item targetItem)
+    // è®¾ç½®é«˜äº®æ¡†ä½ç½®
+    public void SetPosition(ItemGrid targetGrid, BaseItem targetItem)
     {
         Vector2 pos = targetGrid.CalculatePositionOnGrid(targetItem, targetItem.onGridPositionX, targetItem.onGridPositionY);
         highlighter.localPosition = pos;
     }
 
-    //ÏÔÊ¾Òş²Ø
+    //æ˜¾ç¤ºéšè—
     public void Show(bool b)
     {
         highlighter.gameObject.SetActive(b);
     }
 
-    //ÉèÖÃ¸ßÁÁ±³¾°¸¸¼¶
+    //è®¾ç½®é«˜äº®èƒŒæ™¯çˆ¶çº§
     public void SetParent(ItemGrid targetGrid)
     {
         highlighter.SetParent(targetGrid.GetComponent<RectTransform>());
     }
 
-    //ÉèÖÃ¸ßÁÁ¿òÎ»ÖÃ
-    public void SetPosition(ItemGrid targetGrid, Item targetItem, int posX, int posY)
+    //è®¾ç½®é«˜äº®æ¡†ä½ç½®
+    public void SetPosition(ItemGrid targetGrid, BaseItem targetItem, int posX, int posY)
     {
         Vector2 pos = targetGrid.CalculatePositionOnGrid(targetItem, posX, posY);
         highlighter.localPosition = pos;
