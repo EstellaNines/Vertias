@@ -7,12 +7,13 @@ using System.Reflection;
 public class ItemDataGenerator : EditorWindow
 {
     private string jsonFilePath = "Assets/Resources/InventorySystemResources/InventorySystemDatabase/InventorySystemStaticDatabase.json";
-    private string outputPath = "Assets/Scriptable Object数据对象/";
+    private string outputPath = "Assets/InventorySystem/Database/Scriptable Object数据对象/";
 
     [MenuItem("Tools/Generate Item Data from JSON")]
+    [MenuItem("InventorySystem/物品数据生成器")]
     public static void ShowWindow()
     {
-        GetWindow<ItemDataGenerator>("Item Data Generator");
+        GetWindow<ItemDataGenerator>("物品数据生成器");
     }
 
     private void OnGUI()
@@ -70,7 +71,7 @@ public class ItemDataGenerator : EditorWindow
 
             foreach (FieldInfo field in categoryFields)
             {
-                InventorySystemItemCategory category = (InventorySystemItemCategory)field.GetValue(jsonData.category);
+                InventorySystemJsonCategory category = (InventorySystemJsonCategory)field.GetValue(jsonData.category);
                 if (category != null && category.items != null)
                 {
                     totalCreated += CreateItemsForCategory(category, field.Name);
@@ -88,7 +89,7 @@ public class ItemDataGenerator : EditorWindow
         }
     }
 
-    private int CreateItemsForCategory(InventorySystemItemCategory category, string categoryName)
+    private int CreateItemsForCategory(InventorySystemJsonCategory category, string categoryName)
     {
         int created = 0;
 
@@ -111,17 +112,35 @@ public class ItemDataGenerator : EditorWindow
             itemData.height = jsonItem.height;
             itemData.width = jsonItem.width;
             itemData.rarity = jsonItem.rarity;
-            itemData.cellH = jsonItem.cellH;
-            itemData.cellV = jsonItem.cellV;
-            itemData.bulletType = jsonItem.type;
+            itemData.CellH = jsonItem.cellH;
+            itemData.CellV = jsonItem.cellV;
+            itemData.BulletType = jsonItem.type;
             itemData.backgroundColor = jsonItem.BackgroundColor;
+
+            // 设置正确的枚举类别而不是字符串
+            if (System.Enum.TryParse<InventorySystemItemCategory>(categoryName, out InventorySystemItemCategory categoryEnum))
+            {
+                itemData.itemCategory = categoryEnum;
+            }
+            else
+            {
+                Debug.LogWarning($"无法解析类别: {categoryName}，使用默认值 Helmet");
+                itemData.itemCategory = InventorySystemItemCategory.Helmet;
+            }
             itemData.category = categoryName;
 
-            // 尝试加载对应的图标精灵
-            string spritePath = FindSpriteForItem(jsonItem.name, categoryName);
-            if (!string.IsNullOrEmpty(spritePath))
+            // 使用JSON中的ItemIcon字段加载图标
+            if (!string.IsNullOrEmpty(jsonItem.ItemIcon))
             {
-                itemData.itemIcon = AssetDatabase.LoadAssetAtPath<Sprite>(spritePath);
+                string spritePath = FindSpriteByFileName(jsonItem.ItemIcon, categoryName);
+                if (!string.IsNullOrEmpty(spritePath))
+                {
+                    itemData.itemIcon = AssetDatabase.LoadAssetAtPath<Sprite>(spritePath);
+                }
+                else
+                {
+                    Debug.LogWarning($"未找到图标文件: {jsonItem.ItemIcon} (物品: {jsonItem.name})");
+                }
             }
 
             // 生成文件名（清理特殊字符）
@@ -178,27 +197,24 @@ public class ItemDataGenerator : EditorWindow
         }
     }
 
-    private string FindSpriteForItem(string itemName, string categoryName)
+    private string FindSpriteByFileName(string fileName, string categoryName)
     {
-        // 根据类别在对应的UI文件夹中查找精灵
+        // 在InventorySystem/Sprite目录中查找
         string[] searchPaths = {
+            $"Assets/InventorySystem/Sprite/{categoryName}",
+            $"Assets/InventorySystem/Sprite",
             $"Assets/UI/ItemsUI/{GetUICategoryName(categoryName)}",
-            $"Assets/Sprites精灵",
-            $"Assets/InventorySystem/Sprite"
+            $"Assets/Sprites精灵"
         };
 
         foreach (string searchPath in searchPaths)
         {
             if (Directory.Exists(searchPath))
             {
-                string[] files = Directory.GetFiles(searchPath, "*.png", SearchOption.AllDirectories);
-                foreach (string file in files)
+                string[] files = Directory.GetFiles(searchPath, fileName, SearchOption.AllDirectories);
+                if (files.Length > 0)
                 {
-                    string fileName = Path.GetFileNameWithoutExtension(file);
-                    if (fileName.ToLower().Contains(itemName.ToLower().Replace(" ", "").Replace("-", "").Replace(".", "")))
-                    {
-                        return file;
-                    }
+                    return files[0];
                 }
             }
         }
@@ -269,14 +285,14 @@ public class ItemDataGenerator : EditorWindow
                 {
                     Directory.Delete(folder, true);
                 }
-                
+
                 // 删除根目录下的.asset文件
                 string[] assetFiles = Directory.GetFiles(outputPath, "*.asset");
                 foreach (string file in assetFiles)
                 {
                     AssetDatabase.DeleteAsset(file);
                 }
-                
+
                 AssetDatabase.Refresh();
                 Debug.Log($"已清空所有现有数据文件和文件夹");
             }

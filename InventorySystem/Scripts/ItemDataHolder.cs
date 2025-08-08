@@ -21,7 +21,6 @@ public class ItemDataHolder : MonoBehaviour
     }
 
     // 获取物品数据
-    // 返回：InventorySystemItemDataSO数据对象
     public InventorySystemItemDataSO GetItemData()
     {
         return itemData;
@@ -35,6 +34,7 @@ public class ItemDataHolder : MonoBehaviour
         UpdateItemDisplay();
     }
 
+    // 更新物品UI显示
     // 更新物品UI显示
     public void UpdateItemDisplay()
     {
@@ -61,15 +61,38 @@ public class ItemDataHolder : MonoBehaviour
     {
         if (itemData == null) return;
 
+        // 每格80像素，与网格系统保持一致
+        float cellSize = 80f;
+        Vector2 newSize = new Vector2(
+            itemData.width * cellSize,
+            itemData.height * cellSize
+        );
+
+        // 更新预制体根对象尺寸
         RectTransform rectTransform = GetComponent<RectTransform>();
         if (rectTransform != null)
         {
-            // 每格50像素
-            float cellSize = 50f;
-            rectTransform.sizeDelta = new Vector2(
-                itemData.width * cellSize,
-                itemData.height * cellSize
-            );
+            rectTransform.sizeDelta = newSize;
+        }
+
+        // 更新物品图标尺寸
+        if (itemIconImage != null)
+        {
+            RectTransform iconRect = itemIconImage.GetComponent<RectTransform>();
+            if (iconRect != null)
+            {
+                iconRect.sizeDelta = newSize;
+            }
+        }
+
+        // 更新背景图片尺寸
+        if (backgroundImage != null)
+        {
+            RectTransform bgRect = backgroundImage.GetComponent<RectTransform>();
+            if (bgRect != null)
+            {
+                bgRect.sizeDelta = newSize;
+            }
         }
     }
 
@@ -142,13 +165,13 @@ public class ItemDataHolder : MonoBehaviour
     public string ItemCategory => itemData?.category ?? "";
 
     // 子弹类型
-    public string BulletType => itemData?.bulletType ?? "";
+    public string BulletType => itemData?.BulletType ?? "";
 
     // 容量高度（背包/战术挂具）
-    public int CellH => itemData?.cellH ?? 0;
+    public int CellH => itemData?.CellH ?? 0;
 
     // 容量宽度（背包/战术挂具）
-    public int CellV => itemData?.cellV ?? 0;
+    public int CellV => itemData?.CellV ?? 0;
 
     // 背景颜色名称
     public string BackgroundColor => itemData?.backgroundColor ?? "";
@@ -183,14 +206,14 @@ public class ItemDataHolder : MonoBehaviour
     // 返回：是否有容量
     public bool HasCapacity()
     {
-        return itemData != null && (itemData.cellH > 0 || itemData.cellV > 0);
+        return itemData != null && (itemData.CellH > 0 || itemData.CellV > 0);
     }
 
     // 获取物品总容量
     // 返回：总容量（格子数）
     public int GetTotalCapacity()
     {
-        return itemData != null ? itemData.cellH * itemData.cellV : 0;
+        return itemData != null ? itemData.CellH * itemData.CellV : 0;
     }
 
     // 获取物品占用的格子数
@@ -217,7 +240,7 @@ public class ItemDataHolder : MonoBehaviour
                   $"稀有度: {itemData.rarity}\n" +
                   $"类别: {itemData.category}\n" +
                   $"背景颜色: {itemData.backgroundColor}\n" +
-                  $"容量: {itemData.cellH}x{itemData.cellV}\n" +
-                  $"子弹类型: {itemData.bulletType}");
+                  $"容量: {itemData.CellH}x{itemData.CellV}\n" +
+                  $"子弹类型: {itemData.BulletType}");
     }
 }

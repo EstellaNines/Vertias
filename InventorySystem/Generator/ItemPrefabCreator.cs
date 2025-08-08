@@ -161,6 +161,33 @@ public class ItemPrefabCreator : EditorWindow
             itemIconField?.SetValue(dataHolder, image);
             backgroundField?.SetValue(dataHolder, rawImage);
 
+            // 创建ItemHighlightMask子对象
+            GameObject highlightObject = new GameObject("ItemHighlightMask");
+            highlightObject.transform.SetParent(mainObject.transform);
+            highlightObject.layer = 5;
+            
+            RectTransform highlightRect = highlightObject.AddComponent<RectTransform>();
+            highlightRect.anchorMin = Vector2.zero;
+            highlightRect.anchorMax = Vector2.one;
+            highlightRect.anchoredPosition = Vector2.zero;
+            highlightRect.sizeDelta = Vector2.zero;
+            
+            // 添加Image组件用于高光显示
+            Image highlightImage = highlightObject.AddComponent<Image>();
+            highlightImage.color = new Color(1f, 1f, 1f, 0f); // 初始透明
+            highlightImage.raycastTarget = false; // 不阻挡射线检测
+
+            // 在根节点添加InventorySystemItem组件
+            InventorySystemItem inventoryItem = mainObject.AddComponent<InventorySystemItem>();
+            
+            // 在根节点添加ItemHoverHighlight脚本
+            ItemHoverHighlight hoverHighlight = mainObject.AddComponent<ItemHoverHighlight>();
+            
+            // 通过反射设置ItemHoverHighlight的overlay字段
+            var overlayField = typeof(ItemHoverHighlight).GetField("overlay", 
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            overlayField?.SetValue(hoverHighlight, highlightImage);
+            
             // 确保分类文件夹存在
             string categoryFolder = Path.Combine(prefabOutputPath, GetCategoryFolderName(itemData.category));
             if (!Directory.Exists(categoryFolder))
