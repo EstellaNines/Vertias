@@ -10,10 +10,6 @@ public class GridConfig : ScriptableObject
     public int inventoryWidth = 10;
     public int inventoryHeight = 12;
 
-    [Header("测试网格配置")]
-    public int testGridWidth = 50;
-    public int testGridHeight = 50;
-
     [Header("高级配置")]
     public float itemSpacing = 5f;
     public int maxRandomAttempts = 1000;
@@ -24,8 +20,6 @@ public class GridConfig : ScriptableObject
         cellSize = Mathf.Max(1f, cellSize);
         inventoryWidth = Mathf.Max(1, inventoryWidth);
         inventoryHeight = Mathf.Max(1, inventoryHeight);
-        testGridWidth = Mathf.Max(1, testGridWidth);
-        testGridHeight = Mathf.Max(1, testGridHeight);
         itemSpacing = Mathf.Max(0f, itemSpacing);
         maxRandomAttempts = Mathf.Max(1, maxRandomAttempts);
     }

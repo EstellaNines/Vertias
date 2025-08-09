@@ -9,6 +9,10 @@ public class ItemPrefabCreator : EditorWindow
     [Header("预制体生成设置")]
     private string prefabOutputPath = "Assets/InventorySystem/Prefab/";
     private string itemDataPath = "Assets/InventorySystem/Database/Scriptable Object数据对象/";
+    private string gridConfigPath = "Assets/InventorySystem/Database/Scriptable Object数据对象/网格系统GridSystem/WarehouseGridConfig.asset";
+    
+    // 缓存GridConfig
+    private GridConfig gridConfig;
     
     [MenuItem("InventorySystem/物品预制体生成器")]
     public static void ShowWindow()
@@ -25,6 +29,7 @@ public class ItemPrefabCreator : EditorWindow
         GUILayout.Label("路径设置:", EditorStyles.boldLabel);
         prefabOutputPath = EditorGUILayout.TextField("预制体输出路径:", prefabOutputPath);
         itemDataPath = EditorGUILayout.TextField("物品数据路径:", itemDataPath);
+        gridConfigPath = EditorGUILayout.TextField("网格配置路径:", gridConfigPath);
         
         GUILayout.Space(10);
 
@@ -44,6 +49,14 @@ public class ItemPrefabCreator : EditorWindow
 
     private void GenerateAllItemPrefabs()
     {
+        // 加载GridConfig
+        gridConfig = AssetDatabase.LoadAssetAtPath<GridConfig>(gridConfigPath);
+        if (gridConfig == null)
+        {
+            Debug.LogError($"无法加载GridConfig文件: {gridConfigPath}");
+            return;
+        }
+
         // 确保输出目录存在
         if (!Directory.Exists(prefabOutputPath))
         {
@@ -96,13 +109,23 @@ public class ItemPrefabCreator : EditorWindow
     {
         try
         {
+            // 根据GridConfig计算物品实际大小
+            float itemWidth = itemData.width * gridConfig.cellSize;
+            float itemHeight = itemData.height * gridConfig.cellSize;
+            
             // 创建主GameObject
             GameObject mainObject = new GameObject(itemData.itemName);
             
             // 添加RectTransform组件
             RectTransform mainRect = mainObject.AddComponent<RectTransform>();
-            mainRect.sizeDelta = new Vector2(itemData.width * 50f, itemData.height * 50f); // 每格50像素
+            mainRect.sizeDelta = new Vector2(itemWidth, itemHeight);
             mainObject.layer = 5; // UI层
+
+            // 添加CanvasGroup组件到主对象
+            CanvasGroup canvasGroup = mainObject.AddComponent<CanvasGroup>();
+            canvasGroup.alpha = 1f;
+            canvasGroup.blocksRaycasts = true;
+            canvasGroup.interactable = true;
 
             // 创建ItemBackground子对象
             GameObject backgroundObject = new GameObject("ItemBackground");
@@ -113,11 +136,12 @@ public class ItemPrefabCreator : EditorWindow
             backgroundRect.anchorMin = new Vector2(0.5f, 0.5f);
             backgroundRect.anchorMax = new Vector2(0.5f, 0.5f);
             backgroundRect.anchoredPosition = Vector2.zero;
-            backgroundRect.sizeDelta = new Vector2(itemData.width * 50f, itemData.height * 50f);
+            backgroundRect.sizeDelta = new Vector2(itemWidth, itemHeight);
             
             // 添加RawImage组件
+            // 添加RawImage组件
             RawImage rawImage = backgroundObject.AddComponent<RawImage>();
-            rawImage.color = GetColorFromString(itemData.backgroundColor, 191f / 255f); // 透明度191
+            rawImage.color = GetColorFromString(itemData.backgroundColor, 204f / 255f); // 透明度204
             
             // 创建ItemSprite子对象
             GameObject spriteObject = new GameObject("ItemSprite");
@@ -128,7 +152,7 @@ public class ItemPrefabCreator : EditorWindow
             spriteRect.anchorMin = new Vector2(0.5f, 0.5f);
             spriteRect.anchorMax = new Vector2(0.5f, 0.5f);
             spriteRect.anchoredPosition = Vector2.zero;
-            spriteRect.sizeDelta = new Vector2(itemData.width * 50f, itemData.height * 50f);
+            spriteRect.sizeDelta = new Vector2(itemWidth, itemHeight);
             
             // 添加Image组件
             Image image = spriteObject.AddComponent<Image>();
@@ -144,9 +168,9 @@ public class ItemPrefabCreator : EditorWindow
             scriptRect.anchorMin = new Vector2(0.5f, 0.5f);
             scriptRect.anchorMax = new Vector2(0.5f, 0.5f);
             scriptRect.anchoredPosition = Vector2.zero;
-            scriptRect.sizeDelta = new Vector2(itemData.width * 50f, itemData.height * 50f);
+            scriptRect.sizeDelta = new Vector2(itemWidth, itemHeight);
             
-            // 添加ItemDataHolder脚本
+            // 添加ItemDataHolder脚本到ItemScriptableObject对象
             ItemDataHolder dataHolder = scriptObject.AddComponent<ItemDataHolder>();
             
             // 通过反射设置私有字段
@@ -180,6 +204,14 @@ public class ItemPrefabCreator : EditorWindow
             // 在根节点添加InventorySystemItem组件
             InventorySystemItem inventoryItem = mainObject.AddComponent<InventorySystemItem>();
             
+            // 在根节点添加DraggableItem脚本
+            DraggableItem draggableItem = mainObject.AddComponent<DraggableItem>();
+            
+            // 通过反射设置DraggableItem的item字段
+            var itemField = typeof(DraggableItem).GetField("item", 
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            itemField?.SetValue(draggableItem, inventoryItem);
+            
             // 在根节点添加ItemHoverHighlight脚本
             ItemHoverHighlight hoverHighlight = mainObject.AddComponent<ItemHoverHighlight>();
             
@@ -212,7 +244,7 @@ public class ItemPrefabCreator : EditorWindow
             
             if (prefab != null)
             {
-                Debug.Log($"成功创建预制体: {prefabPath}");
+                Debug.Log($"成功创建预制体: {prefabPath} (尺寸: {itemWidth}x{itemHeight})");
                 return true;
             }
             else
@@ -229,7 +261,8 @@ public class ItemPrefabCreator : EditorWindow
     }
 
     // 根据背景颜色字符串获取Color
-    private Color GetColorFromString(string colorName, float alpha = 1f)
+    // 根据背景颜色字符串获取Color
+    private Color GetColorFromString(string colorName, float alpha = 255f) // 默认透明度改为204
     {
         Color baseColor;
         switch (colorName?.ToLower())

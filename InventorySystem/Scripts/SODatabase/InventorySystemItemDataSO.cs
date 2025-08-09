@@ -18,7 +18,7 @@ public enum InventorySystemItemCategory
     Currency     // 货币
 }
 
-[CreateAssetMenu(fileName = "New Item", menuName = "Inventory/Item Data")]
+[CreateAssetMenu(fileName = "New Item", menuName = "Inventory System/Item Data")]
 public class InventorySystemItemDataSO : ScriptableObject
 {
     [Header("基本信息")]

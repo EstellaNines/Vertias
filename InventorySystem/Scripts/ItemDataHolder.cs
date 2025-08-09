@@ -101,20 +101,30 @@ public class ItemDataHolder : MonoBehaviour
     // 返回：对应的Color值
     private Color GetColorFromString(string colorName)
     {
+        Color baseColor;
         switch (colorName?.ToLower())
         {
             case "blue":
-                return HexToColor("#2d3c4b"); // 蓝色
+                baseColor = HexToColor("#2d3c4b"); // 蓝色
+                break;
             case "violet":
             case "purple":
-                return HexToColor("#583b80"); // 紫色
+                baseColor = HexToColor("#583b80"); // 紫色
+                break;
             case "yellow":
-                return HexToColor("#80550d"); // 黄色
+                baseColor = HexToColor("#80550d"); // 黄色
+                break;
             case "red":
-                return HexToColor("#350000"); // 红色
+                baseColor = HexToColor("#350000"); // 红色
+                break;
             default:
-                return Color.white; // 默认白色
+                baseColor = Color.white; // 默认白色
+                break;
         }
+
+        // 设置透明度为204
+        baseColor.a = 225f / 255f;
+        return baseColor;
     }
 
     // 十六进制颜色转换为Color
@@ -128,7 +138,7 @@ public class ItemDataHolder : MonoBehaviour
 
         // 确保是6位十六进制
         if (hex.Length != 6)
-            return Color.white;
+            return new Color(1f, 1f, 1f, 225f / 255f); // 默认白色，透明度204
 
         try
         {
@@ -136,11 +146,11 @@ public class ItemDataHolder : MonoBehaviour
             byte g = System.Convert.ToByte(hex.Substring(2, 2), 16);
             byte b = System.Convert.ToByte(hex.Substring(4, 2), 16);
 
-            return new Color32(r, g, b, 255);
+            return new Color32(r, g, b, 225); // 透明度设为225
         }
         catch
         {
-            return Color.white; // 转换失败时返回白色
+            return new Color(1f, 1f, 1f, 225f / 255f); // 转换失败时返回白色，透明度204
         }
     }
 

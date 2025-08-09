@@ -1,20 +1,22 @@
 using UnityEngine;
 
-// ÒÆ³ı RequireComponent ÌØĞÔ
+// ç§»é™¤æ‹–æ‹½æ¥å£ï¼Œæ”¹ä¸ºç®€å•çš„æ•°æ®å®¹å™¨
 public class InventorySystemItem : MonoBehaviour
 {
     ItemDataHolder holder;
+    private bool isDraggable = true;
 
     public Vector2Int Size => new Vector2Int(holder.ItemWidth, holder.ItemHeight);
     public InventorySystemItemDataSO Data => holder.GetItemData();
+    public bool IsDraggable { get => isDraggable; set => isDraggable = value; }
 
-    void Awake() 
+    void Awake()
     {
-        // ´Ó×Ó¶ÔÏóÖĞ²éÕÒ ItemDataHolder
+        // ä»å­å¯¹è±¡ä¸­æŸ¥æ‰¾ ItemDataHolder
         holder = GetComponentInChildren<ItemDataHolder>();
         if (holder == null)
         {
-            Debug.LogError($"ÔÚ {gameObject.name} µÄ×Ó¶ÔÏóÖĞÎ´ÕÒµ½ ItemDataHolder ×é¼ş£¡");
+            Debug.LogError($"åœ¨ {gameObject.name} çš„å­å¯¹è±¡ä¸­æœªæ‰¾åˆ° ItemDataHolder ç»„ä»¶ï¼");
         }
     }
 }
