@@ -61,8 +61,8 @@ public class ItemDataHolder : MonoBehaviour
     {
         if (itemData == null) return;
 
-        // 每格80像素，与网格系统保持一致
-        float cellSize = 80f;
+        // 每格64像素，与网格系统保持一致
+        float cellSize = 64f; // 从80f修改为64f
         Vector2 newSize = new Vector2(
             itemData.width * cellSize,
             itemData.height * cellSize

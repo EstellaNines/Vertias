@@ -20,8 +20,7 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     public Transform originalParent;
     public Vector2 originalPos;
 
-    // 添加标记来跟踪是否成功装备
-    private bool wasEquipped = false;
+    // 移除了未使用的 wasEquipped 字段
     private bool isDragging = false;
     private bool wasInEquipSlot = false; // 记录拖拽开始时是否在装备栏中
 
@@ -41,7 +40,7 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     // 网格相关
     private ItemSpawner itemSpawner;
     private Vector2Int gridPosition;
-    
+
     // 存储所有Image组件的原始raycastTarget状态
     private List<Image> allImages = new List<Image>();
     private List<bool> originalRaycastTargets = new List<bool>();
@@ -50,7 +49,7 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     private Vector2 originalAnchorMin;
     private Vector2 originalAnchorMax;
     private Vector2 originalPivot;
-    
+
     private void Awake()
     {
         rectTransform = GetComponent<RectTransform>();
@@ -92,7 +91,7 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
                 overlayRect.anchorMax = Vector2.one;
                 overlayRect.sizeDelta = Vector2.zero;
                 overlayRect.anchoredPosition = Vector2.zero;
-                
+
                 // 重新缓存Image组件（因为添加了新的）
                 CacheImageComponents();
             }
@@ -108,23 +107,23 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         originalSize = rectTransform.sizeDelta;
         originalScale = rectTransform.localScale;
     }
-    
+
     // 缓存所有Image组件及其原始raycastTarget状态
     private void CacheImageComponents()
     {
         allImages.Clear();
         originalRaycastTargets.Clear();
-        
+
         // 获取自身及所有子对象的Image组件
         Image[] images = GetComponentsInChildren<Image>(true);
-        
+
         foreach (Image img in images)
         {
             allImages.Add(img);
             originalRaycastTargets.Add(img.raycastTarget);
         }
     }
-    
+
     // 禁用所有Image组件的raycastTarget
     private void DisableAllRaycastTargets()
     {
@@ -136,7 +135,7 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
             }
         }
     }
-    
+
     // 恢复所有Image组件的原始raycastTarget状态
     private void RestoreAllRaycastTargets()
     {
@@ -170,22 +169,21 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         if (!item.IsDraggable) return;
 
         isDragging = true;
-        wasEquipped = false;
 
         // 检查是否从装备栏开始拖拽
         wasInEquipSlot = GetComponentInParent<EquipSlot>() != null;
 
         originalParent = transform.parent;
         originalPos = rectTransform.anchoredPosition;
-    
+
         // 保存当前的世界位置
         Vector3 worldPosition = rectTransform.position;
-        
+
         // 切换到中心锚点进行拖拽
         rectTransform.anchorMin = new Vector2(0.5f, 0.5f);
         rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
         rectTransform.pivot = new Vector2(0.5f, 0.5f);
-        
+
         // 恢复世界位置，这样视觉上物品不会跳动
         rectTransform.position = worldPosition;
 
@@ -216,7 +214,7 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         {
             StartHighlightFade(normalColor);
         }
-        
+
         // 禁用所有Image组件的raycastTarget，防止阻挡射线检测
         DisableAllRaycastTargets();
 
@@ -238,7 +236,7 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
             eventData.position,
             eventData.pressEventCamera,
             out localPointerPosition);
-        
+
         rectTransform.anchoredPosition = localPointerPosition;
 
         // 检测当前是否在有效的放置区域中
@@ -255,7 +253,7 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
 
         bool isOverValidSlot = false;
         bool isOverValidGrid = false;
-        
+
         foreach (var result in results)
         {
             // 检查装备栏
@@ -269,7 +267,7 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
                     break;
                 }
             }
-            
+
             // 检查网格
             ItemGrid itemGrid = result.gameObject.GetComponent<ItemGrid>();
             if (itemGrid != null)
@@ -280,14 +278,14 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
                 if (itemComponent != null)
                 {
                     Vector2Int itemSize = new Vector2Int(itemComponent.Data.width, itemComponent.Data.height);
-                    
+
                     // 检查是否可以放置
                     isOverValidGrid = itemGrid.CanPlaceItem(gridPosition, itemSize);
                 }
                 break;
             }
         }
-    
+
         // 根据检测结果设置高亮颜色
         Color targetColor;
         if (isOverValidSlot)
@@ -310,7 +308,7 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
                     break;
                 }
             }
-            
+
             if (isOverAnyGrid)
             {
                 targetColor = Color.red.WithAlpha(0.35f); // 红色 - 在网格内但不能放置
@@ -320,7 +318,7 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
                 targetColor = normalColor; // 透明 - 不在任何有效区域
             }
         }
-    
+
         // 应用颜色变化
         if (highlightOverlay.color != targetColor)
         {
@@ -348,6 +346,14 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         isDragging = false;
         bool placementSuccessful = false;
 
+        // 检查是否从装备栏拖拽出来
+        EquipSlot originalEquipSlot = originalParent.GetComponent<EquipSlot>();
+        if (originalEquipSlot != null && wasInEquipSlot)
+        {
+            // 通知装备栏物品被移除
+            originalEquipSlot.OnItemRemoved();
+        }
+
         // 使用射线检测来确定放置目标
         var results = new System.Collections.Generic.List<RaycastResult>();
         EventSystem.current.RaycastAll(eventData, results);
@@ -359,11 +365,11 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
             if (equipSlot != null)
             {
                 var itemComponent = GetComponent<InventorySystemItem>();
+                // 在装备成功的部分
                 if (itemComponent != null && CanEquipToSlot(equipSlot, itemComponent))
                 {
                     // 成功装备到装备栏
                     transform.SetParent(equipSlot.transform, false);
-                    wasEquipped = true;
                     placementSuccessful = true;
                     FitToEquipSlot(equipSlot);
 
@@ -381,7 +387,7 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         if (!placementSuccessful)
         {
             ItemGrid targetGrid = null;
-            
+
             // 更全面的网格检测
             foreach (var result in results)
             {
@@ -392,7 +398,7 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
                     targetGrid = itemGrid;
                     break;
                 }
-                
+
                 // 检查父对象中是否有ItemGrid
                 itemGrid = result.gameObject.GetComponentInParent<ItemGrid>();
                 if (itemGrid != null)
@@ -401,7 +407,7 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
                     break;
                 }
             }
-            
+
             // 如果通过射线检测没找到，尝试使用InventoryController的selectedItemGrid
             if (targetGrid == null)
             {
@@ -416,40 +422,40 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
                     }
                 }
             }
-            
+
             if (targetGrid != null)
             {
                 // 计算放置位置
                 Vector2Int dropPosition = targetGrid.GetTileGridPosition(eventData.position);
                 Vector2Int itemSize = new Vector2Int(item.Data.width, item.Data.height);
-                
+
                 Debug.Log($"尝试放置到网格位置: ({dropPosition.x}, {dropPosition.y}), 物品大小: ({itemSize.x}, {itemSize.y})");
-                
+
                 // 检查是否可以放置
                 if (targetGrid.CanPlaceItem(dropPosition, itemSize))
                 {
                     // 直接调用ItemGrid的PlaceItem方法来确保坐标计算一致
-                    var placeItemMethod = typeof(ItemGrid).GetMethod("PlaceItem", 
+                    var placeItemMethod = typeof(ItemGrid).GetMethod("PlaceItem",
                         System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
                     if (placeItemMethod != null)
                     {
                         // 先设置父对象
                         transform.SetParent(targetGrid.transform, false);
-                        
+
                         // 调用PlaceItem方法
                         placeItemMethod.Invoke(targetGrid, new object[] { gameObject, dropPosition, itemSize });
-                        
+
                         placementSuccessful = true;
-                        
+
                         // 恢复原始大小
                         RestoreOriginalSize();
-                    
+
                         // 显示物品背景
                         if (itemBackground != null)
                         {
                             itemBackground.SetActive(true);
                         }
-                        
+
                         Debug.Log($"物品从装备栏成功放置到网格位置: ({dropPosition.x}, {dropPosition.y})");
                     }
                     else
@@ -476,8 +482,7 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
 
             if (wasInEquipSlot)
             {
-                // 返回装备栏
-                EquipSlot originalEquipSlot = originalParent.GetComponent<EquipSlot>();
+                // 返回装备栏 - 重用已声明的originalEquipSlot变量
                 if (originalEquipSlot != null)
                 {
                     FitToEquipSlot(originalEquipSlot);
@@ -498,9 +503,9 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
                     // 计算原始位置对应的网格坐标
                     Vector2Int gridPos = parentGrid.GetTileGridPosition(originalPos + (Vector2)parentGrid.transform.position);
                     Vector2Int itemSize = new Vector2Int(item.Data.width, item.Data.height);
-                    
+
                     // 使用反射调用PlaceItem方法来正确恢复状态
-                    var placeItemMethod = typeof(ItemGrid).GetMethod("PlaceItem", 
+                    var placeItemMethod = typeof(ItemGrid).GetMethod("PlaceItem",
                         System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
                     if (placeItemMethod != null)
                     {
@@ -517,8 +522,23 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
                     itemBackground.SetActive(true);
                 }
             }
+
+            // 如果成功放置到新位置，且新位置是装备栏，则处理背包网格生成
+            if (placementSuccessful)
+            {
+                EquipSlot newEquipSlot = transform.parent.GetComponent<EquipSlot>();
+                if (newEquipSlot != null)
+                {
+                    var itemComponent = GetComponent<InventorySystemItem>();
+                    if (itemComponent != null && itemComponent.Data.itemCategory == InventorySystemItemCategory.Backpack)
+                    {
+                        // 背包网格的创建已经在EquipSlot.OnDrop中处理了
+                        Debug.Log("背包已装备，网格应该已经生成");
+                    }
+                }
+            }
         }
-        
+
         // 恢复所有Image组件的raycastTarget状态
         RestoreAllRaycastTargets();
 

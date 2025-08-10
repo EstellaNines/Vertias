@@ -5,22 +5,22 @@ using System.Linq;
 
 public class ItemSpawner : MonoBehaviour
 {
-    [Header("物品生成设置")]
+    [Header("物品生成器设置")]
     [SerializeField] private ItemGrid targetGrid; // 目标网格
     [SerializeField] private Transform itemParent; // 物品父对象
 
-    [Header("物品预制体和数据")]
+    [Header("物品预制体和数据设置")]
     [SerializeField] private GameObject[] itemPrefabs; // 物品预制体数组
     [SerializeField] private InventorySystemItemDataSO[] itemDataArray; // 物品数据数组
 
-    [Header("调试设置")]
+    [Header("调试信息设置")]
     [SerializeField] private bool showDebugInfo = true;
 
-    // 网格占用状态记录
+    // 网格占用状态数组
     private bool[,] gridOccupancy;
     private List<SpawnedItemInfo> spawnedItems = new List<SpawnedItemInfo>();
 
-    // 生成的物品信息
+    // 生成物品信息类
     [System.Serializable]
     public class SpawnedItemInfo
     {
@@ -45,12 +45,12 @@ public class ItemSpawner : MonoBehaviour
         InitializeGrid();
     }
 
-    // 初始化网格占用状态
+    // 初始化网格占用状态数组
     private void InitializeGrid()
     {
         if (targetGrid == null) return;
 
-        // 获取网格尺寸（通过反射或公共属性）
+        // 获取网格尺寸（通过反射访问私有字段）
         var widthField = typeof(ItemGrid).GetField("width",
             System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
         var heightField = typeof(ItemGrid).GetField("height",
@@ -63,7 +63,7 @@ public class ItemSpawner : MonoBehaviour
 
         if (showDebugInfo)
         {
-            Debug.Log($"网格初始化完成: {gridWidth}x{gridHeight}");
+            Debug.Log($"初始化网格尺寸: {gridWidth}x{gridHeight}");
         }
     }
 
@@ -72,13 +72,13 @@ public class ItemSpawner : MonoBehaviour
     {
         if (itemPrefabs == null || itemPrefabs.Length == 0)
         {
-            Debug.LogError("没有设置头盔预制体！");
+            Debug.LogError("没有设置物品预制体数组！");
             return null;
         }
 
         if (itemDataArray == null || itemDataArray.Length == 0)
         {
-            Debug.LogError("没有设置头盔数据！");
+            Debug.LogError("没有设置物品数据数组！");
             return null;
         }
 
@@ -91,17 +91,17 @@ public class ItemSpawner : MonoBehaviour
         // 检查位置是否可用
         if (!IsPositionAvailable(gridPos, itemSize))
         {
-            // 寻找其他可用位置
+            // 寻找可用位置
             Vector2Int newPos = FindAvailablePosition(itemSize);
             if (newPos == new Vector2Int(-1, -1))
             {
-                Debug.LogWarning("没有找到可用的生成位置！");
+                Debug.LogWarning("没有足够的空间放置物品！");
                 return null;
             }
             gridPos = newPos;
         }
 
-        // 生成物品
+        // 创建物品
         GameObject spawnedItem = CreateHelmetItem(itemPrefabs[helmetIndex], helmetData, gridPos);
 
         if (spawnedItem != null)
@@ -120,7 +120,7 @@ public class ItemSpawner : MonoBehaviour
 
             if (showDebugInfo)
             {
-                Debug.Log($"成功生成头盔: {helmetData.itemName} 在位置 ({gridPos.x}, {gridPos.y})");
+                Debug.Log($"成功生成物品: {helmetData.itemName} 位置: ({gridPos.x}, {gridPos.y})");
             }
         }
 
@@ -131,10 +131,10 @@ public class ItemSpawner : MonoBehaviour
     private GameObject CreateHelmetItem(GameObject prefab, InventorySystemItemDataSO data, Vector2Int gridPos)
     {
         if (prefab == null || data == null || targetGrid == null) return null;
-    
-        // 实例化预制体
+
+        // 实例化物品预制体
         GameObject item = Instantiate(prefab, itemParent);
-    
+
         // 设置物品数据
         ItemDataHolder dataHolder = item.GetComponentInChildren<ItemDataHolder>();
         if (dataHolder != null)
@@ -145,26 +145,26 @@ public class ItemSpawner : MonoBehaviour
         {
             Debug.LogError($"预制体 {prefab.name} 中没有找到 ItemDataHolder 组件！");
         }
-    
-        // 确保所有必要的组件都存在
+
+        // 确保物品具有必要的组件
         EnsureRequiredComponents(item);
-    
-        // 设置物品的锚点为左上角（用于生成时的对齐）
+
+        // 设置物品的锚点和轴心点（使用左上角作为参考点）
         RectTransform itemRect = item.GetComponent<RectTransform>();
         if (itemRect != null)
         {
             itemRect.anchorMin = new Vector2(0, 1); // 左上角
             itemRect.anchorMax = new Vector2(0, 1); // 左上角
-            itemRect.pivot = new Vector2(0, 1);     // 轴心点也设为左上角
+            itemRect.pivot = new Vector2(0, 1);     // 轴心点也设置为左上角
         }
-    
+
         // 设置物品在网格中的位置
         SetItemGridPosition(item, gridPos);
-    
+
         return item;
     }
 
-    // 确保物品具有所有必要的组件
+    // 确保物品具有必要的组件
     private void EnsureRequiredComponents(GameObject item)
     {
         // 确保有 DraggableItem 组件
@@ -196,15 +196,15 @@ public class ItemSpawner : MonoBehaviour
     private void SetItemGridPosition(GameObject item, Vector2Int gridPos)
     {
         if (targetGrid == null) return;
-        
-        // 获取物品数据
+
+        // 获取物品组件
         var itemComponent = item.GetComponent<InventorySystemItem>();
         if (itemComponent == null) return;
-        
+
         Vector2Int itemSize = new Vector2Int(itemComponent.Data.width, itemComponent.Data.height);
-        
-        // 使用反射调用ItemGrid的PlaceItem方法
-        var placeItemMethod = typeof(ItemGrid).GetMethod("PlaceItem", 
+
+        // 通过反射调用ItemGrid的PlaceItem方法
+        var placeItemMethod = typeof(ItemGrid).GetMethod("PlaceItem",
             System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
         if (placeItemMethod != null)
         {
@@ -242,7 +242,7 @@ public class ItemSpawner : MonoBehaviour
         return true;
     }
 
-    // 寻找可用的生成位置
+    // 寻找可用位置
     private Vector2Int FindAvailablePosition(Vector2Int itemSize)
     {
         if (gridOccupancy == null) return new Vector2Int(-1, -1);
@@ -284,7 +284,7 @@ public class ItemSpawner : MonoBehaviour
         }
     }
 
-    // 移除物品时调用
+    // 移除物品
     public void RemoveItem(GameObject item)
     {
         SpawnedItemInfo itemInfo = spawnedItems.FirstOrDefault(info => info.itemObject == item);
@@ -309,8 +309,8 @@ public class ItemSpawner : MonoBehaviour
         }
     }
 
-    // 随机生成头盔（用于测试）
-    [ContextMenu("随机生成头盔")]
+    // 生成随机头盔（编辑器右键菜单）
+    [ContextMenu("生成随机头盔")]
     public void SpawnRandomHelmet()
     {
         if (itemPrefabs != null && itemPrefabs.Length > 0)
@@ -320,8 +320,8 @@ public class ItemSpawner : MonoBehaviour
         }
     }
 
-    // 清除所有物品
-    [ContextMenu("清除所有物品")]
+    // 清空所有物品
+    [ContextMenu("清空所有物品")]
     public void ClearAllItems()
     {
         for (int i = spawnedItems.Count - 1; i >= 0; i--)
@@ -330,7 +330,7 @@ public class ItemSpawner : MonoBehaviour
         }
     }
 
-    // 获取网格占用状态（用于调试）
+    // 获取网格占用状态数组（供外部调用）
     public bool[,] GetGridOccupancy()
     {
         return gridOccupancy;

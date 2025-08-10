@@ -73,6 +73,12 @@ public class BackpackState : MonoBehaviour
         {
             Debug.LogWarning("BackpackState: PlayerInputController未设置，无法绑定输入事件");
         }
+
+        // 设置TopNavigationTransform的BackpackState引用
+        if (topNav != null)
+        {
+            topNav.SetBackpackState(this);
+        }
     }
 
     // 切换背包开关状态
@@ -85,13 +91,18 @@ public class BackpackState : MonoBehaviour
     }
 
     // 打开背包
-    private void OpenBackpack()
+    public void OpenBackpack()
     {
+        if (isBackpackOpen) return;
+        
+        isBackpackOpen = true;
+        
         // 打开背包UI时，禁用游戏玩法输入，启用UI输入
         if (playerInputController != null)
         {
             playerInputController.DisableGameplayInput();
             playerInputController.EnabledUIInput(); // 修复方法名
+            Debug.Log("BackpackState: 背包打开，GamePlay输入已禁用");
         }
 
         // 显示鼠标光标
@@ -103,13 +114,18 @@ public class BackpackState : MonoBehaviour
     }
 
     // 关闭背包
-    private void CloseBackpack()
+    public void CloseBackpack()
     {
+        if (!isBackpackOpen) return;
+        
+        isBackpackOpen = false;
+        
         // 关闭背包时，恢复游戏玩法输入，保持UI输入启用以支持其他UI和Tab键
         if (playerInputController != null)
         {
             playerInputController.EnabledGameplayInput();
             // 保持UI输入启用以支持其他UI和Tab键
+            Debug.Log("BackpackState: 背包关闭，GamePlay输入已恢复");
         }
 
         // 根据游戏需要决定是否隐藏光标，这里保持显示状态

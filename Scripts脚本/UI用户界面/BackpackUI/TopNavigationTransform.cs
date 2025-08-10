@@ -22,6 +22,7 @@ public class TopNavigationTransform : MonoBehaviour
 
     private int currentSelectedIndex = -1;
     private bool isBackpackOpen = false;
+    private BackpackState backpackState; // BackpackState引用
 
     private void Start()
     {
@@ -73,6 +74,12 @@ public class TopNavigationTransform : MonoBehaviour
         currentSelectedIndex = index;
     }
 
+    // 设置BackpackState引用
+    public void SetBackpackState(BackpackState state)
+    {
+        backpackState = state;
+    }
+
     private void OnCloseClicked()
     {
         if (closeImage != null)
@@ -83,22 +90,28 @@ public class TopNavigationTransform : MonoBehaviour
         CloseBackpack(); // 直接关闭背包
     }
 
+    // 添加缺失的ResetCloseSprite协程方法
+    private IEnumerator ResetCloseSprite()
+    {
+        yield return new WaitForSeconds(0.1f); // 等待0.1秒
+        if (closeImage != null)
+        {
+            closeImage.sprite = closeNormalSprite; // 恢复到正常状态
+        }
+    }
+
     private void CloseBackpack()
     {
         if (isBackpackOpen)
         {
             isBackpackOpen = false;
             backpackCanvas.gameObject.SetActive(false);
-            // 重置选中状态
-        }
-    }
-
-    private IEnumerator ResetCloseSprite()
-    {
-        yield return new WaitForSeconds(0.2f); // 等待短暂时间
-        if (closeImage != null)
-        {
-            closeImage.sprite = closeNormalSprite;
+            
+            // 调用BackpackState的关闭方法来处理输入控制
+            if (backpackState != null)
+            {
+                backpackState.CloseBackpack();
+            }
         }
     }
 
@@ -106,16 +119,25 @@ public class TopNavigationTransform : MonoBehaviour
     {
         isBackpackOpen = !isBackpackOpen;
         backpackCanvas.gameObject.SetActive(isBackpackOpen);
+        
         if (isBackpackOpen)
         {
             // 默认显示第一个面板（假设为backpack界面）
             OnNavigationClicked(0);
-            // 打开背包时确保显示第一个面板，提供一致的UI体验
-            // 调用BackpackState中的方法
+            
+            // 调用BackpackState的打开方法来处理输入控制
+            if (backpackState != null)
+            {
+                backpackState.OpenBackpack();
+            }
         }
         else
         {
-            // 关闭背包时的其他逻辑
+            // 调用BackpackState的关闭方法来处理输入控制
+            if (backpackState != null)
+            {
+                backpackState.CloseBackpack();
+            }
         }
     }
 }

@@ -25,18 +25,18 @@ public class GridInteract : MonoBehaviour
         Vector2 mousePosition = Input.mousePosition;
         bool isInGrid = IsMouseInGridBounds(mousePosition);
 
-        // 检查状态是否发生变化
+        // 检测鼠标进入或离开网格区域
         if (isInGrid != wasInGrid)
         {
             if (isInGrid)
             {
-                // 鼠标进入网格范围，设置selectedItemGrid
+                // 鼠标进入网格区域，设置selectedItemGrid
                 inventoryController.selectedItemGrid = itemGrid;
                 Debug.Log($"鼠标进入网格: {gameObject.name}");
             }
             else
             {
-                // 鼠标离开网格范围，清除selectedItemGrid（仅当当前选中的是这个网格时）
+                // 鼠标离开网格区域，清除selectedItemGrid（只有当前网格是选中的网格时才清除）
                 if (inventoryController.selectedItemGrid == itemGrid)
                 {
                     inventoryController.selectedItemGrid = null;
@@ -48,12 +48,12 @@ public class GridInteract : MonoBehaviour
         }
     }
 
-    // 检查鼠标位置是否在网格边界内
+    // 检查鼠标是否在网格边界内
     private bool IsMouseInGridBounds(Vector2 mousePosition)
     {
         if (rectTransform == null || canvas == null) return false;
 
-        // 将鼠标位置转换为相对于网格的本地坐标
+        // 将屏幕坐标转换为本地坐标系中的坐标
         Vector2 localMousePosition;
         RectTransformUtility.ScreenPointToLocalPointInRectangle(
             rectTransform,
@@ -62,14 +62,14 @@ public class GridInteract : MonoBehaviour
             out localMousePosition
         );
 
-        // 获取网格的边界
+        // 获取网格的矩形区域
         Rect gridRect = rectTransform.rect;
 
-        // 检查鼠标是否在网格边界内
+        // 检查鼠标是否在网格区域内
         return gridRect.Contains(localMousePosition);
     }
 
-    // 获取当前鼠标是否在此网格范围内
+    // 获取鼠标是否在当前网格内（供外部调用）
     public bool IsMouseInThisGrid()
     {
         return IsMouseInGridBounds(Input.mousePosition);

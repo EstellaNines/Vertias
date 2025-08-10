@@ -2,17 +2,17 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
+[ExecuteInEditMode]
 public class ItemGrid : MonoBehaviour, IDropHandler
 {
     [Header("网格系统参数设置")]
+    [SerializeField] private GridConfig gridConfig;
     [SerializeField][FieldLabel("网格系统宽度容量")] private int width = 12;
     [SerializeField][FieldLabel("网格系统高度容量")] private int height = 20;
-    const float cellsize = 80f;
-
-    // 计算在格子中的位置
-    Vector2 positionOnTheGrid = new Vector2();
-    Vector2Int tileGridPosition = new Vector2Int();
 
     // 网格占用状态
     private bool[,] gridOccupancy;
@@ -21,9 +21,13 @@ public class ItemGrid : MonoBehaviour, IDropHandler
     RectTransform rectTransform;
     Canvas canvas;
 
-    [Header("测试用头盔预制体")]
-    [SerializeField] private GameObject helmetPrefab; // 头盔预制体
-    [SerializeField] private InventorySystemItemDataSO helmetData; // 头盔数据
+    // 添加标记来处理延迟更新
+    private bool needsUpdate = false;
+    private int pendingWidth;
+    private int pendingHeight;
+
+    // 防止无限循环的标记
+    private bool isUpdatingFromConfig = false;
 
     [System.Serializable]
     public class PlacedItem
@@ -33,32 +37,170 @@ public class ItemGrid : MonoBehaviour, IDropHandler
         public Vector2Int size;
     }
 
+    private void Awake()
+    {
+        // 在Awake中初始化rectTransform，确保在OnValidate之前完成
+        if (rectTransform == null)
+        {
+            rectTransform = GetComponent<RectTransform>();
+        }
+
+        // 从GridConfig加载配置
+        LoadFromGridConfig();
+    }
+
     private void Start()
     {
-        rectTransform = GetComponent<RectTransform>();
-        canvas = FindObjectOfType<Canvas>();
+        if (rectTransform == null)
+        {
+            rectTransform = GetComponent<RectTransform>();
+        }
 
-        // 初始化网格占用状态
-        gridOccupancy = new bool[width, height];
+        // 确保在运行时也从GridConfig加载最新配置
+        LoadFromGridConfig();
+
+        if (Application.isPlaying)
+        {
+            canvas = FindObjectOfType<Canvas>();
+            // 使用从SO对象加载的参数初始化网格占用状态
+            gridOccupancy = new bool[width, height];
+        }
 
         Init(width, height);
     }
 
+    // 修改OnValidate方法，避免无限循环
+    private void OnValidate()
+    {
+        // 防止无限循环
+        if (isUpdatingFromConfig) return;
+
+        // 确保参数在合理范围内
+        width = Mathf.Clamp(width, 1, 50);
+        height = Mathf.Clamp(height, 1, 50);
+
+        // 标记需要更新，而不是直接调用Init
+        needsUpdate = true;
+        pendingWidth = width;
+        pendingHeight = height;
+
+#if UNITY_EDITOR
+        if (!Application.isPlaying)
+        {
+            // 使用EditorApplication.delayCall来延迟执行更新
+            UnityEditor.EditorApplication.delayCall += DelayedUpdate;
+        }
+#endif
+    }
+
+#if UNITY_EDITOR
+    private void DelayedUpdate()
+    {
+        UnityEditor.EditorApplication.delayCall -= DelayedUpdate;
+
+        if (this != null && needsUpdate)
+        {
+            if (rectTransform == null)
+            {
+                rectTransform = GetComponent<RectTransform>();
+            }
+
+            if (rectTransform != null)
+            {
+                Init(pendingWidth, pendingHeight);
+                needsUpdate = false;
+
+                // 延迟保存到GridConfig，避免在OnValidate中直接保存
+                SaveToGridConfigDelayed();
+
+                // 强制刷新Scene视图
+                UnityEditor.SceneView.RepaintAll();
+            }
+        }
+    }
+
+    // 延迟保存到GridConfig
+    private void SaveToGridConfigDelayed()
+    {
+        UnityEditor.EditorApplication.delayCall += () =>
+        {
+            SaveToGridConfig();
+        };
+    }
+#endif
+
     private void Update()
     {
-        if (Input.GetMouseButtonDown(0))
+        // 处理运行时的延迟更新
+        if (needsUpdate && Application.isPlaying)
+        {
+            Init(pendingWidth, pendingHeight);
+            needsUpdate = false;
+        }
+
+        if (Application.isPlaying && Input.GetMouseButtonDown(0))
         {
             // 获取当前鼠标位置在网格中的格子坐标，并打印到控制台
             Debug.Log(GetTileGridPosition(Input.mousePosition));
         }
     }
 
+    // 从GridConfig加载配置
+    public void LoadFromGridConfig()
+    {
+        if (gridConfig != null && !isUpdatingFromConfig)
+        {
+            isUpdatingFromConfig = true;
+            width = gridConfig.inventoryWidth;
+            height = gridConfig.inventoryHeight;
+            isUpdatingFromConfig = false;
+        }
+    }
+
+    // 保存配置到GridConfig
+    public void SaveToGridConfig()
+    {
+#if UNITY_EDITOR
+        if (gridConfig != null && !isUpdatingFromConfig)
+        {
+            isUpdatingFromConfig = true;
+
+            // 只有当值真正改变时才保存
+            bool hasChanged = false;
+            if (gridConfig.inventoryWidth != width)
+            {
+                gridConfig.inventoryWidth = width;
+                hasChanged = true;
+            }
+            if (gridConfig.inventoryHeight != height)
+            {
+                gridConfig.inventoryHeight = height;
+                hasChanged = true;
+            }
+
+            if (hasChanged)
+            {
+                // 标记SO对象为脏数据，确保保存
+                EditorUtility.SetDirty(gridConfig);
+                AssetDatabase.SaveAssets();
+            }
+
+            isUpdatingFromConfig = false;
+        }
+#endif
+    }
+
     // 初始化网格
     public void Init(int width, int height)
     {
+        // 确保rectTransform存在
+        if (rectTransform == null) return;
+
+        float cellSize = gridConfig != null ? gridConfig.cellSize : 64f; // 从80f修改为64f
+
         Vector2 size = new Vector2(
-            width * cellsize, // 宽度
-            height * cellsize // 高度
+            width * cellSize, // 宽度
+            height * cellSize // 高度
         );
         rectTransform.sizeDelta = size;
     }
@@ -66,96 +208,26 @@ public class ItemGrid : MonoBehaviour, IDropHandler
     // 根据鼠标位置计算在格子中的位置
     public Vector2Int GetTileGridPosition(Vector2 screenMousePos)
     {
+        if (canvas == null && Application.isPlaying)
+        {
+            canvas = FindObjectOfType<Canvas>();
+        }
+
+        float cellSize = gridConfig != null ? gridConfig.cellSize : 64f; // 从80f修改为64f
+
         RectTransformUtility.ScreenPointToLocalPointInRectangle(
             rectTransform,
             screenMousePos,
-            canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : canvas.worldCamera,
+            canvas != null && canvas.renderMode != RenderMode.ScreenSpaceOverlay ? canvas.worldCamera : null,
             out Vector2 localPoint);
 
         // 本地坐标 → 网格坐标
-        int x = Mathf.FloorToInt(localPoint.x / cellsize);
-        int y = Mathf.FloorToInt(-localPoint.y / cellsize);
+        int x = Mathf.FloorToInt(localPoint.x / cellSize);
+        int y = Mathf.FloorToInt(-localPoint.y / cellSize);
 
         x = Mathf.Clamp(x, 0, width - 1);
         y = Mathf.Clamp(y, 0, height - 1);
         return new Vector2Int(x, y);
-    }
-
-    // 测试方法：在(0,0)位置生成头盔
-    [ContextMenu("在(0,0)生成测试头盔")]
-    public void SpawnTestHelmetAt00()
-    {
-        if (helmetPrefab == null)
-        {
-            Debug.LogError("头盔预制体未设置！请在Inspector中设置helmetPrefab");
-            return;
-        }
-
-        if (helmetData == null)
-        {
-            Debug.LogError("头盔数据未设置！请在Inspector中设置helmetData");
-            return;
-        }
-
-        Vector2Int spawnPosition = new Vector2Int(0, 0);
-        Vector2Int itemSize = new Vector2Int(helmetData.width, helmetData.height);
-
-        // 检查位置是否可用
-        if (!CanPlaceItem(spawnPosition, itemSize))
-        {
-            Debug.LogWarning("位置(0,0)被占用或超出边界，无法生成头盔！");
-            return;
-        }
-
-        // 实例化头盔
-        GameObject helmet = Instantiate(helmetPrefab, transform);
-        
-        // 设置物品数据
-        ItemDataHolder dataHolder = helmet.GetComponentInChildren<ItemDataHolder>();
-        if (dataHolder != null)
-        {
-            dataHolder.SetItemData(helmetData);
-        }
-        else
-        {
-            Debug.LogError($"预制体 {helmetPrefab.name} 中没有找到 ItemDataHolder 组件！");
-        }
-
-        // 确保必要的组件存在
-        EnsureRequiredComponents(helmet);
-
-        // 放置物品到网格中
-        PlaceItem(helmet, spawnPosition, itemSize);
-
-        Debug.Log($"成功在位置(0,0)生成头盔: {helmetData.itemName}");
-    }
-
-    // 确保物品具有所有必要的组件
-    private void EnsureRequiredComponents(GameObject item)
-    {
-        // 确保有 DraggableItem 组件
-        if (item.GetComponent<DraggableItem>() == null)
-        {
-            item.AddComponent<DraggableItem>();
-        }
-
-        // 确保有 InventorySystemItem 组件
-        if (item.GetComponent<InventorySystemItem>() == null)
-        {
-            item.AddComponent<InventorySystemItem>();
-        }
-
-        // 确保有 ItemHoverHighlight 组件
-        if (item.GetComponent<ItemHoverHighlight>() == null)
-        {
-            item.AddComponent<ItemHoverHighlight>();
-        }
-
-        // 确保有 CanvasGroup 组件（DraggableItem 需要）
-        if (item.GetComponent<CanvasGroup>() == null)
-        {
-            item.AddComponent<CanvasGroup>();
-        }
     }
 
     // 实现IDropHandler接口
@@ -209,39 +281,40 @@ public class ItemGrid : MonoBehaviour, IDropHandler
     }
 
     // 放置物品到网格中
-    // 放置物品到网格中
     private void PlaceItem(GameObject itemObject, Vector2Int position, Vector2Int size)
     {
         RectTransform itemRect = itemObject.GetComponent<RectTransform>();
         if (itemRect == null) return;
-    
+
+        float cellSize = gridConfig != null ? gridConfig.cellSize : 64f; // 从80f修改为64f
+
         // 确保物品使用左上角锚点
         itemRect.anchorMin = new Vector2(0, 1);
         itemRect.anchorMax = new Vector2(0, 1);
         itemRect.pivot = new Vector2(0, 1);
-    
+
         // 计算物品应该放置的位置（基于左上角锚点）
-        float itemWidth = size.x * cellsize;
-        float itemHeight = size.y * cellsize;
-        
+        float itemWidth = size.x * cellSize;
+        float itemHeight = size.y * cellSize;
+
         Vector2 itemPosition = new Vector2(
-            position.x * cellsize,
-            -position.y * cellsize
+            position.x * cellSize,
+            -position.y * cellSize
         );
-        
+
         itemRect.anchoredPosition = itemPosition;
-        
+
         // 标记网格占用
         MarkGridOccupied(position, size, true);
-    
+
         // 记录放置的物品
         placedItems.Add(new PlacedItem
         {
-            itemObject = itemObject, 
+            itemObject = itemObject,
             position = position,
             size = size
         });
-    
+
         Debug.Log($"物品放置在网格位置: ({position.x}, {position.y}), UI位置: {itemPosition}, 物品尺寸: {size.x}x{size.y}");
     }
 
@@ -281,5 +354,30 @@ public class ItemGrid : MonoBehaviour, IDropHandler
     public bool[,] GetGridOccupancy()
     {
         return gridOccupancy;
+    }
+
+    // 获取单元格大小
+    public float GetCellSize()
+    {
+        return gridConfig != null ? gridConfig.cellSize : 64f; // 从80f修改为64f
+    }
+
+    // 设置GridConfig
+    public void SetGridConfig(GridConfig config)
+    {
+        gridConfig = config;
+        LoadFromGridConfig();
+    }
+
+    // 获取GridConfig
+    public GridConfig GetGridConfig()
+    {
+        return gridConfig;
+    }
+
+    // 手动同步到GridConfig（供编辑器使用）
+    public void SyncToGridConfig()
+    {
+        SaveToGridConfig();
     }
 }

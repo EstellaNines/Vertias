@@ -9,7 +9,7 @@ public class ItemPrefabCreator : EditorWindow
     [Header("预制体生成设置")]
     private string prefabOutputPath = "Assets/InventorySystem/Prefab/";
     private string itemDataPath = "Assets/InventorySystem/Database/Scriptable Object数据对象/";
-    private string gridConfigPath = "Assets/InventorySystem/Database/Scriptable Object数据对象/网格系统GridSystem/WarehouseGridConfig.asset";
+    private string gridConfigPath = "Assets/InventorySystem/Database/网格系统参数GridSystemSO/WarehouseGridConfig.asset";
     
     // 缓存GridConfig
     private GridConfig gridConfig;
@@ -110,8 +110,8 @@ public class ItemPrefabCreator : EditorWindow
         try
         {
             // 根据GridConfig计算物品实际大小
-            float itemWidth = itemData.width * gridConfig.cellSize;
-            float itemHeight = itemData.height * gridConfig.cellSize;
+            float itemWidth = itemData.width * gridConfig.cellSize; 
+            float itemHeight = itemData.height * gridConfig.cellSize; 
             
             // 创建主GameObject
             GameObject mainObject = new GameObject(itemData.itemName);
