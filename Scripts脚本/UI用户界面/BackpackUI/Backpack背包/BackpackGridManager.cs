@@ -26,10 +26,10 @@ public class BackpackGridManager : MonoBehaviour
             // 初始化网格
             backpackGrid.LoadFromGridConfig();
 
-            // 设置库存控制器
+            // 设置库存控制器 - 修复：使用新的API
             if (inventoryController != null)
             {
-                inventoryController.SetSelectedGrid(backpackGrid);
+                inventoryController.SetSelectedMainGrid(backpackGrid);
             }
 
             Debug.Log("背包网格系统初始化完成");
@@ -84,5 +84,23 @@ public class BackpackGridManager : MonoBehaviour
         {
             backpackGrid.SaveToGridConfig();
         }
+    }
+
+    // 新增：切换到背包网格模式的方法
+    public void SwitchToBackpackMode()
+    {
+        if (inventoryController != null && backpackGrid != null)
+        {
+            inventoryController.SetSelectedMainGrid(backpackGrid);
+        }
+    }
+
+    // 新增：获取当前是否为活跃网格
+    public bool IsActiveGrid()
+    {
+        if (inventoryController == null) return false;
+        
+        return inventoryController.GetActiveGridType() == InventoryController.ActiveGridType.MainGrid &&
+               inventoryController.selectedItemGrid == backpackGrid;
     }
 }

@@ -412,6 +412,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: BackpackSystem
       objectReference: {fileID: 0}
+    - target: {fileID: 1113951064052934179, guid: 6a74b808f5888aa4b8a4a0625262b9b1, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 640
+      objectReference: {fileID: 0}
+    - target: {fileID: 6175336729012796545, guid: 6a74b808f5888aa4b8a4a0625262b9b1, type: 3}
+      propertyPath: currentActiveGrid
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 7631875762339514084, guid: 6a74b808f5888aa4b8a4a0625262b9b1, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -451,6 +459,10 @@ PrefabInstance:
     - target: {fileID: 7631875762339514084, guid: 6a74b808f5888aa4b8a4a0625262b9b1, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7632974513938584427, guid: 6a74b808f5888aa4b8a4a0625262b9b1, type: 3}
+      propertyPath: width
+      value: 10
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -560,22 +572,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
---- !u!114 &471082307 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 961899222477826337, guid: 6a74b808f5888aa4b8a4a0625262b9b1, type: 3}
-  m_PrefabInstance: {fileID: 190946367}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 36b9062db8f5a2b4abb558c89bba4e4a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!224 &471082311 stripped
-RectTransform:
-  m_CorrespondingSourceObject: {fileID: 5108603617364688383, guid: 6a74b808f5888aa4b8a4a0625262b9b1, type: 3}
-  m_PrefabInstance: {fileID: 190946367}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &481148198
 GameObject:
   m_ObjectHideFlags: 0
@@ -624,8 +620,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 47cdf8ec74eba5b4cb0659214a077991, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  selectedItemGrid: {fileID: 1837633959}
+  selectedItemGrid: {fileID: 0}
+  selectedBackpackGrid: {fileID: 0}
+  selectedTacticalRigGrid: {fileID: 0}
   showDebugInfo: 1
+  currentActiveGrid: 0
 --- !u!1 &694997595
 GameObject:
   m_ObjectHideFlags: 0
@@ -910,9 +909,10 @@ MonoBehaviour:
   acceptedType: 3
   padding: 8
   autoResize: 1
-  backpackGridParent: {fileID: 0}
-  gridSprite: {fileID: 0}
-  defaultGridConfig: {fileID: 0}
+  backpackContainer: {fileID: 0}
+  tacticalRigContainer: {fileID: 0}
+  backpackGridPrefab: {fileID: 0}
+  tacticalRigGridPrefab: {fileID: 0}
 --- !u!114 &973037733
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1019,9 +1019,10 @@ MonoBehaviour:
   acceptedType: 1
   padding: 8
   autoResize: 1
-  backpackGridParent: {fileID: 0}
-  gridSprite: {fileID: 0}
-  defaultGridConfig: {fileID: 0}
+  backpackContainer: {fileID: 0}
+  tacticalRigContainer: {fileID: 0}
+  backpackGridPrefab: {fileID: 0}
+  tacticalRigGridPrefab: {fileID: 0}
 --- !u!114 &1024413194
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1290,9 +1291,10 @@ MonoBehaviour:
   acceptedType: 0
   padding: 8
   autoResize: 1
-  backpackGridParent: {fileID: 0}
-  gridSprite: {fileID: 0}
-  defaultGridConfig: {fileID: 0}
+  backpackContainer: {fileID: 0}
+  tacticalRigContainer: {fileID: 0}
+  backpackGridPrefab: {fileID: 0}
+  tacticalRigGridPrefab: {fileID: 0}
 --- !u!114 &1408635449
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1670,6 +1672,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 43eae4255683c9247ad4045bc67a3ccb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!224 &1922275940 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 1113951064052934179, guid: 6a74b808f5888aa4b8a4a0625262b9b1, type: 3}
+  m_PrefabInstance: {fileID: 190946367}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1922275942 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7632974513938584427, guid: 6a74b808f5888aa4b8a4a0625262b9b1, type: 3}
+  m_PrefabInstance: {fileID: 190946367}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 36b9062db8f5a2b4abb558c89bba4e4a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1990815154
 GameObject:
   m_ObjectHideFlags: 0
@@ -1825,18 +1843,26 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1785fded020e8d548b722fd181533aee, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  targetGrid: {fileID: 471082307}
-  itemParent: {fileID: 471082311}
+  targetGrid: {fileID: 1922275942}
+  itemParent: {fileID: 1922275940}
   itemPrefabs:
   - {fileID: 4594890330782244748, guid: 626c2cb29131210408e795976fbe15a7, type: 3}
   - {fileID: 5990539526742385065, guid: 0bada942d0e44c94dbd6bed6d35012a8, type: 3}
   - {fileID: 9087021199458443259, guid: 19ea4a2c2f415864785603d5beab0efe, type: 3}
   - {fileID: 7752325267894401554, guid: a75142235364ce346bc385d7a7147b83, type: 3}
+  - {fileID: 8812317052519396328, guid: 26198faeed3abaf4f91f3b552212dbe5, type: 3}
+  - {fileID: 1245055937591064071, guid: 67989fe07947b7a498e6eadfe0d62906, type: 3}
+  - {fileID: 6932343277466354512, guid: 278db37fcedfa514690ed15bfb6f75c2, type: 3}
+  - {fileID: 1688233244103538355, guid: ff08c3f65a7a43c42981e9ceb4f56711, type: 3}
   itemDataArray:
   - {fileID: 11400000, guid: 3138114ea2b1ea141b6205354f3f6cf9, type: 2}
   - {fileID: 11400000, guid: 7d4d670b82d6bc34888f13a1d90e4b88, type: 2}
   - {fileID: 11400000, guid: 70c95d7283213a049a7019e8c0e05fd9, type: 2}
   - {fileID: 11400000, guid: 8729607cfd8472a41a685bb080a530b7, type: 2}
+  - {fileID: 11400000, guid: 21d8c1c3dc91a6743b2abd6c527ab301, type: 2}
+  - {fileID: 11400000, guid: 74473351b2ff2d84a82f285d17698639, type: 2}
+  - {fileID: 11400000, guid: 01934f1633f6cf34b9d83fa178c54df7, type: 2}
+  - {fileID: 11400000, guid: 2be8cd9ed0ac96c49876308b198fc939, type: 2}
   showDebugInfo: 1
 --- !u!4 &2065391878
 Transform:

@@ -2,20 +2,23 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using Unity.VisualScripting;
-
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
 
 [ExecuteInEditMode]
-public class ItemGrid : MonoBehaviour, IDropHandler
+public class TactiaclRigItemGrid : MonoBehaviour, IDropHandler
 {
-    [Header("网格系统基础设置")]
+    [Header("战术挂具网格系统参数设置")]
     [SerializeField] private GridConfig gridConfig;
-    [SerializeField][FieldLabel("网格系统宽度格数")] private int width = 12;
-    [SerializeField][FieldLabel("网格系统高度格数")] private int height = 20;
-
+    [SerializeField][FieldLabel("默认网格宽度")] private int defaultWidth = 1;
+    [SerializeField][FieldLabel("默认网格高度")] private int defaultHeight = 1;
+    
+    // 当前装备的战术挂具数据对象（动态设置）
+    private InventorySystemItemDataSO currentTacticalRigData;
+    private int width;
+    private int height;
+    
     // 网格占用状态
     private bool[,] gridOccupancy;
     private List<PlacedItem> placedItems = new List<PlacedItem>();
@@ -23,7 +26,7 @@ public class ItemGrid : MonoBehaviour, IDropHandler
     RectTransform rectTransform;
     Canvas canvas;
 
-    // 避免编辑器中的延迟更新
+    // 添加标记来处理延迟更新
     private bool needsUpdate = false;
     private int pendingWidth;
     private int pendingHeight;
@@ -41,11 +44,17 @@ public class ItemGrid : MonoBehaviour, IDropHandler
 
     private void Awake()
     {
+        // 在Awake中初始化rectTransform，确保在OnValidate之前完成
         if (rectTransform == null)
         {
             rectTransform = GetComponent<RectTransform>();
         }
-        LoadFromGridConfig();
+
+        // 加载默认GridConfig如果没有设置
+        LoadDefaultGridConfig();
+        
+        // 从战术挂具数据加载配置
+        LoadFromTacticalRigData();
     }
 
     private void Start()
@@ -55,24 +64,54 @@ public class ItemGrid : MonoBehaviour, IDropHandler
             rectTransform = GetComponent<RectTransform>();
         }
 
-        LoadFromGridConfig();
+        // 确保在运行时也从战术挂具数据加载最新配置
+        LoadFromTacticalRigData();
 
         if (Application.isPlaying)
         {
             canvas = FindObjectOfType<Canvas>();
+            // 使用从战术挂具数据加载的参数初始化网格占用状态
             gridOccupancy = new bool[width, height];
         }
 
         Init(width, height);
     }
 
+    // 加载默认GridConfig
+    private void LoadDefaultGridConfig()
+    {
+        if (gridConfig == null)
+        {
+            // 尝试加载默认的GridConfig
+            gridConfig = Resources.Load<GridConfig>("DefaultGridConfig");
+            if (gridConfig == null)
+            {
+                // 如果Resources中没有，尝试从指定路径加载
+                string defaultConfigPath = "Assets/InventorySystem/Database/网格系统参数GridSystemSO/DefaultGridConfig.asset";
+#if UNITY_EDITOR
+                gridConfig = UnityEditor.AssetDatabase.LoadAssetAtPath<GridConfig>(defaultConfigPath);
+#endif
+            }
+        }
+    }
+
+    // 修改OnValidate方法，避免无限循环
     private void OnValidate()
     {
+        // 防止无限循环
         if (isUpdatingFromConfig) return;
 
-        width = Mathf.Clamp(width, 1, 50);
-        height = Mathf.Clamp(height, 1, 50);
+        // 加载默认GridConfig
+        LoadDefaultGridConfig();
+        
+        // 从战术挂具数据更新尺寸
+        LoadFromTacticalRigData();
 
+        // 确保参数在合理范围内
+        width = Mathf.Clamp(width, 1, 20);
+        height = Mathf.Clamp(height, 1, 20);
+
+        // 标记需要更新，而不是直接调用Init
         needsUpdate = true;
         pendingWidth = width;
         pendingHeight = height;
@@ -80,6 +119,7 @@ public class ItemGrid : MonoBehaviour, IDropHandler
 #if UNITY_EDITOR
         if (!Application.isPlaying)
         {
+            // 使用EditorApplication.delayCall来延迟执行更新
             UnityEditor.EditorApplication.delayCall += DelayedUpdate;
         }
 #endif
@@ -101,23 +141,17 @@ public class ItemGrid : MonoBehaviour, IDropHandler
             {
                 Init(pendingWidth, pendingHeight);
                 needsUpdate = false;
-                SaveToGridConfigDelayed();
+
+                // 强制刷新Scene视图
                 UnityEditor.SceneView.RepaintAll();
             }
         }
-    }
-
-    private void SaveToGridConfigDelayed()
-    {
-        UnityEditor.EditorApplication.delayCall += () =>
-        {
-            SaveToGridConfig();
-        };
     }
 #endif
 
     private void Update()
     {
+        // 处理运行时的延迟更新
         if (needsUpdate && Application.isPlaying)
         {
             Init(pendingWidth, pendingHeight);
@@ -126,64 +160,57 @@ public class ItemGrid : MonoBehaviour, IDropHandler
 
         if (Application.isPlaying && Input.GetMouseButtonDown(0))
         {
+            // 获取当前鼠标位置在网格中的格子坐标，并打印到控制台
             Debug.Log(GetTileGridPosition(Input.mousePosition));
         }
     }
 
-    public void LoadFromGridConfig()
+    // 从战术挂具数据加载配置
+    public void LoadFromTacticalRigData()
     {
-        if (gridConfig != null && !isUpdatingFromConfig)
+        if (currentTacticalRigData != null && !isUpdatingFromConfig)
         {
             isUpdatingFromConfig = true;
-            width = gridConfig.inventoryWidth;
-            height = gridConfig.inventoryHeight;
+            width = currentTacticalRigData.CellH;  // 使用战术挂具数据的水平格子数
+            height = currentTacticalRigData.CellV; // 使用战术挂具数据的垂直格子数
             isUpdatingFromConfig = false;
         }
     }
 
-    public void SaveToGridConfig()
+    // 设置战术挂具数据并更新网格
+    public void SetTacticalRigData(InventorySystemItemDataSO data)
     {
-#if UNITY_EDITOR
-        if (gridConfig != null && !isUpdatingFromConfig)
+        currentTacticalRigData = data;
+        LoadFromTacticalRigData();
+
+        // 重新初始化网格占用状态
+        if (Application.isPlaying)
         {
-            isUpdatingFromConfig = true;
-
-            bool hasChanged = false;
-            if (gridConfig.inventoryWidth != width)
-            {
-                gridConfig.inventoryWidth = width;
-                hasChanged = true;
-            }
-            if (gridConfig.inventoryHeight != height)
-            {
-                gridConfig.inventoryHeight = height;
-                hasChanged = true;
-            }
-
-            if (hasChanged)
-            {
-                EditorUtility.SetDirty(gridConfig);
-                AssetDatabase.SaveAssets();
-            }
-
-            isUpdatingFromConfig = false;
+            gridOccupancy = new bool[width, height];
+            // 清空已放置物品列表
+            placedItems.Clear();
         }
-#endif
+
+        // 立即更新网格尺寸
+        Init(width, height);
     }
 
+    // 初始化网格
     public void Init(int width, int height)
     {
+        // 确保rectTransform存在
         if (rectTransform == null) return;
 
         float cellSize = gridConfig != null ? gridConfig.cellSize : 64f;
 
         Vector2 size = new Vector2(
-            width * cellSize,
-            height * cellSize
+            width * cellSize, // 宽度
+            height * cellSize // 高度
         );
         rectTransform.sizeDelta = size;
     }
 
+    // 根据鼠标位置计算在格子中的位置
     public Vector2Int GetTileGridPosition(Vector2 screenMousePos)
     {
         if (canvas == null && Application.isPlaying)
@@ -199,6 +226,7 @@ public class ItemGrid : MonoBehaviour, IDropHandler
             canvas != null && canvas.renderMode != RenderMode.ScreenSpaceOverlay ? canvas.worldCamera : null,
             out Vector2 localPoint);
 
+        // 本地坐标 → 网格坐标
         int x = Mathf.FloorToInt(localPoint.x / cellSize);
         int y = Mathf.FloorToInt(-localPoint.y / cellSize);
 
@@ -207,6 +235,7 @@ public class ItemGrid : MonoBehaviour, IDropHandler
         return new Vector2Int(x, y);
     }
 
+    // 实现IDropHandler接口
     public void OnDrop(PointerEventData eventData)
     {
         var dropped = eventData.pointerDrag;
@@ -218,23 +247,30 @@ public class ItemGrid : MonoBehaviour, IDropHandler
         var item = draggable.GetComponent<InventorySystemItem>();
         if (item == null) return;
 
+        // 计算放置位置
         Vector2Int dropPosition = GetTileGridPosition(eventData.position);
         Vector2Int itemSize = new Vector2Int(item.Data.width, item.Data.height);
 
+        // 检查是否可以放置
         if (CanPlaceItem(dropPosition, itemSize))
         {
+            // 放置物品
             PlaceItem(dropped, dropPosition, itemSize);
         }
+        // 如果不能放置，DraggableItem会自动处理返回原位置
     }
 
+    // 检查是否可以在指定位置放置物品
     public bool CanPlaceItem(Vector2Int position, Vector2Int size)
     {
+        // 检查边界
         if (position.x < 0 || position.y < 0 ||
             position.x + size.x > width || position.y + size.y > height)
         {
             return false;
         }
 
+        // 检查重叠
         for (int x = position.x; x < position.x + size.x; x++)
         {
             for (int y = position.y; y < position.y + size.y; y++)
@@ -249,6 +285,7 @@ public class ItemGrid : MonoBehaviour, IDropHandler
         return true;
     }
 
+    // 放置物品到网格中
     private void PlaceItem(GameObject itemObject, Vector2Int position, Vector2Int size)
     {
         RectTransform itemRect = itemObject.GetComponent<RectTransform>();
@@ -256,9 +293,14 @@ public class ItemGrid : MonoBehaviour, IDropHandler
 
         float cellSize = gridConfig != null ? gridConfig.cellSize : 64f;
 
+        // 确保物品使用左上角锚点
         itemRect.anchorMin = new Vector2(0, 1);
         itemRect.anchorMax = new Vector2(0, 1);
         itemRect.pivot = new Vector2(0, 1);
+
+        // 计算物品应该放置的位置（基于左上角锚点）
+        float itemWidth = size.x * cellSize;
+        float itemHeight = size.y * cellSize;
 
         Vector2 itemPosition = new Vector2(
             position.x * cellSize,
@@ -267,8 +309,10 @@ public class ItemGrid : MonoBehaviour, IDropHandler
 
         itemRect.anchoredPosition = itemPosition;
 
+        // 标记网格占用
         MarkGridOccupied(position, size, true);
 
+        // 记录放置的物品
         placedItems.Add(new PlacedItem
         {
             itemObject = itemObject,
@@ -276,9 +320,10 @@ public class ItemGrid : MonoBehaviour, IDropHandler
             size = size
         });
 
-        Debug.Log($"物品放置到网格位置: ({position.x}, {position.y}), UI位置: {itemPosition}, 物品尺寸: {size.x}x{size.y}");
+        Debug.Log($"物品放置在战术挂具网格位置: ({position.x}, {position.y}), UI位置: {itemPosition}, 物品尺寸: {size.x}x{size.y}");
     }
 
+    // 标记网格占用状态
     private void MarkGridOccupied(Vector2Int position, Vector2Int size, bool occupied)
     {
         for (int x = position.x; x < position.x + size.x; x++)
@@ -290,44 +335,72 @@ public class ItemGrid : MonoBehaviour, IDropHandler
         }
     }
 
+    // 移除物品时调用
     public void RemoveItem(GameObject item)
     {
         PlacedItem placedItem = placedItems.Find(p => p.itemObject == item);
         if (placedItem != null)
         {
+            // 清除网格占用
             MarkGridOccupied(placedItem.position, placedItem.size, false);
+
+            // 从列表中移除
             placedItems.Remove(placedItem);
         }
     }
 
+    // 获取网格尺寸（供外部使用）
     public Vector2Int GetGridSize()
     {
         return new Vector2Int(width, height);
     }
 
+    // 获取网格占用状态（供外部使用）
     public bool[,] GetGridOccupancy()
     {
         return gridOccupancy;
     }
 
+    // 获取单元格大小
     public float GetCellSize()
     {
         return gridConfig != null ? gridConfig.cellSize : 64f;
     }
 
+    // 设置GridConfig
     public void SetGridConfig(GridConfig config)
     {
         gridConfig = config;
-        LoadFromGridConfig();
     }
 
+    // 获取GridConfig
     public GridConfig GetGridConfig()
     {
         return gridConfig;
     }
 
-    public void SyncToGridConfig()
+    // 获取战术挂具数据
+    public InventorySystemItemDataSO GetTacticalRigData()
     {
-        SaveToGridConfig();
+        return currentTacticalRigData;  // 修改：使用currentTacticalRigData而不是tacticalRigData
+    }
+
+    // 清空网格中的所有物品
+    public void ClearGrid()
+    {
+        if (gridOccupancy != null)
+        {
+            // 清空占用状态
+            for (int x = 0; x < width; x++)
+            {
+                for (int y = 0; y < height; y++)
+                {
+                    gridOccupancy[x, y] = false;
+                }
+            }
+        }
+
+        // 清空物品列表
+        placedItems.Clear();
     }
 }
