@@ -12,6 +12,16 @@ public class InventoryController : MonoBehaviour
     [Header("调试信息设置")]
     [SerializeField] private bool showDebugInfo = true; // 是否显示调试信息
 
+    [Header("预览设置")]
+    [SerializeField] private bool enablePreview = true; // 是否启用预览功能
+    [SerializeField] private Vector2Int previewItemSize = new Vector2Int(2, 1); // 预览物品大小（用于测试）
+
+    // 高亮组件
+    private InventoryHighlight inventoryHighlight;
+
+    // 当前拖拽的物品（用于预览）
+    private InventorySystemItem draggedItem;
+
     // 当前活跃的网格类型枚举
     public enum ActiveGridType
     {
@@ -23,21 +33,182 @@ public class InventoryController : MonoBehaviour
 
     [SerializeField] private ActiveGridType currentActiveGrid = ActiveGridType.None;
 
+    private void Start()
+    {
+        // 获取或添加InventoryHighlight组件
+        inventoryHighlight = GetComponent<InventoryHighlight>();
+        if (inventoryHighlight == null)
+        {
+            inventoryHighlight = gameObject.AddComponent<InventoryHighlight>();
+        }
+    }
+
     private void Update()
     {
-        // 根据当前活跃网格类型处理输入
+        // 只有在拖拽物品时才检测网格切换
+        if (draggedItem != null)
+        {
+            DetectHoveredGrid();
+        }
+    
+        // 根据当前活跃网格类型处理输入 - 只处理当前活跃的网格
         switch (currentActiveGrid)
         {
             case ActiveGridType.MainGrid:
-                HandleMainGridInput();
+                if (selectedItemGrid != null)
+                    HandleMainGridInput();
                 break;
             case ActiveGridType.BackpackGrid:
-                HandleBackpackGridInput();
+                if (selectedBackpackGrid != null)
+                    HandleBackpackGridInput();
                 break;
             case ActiveGridType.TacticalRigGrid:
-                HandleTacticalRigGridInput();
+                if (selectedTacticalRigGrid != null)
+                    HandleTacticalRigGridInput();
                 break;
         }
+    
+        // 处理预览功能
+        if (enablePreview)
+        {
+            HandlePreview();
+        }
+    }
+
+    /// <summary>
+    /// 处理预览功能
+    /// </summary>
+    private void HandlePreview()
+    {
+        // 只有在拖拽物品时才显示预览
+        if (draggedItem == null)
+        {
+            inventoryHighlight.Hide();
+            return;
+        }
+
+        // 检查是否有活跃的网格
+        object targetGrid = GetCurrentActiveGrid();
+        if (targetGrid == null)
+        {
+            inventoryHighlight.Hide();
+            return;
+        }
+
+        // 获取鼠标位置
+        Vector2 mousePos = Input.mousePosition;
+        Vector2Int tilePos = GetTileGridPosition(targetGrid, mousePos);
+
+        // 检查位置是否有效
+        if (tilePos.x < 0 || tilePos.y < 0)
+        {
+            inventoryHighlight.Hide();
+            return;
+        }
+
+        // 使用当前拖拽物品的大小
+        Vector2Int itemSize = new Vector2Int(draggedItem.Data.width, draggedItem.Data.height);
+
+        // 检查是否可以放置
+        bool canPlace = CanPlaceItem(targetGrid, tilePos, itemSize);
+
+        // 显示预览
+        inventoryHighlight.Show(true);
+        inventoryHighlight.SetSize(itemSize.x, itemSize.y);
+        inventoryHighlight.SetParent(targetGrid);
+        inventoryHighlight.SetPosition(targetGrid, draggedItem, tilePos.x, tilePos.y);
+        inventoryHighlight.SetCanPlace(canPlace);
+
+        if (showDebugInfo)
+        {
+            Debug.Log($"预览位置: ({tilePos.x}, {tilePos.y}) - 可放置: {canPlace} - 网格类型: {currentActiveGrid}");
+        }
+    }
+
+    /// <summary>
+    /// 获取当前活跃的网格
+    /// </summary>
+    /// <returns>当前活跃的网格对象</returns>
+    private object GetCurrentActiveGrid()
+    {
+        switch (currentActiveGrid)
+        {
+            case ActiveGridType.MainGrid:
+                return selectedItemGrid;
+            case ActiveGridType.BackpackGrid:
+                return selectedBackpackGrid;
+            case ActiveGridType.TacticalRigGrid:
+                return selectedTacticalRigGrid;
+            default:
+                return null;
+        }
+    }
+
+    /// <summary>
+    /// 获取网格位置
+    /// </summary>
+    /// <param name="grid">网格对象</param>
+    /// <param name="screenPos">屏幕位置</param>
+    /// <returns>网格坐标</returns>
+    private Vector2Int GetTileGridPosition(object grid, Vector2 screenPos)
+    {
+        if (grid is ItemGrid itemGrid)
+        {
+            return itemGrid.GetTileGridPosition(screenPos);
+        }
+        else if (grid is BackpackItemGrid backpackGrid)
+        {
+            return backpackGrid.GetTileGridPosition(screenPos);
+        }
+        else if (grid is TactiaclRigItemGrid tacticalGrid)
+        {
+            return tacticalGrid.GetTileGridPosition(screenPos);
+        }
+
+        return new Vector2Int(-1, -1);
+    }
+
+    /// <summary>
+    /// 检查是否可以放置物品
+    /// </summary>
+    /// <param name="grid">网格对象</param>
+    /// <param name="position">位置</param>
+    /// <param name="size">大小</param>
+    /// <returns>是否可以放置</returns>
+    private bool CanPlaceItem(object grid, Vector2Int position, Vector2Int size)
+    {
+        if (grid is ItemGrid itemGrid)
+        {
+            return itemGrid.CanPlaceItem(position, size);
+        }
+        else if (grid is BackpackItemGrid backpackGrid)
+        {
+            return backpackGrid.CanPlaceItem(position, size);
+        }
+        else if (grid is TactiaclRigItemGrid tacticalGrid)
+        {
+            return tacticalGrid.CanPlaceItem(position, size);
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// 设置当前拖拽的物品（供外部调用）
+    /// </summary>
+    /// <param name="item">拖拽的物品</param>
+    public void SetDraggedItem(InventorySystemItem item)
+    {
+        draggedItem = item;
+    }
+
+    /// <summary>
+    /// 清除拖拽的物品
+    /// </summary>
+    public void ClearDraggedItem()
+    {
+        draggedItem = null;
+        inventoryHighlight.Hide();
     }
 
     // 处理主网格输入
@@ -209,4 +380,72 @@ public class InventoryController : MonoBehaviour
                 return null;
         }
     }
+
+    /// <summary>
+    /// 检测鼠标当前悬停的网格并自动切换活跃网格
+    /// </summary>
+    private void DetectHoveredGrid()
+    {
+        Vector2 mousePos = Input.mousePosition;
+
+        // 检查主网格
+        if (selectedItemGrid != null && IsMouseOverGrid(selectedItemGrid.transform, mousePos))
+        {
+            if (currentActiveGrid != ActiveGridType.MainGrid)
+            {
+                currentActiveGrid = ActiveGridType.MainGrid;
+                if (showDebugInfo)
+                {
+                    Debug.Log("切换到主网格");
+                }
+            }
+            return;
+        }
+
+        // 检查背包网格
+        if (selectedBackpackGrid != null && IsMouseOverGrid(selectedBackpackGrid.transform, mousePos))
+        {
+            if (currentActiveGrid != ActiveGridType.BackpackGrid)
+            {
+                currentActiveGrid = ActiveGridType.BackpackGrid;
+                if (showDebugInfo)
+                {
+                    Debug.Log("切换到背包网格");
+                }
+            }
+            return;
+        }
+
+        // 检查战术挂具网格
+        if (selectedTacticalRigGrid != null && IsMouseOverGrid(selectedTacticalRigGrid.transform, mousePos))
+        {
+            if (currentActiveGrid != ActiveGridType.TacticalRigGrid)
+            {
+                currentActiveGrid = ActiveGridType.TacticalRigGrid;
+                if (showDebugInfo)
+                {
+                    Debug.Log("切换到战术挂具网格");
+                }
+            }
+            return;
+        }
+    }
+
+    /// <summary>
+    /// 检查鼠标是否在指定网格上方
+    /// </summary>
+    /// <param name="gridTransform">网格变换</param>
+    /// <param name="mousePos">鼠标位置</param>
+    /// <returns>是否在网格上方</returns>
+    private bool IsMouseOverGrid(Transform gridTransform, Vector2 mousePos)
+    {
+        if (gridTransform == null) return false;
+
+        RectTransform rectTransform = gridTransform.GetComponent<RectTransform>();
+        if (rectTransform == null) return false;
+
+        return RectTransformUtility.RectangleContainsScreenPoint(rectTransform, mousePos, null);
+    }
+
 }
+

@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 1729644158132717817}
   - component: {fileID: 1968652684278131046}
   - component: {fileID: 1887014327054854891}
+  - component: {fileID: 2250161686416702856}
   m_Layer: 5
   m_Name: TacicalRigItemGrid
   m_TagString: Untagged
@@ -89,6 +90,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   gridConfig: {fileID: 11400000, guid: 7142a0d87094f254189ec042d12bfe56, type: 2}
-  tacticalRigData: {fileID: 0}
-  width: 1
-  height: 1
+  defaultWidth: 1
+  defaultHeight: 1
+--- !u!114 &2250161686416702856
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2521853250318689196}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 43eae4255683c9247ad4045bc67a3ccb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gridPriority: 2

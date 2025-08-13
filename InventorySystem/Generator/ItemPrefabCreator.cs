@@ -139,7 +139,6 @@ public class ItemPrefabCreator : EditorWindow
             backgroundRect.sizeDelta = new Vector2(itemWidth, itemHeight);
             
             // 添加RawImage组件
-            // 添加RawImage组件
             RawImage rawImage = backgroundObject.AddComponent<RawImage>();
             rawImage.color = GetColorFromString(itemData.backgroundColor, 204f / 255f); // 透明度204
             
@@ -185,40 +184,19 @@ public class ItemPrefabCreator : EditorWindow
             itemIconField?.SetValue(dataHolder, image);
             backgroundField?.SetValue(dataHolder, rawImage);
 
-            // 创建ItemHighlightMask子对象
-            GameObject highlightObject = new GameObject("ItemHighlightMask");
-            highlightObject.transform.SetParent(mainObject.transform);
-            highlightObject.layer = 5;
-            
-            RectTransform highlightRect = highlightObject.AddComponent<RectTransform>();
-            highlightRect.anchorMin = Vector2.zero;
-            highlightRect.anchorMax = Vector2.one;
-            highlightRect.anchoredPosition = Vector2.zero;
-            highlightRect.sizeDelta = Vector2.zero;
-            
-            // 添加Image组件用于高光显示
-            Image highlightImage = highlightObject.AddComponent<Image>();
-            highlightImage.color = new Color(1f, 1f, 1f, 0f); // 初始透明
-            highlightImage.raycastTarget = false; // 不阻挡射线检测
-
             // 在根节点添加InventorySystemItem组件
             InventorySystemItem inventoryItem = mainObject.AddComponent<InventorySystemItem>();
             
             // 在根节点添加DraggableItem脚本
             DraggableItem draggableItem = mainObject.AddComponent<DraggableItem>();
             
-            // 通过反射设置DraggableItem的item字段
+            // 通过反射设置DraggableItem的字段
             var itemField = typeof(DraggableItem).GetField("item", 
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
             itemField?.SetValue(draggableItem, inventoryItem);
             
-            // 在根节点添加ItemHoverHighlight脚本
+            // 添加ItemHoverHighlight组件
             ItemHoverHighlight hoverHighlight = mainObject.AddComponent<ItemHoverHighlight>();
-            
-            // 通过反射设置ItemHoverHighlight的overlay字段
-            var overlayField = typeof(ItemHoverHighlight).GetField("overlay", 
-                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            overlayField?.SetValue(hoverHighlight, highlightImage);
             
             // 确保分类文件夹存在
             string categoryFolder = Path.Combine(prefabOutputPath, GetCategoryFolderName(itemData.category));
@@ -261,8 +239,7 @@ public class ItemPrefabCreator : EditorWindow
     }
 
     // 根据背景颜色字符串获取Color
-    // 根据背景颜色字符串获取Color
-    private Color GetColorFromString(string colorName, float alpha = 255f) // 默认透明度改为204
+    private Color GetColorFromString(string colorName, float alpha = 255f)
     {
         Color baseColor;
         switch (colorName?.ToLower())
@@ -281,7 +258,8 @@ public class ItemPrefabCreator : EditorWindow
                 ColorUtility.TryParseHtmlString("#350000", out baseColor);
                 break;
             default:
-                baseColor = Color.white;
+                // 将默认颜色改为透明
+                baseColor = Color.clear;
                 break;
         }
         
@@ -316,14 +294,12 @@ public class ItemPrefabCreator : EditorWindow
     {
         if (string.IsNullOrEmpty(fileName)) return "UnknownItem";
         
-        // 移除或替换不合法的文件名字符
         char[] invalidChars = Path.GetInvalidFileNameChars();
         foreach (char c in invalidChars)
         {
             fileName = fileName.Replace(c, '_');
         }
         
-        // 移除小数点
         fileName = fileName.Replace(".", "");
         
         return fileName.Trim();
