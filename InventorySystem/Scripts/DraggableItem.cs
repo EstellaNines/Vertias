@@ -6,33 +6,20 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 
 [RequireComponent(typeof(CanvasGroup))]
-public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerEnterHandler, IPointerExitHandler
+public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
     [Header("拖拽时自动寻找")]
     [SerializeField] private InventorySystemItem item;
-
-    [Header("高亮显示设置")]
-    [SerializeField] private Image highlightOverlay;
-    [SerializeField] private float fadeTime = 0.15f;
 
     private RectTransform rectTransform;
     private CanvasGroup canvasGroup;
     public Transform originalParent;
     public Vector2 originalPos;
-
-    private bool isDragging = false;
     private bool wasInEquipSlot = false;
 
     private GameObject itemBackground;
     private Vector2 originalSize;
     private Vector3 originalScale;
-
-    private Color normalColor = Color.white.WithAlpha(0f);
-    private Color hoverColor = Color.white.WithAlpha(0.35f);
-    private Color validDropColor = Color.green.WithAlpha(0.35f);
-    private Color invalidDropColor = Color.red.WithAlpha(0.35f);
-
-    private Coroutine currentFadeCoroutine;
 
     private ItemSpawner itemSpawner;
     private Vector2Int gridPosition;
@@ -57,36 +44,6 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         originalAnchorMin = rectTransform.anchorMin;
         originalAnchorMax = rectTransform.anchorMax;
         originalPivot = rectTransform.pivot;
-
-        if (highlightOverlay == null)
-        {
-            highlightOverlay = GetComponentInChildren<Image>();
-            if (highlightOverlay != null && highlightOverlay.gameObject != itemBackground)
-            {
-                // 使用找到的Image作为高亮层
-            }
-            else
-            {
-                GameObject overlayObj = new GameObject("HighlightOverlay");
-                overlayObj.transform.SetParent(transform, false);
-                highlightOverlay = overlayObj.AddComponent<Image>();
-                highlightOverlay.color = normalColor;
-
-                RectTransform overlayRect = highlightOverlay.GetComponent<RectTransform>();
-                overlayRect.anchorMin = Vector2.zero;
-                overlayRect.anchorMax = Vector2.one;
-                overlayRect.sizeDelta = Vector2.zero;
-                overlayRect.anchoredPosition = Vector2.zero;
-
-                CacheImageComponents();
-            }
-        }
-
-        if (highlightOverlay != null)
-        {
-            highlightOverlay.color = normalColor;
-            highlightOverlay.raycastTarget = false;
-        }
 
         originalSize = rectTransform.sizeDelta;
         originalScale = rectTransform.localScale;
@@ -128,27 +85,10 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         }
     }
 
-    public void OnPointerEnter(PointerEventData eventData)
-    {
-        if (!isDragging && highlightOverlay != null)
-        {
-            StartHighlightFade(hoverColor);
-        }
-    }
-
-    public void OnPointerExit(PointerEventData eventData)
-    {
-        if (!isDragging && highlightOverlay != null)
-        {
-            StartHighlightFade(normalColor);
-        }
-    }
-
     public void OnBeginDrag(PointerEventData eventData)
     {
         if (!item.IsDraggable) return;
 
-        isDragging = true;
         canvasGroup.alpha = 1.0f;
         canvasGroup.blocksRaycasts = false;
 
@@ -216,15 +156,17 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
             itemBackground.SetActive(false);
         }
 
-        if (highlightOverlay != null)
-        {
-            StartHighlightFade(normalColor);
-        }
-
         DisableAllRaycastTargets();
         transform.SetParent(item.GetComponentInParent<Canvas>().transform, true);
         canvasGroup.alpha = 1.0f;
         canvasGroup.blocksRaycasts = false;
+
+        // 通知InventoryController开始拖拽
+        var inventoryController = FindObjectOfType<InventoryController>();
+        if (inventoryController != null)
+        {
+            inventoryController.SetDraggedItem(item);
+        }
     }
 
     public void OnDrag(PointerEventData eventData)
@@ -246,7 +188,7 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     {
         if (!item.IsDraggable) return;
 
-        isDragging = false;
+        // 移除 isDragging = false;
         bool placementSuccessful = false;
 
         EquipSlot originalEquipSlot = originalParent.GetComponent<EquipSlot>();
@@ -380,7 +322,7 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
                 Debug.Log($"尝试放到网格位置: ({dropPosition.x}, {dropPosition.y}), 物品大小: ({itemSize.x}, {itemSize.y})");
 
                 bool canPlace = false;
-                
+
                 // 调用对应的CanPlaceItem方法
                 if (gridType == typeof(ItemGrid))
                 {
@@ -398,7 +340,7 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
                 if (canPlace)
                 {
                     transform.SetParent(((MonoBehaviour)targetGrid).transform, false);
-                    
+
                     // 调用对应的PlaceItem方法
                     if (gridType == typeof(ItemGrid))
                     {
@@ -501,9 +443,11 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         canvasGroup.alpha = 1f;
         canvasGroup.blocksRaycasts = true;
 
-        if (highlightOverlay != null)
+        // 通知InventoryController结束拖拽
+        var inventoryController = FindObjectOfType<InventoryController>();
+        if (inventoryController != null)
         {
-            StartHighlightFade(normalColor);
+            inventoryController.ClearDraggedItem();
         }
     }
 
@@ -544,51 +488,19 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         {
             itemBackground.SetActive(true);
         }
-
-        if (highlightOverlay != null)
-        {
-            StartHighlightFade(normalColor);
-        }
-    }
-
-    private void StartHighlightFade(Color targetColor)
-    {
-        if (currentFadeCoroutine != null)
-        {
-            StopCoroutine(currentFadeCoroutine);
-        }
-        currentFadeCoroutine = StartCoroutine(FadeHighlight(targetColor));
-    }
-
-    private IEnumerator FadeHighlight(Color targetColor)
-    {
-        if (highlightOverlay == null) yield break;
-
-        Color startColor = highlightOverlay.color;
-        float elapsedTime = 0f;
-
-        while (elapsedTime < fadeTime)
-        {
-            elapsedTime += Time.deltaTime;
-            float t = elapsedTime / fadeTime;
-            highlightOverlay.color = Color.Lerp(startColor, targetColor, t);
-            yield return null;
-        }
-
-        highlightOverlay.color = targetColor;
     }
 
     private bool CanEquipToSlot(EquipSlot equipSlot, InventorySystemItem itemComponent)
     {
         var acceptedTypeField = typeof(EquipSlot).GetField("acceptedType",
             System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-        
+
         if (acceptedTypeField != null)
         {
             InventorySystemItemCategory acceptedType = (InventorySystemItemCategory)acceptedTypeField.GetValue(equipSlot);
             return itemComponent.Data.itemCategory == acceptedType;
         }
-        
+
         return false;
     }
 }

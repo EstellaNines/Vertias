@@ -176,6 +176,14 @@ public class BackpackItemGrid : MonoBehaviour, IDropHandler
             height = currentBackpackData.CellV;
             isUpdatingFromConfig = false;
         }
+        else if (!isUpdatingFromConfig)
+        {
+            // 使用默认值
+            isUpdatingFromConfig = true;
+            width = defaultWidth;
+            height = defaultHeight;
+            isUpdatingFromConfig = false;
+        }
     }
     
     // 获取当前装备的背包数据

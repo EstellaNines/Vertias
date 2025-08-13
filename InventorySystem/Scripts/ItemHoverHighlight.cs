@@ -19,8 +19,15 @@ public class ItemHoverHighlight : MonoBehaviour, IPointerEnterHandler, IPointerE
         overlay.color = normal;
     }
 
-    public void OnPointerEnter(PointerEventData _) => StartCoroutine(Fade(hover));
-    public void OnPointerExit(PointerEventData _) => StartCoroutine(Fade(normal));
+    public void OnPointerEnter(PointerEventData eventData)
+    {
+        StartCoroutine(Fade(hover));
+    }
+
+    public void OnPointerExit(PointerEventData eventData)
+    {
+        StartCoroutine(Fade(normal));
+    }
 
     IEnumerator Fade(Color target)
     {

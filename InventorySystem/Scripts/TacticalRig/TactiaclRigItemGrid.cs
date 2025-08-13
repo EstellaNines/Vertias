@@ -175,6 +175,14 @@ public class TactiaclRigItemGrid : MonoBehaviour, IDropHandler
             height = currentTacticalRigData.CellV; // 使用战术挂具数据的垂直格子数
             isUpdatingFromConfig = false;
         }
+        else if (!isUpdatingFromConfig)
+        {
+            // 使用默认值
+            isUpdatingFromConfig = true;
+            width = defaultWidth;
+            height = defaultHeight;
+            isUpdatingFromConfig = false;
+        }
     }
 
     // 设置战术挂具数据并更新网格

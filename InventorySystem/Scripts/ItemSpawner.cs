@@ -2,6 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using System;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 public class ItemSpawner : MonoBehaviour
 {
@@ -9,15 +13,41 @@ public class ItemSpawner : MonoBehaviour
     [SerializeField] private ItemGrid targetGrid; // 目标网格
     [SerializeField] private Transform itemParent; // 物品父对象
 
-    [Header("物品预制体和数据设置")]
-    [SerializeField] private GameObject[] itemPrefabs; // 物品预制体数组
-    [SerializeField] private InventorySystemItemDataSO[] itemDataArray; // 物品数据数组
+    [Header("生成控制设置")]
+    [Range(1, 50)]
+    [SerializeField] private int spawnCount = 5; // 生成数量滑条
+
+    [Header("物品类型选择")]
+    [SerializeField][FieldLabel("头盔")] private bool spawnHelmet = true;
+    [SerializeField][FieldLabel("护甲")] private bool spawnArmor = true;
+    [SerializeField][FieldLabel("战术挂具")] private bool spawnTacticalRig = true;
+    [SerializeField][FieldLabel("背包")] private bool spawnBackpack = true;
+    [SerializeField][FieldLabel("武器")] private bool spawnWeapon = true;
+    [SerializeField][FieldLabel("弹药")] private bool spawnAmmunition = true;
+    [SerializeField][FieldLabel("食物")] private bool spawnFood = true;
+    [SerializeField][FieldLabel("饮料")] private bool spawnDrink = true;
+    [SerializeField][FieldLabel("治疗药物")] private bool spawnHealing = true;
+    [SerializeField][FieldLabel("止血药物")] private bool spawnHemostatic = true;
+    [SerializeField][FieldLabel("镇静药物")] private bool spawnSedative = true;
+    [SerializeField][FieldLabel("情报")] private bool spawnIntelligence = true;
+    [SerializeField][FieldLabel("货币")] private bool spawnCurrency = true;
+
+    [Header("文件夹路径设置")]
+    [SerializeField] private string databasePath = "Assets/InventorySystem/Database/Scriptable Object数据对象";
+    [SerializeField] private string prefabPath = "Assets/InventorySystem/Prefab";
 
     [Header("调试信息设置")]
     [SerializeField] private bool showDebugInfo = true;
+    [SerializeField] private bool showGridOccupancy = false; // 显示网格占用状态
+    [SerializeField] private bool autoLoadOnStart = true; // 启动时自动加载
 
-    // 网格占用状态数组
-    private bool[,] gridOccupancy;
+    // 自动加载的物品数据和预制体
+    private Dictionary<string, InventorySystemItemDataSO> itemDataDict = new Dictionary<string, InventorySystemItemDataSO>();
+    private Dictionary<string, GameObject> itemPrefabDict = new Dictionary<string, GameObject>();
+    private List<InventorySystemItemDataSO> allItemData = new List<InventorySystemItemDataSO>();
+
+    // 网格占用状态数组 (0=空闲, 1=占用)
+    private int[,] gridOccupancy;
     private List<SpawnedItemInfo> spawnedItems = new List<SpawnedItemInfo>();
 
     // 生成物品信息类
@@ -43,6 +73,271 @@ public class ItemSpawner : MonoBehaviour
         }
 
         InitializeGrid();
+
+        if (autoLoadOnStart)
+        {
+            LoadAllItemsFromFolders();
+        }
+    }
+
+    // 从文件夹加载所有物品数据和预制体
+    [ContextMenu("加载所有物品")]
+    public void LoadAllItemsFromFolders()
+    {
+        LoadItemDataFromDatabase();
+        LoadPrefabsFromFolder();
+
+        if (showDebugInfo)
+        {
+            Debug.Log($"加载完成: {allItemData.Count} 个物品数据, {itemPrefabDict.Count} 个预制体");
+        }
+    }
+
+    // 从Database文件夹加载所有ScriptableObject数据
+    private void LoadItemDataFromDatabase()
+    {
+        itemDataDict.Clear();
+        allItemData.Clear();
+
+#if UNITY_EDITOR
+        // 在编辑器中使用AssetDatabase
+        string[] guids = AssetDatabase.FindAssets("t:InventorySystemItemDataSO", new[] { databasePath });
+        
+        foreach (string guid in guids)
+        {
+            string assetPath = AssetDatabase.GUIDToAssetPath(guid);
+            InventorySystemItemDataSO itemData = AssetDatabase.LoadAssetAtPath<InventorySystemItemDataSO>(assetPath);
+            
+            if (itemData != null)
+            {
+                string key = GetItemKey(itemData.itemName);
+                if (!itemDataDict.ContainsKey(key))
+                {
+                    itemDataDict[key] = itemData;
+                    allItemData.Add(itemData);
+                }
+            }
+        }
+#else
+        // 运行时使用Resources.LoadAll (需要将资源放在Resources文件夹中)
+        InventorySystemItemDataSO[] loadedData = Resources.LoadAll<InventorySystemItemDataSO>("");
+
+        foreach (var itemData in loadedData)
+        {
+            if (itemData != null)
+            {
+                string key = GetItemKey(itemData.itemName);
+                if (!itemDataDict.ContainsKey(key))
+                {
+                    itemDataDict[key] = itemData;
+                    allItemData.Add(itemData);
+                }
+            }
+        }
+#endif
+
+        if (showDebugInfo)
+        {
+            Debug.Log($"从Database加载了 {allItemData.Count} 个物品数据");
+        }
+    }
+
+    // 从Prefab文件夹加载所有预制体
+    private void LoadPrefabsFromFolder()
+    {
+        itemPrefabDict.Clear();
+
+#if UNITY_EDITOR
+        // 在编辑器中使用AssetDatabase
+        string[] guids = AssetDatabase.FindAssets("t:GameObject", new[] { prefabPath });
+        
+        foreach (string guid in guids)
+        {
+            string assetPath = AssetDatabase.GUIDToAssetPath(guid);
+            GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(assetPath);
+            
+            if (prefab != null)
+            {
+                string key = GetItemKey(prefab.name);
+                if (!itemPrefabDict.ContainsKey(key))
+                {
+                    itemPrefabDict[key] = prefab;
+                }
+            }
+        }
+#else
+        // 运行时使用Resources.LoadAll (需要将预制体放在Resources文件夹中)
+        GameObject[] loadedPrefabs = Resources.LoadAll<GameObject>("");
+
+        foreach (var prefab in loadedPrefabs)
+        {
+            if (prefab != null)
+            {
+                string key = GetItemKey(prefab.name);
+                if (!itemPrefabDict.ContainsKey(key))
+                {
+                    itemPrefabDict[key] = prefab;
+                }
+            }
+        }
+#endif
+
+        if (showDebugInfo)
+        {
+            Debug.Log($"从Prefab文件夹加载了 {itemPrefabDict.Count} 个预制体");
+        }
+    }
+
+    // 生成物品键值（用于匹配数据和预制体）
+    private string GetItemKey(string name)
+    {
+        // 移除特殊字符和空格，转换为小写用于匹配
+        return name.Replace(" ", "").Replace("(", "").Replace(")", "").Replace("-", "").Replace("_", "").ToLower();
+    }
+
+    // 根据物品数据查找对应的预制体
+    private GameObject FindPrefabForItemData(InventorySystemItemDataSO itemData)
+    {
+        string dataKey = GetItemKey(itemData.itemName);
+
+        // 直接匹配
+        if (itemPrefabDict.ContainsKey(dataKey))
+        {
+            return itemPrefabDict[dataKey];
+        }
+
+        // 模糊匹配
+        foreach (var kvp in itemPrefabDict)
+        {
+            if (kvp.Key.Contains(dataKey) || dataKey.Contains(kvp.Key))
+            {
+                return kvp.Value;
+            }
+        }
+
+        if (showDebugInfo)
+        {
+            Debug.LogWarning($"未找到物品 '{itemData.itemName}' 对应的预制体");
+        }
+
+        return null;
+    }
+
+    // 生成多个随机物品
+    public void SpawnRandomItems()
+    {
+        if (allItemData.Count == 0)
+        {
+            Debug.LogError("没有加载任何物品数据！请先调用LoadAllItemsFromFolders()");
+            return;
+        }
+
+        List<InventorySystemItemDataSO> availableItems = GetAvailableItemsByCategory();
+        if (availableItems.Count == 0)
+        {
+            Debug.LogWarning("没有选择任何物品类型！");
+            return;
+        }
+
+        int successCount = 0;
+        int attemptCount = 0;
+        int maxAttempts = spawnCount * 3; // 最大尝试次数
+
+        while (successCount < spawnCount && attemptCount < maxAttempts)
+        {
+            attemptCount++;
+
+            // 随机选择物品
+            InventorySystemItemDataSO randomItemData = availableItems[UnityEngine.Random.Range(0, availableItems.Count)];
+            GameObject prefab = FindPrefabForItemData(randomItemData);
+
+            if (prefab != null)
+            {
+                GameObject spawnedItem = SpawnItemAtRandomPosition(prefab, randomItemData);
+                if (spawnedItem != null)
+                {
+                    successCount++;
+                }
+            }
+            else
+            {
+                if (showDebugInfo)
+                {
+                    Debug.LogWarning($"物品 '{randomItemData.itemName}' 没有对应的预制体");
+                }
+            }
+        }
+
+        if (showDebugInfo)
+        {
+            Debug.Log($"生成完成: 成功生成 {successCount}/{spawnCount} 个物品，尝试次数: {attemptCount}");
+            if (showGridOccupancy)
+            {
+                PrintGridOccupancy();
+            }
+        }
+    }
+
+    // 根据选择的类型获取可用物品列表
+    private List<InventorySystemItemDataSO> GetAvailableItemsByCategory()
+    {
+        List<InventorySystemItemDataSO> availableItems = new List<InventorySystemItemDataSO>();
+
+        foreach (var itemData in allItemData)
+        {
+            if (itemData == null) continue;
+
+            bool shouldInclude = false;
+            switch (itemData.itemCategory)
+            {
+                case InventorySystemItemCategory.Helmet:
+                    shouldInclude = spawnHelmet;
+                    break;
+                case InventorySystemItemCategory.Armor:
+                    shouldInclude = spawnArmor;
+                    break;
+                case InventorySystemItemCategory.TacticalRig:
+                    shouldInclude = spawnTacticalRig;
+                    break;
+                case InventorySystemItemCategory.Backpack:
+                    shouldInclude = spawnBackpack;
+                    break;
+                case InventorySystemItemCategory.Weapon:
+                    shouldInclude = spawnWeapon;
+                    break;
+                case InventorySystemItemCategory.Ammunition:
+                    shouldInclude = spawnAmmunition;
+                    break;
+                case InventorySystemItemCategory.Food:
+                    shouldInclude = spawnFood;
+                    break;
+                case InventorySystemItemCategory.Drink:
+                    shouldInclude = spawnDrink;
+                    break;
+                case InventorySystemItemCategory.Healing:
+                    shouldInclude = spawnHealing;
+                    break;
+                case InventorySystemItemCategory.Hemostatic:
+                    shouldInclude = spawnHemostatic;
+                    break;
+                case InventorySystemItemCategory.Sedative:
+                    shouldInclude = spawnSedative;
+                    break;
+                case InventorySystemItemCategory.Intelligence:
+                    shouldInclude = spawnIntelligence;
+                    break;
+                case InventorySystemItemCategory.Currency:
+                    shouldInclude = spawnCurrency;
+                    break;
+            }
+
+            if (shouldInclude)
+            {
+                availableItems.Add(itemData);
+            }
+        }
+
+        return availableItems;
     }
 
     // 初始化网格占用状态数组
@@ -59,7 +354,7 @@ public class ItemSpawner : MonoBehaviour
         int gridWidth = widthField != null ? (int)widthField.GetValue(targetGrid) : 12;
         int gridHeight = heightField != null ? (int)heightField.GetValue(targetGrid) : 20;
 
-        gridOccupancy = new bool[gridWidth, gridHeight];
+        gridOccupancy = new int[gridWidth, gridHeight];
 
         if (showDebugInfo)
         {
@@ -67,47 +362,52 @@ public class ItemSpawner : MonoBehaviour
         }
     }
 
-    // 在指定位置生成头盔物品
-    public GameObject SpawnHelmetAtPosition(Vector2Int gridPos, int helmetIndex = 0)
+    // 在随机位置生成物品
+    public GameObject SpawnItemAtRandomPosition(GameObject prefab, InventorySystemItemDataSO data)
     {
-        if (itemPrefabs == null || itemPrefabs.Length == 0)
+        Vector2Int itemSize = new Vector2Int(data.width, data.height);
+        Vector2Int availablePos = FindAvailablePosition(itemSize);
+
+        if (availablePos == new Vector2Int(-1, -1))
         {
-            Debug.LogError("没有设置物品预制体数组！");
+            if (showDebugInfo)
+            {
+                Debug.LogWarning($"没有足够空间放置物品: {data.itemName} (尺寸: {itemSize.x}x{itemSize.y})");
+            }
             return null;
         }
 
-        if (itemDataArray == null || itemDataArray.Length == 0)
+        return SpawnItemAtPosition(prefab, data, availablePos);
+    }
+
+    // 在指定位置生成物品
+    public GameObject SpawnItemAtPosition(GameObject prefab, InventorySystemItemDataSO data, Vector2Int gridPos)
+    {
+        if (prefab == null || data == null || targetGrid == null)
         {
-            Debug.LogError("没有设置物品数据数组！");
+            Debug.LogError("生成物品参数无效！");
             return null;
         }
 
-        helmetIndex = Mathf.Clamp(helmetIndex, 0, itemPrefabs.Length - 1);
-        int dataIndex = Mathf.Clamp(helmetIndex, 0, itemDataArray.Length - 1);
+        Vector2Int itemSize = new Vector2Int(data.width, data.height);
 
-        InventorySystemItemDataSO helmetData = itemDataArray[dataIndex];
-        Vector2Int itemSize = new Vector2Int(helmetData.width, helmetData.height);
-
-        // 检查位置是否可用
+        // 使用0/1标记检查位置是否可用
         if (!IsPositionAvailable(gridPos, itemSize))
         {
-            // 寻找可用位置
-            Vector2Int newPos = FindAvailablePosition(itemSize);
-            if (newPos == new Vector2Int(-1, -1))
+            if (showDebugInfo)
             {
-                Debug.LogWarning("没有足够的空间放置物品！");
-                return null;
+                Debug.LogWarning($"位置 ({gridPos.x}, {gridPos.y}) 被占用或超出边界！");
             }
-            gridPos = newPos;
+            return null;
         }
 
         // 创建物品
-        GameObject spawnedItem = CreateHelmetItem(itemPrefabs[helmetIndex], helmetData, gridPos);
+        GameObject spawnedItem = CreateItem(prefab, data, gridPos);
 
         if (spawnedItem != null)
         {
-            // 标记网格占用
-            MarkGridOccupied(gridPos, itemSize, true);
+            // 标记网格占用 (设置为1)
+            MarkGridOccupied(gridPos, itemSize, 1);
 
             // 记录生成的物品信息
             spawnedItems.Add(new SpawnedItemInfo
@@ -115,20 +415,20 @@ public class ItemSpawner : MonoBehaviour
                 itemObject = spawnedItem,
                 gridPosition = gridPos,
                 size = itemSize,
-                itemData = helmetData
+                itemData = data
             });
 
             if (showDebugInfo)
             {
-                Debug.Log($"成功生成物品: {helmetData.itemName} 位置: ({gridPos.x}, {gridPos.y})");
+                Debug.Log($"成功生成物品: {data.itemName} 位置: ({gridPos.x}, {gridPos.y}) 尺寸: ({itemSize.x}x{itemSize.y})");
             }
         }
 
         return spawnedItem;
     }
 
-    // 创建头盔物品
-    private GameObject CreateHelmetItem(GameObject prefab, InventorySystemItemDataSO data, Vector2Int gridPos)
+    // 创建物品
+    private GameObject CreateItem(GameObject prefab, InventorySystemItemDataSO data, Vector2Int gridPos)
     {
         if (prefab == null || data == null || targetGrid == null) return null;
 
@@ -212,7 +512,7 @@ public class ItemSpawner : MonoBehaviour
         }
     }
 
-    // 检查位置是否可用
+    // 检查位置是否可用 (使用0/1标记)
     private bool IsPositionAvailable(Vector2Int position, Vector2Int size)
     {
         if (gridOccupancy == null) return false;
@@ -227,12 +527,12 @@ public class ItemSpawner : MonoBehaviour
             return false;
         }
 
-        // 检查重叠
+        // 检查重叠 (0=空闲, 1=占用)
         for (int x = position.x; x < position.x + size.x; x++)
         {
             for (int y = position.y; y < position.y + size.y; y++)
             {
-                if (gridOccupancy[x, y])
+                if (gridOccupancy[x, y] == 1) // 位置被占用
                 {
                     return false;
                 }
@@ -266,8 +566,8 @@ public class ItemSpawner : MonoBehaviour
         return new Vector2Int(-1, -1); // 没有找到可用位置
     }
 
-    // 标记网格占用状态
-    private void MarkGridOccupied(Vector2Int position, Vector2Int size, bool occupied)
+    // 标记网格占用状态 (0=空闲, 1=占用)
+    private void MarkGridOccupied(Vector2Int position, Vector2Int size, int occupancyValue)
     {
         if (gridOccupancy == null) return;
 
@@ -278,7 +578,7 @@ public class ItemSpawner : MonoBehaviour
                 if (x >= 0 && x < gridOccupancy.GetLength(0) &&
                     y >= 0 && y < gridOccupancy.GetLength(1))
                 {
-                    gridOccupancy[x, y] = occupied;
+                    gridOccupancy[x, y] = occupancyValue;
                 }
             }
         }
@@ -290,8 +590,8 @@ public class ItemSpawner : MonoBehaviour
         SpawnedItemInfo itemInfo = spawnedItems.FirstOrDefault(info => info.itemObject == item);
         if (itemInfo != null)
         {
-            // 清除网格占用
-            MarkGridOccupied(itemInfo.gridPosition, itemInfo.size, false);
+            // 清除网格占用 (设置为0)
+            MarkGridOccupied(itemInfo.gridPosition, itemInfo.size, 0);
 
             // 从列表中移除
             spawnedItems.Remove(itemInfo);
@@ -309,30 +609,97 @@ public class ItemSpawner : MonoBehaviour
         }
     }
 
-    // 生成随机头盔（编辑器右键菜单）
-    [ContextMenu("生成随机头盔")]
-    public void SpawnRandomHelmet()
-    {
-        if (itemPrefabs != null && itemPrefabs.Length > 0)
-        {
-            int randomIndex = Random.Range(0, itemPrefabs.Length);
-            SpawnHelmetAtPosition(Vector2Int.zero, randomIndex);
-        }
-    }
-
     // 清空所有物品
-    [ContextMenu("清空所有物品")]
     public void ClearAllItems()
     {
         for (int i = spawnedItems.Count - 1; i >= 0; i--)
         {
             RemoveItem(spawnedItems[i].itemObject);
         }
+
+        // 重置网格占用状态
+        if (gridOccupancy != null)
+        {
+            int width = gridOccupancy.GetLength(0);
+            int height = gridOccupancy.GetLength(1);
+            for (int x = 0; x < width; x++)
+            {
+                for (int y = 0; y < height; y++)
+                {
+                    gridOccupancy[x, y] = 0;
+                }
+            }
+        }
+
+        if (showDebugInfo)
+        {
+            Debug.Log("已清空所有物品并重置网格占用状态");
+        }
+    }
+
+    // 打印网格占用状态 (调试用)
+    private void PrintGridOccupancy()
+    {
+        if (gridOccupancy == null) return;
+
+        int width = gridOccupancy.GetLength(0);
+        int height = gridOccupancy.GetLength(1);
+
+        System.Text.StringBuilder sb = new System.Text.StringBuilder();
+        sb.AppendLine("网格占用状态 (0=空闲, 1=占用):");
+
+        for (int y = 0; y < height; y++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                sb.Append(gridOccupancy[x, y]);
+                sb.Append(" ");
+            }
+            sb.AppendLine();
+        }
+
+        Debug.Log(sb.ToString());
     }
 
     // 获取网格占用状态数组（供外部调用）
-    public bool[,] GetGridOccupancy()
+    public int[,] GetGridOccupancy()
     {
         return gridOccupancy;
+    }
+
+    // 获取生成的物品列表
+    public List<SpawnedItemInfo> GetSpawnedItems()
+    {
+        return spawnedItems;
+    }
+
+    // 设置生成数量
+    public void SetSpawnCount(int count)
+    {
+        spawnCount = Mathf.Clamp(count, 1, 50);
+    }
+
+    // 获取生成数量
+    public int GetSpawnCount()
+    {
+        return spawnCount;
+    }
+
+    // 获取加载的物品数据数量
+    public int GetLoadedItemDataCount()
+    {
+        return allItemData.Count;
+    }
+
+    // 获取加载的预制体数量
+    public int GetLoadedPrefabCount()
+    {
+        return itemPrefabDict.Count;
+    }
+
+    // 获取所有物品数据
+    public List<InventorySystemItemDataSO> GetAllItemData()
+    {
+        return allItemData;
     }
 }
