@@ -2,50 +2,68 @@ using UnityEngine;
 
 public enum InventorySystemItemCategory
 {
-    Helmet,         // å¤´ç›”
-    Armor,          // æŠ¤ç”²
-    TacticalRig,    // æˆ˜æœ¯æŒ‚å…·
-    Backpack,       // èƒŒåŒ…
-    Weapon,         // æ­¦å™¨
-    Ammunition,     // å¼¹è¯
-    Food,           // é£Ÿç‰©
-    Drink,          // é¥®æ–™
-    Sedative,       // é•‡é™å‰‚
-    Hemostatic,     // æ­¢è¡€å‰‚
-    Healing,        // æ²»ç–—ç”¨å“
-    Intelligence,   // æƒ…æŠ¥
-    Currency        // è´§å¸
+    Helmet,         // Í·¿ø
+    Armor,          // »¤¼×
+    TacticalRig,    // Õ½Êõ¹Ò¾ß
+    Backpack,       // ±³°ü
+    Weapon,         // ÎäÆ÷
+    Ammunition,     // µ¯Ò©
+    Food,           // Ê³Îï
+    Drink,          // ÒûÁÏ
+    Sedative,       // Õò¾²¼Á
+    Hemostatic,     // Ö¹Ñª¼Á
+    Healing,        // ÖÎÁÆÓÃÆ·
+    Intelligence,   // Çé±¨
+    Currency        // »õ±Ò
 }
 
 [CreateAssetMenu(fileName = "New Item", menuName = "Inventory System/Item Data")]
 public class InventorySystemItemDataSO : ScriptableObject
 {
-    [Header("åŸºæœ¬ä¿¡æ¯")]
+    [Header("»ù±¾ĞÅÏ¢")]
     public int id;
     public string itemName;
 
-    [Header("ç‰©å“ç±»åˆ«")]
+    [Header("ÎïÆ·Àà±ğ")]
     public InventorySystemItemCategory itemCategory = InventorySystemItemCategory.Helmet;
 
-    [Header("ç½‘æ ¼å°ºå¯¸")]
+    [Header("Íø¸ñ³ß´ç")]
     public int height = 1;
     public int width = 1;
 
-    [Header("çè´µç¨‹åº¦")]
+    [Header("Õä¹ó³Ì¶È")]
     public string rarity;
 
-    [Header("å®¹é‡ä¿¡æ¯(èƒŒåŒ…/æˆ˜æœ¯æŒ‚å…·)")]
+    [Header("ÈİÁ¿ĞÅÏ¢(±³°ü/Õ½Êõ¹Ò¾ß)")]
     [SerializeField] private int cellH;
     [SerializeField] private int cellV;
 
-    [Header("å­å¼¹ç±»å‹(å¼¹è¯/æ­¦å™¨)")]
+    [Header("×Óµ¯ÀàĞÍ(µ¯Ò©/ÎäÆ÷)")]
     [SerializeField] private string bulletType;
 
-    [Header("èƒŒæ™¯é¢œè‰²")]
+    [Header("±³¾°ÑÕÉ«")]
     public string backgroundColor;
 
-    [Header("ç‰©å“å›¾æ ‡")]
+    [Header("ÎïÆ·Í¼±ê")]
     public Sprite itemIcon;
+
+    [Header("ËõĞ´Ãû³Æ")]
+    public string shortName;
+
+    [Header("ÄÍ¾ÃÖµ(Í·¿ø/»¤¼×)")]
+    public int durability;
+
+    [Header("Ê¹ÓÃ´ÎÊı(Ê³Æ·/ÒûÁÏ/Ò½ÁÆÓÃÆ·)")]
+    public int usageCount;
+
+    [Header("×î´ó»Ø¸´ÑªÁ¿(ÖÎÁÆÓÃÆ·)")]
+    public int maxHealAmount;
+
+    [Header("¶ÑµşÉÏÏŞ(»õ±Ò/µ¯Ò©)")]
+    public int maxStack;
+
+    [Header("Çé±¨Öµ(Çé±¨ÎïÆ·)")]
+    public int intelligenceValue;
 
     [HideInInspector]
     public string category;

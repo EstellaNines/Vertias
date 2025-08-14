@@ -6,7 +6,6 @@ using UnityEditor;
 public class ItemSpawnerEditor : Editor
 {
     private ItemSpawner spawner;
-    private bool showItemTypesFoldout = true;
     private bool showDebugFoldout = false;
 
     private void OnEnable()

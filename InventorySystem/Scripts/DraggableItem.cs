@@ -8,7 +8,7 @@ using Unity.VisualScripting;
 [RequireComponent(typeof(CanvasGroup))]
 public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
-    [Header("æ‹–æ‹½æ—¶è‡ªåŠ¨å¯»æ‰¾")]
+    [Header("ÍÏ×§Ê±×Ô¶¯Ñ°ÕÒ")]
     [SerializeField] private InventorySystemItem item;
 
     private RectTransform rectTransform;
@@ -31,6 +31,8 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     private Vector2 originalAnchorMax;
     private Vector2 originalPivot;
 
+    private bool isDragging = false;
+
     private void Awake()
     {
         rectTransform = GetComponent<RectTransform>();
@@ -47,6 +49,8 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
 
         originalSize = rectTransform.sizeDelta;
         originalScale = rectTransform.localScale;
+
+
     }
 
     private void CacheImageComponents()
@@ -89,6 +93,7 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     {
         if (!item.IsDraggable) return;
 
+        isDragging = true; // ÉèÖÃÍÏ×§×´Ì¬
         canvasGroup.alpha = 1.0f;
         canvasGroup.blocksRaycasts = false;
 
@@ -105,7 +110,7 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
 
         if (!wasInEquipSlot)
         {
-            // æ£€æŸ¥ä¸åŒç±»å‹çš„ç½‘æ ¼
+            // ¼ì²é²»Í¬ÀàĞÍµÄÍø¸ñ
             object parentGrid = null;
             System.Type gridType = null;
 
@@ -136,7 +141,7 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
 
             if (parentGrid != null)
             {
-                // ä½¿ç”¨åå°„è°ƒç”¨RemoveItem
+                // Ê¹ÓÃ·´Éäµ÷ÓÃRemoveItem
                 var removeItemMethod = gridType.GetMethod("RemoveItem",
                     System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
                 if (removeItemMethod != null)
@@ -161,7 +166,7 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         canvasGroup.alpha = 1.0f;
         canvasGroup.blocksRaycasts = false;
 
-        // é€šçŸ¥InventoryControllerå¼€å§‹æ‹–æ‹½
+        // Í¨ÖªInventoryController¿ªÊ¼ÍÏ×§
         var inventoryController = FindObjectOfType<InventoryController>();
         if (inventoryController != null)
         {
@@ -188,7 +193,7 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     {
         if (!item.IsDraggable) return;
 
-        // ç§»é™¤ isDragging = false;
+        // ÒÆ³ı isDragging = false;
         bool placementSuccessful = false;
 
         EquipSlot originalEquipSlot = originalParent.GetComponent<EquipSlot>();
@@ -200,7 +205,7 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         var results = new System.Collections.Generic.List<RaycastResult>();
         EventSystem.current.RaycastAll(eventData, results);
 
-        // æ£€æŸ¥è£…å¤‡æ§½
+        // ¼ì²é×°±¸²Û
         foreach (var result in results)
         {
             EquipSlot equipSlot = result.gameObject.GetComponent<EquipSlot>();
@@ -222,7 +227,7 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
             }
         }
 
-        // æ£€æŸ¥ç½‘æ ¼
+        // ¼ì²éÍø¸ñ
         if (!placementSuccessful)
         {
             object targetGrid = null;
@@ -230,7 +235,7 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
 
             foreach (var result in results)
             {
-                // æ£€æŸ¥ItemGrid
+                // ¼ì²éItemGrid
                 ItemGrid itemGrid = result.gameObject.GetComponent<ItemGrid>();
                 if (itemGrid != null)
                 {
@@ -253,7 +258,7 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
                     break;
                 }
 
-                // æ£€æŸ¥BackpackItemGrid
+                // ¼ì²éBackpackItemGrid
                 BackpackItemGrid backpackGrid = result.gameObject.GetComponent<BackpackItemGrid>();
                 if (backpackGrid != null)
                 {
@@ -276,7 +281,7 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
                     break;
                 }
 
-                // æ£€æŸ¥TactiaclRigItemGrid
+                // ¼ì²éTactiaclRigItemGrid
                 TactiaclRigItemGrid tacticalRigGrid = result.gameObject.GetComponent<TactiaclRigItemGrid>();
                 if (tacticalRigGrid != null)
                 {
@@ -303,9 +308,10 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
             if (targetGrid != null)
             {
                 Vector2Int dropPosition = Vector2Int.zero;
-                Vector2Int itemSize = new Vector2Int(item.Data.width, item.Data.height);
+                Vector2Int itemSize = item.Size;  //new Vector2Int(item.Data.width, item.Data.height);
 
-                // è°ƒç”¨å¯¹åº”çš„GetTileGridPositionæ–¹æ³•
+
+                // µ÷ÓÃ¶ÔÓ¦µÄGetTileGridPosition·½·¨
                 if (gridType == typeof(ItemGrid))
                 {
                     dropPosition = ((ItemGrid)targetGrid).GetTileGridPosition(eventData.position);
@@ -319,11 +325,11 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
                     dropPosition = ((TactiaclRigItemGrid)targetGrid).GetTileGridPosition(eventData.position);
                 }
 
-                Debug.Log($"å°è¯•æ”¾åˆ°ç½‘æ ¼ä½ç½®: ({dropPosition.x}, {dropPosition.y}), ç‰©å“å¤§å°: ({itemSize.x}, {itemSize.y})");
+                Debug.Log($"³¢ÊÔ·Åµ½Íø¸ñÎ»ÖÃ: ({dropPosition.x}, {dropPosition.y}), ÎïÆ·´óĞ¡: ({itemSize.x}, {itemSize.y})");
 
                 bool canPlace = false;
 
-                // è°ƒç”¨å¯¹åº”çš„CanPlaceItemæ–¹æ³•
+                // µ÷ÓÃ¶ÔÓ¦µÄCanPlaceItem·½·¨
                 if (gridType == typeof(ItemGrid))
                 {
                     canPlace = ((ItemGrid)targetGrid).CanPlaceItem(dropPosition, itemSize);
@@ -341,7 +347,7 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
                 {
                     transform.SetParent(((MonoBehaviour)targetGrid).transform, false);
 
-                    // è°ƒç”¨å¯¹åº”çš„PlaceItemæ–¹æ³•
+                    // µ÷ÓÃ¶ÔÓ¦µÄPlaceItem·½·¨
                     if (gridType == typeof(ItemGrid))
                     {
                         var placeItemMethod = typeof(ItemGrid).GetMethod("PlaceItem",
@@ -378,20 +384,20 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
                         itemBackground.SetActive(true);
                     }
 
-                    Debug.Log($"ç‰©å“æ”¾ç½®ç½‘æ ¼æˆåŠŸï¼Œæ”¾åˆ°ç½‘æ ¼ä½ç½®: ({dropPosition.x}, {dropPosition.y})");
+                    Debug.Log($"ÎïÆ··ÅÖÃÍø¸ñ³É¹¦£¬·Åµ½Íø¸ñÎ»ÖÃ: ({dropPosition.x}, {dropPosition.y})");
                 }
                 else
                 {
-                    Debug.Log($"æ— æ³•æ”¾åˆ°ç½‘æ ¼ä½ç½®: ({dropPosition.x}, {dropPosition.y}) - ä½ç½®è¢«å ç”¨æˆ–è¶…å‡ºè¾¹ç•Œ");
+                    Debug.Log($"ÎŞ·¨·Åµ½Íø¸ñÎ»ÖÃ: ({dropPosition.x}, {dropPosition.y}) - Î»ÖÃ±»Õ¼ÓÃ»ò³¬³ö±ß½ç");
                 }
             }
             else
             {
-                Debug.Log("æœªæ£€æµ‹åˆ°æœ‰æ•ˆçš„ç½‘æ ¼ç›®æ ‡");
+                Debug.Log("Î´¼ì²âµ½ÓĞĞ§µÄÍø¸ñÄ¿±ê");
             }
         }
 
-        // è¿”å›åŸä½ç½®
+        // ·µ»ØÔ­Î»ÖÃ
         if (!placementSuccessful)
         {
             transform.SetParent(originalParent, false);
@@ -405,7 +411,7 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
             {
                 if (originalEquipSlot != null)
                 {
-                    // é‡æ–°è£…å¤‡ç‰©å“å¹¶åˆ›å»ºç½‘æ ¼
+                    // ÖØĞÂ×°±¸ÎïÆ·²¢´´½¨Íø¸ñ
                     originalEquipSlot.ReequipItem(this);
                 }
 
@@ -420,7 +426,7 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
                 if (parentGrid != null)
                 {
                     Vector2Int gridPos = parentGrid.GetTileGridPosition(originalPos + (Vector2)parentGrid.transform.position);
-                    Vector2Int itemSize = new Vector2Int(item.Data.width, item.Data.height);
+                    Vector2Int itemSize = item.Size;//new Vector2Int(item.Data.width, item.Data.height);
 
                     var placeItemMethod = typeof(ItemGrid).GetMethod("PlaceItem",
                         System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
@@ -443,12 +449,14 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         canvasGroup.alpha = 1f;
         canvasGroup.blocksRaycasts = true;
 
-        // é€šçŸ¥InventoryControllerç»“æŸæ‹–æ‹½
+        // Í¨ÖªInventoryController½áÊøÍÏ×§
         var inventoryController = FindObjectOfType<InventoryController>();
         if (inventoryController != null)
         {
             inventoryController.ClearDraggedItem();
         }
+
+        isDragging = false; // ½áÊøÍÏ×§×´Ì¬
     }
 
     private void FitToEquipSlot(EquipSlot equipSlot)

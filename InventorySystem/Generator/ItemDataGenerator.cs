@@ -109,6 +109,7 @@ public class ItemDataGenerator : EditorWindow
             // 填充数据
             itemData.id = jsonItem.id;
             itemData.itemName = jsonItem.name;
+            itemData.shortName = jsonItem.shortName;
             itemData.height = jsonItem.height;
             itemData.width = jsonItem.width;
             itemData.rarity = jsonItem.rarity;
@@ -116,6 +117,11 @@ public class ItemDataGenerator : EditorWindow
             itemData.CellV = jsonItem.cellV;
             itemData.BulletType = jsonItem.type;
             itemData.backgroundColor = jsonItem.BackgroundColor;
+            itemData.durability = jsonItem.durability;
+            itemData.usageCount = jsonItem.usageCount;
+            itemData.maxHealAmount = jsonItem.maxHealAmount;
+            itemData.maxStack = jsonItem.maxStack;
+            itemData.intelligenceValue = jsonItem.intelligenceValue;
 
             // 设置正确的枚举类别而不是字符串
             if (System.Enum.TryParse<InventorySystemItemCategory>(categoryName, out InventorySystemItemCategory categoryEnum))

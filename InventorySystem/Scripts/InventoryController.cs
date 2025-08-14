@@ -106,8 +106,10 @@ public class InventoryController : MonoBehaviour
             return;
         }
 
-        // 使用当前拖拽物品的大小
-        Vector2Int itemSize = new Vector2Int(draggedItem.Data.width, draggedItem.Data.height);
+        // 使用拖拽物品的实际大小进行预览
+        Vector2Int itemSize = draggedItem.Data != null ? 
+            new Vector2Int(draggedItem.Data.width, draggedItem.Data.height) : 
+            previewItemSize; // 如果没有数据则使用默认大小
 
         // 检查是否可以放置
         bool canPlace = CanPlaceItem(targetGrid, tilePos, itemSize);

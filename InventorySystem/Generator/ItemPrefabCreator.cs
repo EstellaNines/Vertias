@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEditor;
 using System.IO;
+using TMPro;
 
 #if UNITY_EDITOR
 public class ItemPrefabCreator : EditorWindow
@@ -198,8 +199,13 @@ public class ItemPrefabCreator : EditorWindow
             // 添加ItemHoverHighlight组件
             ItemHoverHighlight hoverHighlight = mainObject.AddComponent<ItemHoverHighlight>();
             
+
+            
+            // 创建MaxData和CurrentData TMP对象
+            CreateDataDisplayObjects(backgroundObject, itemData, itemWidth, itemHeight);
+            
             // 确保分类文件夹存在
-            string categoryFolder = Path.Combine(prefabOutputPath, GetCategoryFolderName(itemData.category));
+            string categoryFolder = Path.Combine(prefabOutputPath, GetCategoryFolderName(itemData.itemCategory.ToString()));
             if (!Directory.Exists(categoryFolder))
             {
                 Directory.CreateDirectory(categoryFolder);
@@ -332,6 +338,110 @@ public class ItemPrefabCreator : EditorWindow
                 Debug.LogError($"清理预制体时发生错误: {e.Message}");
             }
         }
+    }
+
+    private void CreateDataDisplayObjects(GameObject backgroundParent, InventorySystemItemDataSO itemData, float itemWidth, float itemHeight)
+    {
+        // 根据物品类型确定需要显示的数据
+        string currentDataText = "";
+        string maxDataText = "";
+        
+        switch (itemData.itemCategory)
+        {
+            case InventorySystemItemCategory.Helmet:
+            case InventorySystemItemCategory.Armor:
+                if (itemData.durability > 0)
+                {
+                    currentDataText = itemData.durability.ToString();
+                    maxDataText = "/" + itemData.durability.ToString();
+                }
+                break;
+                
+            case InventorySystemItemCategory.Food:
+            case InventorySystemItemCategory.Drink:
+            case InventorySystemItemCategory.Hemostatic:
+            case InventorySystemItemCategory.Sedative:
+                if (itemData.usageCount > 0)
+                {
+                    currentDataText = itemData.usageCount.ToString();
+                    maxDataText = "/" + itemData.usageCount.ToString();
+                }
+                break;
+                
+            case InventorySystemItemCategory.Healing:
+                if (itemData.maxHealAmount > 0)
+                {
+                    currentDataText = itemData.maxHealAmount.ToString();
+                    maxDataText = "/" + itemData.maxHealAmount.ToString();
+                }
+                break;
+                
+            case InventorySystemItemCategory.Currency:
+            case InventorySystemItemCategory.Ammunition:
+                if (itemData.maxStack > 0)
+                {
+                    currentDataText = "1";
+                    maxDataText = "/" + itemData.maxStack.ToString();
+                }
+                break;
+                
+            case InventorySystemItemCategory.Intelligence:
+                if (itemData.intelligenceValue > 0)
+                {
+                    currentDataText = itemData.intelligenceValue.ToString();
+                    maxDataText = "";
+                }
+                break;
+                
+            default:
+                return; // 其他类型不显示数据
+        }
+        
+        // 如果没有数据需要显示，直接返回
+        if (string.IsNullOrEmpty(currentDataText))
+            return;
+            
+        // 合并显示文本（如果有MaxData的话）
+        string displayText = currentDataText + maxDataText;
+        
+        // 创建数值显示对象，父对象设置为主对象（与UNTAR helmet保持一致）
+        GameObject dataDisplayObj = new GameObject("DataDisplay");
+        dataDisplayObj.transform.SetParent(backgroundParent.transform.parent); // 设置为主对象的子对象
+        dataDisplayObj.layer = 5;
+        
+        RectTransform dataRect = dataDisplayObj.AddComponent<RectTransform>();
+        // 设置锚点为右下角（与UNTAR helmet一致）
+        dataRect.anchorMin = new Vector2(1f, 0f);
+        dataRect.anchorMax = new Vector2(1f, 0f);
+        dataRect.pivot = new Vector2(1f, 0f);
+        // 位置设置为右下角（与UNTAR helmet一致）
+        dataRect.anchoredPosition = new Vector2(0f, 0f);
+        // 尺寸设置（与UNTAR helmet一致）
+        dataRect.sizeDelta = new Vector2(50, 2);
+        
+        CanvasRenderer dataRenderer = dataDisplayObj.AddComponent<CanvasRenderer>();
+        
+        TextMeshProUGUI dataTMP = dataDisplayObj.AddComponent<TextMeshProUGUI>();
+        dataTMP.text = displayText;
+        // 在CreateDataDisplayObjects方法中
+        dataTMP.fontSize = 18; // 基础字体大小
+        dataTMP.fontSizeMin = 18; // 最小字体大小
+        dataTMP.fontSizeMax = 20; // 最大字体大小
+        dataTMP.enableAutoSizing = true; // 启用自动调整大小
+        dataTMP.color = Color.white;
+        dataTMP.alignment = TextAlignmentOptions.BottomRight; // 底部右对齐（与UNTAR helmet一致）
+        // 禁用自动换行（与UNTAR helmet一致）
+        dataTMP.enableWordWrapping = false;
+        dataTMP.overflowMode = TextOverflowModes.Overflow;
+        // 启用自动调整大小（与UNTAR helmet一致）
+        dataTMP.enableAutoSizing = true;
+        dataTMP.fontSizeMin = 18;
+        dataTMP.fontSizeMax = 20;
+        // 设置字体权重（与UNTAR helmet一致）
+        dataTMP.fontWeight = TMPro.FontWeight.Regular;
+        // 设置水平和垂直对齐（与UNTAR helmet一致）
+        dataTMP.horizontalAlignment = TMPro.HorizontalAlignmentOptions.Right;
+        dataTMP.verticalAlignment = TMPro.VerticalAlignmentOptions.Bottom;
     }
 }
 #endif

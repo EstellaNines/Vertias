@@ -38,6 +38,7 @@ public class InventorySystemJsonItemData
 {
     public int id;
     public string name;
+    public string shortName;
     public int height;
     public int width;
     public string rarity;
@@ -45,5 +46,10 @@ public class InventorySystemJsonItemData
     public int cellV;
     public string type;
     public string BackgroundColor;
-    public string ItemIcon; 
+    public string ItemIcon;
+    public int durability;
+    public int usageCount;
+    public int maxHealAmount;
+    public int maxStack;
+    public int intelligenceValue;
 }
