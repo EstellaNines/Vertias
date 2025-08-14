@@ -124,7 +124,7 @@ public class ItemDataHolder : MonoBehaviour
         }
 
         // 设置透明度为204
-        baseColor.a = 225f / 255f;
+        baseColor.a = 225f / 255f; // 设置透明度
         return baseColor;
     }
 

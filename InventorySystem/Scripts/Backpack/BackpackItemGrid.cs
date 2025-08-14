@@ -417,5 +417,45 @@ public class BackpackItemGrid : MonoBehaviour, IDropHandler
 
         // 清空物品列表
         placedItems.Clear();
-    }
+        }
+        
+        /// <summary>
+        /// 按格子坐标获取物品
+        /// </summary>
+        /// <param name="x">X坐标</param>
+        /// <param name="y">Y坐标</param>
+        /// <returns>该位置的物品，如果没有则返回null</returns>
+        public InventorySystemItem GetItem(int x, int y)
+        {
+            foreach (var placedItem in placedItems)
+            {
+                // 检查点击位置是否在物品范围内
+                if (x >= placedItem.position.x && x < placedItem.position.x + placedItem.size.x &&
+                    y >= placedItem.position.y && y < placedItem.position.y + placedItem.size.y)
+                {
+                    return placedItem.itemObject.GetComponent<InventorySystemItem>();
+                }
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// 根据鼠标屏幕位置获取物品
+        /// </summary>
+        /// <param name="screenMousePos">鼠标屏幕位置</param>
+        /// <returns>该位置的物品，如果没有则返回null</returns>
+        public InventorySystemItem GetItemAtScreenPosition(Vector2 screenMousePos)
+        {
+            Vector2Int gridPos = GetTileGridPosition(screenMousePos);
+            return GetItem(gridPos.x, gridPos.y);
+        }
+
+        /// <summary>
+        /// 获取所有已放置的物品
+        /// </summary>
+        /// <returns>已放置物品列表</returns>
+        public List<PlacedItem> GetPlacedItems()
+        {
+            return new List<PlacedItem>(placedItems);
+        }
 }

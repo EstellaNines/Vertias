@@ -30,8 +30,7 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     private Vector2 originalAnchorMin;
     private Vector2 originalAnchorMax;
     private Vector2 originalPivot;
-
-    private bool isDragging = false;
+    public bool isDragging { get; private set; } = false; // 改为公共属性
 
     private void Awake()
     {
@@ -94,6 +93,13 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         if (!item.IsDraggable) return;
 
         isDragging = true; // 设置拖拽状态
+        
+        // 强制隐藏悬停高亮
+        var hoverHighlight = GetComponent<ItemHoverHighlight>();
+        if (hoverHighlight != null)
+        {
+            hoverHighlight.ForceHide();
+        }
         canvasGroup.alpha = 1.0f;
         canvasGroup.blocksRaycasts = false;
 
@@ -193,7 +199,6 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     {
         if (!item.IsDraggable) return;
 
-        // 移除 isDragging = false;
         bool placementSuccessful = false;
 
         EquipSlot originalEquipSlot = originalParent.GetComponent<EquipSlot>();
@@ -457,6 +462,13 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         }
 
         isDragging = false; // 结束拖拽状态
+        
+        // 添加：确保在拖拽结束后隐藏高亮覆盖层
+        var hoverHighlight = GetComponent<ItemHoverHighlight>();
+        if (hoverHighlight != null)
+        {
+            hoverHighlight.ForceHide();
+        }
     }
 
     private void FitToEquipSlot(EquipSlot equipSlot)

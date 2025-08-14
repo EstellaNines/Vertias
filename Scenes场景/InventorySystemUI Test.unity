@@ -231,6 +231,11 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1579302}
   m_CullTransparentMesh: 1
+--- !u!223 &12743310 stripped
+Canvas:
+  m_CorrespondingSourceObject: {fileID: 6781750670584031477, guid: 6a74b808f5888aa4b8a4a0625262b9b1, type: 3}
+  m_PrefabInstance: {fileID: 190946367}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &67446897
 GameObject:
   m_ObjectHideFlags: 0
@@ -420,6 +425,10 @@ PrefabInstance:
       propertyPath: currentActiveGrid
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6250862913932596021, guid: 6a74b808f5888aa4b8a4a0625262b9b1, type: 3}
+      propertyPath: parentCanvas
+      value: 
+      objectReference: {fileID: 12743310}
     - target: {fileID: 7631875762339514084, guid: 6a74b808f5888aa4b8a4a0625262b9b1, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -627,6 +636,7 @@ MonoBehaviour:
   enablePreview: 1
   previewItemSize: {x: 2, y: 1}
   currentActiveGrid: 0
+  contextMenu: {fileID: 0}
 --- !u!1 &694997595
 GameObject:
   m_ObjectHideFlags: 0

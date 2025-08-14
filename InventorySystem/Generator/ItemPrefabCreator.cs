@@ -199,7 +199,27 @@ public class ItemPrefabCreator : EditorWindow
             // 添加ItemHoverHighlight组件
             ItemHoverHighlight hoverHighlight = mainObject.AddComponent<ItemHoverHighlight>();
             
-
+            // 创建专门的高亮覆盖层Image对象
+            GameObject overlayObject = new GameObject("Image");
+            overlayObject.transform.SetParent(mainObject.transform);
+            overlayObject.layer = 5;
+            
+            RectTransform overlayRect = overlayObject.AddComponent<RectTransform>();
+            overlayRect.anchorMin = new Vector2(0.5f, 0.5f);
+            overlayRect.anchorMax = new Vector2(0.5f, 0.5f);
+            overlayRect.anchoredPosition = Vector2.zero;
+            overlayRect.sizeDelta = new Vector2(itemWidth, itemHeight);
+            
+            // 添加CanvasRenderer和Image组件
+            CanvasRenderer overlayRenderer = overlayObject.AddComponent<CanvasRenderer>();
+            Image overlayImage = overlayObject.AddComponent<Image>();
+            overlayImage.color = new Color(1f, 1f, 1f, 0f); // 修改：将透明度从0.749f改为0f，默认完全透明
+            overlayImage.raycastTarget = true;
+            
+            // 通过反射设置ItemHoverHighlight的overlay字段
+            var overlayField = typeof(ItemHoverHighlight).GetField("overlay", 
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            overlayField?.SetValue(hoverHighlight, overlayImage);
             
             // 创建MaxData和CurrentData TMP对象
             CreateDataDisplayObjects(backgroundObject, itemData, itemWidth, itemHeight);
