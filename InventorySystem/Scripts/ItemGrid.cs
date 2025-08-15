@@ -30,12 +30,12 @@ public class ItemGrid : BaseItemGrid
             inventoryHeight = gridConfig.inventoryHeight;
             width = inventoryWidth;
             height = inventoryHeight;
-
+            
             // 强制更新网格数组
             InitializeGridArrays();
-
+            
             isUpdatingFromConfig = false;
-
+            
             // 移除showDebugInfo引用，直接使用Debug.Log
             Debug.Log($"从GridConfig加载尺寸: {inventoryWidth}x{inventoryHeight}");
         }

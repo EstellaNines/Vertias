@@ -120,4 +120,46 @@ public class InventorySystemItemDataSO : ScriptableObject
     {
         category = itemCategory.ToString();
     }
+    
+    [Header("旋转设置")]
+    [SerializeField] private int rotationAngle = 0; // 当前旋转角度（0, 90, 180, 270）
+    [SerializeField] private bool canRotate = true; // 是否允许旋转
+    
+    // 旋转角度属性
+    public int RotationAngle
+    {
+        get => rotationAngle;
+        set => rotationAngle = Mathf.Clamp(value, 0, 270);
+    }
+    
+    // 是否可旋转属性
+    public bool CanRotate
+    {
+        get => canRotate;
+        set => canRotate = value;
+    }
+    
+    // 获取旋转后的尺寸
+    public Vector2Int GetRotatedSize()
+    {
+        // 90度和270度旋转时，宽高互换
+        if (rotationAngle == 90 || rotationAngle == 270)
+        {
+            return new Vector2Int(height, width);
+        }
+        return new Vector2Int(width, height);
+    }
+    
+    // 旋转物品（顺时针90度）
+    public void RotateClockwise()
+    {
+        if (!canRotate) return;
+        rotationAngle = (rotationAngle + 90) % 360;
+    }
+    
+    // 重置旋转角度
+    public void ResetRotation()
+    {
+        rotationAngle = 0;
+    }
 }

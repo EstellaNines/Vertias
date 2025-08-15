@@ -1,5 +1,5 @@
-using System.Collections;
-using System.Collections.Generic;
+// TacticalRigItemGrid.cs
+// 战术挂具专用网格，继承 BaseItemGrid，支持运行时切换数据
 using UnityEngine;
 using UnityEngine.EventSystems;
 #if UNITY_EDITOR
@@ -9,17 +9,18 @@ using UnityEditor;
 [ExecuteInEditMode]
 public class TactiaclRigItemGrid : BaseItemGrid
 {
-    [Header("战术挂具网格系统参数设置")]
-    [SerializeField][FieldLabel("默认网格宽度")] private int defaultWidth = 1;
-    [SerializeField][FieldLabel("默认网格高度")] private int defaultHeight = 1;
-    
-    // 当前装备的战术挂具数据对象（动态设置）
+    [Header("战术挂具网格参数")]
+    [SerializeField, Tooltip("默认宽度")] private int defaultWidth = 1;
+    [SerializeField, Tooltip("默认高度")] private int defaultHeight = 1;
+
+    // 当前战术挂具数据（运行时动态设置）
     private InventorySystemItemDataSO currentTacticalRigData;
 
+    /* ---------------- 生命周期 ---------------- */
     protected override void Awake()
     {
-        base.Awake();
         LoadFromTacticalRigData();
+        base.Awake();
     }
 
     protected override void Start()
@@ -31,30 +32,22 @@ public class TactiaclRigItemGrid : BaseItemGrid
     protected override void OnValidate()
     {
         if (isUpdatingFromConfig) return;
-
         LoadFromTacticalRigData();
-        
         width = Mathf.Clamp(width, 1, 20);
         height = Mathf.Clamp(height, 1, 20);
-        
         base.OnValidate();
     }
 
-    protected override void Init(int width, int height)
+    protected override void Init(int w, int h)
     {
         if (rectTransform == null) return;
-
         float cellSize = gridConfig != null ? gridConfig.cellSize : 64f;
-
-        Vector2 size = new Vector2(
-            width * cellSize,
-            height * cellSize
-        );
-        rectTransform.sizeDelta = size;
+        rectTransform.sizeDelta = new Vector2(w * cellSize, h * cellSize);
+        if (Application.isPlaying) InitializeGridArrays();
     }
 
-    // 从战术挂具数据加载配置
-    public void LoadFromTacticalRigData()
+    /* ---------------- 动态数据 ---------------- */
+    private void LoadFromTacticalRigData()
     {
         if (currentTacticalRigData != null && !isUpdatingFromConfig)
         {
@@ -72,30 +65,24 @@ public class TactiaclRigItemGrid : BaseItemGrid
         }
     }
 
-    // 设置战术挂具数据并更新网格
+    /// <summary>运行时更换战术挂具</summary>
     public void SetTacticalRigData(InventorySystemItemDataSO data)
     {
         currentTacticalRigData = data;
         LoadFromTacticalRigData();
-
         if (Application.isPlaying)
         {
-            gridOccupancy = new bool[width, height];
+            InitializeGridArrays();
             placedItems.Clear();
         }
-
         Init(width, height);
     }
 
-    // 获取战术挂具数据
-    public InventorySystemItemDataSO GetTacticalRigData()
-    {
-        return currentTacticalRigData;
-    }
+    public InventorySystemItemDataSO GetTacticalRigData() => currentTacticalRigData;
 
-    public override void PlaceItem(GameObject itemObject, Vector2Int position, Vector2Int size)
-    {
-        base.PlaceItem(itemObject, position, size);
-        Debug.Log($"物品放置在战术挂具网格位置: ({position.x}, {position.y}), 物品尺寸: {size.x}x{size.y}");
-    }
+    /// <summary>挂具占用率</summary>
+    public float GetTacticalRigOccupancyRate() => GetOccupancyRate();
+
+    /// <summary>挂具剩余格子数</summary>
+    public int GetRemainingSpace() => width * height - occupiedCells.Count;
 }

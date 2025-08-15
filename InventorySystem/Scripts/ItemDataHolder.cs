@@ -234,12 +234,107 @@ public class ItemDataHolder : MonoBehaviour
 		return itemData != null ? itemData.height * itemData.width : 1;
 	}
 
-	// 获取物品尺寸
-	// 返回：物品尺寸
-	public Vector2Int GetCurrentSize()
+	[Header("旋转状态")]
+	[SerializeField] private int currentRotation = 0; // 当前实际旋转角度
+
+	// 获取当前旋转角度
+	public int GetCurrentRotation()
+	{
+		return currentRotation;
+	}
+
+	// 设置旋转角度
+	public void SetRotation(int angle)
+	{
+		currentRotation = Mathf.Clamp(angle, 0, 270);
+		UpdateRotationDisplay();
+	}
+
+	// 更新旋转显示 - 以几何中心为轴心（修复版）
+	private void UpdateRotationDisplay()
+	{
+	    RectTransform rectTransform = GetComponent<RectTransform>();
+	    if (rectTransform != null && itemData != null)
+	    {
+	        // 保存当前的世界位置（使用position而不是TransformPoint）
+	        Vector3 worldPosition = rectTransform.position;
+	        
+	        // 确保轴心为几何中心
+	        rectTransform.pivot = new Vector2(0.5f, 0.5f);
+	        
+	        // 应用旋转（直接设置，不需要复杂的位置计算）
+	        rectTransform.rotation = Quaternion.Euler(0, 0, -currentRotation);
+	        
+	        // 恢复世界位置（因为pivot已经是中心，所以position就是中心位置）
+	        rectTransform.position = worldPosition;
+	    }
+	}
+
+	// 获取当前网格的格子大小
+	private float GetCellSize()
+	{
+		// 尝试从父级网格获取格子大小
+		var parentGrid = GetComponentInParent<BaseItemGrid>();
+		if (parentGrid != null)
+		{
+			return parentGrid.GetCellSize();
+		}
+		return 64f; // 默认格子大小
+	}
+
+	// 旋转物品（顺时针90度）- 改进版
+	public bool RotateItem()
+	{
+		if (itemData == null || !itemData.CanRotate) return false;
+
+		// 保存旧的旋转状态
+		int oldRotation = currentRotation;
+		Vector2Int oldSize = GetRotatedSize();
+
+		// 应用新的旋转
+		currentRotation = (currentRotation + 90) % 360;
+		Vector2Int newSize = GetRotatedSize();
+
+		// 更新显示（包含中心轴心旋转逻辑）
+		UpdateRotationDisplay();
+
+		// 更新预制体尺寸
+		UpdatePrefabSize();
+
+		return true;
+	}
+
+	// 获取旋转后的尺寸
+	public Vector2Int GetRotatedSize()
 	{
 		if (itemData == null) return Vector2Int.one;
+
+		// 90度和270度旋转时，宽高互换
+		if (currentRotation == 90 || currentRotation == 270)
+		{
+			return new Vector2Int(itemData.height, itemData.width);
+		}
 		return new Vector2Int(itemData.width, itemData.height);
+	}
+
+	// 获取物品尺寸（支持旋转）
+	public Vector2Int GetCurrentSize()
+	{
+		return GetRotatedSize();
+	}
+
+	// 检查是否可以旋转
+	public bool CanRotate()
+	{
+		return itemData != null && itemData.CanRotate;
+	}
+
+	// 重置旋转
+	public void ResetRotation()
+	{
+		currentRotation = 0;
+		UpdateRotationDisplay();
+		UpdatePrefabSize();
 	}
 
 	// 调试：打印物品信息
