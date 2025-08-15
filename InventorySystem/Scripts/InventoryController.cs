@@ -212,9 +212,6 @@ public class InventoryController : MonoBehaviour
         draggedItem = null;
         inventoryHighlight.Hide();
     }
-
-    [Header("右键菜单设置")]
-    [SerializeField] private ItemContextMenu contextMenu; // 右键菜单组件
     
     // 处理主网格输入
     private void HandleMainGridInput()
@@ -230,19 +227,6 @@ public class InventoryController : MonoBehaviour
             {
                 Debug.Log($"点击主网格位置: ({gridPosition.x}, {gridPosition.y}) - 网格名称: {selectedItemGrid.gameObject.name}");
             }
-        }
-        
-        // 右键点击时显示物品菜单
-        if (Input.GetMouseButtonDown(1))
-        {
-            HandleRightClick(selectedItemGrid, Input.mousePosition);
-        }
-
-        // 右键按住时持续显示当前鼠标位置（调试用）
-        if (showDebugInfo && Input.GetMouseButton(1))
-        {
-            Vector2Int gridPosition = selectedItemGrid.GetTileGridPosition(Input.mousePosition);
-            Debug.Log($"鼠标当前主网格位置: ({gridPosition.x}, {gridPosition.y})");
         }
     }
 
@@ -261,19 +245,6 @@ public class InventoryController : MonoBehaviour
                 Debug.Log($"点击背包网格位置: ({gridPosition.x}, {gridPosition.y}) - 网格名称: {selectedBackpackGrid.gameObject.name}");
             }
         }
-        
-        // 右键点击时显示物品菜单
-        if (Input.GetMouseButtonDown(1))
-        {
-            HandleRightClick(selectedBackpackGrid, Input.mousePosition);
-        }
-
-        // 右键按住时持续显示当前鼠标位置（调试用）
-        if (showDebugInfo && Input.GetMouseButton(1))
-        {
-            Vector2Int gridPosition = selectedBackpackGrid.GetTileGridPosition(Input.mousePosition);
-            Debug.Log($"鼠标当前背包网格位置: ({gridPosition.x}, {gridPosition.y})");
-        }
     }
 
     // 处理战术挂具网格输入
@@ -291,76 +262,6 @@ public class InventoryController : MonoBehaviour
                 Debug.Log($"点击战术挂具网格位置: ({gridPosition.x}, {gridPosition.y}) - 网格名称: {selectedTacticalRigGrid.gameObject.name}");
             }
         }
-        
-        // 右键点击时显示物品菜单
-        if (Input.GetMouseButtonDown(1))
-        {
-            HandleRightClick(selectedTacticalRigGrid, Input.mousePosition);
-        }
-
-        // 右键按住时持续显示当前鼠标位置（调试用）
-        if (showDebugInfo && Input.GetMouseButton(1))
-        {
-            Vector2Int gridPosition = selectedTacticalRigGrid.GetTileGridPosition(Input.mousePosition);
-            Debug.Log($"鼠标当前战术挂具网格位置: ({gridPosition.x}, {gridPosition.y})");
-        }
-    }
-    
-    /// <summary>
-    /// 处理右键点击事件
-    /// </summary>
-    /// <param name="grid">网格对象</param>
-    /// <param name="screenPosition">屏幕位置</param>
-    private void HandleRightClick(object grid, Vector2 screenPosition)
-    {
-        if (contextMenu == null) return;
-        
-        InventorySystemItem item = GetItemAtPosition(grid, screenPosition);
-        
-        if (item != null)
-        {
-            // 显示右键菜单
-            contextMenu.ShowMenu(item, screenPosition);
-            
-            if (showDebugInfo)
-            {
-                Debug.Log($"右键点击物品: {item.Data.itemName} 在位置: {screenPosition}");
-            }
-        }
-        else
-        {
-            // 隐藏菜单（如果点击空白区域）
-            contextMenu.HideMenu();
-            
-            if (showDebugInfo)
-            {
-                Debug.Log("右键点击空白区域");
-            }
-        }
-    }
-    
-    /// <summary>
-    /// 根据屏幕位置获取物品
-    /// </summary>
-    /// <param name="grid">网格对象</param>
-    /// <param name="screenPosition">屏幕位置</param>
-    /// <returns>该位置的物品</returns>
-    private InventorySystemItem GetItemAtPosition(object grid, Vector2 screenPosition)
-    {
-        if (grid is ItemGrid itemGrid)
-        {
-            return itemGrid.GetItemAtScreenPosition(screenPosition);
-        }
-        else if (grid is BackpackItemGrid backpackGrid)
-        {
-            return backpackGrid.GetItemAtScreenPosition(screenPosition);
-        }
-        else if (grid is TactiaclRigItemGrid tacticalGrid)
-        {
-            return tacticalGrid.GetItemAtScreenPosition(screenPosition);
-        }
-        
-        return null;
     }
     
     // 设置选中的主网格
@@ -526,6 +427,5 @@ public class InventoryController : MonoBehaviour
 
         return RectTransformUtility.RectangleContainsScreenPoint(rectTransform, mousePos, null);
     }
-
 }
 

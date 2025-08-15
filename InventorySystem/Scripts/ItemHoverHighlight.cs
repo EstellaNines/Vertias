@@ -8,8 +8,8 @@ using UnityEngine.UI;
 public class ItemHoverHighlight : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
     [SerializeField] private Image overlay;
-    [SerializeField] private float fadeTime = 0.1f; // æ·»åŠ fadeTimeå˜é‡
-    private DraggableItem draggableItem; // æ·»åŠ å¼•ç”¨
+    [SerializeField] private float fadeTime = 0.1f; // Ìí¼ÓfadeTime±äÁ¿
+    private DraggableItem draggableItem; // Ìí¼ÓÒıÓÃ
 
     private void Awake()
     {
@@ -18,7 +18,7 @@ public class ItemHoverHighlight : MonoBehaviour, IPointerEnterHandler, IPointerE
             overlay = GetComponentInChildren<Image>();
         }
         
-        // è·å–DraggableItemç»„ä»¶å¼•ç”¨
+        // »ñÈ¡DraggableItem×é¼şÒıÓÃ
         draggableItem = GetComponent<DraggableItem>();
         
         if (overlay != null)
@@ -31,7 +31,7 @@ public class ItemHoverHighlight : MonoBehaviour, IPointerEnterHandler, IPointerE
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        // æ£€æŸ¥æ˜¯å¦æ­£åœ¨æ‹–æ‹½ï¼Œå¦‚æœæ˜¯åˆ™ä¸å“åº”æ‚¬åœäº‹ä»¶
+        // ¼ì²éÊÇ·ñÕıÔÚÍÏ×§£¬Èç¹ûÊÇÔò²»ÏìÓ¦ĞüÍ£ÊÂ¼ş
         if (draggableItem != null && draggableItem.isDragging)
             return;
             
@@ -44,7 +44,7 @@ public class ItemHoverHighlight : MonoBehaviour, IPointerEnterHandler, IPointerE
 
     public void OnPointerExit(PointerEventData eventData)
     {
-        // æ£€æŸ¥æ˜¯å¦æ­£åœ¨æ‹–æ‹½ï¼Œå¦‚æœæ˜¯åˆ™ä¸å“åº”æ‚¬åœäº‹ä»¶
+        // ¼ì²éÊÇ·ñÕıÔÚÍÏ×§£¬Èç¹ûÊÇÔò²»ÏìÓ¦ĞüÍ£ÊÂ¼ş
         if (draggableItem != null && draggableItem.isDragging)
             return;
             
@@ -66,10 +66,10 @@ public class ItemHoverHighlight : MonoBehaviour, IPointerEnterHandler, IPointerE
         }
     }
 
-    IEnumerator Fade(float targetAlpha) // ä¿®æ”¹å‚æ•°ç±»å‹ä¸ºfloat
+    IEnumerator Fade(float targetAlpha) // ĞŞ¸Ä²ÎÊıÀàĞÍÎªfloat
     {
         Color start = overlay.color;
-        Color target = new Color(start.r, start.g, start.b, targetAlpha); // åˆ›å»ºç›®æ ‡é¢œè‰²
+        Color target = new Color(start.r, start.g, start.b, targetAlpha); // ´´½¨Ä¿±êÑÕÉ«
         
         for (float t = 0; t < fadeTime; t += Time.unscaledDeltaTime)
         {
