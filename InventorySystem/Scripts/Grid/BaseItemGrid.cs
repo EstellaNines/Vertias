@@ -459,4 +459,45 @@ public abstract class BaseItemGrid : MonoBehaviour, IDropHandler
         if (width * height == 0) return 0f;
         return (float)occupiedCells.Count / (width * height);
     }
+
+    // 按格子坐标转化为UI坐标位置
+    public virtual Vector2 CalculatePositionOnGrid(InventorySystemItem item, int posX, int posY)
+    {
+        Vector2 position = new Vector2();
+        float cellSize = GetCellSize();
+
+        if (item != null && item.Data != null)
+        {
+            position.x = posX * cellSize + cellSize * item.Data.width / 2;
+            position.y = -(posY * cellSize + cellSize * item.Data.height / 2);
+        }
+        else
+        {
+            // 如果没有物品数据，使用默认1x1大小
+            position.x = posX * cellSize + cellSize / 2;
+            position.y = -(posY * cellSize + cellSize / 2);
+        }
+
+        return position;
+    }
+
+    // 重载方法：直接指定物品大小
+    public virtual Vector2 CalculatePositionOnGrid(int itemWidth, int itemHeight, int posX, int posY)
+    {
+        Vector2 position = new Vector2();
+        float cellSize = GetCellSize();
+
+        position.x = posX * cellSize + cellSize * itemWidth / 2;
+        position.y = -(posY * cellSize + cellSize * itemHeight / 2);
+
+        return position;
+    }
+
+    // 边界检查方法
+    public virtual bool BoundryCheck(int posX, int posY, int width, int height)
+    {
+        if (posX < 0 || posY < 0) return false;
+        if (posX + width > this.width || posY + height > this.height) return false;
+        return true;
+    }
 }

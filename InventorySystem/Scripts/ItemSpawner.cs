@@ -557,11 +557,7 @@ public class ItemSpawner : MonoBehaviour
             item.AddComponent<InventorySystemItem>();
         }
 
-        // 确保有 ItemHoverHighlight 组件
-        if (item.GetComponent<ItemHoverHighlight>() == null)
-        {
-            item.AddComponent<ItemHoverHighlight>();
-        }
+
 
         // 确保有 CanvasGroup 组件（DraggableItem 需要）
         if (item.GetComponent<CanvasGroup>() == null)

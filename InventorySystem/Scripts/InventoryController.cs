@@ -18,6 +18,7 @@ public class InventoryController : MonoBehaviour
 
     // 高亮组件
     private InventoryHighlight inventoryHighlight;
+    private HoverHighlight hoverHighlight; // 悬停高亮组件
 
     // 当前拖拽的物品（用于预览）
     private InventorySystemItem draggedItem;
@@ -41,6 +42,13 @@ public class InventoryController : MonoBehaviour
         {
             inventoryHighlight = gameObject.AddComponent<InventoryHighlight>();
         }
+
+        // 获取或添加HoverHighlight组件
+        hoverHighlight = GetComponent<HoverHighlight>();
+        if (hoverHighlight == null)
+        {
+            hoverHighlight = gameObject.AddComponent<HoverHighlight>();
+        }
     }
 
     private void Update()
@@ -50,7 +58,7 @@ public class InventoryController : MonoBehaviour
         {
             DetectHoveredGrid();
         }
-    
+
         // 根据当前活跃网格类型处理输入 - 只处理当前活跃的网格
         switch (currentActiveGrid)
         {
@@ -67,7 +75,7 @@ public class InventoryController : MonoBehaviour
                     HandleTacticalRigGridInput();
                 break;
         }
-    
+
         // 处理预览功能
         if (enablePreview)
         {
@@ -75,9 +83,7 @@ public class InventoryController : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// 处理预览功能
-    /// </summary>
+    // 处理预览功能
     private void HandlePreview()
     {
         // 只有在拖拽物品时才显示预览
@@ -107,8 +113,8 @@ public class InventoryController : MonoBehaviour
         }
 
         // 使用拖拽物品的实际大小进行预览
-        Vector2Int itemSize = draggedItem.Data != null ? 
-            new Vector2Int(draggedItem.Data.width, draggedItem.Data.height) : 
+        Vector2Int itemSize = draggedItem.Data != null ?
+            new Vector2Int(draggedItem.Data.width, draggedItem.Data.height) :
             previewItemSize; // 如果没有数据则使用默认大小
 
         // 检查是否可以放置
@@ -127,10 +133,7 @@ public class InventoryController : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// 获取当前活跃的网格
-    /// </summary>
-    /// <returns>当前活跃的网格对象</returns>
+    // 获取当前活跃的网格
     private object GetCurrentActiveGrid()
     {
         switch (currentActiveGrid)
@@ -146,12 +149,7 @@ public class InventoryController : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// 获取网格位置
-    /// </summary>
-    /// <param name="grid">网格对象</param>
-    /// <param name="screenPos">屏幕位置</param>
-    /// <returns>网格坐标</returns>
+    // 获取网格位置
     private Vector2Int GetTileGridPosition(object grid, Vector2 screenPos)
     {
         if (grid is ItemGrid itemGrid)
@@ -170,13 +168,7 @@ public class InventoryController : MonoBehaviour
         return new Vector2Int(-1, -1);
     }
 
-    /// <summary>
-    /// 检查是否可以放置物品
-    /// </summary>
-    /// <param name="grid">网格对象</param>
-    /// <param name="position">位置</param>
-    /// <param name="size">大小</param>
-    /// <returns>是否可以放置</returns>
+    // 检查是否可以放置物品
     private bool CanPlaceItem(object grid, Vector2Int position, Vector2Int size)
     {
         if (grid is ItemGrid itemGrid)
@@ -195,24 +187,19 @@ public class InventoryController : MonoBehaviour
         return false;
     }
 
-    /// <summary>
-    /// 设置当前拖拽的物品（供外部调用）
-    /// </summary>
-    /// <param name="item">拖拽的物品</param>
+    // 设置当前拖拽的物品（供外部调用）
     public void SetDraggedItem(InventorySystemItem item)
     {
         draggedItem = item;
     }
 
-    /// <summary>
-    /// 清除拖拽的物品
-    /// </summary>
+    // 清除拖拽的物品
     public void ClearDraggedItem()
     {
         draggedItem = null;
         inventoryHighlight.Hide();
     }
-    
+
     // 处理主网格输入
     private void HandleMainGridInput()
     {
@@ -263,7 +250,7 @@ public class InventoryController : MonoBehaviour
             }
         }
     }
-    
+
     // 设置选中的主网格
     public void SetSelectedMainGrid(ItemGrid itemGrid)
     {
@@ -362,9 +349,7 @@ public class InventoryController : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// 检测鼠标当前悬停的网格并自动切换活跃网格
-    /// </summary>
+    // 检测鼠标当前悬停的网格并自动切换活跃网格
     private void DetectHoveredGrid()
     {
         Vector2 mousePos = Input.mousePosition;
@@ -412,12 +397,7 @@ public class InventoryController : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// 检查鼠标是否在指定网格上方
-    /// </summary>
-    /// <param name="gridTransform">网格变换</param>
-    /// <param name="mousePos">鼠标位置</param>
-    /// <returns>是否在网格上方</returns>
+    // 检查鼠标是否在指定网格上方
     private bool IsMouseOverGrid(Transform gridTransform, Vector2 mousePos)
     {
         if (gridTransform == null) return false;
@@ -426,6 +406,30 @@ public class InventoryController : MonoBehaviour
         if (rectTransform == null) return false;
 
         return RectTransformUtility.RectangleContainsScreenPoint(rectTransform, mousePos, null);
+    }
+
+    /// <summary>
+    /// 显示悬停高亮
+    /// </summary>
+    /// <param name="item">要高亮的物品</param>
+    /// <param name="parentGrid">父级网格</param>
+    public void ShowHoverHighlight(InventorySystemItem item, Transform parentGrid)
+    {
+        if (hoverHighlight != null)
+        {
+            hoverHighlight.ShowHoverHighlight(item, parentGrid);
+        }
+    }
+
+    /// <summary>
+    /// 隐藏悬停高亮
+    /// </summary>
+    public void HideHoverHighlight()
+    {
+        if (hoverHighlight != null)
+        {
+            hoverHighlight.HideHoverHighlight();
+        }
     }
 }
 

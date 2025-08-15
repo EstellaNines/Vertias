@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 
 [RequireComponent(typeof(CanvasGroup))]
-public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
+public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerEnterHandler, IPointerExitHandler
 {
     [Header("拖拽时自动寻找")]
     [SerializeField] private InventorySystemItem item;
@@ -93,13 +93,6 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         if (!item.IsDraggable) return;
 
         isDragging = true; // 设置拖拽状态
-
-        // 强制隐藏悬停高亮
-        var hoverHighlight = GetComponent<ItemHoverHighlight>();
-        if (hoverHighlight != null)
-        {
-            hoverHighlight.ForceHide();
-        }
         canvasGroup.alpha = 1.0f;
         canvasGroup.blocksRaycasts = false;
 
@@ -164,6 +157,7 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
 
         if (itemBackground != null)
         {
+            // 拖拽时背景消失
             itemBackground.SetActive(false);
         }
 
@@ -225,7 +219,8 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
 
                     if (itemBackground != null)
                     {
-                        itemBackground.SetActive(false);
+                        // 放入装备槽后恢复背景显示
+                        itemBackground.SetActive(true);
                     }
                     break;
                 }
@@ -371,6 +366,7 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
 
                     if (itemBackground != null)
                     {
+                        // 放到任意网格后恢复背景
                         itemBackground.SetActive(true);
                     }
 
@@ -407,7 +403,8 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
 
                 if (itemBackground != null)
                 {
-                    itemBackground.SetActive(false);
+                    // 仍在装备槽，背景显示
+                    itemBackground.SetActive(true);
                 }
             }
             else
@@ -451,6 +448,7 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
 
                 if (itemBackground != null)
                 {
+                    // 回到原网格，背景显示
                     itemBackground.SetActive(true);
                 }
             }
@@ -468,13 +466,6 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         }
 
         isDragging = false; // 清除拖拽状态
-
-        // 添加：确保拖拽结束后不会重复触发悬停高亮
-        var hoverHighlight = GetComponent<ItemHoverHighlight>();
-        if (hoverHighlight != null)
-        {
-            hoverHighlight.ForceHide();
-        }
     }
 
     private void FitToEquipSlot(EquipSlot equipSlot)
@@ -528,5 +519,39 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         }
 
         return false;
+    }
+
+    // 在OnEndDrag方法后添加悬停事件处理方法
+    
+    /// <summary>
+    /// 鼠标进入物品时触发
+    /// </summary>
+    public void OnPointerEnter(PointerEventData eventData)
+    {
+        // 只有在非拖拽状态下才显示悬停高亮
+        if (!isDragging && item.IsDraggable)
+        {
+            var inventoryController = FindObjectOfType<InventoryController>();
+            if (inventoryController != null)
+            {
+                inventoryController.ShowHoverHighlight(item, transform.parent);
+            }
+        }
+    }
+    
+    /// <summary>
+    /// 鼠标离开物品时触发
+    /// </summary>
+    public void OnPointerExit(PointerEventData eventData)
+    {
+        // 隐藏悬停高亮
+        if (!isDragging)
+        {
+            var inventoryController = FindObjectOfType<InventoryController>();
+            if (inventoryController != null)
+            {
+                inventoryController.HideHoverHighlight();
+            }
+        }
     }
 }

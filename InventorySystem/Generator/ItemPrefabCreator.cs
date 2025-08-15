@@ -11,10 +11,10 @@ public class ItemPrefabCreator : EditorWindow
     private string prefabOutputPath = "Assets/InventorySystem/Prefab/";
     private string itemDataPath = "Assets/InventorySystem/Database/Scriptable Object数据对象/";
     private string gridConfigPath = "Assets/InventorySystem/Database/网格系统参数GridSystemSO/WarehouseGridConfig.asset";
-    
+
     // 缓存GridConfig
     private GridConfig gridConfig;
-    
+
     [MenuItem("InventorySystem/物品预制体生成器")]
     public static void ShowWindow()
     {
@@ -31,7 +31,7 @@ public class ItemPrefabCreator : EditorWindow
         prefabOutputPath = EditorGUILayout.TextField("预制体输出路径:", prefabOutputPath);
         itemDataPath = EditorGUILayout.TextField("物品数据路径:", itemDataPath);
         gridConfigPath = EditorGUILayout.TextField("网格配置路径:", gridConfigPath);
-        
+
         GUILayout.Space(10);
 
         // 生成按钮
@@ -39,9 +39,9 @@ public class ItemPrefabCreator : EditorWindow
         {
             GenerateAllItemPrefabs();
         }
-        
+
         GUILayout.Space(10);
-        
+
         if (GUILayout.Button("清理现有预制体", GUILayout.Height(25)))
         {
             ClearExistingPrefabs();
@@ -66,7 +66,7 @@ public class ItemPrefabCreator : EditorWindow
 
         // 查找所有InventorySystemItemDataSO文件
         string[] guids = AssetDatabase.FindAssets("t:InventorySystemItemDataSO", new[] { itemDataPath });
-        
+
         if (guids.Length == 0)
         {
             Debug.LogWarning("未找到任何InventorySystemItemDataSO数据文件！");
@@ -80,26 +80,26 @@ public class ItemPrefabCreator : EditorWindow
         {
             string assetPath = AssetDatabase.GUIDToAssetPath(guids[i]);
             InventorySystemItemDataSO itemData = AssetDatabase.LoadAssetAtPath<InventorySystemItemDataSO>(assetPath);
-            
+
             if (itemData != null)
             {
                 // 显示进度
-                EditorUtility.DisplayProgressBar("生成物品预制体", 
-                    $"正在生成: {itemData.itemName} ({i + 1}/{totalCount})", 
+                EditorUtility.DisplayProgressBar("生成物品预制体",
+                    $"正在生成: {itemData.itemName} ({i + 1}/{totalCount})",
                     (float)(i + 1) / totalCount);
-                
+
                 if (CreateItemPrefab(itemData))
                 {
                     successCount++;
                 }
             }
         }
-        
+
         EditorUtility.ClearProgressBar();
         AssetDatabase.Refresh();
-        
+
         Debug.Log($"预制体生成完成！成功生成 {successCount}/{totalCount} 个预制体。");
-        
+
         if (successCount < totalCount)
         {
             Debug.LogWarning($"有 {totalCount - successCount} 个预制体生成失败，请检查控制台错误信息。");
@@ -111,12 +111,12 @@ public class ItemPrefabCreator : EditorWindow
         try
         {
             // 根据GridConfig计算物品实际大小
-            float itemWidth = itemData.width * gridConfig.cellSize; 
-            float itemHeight = itemData.height * gridConfig.cellSize; 
-            
+            float itemWidth = itemData.width * gridConfig.cellSize;
+            float itemHeight = itemData.height * gridConfig.cellSize;
+
             // 创建主GameObject
             GameObject mainObject = new GameObject(itemData.itemName);
-            
+
             // 添加RectTransform组件
             RectTransform mainRect = mainObject.AddComponent<RectTransform>();
             mainRect.sizeDelta = new Vector2(itemWidth, itemHeight);
@@ -132,98 +132,73 @@ public class ItemPrefabCreator : EditorWindow
             GameObject backgroundObject = new GameObject("ItemBackground");
             backgroundObject.transform.SetParent(mainObject.transform);
             backgroundObject.layer = 5;
-            
+
             RectTransform backgroundRect = backgroundObject.AddComponent<RectTransform>();
             backgroundRect.anchorMin = new Vector2(0.5f, 0.5f);
             backgroundRect.anchorMax = new Vector2(0.5f, 0.5f);
             backgroundRect.anchoredPosition = Vector2.zero;
             backgroundRect.sizeDelta = new Vector2(itemWidth, itemHeight);
-            
+
             // 添加RawImage组件
             RawImage rawImage = backgroundObject.AddComponent<RawImage>();
             rawImage.color = GetColorFromString(itemData.backgroundColor, 204f / 255f); // 透明度204
-            
+
             // 创建ItemSprite子对象
             GameObject spriteObject = new GameObject("ItemSprite");
             spriteObject.transform.SetParent(mainObject.transform);
             spriteObject.layer = 5;
-            
+
             RectTransform spriteRect = spriteObject.AddComponent<RectTransform>();
             spriteRect.anchorMin = new Vector2(0.5f, 0.5f);
             spriteRect.anchorMax = new Vector2(0.5f, 0.5f);
             spriteRect.anchoredPosition = Vector2.zero;
             spriteRect.sizeDelta = new Vector2(itemWidth, itemHeight);
-            
+
             // 添加Image组件
             Image image = spriteObject.AddComponent<Image>();
             image.sprite = itemData.itemIcon;
             image.preserveAspect = true;
-            
+
             // 创建ItemScriptableObject子对象
             GameObject scriptObject = new GameObject("ItemScriptableObject");
             scriptObject.transform.SetParent(mainObject.transform);
             scriptObject.layer = 5;
-            
+
             RectTransform scriptRect = scriptObject.AddComponent<RectTransform>();
             scriptRect.anchorMin = new Vector2(0.5f, 0.5f);
             scriptRect.anchorMax = new Vector2(0.5f, 0.5f);
             scriptRect.anchoredPosition = Vector2.zero;
             scriptRect.sizeDelta = new Vector2(itemWidth, itemHeight);
-            
+
             // 添加ItemDataHolder脚本到ItemScriptableObject对象
             ItemDataHolder dataHolder = scriptObject.AddComponent<ItemDataHolder>();
-            
+
             // 通过反射设置私有字段
-            var itemDataField = typeof(ItemDataHolder).GetField("itemData", 
+            var itemDataField = typeof(ItemDataHolder).GetField("itemData",
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            var itemIconField = typeof(ItemDataHolder).GetField("itemIconImage", 
+            var itemIconField = typeof(ItemDataHolder).GetField("itemIconImage",
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            var backgroundField = typeof(ItemDataHolder).GetField("backgroundImage", 
+            var backgroundField = typeof(ItemDataHolder).GetField("backgroundImage",
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            
+
             itemDataField?.SetValue(dataHolder, itemData);
             itemIconField?.SetValue(dataHolder, image);
             backgroundField?.SetValue(dataHolder, rawImage);
 
             // 在根节点添加InventorySystemItem组件
             InventorySystemItem inventoryItem = mainObject.AddComponent<InventorySystemItem>();
-            
+
             // 在根节点添加DraggableItem脚本
             DraggableItem draggableItem = mainObject.AddComponent<DraggableItem>();
-            
+
             // 通过反射设置DraggableItem的字段
-            var itemField = typeof(DraggableItem).GetField("item", 
+            var itemField = typeof(DraggableItem).GetField("item",
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
             itemField?.SetValue(draggableItem, inventoryItem);
-            
-            // 添加ItemHoverHighlight组件
-            ItemHoverHighlight hoverHighlight = mainObject.AddComponent<ItemHoverHighlight>();
-            
-            // 创建专门的高亮覆盖层Image对象
-            GameObject overlayObject = new GameObject("Image");
-            overlayObject.transform.SetParent(mainObject.transform);
-            overlayObject.layer = 5;
-            
-            RectTransform overlayRect = overlayObject.AddComponent<RectTransform>();
-            overlayRect.anchorMin = new Vector2(0.5f, 0.5f);
-            overlayRect.anchorMax = new Vector2(0.5f, 0.5f);
-            overlayRect.anchoredPosition = Vector2.zero;
-            overlayRect.sizeDelta = new Vector2(itemWidth, itemHeight);
-            
-            // 添加CanvasRenderer和Image组件
-            CanvasRenderer overlayRenderer = overlayObject.AddComponent<CanvasRenderer>();
-            Image overlayImage = overlayObject.AddComponent<Image>();
-            overlayImage.color = new Color(1f, 1f, 1f, 0f); // 修改：将透明度从0.749f改为0f，默认完全透明
-            overlayImage.raycastTarget = true;
-            
-            // 通过反射设置ItemHoverHighlight的overlay字段
-            var overlayField = typeof(ItemHoverHighlight).GetField("overlay", 
-                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            overlayField?.SetValue(hoverHighlight, overlayImage);
-            
+
             // 创建MaxData和CurrentData TMP对象
             CreateDataDisplayObjects(backgroundObject, itemData, itemWidth, itemHeight);
-            
+
             // 确保分类文件夹存在
             string categoryFolder = Path.Combine(prefabOutputPath, GetCategoryFolderName(itemData.itemCategory.ToString()));
             if (!Directory.Exists(categoryFolder))
@@ -234,18 +209,18 @@ public class ItemPrefabCreator : EditorWindow
             // 保存为预制体
             string prefabPath = Path.Combine(categoryFolder, CleanFileName(itemData.itemName) + ".prefab");
             prefabPath = prefabPath.Replace("\\", "/"); // 统一路径分隔符
-            
+
             // 检查是否已存在同名预制体
             if (File.Exists(prefabPath))
             {
                 Debug.LogWarning($"预制体已存在，将覆盖: {prefabPath}");
             }
-            
+
             GameObject prefab = PrefabUtility.SaveAsPrefabAsset(mainObject, prefabPath);
-            
+
             // 清理临时对象
             DestroyImmediate(mainObject);
-            
+
             if (prefab != null)
             {
                 Debug.Log($"成功创建预制体: {prefabPath} (尺寸: {itemWidth}x{itemHeight})");
@@ -288,7 +263,7 @@ public class ItemPrefabCreator : EditorWindow
                 baseColor = Color.clear;
                 break;
         }
-        
+
         baseColor.a = alpha;
         return baseColor;
     }
@@ -319,23 +294,23 @@ public class ItemPrefabCreator : EditorWindow
     private string CleanFileName(string fileName)
     {
         if (string.IsNullOrEmpty(fileName)) return "UnknownItem";
-        
+
         char[] invalidChars = Path.GetInvalidFileNameChars();
         foreach (char c in invalidChars)
         {
             fileName = fileName.Replace(c, '_');
         }
-        
+
         fileName = fileName.Replace(".", "");
-        
+
         return fileName.Trim();
     }
 
     // 清理现有预制体
     private void ClearExistingPrefabs()
     {
-        if (EditorUtility.DisplayDialog("确认清理", 
-            "这将删除输出路径下的所有预制体文件，此操作不可撤销！\n确定要继续吗？", 
+        if (EditorUtility.DisplayDialog("确认清理",
+            "这将删除输出路径下的所有预制体文件，此操作不可撤销！\n确定要继续吗？",
             "确定", "取消"))
         {
             try
@@ -343,12 +318,12 @@ public class ItemPrefabCreator : EditorWindow
                 if (Directory.Exists(prefabOutputPath))
                 {
                     string[] prefabFiles = Directory.GetFiles(prefabOutputPath, "*.prefab", SearchOption.AllDirectories);
-                    
+
                     foreach (string file in prefabFiles)
                     {
                         AssetDatabase.DeleteAsset(file.Replace("\\", "/").Replace(Application.dataPath, "Assets"));
                     }
-                    
+
                     AssetDatabase.Refresh();
                     Debug.Log($"已清理 {prefabFiles.Length} 个预制体文件。");
                 }
@@ -365,7 +340,7 @@ public class ItemPrefabCreator : EditorWindow
         // 根据物品类型确定需要显示的数据
         string currentDataText = "";
         string maxDataText = "";
-        
+
         switch (itemData.itemCategory)
         {
             case InventorySystemItemCategory.Helmet:
@@ -376,7 +351,7 @@ public class ItemPrefabCreator : EditorWindow
                     maxDataText = "/" + itemData.durability.ToString();
                 }
                 break;
-                
+
             case InventorySystemItemCategory.Food:
             case InventorySystemItemCategory.Drink:
             case InventorySystemItemCategory.Hemostatic:
@@ -387,7 +362,7 @@ public class ItemPrefabCreator : EditorWindow
                     maxDataText = "/" + itemData.usageCount.ToString();
                 }
                 break;
-                
+
             case InventorySystemItemCategory.Healing:
                 if (itemData.maxHealAmount > 0)
                 {
@@ -395,7 +370,7 @@ public class ItemPrefabCreator : EditorWindow
                     maxDataText = "/" + itemData.maxHealAmount.ToString();
                 }
                 break;
-                
+
             case InventorySystemItemCategory.Currency:
             case InventorySystemItemCategory.Ammunition:
                 if (itemData.maxStack > 0)
@@ -404,7 +379,7 @@ public class ItemPrefabCreator : EditorWindow
                     maxDataText = "/" + itemData.maxStack.ToString();
                 }
                 break;
-                
+
             case InventorySystemItemCategory.Intelligence:
                 if (itemData.intelligenceValue > 0)
                 {
@@ -412,23 +387,23 @@ public class ItemPrefabCreator : EditorWindow
                     maxDataText = "";
                 }
                 break;
-                
+
             default:
                 return; // 其他类型不显示数据
         }
-        
+
         // 如果没有数据需要显示，直接返回
         if (string.IsNullOrEmpty(currentDataText))
             return;
-            
+
         // 合并显示文本（如果有MaxData的话）
         string displayText = currentDataText + maxDataText;
-        
+
         // 创建数值显示对象，父对象设置为主对象（与UNTAR helmet保持一致）
         GameObject dataDisplayObj = new GameObject("DataDisplay");
         dataDisplayObj.transform.SetParent(backgroundParent.transform.parent); // 设置为主对象的子对象
         dataDisplayObj.layer = 5;
-        
+
         RectTransform dataRect = dataDisplayObj.AddComponent<RectTransform>();
         // 设置锚点为右下角（与UNTAR helmet一致）
         dataRect.anchorMin = new Vector2(1f, 0f);
@@ -438,9 +413,9 @@ public class ItemPrefabCreator : EditorWindow
         dataRect.anchoredPosition = new Vector2(0f, 0f);
         // 尺寸设置（与UNTAR helmet一致）
         dataRect.sizeDelta = new Vector2(50, 2);
-        
+
         CanvasRenderer dataRenderer = dataDisplayObj.AddComponent<CanvasRenderer>();
-        
+
         TextMeshProUGUI dataTMP = dataDisplayObj.AddComponent<TextMeshProUGUI>();
         dataTMP.text = displayText;
         // 在CreateDataDisplayObjects方法中
