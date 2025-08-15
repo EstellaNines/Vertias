@@ -8,8 +8,8 @@ using UnityEngine.UI;
 public class ItemHoverHighlight : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
     [SerializeField] private Image overlay;
-    [SerializeField] private float fadeTime = 0.1f; // Ìí¼ÓfadeTime±äÁ¿
-    private DraggableItem draggableItem; // Ìí¼ÓÒıÓÃ
+    [SerializeField] private float fadeTime = 0.1f; // æ‚¬åœé«˜äº®çš„æ·¡å…¥/æ·¡å‡ºæ—¶é•¿ï¼ˆç§’ï¼‰
+    private DraggableItem draggableItem; // æ‹–æ‹½ç»„ä»¶ï¼Œç”¨äºåœ¨æ‹–æ‹½æ—¶å±è”½æ‚¬åœé«˜äº®
 
     private void Awake()
     {
@@ -18,7 +18,7 @@ public class ItemHoverHighlight : MonoBehaviour, IPointerEnterHandler, IPointerE
             overlay = GetComponentInChildren<Image>();
         }
         
-        // »ñÈ¡DraggableItem×é¼şÒıÓÃ
+        // è·å– DraggableItem ç»„ä»¶å¼•ç”¨
         draggableItem = GetComponent<DraggableItem>();
         
         if (overlay != null)
@@ -31,7 +31,7 @@ public class ItemHoverHighlight : MonoBehaviour, IPointerEnterHandler, IPointerE
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        // ¼ì²éÊÇ·ñÕıÔÚÍÏ×§£¬Èç¹ûÊÇÔò²»ÏìÓ¦ĞüÍ£ÊÂ¼ş
+        // æ­£åœ¨æ‹–æ‹½æ—¶ä¸å“åº”æŒ‡é’ˆè¿›å…¥ï¼ˆé¿å…ä¸æ‹–æ‹½äº¤äº’å†²çªï¼‰
         if (draggableItem != null && draggableItem.isDragging)
             return;
             
@@ -44,7 +44,7 @@ public class ItemHoverHighlight : MonoBehaviour, IPointerEnterHandler, IPointerE
 
     public void OnPointerExit(PointerEventData eventData)
     {
-        // ¼ì²éÊÇ·ñÕıÔÚÍÏ×§£¬Èç¹ûÊÇÔò²»ÏìÓ¦ĞüÍ£ÊÂ¼ş
+        // æ­£åœ¨æ‹–æ‹½æ—¶ä¸å“åº”æŒ‡é’ˆç¦»å¼€
         if (draggableItem != null && draggableItem.isDragging)
             return;
             
@@ -66,10 +66,10 @@ public class ItemHoverHighlight : MonoBehaviour, IPointerEnterHandler, IPointerE
         }
     }
 
-    IEnumerator Fade(float targetAlpha) // ĞŞ¸Ä²ÎÊıÀàĞÍÎªfloat
+    IEnumerator Fade(float targetAlpha) // æ·¡å…¥æ·¡å‡ºåç¨‹
     {
         Color start = overlay.color;
-        Color target = new Color(start.r, start.g, start.b, targetAlpha); // ´´½¨Ä¿±êÑÕÉ«
+        Color target = new Color(start.r, start.g, start.b, targetAlpha); // ç›®æ ‡é¢œè‰²ï¼ˆä»…ä¿®æ”¹ alphaï¼‰
         
         for (float t = 0; t < fadeTime; t += Time.unscaledDeltaTime)
         {

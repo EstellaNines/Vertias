@@ -1,265 +1,265 @@
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
-// ÎïÆ·Êı¾İ³ÖÓĞÕß×é¼ş£¬ÓÃÓÚÔÚÔ¤ÖÆÌåÉÏ³ÖÓĞºÍ·ÃÎÊInventorySystemItemDataSOÊı¾İ
+// ç‰©å“æ•°æ®å®¹å™¨ï¼šæŒ‚åœ¨ç‰©å“é¢„åˆ¶ä½“ä¸Šï¼Œè´Ÿè´£ä¸ InventorySystemItemDataSO äº¤äº’
 public class ItemDataHolder : MonoBehaviour
 {
-    [Header("ÎïÆ·Êı¾İ")]
-    [SerializeField] private InventorySystemItemDataSO itemData;
+	[Header("ç‰©å“æ•°æ®")]
+	[SerializeField] private InventorySystemItemDataSO itemData;
 
-    [Header("UI×é¼şÒıÓÃ")]
-    [SerializeField] private Image itemIconImage;
-    [SerializeField] private RawImage backgroundImage;
+	[Header("UI ç»„ä»¶å¼•ç”¨")]
+	[SerializeField] private Image itemIconImage;
+	[SerializeField] private RawImage backgroundImage;
 
 
-    private void Awake()
-    {
-        // Èç¹ûÓĞÊı¾İ£¬×Ô¶¯¸üĞÂUIÏÔÊ¾
-        if (itemData != null)
-        {
-            UpdateItemDisplay();
-        }
-    }
+	private void Awake()
+	{
+		// å¦‚æœå·²æœ‰æ•°æ®ï¼Œè‡ªåŠ¨åˆ·æ–° UI æ˜¾ç¤º
+		if (itemData != null)
+		{
+			UpdateItemDisplay();
+		}
+	}
 
-    // »ñÈ¡ÎïÆ·Êı¾İ
-    public InventorySystemItemDataSO GetItemData()
-    {
-        return itemData;
-    }
+	// è·å–ç‰©å“æ•°æ®
+	public InventorySystemItemDataSO GetItemData()
+	{
+		return itemData;
+	}
 
-    // ÉèÖÃÎïÆ·Êı¾İ
-    // data£ºÒªÉèÖÃµÄInventorySystemItemDataSOÊı¾İ
-    public void SetItemData(InventorySystemItemDataSO data)
-    {
-        itemData = data;
-        UpdateItemDisplay();
-    }
+	// è®¾ç½®ç‰©å“æ•°æ®
+	// data éœ€è¦ä¸º InventorySystemItemDataSO
+	public void SetItemData(InventorySystemItemDataSO data)
+	{
+		itemData = data;
+		UpdateItemDisplay();
+	}
 
-    // ¸üĞÂÎïÆ·UIÏÔÊ¾
-    // ¸üĞÂÎïÆ·UIÏÔÊ¾
-    public void UpdateItemDisplay()
-    {
-        if (itemData == null) return;
+	// åˆ·æ–°ç‰©å“ UI æ˜¾ç¤º
+	public void UpdateItemDisplay()
+	{
+		if (itemData == null) return;
 
-        // ¸üĞÂÎïÆ·Í¼±ê
-        if (itemIconImage != null && itemData.itemIcon != null)
-        {
-            itemIconImage.sprite = itemData.itemIcon;
-        }
+		// æ›´æ–°ç‰©å“å›¾æ ‡
+		if (itemIconImage != null && itemData.itemIcon != null)
+		{
+			itemIconImage.sprite = itemData.itemIcon;
+		}
 
-        // ¸üĞÂ±³¾°ÑÕÉ«
-        if (backgroundImage != null)
-        {
-            backgroundImage.color = GetColorFromString(itemData.backgroundColor);
-        }
+		// æ›´æ–°èƒŒæ™¯é¢œè‰²
+		if (backgroundImage != null)
+		{
+			backgroundImage.color = GetColorFromString(itemData.backgroundColor);
+		}
 
-        // ¸üĞÂÔ¤ÖÆÌå³ß´ç
-        UpdatePrefabSize();
-    }
+		// æ›´æ–°é¢„åˆ¶ä½“å°ºå¯¸
+		UpdatePrefabSize();
+	}
 
-    // ¸ù¾İÎïÆ·Íø¸ñ³ß´ç¸üĞÂÔ¤ÖÆÌå´óĞ¡
-    private void UpdatePrefabSize()
-    {
-        if (itemData == null) return;
+	// æ ¹æ®ç‰©å“å°ºå¯¸æ›´æ–°é¢„åˆ¶ä½“å¤§å°
+	private void UpdatePrefabSize()
+	{
+		if (itemData == null) return;
 
-        // Ã¿¸ñ64ÏñËØ£¬ÓëÍø¸ñÏµÍ³±£³ÖÒ»ÖÂ
-        float cellSize = 64f; // ´Ó80fĞŞ¸ÄÎª64f
-        Vector2 newSize = new Vector2(
-            itemData.width * cellSize,
-            itemData.height * cellSize
-        );
+		// æ¯æ ¼ 64 åƒç´ ï¼Œä¸ç³»ç»Ÿç»Ÿä¸€
+		float cellSize = 64f; // ä» 80f è°ƒæ•´ä¸º 64f
+		Vector2 newSize = new Vector2(
+			itemData.width * cellSize,
+			itemData.height * cellSize
+		);
 
-        // ¸üĞÂÔ¤ÖÆÌå¸ù¶ÔÏó³ß´ç
-        RectTransform rectTransform = GetComponent<RectTransform>();
-        if (rectTransform != null)
-        {
-            rectTransform.sizeDelta = newSize;
-        }
+		// æ›´æ–°é¢„åˆ¶ä½“ RectTransform å°ºå¯¸
+		RectTransform rectTransform = GetComponent<RectTransform>();
+		if (rectTransform != null)
+		{
+			rectTransform.sizeDelta = newSize;
+		}
 
-        // ¸üĞÂÎïÆ·Í¼±ê³ß´ç
-        if (itemIconImage != null)
-        {
-            RectTransform iconRect = itemIconImage.GetComponent<RectTransform>();
-            if (iconRect != null)
-            {
-                iconRect.sizeDelta = newSize;
-            }
-        }
+		// æ›´æ–°ç‰©å“å›¾æ ‡å°ºå¯¸
+		if (itemIconImage != null)
+		{
+			RectTransform iconRect = itemIconImage.GetComponent<RectTransform>();
+			if (iconRect != null)
+			{
+				iconRect.sizeDelta = newSize;
+			}
+		}
 
-        // ¸üĞÂ±³¾°Í¼Æ¬³ß´ç
-        if (backgroundImage != null)
-        {
-            RectTransform bgRect = backgroundImage.GetComponent<RectTransform>();
-            if (bgRect != null)
-            {
-                bgRect.sizeDelta = newSize;
-            }
-        }
-    }
+		// æ›´æ–°èƒŒæ™¯å›¾ç‰‡å°ºå¯¸
+		if (backgroundImage != null)
+		{
+			RectTransform bgRect = backgroundImage.GetComponent<RectTransform>();
+			if (bgRect != null)
+			{
+				bgRect.sizeDelta = newSize;
+			}
+		}
+	}
 
-    // ½«ÑÕÉ«×Ö·û´®×ª»»ÎªColor
-    // colorName£ºÑÕÉ«Ãû³Æ
-    // ·µ»Ø£º¶ÔÓ¦µÄColorÖµ
-    private Color GetColorFromString(string colorName)
-    {
-        Color baseColor;
-        switch (colorName?.ToLower())
-        {
-            case "blue":
-                baseColor = HexToColor("#2d3c4b"); // À¶É«
-                break;
-            case "violet":
-            case "purple":
-                baseColor = HexToColor("#583b80"); // ×ÏÉ«
-                break;
-            case "yellow":
-                baseColor = HexToColor("#80550d"); // »ÆÉ«
-                break;
-            case "red":
-                baseColor = HexToColor("#350000"); // ºìÉ«
-                break;
-            default:
-                baseColor = Color.white; // Ä¬ÈÏ°×É«
-                break;
-        }
+	// å°†é¢œè‰²åç§°è½¬ä¸º Color
+	// colorNameï¼šé¢œè‰²å
+	// è¿”å›ï¼šå¯¹åº”çš„ Color å€¼
+	private Color GetColorFromString(string colorName)
+	{
+		Color baseColor;
+		switch (colorName?.ToLower())
+		{
+			case "blue":
+				baseColor = HexToColor("#2d3c4b"); // è“è‰²
+				break;
+			case "violet":
+			case "purple":
+				baseColor = HexToColor("#583b80"); // ç´«è‰²
+				break;
+			case "yellow":
+				baseColor = HexToColor("#80550d"); // é»„è‰²
+				break;
+			case "red":
+				baseColor = HexToColor("#350000"); // çº¢è‰²
+				break;
+			default:
+				baseColor = Color.white; // é»˜è®¤ç™½è‰²
+				break;
+		}
 
-        // ÉèÖÃÍ¸Ã÷¶ÈÎª204
-        baseColor.a = 225f / 255f; // ÉèÖÃÍ¸Ã÷¶È
-        return baseColor;
-    }
+		// è®¾ç½®é€æ˜åº¦ä¸º 225
+		baseColor.a = 225f / 255f; // é€æ˜åº¦
+		return baseColor;
+	}
 
-    // Ê®Áù½øÖÆÑÕÉ«×ª»»ÎªColor
-    // hex£ºÊ®Áù½øÖÆÑÕÉ«Öµ
-    // ·µ»Ø£ºColor¶ÔÏó
-    private Color HexToColor(string hex)
-    {
-        // ÒÆ³ı#ºÅ
-        if (hex.StartsWith("#"))
-            hex = hex.Substring(1);
+	// åå…­è¿›åˆ¶é¢œè‰²è½¬ä¸º Color
+	// hexï¼šåå…­è¿›åˆ¶é¢œè‰²å€¼
+	// è¿”å›ï¼šColor å®ä¾‹
+	private Color HexToColor(string hex)
+	{
+		// ç§»é™¤ #
+		if (hex.StartsWith("#"))
+			hex = hex.Substring(1);
 
-        // È·±£ÊÇ6Î»Ê®Áù½øÖÆ
-        if (hex.Length != 6)
-            return new Color(1f, 1f, 1f, 225f / 255f); // Ä¬ÈÏ°×É«£¬Í¸Ã÷¶È204
+		// ç¡®ä¿ä¸º 6 ä½åå…­è¿›åˆ¶
+		if (hex.Length != 6)
+			return new Color(1f, 1f, 1f, 225f / 255f); // é»˜è®¤ç™½è‰²ï¼Œé€æ˜åº¦ 225
 
-        try
-        {
-            byte r = System.Convert.ToByte(hex.Substring(0, 2), 16);
-            byte g = System.Convert.ToByte(hex.Substring(2, 2), 16);
-            byte b = System.Convert.ToByte(hex.Substring(4, 2), 16);
+		try
+		{
+			byte r = System.Convert.ToByte(hex.Substring(0, 2), 16);
+			byte g = System.Convert.ToByte(hex.Substring(2, 2), 16);
+			byte b = System.Convert.ToByte(hex.Substring(4, 2), 16);
 
-            return new Color32(r, g, b, 225); // Í¸Ã÷¶ÈÉèÎª225
-        }
-        catch
-        {
-            return new Color(1f, 1f, 1f, 225f / 255f); // ×ª»»Ê§°ÜÊ±·µ»Ø°×É«£¬Í¸Ã÷¶È204
-        }
-    }
+			return new Color32(r, g, b, 225); // é€æ˜åº¦è®¾ä¸º 225
+		}
+		catch
+		{
+			return new Color(1f, 1f, 1f, 225f / 255f); // è½¬æ¢å¤±è´¥æ—¶è¿”å›ç™½è‰²ï¼Œé€æ˜åº¦ 225
+		}
+	}
 
-    // === ±ã½İ·ÃÎÊÊôĞÔ ===
+	// === æ•°æ®è®¿é—®å™¨ ===
 
-    // ÎïÆ·ID
-    public int ItemID => itemData?.id ?? 0;
+	// ç‰©å“ ID
+	public int ItemID => itemData?.id ?? 0;
 
-    // ÎïÆ·Ãû³Æ
-    public string ItemName => itemData?.itemName ?? "";
+	// ç‰©å“åç§°
+	public string ItemName => itemData?.itemName ?? "";
 
-    // ÎïÆ·¸ß¶È
-    public int ItemHeight => itemData?.height ?? 1;
+	// ç‰©å“é«˜åº¦
+	public int ItemHeight => itemData?.height ?? 1;
 
-    // ÎïÆ·¿í¶È
-    public int ItemWidth => itemData?.width ?? 1;
+	// ç‰©å“å®½åº¦
+	public int ItemWidth => itemData?.width ?? 1;
 
-    // ÎïÆ·Ï¡ÓĞ¶È
-    public string ItemRarity => itemData?.rarity ?? "";
+	// ç‰©å“ç¨€æœ‰åº¦
+	public string ItemRarity => itemData?.rarity ?? "";
 
-    // ÎïÆ·Àà±ğ
-    public string ItemCategory => itemData?.category ?? "";
+	// ç‰©å“ç±»åˆ«
+	public string ItemCategory => itemData?.category ?? "";
 
-    // ×Óµ¯ÀàĞÍ
-    public string BulletType => itemData?.BulletType ?? "";
+	// å¼¹è¯ç±»å‹
+	public string BulletType => itemData?.BulletType ?? "";
 
-    // ÈİÁ¿¸ß¶È£¨±³°ü/Õ½Êõ¹Ò¾ß£©
-    public int CellH => itemData?.CellH ?? 0;
+	// å®¹é‡é«˜åº¦ï¼ˆèƒŒåŒ…/æˆ˜æœ¯èƒŒå¿ƒï¼‰
+	public int CellH => itemData?.CellH ?? 0;
 
-    // ÈİÁ¿¿í¶È£¨±³°ü/Õ½Êõ¹Ò¾ß£©
-    public int CellV => itemData?.CellV ?? 0;
+	// å®¹é‡å®½åº¦ï¼ˆèƒŒåŒ…/æˆ˜æœ¯èƒŒå¿ƒï¼‰
+	public int CellV => itemData?.CellV ?? 0;
 
-    // ±³¾°ÑÕÉ«Ãû³Æ
-    public string BackgroundColor => itemData?.backgroundColor ?? "";
+	// èƒŒæ™¯é¢œè‰²å
+	public string BackgroundColor => itemData?.backgroundColor ?? "";
 
-    // ÎïÆ·Í¼±ê¾«Áé
-    public Sprite ItemIcon => itemData?.itemIcon;
+	// ç‰©å“å›¾æ ‡
+	public Sprite ItemIcon => itemData?.itemIcon;
 
-    // === ÊµÓÃ·½·¨ ===
+	// === å®ç”¨æ–¹æ³• ===
 
-    // ¼ì²éÊÇ·ñÎª±³°üÀàÎïÆ·
-    // ·µ»Ø£ºÊÇ·ñÎª±³°ü
-    public bool IsBackpack()
-    {
-        return itemData != null && itemData.category.ToLower().Contains("backpack");
-    }
+	// æ˜¯å¦ä¸ºèƒŒåŒ…ç±»ç‰©å“
+	// è¿”å›ï¼šæ˜¯å¦ä¸ºèƒŒåŒ…
+	public bool IsBackpack()
+	{
+		return itemData != null && itemData.category.ToLower().Contains("backpack");
+	}
 
-    // ¼ì²éÊÇ·ñÎªÎäÆ÷ÀàÎïÆ·
-    // ·µ»Ø£ºÊÇ·ñÎªÎäÆ÷
-    public bool IsWeapon()
-    {
-        return itemData != null && itemData.category.ToLower().Contains("weapon");
-    }
+	// æ˜¯å¦ä¸ºæ­¦å™¨ç±»ç‰©å“
+	// è¿”å›ï¼šæ˜¯å¦ä¸ºæ­¦å™¨
+	public bool IsWeapon()
+	{
+		return itemData != null && itemData.category.ToLower().Contains("weapon");
+	}
 
-    // ¼ì²éÊÇ·ñÎªµ¯Ò©ÀàÎïÆ·
-    // ·µ»Ø£ºÊÇ·ñÎªµ¯Ò©
-    public bool IsAmmunition()
-    {
-        return itemData != null && itemData.category.ToLower().Contains("ammunition");
-    }
+	// æ˜¯å¦ä¸ºå¼¹è¯ç±»ç‰©å“
+	// è¿”å›ï¼šæ˜¯å¦ä¸ºå¼¹è¯
+	public bool IsAmmunition()
+	{
+		return itemData != null && itemData.category.ToLower().Contains("ammunition");
+	}
 
-    // ¼ì²éÊÇ·ñÓĞÈİÁ¿£¨±³°ü»òÕ½Êõ¹Ò¾ß£©
-    // ·µ»Ø£ºÊÇ·ñÓĞÈİÁ¿
-    public bool HasCapacity()
-    {
-        return itemData != null && (itemData.CellH > 0 || itemData.CellV > 0);
-    }
+	// æ˜¯å¦å…·æœ‰å†…éƒ¨å®¹é‡ï¼ˆèƒŒåŒ…/æˆ˜æœ¯èƒŒå¿ƒï¼‰
+	// è¿”å›ï¼šæ˜¯å¦å…·æœ‰å®¹é‡
+	public bool HasCapacity()
+	{
+		return itemData != null && (itemData.CellH > 0 || itemData.CellV > 0);
+	}
 
-    // »ñÈ¡ÎïÆ·×ÜÈİÁ¿
-    // ·µ»Ø£º×ÜÈİÁ¿£¨¸ñ×ÓÊı£©
-    public int GetTotalCapacity()
-    {
-        return itemData != null ? itemData.CellH * itemData.CellV : 0;
-    }
+	// è·å–ç‰©å“æ€»å®¹é‡
+	// è¿”å›ï¼šå®¹é‡ï¼ˆæ¨ªÃ—çºµï¼‰
+	public int GetTotalCapacity()
+	{
+		return itemData != null ? itemData.CellH * itemData.CellV : 0;
+	}
 
-    // »ñÈ¡ÎïÆ·Õ¼ÓÃµÄ¸ñ×ÓÊı
-    // ·µ»Ø£ºÕ¼ÓÃ¸ñ×ÓÊı
-    public int GetOccupiedSlots()
-    {
-        return itemData != null ? itemData.height * itemData.width : 1;
-    }
+	// è·å–ç‰©å“å ç”¨çš„æ ¼å­æ•°
+	// è¿”å›ï¼šå ç”¨æ ¼æ•°
+	public int GetOccupiedSlots()
+	{
+		return itemData != null ? itemData.height * itemData.width : 1;
+	}
 
-    // »ñÈ¡ÎïÆ·³ß´ç
-    // ·µ»Ø£ºÎïÆ·³ß´ç
-    public Vector2Int GetCurrentSize()
-    {
-        if (itemData == null) return Vector2Int.one;
-        return new Vector2Int(itemData.width, itemData.height);
-    }
+	// è·å–ç‰©å“å°ºå¯¸
+	// è¿”å›ï¼šç‰©å“å°ºå¯¸
+	public Vector2Int GetCurrentSize()
+	{
+		if (itemData == null) return Vector2Int.one;
+		return new Vector2Int(itemData.width, itemData.height);
+	}
 
-    // µ÷ÊÔĞÅÏ¢Êä³ö
-    [ContextMenu("Êä³öÎïÆ·ĞÅÏ¢")]
-    public void LogItemInfo()
-    {
-        if (itemData == null)
-        {
-            Debug.Log("ÎïÆ·Êı¾İÎª¿Õ");
-            return;
-        }
+	// è°ƒè¯•ï¼šæ‰“å°ç‰©å“ä¿¡æ¯
+	[ContextMenu("æ‰“å°ç‰©å“ä¿¡æ¯")]
+	public void LogItemInfo()
+	{
+		if (itemData == null)
+		{
+			Debug.Log("ç‰©å“æ•°æ®ä¸ºç©º");
+			return;
+		}
 
-        Debug.Log($"ÎïÆ·ĞÅÏ¢:\n" +
-                  $"ID: {itemData.id}\n" +
-                  $"Ãû³Æ: {itemData.itemName}\n" +
-                  $"³ß´ç: {itemData.width}x{itemData.height}\n" +
-                  $"Ï¡ÓĞ¶È: {itemData.rarity}\n" +
-                  $"Àà±ğ: {itemData.category}\n" +
-                  $"±³¾°ÑÕÉ«: {itemData.backgroundColor}\n" +
-                  $"ÈİÁ¿: {itemData.CellH}x{itemData.CellV}\n" +
-                  $"×Óµ¯ÀàĞÍ: {itemData.BulletType}");
-    }
+		Debug.Log($"ç‰©å“ä¿¡æ¯:\n" +
+				  $"ID: {itemData.id}\n" +
+				  $"åç§°: {itemData.itemName}\n" +
+				  $"å°ºå¯¸: {itemData.width}x{itemData.height}\n" +
+				  $"ç¨€æœ‰åº¦: {itemData.rarity}\n" +
+				  $"ç±»åˆ«: {itemData.category}\n" +
+				  $"èƒŒæ™¯é¢œè‰²: {itemData.backgroundColor}\n" +
+				  $"å®¹é‡: {itemData.CellH}x{itemData.CellV}\n" +
+				  $"å¼¹è¯ç±»å‹: {itemData.BulletType}");
+	}
 }

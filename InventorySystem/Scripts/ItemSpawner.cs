@@ -72,11 +72,111 @@ public class ItemSpawner : MonoBehaviour
             itemParent = targetGrid?.transform;
         }
 
-        InitializeGrid();
+        // 延迟初始化，确保targetGrid完全初始化
+        StartCoroutine(DelayedInitialization());
 
         if (autoLoadOnStart)
         {
             LoadAllItemsFromFolders();
+        }
+    }
+
+    // 延迟初始化协程
+    private IEnumerator DelayedInitialization()
+    {
+        // 等待一帧，确保所有Start()方法执行完毕
+        yield return null;
+
+        // 优先从GridConfig获取尺寸，而不是依赖GetGridSize()
+        if (targetGrid != null)
+        {
+            GridConfig config = targetGrid.GetGridConfig();
+            if (config != null)
+            {
+                // 直接从GridConfig获取正确的尺寸
+                InitializeGridWithConfig(config);
+                if (showDebugInfo)
+                {
+                    Debug.Log($"从GridConfig获取网格尺寸: {config.inventoryWidth}x{config.inventoryHeight}");
+                }
+            }
+            else
+            {
+                // 回退到原有方法
+                Vector2Int gridSize = targetGrid.GetGridSize();
+                if (gridSize.x > 0 && gridSize.y > 0)
+                {
+                    InitializeGrid();
+                }
+                else
+                {
+                    yield return new WaitForSeconds(0.1f);
+                    InitializeGrid();
+                }
+            }
+        }
+    }
+
+    // 新增：使用GridConfig初始化网格
+    private void InitializeGridWithConfig(GridConfig config)
+    {
+        if (config == null)
+        {
+            Debug.LogError("GridConfig为空，无法初始化网格！");
+            return;
+        }
+
+        int gridWidth = config.inventoryWidth;
+        int gridHeight = config.inventoryHeight;
+
+        // 添加有效性检查
+        if (gridWidth <= 0 || gridHeight <= 0)
+        {
+            Debug.LogError($"GridConfig中的网格尺寸无效: {gridWidth}x{gridHeight}");
+            return;
+        }
+
+        gridOccupancy = new int[gridWidth, gridHeight];
+
+        if (showDebugInfo)
+        {
+            Debug.Log($"使用GridConfig初始化网格尺寸: {gridWidth}x{gridHeight}");
+        }
+    }
+
+    // 修改原有的InitializeGrid方法作为备用
+    private void InitializeGrid()
+    {
+        if (targetGrid == null)
+        {
+            Debug.LogError("targetGrid为空，无法初始化网格！");
+            return;
+        }
+
+        // 先尝试从GridConfig获取
+        GridConfig config = targetGrid.GetGridConfig();
+        if (config != null)
+        {
+            InitializeGridWithConfig(config);
+            return;
+        }
+
+        // 如果没有GridConfig，使用GetGridSize()作为最后手段
+        Vector2Int gridSize = targetGrid.GetGridSize();
+        int gridWidth = gridSize.x;
+        int gridHeight = gridSize.y;
+
+        if (gridWidth <= 0 || gridHeight <= 0)
+        {
+            Debug.LogError($"获取到无效的网格尺寸: {gridWidth}x{gridHeight}");
+            return;
+        }
+
+        gridOccupancy = new int[gridWidth, gridHeight];
+
+        if (showDebugInfo)
+        {
+            Debug.Log($"使用GetGridSize()初始化网格尺寸: {gridWidth}x{gridHeight} (备用方案)");
         }
     }
 
@@ -102,12 +202,12 @@ public class ItemSpawner : MonoBehaviour
 #if UNITY_EDITOR
         // 在编辑器中使用AssetDatabase
         string[] guids = AssetDatabase.FindAssets("t:InventorySystemItemDataSO", new[] { databasePath });
-        
+
         foreach (string guid in guids)
         {
             string assetPath = AssetDatabase.GUIDToAssetPath(guid);
             InventorySystemItemDataSO itemData = AssetDatabase.LoadAssetAtPath<InventorySystemItemDataSO>(assetPath);
-            
+
             if (itemData != null)
             {
                 string key = GetItemKey(itemData.itemName);
@@ -150,12 +250,12 @@ public class ItemSpawner : MonoBehaviour
 #if UNITY_EDITOR
         // 在编辑器中使用AssetDatabase
         string[] guids = AssetDatabase.FindAssets("t:GameObject", new[] { prefabPath });
-        
+
         foreach (string guid in guids)
         {
             string assetPath = AssetDatabase.GUIDToAssetPath(guid);
             GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(assetPath);
-            
+
             if (prefab != null)
             {
                 string key = GetItemKey(prefab.name);
@@ -340,28 +440,6 @@ public class ItemSpawner : MonoBehaviour
         return availableItems;
     }
 
-    // 初始化网格占用状态数组
-    private void InitializeGrid()
-    {
-        if (targetGrid == null) return;
-
-        // 获取网格尺寸（通过反射访问私有字段）
-        var widthField = typeof(ItemGrid).GetField("width",
-            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-        var heightField = typeof(ItemGrid).GetField("height",
-            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-
-        int gridWidth = widthField != null ? (int)widthField.GetValue(targetGrid) : 12;
-        int gridHeight = heightField != null ? (int)heightField.GetValue(targetGrid) : 20;
-
-        gridOccupancy = new int[gridWidth, gridHeight];
-
-        if (showDebugInfo)
-        {
-            Debug.Log($"初始化网格尺寸: {gridWidth}x{gridHeight}");
-        }
-    }
-
     // 在随机位置生成物品
     public GameObject SpawnItemAtRandomPosition(GameObject prefab, InventorySystemItemDataSO data)
     {
@@ -503,12 +581,10 @@ public class ItemSpawner : MonoBehaviour
 
         Vector2Int itemSize = new Vector2Int(itemComponent.Data.width, itemComponent.Data.height);
 
-        // 通过反射调用ItemGrid的PlaceItem方法
-        var placeItemMethod = typeof(ItemGrid).GetMethod("PlaceItem",
-            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-        if (placeItemMethod != null)
+        // 直接调用ItemGrid的PlaceItem方法（不再使用反射）
+        if (targetGrid != null)
         {
-            placeItemMethod.Invoke(targetGrid, new object[] { item, gridPos, itemSize });
+            targetGrid.PlaceItem(item, gridPos, itemSize);
         }
     }
 
@@ -702,4 +778,55 @@ public class ItemSpawner : MonoBehaviour
     {
         return allItemData;
     }
+
+    private void Update()
+    {
+        // 检测网格尺寸变化并重新初始化
+        if (targetGrid != null && gridOccupancy != null)
+        {
+            GridConfig config = targetGrid.GetGridConfig();
+            if (config != null && 
+                (config.inventoryWidth != gridOccupancy.GetLength(0) || 
+                 config.inventoryHeight != gridOccupancy.GetLength(1)))
+            {
+                if (showDebugInfo)
+                {
+                    Debug.Log($"检测到网格尺寸变化，重新初始化: {config.inventoryWidth}x{config.inventoryHeight}");
+                }
+                InitializeGridWithConfig(config);
+            }
+        }
+    }
+
+    // 验证已生成物品的位置是否仍然有效
+    private void ValidateSpawnedItems()
+    {
+        if (gridOccupancy == null) return;
+
+        // 清空网格占用状态
+        int width = gridOccupancy.GetLength(0);
+        int height = gridOccupancy.GetLength(1);
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                gridOccupancy[x, y] = 0;
+            }
+        }
+
+        // 重新标记已生成物品的占用状态
+        foreach (var spawnedItem in spawnedItems)
+        {
+            if (spawnedItem.itemObject != null)
+            {
+                MarkGridOccupied(spawnedItem.gridPosition, spawnedItem.size, 1);
+            }
+        }
+
+        if (showDebugInfo)
+        {
+            Debug.Log($"重新验证了 {spawnedItems.Count} 个已生成物品的位置");
+        }
+    }
+
 }

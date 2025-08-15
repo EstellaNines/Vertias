@@ -37,7 +37,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 640, y: 1280}
+  m_SizeDelta: {x: 640, y: 1920}
   m_Pivot: {x: 0, y: 1}
 --- !u!222 &4222011333629575062
 CanvasRenderer:
@@ -90,8 +90,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   gridConfig: {fileID: 11400000, guid: ddde6bc56023bc2478936a7672d21141, type: 2}
-  width: 10
-  height: 20
+  inventoryWidth: 10
+  inventoryHeight: 30
 --- !u!114 &5204804620851408900
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -104,3 +104,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 43eae4255683c9247ad4045bc67a3ccb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  gridPriority: 0

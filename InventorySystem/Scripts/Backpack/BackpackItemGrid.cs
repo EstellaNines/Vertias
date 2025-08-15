@@ -13,12 +13,12 @@ public class BackpackItemGrid : MonoBehaviour, IDropHandler
     [SerializeField] private GridConfig gridConfig;
     [SerializeField][FieldLabel("默认网格宽度")] private int defaultWidth = 1;
     [SerializeField][FieldLabel("默认网格高度")] private int defaultHeight = 1;
-    
+
     // 当前装备的背包数据对象（动态设置）
     private InventorySystemItemDataSO currentBackpackData;
     private int width;
     private int height;
-    
+
     // 网格占用状态
     private bool[,] gridOccupancy;
     private List<PlacedItem> placedItems = new List<PlacedItem>();
@@ -52,7 +52,7 @@ public class BackpackItemGrid : MonoBehaviour, IDropHandler
 
         // 加载默认GridConfig如果没有设置
         LoadDefaultGridConfig();
-        
+
         // 从背包数据加载配置
         LoadFromBackpackData();
     }
@@ -103,7 +103,7 @@ public class BackpackItemGrid : MonoBehaviour, IDropHandler
 
         // 加载默认GridConfig
         LoadDefaultGridConfig();
-        
+
         // 从背包数据更新尺寸
         LoadFromBackpackData();
 
@@ -185,28 +185,25 @@ public class BackpackItemGrid : MonoBehaviour, IDropHandler
             isUpdatingFromConfig = false;
         }
     }
-    
+
     // 获取当前装备的背包数据
     public InventorySystemItemDataSO GetCurrentBackpackData()
     {
         return currentBackpackData;
     }
-    
+
     // 设置背包数据并更新网格
     public void SetBackpackData(InventorySystemItemDataSO data)
     {
-        currentBackpackData = data;  // 修改：使用currentBackpackData而不是backpackData
+        currentBackpackData = data;
         LoadFromBackpackData();
 
-        // 重新初始化网格占用状态
         if (Application.isPlaying)
         {
             gridOccupancy = new bool[width, height];
-            // 清空已放置物品列表
             placedItems.Clear();
         }
 
-        // 立即更新网格尺寸
         Init(width, height);
     }
 
@@ -301,7 +298,7 @@ public class BackpackItemGrid : MonoBehaviour, IDropHandler
     }
 
     // 放置物品到网格中
-    private void PlaceItem(GameObject itemObject, Vector2Int position, Vector2Int size)
+    public void PlaceItem(GameObject itemObject, Vector2Int position, Vector2Int size)
     {
         RectTransform itemRect = itemObject.GetComponent<RectTransform>();
         if (itemRect == null) return;
@@ -397,7 +394,7 @@ public class BackpackItemGrid : MonoBehaviour, IDropHandler
     // 获取背包数据
     public InventorySystemItemDataSO GetBackpackData()
     {
-        return currentBackpackData;  // 修改：使用currentBackpackData而不是backpackData
+        return currentBackpackData;
     }
 
     // 清空网格中的所有物品
@@ -417,45 +414,33 @@ public class BackpackItemGrid : MonoBehaviour, IDropHandler
 
         // 清空物品列表
         placedItems.Clear();
-        }
-        
-        /// <summary>
-        /// 按格子坐标获取物品
-        /// </summary>
-        /// <param name="x">X坐标</param>
-        /// <param name="y">Y坐标</param>
-        /// <returns>该位置的物品，如果没有则返回null</returns>
-        public InventorySystemItem GetItem(int x, int y)
+    }
+
+    // 按格子坐标获取物品
+    public InventorySystemItem GetItem(int x, int y)
+    {
+        foreach (var placedItem in placedItems)
         {
-            foreach (var placedItem in placedItems)
+            // 检查点击位置是否在物品范围内
+            if (x >= placedItem.position.x && x < placedItem.position.x + placedItem.size.x &&
+                y >= placedItem.position.y && y < placedItem.position.y + placedItem.size.y)
             {
-                // 检查点击位置是否在物品范围内
-                if (x >= placedItem.position.x && x < placedItem.position.x + placedItem.size.x &&
-                    y >= placedItem.position.y && y < placedItem.position.y + placedItem.size.y)
-                {
-                    return placedItem.itemObject.GetComponent<InventorySystemItem>();
-                }
+                return placedItem.itemObject.GetComponent<InventorySystemItem>();
             }
-            return null;
         }
+        return null;
+    }
 
-        /// <summary>
-        /// 根据鼠标屏幕位置获取物品
-        /// </summary>
-        /// <param name="screenMousePos">鼠标屏幕位置</param>
-        /// <returns>该位置的物品，如果没有则返回null</returns>
-        public InventorySystemItem GetItemAtScreenPosition(Vector2 screenMousePos)
-        {
-            Vector2Int gridPos = GetTileGridPosition(screenMousePos);
-            return GetItem(gridPos.x, gridPos.y);
-        }
+    // 根据鼠标屏幕位置获取物品
+    public InventorySystemItem GetItemAtScreenPosition(Vector2 screenMousePos)
+    {
+        Vector2Int gridPos = GetTileGridPosition(screenMousePos);
+        return GetItem(gridPos.x, gridPos.y);
+    }
 
-        /// <summary>
-        /// 获取所有已放置的物品
-        /// </summary>
-        /// <returns>已放置物品列表</returns>
-        public List<PlacedItem> GetPlacedItems()
-        {
-            return new List<PlacedItem>(placedItems);
-        }
+    // 获取所有已放置的物品
+    public List<PlacedItem> GetPlacedItems()
+    {
+        return new List<PlacedItem>(placedItems);
+    }
 }
