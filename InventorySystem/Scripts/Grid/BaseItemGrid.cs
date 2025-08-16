@@ -189,7 +189,7 @@ public abstract class BaseItemGrid : MonoBehaviour, IDropHandler
         Vector2Int dropPosition = GetTileGridPosition(eventData.position);
         Vector2Int itemSize = new Vector2Int(item.Data.width, item.Data.height);
 
-        if (CanPlaceItem(dropPosition, itemSize))
+        if (CanPlaceItem(dropped, dropPosition))
         {
             PlaceItem(dropped, dropPosition, itemSize);
         }
@@ -218,6 +218,22 @@ public abstract class BaseItemGrid : MonoBehaviour, IDropHandler
         }
 
         return true;
+    }
+
+    // 智能检测物品放置（获取物品尺寸）
+    public virtual bool CanPlaceItem(GameObject itemObject, Vector2Int position)
+    {
+        // 尝试获取InventorySystemItem
+        var inventoryItem = itemObject.GetComponent<InventorySystemItem>();
+        if (inventoryItem != null && inventoryItem.Data != null)
+        {
+            // 使用原始尺寸
+            Vector2Int originalSize = new Vector2Int(inventoryItem.Data.width, inventoryItem.Data.height);
+            return CanPlaceItem(position, originalSize);
+        }
+        
+        // 默认使用1x1尺寸
+        return CanPlaceItem(position, Vector2Int.one);
     }
 
     // 使用前缀和数组的快速检查方法 - O(1)查询
@@ -535,37 +551,5 @@ public abstract class BaseItemGrid : MonoBehaviour, IDropHandler
         return true;
     }
 
-    // 支持旋转的PlaceItem重载
-    public virtual void PlaceItemWithRotation(GameObject itemObject,
-                                              Vector2Int gridPos,
-                                              Vector2Int size,
-                                              int rotation = 0)
-    {
-        RectTransform rt = itemObject.GetComponent<RectTransform>();
-        if (rt == null) return;
 
-        float cell = GetCellSize();
-
-        // 1. 锚点固定在左上角（0,1）
-        rt.anchorMin = rt.anchorMax = new Vector2(0, 1);
-        rt.pivot = new Vector2(0.5f, 0.5f);   // 关键：中心轴心
-
-        // 2. 计算 **中心点** 的 anchoredPosition
-        Vector2 center = new Vector2(
-            gridPos.x * cell + (size.x * cell) * 0.5f,
-            -gridPos.y * cell - (size.y * cell) * 0.5f
-        );
-        rt.anchoredPosition = center;
-
-        // 3. 应用旋转
-        rt.localRotation = Quaternion.Euler(0, 0, -rotation);
-
-        MarkGridOccupied(gridPos, size, true);
-        placedItems.Add(new PlacedItem
-        {
-            itemObject = itemObject,
-            position = gridPos,
-            size = size
-        });
-    }
 }

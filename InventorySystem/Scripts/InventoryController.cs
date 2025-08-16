@@ -4,26 +4,26 @@ using UnityEngine;
 
 public class InventoryController : MonoBehaviour
 {
-    [Header("åº“å­˜æ§åˆ¶å™¨è®¾ç½®")]
-    public ItemGrid selectedItemGrid; // å½“å‰é€‰ä¸­çš„ä¸»ç½‘æ ¼
-    public BackpackItemGrid selectedBackpackGrid; // å½“å‰é€‰ä¸­çš„èƒŒåŒ…ç½‘æ ¼
-    public TactiaclRigItemGrid selectedTacticalRigGrid; // å½“å‰é€‰ä¸­çš„æˆ˜æœ¯æŒ‚å…·ç½‘æ ¼
+    [Header("¿â´æ¿ØÖÆÆ÷ÉèÖÃ")]
+    public ItemGrid selectedItemGrid; // µ±Ç°Ñ¡ÖĞµÄÖ÷Íø¸ñ
+    public BackpackItemGrid selectedBackpackGrid; // µ±Ç°Ñ¡ÖĞµÄ±³°üÍø¸ñ
+    public TactiaclRigItemGrid selectedTacticalRigGrid; // µ±Ç°Ñ¡ÖĞµÄÕ½Êõ¹Ò¾ßÍø¸ñ
 
-    [Header("è°ƒè¯•ä¿¡æ¯è®¾ç½®")]
-    [SerializeField] private bool showDebugInfo = true; // æ˜¯å¦æ˜¾ç¤ºè°ƒè¯•ä¿¡æ¯
+    [Header("µ÷ÊÔĞÅÏ¢ÉèÖÃ")]
+    [SerializeField] private bool showDebugInfo = true; // ÊÇ·ñÏÔÊ¾µ÷ÊÔĞÅÏ¢
 
-    [Header("é¢„è§ˆè®¾ç½®")]
-    [SerializeField] private bool enablePreview = true; // æ˜¯å¦å¯ç”¨é¢„è§ˆåŠŸèƒ½
-    [SerializeField] private Vector2Int previewItemSize = new Vector2Int(2, 1); // é¢„è§ˆç‰©å“å¤§å°ï¼ˆç”¨äºæµ‹è¯•ï¼‰
+    [Header("Ô¤ÀÀÉèÖÃ")]
+    [SerializeField] private bool enablePreview = true; // ÊÇ·ñÆôÓÃÔ¤ÀÀ¹¦ÄÜ
+    [SerializeField] private Vector2Int previewItemSize = new Vector2Int(2, 1); // Ô¤ÀÀÎïÆ·´óĞ¡£¨ÓÃÓÚ²âÊÔ£©
 
-    // é«˜äº®ç»„ä»¶
+    // ¸ßÁÁ×é¼ş
     private InventoryHighlight inventoryHighlight;
-    private HoverHighlight hoverHighlight; // æ‚¬åœé«˜äº®ç»„ä»¶
+    private HoverHighlight hoverHighlight; // ĞüÍ£¸ßÁÁ×é¼ş
 
-    // å½“å‰æ‹–æ‹½çš„ç‰©å“ï¼ˆç”¨äºé¢„è§ˆï¼‰
+    // µ±Ç°ÍÏ×§µÄÎïÆ·£¨ÓÃÓÚÔ¤ÀÀ£©
     private InventorySystemItem draggedItem;
 
-    // å½“å‰æ´»è·ƒçš„ç½‘æ ¼ç±»å‹æšä¸¾
+    // µ±Ç°»îÔ¾µÄÍø¸ñÀàĞÍÃ¶¾Ù
     public enum ActiveGridType
     {
         None,
@@ -36,14 +36,14 @@ public class InventoryController : MonoBehaviour
 
     private void Start()
     {
-        // è·å–æˆ–æ·»åŠ InventoryHighlightç»„ä»¶
+        // »ñÈ¡»òÌí¼ÓInventoryHighlight×é¼ş
         inventoryHighlight = GetComponent<InventoryHighlight>();
         if (inventoryHighlight == null)
         {
             inventoryHighlight = gameObject.AddComponent<InventoryHighlight>();
         }
 
-        // è·å–æˆ–æ·»åŠ HoverHighlightç»„ä»¶
+        // »ñÈ¡»òÌí¼ÓHoverHighlight×é¼ş
         hoverHighlight = GetComponent<HoverHighlight>();
         if (hoverHighlight == null)
         {
@@ -53,13 +53,13 @@ public class InventoryController : MonoBehaviour
 
     private void Update()
     {
-        // åªæœ‰åœ¨æ‹–æ‹½ç‰©å“æ—¶æ‰æ£€æµ‹ç½‘æ ¼åˆ‡æ¢
+        // Ö»ÓĞÔÚÍÏ×§ÎïÆ·Ê±²Å¼ì²âÍø¸ñÇĞ»»
         if (draggedItem != null)
         {
             DetectHoveredGrid();
         }
 
-        // æ ¹æ®å½“å‰æ´»è·ƒç½‘æ ¼ç±»å‹å¤„ç†è¾“å…¥ - åªå¤„ç†å½“å‰æ´»è·ƒçš„ç½‘æ ¼
+        // ¸ù¾İµ±Ç°»îÔ¾Íø¸ñÀàĞÍ´¦ÀíÊäÈë - Ö»´¦Àíµ±Ç°»îÔ¾µÄÍø¸ñ
         switch (currentActiveGrid)
         {
             case ActiveGridType.MainGrid:
@@ -76,24 +76,24 @@ public class InventoryController : MonoBehaviour
                 break;
         }
 
-        // å¤„ç†é¢„è§ˆåŠŸèƒ½
+        // ´¦ÀíÔ¤ÀÀ¹¦ÄÜ
         if (enablePreview)
         {
             HandlePreview();
         }
     }
 
-    // å¤„ç†é¢„è§ˆåŠŸèƒ½
+    // ´¦ÀíÔ¤ÀÀ¹¦ÄÜ
     private void HandlePreview()
     {
-        // åªæœ‰åœ¨æ‹–æ‹½ç‰©å“æ—¶æ‰æ˜¾ç¤ºé¢„è§ˆ
+        // Ö»ÓĞÔÚÍÏ×§ÎïÆ·Ê±²ÅÏÔÊ¾Ô¤ÀÀ
         if (draggedItem == null)
         {
             inventoryHighlight.Hide();
             return;
         }
 
-        // æ£€æŸ¥æ˜¯å¦æœ‰æ´»è·ƒçš„ç½‘æ ¼
+        // ¼ì²éÊÇ·ñÓĞ»îÔ¾µÄÍø¸ñ
         object targetGrid = GetCurrentActiveGrid();
         if (targetGrid == null)
         {
@@ -101,39 +101,69 @@ public class InventoryController : MonoBehaviour
             return;
         }
 
-        // è·å–é¼ æ ‡ä½ç½®
+        // »ñÈ¡Êó±êÎ»ÖÃ
         Vector2 mousePos = Input.mousePosition;
         Vector2Int tilePos = GetTileGridPosition(targetGrid, mousePos);
 
-        // æ£€æŸ¥ä½ç½®æ˜¯å¦æœ‰æ•ˆ
+        // ¼ì²éÎ»ÖÃÊÇ·ñÓĞĞ§
         if (tilePos.x < 0 || tilePos.y < 0)
         {
             inventoryHighlight.Hide();
             return;
         }
 
-        // ä½¿ç”¨æ‹–æ‹½ç‰©å“çš„å®é™…å¤§å°è¿›è¡Œé¢„è§ˆ
-        Vector2Int itemSize = draggedItem.Data != null ?
-            new Vector2Int(draggedItem.Data.width, draggedItem.Data.height) :
-            previewItemSize; // å¦‚æœæ²¡æœ‰æ•°æ®åˆ™ä½¿ç”¨é»˜è®¤å¤§å°
+        // »ñÈ¡ÎïÆ·³ß´ç
+        Vector2Int itemSize = previewItemSize; // Ä¬ÈÏ´óĞ¡
+        
+        // ´ÓÎïÆ·Êı¾İ»ñÈ¡³ß´çĞÅÏ¢
+        if (draggedItem.Data != null)
+        {
+            // Ê¹ÓÃÔ­Ê¼Êı¾İ
+            itemSize = new Vector2Int(draggedItem.Data.width, draggedItem.Data.height);
+        }
 
-        // æ£€æŸ¥æ˜¯å¦å¯ä»¥æ”¾ç½®
-        bool canPlace = CanPlaceItem(targetGrid, tilePos, itemSize);
+        // ¼ì²éÊÇ·ñ¿ÉÒÔ·ÅÖÃ£¨Ê¹ÓÃÖÇÄÜ¼ì²â£©
+        bool canPlace = false;
+        if (targetGrid is ItemGrid itemGrid)
+        {
+            canPlace = itemGrid.CanPlaceItem(draggedItem.gameObject, tilePos);
+        }
+        else if (targetGrid is BackpackItemGrid backpackGrid)
+        {
+            canPlace = backpackGrid.CanPlaceItem(draggedItem.gameObject, tilePos);
+        }
+        else if (targetGrid is TactiaclRigItemGrid tacticalGrid)
+        {
+            canPlace = tacticalGrid.CanPlaceItem(draggedItem.gameObject, tilePos);
+        }
 
-        // æ˜¾ç¤ºé¢„è§ˆ
+        // ÏÔÊ¾Ô¤ÀÀ
         inventoryHighlight.Show(true);
-        inventoryHighlight.SetSize(itemSize.x, itemSize.y);
         inventoryHighlight.SetParent(targetGrid);
+        
+        // ÉèÖÃÎ»ÖÃºÍ³ß´ç
         inventoryHighlight.SetPosition(targetGrid, draggedItem, tilePos.x, tilePos.y);
+        inventoryHighlight.SetSize(itemSize.x, itemSize.y);
+        
+        // ÉèÖÃÑÕÉ«
         inventoryHighlight.SetCanPlace(canPlace);
+
+        // Ç¿ÖÆË¢ĞÂ¸ßÁÁ¶ÔÏó£¬È·±£ÕıÈ·ÏÔÊ¾
+        inventoryHighlight.ForceRefresh();
+
+        // µ÷ÊÔ¸ßÁÁ¶ÔÏó×´Ì¬
+        if (showDebugInfo)
+        {
+            inventoryHighlight.DebugHighlightState();
+        }
 
         if (showDebugInfo)
         {
-            Debug.Log($"é¢„è§ˆä½ç½®: ({tilePos.x}, {tilePos.y}) - å¯æ”¾ç½®: {canPlace} - ç½‘æ ¼ç±»å‹: {currentActiveGrid}");
+            Debug.Log($"Ô¤ÀÀÎ»ÖÃ: ({tilePos.x}, {tilePos.y}) - ¿É·ÅÖÃ: {canPlace} - Íø¸ñÀàĞÍ: {currentActiveGrid} - ÎïÆ·³ß´ç: {itemSize.x}x{itemSize.y}");
         }
     }
 
-    // è·å–å½“å‰æ´»è·ƒçš„ç½‘æ ¼
+    // »ñÈ¡µ±Ç°»îÔ¾µÄÍø¸ñ
     private object GetCurrentActiveGrid()
     {
         switch (currentActiveGrid)
@@ -149,7 +179,7 @@ public class InventoryController : MonoBehaviour
         }
     }
 
-    // è·å–ç½‘æ ¼ä½ç½®
+    // »ñÈ¡Íø¸ñÎ»ÖÃ
     private Vector2Int GetTileGridPosition(object grid, Vector2 screenPos)
     {
         if (grid is ItemGrid itemGrid)
@@ -168,7 +198,7 @@ public class InventoryController : MonoBehaviour
         return new Vector2Int(-1, -1);
     }
 
-    // æ£€æŸ¥æ˜¯å¦å¯ä»¥æ”¾ç½®ç‰©å“
+    // ¼ì²éÊÇ·ñ¿ÉÒÔ·ÅÖÃÎïÆ·
     private bool CanPlaceItem(object grid, Vector2Int position, Vector2Int size)
     {
         if (grid is ItemGrid itemGrid)
@@ -187,71 +217,71 @@ public class InventoryController : MonoBehaviour
         return false;
     }
 
-    // è®¾ç½®å½“å‰æ‹–æ‹½çš„ç‰©å“ï¼ˆä¾›å¤–éƒ¨è°ƒç”¨ï¼‰
+    // ÉèÖÃµ±Ç°ÍÏ×§µÄÎïÆ·£¨¹©Íâ²¿µ÷ÓÃ£©
     public void SetDraggedItem(InventorySystemItem item)
     {
         draggedItem = item;
     }
 
-    // æ¸…é™¤æ‹–æ‹½çš„ç‰©å“
+    // Çå³ıÍÏ×§µÄÎïÆ·
     public void ClearDraggedItem()
     {
         draggedItem = null;
         inventoryHighlight.Hide();
     }
 
-    // å¤„ç†ä¸»ç½‘æ ¼è¾“å…¥
+    // ´¦ÀíÖ÷Íø¸ñÊäÈë
     private void HandleMainGridInput()
     {
         if (selectedItemGrid == null) return;
 
-        // å·¦é”®ç‚¹å‡»æ—¶è·å–ç½‘æ ¼ä½ç½®å¹¶è¾“å‡ºè°ƒè¯•ä¿¡æ¯
+        // ×ó¼üµã»÷Ê±»ñÈ¡Íø¸ñÎ»ÖÃ²¢Êä³öµ÷ÊÔĞÅÏ¢
         if (Input.GetMouseButtonDown(0))
         {
             Vector2Int gridPosition = selectedItemGrid.GetTileGridPosition(Input.mousePosition);
 
             if (showDebugInfo)
             {
-                Debug.Log($"ç‚¹å‡»ä¸»ç½‘æ ¼ä½ç½®: ({gridPosition.x}, {gridPosition.y}) - ç½‘æ ¼åç§°: {selectedItemGrid.gameObject.name}");
+                Debug.Log($"µã»÷Ö÷Íø¸ñÎ»ÖÃ: ({gridPosition.x}, {gridPosition.y}) - Íø¸ñÃû³Æ: {selectedItemGrid.gameObject.name}");
             }
         }
     }
 
-    // å¤„ç†èƒŒåŒ…ç½‘æ ¼è¾“å…¥
+    // ´¦Àí±³°üÍø¸ñÊäÈë
     private void HandleBackpackGridInput()
     {
         if (selectedBackpackGrid == null) return;
 
-        // å·¦é”®ç‚¹å‡»æ—¶è·å–ç½‘æ ¼ä½ç½®å¹¶è¾“å‡ºè°ƒè¯•ä¿¡æ¯
+        // ×ó¼üµã»÷Ê±»ñÈ¡Íø¸ñÎ»ÖÃ²¢Êä³öµ÷ÊÔĞÅÏ¢
         if (Input.GetMouseButtonDown(0))
         {
             Vector2Int gridPosition = selectedBackpackGrid.GetTileGridPosition(Input.mousePosition);
 
             if (showDebugInfo)
             {
-                Debug.Log($"ç‚¹å‡»èƒŒåŒ…ç½‘æ ¼ä½ç½®: ({gridPosition.x}, {gridPosition.y}) - ç½‘æ ¼åç§°: {selectedBackpackGrid.gameObject.name}");
+                Debug.Log($"µã»÷±³°üÍø¸ñÎ»ÖÃ: ({gridPosition.x}, {gridPosition.y}) - Íø¸ñÃû³Æ: {selectedBackpackGrid.gameObject.name}");
             }
         }
     }
 
-    // å¤„ç†æˆ˜æœ¯æŒ‚å…·ç½‘æ ¼è¾“å…¥
+    // ´¦ÀíÕ½Êõ¹Ò¾ßÍø¸ñÊäÈë
     private void HandleTacticalRigGridInput()
     {
         if (selectedTacticalRigGrid == null) return;
 
-        // å·¦é”®ç‚¹å‡»æ—¶è·å–ç½‘æ ¼ä½ç½®å¹¶è¾“å‡ºè°ƒè¯•ä¿¡æ¯
+        // ×ó¼üµã»÷Ê±»ñÈ¡Íø¸ñÎ»ÖÃ²¢Êä³öµ÷ÊÔĞÅÏ¢
         if (Input.GetMouseButtonDown(0))
         {
             Vector2Int gridPosition = selectedTacticalRigGrid.GetTileGridPosition(Input.mousePosition);
 
             if (showDebugInfo)
             {
-                Debug.Log($"ç‚¹å‡»æˆ˜æœ¯æŒ‚å…·ç½‘æ ¼ä½ç½®: ({gridPosition.x}, {gridPosition.y}) - ç½‘æ ¼åç§°: {selectedTacticalRigGrid.gameObject.name}");
+                Debug.Log($"µã»÷Õ½Êõ¹Ò¾ßÍø¸ñÎ»ÖÃ: ({gridPosition.x}, {gridPosition.y}) - Íø¸ñÃû³Æ: {selectedTacticalRigGrid.gameObject.name}");
             }
         }
     }
 
-    // è®¾ç½®é€‰ä¸­çš„ä¸»ç½‘æ ¼
+    // ÉèÖÃÑ¡ÖĞµÄÖ÷Íø¸ñ
     public void SetSelectedMainGrid(ItemGrid itemGrid)
     {
         if (selectedItemGrid != itemGrid)
@@ -260,12 +290,12 @@ public class InventoryController : MonoBehaviour
             currentActiveGrid = ActiveGridType.MainGrid;
             if (showDebugInfo)
             {
-                Debug.Log($"åˆ‡æ¢é€‰ä¸­ä¸»ç½‘æ ¼: {(itemGrid != null ? itemGrid.gameObject.name : "æ— ")}");
+                Debug.Log($"ÇĞ»»Ñ¡ÖĞÖ÷Íø¸ñ: {(itemGrid != null ? itemGrid.gameObject.name : "ÎŞ")}");
             }
         }
     }
 
-    // è®¾ç½®é€‰ä¸­çš„èƒŒåŒ…ç½‘æ ¼
+    // ÉèÖÃÑ¡ÖĞµÄ±³°üÍø¸ñ
     public void SetSelectedBackpackGrid(BackpackItemGrid backpackGrid)
     {
         if (selectedBackpackGrid != backpackGrid)
@@ -274,12 +304,12 @@ public class InventoryController : MonoBehaviour
             currentActiveGrid = ActiveGridType.BackpackGrid;
             if (showDebugInfo)
             {
-                Debug.Log($"åˆ‡æ¢é€‰ä¸­èƒŒåŒ…ç½‘æ ¼: {(backpackGrid != null ? backpackGrid.gameObject.name : "æ— ")}");
+                Debug.Log($"ÇĞ»»Ñ¡ÖĞ±³°üÍø¸ñ: {(backpackGrid != null ? backpackGrid.gameObject.name : "ÎŞ")}");
             }
         }
     }
 
-    // è®¾ç½®é€‰ä¸­çš„æˆ˜æœ¯æŒ‚å…·ç½‘æ ¼
+    // ÉèÖÃÑ¡ÖĞµÄÕ½Êõ¹Ò¾ßÍø¸ñ
     public void SetSelectedTacticalRigGrid(TactiaclRigItemGrid tacticalRigGrid)
     {
         if (selectedTacticalRigGrid != tacticalRigGrid)
@@ -288,30 +318,30 @@ public class InventoryController : MonoBehaviour
             currentActiveGrid = ActiveGridType.TacticalRigGrid;
             if (showDebugInfo)
             {
-                Debug.Log($"åˆ‡æ¢é€‰ä¸­æˆ˜æœ¯æŒ‚å…·ç½‘æ ¼: {(tacticalRigGrid != null ? tacticalRigGrid.gameObject.name : "æ— ")}");
+                Debug.Log($"ÇĞ»»Ñ¡ÖĞÕ½Êõ¹Ò¾ßÍø¸ñ: {(tacticalRigGrid != null ? tacticalRigGrid.gameObject.name : "ÎŞ")}");
             }
         }
     }
 
-    // æ¸…é™¤é€‰ä¸­çš„ç½‘æ ¼
+    // Çå³ıÑ¡ÖĞµÄÍø¸ñ
     public void ClearSelectedGrid()
     {
         if (showDebugInfo)
         {
-            string gridName = "æ— ";
+            string gridName = "ÎŞ";
             switch (currentActiveGrid)
             {
                 case ActiveGridType.MainGrid:
-                    gridName = selectedItemGrid?.gameObject.name ?? "æ— ";
+                    gridName = selectedItemGrid?.gameObject.name ?? "ÎŞ";
                     break;
                 case ActiveGridType.BackpackGrid:
-                    gridName = selectedBackpackGrid?.gameObject.name ?? "æ— ";
+                    gridName = selectedBackpackGrid?.gameObject.name ?? "ÎŞ";
                     break;
                 case ActiveGridType.TacticalRigGrid:
-                    gridName = selectedTacticalRigGrid?.gameObject.name ?? "æ— ";
+                    gridName = selectedTacticalRigGrid?.gameObject.name ?? "ÎŞ";
                     break;
             }
-            Debug.Log($"æ¸…é™¤é€‰ä¸­ç½‘æ ¼: {gridName}");
+            Debug.Log($"Çå³ıÑ¡ÖĞÍø¸ñ: {gridName}");
         }
 
         selectedItemGrid = null;
@@ -320,20 +350,20 @@ public class InventoryController : MonoBehaviour
         currentActiveGrid = ActiveGridType.None;
     }
 
-    // è·å–æ˜¯å¦æœ‰é€‰ä¸­çš„ç½‘æ ¼
+    // »ñÈ¡ÊÇ·ñÓĞÑ¡ÖĞµÄÍø¸ñ
     public bool HasSelectedGrid()
     {
         return currentActiveGrid != ActiveGridType.None &&
                (selectedItemGrid != null || selectedBackpackGrid != null || selectedTacticalRigGrid != null);
     }
 
-    // è·å–å½“å‰æ´»è·ƒçš„ç½‘æ ¼ç±»å‹
+    // »ñÈ¡µ±Ç°»îÔ¾µÄÍø¸ñÀàĞÍ
     public ActiveGridType GetActiveGridType()
     {
         return currentActiveGrid;
     }
 
-    // è·å–å½“å‰æ´»è·ƒçš„ç½‘æ ¼å¯¹è±¡ï¼ˆé€šç”¨æ–¹æ³•ï¼‰
+    // »ñÈ¡µ±Ç°»îÔ¾µÄÍø¸ñ¶ÔÏó£¨Í¨ÓÃ·½·¨£©
     public GameObject GetActiveGridObject()
     {
         switch (currentActiveGrid)
@@ -349,12 +379,12 @@ public class InventoryController : MonoBehaviour
         }
     }
 
-    // æ£€æµ‹é¼ æ ‡å½“å‰æ‚¬åœçš„ç½‘æ ¼å¹¶è‡ªåŠ¨åˆ‡æ¢æ´»è·ƒç½‘æ ¼
+    // ¼ì²âÊó±êµ±Ç°ĞüÍ£µÄÍø¸ñ²¢×Ô¶¯ÇĞ»»»îÔ¾Íø¸ñ
     private void DetectHoveredGrid()
     {
         Vector2 mousePos = Input.mousePosition;
 
-        // æ£€æŸ¥ä¸»ç½‘æ ¼
+        // ¼ì²éÖ÷Íø¸ñ
         if (selectedItemGrid != null && IsMouseOverGrid(selectedItemGrid.transform, mousePos))
         {
             if (currentActiveGrid != ActiveGridType.MainGrid)
@@ -362,13 +392,13 @@ public class InventoryController : MonoBehaviour
                 currentActiveGrid = ActiveGridType.MainGrid;
                 if (showDebugInfo)
                 {
-                    Debug.Log("åˆ‡æ¢åˆ°ä¸»ç½‘æ ¼");
+                    Debug.Log("ÇĞ»»µ½Ö÷Íø¸ñ");
                 }
             }
             return;
         }
 
-        // æ£€æŸ¥èƒŒåŒ…ç½‘æ ¼
+        // ¼ì²é±³°üÍø¸ñ
         if (selectedBackpackGrid != null && IsMouseOverGrid(selectedBackpackGrid.transform, mousePos))
         {
             if (currentActiveGrid != ActiveGridType.BackpackGrid)
@@ -376,13 +406,13 @@ public class InventoryController : MonoBehaviour
                 currentActiveGrid = ActiveGridType.BackpackGrid;
                 if (showDebugInfo)
                 {
-                    Debug.Log("åˆ‡æ¢åˆ°èƒŒåŒ…ç½‘æ ¼");
+                    Debug.Log("ÇĞ»»µ½±³°üÍø¸ñ");
                 }
             }
             return;
         }
 
-        // æ£€æŸ¥æˆ˜æœ¯æŒ‚å…·ç½‘æ ¼
+        // ¼ì²éÕ½Êõ¹Ò¾ßÍø¸ñ
         if (selectedTacticalRigGrid != null && IsMouseOverGrid(selectedTacticalRigGrid.transform, mousePos))
         {
             if (currentActiveGrid != ActiveGridType.TacticalRigGrid)
@@ -390,14 +420,14 @@ public class InventoryController : MonoBehaviour
                 currentActiveGrid = ActiveGridType.TacticalRigGrid;
                 if (showDebugInfo)
                 {
-                    Debug.Log("åˆ‡æ¢åˆ°æˆ˜æœ¯æŒ‚å…·ç½‘æ ¼");
+                    Debug.Log("ÇĞ»»µ½Õ½Êõ¹Ò¾ßÍø¸ñ");
                 }
             }
             return;
         }
     }
 
-    // æ£€æŸ¥é¼ æ ‡æ˜¯å¦åœ¨æŒ‡å®šç½‘æ ¼ä¸Šæ–¹
+    // ¼ì²éÊó±êÊÇ·ñÔÚÖ¸¶¨Íø¸ñÉÏ·½
     private bool IsMouseOverGrid(Transform gridTransform, Vector2 mousePos)
     {
         if (gridTransform == null) return false;
@@ -409,10 +439,10 @@ public class InventoryController : MonoBehaviour
     }
 
     /// <summary>
-    /// æ˜¾ç¤ºæ‚¬åœé«˜äº®
+    /// ÏÔÊ¾ĞüÍ£¸ßÁÁ
     /// </summary>
-    /// <param name="item">è¦é«˜äº®çš„ç‰©å“</param>
-    /// <param name="parentGrid">çˆ¶çº§ç½‘æ ¼</param>
+    /// <param name="item">Òª¸ßÁÁµÄÎïÆ·</param>
+    /// <param name="parentGrid">¸¸¼¶Íø¸ñ</param>
     public void ShowHoverHighlight(InventorySystemItem item, Transform parentGrid)
     {
         if (hoverHighlight != null)
@@ -422,13 +452,39 @@ public class InventoryController : MonoBehaviour
     }
 
     /// <summary>
-    /// éšè—æ‚¬åœé«˜äº®
+    /// ÏÔÊ¾ĞüÍ£¸ßÁÁ£¨×°±¸À¸°æ±¾£©
+    /// </summary>
+    /// <param name="item">Òª¸ßÁÁµÄÎïÆ·</param>
+    /// <param name="parentGrid">¸¸¼¶Íø¸ñ</param>
+    /// <param name="equipSlot">×°±¸À¸ÒıÓÃ</param>
+    public void ShowHoverHighlight(InventorySystemItem item, Transform parentGrid, EquipSlot equipSlot)
+    {
+        if (hoverHighlight != null)
+        {
+            hoverHighlight.ShowHoverHighlight(item, parentGrid, equipSlot);
+        }
+    }
+
+    /// <summary>
+    /// Òş²ØĞüÍ£¸ßÁÁ
     /// </summary>
     public void HideHoverHighlight()
     {
         if (hoverHighlight != null)
         {
             hoverHighlight.HideHoverHighlight();
+        }
+    }
+
+    /// <summary>
+    /// Ç¿ÖÆË¢ĞÂÔ¤ÀÀ
+    /// </summary>
+    public void ForceRefreshPreview()
+    {
+        // Ç¿ÖÆË¢ĞÂÔ¤ÀÀ
+        if (enablePreview && draggedItem != null)
+        {
+            HandlePreview();
         }
     }
 }

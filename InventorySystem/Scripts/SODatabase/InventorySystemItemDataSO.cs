@@ -2,67 +2,67 @@ using UnityEngine;
 
 public enum InventorySystemItemCategory
 {
-    Helmet,         // Í·¿ø
-    Armor,          // »¤¼×
-    TacticalRig,    // Õ½Êõ¹Ò¾ß
-    Backpack,       // ±³°ü
-    Weapon,         // ÎäÆ÷
-    Ammunition,     // µ¯Ò©
-    Food,           // Ê³Îï
-    Drink,          // ÒûÁÏ
-    Sedative,       // Õò¾²¼Á
-    Hemostatic,     // Ö¹Ñª¼Á
-    Healing,        // ÖÎÁÆÓÃÆ·
-    Intelligence,   // Çé±¨
-    Currency        // »õ±Ò
+    Helmet,         // å¤´ç›”
+    Armor,          // æŠ¤ç”²
+    TacticalRig,    // æˆ˜æœ¯æŒ‚å…·
+    Backpack,       // èƒŒåŒ…
+    Weapon,         // æ­¦å™¨
+    Ammunition,     // å¼¹è¯
+    Food,           // é£Ÿç‰©
+    Drink,          // é¥®æ–™
+    Sedative,       // é•‡é™å‰‚
+    Hemostatic,     // æ­¢è¡€å‰‚
+    Healing,        // æ²»ç–—ç”¨å“
+    Intelligence,   // æƒ…æŠ¥
+    Currency        // è´§å¸
 }
 
 [CreateAssetMenu(fileName = "New Item", menuName = "Inventory System/Item Data")]
 public class InventorySystemItemDataSO : ScriptableObject
 {
-    [Header("»ù±¾ÐÅÏ¢")]
+    [Header("åŸºæœ¬ä¿¡æ¯")]
     public int id;
     public string itemName;
 
-    [Header("ÎïÆ·Àà±ð")]
+    [Header("ç‰©å“ç±»åˆ«")]
     public InventorySystemItemCategory itemCategory = InventorySystemItemCategory.Helmet;
 
-    [Header("Íø¸ñ³ß´ç")]
+    [Header("ç½‘æ ¼å°ºå¯¸")]
     public int height = 1;
     public int width = 1;
 
-    [Header("Õä¹ó³Ì¶È")]
+    [Header("çè´µç¨‹åº¦")]
     public string rarity;
 
-    [Header("ÈÝÁ¿ÐÅÏ¢(±³°ü/Õ½Êõ¹Ò¾ß)")]
+    [Header("å®¹é‡ä¿¡æ¯(èƒŒåŒ…/æˆ˜æœ¯æŒ‚å…·)")]
     [SerializeField] private int cellH;
     [SerializeField] private int cellV;
 
-    [Header("×Óµ¯ÀàÐÍ(µ¯Ò©/ÎäÆ÷)")]
+    [Header("å­å¼¹ç±»åž‹(å¼¹è¯/æ­¦å™¨)")]
     [SerializeField] private string bulletType;
 
-    [Header("±³¾°ÑÕÉ«")]
+    [Header("èƒŒæ™¯é¢œè‰²")]
     public string backgroundColor;
 
-    [Header("ÎïÆ·Í¼±ê")]
+    [Header("ç‰©å“å›¾æ ‡")]
     public Sprite itemIcon;
 
-    [Header("ËõÐ´Ãû³Æ")]
+    [Header("ç¼©å†™åç§°")]
     public string shortName;
 
-    [Header("ÄÍ¾ÃÖµ(Í·¿ø/»¤¼×)")]
+    [Header("è€ä¹…å€¼(å¤´ç›”/æŠ¤ç”²)")]
     public int durability;
 
-    [Header("Ê¹ÓÃ´ÎÊý(Ê³Æ·/ÒûÁÏ/Ò½ÁÆÓÃÆ·)")]
+    [Header("ä½¿ç”¨æ¬¡æ•°(é£Ÿå“/é¥®æ–™/åŒ»ç–—ç”¨å“)")]
     public int usageCount;
 
-    [Header("×î´ó»Ø¸´ÑªÁ¿(ÖÎÁÆÓÃÆ·)")]
+    [Header("æœ€å¤§å›žå¤è¡€é‡(æ²»ç–—ç”¨å“)")]
     public int maxHealAmount;
 
-    [Header("¶ÑµþÉÏÏÞ(»õ±Ò/µ¯Ò©)")]
+    [Header("å †å ä¸Šé™(è´§å¸/å¼¹è¯)")]
     public int maxStack;
 
-    [Header("Çé±¨Öµ(Çé±¨ÎïÆ·)")]
+    [Header("æƒ…æŠ¥å€¼(æƒ…æŠ¥ç‰©å“)")]
     public int intelligenceValue;
 
     [HideInInspector]
@@ -120,46 +120,6 @@ public class InventorySystemItemDataSO : ScriptableObject
     {
         category = itemCategory.ToString();
     }
-    
-    [Header("Ðý×ªÉèÖÃ")]
-    [SerializeField] private int rotationAngle = 0; // µ±Ç°Ðý×ª½Ç¶È£¨0, 90, 180, 270£©
-    [SerializeField] private bool canRotate = true; // ÊÇ·ñÔÊÐíÐý×ª
-    
-    // Ðý×ª½Ç¶ÈÊôÐÔ
-    public int RotationAngle
-    {
-        get => rotationAngle;
-        set => rotationAngle = Mathf.Clamp(value, 0, 270);
-    }
-    
-    // ÊÇ·ñ¿ÉÐý×ªÊôÐÔ
-    public bool CanRotate
-    {
-        get => canRotate;
-        set => canRotate = value;
-    }
-    
-    // »ñÈ¡Ðý×ªºóµÄ³ß´ç
-    public Vector2Int GetRotatedSize()
-    {
-        // 90¶ÈºÍ270¶ÈÐý×ªÊ±£¬¿í¸ß»¥»»
-        if (rotationAngle == 90 || rotationAngle == 270)
-        {
-            return new Vector2Int(height, width);
-        }
-        return new Vector2Int(width, height);
-    }
-    
-    // Ðý×ªÎïÆ·£¨Ë³Ê±Õë90¶È£©
-    public void RotateClockwise()
-    {
-        if (!canRotate) return;
-        rotationAngle = (rotationAngle + 90) % 360;
-    }
-    
-    // ÖØÖÃÐý×ª½Ç¶È
-    public void ResetRotation()
-    {
-        rotationAngle = 0;
-    }
+
+
 }

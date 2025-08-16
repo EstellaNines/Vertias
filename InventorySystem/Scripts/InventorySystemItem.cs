@@ -6,7 +6,7 @@ public class InventorySystemItem : MonoBehaviour
     ItemDataHolder holder;
     private bool isDraggable = true;
 
-    public Vector2Int Size => holder != null ? holder.GetCurrentSize() : Vector2Int.one;
+    public Vector2Int Size => holder != null ? new Vector2Int(holder.ItemWidth, holder.ItemHeight) : Vector2Int.one;
     public InventorySystemItemDataSO Data => holder.GetItemData();
     public bool IsDraggable { get => isDraggable; set => isDraggable = value; }
 

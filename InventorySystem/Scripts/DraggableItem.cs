@@ -32,8 +32,7 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     private Vector2 originalPivot;
     public bool isDragging { get; private set; } = false; // 拖拽状态标识
 
-    [Header("旋转设置")]
-    [SerializeField] private bool enableRotationDuringDrag = true; // 是否允许拖拽时旋转
+
 
     private ItemDataHolder itemDataHolder;
 
@@ -101,202 +100,18 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
 
     private void Update()
     {
-        // 只有在拖拽状态下才允许旋转
-        if (isDragging && enableRotationDuringDrag)
-        {
-            HandleRotationInput();
-        }
+        // 旋转功能已移除
     }
 
-    // 处理旋转输入
-    private void HandleRotationInput()
-    {
-        if (Input.GetKeyDown(KeyCode.R))
-        {
-            TryRotateItem();
-        }
-    }
 
-    // 尝试旋转物品
-    private bool TryRotateItem()
-    {
-        if (itemDataHolder == null || !itemDataHolder.CanRotate())
-        {
-            Debug.Log("物品不支持旋转");
-            return false;
-        }
 
-        // 保存旋转前的状态
-        int previousRotation = itemDataHolder.GetCurrentRotation();
-        Vector2Int previousSize = itemDataHolder.GetCurrentSize();
 
-        // 执行旋转
-        bool rotated = itemDataHolder.RotateItem();
-        if (!rotated) return false;
 
-        // 检查旋转后是否会超出边界或发生碰撞
-        if (isDragging && !CanRotateAtCurrentPosition())
-        {
-            // 如果不能旋转，回滚到之前的状态
-            itemDataHolder.SetRotation(previousRotation);
-            Debug.Log("旋转会导致碰撞或超出边界，已自动回弹");
-            return false;
-        }
 
-        Debug.Log($"物品旋转成功，当前角度：{itemDataHolder.GetCurrentRotation()}度");
-        return true;
-    }
 
-    // 检查当前位置是否可以旋转（增强版）
-    private bool CanRotateAtCurrentPosition()
-    {
-        if (itemDataHolder == null) return false;
 
-        // 获取当前鼠标位置下的网格
-        var results = new System.Collections.Generic.List<RaycastResult>();
-        PointerEventData eventData = new PointerEventData(EventSystem.current)
-        {
-            position = Input.mousePosition
-        };
-        EventSystem.current.RaycastAll(eventData, results);
 
-        foreach (var result in results)
-        {
-            // 检查BackpackItemGrid
-            BackpackItemGrid backpackGrid = result.gameObject.GetComponent<BackpackItemGrid>();
-            if (backpackGrid == null)
-                backpackGrid = result.gameObject.GetComponentInParent<BackpackItemGrid>();
 
-            if (backpackGrid != null)
-            {
-                Vector2Int dropPosition = backpackGrid.GetTileGridPosition(Input.mousePosition);
-                Vector2Int newSize = itemDataHolder.GetRotatedSize();
-
-                // 检查边界
-                Vector2Int gridSize = backpackGrid.GetGridSize();
-                if (dropPosition.x + newSize.x > gridSize.x ||
-                    dropPosition.y + newSize.y > gridSize.y ||
-                    dropPosition.x < 0 || dropPosition.y < 0)
-                {
-                    Debug.Log($"旋转后会超出网格边界: 位置({dropPosition.x}, {dropPosition.y}), 尺寸({newSize.x}, {newSize.y}), 网格大小({gridSize.x}, {gridSize.y})");
-                    return false;
-                }
-
-                // 检查碰撞（排除自己）
-                return backpackGrid.CanPlaceItem(dropPosition, newSize, gameObject);
-            }
-
-            // 可以添加其他网格类型的检查...
-            // ItemGrid, TacticalRigItemGrid等
-        }
-
-        return true; // 如果没有找到网格，默认允许旋转
-    }
-
-    // 智能旋转 - 完全修复版
-    private bool TrySmartRotate()
-    {
-        if (itemDataHolder == null || !itemDataHolder.CanRotate())
-            return false;
-
-        // 保存当前状态
-        int originalRotation = itemDataHolder.GetCurrentRotation();
-        Vector3 originalWorldPosition = rectTransform.position;
-        
-        // 获取当前网格位置
-        Vector2Int currentGridPos = GetCurrentGridPosition();
-    
-        // 执行旋转（ItemDataHolder会处理中心轴心旋转）
-        itemDataHolder.RotateItem();
-        Vector2Int newSize = itemDataHolder.GetRotatedSize();
-    
-        // 检查旋转后是否可以在当前位置放置
-        if (CanPlaceAtPosition(currentGridPos, newSize))
-        {
-            // 当前位置可以放置，确保位置正确
-            rectTransform.position = originalWorldPosition;
-            return true;
-        }
-    
-        // 当前位置不行，尝试在附近寻找合适位置
-        for (int offsetX = -1; offsetX <= 1; offsetX++)
-        {
-            for (int offsetY = -1; offsetY <= 1; offsetY++)
-            {
-                Vector2Int testPos = currentGridPos + new Vector2Int(offsetX, offsetY);
-                if (CanPlaceAtPosition(testPos, newSize))
-                {
-                    // 找到合适位置，对齐到该位置
-                    AlignToGrid(testPos);
-                    return true;
-                }
-            }
-        }
-    
-        // 没找到合适位置，回滚旋转
-        itemDataHolder.SetRotation(originalRotation);
-        return false;
-    }
-
-    // 对齐到网格位置（修复版）
-    private void AlignToGrid(Vector2Int gridPosition)
-    {
-        BaseItemGrid currentGrid = GetCurrentGrid();
-        if (currentGrid == null) return;
-
-        float cellSize = currentGrid.GetCellSize();
-        Vector2Int itemSize = itemDataHolder.GetRotatedSize();
-
-        // 统一使用中心轴心和锚点
-        rectTransform.anchorMin = new Vector2(0.5f, 0.5f);
-        rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
-        rectTransform.pivot = new Vector2(0.5f, 0.5f);
-
-        // 计算网格中心位置（基于中心锚点）
-        Vector2 centerPosition = new Vector2(
-            gridPosition.x * cellSize + (itemSize.x * cellSize) / 2f,
-            -gridPosition.y * cellSize - (itemSize.y * cellSize) / 2f
-        );
-
-        rectTransform.anchoredPosition = centerPosition;
-    }
-
-    // 获取当前所在的网格
-    private BaseItemGrid GetCurrentGrid()
-    {
-        // 通过射线检测获取当前鼠标下的网格
-        PointerEventData pointerData = new PointerEventData(EventSystem.current)
-        {
-            position = Input.mousePosition
-        };
-
-        var results = new System.Collections.Generic.List<RaycastResult>();
-        EventSystem.current.RaycastAll(pointerData, results);
-
-        foreach (var result in results)
-        {
-            BaseItemGrid grid = result.gameObject.GetComponent<BaseItemGrid>();
-            if (grid != null)
-            {
-                return grid;
-            }
-
-            // 检查其他网格类型
-            BackpackItemGrid backpackGrid = result.gameObject.GetComponent<BackpackItemGrid>();
-            if (backpackGrid != null)
-            {
-                return backpackGrid;
-            }
-
-            TactiaclRigItemGrid tacticalGrid = result.gameObject.GetComponent<TactiaclRigItemGrid>();
-            if (tacticalGrid != null)
-            {
-                return tacticalGrid;
-            }
-        }
-
-        return null;
-    }
     public void OnBeginDrag(PointerEventData eventData)
     {
         if (!item.IsDraggable) return;
@@ -396,11 +211,69 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
             out localPointerPosition);
 
         rectTransform.anchoredPosition = localPointerPosition;
+        
+        // 检测装备栏并显示高亮提示
+        CheckEquipSlotHighlight(eventData);
+    }
+    
+    /// <summary>
+    /// 检测装备栏并显示高亮提示
+    /// </summary>
+    /// <param name="eventData">拖拽事件数据</param>
+    private void CheckEquipSlotHighlight(PointerEventData eventData)
+    {
+        // 进行射线检测
+        var results = new System.Collections.Generic.List<RaycastResult>();
+        EventSystem.current.RaycastAll(eventData, results);
+        
+        EquipSlot targetEquipSlot = null;
+        
+        // 查找装备栏
+        foreach (var result in results)
+        {
+            EquipSlot equipSlot = result.gameObject.GetComponent<EquipSlot>();
+            if (equipSlot != null)
+            {
+                targetEquipSlot = equipSlot;
+                break;
+            }
+        }
+        
+        // 如果找到装备栏，显示高亮提示
+        if (targetEquipSlot != null)
+        {
+            var itemComponent = GetComponent<InventorySystemItem>();
+            if (itemComponent != null)
+            {
+                bool canEquip = CanEquipToSlot(targetEquipSlot, itemComponent);
+                targetEquipSlot.ShowEquipHighlight(canEquip);
+            }
+        }
+        else
+        {
+            // 如果没有找到装备栏，隐藏所有装备栏高亮
+            HideAllEquipSlotHighlights();
+        }
+    }
+    
+    /// <summary>
+    /// 隐藏所有装备栏高亮
+    /// </summary>
+    private void HideAllEquipSlotHighlights()
+    {
+        EquipSlot[] allEquipSlots = FindObjectsOfType<EquipSlot>();
+        foreach (var equipSlot in allEquipSlots)
+        {
+            equipSlot.HideEquipHighlight();
+        }
     }
 
     public void OnEndDrag(PointerEventData eventData)
     {
         if (!item.IsDraggable) return;
+
+        // 清理所有装备栏高亮显示
+        HideAllEquipSlotHighlights();
 
         bool placementSuccessful = false;
 
@@ -517,8 +390,8 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
             if (targetGrid != null)
             {
                 Vector2Int dropPosition = Vector2Int.zero;
-                Vector2Int itemSize = item.Size;  //new Vector2Int(item.Data.width, item.Data.height);
-
+                // 使用原始尺寸进行占位检测
+                Vector2Int itemSize = item.Size;
 
                 // 调用对应的 GetTileGridPosition 方法
                 if (gridType == typeof(ItemGrid))
@@ -538,18 +411,18 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
 
                 bool canPlace = false;
 
-                // 调用对应的 CanPlaceItem 方法
+                // 调用对应的 CanPlaceItem 方法（使用智能检测）
                 if (gridType == typeof(ItemGrid))
                 {
-                    canPlace = ((ItemGrid)targetGrid).CanPlaceItem(dropPosition, itemSize);
+                    canPlace = ((ItemGrid)targetGrid).CanPlaceItem(gameObject, dropPosition);
                 }
                 else if (gridType == typeof(BackpackItemGrid))
                 {
-                    canPlace = ((BackpackItemGrid)targetGrid).CanPlaceItem(dropPosition, itemSize);
+                    canPlace = ((BackpackItemGrid)targetGrid).CanPlaceItem(gameObject, dropPosition);
                 }
                 else if (gridType == typeof(TactiaclRigItemGrid))
                 {
-                    canPlace = ((TactiaclRigItemGrid)targetGrid).CanPlaceItem(dropPosition, itemSize);
+                    canPlace = ((TactiaclRigItemGrid)targetGrid).CanPlaceItem(gameObject, dropPosition);
                 }
 
                 if (canPlace)
@@ -623,6 +496,7 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
                 if (itemGrid != null)
                 {
                     Vector2Int gridPos = itemGrid.GetTileGridPosition(originalPos + (Vector2)itemGrid.transform.position);
+                    // 使用原始尺寸
                     Vector2Int itemSize = item.Size;
 
                     // 直接调用PlaceItem方法（不再使用反射）
@@ -634,6 +508,7 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
                     if (backpackGrid != null)
                     {
                         Vector2Int gridPos = backpackGrid.GetTileGridPosition(originalPos + (Vector2)backpackGrid.transform.position);
+                        // 使用原始尺寸
                         Vector2Int itemSize = item.Size;
 
                         // 直接调用PlaceItem方法
@@ -645,6 +520,7 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
                         if (tacticalGrid != null)
                         {
                             Vector2Int gridPos = tacticalGrid.GetTileGridPosition(originalPos + (Vector2)tacticalGrid.transform.position);
+                            // 使用原始尺寸
                             Vector2Int itemSize = item.Size;
 
                             // 直接调用PlaceItem方法
@@ -652,14 +528,14 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
                         }
                     }
                 }
+            }
 
-                RestoreOriginalSize();
+            RestoreOriginalSize();
 
-                if (itemBackground != null)
-                {
-                    // 回到原网格，背景显示
-                    itemBackground.SetActive(true);
-                }
+            if (itemBackground != null)
+            {
+                // 回到原网格，背景显示
+                itemBackground.SetActive(true);
             }
         }
 
@@ -743,7 +619,26 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
             var inventoryController = FindObjectOfType<InventoryController>();
             if (inventoryController != null)
             {
-                inventoryController.ShowHoverHighlight(item, transform.parent);
+                // 检测是否在装备栏中
+                EquipSlot equipSlot = GetComponentInParent<EquipSlot>();
+                if (equipSlot != null)
+                {
+                    // 在装备栏中，传递装备栏信息以适配大小
+                    inventoryController.ShowHoverHighlight(item, equipSlot.transform, equipSlot);
+                }
+                else
+                {
+                    // 在普通网格中，获取正确的父级网格对象
+                    Transform parentGrid = GetParentGridTransform();
+                    if (parentGrid != null)
+                    {
+                        inventoryController.ShowHoverHighlight(item, parentGrid);
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"无法获取物品 {item.name} 的父级网格");
+                    }
+                }
             }
         }
     }
@@ -879,5 +774,44 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
                 break;
             }
         }
+    }
+
+    /// <summary>
+    /// 获取物品的父级网格Transform
+    /// </summary>
+    /// <returns>父级网格Transform</returns>
+    private Transform GetParentGridTransform()
+    {
+        // 尝试获取BaseItemGrid
+        var baseGrid = GetComponentInParent<BaseItemGrid>();
+        if (baseGrid != null)
+        {
+            return baseGrid.transform;
+        }
+
+        // 尝试获取BackpackItemGrid
+        var backpackGrid = GetComponentInParent<BackpackItemGrid>();
+        if (backpackGrid != null)
+        {
+            return backpackGrid.transform;
+        }
+
+        // 尝试获取TactiaclRigItemGrid
+        var tacticalGrid = GetComponentInParent<TactiaclRigItemGrid>();
+        if (tacticalGrid != null)
+        {
+            return tacticalGrid.transform;
+        }
+
+        // 尝试获取ItemGrid
+        var itemGrid = GetComponentInParent<ItemGrid>();
+        if (itemGrid != null)
+        {
+            return itemGrid.transform;
+        }
+
+        // 如果都找不到，返回transform.parent
+        Debug.LogWarning($"无法找到物品 {item.name} 的网格父级，使用默认父级: {transform.parent?.name}");
+        return transform.parent;
     }
 }
