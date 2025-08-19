@@ -42,8 +42,11 @@ public class TopNavigationTransform : MonoBehaviour
 
             navigationImages[i].sprite = normalSprites[i];
         }
-        // 默认显示第一个面板
-        if (panels.Length > 0) panels[0].gameObject.SetActive(true);
+        // 默认显示第一个面板（背包网格界面）并设置正确的状态
+        if (panels.Length > 0)
+        {
+            OnNavigationClicked(0);
+        }
     }
 
     private void InitializeCloseImage()
@@ -80,6 +83,15 @@ public class TopNavigationTransform : MonoBehaviour
         backpackState = state;
     }
 
+    /// <summary>
+    /// 公共方法：切换到指定索引的导航面板
+    /// </summary>
+    /// <param name="index">面板索引</param>
+    public void SwitchToPanel(int index)
+    {
+        OnNavigationClicked(index);
+    }
+
     private void OnCloseClicked()
     {
         if (closeImage != null)
@@ -106,7 +118,7 @@ public class TopNavigationTransform : MonoBehaviour
         {
             isBackpackOpen = false;
             backpackCanvas.gameObject.SetActive(false);
-            
+
             // 调用BackpackState的关闭方法来处理输入控制
             if (backpackState != null)
             {
@@ -119,12 +131,12 @@ public class TopNavigationTransform : MonoBehaviour
     {
         isBackpackOpen = !isBackpackOpen;
         backpackCanvas.gameObject.SetActive(isBackpackOpen);
-        
+
         if (isBackpackOpen)
         {
             // 默认显示第一个面板（假设为backpack界面）
             OnNavigationClicked(0);
-            
+
             // 调用BackpackState的打开方法来处理输入控制
             if (backpackState != null)
             {
@@ -139,5 +151,27 @@ public class TopNavigationTransform : MonoBehaviour
                 backpackState.CloseBackpack();
             }
         }
+    }
+
+    /// <summary>
+    /// 直接打开背包并切换到指定面板
+    /// </summary>
+    /// <param name="panelIndex">要打开的面板索引</param>
+    public void OpenToSpecificPanel(int panelIndex)
+    {
+        if (!isBackpackOpen)
+        {
+            isBackpackOpen = true;
+            backpackCanvas.gameObject.SetActive(true);
+
+            // 调用BackpackState的打开方法来处理输入控制
+            if (backpackState != null)
+            {
+                backpackState.OpenBackpack();
+            }
+        }
+
+        // 切换到指定面板
+        OnNavigationClicked(panelIndex);
     }
 }

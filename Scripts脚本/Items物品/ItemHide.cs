@@ -8,7 +8,7 @@ public class ItemHide : MonoBehaviour
     private Color color; // 颜色
     [Header("透明度")]
     [Range(0, 1)]
-    [FieldLabel("透明度参数")] public float alpha = 0.5f;
+    [FieldLabel("进入范围时的透明度参数")] public float alpha = 0.8f;
 
     private void Start()
     {
@@ -18,16 +18,21 @@ public class ItemHide : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.gameObject.tag == "Player" && spriteRenderer.sprite != null)
+        // 检查碰撞体是否是BoxCollider2D类型且属于玩家
+        if (collision is BoxCollider2D && collision.gameObject.tag == "Player" && spriteRenderer.sprite != null)
         {
-            Color Newcolor = new Color(color.r, color.g, color.b, alpha);
+            Color Newcolor = new Color(color.r, color.g, color.b, alpha); // 进入范围时设置为0.8透明度
             spriteRenderer.color = Newcolor;
         }
     }
 
     void OnTriggerExit2D(Collider2D collision)
     {
-        Color Newcolor = new Color(color.r, color.g, color.b, 1f);
-        spriteRenderer.color = Newcolor;
+        // 检查碰撞体是否是BoxCollider2D类型且属于玩家
+        if (collision is BoxCollider2D && collision.gameObject.tag == "Player")
+        {
+            Color Newcolor = new Color(color.r, color.g, color.b, 1.0f); // 离开范围时恢复为完全不透明
+            spriteRenderer.color = Newcolor;
+        }
     }
 }

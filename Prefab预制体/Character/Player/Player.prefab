@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 7473251349105020295}
   - component: {fileID: 357775602801624902}
   - component: {fileID: 3980517779075264897}
+  - component: {fileID: 5172414224792230201}
   - component: {fileID: 3403322690579170722}
   - component: {fileID: 4721661413699007426}
   m_Layer: 9
@@ -139,6 +140,51 @@ Rigidbody2D:
   m_SleepingMode: 0
   m_CollisionDetection: 1
   m_Constraints: 4
+--- !u!61 &5172414224792230201
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 351720364157295539}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0, y: 0.13739562}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0.5, y: 0}
+    oldSize: {x: 0.875, y: 1.1875}
+    newSize: {x: 0.875, y: 1.1875}
+    adaptiveTilingThreshold: 0.5
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  serializedVersion: 2
+  m_Size: {x: 0.875, y: 0.27479124}
+  m_EdgeRadius: 0
 --- !u!70 &3403322690579170722
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
@@ -230,6 +276,8 @@ MonoBehaviour:
   PlayerRB2D: {fileID: 0}
   AIMTOR: {fileID: 0}
   collider2D: {fileID: 0}
+  isHoldingFire: 0
+  fireHoldTime: 0
 --- !u!1 &2244033289758825558
 GameObject:
   m_ObjectHideFlags: 0

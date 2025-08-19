@@ -9,6 +9,7 @@ public class WeaponNotice : MonoBehaviour
     [Header("UI组件")]
     [FieldLabel("武器图标")] public Image weaponIcon; // 武器图标UI组件
     [FieldLabel("弹药信息文本")] public TextMeshProUGUI ammoInfoText; // 弹药信息文本
+    [FieldLabel("默认武器图片")] public Sprite defaultWeaponSprite; // 默认武器图片引用
 
     [Header("引用组件")]
     [FieldLabel("玩家")] public Player player; // 玩家引用
@@ -16,12 +17,15 @@ public class WeaponNotice : MonoBehaviour
 
     [Header("设置")]
     [FieldLabel("默认透明度")][Range(0f, 1f)] public float defaultAlpha = 1f; // 武器图标默认透明度
-    [FieldLabel("无武器时隐藏")] public bool hideWhenNoWeapon = true; // 无武器时隐藏武器图标
+    [FieldLabel("无武器时隐藏")] public bool hideWhenNoWeapon = false; // 无武器时隐藏武器图标（改为false以显示默认图片）
+    [FieldLabel("保持默认图片原始尺寸")] public bool preserveDefaultImageSize = true; // 保持默认图片原始尺寸不拉伸
 
     // 内部状态
     private WeaponManager currentWeapon;
     private SpriteRenderer currentWeaponSprite;
     private bool isAmmoInfoVisible = false; // 弹药信息是否可见
+    private Vector2 originalImageSize; // 保存Image组件的原始尺寸
+    private bool isShowingDefaultImage = false; // 是否正在显示默认图片
 
     void Start()
     {
@@ -125,17 +129,15 @@ public class WeaponNotice : MonoBehaviour
     {
         if (weaponIcon != null)
         {
-            // 初始状态隐藏武器图标
-            if (hideWhenNoWeapon)
+            // 保存Image组件的原始尺寸
+            RectTransform rectTransform = weaponIcon.GetComponent<RectTransform>();
+            if (rectTransform != null)
             {
-                weaponIcon.gameObject.SetActive(false);
+                originalImageSize = rectTransform.sizeDelta;
             }
-            else
-            {
-                Color iconColor = weaponIcon.color;
-                iconColor.a = 0f;
-                weaponIcon.color = iconColor;
-            }
+
+            // 显示默认武器图片
+            ShowDefaultWeaponImage();
         }
 
         // 初始化弹药信息文本 - 默认激活显示
@@ -178,7 +180,7 @@ public class WeaponNotice : MonoBehaviour
         {
             return currentWeapon.GetWeaponName();
         }
-        return "无武器";
+        return "Null";
     }
 
     // 触发武器检查（外部调用）
@@ -220,7 +222,7 @@ public class WeaponNotice : MonoBehaviour
         }
         else
         {
-            ammoInfoText.text = "未装备武器";
+            ammoInfoText.text = "Null";
         }
     }
 
@@ -229,7 +231,7 @@ public class WeaponNotice : MonoBehaviour
     {
         // 获取当前武器的最大弹夹容量
         int maxCapacity = currentWeapon != null ? currentWeapon.GetMagazineCapacity() : 30;
-        
+
         if (ammoCount == 0)
         {
             return "Empty";
@@ -254,7 +256,7 @@ public class WeaponNotice : MonoBehaviour
         {
             return "Almost Empty";
         }
-        
+
         return ""; // 默认不显示任何文本
     }
 
@@ -325,6 +327,17 @@ public class WeaponNotice : MonoBehaviour
             weaponIcon.gameObject.SetActive(true);
         }
 
+        // 如果之前显示的是默认图片，恢复Image组件的原始尺寸
+        if (isShowingDefaultImage)
+        {
+            RectTransform rectTransform = weaponIcon.GetComponent<RectTransform>();
+            if (rectTransform != null)
+            {
+                rectTransform.sizeDelta = originalImageSize;
+            }
+            isShowingDefaultImage = false;
+        }
+
         // 设置透明度
         Color iconColor = weaponIcon.color;
         iconColor.a = defaultAlpha;
@@ -343,14 +356,45 @@ public class WeaponNotice : MonoBehaviour
         }
         else
         {
-            // 仅设置透明度为0
-            Color iconColor = weaponIcon.color;
-            iconColor.a = 0f;
-            weaponIcon.color = iconColor;
+            // 显示默认武器图片而不是隐藏
+            ShowDefaultWeaponImage();
+        }
+    }
+
+    // 显示默认武器图片
+    private void ShowDefaultWeaponImage()
+    {
+        if (weaponIcon == null || defaultWeaponSprite == null) return;
+
+        // 激活图标GameObject
+        if (!weaponIcon.gameObject.activeInHierarchy)
+        {
+            weaponIcon.gameObject.SetActive(true);
         }
 
-        // 清空精灵
-        weaponIcon.sprite = null;
+        // 设置默认精灵
+        weaponIcon.sprite = defaultWeaponSprite;
+
+        // 设置透明度
+        Color iconColor = weaponIcon.color;
+        iconColor.a = defaultAlpha;
+        weaponIcon.color = iconColor;
+
+        // 如果需要保持默认图片原始尺寸
+        if (preserveDefaultImageSize)
+        {
+            RectTransform rectTransform = weaponIcon.GetComponent<RectTransform>();
+            if (rectTransform != null && defaultWeaponSprite != null)
+            {
+                // 设置默认图片为固定的480*480像素大小
+                Vector2 spriteSize = new Vector2(120f, 120f);
+                rectTransform.sizeDelta = spriteSize;
+            }
+        }
+
+        isShowingDefaultImage = true;
+
+        Debug.Log("WeaponNotice: 显示默认武器图片");
     }
 
     // 显示弹药信息

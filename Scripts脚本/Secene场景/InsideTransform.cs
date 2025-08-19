@@ -23,6 +23,7 @@ public class InsideTransform : MonoBehaviour
     
     private bool playerInRange = false; // 玩家是否在范围内
     private GameObject playerInTrigger; // 在触发器内的玩家对象
+    private bool isOperateEventBound = false; // 记录是否已绑定Operate事件
 
     void Start()
     {
@@ -36,10 +37,9 @@ public class InsideTransform : MonoBehaviour
             }
         }
         
-        // 订阅F键操作事件
+        // 启用UI输入（但不在这里绑定F键事件，而是在触发器范围内绑定）
         if (playerInputController != null)
         {
-            playerInputController.onOperate += OnOperatePressed;
             playerInputController.EnabledUIInput(); // 启用UI输入
         }
         
@@ -59,10 +59,7 @@ public class InsideTransform : MonoBehaviour
     void OnDestroy()
     {
         // 取消订阅事件
-        if (playerInputController != null)
-        {
-            playerInputController.onOperate -= OnOperatePressed;
-        }
+        UnbindOperateEvent();
     }
     
     // F键按下时的处理
@@ -138,6 +135,7 @@ public class InsideTransform : MonoBehaviour
             playerInRange = true;
             playerInTrigger = collision.gameObject;
             ShowPromptUI(); // 显示UI
+            BindOperateEvent(); // 绑定F键事件
             Debug.Log("玩家进入内部传送区域，按F键返回外部");
         }
     }
@@ -149,7 +147,30 @@ public class InsideTransform : MonoBehaviour
             playerInRange = false;
             playerInTrigger = null;
             HidePromptUI(); // 隐藏UI
+            UnbindOperateEvent(); // 解绑F键事件
             Debug.Log("玩家离开内部传送区域");
+        }
+    }
+
+    // 绑定F键（Operate）事件
+    private void BindOperateEvent()
+    {
+        if (playerInputController != null && !isOperateEventBound)
+        {
+            playerInputController.onOperate += OnOperatePressed;
+            isOperateEventBound = true;
+            Debug.Log("已绑定F键（Operate）事件到内部传送触发器");
+        }
+    }
+
+    // 解绑F键（Operate）事件
+    private void UnbindOperateEvent()
+    {
+        if (playerInputController != null && isOperateEventBound)
+        {
+            playerInputController.onOperate -= OnOperatePressed;
+            isOperateEventBound = false;
+            Debug.Log("已解绑F键（Operate）事件从内部传送触发器");
         }
     }
 }

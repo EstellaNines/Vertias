@@ -8,8 +8,11 @@ public class BackpackState : MonoBehaviour
     [Header("背包UI组件")]
     [SerializeField] private Canvas backpackCanvas; // 背包Canvas组件
     [SerializeField] private PlayerInputController playerInputController; // 玩家输入控制器组件
-    [SerializeField] private ButtonOpenPlatform buttonOpenPlatform; // 按钮开启平台组件
+    // ButtonOpenPlatform组件已移除，统一使用TopNavigationTransform进行面板管理
     [SerializeField] private TopNavigationTransform topNav; // TopNavigationTransform组件引用
+    
+    // 公共属性，供外部脚本访问TopNavigationTransform
+    public TopNavigationTransform topNavigationTransform => topNav;
 
     [Header("状态变量")]
     private bool isBackpackOpen = false; // 背包是否打开
@@ -64,10 +67,11 @@ public class BackpackState : MonoBehaviour
             // 先解除可能存在的重复绑定
             playerInputController.onBackPack -= ToggleBackpack; // 先解除
             playerInputController.onBackPack += ToggleBackpack;  // 再绑定
+            
             playerInputController.EnabledUIInput(); // 修复方法名
 
             isInitialized = true;
-            Debug.Log("BackpackState: 背包系统初始化完成");
+            Debug.Log("BackpackState: 背包系统初始化完成，已绑定Tab键事件");
         }
         else
         {
@@ -81,7 +85,7 @@ public class BackpackState : MonoBehaviour
         }
     }
 
-    // 切换背包开关状态
+    // 切换背包开关状态（Tab键）
     private void ToggleBackpack()
     {
         if (topNav != null)
@@ -89,6 +93,8 @@ public class BackpackState : MonoBehaviour
             topNav.ToggleBackpack(); // 委托给TopNavigationTransform处理
         }
     }
+
+
 
     // 打开背包
     public void OpenBackpack()
@@ -139,20 +145,18 @@ public class BackpackState : MonoBehaviour
     // 显示默认面板
     private void ShowDefaultPanel()
     {
-        if (buttonOpenPlatform != null)
+        if (topNav != null)
         {
-            // 默认显示第一个按钮对应的面板，通常是背包主界面的RawImage
-            buttonOpenPlatform.SelectButton(0);
+            // 默认显示第一个面板，通常是背包主界面
+            topNav.SwitchToPanel(0);
         }
     }
 
     // 隐藏所有面板
     private void HideAllPanels()
     {
-        if (buttonOpenPlatform != null)
-        {
-            buttonOpenPlatform.ClearSelection();
-        }
+        // TopNavigationTransform会在背包关闭时自动处理面板隐藏
+        // 这里不需要额外操作
     }
 
     // 强制关闭背包（外部调用）

@@ -15,17 +15,17 @@ public class ItemSpawnerEditor : Editor
 
     public override void OnInspectorGUI()
     {
-        // ç»˜åˆ¶é»˜è®¤æ£€æŸ¥å™¨
+        // »æÖÆÄ¬ÈÏ¼ì²éÆ÷
         DrawDefaultInspector();
 
         EditorGUILayout.Space(10);
-        EditorGUILayout.LabelField("ç‰©å“ç”Ÿæˆæ§åˆ¶", EditorStyles.boldLabel);
+        EditorGUILayout.LabelField("ÎïÆ·Éú³É¿ØÖÆ", EditorStyles.boldLabel);
 
-        // ç”ŸæˆæŒ‰é’®åŒºåŸŸ
+        // Éú³É°´Å¥ÇøÓò
         EditorGUILayout.BeginHorizontal();
 
-        // ç”Ÿæˆéšæœºç‰©å“æŒ‰é’®
-        if (GUILayout.Button("ç”Ÿæˆéšæœºç‰©å“", GUILayout.Height(30)))
+        // Éú³ÉËæ»úÎïÆ·°´Å¥
+        if (GUILayout.Button("Éú³ÉËæ»úÎïÆ·", GUILayout.Height(30)))
         {
             if (Application.isPlaying)
             {
@@ -33,23 +33,23 @@ public class ItemSpawnerEditor : Editor
             }
             else
             {
-                EditorUtility.DisplayDialog("æç¤º", "è¯·åœ¨è¿è¡Œæ—¶ä½¿ç”¨æ­¤åŠŸèƒ½ï¼", "ç¡®å®š");
+                EditorUtility.DisplayDialog("ÌáÊ¾", "ÇëÔÚÔËĞĞÊ±Ê¹ÓÃ´Ë¹¦ÄÜ£¡", "È·¶¨");
             }
         }
 
-        // æ¸…ç©ºæ‰€æœ‰ç‰©å“æŒ‰é’®
-        if (GUILayout.Button("æ¸…ç©ºæ‰€æœ‰ç‰©å“", GUILayout.Height(30)))
+        // Çå¿ÕËùÓĞÎïÆ·°´Å¥
+        if (GUILayout.Button("Çå¿ÕËùÓĞÎïÆ·", GUILayout.Height(30)))
         {
             if (Application.isPlaying)
             {
-                if (EditorUtility.DisplayDialog("ç¡®è®¤æ¸…ç©º", "ç¡®å®šè¦æ¸…ç©ºæ‰€æœ‰ç”Ÿæˆçš„ç‰©å“å—ï¼Ÿ", "ç¡®å®š", "å–æ¶ˆ"))
+                if (EditorUtility.DisplayDialog("È·ÈÏÇå¿Õ", "È·¶¨ÒªÇå¿ÕËùÓĞÉú³ÉµÄÎïÆ·Âğ£¿", "È·¶¨", "È¡Ïû"))
                 {
                     spawner.ClearAllItems();
                 }
             }
             else
             {
-                EditorUtility.DisplayDialog("æç¤º", "è¯·åœ¨è¿è¡Œæ—¶ä½¿ç”¨æ­¤åŠŸèƒ½ï¼", "ç¡®å®š");
+                EditorUtility.DisplayDialog("ÌáÊ¾", "ÇëÔÚÔËĞĞÊ±Ê¹ÓÃ´Ë¹¦ÄÜ£¡", "È·¶¨");
             }
         }
 
@@ -57,26 +57,26 @@ public class ItemSpawnerEditor : Editor
 
         EditorGUILayout.Space(5);
 
-        // å¿«é€Ÿè®¾ç½®æŒ‰é’®åŒºåŸŸ
-        EditorGUILayout.LabelField("å¿«é€Ÿè®¾ç½®", EditorStyles.miniBoldLabel);
+        // ¿ìËÙÉèÖÃ°´Å¥ÇøÓò
+        EditorGUILayout.LabelField("¿ìËÙÉèÖÃ", EditorStyles.miniBoldLabel);
         EditorGUILayout.BeginHorizontal();
 
-        if (GUILayout.Button("å…¨é€‰ç‰©å“ç±»å‹"))
+        if (GUILayout.Button("È«Ñ¡ÎïÆ·ÀàĞÍ"))
         {
             SetAllItemTypes(true);
         }
 
-        if (GUILayout.Button("å…¨ä¸é€‰ç‰©å“ç±»å‹"))
+        if (GUILayout.Button("È«²»Ñ¡ÎïÆ·ÀàĞÍ"))
         {
             SetAllItemTypes(false);
         }
 
-        if (GUILayout.Button("ä»…é€‰æ‹©è£…å¤‡"))
+        if (GUILayout.Button("½öÑ¡Ôñ×°±¸"))
         {
             SetEquipmentOnly();
         }
 
-        if (GUILayout.Button("ä»…é€‰æ‹©æ¶ˆè€—å“"))
+        if (GUILayout.Button("½öÑ¡ÔñÏûºÄÆ·"))
         {
             SetConsumablesOnly();
         }
@@ -85,13 +85,13 @@ public class ItemSpawnerEditor : Editor
 
         EditorGUILayout.Space(10);
 
-        // è¿è¡Œæ—¶ä¿¡æ¯æ˜¾ç¤º
+        // ÔËĞĞÊ±ĞÅÏ¢ÏÔÊ¾
         if (Application.isPlaying)
         {
-            EditorGUILayout.LabelField("è¿è¡Œæ—¶ä¿¡æ¯", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("ÔËĞĞÊ±ĞÅÏ¢", EditorStyles.boldLabel);
 
             var spawnedItems = spawner.GetSpawnedItems();
-            EditorGUILayout.LabelField($"å·²ç”Ÿæˆç‰©å“æ•°é‡: {spawnedItems.Count}");
+            EditorGUILayout.LabelField($"ÒÑÉú³ÉÎïÆ·ÊıÁ¿: {spawnedItems.Count}");
 
             var gridOccupancy = spawner.GetGridOccupancy();
             if (gridOccupancy != null)
@@ -111,23 +111,23 @@ public class ItemSpawnerEditor : Editor
                 }
 
                 float occupancyPercentage = (float)occupiedCells / totalCells * 100f;
-                EditorGUILayout.LabelField($"ç½‘æ ¼å ç”¨ç‡: {occupancyPercentage:F1}% ({occupiedCells}/{totalCells})");
+                EditorGUILayout.LabelField($"Íø¸ñÕ¼ÓÃÂÊ: {occupancyPercentage:F1}% ({occupiedCells}/{totalCells})");
             }
 
             EditorGUILayout.Space(5);
 
-            // æ˜¾ç¤ºç”Ÿæˆçš„ç‰©å“åˆ—è¡¨
+            // ÏÔÊ¾Éú³ÉµÄÎïÆ·ÁĞ±í
             if (spawnedItems.Count > 0)
             {
-                showDebugFoldout = EditorGUILayout.Foldout(showDebugFoldout, "ç”Ÿæˆçš„ç‰©å“åˆ—è¡¨");
+                showDebugFoldout = EditorGUILayout.Foldout(showDebugFoldout, "Éú³ÉµÄÎïÆ·ÁĞ±í");
                 if (showDebugFoldout)
                 {
                     EditorGUI.indentLevel++;
                     foreach (var item in spawnedItems)
                     {
                         EditorGUILayout.BeginHorizontal();
-                        EditorGUILayout.LabelField($"{item.itemData.itemName} - ä½ç½®:({item.gridPosition.x},{item.gridPosition.y}) å°ºå¯¸:({item.size.x}x{item.size.y})");
-                        if (GUILayout.Button("åˆ é™¤", GUILayout.Width(50)))
+                        EditorGUILayout.LabelField($"{item.itemData.itemName} - Î»ÖÃ:({item.gridPosition.x},{item.gridPosition.y}) ³ß´ç:({item.size.x}x{item.size.y})");
+                        if (GUILayout.Button("É¾³ı", GUILayout.Width(50)))
                         {
                             spawner.RemoveItem(item.itemObject);
                             break;
@@ -140,17 +140,17 @@ public class ItemSpawnerEditor : Editor
         }
         else
         {
-            EditorGUILayout.HelpBox("è¯·è¿è¡Œæ¸¸æˆä»¥æŸ¥çœ‹ç”Ÿæˆå™¨çŠ¶æ€å’Œä½¿ç”¨ç”ŸæˆåŠŸèƒ½ã€‚", MessageType.Info);
+            EditorGUILayout.HelpBox("ÇëÔËĞĞÓÎÏ·ÒÔ²é¿´Éú³ÉÆ÷×´Ì¬ºÍÊ¹ÓÃÉú³É¹¦ÄÜ¡£", MessageType.Info);
         }
 
-        // åº”ç”¨ä¿®æ”¹
+        // Ó¦ÓÃĞŞ¸Ä
         if (GUI.changed)
         {
             EditorUtility.SetDirty(target);
         }
     }
 
-    // è®¾ç½®æ‰€æœ‰ç‰©å“ç±»å‹
+    // ÉèÖÃËùÓĞÎïÆ·ÀàĞÍ
     private void SetAllItemTypes(bool enabled)
     {
         SerializedObject so = new SerializedObject(target);
@@ -172,7 +172,7 @@ public class ItemSpawnerEditor : Editor
         so.ApplyModifiedProperties();
     }
 
-    // ä»…é€‰æ‹©è£…å¤‡ç±»å‹
+    // ½öÑ¡Ôñ×°±¸ÀàĞÍ
     private void SetEquipmentOnly()
     {
         SerializedObject so = new SerializedObject(target);
@@ -195,7 +195,7 @@ public class ItemSpawnerEditor : Editor
         so.ApplyModifiedProperties();
     }
 
-    // ä»…é€‰æ‹©æ¶ˆè€—å“ç±»å‹
+    // ½öÑ¡ÔñÏûºÄÆ·ÀàĞÍ
     private void SetConsumablesOnly()
     {
         SerializedObject so = new SerializedObject(target);
