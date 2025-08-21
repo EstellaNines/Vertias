@@ -1,20 +1,388 @@
 using UnityEngine;
+using System;
+using System.Collections.Generic;
+using System.IO;
+
+// ±£´æÏµÍ³ÅäÖÃ
+[System.Serializable]
+public class SaveSystemConfig
+{
+    [Header("±£´æÂ·¾¶ÅäÖÃ")]
+    public string saveRootPath = "SaveData";           // ±£´æ¸ùÄ¿Â¼
+    public string inventorySavePath = "Inventory";     // ±³°ü±£´æÂ·¾¶
+    public string playerDataPath = "PlayerData";       // Íæ¼ÒÊı¾İÂ·¾¶
+    public string configBackupPath = "Backup";         // ÅäÖÃ±¸·İÂ·¾¶
+
+    [Header("ÎÄ¼ş¸ñÊ½ÅäÖÃ")]
+    public string saveFileExtension = ".json";         // ±£´æÎÄ¼şÀ©Õ¹Ãû
+    public bool useCompression = false;                // ÊÇ·ñÊ¹ÓÃÑ¹Ëõ
+    public bool useEncryption = false;                 // ÊÇ·ñÊ¹ÓÃ¼ÓÃÜ
+
+    [Header("±¸·İÅäÖÃ")]
+    public bool autoBackup = true;                     // ×Ô¶¯±¸·İ
+    public int maxBackupCount = 5;                     // ×î´ó±¸·İÊıÁ¿
+    public float backupInterval = 300f;                // ±¸·İ¼ä¸ô£¨Ãë£©
+
+    // »ñÈ¡ÍêÕû±£´æÂ·¾¶
+    public string GetFullSavePath(string subPath = "")
+    {
+        string fullPath = Path.Combine(Application.persistentDataPath, saveRootPath);
+        if (!string.IsNullOrEmpty(subPath))
+        {
+            fullPath = Path.Combine(fullPath, subPath);
+        }
+        return fullPath;
+    }
+
+    // »ñÈ¡±³°ü±£´æÂ·¾¶
+    public string GetInventorySavePath()
+    {
+        return GetFullSavePath(inventorySavePath);
+    }
+
+    // »ñÈ¡Íæ¼ÒÊı¾İ±£´æÂ·¾¶
+    public string GetPlayerDataSavePath()
+    {
+        return GetFullSavePath(playerDataPath);
+    }
+
+    // »ñÈ¡±¸·İÂ·¾¶
+    public string GetBackupPath()
+    {
+        return GetFullSavePath(configBackupPath);
+    }
+}
+
+// °æ±¾¿ØÖÆÅäÖÃ
+[System.Serializable]
+public class VersionControlConfig
+{
+    [Header("°æ±¾ĞÅÏ¢")]
+    public int majorVersion = 1;                       // Ö÷°æ±¾ºÅ
+    public int minorVersion = 0;                       // ´Î°æ±¾ºÅ
+    public int patchVersion = 0;                       // ²¹¶¡°æ±¾ºÅ
+    public string buildDate = "";                       // ¹¹½¨ÈÕÆÚ
+
+    [Header("¼æÈİĞÔÅäÖÃ")]
+    public List<string> compatibleVersions = new List<string>(); // ¼æÈİµÄ°æ±¾ÁĞ±í
+    public bool strictVersionCheck = false;            // ÑÏ¸ñ°æ±¾¼ì²é
+    public bool allowDowngrade = false;                // ÔÊĞí½µ¼¶
+
+    public VersionControlConfig()
+    {
+        buildDate = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+    }
+
+    // »ñÈ¡°æ±¾×Ö·û´®
+    public string GetVersionString()
+    {
+        return $"{majorVersion}.{minorVersion}.{patchVersion}";
+    }
+
+    // ¼ì²é°æ±¾¼æÈİĞÔ
+    public bool IsCompatibleWith(string version)
+    {
+        if (!strictVersionCheck) return true;
+
+        return compatibleVersions.Contains(version) || version == GetVersionString();
+    }
+
+    // ±È½Ï°æ±¾
+    public int CompareVersion(string otherVersion)
+    {
+        string[] parts = otherVersion.Split('.');
+        if (parts.Length != 3) return -1;
+
+        if (!int.TryParse(parts[0], out int otherMajor) ||
+            !int.TryParse(parts[1], out int otherMinor) ||
+            !int.TryParse(parts[2], out int otherPatch))
+        {
+            return -1;
+        }
+
+        if (majorVersion != otherMajor) return majorVersion.CompareTo(otherMajor);
+        if (minorVersion != otherMinor) return minorVersion.CompareTo(otherMinor);
+        return patchVersion.CompareTo(otherPatch);
+    }
+}
+
+// Êı¾İÇ¨ÒÆÅäÖÃ
+[System.Serializable]
+public class DataMigrationConfig
+{
+    [Header("Ç¨ÒÆÅäÖÃ")]
+    public bool enableAutoMigration = true;            // ÆôÓÃ×Ô¶¯Ç¨ÒÆ
+    public bool createBackupBeforeMigration = true;    // Ç¨ÒÆÇ°´´½¨±¸·İ
+    public bool validateAfterMigration = true;         // Ç¨ÒÆºóÑéÖ¤Êı¾İ
+
+    [Header("Ç¨ÒÆ¹æÔò")]
+    public List<string> migrationScripts = new List<string>(); // Ç¨ÒÆ½Å±¾ÁĞ±í
+    public bool skipFailedMigrations = false;          // Ìø¹ıÊ§°ÜµÄÇ¨ÒÆ
+    public int maxMigrationRetries = 3;                // ×î´óÖØÊÔ´ÎÊı
+
+    [Header("Êı¾İÇåÀí")]
+    public bool cleanupOldData = false;                // ÇåÀí¾ÉÊı¾İ
+    public int dataRetentionDays = 30;                 // Êı¾İ±£ÁôÌìÊı
+    public bool compressOldBackups = true;             // Ñ¹Ëõ¾É±¸·İ
+
+    // Ìí¼ÓÇ¨ÒÆ½Å±¾
+    public void AddMigrationScript(string scriptName)
+    {
+        if (!migrationScripts.Contains(scriptName))
+        {
+            migrationScripts.Add(scriptName);
+        }
+    }
+
+    // ÒÆ³ıÇ¨ÒÆ½Å±¾
+    public void RemoveMigrationScript(string scriptName)
+    {
+        migrationScripts.Remove(scriptName);
+    }
+
+    // ¼ì²éÊÇ·ñĞèÒªÇ¨ÒÆ
+    public bool NeedsMigration(string fromVersion, string toVersion)
+    {
+        return enableAutoMigration && fromVersion != toVersion;
+    }
+}
 
 [CreateAssetMenu(fileName = "GridConfig", menuName = "Inventory System/Grid Config")]
 public class GridConfig : ScriptableObject
 {
-    [Header("ç½‘æ ¼åŸºç¡€é…ç½®")]
-    public float cellSize = 64f; // ä»80fä¿®æ”¹ä¸º64f
+    [Header("Grid Settings")]
+    public int gridWidth = 10;
+    public int gridHeight = 10;
+    public float cellSize = 64f;
+    public Vector2 spacing = new Vector2(2f, 2f);
+    
+    [Header("±³°üÍø¸ñÅäÖÃ - Ïòºó¼æÈİ")]
+    public int inventoryWidth = 10;     // ±³°ü¿í¶È£¨Ïòºó¼æÈİ£©
+    public int inventoryHeight = 12;    // ±³°ü¸ß¶È£¨Ïòºó¼æÈİ£©
 
-    [Header("èƒŒåŒ…ç½‘æ ¼é…ç½®")]
-    public int inventoryWidth = 10;
-    public int inventoryHeight = 12;
+    [Header("Visual Settings")]
+    public Color gridLineColor = Color.white;
+    public Color highlightColor = Color.yellow;
+    public Color invalidColor = Color.red;
+    public float gridLineWidth = 1f;
 
-    // éªŒè¯é…ç½®çš„åˆç†æ€§
+    [Header("Interaction Settings")]
+    public bool enableGridSnap = true;
+    public bool showGridLines = true;
+    public bool enableHighlight = true;
+
+    [Header("À©Õ¹ÅäÖÃ")]
+    [SerializeField] private SaveSystemConfig saveSystemConfig = new SaveSystemConfig();
+    [SerializeField] private VersionControlConfig versionControlConfig = new VersionControlConfig();
+    [SerializeField] private DataMigrationConfig dataMigrationConfig = new DataMigrationConfig();
+
+    [Header("ÅäÖÃÔªÊı¾İ")]
+    [SerializeField] private string configVersion = "1.0.0";
+    [SerializeField] private string lastModified = "";
+    [SerializeField] private bool isModified = false;
+
+    // ÊôĞÔ·ÃÎÊÆ÷
+    public SaveSystemConfig SaveSystemConfig => saveSystemConfig;
+    public VersionControlConfig VersionControlConfig => versionControlConfig;
+    public DataMigrationConfig DataMigrationConfig => dataMigrationConfig;
+    public string ConfigVersion => configVersion;
+    public string LastModified => lastModified;
+    public bool IsModified => isModified;
+
+    private void OnEnable()
+    {
+        // ³õÊ¼»¯ÅäÖÃ
+        if (saveSystemConfig == null)
+            saveSystemConfig = new SaveSystemConfig();
+        if (versionControlConfig == null)
+            versionControlConfig = new VersionControlConfig();
+        if (dataMigrationConfig == null)
+            dataMigrationConfig = new DataMigrationConfig();
+
+        // ¸üĞÂ×îºóĞŞ¸ÄÊ±¼ä
+        UpdateLastModified();
+    }
+
     private void OnValidate()
     {
-        cellSize = Mathf.Max(1f, cellSize);
-        inventoryWidth = Mathf.Max(1, inventoryWidth);
-        inventoryHeight = Mathf.Max(1, inventoryHeight);
+        // ±ê¼ÇÎªÒÑĞŞ¸Ä
+        MarkAsModified();
+
+        // ÑéÖ¤ÅäÖÃÊı¾İ
+        ValidateConfiguration();
+    }
+
+    // ¸üĞÂ×îºóĞŞ¸ÄÊ±¼ä
+    public void UpdateLastModified()
+    {
+        lastModified = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+    }
+
+    // ±ê¼ÇÎªÒÑĞŞ¸Ä
+    public void MarkAsModified()
+    {
+        isModified = true;
+        UpdateLastModified();
+    }
+
+    // ÖØÖÃĞŞ¸Ä±ê¼Ç
+    public void ResetModifiedFlag()
+    {
+        isModified = false;
+    }
+
+    // ¸üĞÂÅäÖÃ°æ±¾
+    public void UpdateConfigVersion(string newVersion)
+    {
+        configVersion = newVersion;
+        MarkAsModified();
+    }
+
+    // ÑéÖ¤ÅäÖÃ
+    public bool ValidateConfiguration()
+    {
+        bool isValid = true;
+        
+        // ÑéÖ¤Íø¸ñÉèÖÃ
+        if (gridWidth <= 0 || gridHeight <= 0)
+        {
+            Debug.LogWarning("GridConfig: Íø¸ñ¿í¶ÈºÍ¸ß¶È±ØĞë´óÓÚ0");
+            isValid = false;
+        }
+        
+        // ÑéÖ¤±³°üÍø¸ñÉèÖÃ£¨Ïòºó¼æÈİ£©
+        if (inventoryWidth <= 0 || inventoryHeight <= 0)
+        {
+            Debug.LogWarning("GridConfig: ±³°üÍø¸ñ¿í¶ÈºÍ¸ß¶È±ØĞë´óÓÚ0");
+            isValid = false;
+        }
+        
+        if (cellSize <= 0)
+        {
+            Debug.LogWarning("GridConfig: µ¥Ôª¸ñ´óĞ¡±ØĞë´óÓÚ0");
+            isValid = false;
+        }
+
+        // ÑéÖ¤±£´æÏµÍ³ÅäÖÃ
+        if (saveSystemConfig != null)
+        {
+            if (string.IsNullOrEmpty(saveSystemConfig.saveRootPath))
+            {
+                Debug.LogWarning("GridConfig: ±£´æ¸ùÂ·¾¶²»ÄÜÎª¿Õ");
+                isValid = false;
+            }
+
+            if (saveSystemConfig.maxBackupCount < 0)
+            {
+                Debug.LogWarning("GridConfig: ×î´ó±¸·İÊıÁ¿²»ÄÜÎª¸ºÊı");
+                isValid = false;
+            }
+        }
+
+        return isValid;
+    }
+
+    // ÖØÖÃÎªÄ¬ÈÏÅäÖÃ
+    [ContextMenu("ÖØÖÃÎªÄ¬ÈÏÅäÖÃ")]
+    public void ResetToDefault()
+    {
+        gridWidth = 10;
+        gridHeight = 10;
+        cellSize = 64f;
+        spacing = new Vector2(2f, 2f);
+        
+        // ÖØÖÃ±³°üÍø¸ñÅäÖÃ£¨Ïòºó¼æÈİ£©
+        inventoryWidth = 10;
+        inventoryHeight = 12;
+        
+        gridLineColor = Color.white;
+        highlightColor = Color.yellow;
+        invalidColor = Color.red;
+        gridLineWidth = 1f;
+        
+        enableGridSnap = true;
+        showGridLines = true;
+        enableHighlight = true;
+
+        saveSystemConfig = new SaveSystemConfig();
+        versionControlConfig = new VersionControlConfig();
+        dataMigrationConfig = new DataMigrationConfig();
+
+        configVersion = "1.0.0";
+        MarkAsModified();
+
+        Debug.Log("GridConfig: ÒÑÖØÖÃÎªÄ¬ÈÏÅäÖÃ");
+    }
+
+    // µ¼³öÅäÖÃĞÅÏ¢
+    public string ExportConfigInfo()
+    {
+        var info = new System.Text.StringBuilder();
+        info.AppendLine($"=== GridConfig ÅäÖÃĞÅÏ¢ ===");
+        info.AppendLine($"ÅäÖÃ°æ±¾: {configVersion}");
+        info.AppendLine($"×îºóĞŞ¸Ä: {lastModified}");
+        info.AppendLine($"ÊÇ·ñÒÑĞŞ¸Ä: {isModified}");
+        info.AppendLine();
+
+        info.AppendLine($"Íø¸ñÉèÖÃ:");
+        info.AppendLine($"  ³ß´ç: {gridWidth} x {gridHeight}");
+        info.AppendLine($"  µ¥Ôª¸ñ´óĞ¡: {cellSize}");
+        info.AppendLine($"  ¼ä¾à: {spacing}");
+        info.AppendLine();
+        
+        info.AppendLine($"±³°üÍø¸ñÉèÖÃ£¨Ïòºó¼æÈİ£©:");
+        info.AppendLine($"  ±³°ü³ß´ç: {inventoryWidth} x {inventoryHeight}");
+        info.AppendLine();
+
+        info.AppendLine($"±£´æÏµÍ³ÅäÖÃ:");
+        info.AppendLine($"  ¸ùÂ·¾¶: {saveSystemConfig.saveRootPath}");
+        info.AppendLine($"  ±³°üÂ·¾¶: {saveSystemConfig.inventorySavePath}");
+        info.AppendLine($"  ×Ô¶¯±¸·İ: {saveSystemConfig.autoBackup}");
+        info.AppendLine($"  ×î´ó±¸·İÊı: {saveSystemConfig.maxBackupCount}");
+        info.AppendLine();
+
+        info.AppendLine($"°æ±¾¿ØÖÆÅäÖÃ:");
+        info.AppendLine($"  °æ±¾: {versionControlConfig.GetVersionString()}");
+        info.AppendLine($"  ¹¹½¨ÈÕÆÚ: {versionControlConfig.buildDate}");
+        info.AppendLine($"  ÑÏ¸ñ°æ±¾¼ì²é: {versionControlConfig.strictVersionCheck}");
+        info.AppendLine();
+
+        info.AppendLine($"Êı¾İÇ¨ÒÆÅäÖÃ:");
+        info.AppendLine($"  ÆôÓÃ×Ô¶¯Ç¨ÒÆ: {dataMigrationConfig.enableAutoMigration}");
+        info.AppendLine($"  Ç¨ÒÆÇ°±¸·İ: {dataMigrationConfig.createBackupBeforeMigration}");
+        info.AppendLine($"  ÇåÀí¾ÉÊı¾İ: {dataMigrationConfig.cleanupOldData}");
+
+        return info.ToString();
+    }
+
+    // ²âÊÔÅäÖÃÑéÖ¤
+    [ContextMenu("²âÊÔÅäÖÃÑéÖ¤")]
+    public void TestConfigValidation()
+    {
+        bool isValid = ValidateConfiguration();
+        Debug.Log($"GridConfig: ÅäÖÃÑéÖ¤½á¹û - {(isValid ? "Í¨¹ı" : "Ê§°Ü")}");
+        Debug.Log(ExportConfigInfo());
+    }
+
+    // ²âÊÔÂ·¾¶Éú³É
+    [ContextMenu("²âÊÔÂ·¾¶Éú³É")]
+    public void TestPathGeneration()
+    {
+        Debug.Log($"GridConfig: Â·¾¶²âÊÔ");
+        Debug.Log($"ÍêÕû±£´æÂ·¾¶: {saveSystemConfig.GetFullSavePath()}");
+        Debug.Log($"±³°ü±£´æÂ·¾¶: {saveSystemConfig.GetInventorySavePath()}");
+        Debug.Log($"Íæ¼ÒÊı¾İÂ·¾¶: {saveSystemConfig.GetPlayerDataSavePath()}");
+        Debug.Log($"±¸·İÂ·¾¶: {saveSystemConfig.GetBackupPath()}");
+    }
+
+    public Vector2 GetCellSize()
+    {
+        return new Vector2(cellSize, cellSize);
+    }
+
+    public Vector2 GetGridSize()
+    {
+        return new Vector2(gridWidth * (cellSize + spacing.x) - spacing.x,
+                          gridHeight * (cellSize + spacing.y) - spacing.y);
     }
 }

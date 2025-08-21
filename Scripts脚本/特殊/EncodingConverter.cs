@@ -292,7 +292,7 @@ namespace EditorTools
                 EditorGUILayout.BeginHorizontal();
 
                 // 文件状态图标
-                string statusIcon = info.isUTF8 ? "?" : "?";
+                string statusIcon = info.isUTF8 ? "✓" : "⚠";
                 Color statusColor = info.isUTF8 ? Color.green : Color.yellow;
 
                 GUIStyle statusStyle = new GUIStyle(EditorStyles.label)

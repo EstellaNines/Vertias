@@ -60,6 +60,8 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         originalSize = rectTransform.sizeDelta;
         originalScale = rectTransform.localScale;
 
+        // 初始化拖拽状态保存系统
+        InitializeDragStateSaveSystem();
     }
 
     private void CacheImageComponents()
@@ -123,6 +125,9 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         wasInEquipSlot = GetComponentInParent<EquipSlot>() != null;
         originalParent = transform.parent;
         originalPos = rectTransform.anchoredPosition;
+
+        // 保存拖拽开始时的状态
+        SaveStateOnDragBegin();
 
         Vector3 worldPosition = rectTransform.position;
 
@@ -551,6 +556,9 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         }
 
         isDragging = false; // 清除拖拽状态
+        
+        // 在拖拽结束时更新状态
+        UpdateStateOnDragEnd();
     }
 
     private void FitToEquipSlot(EquipSlot equipSlot)
@@ -813,5 +821,490 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         // 如果都找不到，返回transform.parent
         Debug.LogWarning($"无法找到物品 {item.name} 的网格父级，使用默认父级: {transform.parent?.name}");
         return transform.parent;
+    }
+
+    // ==================== 拖拽状态保存扩展接口 ====================
+    
+    [System.Serializable]
+    public class DraggableItemSaveData
+    {
+        public string itemID;
+        public bool isDragging;
+        public Vector2 originalPosition;
+        public Vector2 currentPosition;
+        public string originalParentID;
+        public string currentParentID;
+        public Vector2Int gridPosition;
+        public bool wasInEquipSlot;
+        public Vector2 originalSize;
+        public Vector3 originalScale;
+        public Vector2 originalAnchorMin;
+        public Vector2 originalAnchorMax;
+        public Vector2 originalPivot;
+        public string lastModified;
+        public int saveVersion;
+    }
+    
+    [Header("拖拽状态保存设置")]
+    [SerializeField] private string draggableItemID = "";
+    [SerializeField] private bool autoGenerateID = true;
+    [SerializeField] private int saveVersion = 1;
+    
+    // 拖拽状态保存事件
+    public System.Action<string> OnDragStateSaved;
+    public System.Action<string> OnDragStateLoaded;
+    public System.Action<string, string> OnDragStateError;
+    
+    // 网格关联信息
+    private string currentGridID = "";
+    private string originalGridID = "";
+    private Dictionary<string, Vector2Int> gridPositionHistory = new Dictionary<string, Vector2Int>();
+    
+    /// <summary>
+    /// 获取拖拽物品ID
+    /// </summary>
+    public string GetDraggableItemID()
+    {
+        if (string.IsNullOrEmpty(draggableItemID) && autoGenerateID)
+        {
+            GenerateNewDraggableItemID();
+        }
+        return draggableItemID;
+    }
+    
+    /// <summary>
+    /// 设置拖拽物品ID
+    /// </summary>
+    public void SetDraggableItemID(string id)
+    {
+        if (!string.IsNullOrEmpty(id))
+        {
+            draggableItemID = id;
+        }
+    }
+    
+    /// <summary>
+    /// 生成新的拖拽物品ID
+    /// </summary>
+    public void GenerateNewDraggableItemID()
+    {
+        draggableItemID = "DraggableItem_" + System.Guid.NewGuid().ToString("N")[..8];
+    }
+    
+    /// <summary>
+    /// 验证拖拽物品ID是否有效
+    /// </summary>
+    public bool IsDraggableItemIDValid()
+    {
+        return !string.IsNullOrEmpty(draggableItemID) && draggableItemID.Length >= 8;
+    }
+    
+    /// <summary>
+    /// 保存拖拽状态
+    /// </summary>
+    public bool SaveDragState()
+    {
+        try
+        {
+            var saveData = new DraggableItemSaveData
+            {
+                itemID = GetDraggableItemID(),
+                isDragging = isDragging,
+                originalPosition = originalPos,
+                currentPosition = rectTransform.anchoredPosition,
+                originalParentID = GetTransformID(originalParent),
+                currentParentID = GetTransformID(transform.parent),
+                gridPosition = gridPosition,
+                wasInEquipSlot = wasInEquipSlot,
+                originalSize = originalSize,
+                originalScale = originalScale,
+                originalAnchorMin = originalAnchorMin,
+                originalAnchorMax = originalAnchorMax,
+                originalPivot = originalPivot,
+                lastModified = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+                saveVersion = saveVersion
+            };
+            
+            string jsonData = JsonUtility.ToJson(saveData, true);
+            if (!string.IsNullOrEmpty(jsonData))
+            {
+                OnDragStateSaved?.Invoke(GetDraggableItemID());
+                Debug.Log($"[DraggableItem] 拖拽状态保存成功：{GetDraggableItemID()}");
+                return true;
+            }
+            
+            return false;
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[DraggableItem] 保存拖拽状态时发生错误：{ex.Message}");
+            OnDragStateError?.Invoke(GetDraggableItemID(), ex.Message);
+            return false;
+        }
+    }
+    
+    /// <summary>
+    /// 加载拖拽状态
+    /// </summary>
+    public bool LoadDragState(string jsonData)
+    {
+        try
+        {
+            if (string.IsNullOrEmpty(jsonData))
+            {
+                Debug.LogError("[DraggableItem] 加载数据为空");
+                return false;
+            }
+            
+            var saveData = JsonUtility.FromJson<DraggableItemSaveData>(jsonData);
+            if (saveData == null)
+            {
+                Debug.LogError("[DraggableItem] 反序列化拖拽状态数据失败");
+                return false;
+            }
+            
+            // 验证数据版本
+            if (saveData.saveVersion > saveVersion)
+            {
+                Debug.LogWarning($"[DraggableItem] 保存数据版本 ({saveData.saveVersion}) 高于当前版本 ({saveVersion})，可能存在兼容性问题");
+            }
+            
+            // 恢复拖拽状态
+            draggableItemID = saveData.itemID;
+            isDragging = saveData.isDragging;
+            originalPos = saveData.originalPosition;
+            gridPosition = saveData.gridPosition;
+            wasInEquipSlot = saveData.wasInEquipSlot;
+            originalSize = saveData.originalSize;
+            originalScale = saveData.originalScale;
+            originalAnchorMin = saveData.originalAnchorMin;
+            originalAnchorMax = saveData.originalAnchorMax;
+            originalPivot = saveData.originalPivot;
+            
+            // 恢复位置
+            if (rectTransform != null)
+            {
+                rectTransform.anchoredPosition = saveData.currentPosition;
+                rectTransform.sizeDelta = originalSize;
+                rectTransform.localScale = originalScale;
+                rectTransform.anchorMin = originalAnchorMin;
+                rectTransform.anchorMax = originalAnchorMax;
+                rectTransform.pivot = originalPivot;
+            }
+            
+            // 恢复父级关系
+            RestoreParentRelationship(saveData.originalParentID, saveData.currentParentID);
+            
+            OnDragStateLoaded?.Invoke(GetDraggableItemID());
+            Debug.Log($"[DraggableItem] 拖拽状态加载成功：{GetDraggableItemID()}");
+            return true;
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[DraggableItem] 加载拖拽状态时发生错误：{ex.Message}");
+            OnDragStateError?.Invoke(GetDraggableItemID(), ex.Message);
+            return false;
+        }
+    }
+    
+    /// <summary>
+    /// 恢复父级关系
+    /// </summary>
+    private void RestoreParentRelationship(string originalParentID, string currentParentID)
+    {
+        try
+        {
+            // 根据ID查找并恢复原始父级
+            if (!string.IsNullOrEmpty(originalParentID))
+            {
+                Transform foundOriginalParent = FindTransformByID(originalParentID);
+                if (foundOriginalParent != null)
+                {
+                    originalParent = foundOriginalParent;
+                }
+            }
+            
+            // 根据ID查找并设置当前父级
+            if (!string.IsNullOrEmpty(currentParentID))
+            {
+                Transform foundCurrentParent = FindTransformByID(currentParentID);
+                if (foundCurrentParent != null && foundCurrentParent != transform.parent)
+                {
+                    transform.SetParent(foundCurrentParent, false);
+                }
+            }
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[DraggableItem] 恢复父级关系时发生错误：{ex.Message}");
+        }
+    }
+    
+    /// <summary>
+    /// 根据ID查找Transform
+    /// </summary>
+    private Transform FindTransformByID(string transformID)
+    {
+        if (string.IsNullOrEmpty(transformID))
+            return null;
+            
+        // 这里可以实现更复杂的ID查找逻辑
+        // 目前简单地通过名称查找
+        GameObject[] allObjects = FindObjectsOfType<GameObject>();
+        foreach (GameObject obj in allObjects)
+        {
+            if (obj.name.Contains(transformID) || transformID.Contains(obj.name))
+            {
+                return obj.transform;
+            }
+        }
+        
+        return null;
+    }
+    
+    /// <summary>
+    /// 获取Transform的ID
+    /// </summary>
+    private string GetTransformID(Transform target)
+    {
+        if (target == null)
+            return "";
+            
+        // 尝试获取组件的ID
+        var gridComponent = target.GetComponent<BaseItemGrid>();
+        if (gridComponent != null)
+        {
+            // 如果网格组件实现了ISaveable接口，获取其ID
+            var saveableGrid = gridComponent as ISaveable;
+            if (saveableGrid != null)
+            {
+                return saveableGrid.GetSaveID();
+            }
+        }
+        
+        // 否则使用GameObject名称和实例ID组合
+        return $"{target.name}_{target.GetInstanceID()}";
+    }
+    
+    /// <summary>
+    /// 更新网格关联信息
+    /// </summary>
+    public void UpdateGridAssociation(string gridID, Vector2Int position)
+    {
+        try
+        {
+            if (!string.IsNullOrEmpty(gridID))
+            {
+                currentGridID = gridID;
+                gridPosition = position;
+                
+                // 记录位置历史
+                if (gridPositionHistory.ContainsKey(gridID))
+                {
+                    gridPositionHistory[gridID] = position;
+                }
+                else
+                {
+                    gridPositionHistory.Add(gridID, position);
+                }
+                
+                Debug.Log($"[DraggableItem] 更新网格关联：{gridID} 位置：{position}");
+            }
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[DraggableItem] 更新网格关联时发生错误：{ex.Message}");
+        }
+    }
+    
+    /// <summary>
+    /// 获取当前网格ID
+    /// </summary>
+    public string GetCurrentGridID()
+    {
+        return currentGridID;
+    }
+    
+    /// <summary>
+    /// 获取原始网格ID
+    /// </summary>
+    public string GetOriginalGridID()
+    {
+        return originalGridID;
+    }
+    
+    /// <summary>
+    /// 设置原始网格ID
+    /// </summary>
+    public void SetOriginalGridID(string gridID)
+    {
+        originalGridID = gridID;
+    }
+    
+    /// <summary>
+    /// 获取在指定网格中的历史位置
+    /// </summary>
+    public Vector2Int GetGridPositionHistory(string gridID)
+    {
+        return gridPositionHistory.TryGetValue(gridID, out Vector2Int position) ? position : Vector2Int.zero;
+    }
+    
+    /// <summary>
+    /// 清除网格位置历史
+    /// </summary>
+    public void ClearGridPositionHistory()
+    {
+        gridPositionHistory.Clear();
+        Debug.Log("[DraggableItem] 已清除网格位置历史");
+    }
+    
+    /// <summary>
+    /// 恢复到原始位置
+    /// </summary>
+    public bool RestoreToOriginalPosition()
+    {
+        try
+        {
+            if (originalParent != null && rectTransform != null)
+            {
+                // 恢复父级
+                transform.SetParent(originalParent, false);
+                
+                // 恢复位置和属性
+                rectTransform.anchoredPosition = originalPos;
+                rectTransform.sizeDelta = originalSize;
+                rectTransform.localScale = originalScale;
+                rectTransform.anchorMin = originalAnchorMin;
+                rectTransform.anchorMax = originalAnchorMax;
+                rectTransform.pivot = originalPivot;
+                
+                // 重置拖拽状态
+                isDragging = false;
+                
+                // 恢复网格关联
+                if (!string.IsNullOrEmpty(originalGridID))
+                {
+                    currentGridID = originalGridID;
+                }
+                
+                Debug.Log($"[DraggableItem] 成功恢复到原始位置：{originalPos}");
+                return true;
+            }
+            
+            Debug.LogWarning("[DraggableItem] 无法恢复到原始位置：缺少必要的引用");
+            return false;
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[DraggableItem] 恢复到原始位置时发生错误：{ex.Message}");
+            return false;
+        }
+    }
+    
+    /// <summary>
+    /// 验证拖拽状态数据
+    /// </summary>
+    public bool ValidateDragStateData()
+    {
+        try
+        {
+            // 验证基本组件
+            if (rectTransform == null)
+            {
+                Debug.LogError("[DraggableItem] RectTransform组件缺失");
+                return false;
+            }
+            
+            if (canvasGroup == null)
+            {
+                Debug.LogError("[DraggableItem] CanvasGroup组件缺失");
+                return false;
+            }
+            
+            if (item == null)
+            {
+                Debug.LogError("[DraggableItem] InventorySystemItem组件缺失");
+                return false;
+            }
+            
+            // 验证ID
+            if (!IsDraggableItemIDValid())
+            {
+                Debug.LogError("[DraggableItem] 拖拽物品ID无效");
+                return false;
+            }
+            
+            Debug.Log("[DraggableItem] 拖拽状态数据验证通过");
+            return true;
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[DraggableItem] 验证拖拽状态数据时发生错误：{ex.Message}");
+            return false;
+        }
+    }
+    
+    /// <summary>
+    /// 获取拖拽状态摘要
+    /// </summary>
+    public string GetDragStateSummary()
+    {
+        return $"ID: {GetDraggableItemID()}, 拖拽中: {isDragging}, 当前网格: {currentGridID}, 位置: {gridPosition}";
+    }
+    
+    /// <summary>
+    /// 在拖拽开始时保存状态
+    /// </summary>
+    private void SaveStateOnDragBegin()
+    {
+        // 保存原始网格ID
+        if (string.IsNullOrEmpty(originalGridID))
+        {
+            Transform parentGrid = GetParentGridTransform();
+            if (parentGrid != null)
+            {
+                originalGridID = GetTransformID(parentGrid);
+            }
+        }
+        
+        // 自动保存拖拽状态
+        SaveDragState();
+    }
+    
+    /// <summary>
+    /// 在拖拽结束时更新状态
+    /// </summary>
+    private void UpdateStateOnDragEnd()
+    {
+        // 更新当前网格关联
+        Transform currentGrid = GetParentGridTransform();
+        if (currentGrid != null)
+        {
+            string newGridID = GetTransformID(currentGrid);
+            UpdateGridAssociation(newGridID, gridPosition);
+        }
+        
+        // 自动保存拖拽状态
+        SaveDragState();
+    }
+    
+    /// <summary>
+    /// 初始化拖拽状态保存系统
+    /// </summary>
+    private void InitializeDragStateSaveSystem()
+    {
+        // 确保有有效的ID
+        if (string.IsNullOrEmpty(draggableItemID) && autoGenerateID)
+        {
+            GenerateNewDraggableItemID();
+        }
+        
+        // 初始化网格位置历史字典
+        if (gridPositionHistory == null)
+        {
+            gridPositionHistory = new Dictionary<string, Vector2Int>();
+        }
+        
+        Debug.Log($"[DraggableItem] 拖拽状态保存系统初始化完成，ID：{GetDraggableItemID()}");
     }
 }

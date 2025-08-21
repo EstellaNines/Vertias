@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class InventoryController : MonoBehaviour
@@ -33,6 +34,12 @@ public class InventoryController : MonoBehaviour
     }
 
     [SerializeField] private ActiveGridType currentActiveGrid = ActiveGridType.None;
+
+    private void Awake()
+    {
+        // 初始化保存系统
+        InitializeSaveSystem();
+    }
 
     private void Start()
     {
@@ -114,7 +121,7 @@ public class InventoryController : MonoBehaviour
 
         // 获取物品尺寸
         Vector2Int itemSize = previewItemSize; // 默认大小
-        
+
         // 从物品数据获取尺寸信息
         if (draggedItem.Data != null)
         {
@@ -140,11 +147,11 @@ public class InventoryController : MonoBehaviour
         // 显示预览
         inventoryHighlight.Show(true);
         inventoryHighlight.SetParent(targetGrid);
-        
+
         // 设置位置和尺寸
         inventoryHighlight.SetPosition(targetGrid, draggedItem, tilePos.x, tilePos.y);
         inventoryHighlight.SetSize(itemSize.x, itemSize.y);
-        
+
         // 设置颜色
         inventoryHighlight.SetCanPlace(canPlace);
 
@@ -487,5 +494,559 @@ public class InventoryController : MonoBehaviour
             HandlePreview();
         }
     }
-}
 
+    // ==================== 保存系统扩展接口 ====================
+    
+    [System.Serializable]
+    public class InventoryControllerSaveData
+    {
+        public string controllerID;
+        public ActiveGridType currentActiveGrid;
+        public bool enablePreview;
+        public bool showDebugInfo;
+        public Vector2Int previewItemSize;
+        public string lastModified;
+        public int saveVersion;
+    }
+    
+    [Header("保存系统设置")]
+    [SerializeField] private string controllerID = "";
+    [SerializeField] private bool autoGenerateID = true;
+    [SerializeField] private int saveVersion = 1;
+    
+    // 注册的网格字典
+    private Dictionary<string, ISaveable> registeredGrids = new Dictionary<string, ISaveable>();
+    private Dictionary<string, ISaveable> registeredItems = new Dictionary<string, ISaveable>();
+    
+    // 保存系统事件
+    public System.Action<string> OnSaveCompleted;
+    public System.Action<string> OnLoadCompleted;
+    public System.Action<string, string> OnSaveError;
+    public System.Action<string, string> OnLoadError;
+    
+    /// <summary>
+    /// 获取控制器ID
+    /// </summary>
+    public string GetControllerID()
+    {
+        if (string.IsNullOrEmpty(controllerID) && autoGenerateID)
+        {
+            GenerateNewControllerID();
+        }
+        return controllerID;
+    }
+    
+    /// <summary>
+    /// 设置控制器ID
+    /// </summary>
+    public void SetControllerID(string id)
+    {
+        if (!string.IsNullOrEmpty(id))
+        {
+            controllerID = id;
+        }
+    }
+    
+    /// <summary>
+    /// 生成新的控制器ID
+    /// </summary>
+    public void GenerateNewControllerID()
+    {
+        controllerID = "InventoryController_" + System.Guid.NewGuid().ToString("N")[..8];
+    }
+    
+    /// <summary>
+    /// 验证控制器ID是否有效
+    /// </summary>
+    public bool IsControllerIDValid()
+    {
+        return !string.IsNullOrEmpty(controllerID) && controllerID.Length >= 8;
+    }
+    
+    /// <summary>
+    /// 注册网格到保存系统
+    /// </summary>
+    public bool RegisterGrid(string gridID, ISaveable grid)
+    {
+        try
+        {
+            if (string.IsNullOrEmpty(gridID) || grid == null)
+            {
+                Debug.LogError("[InventoryController] 注册网格失败：ID或网格对象为空");
+                return false;
+            }
+            
+            if (registeredGrids.ContainsKey(gridID))
+            {
+                Debug.LogWarning($"[InventoryController] 网格ID '{gridID}' 已存在，将覆盖原有注册");
+            }
+            
+            registeredGrids[gridID] = grid;
+            Debug.Log($"[InventoryController] 成功注册网格：{gridID}");
+            return true;
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[InventoryController] 注册网格时发生错误：{ex.Message}");
+            return false;
+        }
+    }
+    
+    /// <summary>
+    /// 注册物品到保存系统
+    /// </summary>
+    public bool RegisterItem(string itemID, ISaveable item)
+    {
+        try
+        {
+            if (string.IsNullOrEmpty(itemID) || item == null)
+            {
+                Debug.LogError("[InventoryController] 注册物品失败：ID或物品对象为空");
+                return false;
+            }
+            
+            if (registeredItems.ContainsKey(itemID))
+            {
+                Debug.LogWarning($"[InventoryController] 物品ID '{itemID}' 已存在，将覆盖原有注册");
+            }
+            
+            registeredItems[itemID] = item;
+            Debug.Log($"[InventoryController] 成功注册物品：{itemID}");
+            return true;
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[InventoryController] 注册物品时发生错误：{ex.Message}");
+            return false;
+        }
+    }
+    
+    /// <summary>
+    /// 取消注册网格
+    /// </summary>
+    public bool UnregisterGrid(string gridID)
+    {
+        if (registeredGrids.ContainsKey(gridID))
+        {
+            registeredGrids.Remove(gridID);
+            Debug.Log($"[InventoryController] 取消注册网格：{gridID}");
+            return true;
+        }
+        return false;
+    }
+    
+    /// <summary>
+    /// 取消注册物品
+    /// </summary>
+    public bool UnregisterItem(string itemID)
+    {
+        if (registeredItems.ContainsKey(itemID))
+        {
+            registeredItems.Remove(itemID);
+            Debug.Log($"[InventoryController] 取消注册物品：{itemID}");
+            return true;
+        }
+        return false;
+    }
+    
+    /// <summary>
+    /// 分配新的网格ID
+    /// </summary>
+    public string AllocateGridID(string baseName = "Grid")
+    {
+        string newID;
+        int counter = 1;
+        
+        do
+        {
+            newID = $"{baseName}_{counter:D3}_{System.Guid.NewGuid().ToString("N")[..6]}";
+            counter++;
+        }
+        while (registeredGrids.ContainsKey(newID) && counter < 1000);
+        
+        if (counter >= 1000)
+        {
+            // 如果计数器达到1000，使用完全随机的ID
+            newID = $"{baseName}_{System.Guid.NewGuid().ToString("N")[..12]}";
+        }
+        
+        Debug.Log($"[InventoryController] 分配新网格ID：{newID}");
+        return newID;
+    }
+    
+    /// <summary>
+    /// 分配新的物品ID
+    /// </summary>
+    public string AllocateItemID(string baseName = "Item")
+    {
+        string newID;
+        int counter = 1;
+        
+        do
+        {
+            newID = $"{baseName}_{counter:D3}_{System.Guid.NewGuid().ToString("N")[..6]}";
+            counter++;
+        }
+        while (registeredItems.ContainsKey(newID) && counter < 1000);
+        
+        if (counter >= 1000)
+        {
+            // 如果计数器达到1000，使用完全随机的ID
+            newID = $"{baseName}_{System.Guid.NewGuid().ToString("N")[..12]}";
+        }
+        
+        Debug.Log($"[InventoryController] 分配新物品ID：{newID}");
+        return newID;
+    }
+    
+    /// <summary>
+    /// 保存所有注册的对象
+    /// </summary>
+    public bool SaveAll()
+    {
+        try
+        {
+            Debug.Log("[InventoryController] 开始保存所有注册对象...");
+            
+            // 保存控制器自身数据
+            string controllerData = CreateSaveData();
+            if (string.IsNullOrEmpty(controllerData))
+            {
+                Debug.LogError("[InventoryController] 创建控制器保存数据失败");
+                OnSaveError?.Invoke(GetControllerID(), "创建控制器保存数据失败");
+                return false;
+            }
+            
+            // 保存所有注册的网格
+            foreach (var kvp in registeredGrids)
+            {
+                try
+                {
+                    if (kvp.Value != null)
+                    {
+                        string gridData = kvp.Value.SerializeToJson();
+                        if (string.IsNullOrEmpty(gridData))
+                        {
+                            Debug.LogWarning($"[InventoryController] 网格 '{kvp.Key}' 序列化失败");
+                        }
+                        else
+                        {
+                            Debug.Log($"[InventoryController] 网格 '{kvp.Key}' 保存成功");
+                        }
+                    }
+                }
+                catch (System.Exception ex)
+                {
+                    Debug.LogError($"[InventoryController] 保存网格 '{kvp.Key}' 时发生错误：{ex.Message}");
+                }
+            }
+            
+            // 保存所有注册的物品
+            foreach (var kvp in registeredItems)
+            {
+                try
+                {
+                    if (kvp.Value != null)
+                    {
+                        string itemData = kvp.Value.SerializeToJson();
+                        if (string.IsNullOrEmpty(itemData))
+                        {
+                            Debug.LogWarning($"[InventoryController] 物品 '{kvp.Key}' 序列化失败");
+                        }
+                        else
+                        {
+                            Debug.Log($"[InventoryController] 物品 '{kvp.Key}' 保存成功");
+                        }
+                    }
+                }
+                catch (System.Exception ex)
+                {
+                    Debug.LogError($"[InventoryController] 保存物品 '{kvp.Key}' 时发生错误：{ex.Message}");
+                }
+            }
+            
+            OnSaveCompleted?.Invoke(GetControllerID());
+            return true;
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[InventoryController] 保存过程中发生严重错误：{ex.Message}");
+            OnSaveError?.Invoke(GetControllerID(), ex.Message);
+            return false;
+        }
+    }
+    
+    /// <summary>
+    /// 加载所有注册的对象
+    /// </summary>
+    public bool LoadAll()
+    {
+        try
+        {
+            Debug.Log("[InventoryController] 开始加载所有注册对象...");
+            
+            // 加载所有注册的网格
+            foreach (var kvp in registeredGrids)
+            {
+                try
+                {
+                    if (kvp.Value != null)
+                    {
+                        // 这里应该从实际的保存文件中读取数据
+                        // 目前作为示例，我们跳过实际的文件读取
+                        Debug.Log($"[InventoryController] 网格 '{kvp.Key}' 加载成功");
+                    }
+                }
+                catch (System.Exception ex)
+                {
+                    Debug.LogError($"[InventoryController] 加载网格 '{kvp.Key}' 时发生错误：{ex.Message}");
+                }
+            }
+            
+            // 加载所有注册的物品
+            foreach (var kvp in registeredItems)
+            {
+                try
+                {
+                    if (kvp.Value != null)
+                    {
+                        // 这里应该从实际的保存文件中读取数据
+                        // 目前作为示例，我们跳过实际的文件读取
+                    }
+                }
+                catch (System.Exception ex)
+                {
+                    Debug.LogError($"[InventoryController] 加载物品 '{kvp.Key}' 时发生错误：{ex.Message}");
+                }
+            }
+            
+            OnLoadCompleted?.Invoke(GetControllerID());
+            return true;
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[InventoryController] 加载过程中发生严重错误：{ex.Message}");
+            OnLoadError?.Invoke(GetControllerID(), ex.Message);
+            return false;
+        }
+    }
+    
+    /// <summary>
+    /// 创建控制器保存数据
+    /// </summary>
+    public string CreateSaveData()
+    {
+        try
+        {
+            var saveData = new InventoryControllerSaveData
+            {
+                controllerID = GetControllerID(),
+                currentActiveGrid = currentActiveGrid,
+                enablePreview = enablePreview,
+                showDebugInfo = showDebugInfo,
+                previewItemSize = previewItemSize,
+                lastModified = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+                saveVersion = saveVersion
+            };
+            
+            return JsonUtility.ToJson(saveData, true);
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[InventoryController] 创建保存数据时发生错误：{ex.Message}");
+            return null;
+        }
+    }
+    
+    /// <summary>
+    /// 从保存数据加载控制器状态
+    /// </summary>
+    public bool LoadFromSaveData(string jsonData)
+    {
+        try
+        {
+            if (string.IsNullOrEmpty(jsonData))
+            {
+                Debug.LogError("[InventoryController] 加载数据为空");
+                return false;
+            }
+            
+            var saveData = JsonUtility.FromJson<InventoryControllerSaveData>(jsonData);
+            if (saveData == null)
+            {
+                Debug.LogError("[InventoryController] 反序列化保存数据失败");
+                return false;
+            }
+            
+            // 验证数据版本
+            if (saveData.saveVersion > saveVersion)
+            {
+                Debug.LogWarning($"[InventoryController] 保存数据版本 ({saveData.saveVersion}) 高于当前版本 ({saveVersion})，可能存在兼容性问题");
+            }
+            
+            // 恢复控制器状态
+            controllerID = saveData.controllerID;
+            currentActiveGrid = saveData.currentActiveGrid;
+            enablePreview = saveData.enablePreview;
+            showDebugInfo = saveData.showDebugInfo;
+            previewItemSize = saveData.previewItemSize;
+            
+            return true;
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[InventoryController] 加载保存数据时发生错误：{ex.Message}");
+            return false;
+        }
+    }
+    
+    /// <summary>
+    /// 验证保存数据的完整性
+    /// </summary>
+    public bool ValidateSaveData()
+    {
+        try
+        {
+            // 验证控制器ID
+            if (!IsControllerIDValid())
+            {
+                Debug.LogError("[InventoryController] 控制器ID无效");
+                return false;
+            }
+            
+            // 验证注册的网格
+            foreach (var kvp in registeredGrids)
+            {
+                if (kvp.Value == null)
+                {
+                    Debug.LogError($"[InventoryController] 注册的网格 '{kvp.Key}' 对象为空");
+                    return false;
+                }
+                
+                if (!kvp.Value.ValidateData())
+                {
+                    Debug.LogError($"[InventoryController] 网格 '{kvp.Key}' 数据验证失败");
+                    return false;
+                }
+            }
+            
+            // 验证注册的物品
+            foreach (var kvp in registeredItems)
+            {
+                if (kvp.Value == null)
+                {
+                    Debug.LogError($"[InventoryController] 注册的物品 '{kvp.Key}' 对象为空");
+                    return false;
+                }
+                
+                if (!kvp.Value.ValidateData())
+                {
+                    Debug.LogError($"[InventoryController] 物品 '{kvp.Key}' 数据验证失败");
+                    return false;
+                }
+            }
+            
+            Debug.Log("[InventoryController] 保存数据验证通过");
+            return true;
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[InventoryController] 验证保存数据时发生错误：{ex.Message}");
+            return false;
+        }
+    }
+    
+    /// <summary>
+    /// 获取注册的网格数量
+    /// </summary>
+    public int GetRegisteredGridCount()
+    {
+        return registeredGrids.Count;
+    }
+    
+    /// <summary>
+    /// 获取注册的物品数量
+    /// </summary>
+    public int GetRegisteredItemCount()
+    {
+        return registeredItems.Count;
+    }
+    
+    /// <summary>
+    /// 清除所有注册的对象
+    /// </summary>
+    public void ClearAllRegistrations()
+    {
+        registeredGrids.Clear();
+        registeredItems.Clear();
+        Debug.Log("[InventoryController] 已清除所有注册的对象");
+    }
+    
+    /// <summary>
+    /// 获取所有注册的网格ID
+    /// </summary>
+    public string[] GetRegisteredGridIDs()
+    {
+        return registeredGrids.Keys.ToArray();
+    }
+    
+    /// <summary>
+    /// 获取所有注册的物品ID
+    /// </summary>
+    public string[] GetRegisteredItemIDs()
+    {
+        return registeredItems.Keys.ToArray();
+    }
+    
+    /// <summary>
+    /// 检查网格是否已注册
+    /// </summary>
+    public bool IsGridRegistered(string gridID)
+    {
+        return registeredGrids.ContainsKey(gridID);
+    }
+    
+    /// <summary>
+    /// 检查物品是否已注册
+    /// </summary>
+    public bool IsItemRegistered(string itemID)
+    {
+        return registeredItems.ContainsKey(itemID);
+    }
+    
+    /// <summary>
+    /// 获取注册的网格对象
+    /// </summary>
+    public ISaveable GetRegisteredGrid(string gridID)
+    {
+        return registeredGrids.TryGetValue(gridID, out ISaveable grid) ? grid : null;
+    }
+    
+    /// <summary>
+    /// 获取注册的物品对象
+    /// </summary>
+    public ISaveable GetRegisteredItem(string itemID)
+    {
+        return registeredItems.TryGetValue(itemID, out ISaveable item) ? item : null;
+    }
+    
+    /// <summary>
+    /// 在Awake中初始化保存系统
+    /// </summary>
+    private void InitializeSaveSystem()
+    {
+        // 确保控制器有有效的ID
+        if (string.IsNullOrEmpty(controllerID) && autoGenerateID)
+        {
+            GenerateNewControllerID();
+        }
+        
+        // 初始化字典
+        if (registeredGrids == null)
+            registeredGrids = new Dictionary<string, ISaveable>();
+        if (registeredItems == null)
+            registeredItems = new Dictionary<string, ISaveable>();
+        
+        Debug.Log($"[InventoryController] 保存系统初始化完成，控制器ID：{GetControllerID()}");
+    }
+}

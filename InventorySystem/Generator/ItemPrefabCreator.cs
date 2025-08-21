@@ -7,42 +7,42 @@ using TMPro;
 #if UNITY_EDITOR
 public class ItemPrefabCreator : EditorWindow
 {
-    [Header("Ô¤ÖÆÌåÉú³ÉÉèÖÃ")]
+    [Header("é¢„åˆ¶ä½“ç”Ÿæˆè®¾ç½®")]
     private string prefabOutputPath = "Assets/InventorySystem/Prefab/";
-    private string itemDataPath = "Assets/InventorySystem/Database/Scriptable ObjectÊı¾İ¶ÔÏó/";
-    private string gridConfigPath = "Assets/InventorySystem/Database/Íø¸ñÏµÍ³²ÎÊıGridSystemSO/WarehouseGridConfig.asset";
+    private string itemDataPath = "Assets/InventorySystem/Database/Scriptable Objectæ•°æ®å¯¹è±¡/";
+    private string gridConfigPath = "Assets/InventorySystem/Database/ç½‘æ ¼ç³»ç»Ÿå‚æ•°GridSystemSO/WarehouseGridConfig.asset";
 
-    // »º´æGridConfig
+    // ç¼“å­˜GridConfig
     private GridConfig gridConfig;
 
-    [MenuItem("InventorySystem/ÎïÆ·Ô¤ÖÆÌåÉú³ÉÆ÷")]
+    [MenuItem("InventorySystem/ç‰©å“é¢„åˆ¶ä½“ç”Ÿæˆå™¨")]
     public static void ShowWindow()
     {
-        GetWindow<ItemPrefabCreator>("ÎïÆ·Ô¤ÖÆÌåÉú³ÉÆ÷");
+        GetWindow<ItemPrefabCreator>("ç‰©å“é¢„åˆ¶ä½“ç”Ÿæˆå™¨");
     }
 
     private void OnGUI()
     {
-        GUILayout.Label("ÎïÆ·Ô¤ÖÆÌåÉú³ÉÆ÷", EditorStyles.boldLabel);
+        GUILayout.Label("ç‰©å“é¢„åˆ¶ä½“ç”Ÿæˆå™¨", EditorStyles.boldLabel);
         GUILayout.Space(10);
 
-        // Â·¾¶ÉèÖÃ
-        GUILayout.Label("Â·¾¶ÉèÖÃ:", EditorStyles.boldLabel);
-        prefabOutputPath = EditorGUILayout.TextField("Ô¤ÖÆÌåÊä³öÂ·¾¶:", prefabOutputPath);
-        itemDataPath = EditorGUILayout.TextField("ÎïÆ·Êı¾İÂ·¾¶:", itemDataPath);
-        gridConfigPath = EditorGUILayout.TextField("Íø¸ñÅäÖÃÂ·¾¶:", gridConfigPath);
+        // è·¯å¾„è®¾ç½®
+        GUILayout.Label("è·¯å¾„è®¾ç½®:", EditorStyles.boldLabel);
+        prefabOutputPath = EditorGUILayout.TextField("é¢„åˆ¶ä½“è¾“å‡ºè·¯å¾„:", prefabOutputPath);
+        itemDataPath = EditorGUILayout.TextField("ç‰©å“æ•°æ®è·¯å¾„:", itemDataPath);
+        gridConfigPath = EditorGUILayout.TextField("ç½‘æ ¼é…ç½®è·¯å¾„:", gridConfigPath);
 
         GUILayout.Space(10);
 
-        // Éú³É°´Å¥
-        if (GUILayout.Button("Éú³ÉËùÓĞÎïÆ·Ô¤ÖÆÌå", GUILayout.Height(30)))
+        // ç”ŸæˆæŒ‰é’®
+        if (GUILayout.Button("ç”Ÿæˆæ‰€æœ‰ç‰©å“é¢„åˆ¶ä½“", GUILayout.Height(30)))
         {
             GenerateAllItemPrefabs();
         }
 
         GUILayout.Space(10);
 
-        if (GUILayout.Button("ÇåÀíÏÖÓĞÔ¤ÖÆÌå", GUILayout.Height(25)))
+        if (GUILayout.Button("æ¸…ç†ç°æœ‰é¢„åˆ¶ä½“", GUILayout.Height(25)))
         {
             ClearExistingPrefabs();
         }
@@ -50,26 +50,26 @@ public class ItemPrefabCreator : EditorWindow
 
     private void GenerateAllItemPrefabs()
     {
-        // ¼ÓÔØGridConfig
+        // åŠ è½½GridConfig
         gridConfig = AssetDatabase.LoadAssetAtPath<GridConfig>(gridConfigPath);
         if (gridConfig == null)
         {
-            Debug.LogError($"ÎŞ·¨¼ÓÔØGridConfigÎÄ¼ş: {gridConfigPath}");
+            Debug.LogError($"æ— æ³•åŠ è½½GridConfigæ–‡ä»¶: {gridConfigPath}");
             return;
         }
 
-        // È·±£Êä³öÄ¿Â¼´æÔÚ
+        // ç¡®ä¿è¾“å‡ºç›®å½•å­˜åœ¨
         if (!Directory.Exists(prefabOutputPath))
         {
             Directory.CreateDirectory(prefabOutputPath);
         }
 
-        // ²éÕÒËùÓĞInventorySystemItemDataSOÎÄ¼ş
+        // æŸ¥æ‰¾æ‰€æœ‰InventorySystemItemDataSOæ–‡ä»¶
         string[] guids = AssetDatabase.FindAssets("t:InventorySystemItemDataSO", new[] { itemDataPath });
 
         if (guids.Length == 0)
         {
-            Debug.LogWarning("Î´ÕÒµ½ÈÎºÎInventorySystemItemDataSOÊı¾İÎÄ¼ş£¡");
+            Debug.LogWarning("æœªæ‰¾åˆ°ä»»ä½•InventorySystemItemDataSOæ•°æ®æ–‡ä»¶ï¼");
             return;
         }
 
@@ -83,9 +83,9 @@ public class ItemPrefabCreator : EditorWindow
 
             if (itemData != null)
             {
-                // ÏÔÊ¾½ø¶È
-                EditorUtility.DisplayProgressBar("Éú³ÉÎïÆ·Ô¤ÖÆÌå",
-                    $"ÕıÔÚÉú³É: {itemData.itemName} ({i + 1}/{totalCount})",
+                // æ˜¾ç¤ºè¿›åº¦
+                EditorUtility.DisplayProgressBar("ç”Ÿæˆç‰©å“é¢„åˆ¶ä½“",
+                    $"æ­£åœ¨ç”Ÿæˆ: {itemData.itemName} ({i + 1}/{totalCount})",
                     (float)(i + 1) / totalCount);
 
                 if (CreateItemPrefab(itemData))
@@ -98,11 +98,11 @@ public class ItemPrefabCreator : EditorWindow
         EditorUtility.ClearProgressBar();
         AssetDatabase.Refresh();
 
-        Debug.Log($"Ô¤ÖÆÌåÉú³ÉÍê³É£¡³É¹¦Éú³É {successCount}/{totalCount} ¸öÔ¤ÖÆÌå¡£");
+        Debug.Log($"é¢„åˆ¶ä½“ç”Ÿæˆå®Œæˆï¼æˆåŠŸç”Ÿæˆ {successCount}/{totalCount} ä¸ªé¢„åˆ¶ä½“ã€‚");
 
         if (successCount < totalCount)
         {
-            Debug.LogWarning($"ÓĞ {totalCount - successCount} ¸öÔ¤ÖÆÌåÉú³ÉÊ§°Ü£¬Çë¼ì²é¿ØÖÆÌ¨´íÎóĞÅÏ¢¡£");
+            Debug.LogWarning($"æœ‰ {totalCount - successCount} ä¸ªé¢„åˆ¶ä½“ç”Ÿæˆå¤±è´¥ï¼Œè¯·æ£€æŸ¥æ§åˆ¶å°é”™è¯¯ä¿¡æ¯ã€‚");
         }
     }
 
@@ -110,25 +110,25 @@ public class ItemPrefabCreator : EditorWindow
     {
         try
         {
-            // ¸ù¾İGridConfig¼ÆËãÎïÆ·Êµ¼Ê´óĞ¡
+            // æ ¹æ®GridConfigè®¡ç®—ç‰©å“å®é™…å¤§å°
             float itemWidth = itemData.width * gridConfig.cellSize;
             float itemHeight = itemData.height * gridConfig.cellSize;
 
-            // ´´½¨Ö÷GameObject
+            // åˆ›å»ºä¸»GameObject
             GameObject mainObject = new GameObject(itemData.itemName);
 
-            // Ìí¼ÓRectTransform×é¼ş
+            // æ·»åŠ RectTransformç»„ä»¶
             RectTransform mainRect = mainObject.AddComponent<RectTransform>();
             mainRect.sizeDelta = new Vector2(itemWidth, itemHeight);
-            mainObject.layer = 5; // UI²ã
+            mainObject.layer = 5; // UIå±‚
 
-            // Ìí¼ÓCanvasGroup×é¼şµ½Ö÷¶ÔÏó
+            // æ·»åŠ CanvasGroupç»„ä»¶åˆ°ä¸»å¯¹è±¡
             CanvasGroup canvasGroup = mainObject.AddComponent<CanvasGroup>();
             canvasGroup.alpha = 1f;
             canvasGroup.blocksRaycasts = true;
             canvasGroup.interactable = true;
 
-            // ´´½¨ItemBackground×Ó¶ÔÏó
+            // åˆ›å»ºItemBackgroundå­å¯¹è±¡
             GameObject backgroundObject = new GameObject("ItemBackground");
             backgroundObject.transform.SetParent(mainObject.transform);
             backgroundObject.layer = 5;
@@ -139,11 +139,11 @@ public class ItemPrefabCreator : EditorWindow
             backgroundRect.anchoredPosition = Vector2.zero;
             backgroundRect.sizeDelta = new Vector2(itemWidth, itemHeight);
 
-            // Ìí¼ÓRawImage×é¼ş
+            // æ·»åŠ RawImageç»„ä»¶
             RawImage rawImage = backgroundObject.AddComponent<RawImage>();
-            rawImage.color = GetColorFromString(itemData.backgroundColor, 204f / 255f); // Í¸Ã÷¶È204
+            rawImage.color = GetColorFromString(itemData.backgroundColor, 204f / 255f); // é€æ˜åº¦204
 
-            // ´´½¨ItemSprite×Ó¶ÔÏó
+            // åˆ›å»ºItemSpriteå­å¯¹è±¡
             GameObject spriteObject = new GameObject("ItemSprite");
             spriteObject.transform.SetParent(mainObject.transform);
             spriteObject.layer = 5;
@@ -154,12 +154,12 @@ public class ItemPrefabCreator : EditorWindow
             spriteRect.anchoredPosition = Vector2.zero;
             spriteRect.sizeDelta = new Vector2(itemWidth, itemHeight);
 
-            // Ìí¼ÓImage×é¼ş
+            // æ·»åŠ Imageç»„ä»¶
             Image image = spriteObject.AddComponent<Image>();
             image.sprite = itemData.itemIcon;
             image.preserveAspect = true;
 
-            // ´´½¨ItemScriptableObject×Ó¶ÔÏó
+            // åˆ›å»ºItemScriptableObjectå­å¯¹è±¡
             GameObject scriptObject = new GameObject("ItemScriptableObject");
             scriptObject.transform.SetParent(mainObject.transform);
             scriptObject.layer = 5;
@@ -170,10 +170,10 @@ public class ItemPrefabCreator : EditorWindow
             scriptRect.anchoredPosition = Vector2.zero;
             scriptRect.sizeDelta = new Vector2(itemWidth, itemHeight);
 
-            // Ìí¼ÓItemDataHolder½Å±¾µ½ItemScriptableObject¶ÔÏó
+            // æ·»åŠ ItemDataHolderè„šæœ¬åˆ°ItemScriptableObjectå¯¹è±¡
             ItemDataHolder dataHolder = scriptObject.AddComponent<ItemDataHolder>();
 
-            // Í¨¹ı·´ÉäÉèÖÃË½ÓĞ×Ö¶Î
+            // é€šè¿‡åå°„è®¾ç½®ç§æœ‰å­—æ®µ
             var itemDataField = typeof(ItemDataHolder).GetField("itemData",
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
             var itemIconField = typeof(ItemDataHolder).GetField("itemIconImage",
@@ -185,61 +185,61 @@ public class ItemPrefabCreator : EditorWindow
             itemIconField?.SetValue(dataHolder, image);
             backgroundField?.SetValue(dataHolder, rawImage);
 
-            // ÔÚ¸ù½ÚµãÌí¼ÓInventorySystemItem×é¼ş
+            // åœ¨æ ¹èŠ‚ç‚¹æ·»åŠ InventorySystemItemç»„ä»¶
             InventorySystemItem inventoryItem = mainObject.AddComponent<InventorySystemItem>();
 
-            // ÔÚ¸ù½ÚµãÌí¼ÓDraggableItem½Å±¾
+            // åœ¨æ ¹èŠ‚ç‚¹æ·»åŠ DraggableItemè„šæœ¬
             DraggableItem draggableItem = mainObject.AddComponent<DraggableItem>();
 
-            // Í¨¹ı·´ÉäÉèÖÃDraggableItemµÄ×Ö¶Î
+            // é€šè¿‡åå°„è®¾ç½®DraggableItemçš„å­—æ®µ
             var itemField = typeof(DraggableItem).GetField("item",
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
             itemField?.SetValue(draggableItem, inventoryItem);
 
-            // ´´½¨MaxDataºÍCurrentData TMP¶ÔÏó
+            // åˆ›å»ºMaxDataå’ŒCurrentData TMPå¯¹è±¡
             CreateDataDisplayObjects(backgroundObject, itemData, itemWidth, itemHeight);
 
-            // È·±£·ÖÀàÎÄ¼ş¼Ğ´æÔÚ
+            // ç¡®ä¿åˆ†ç±»æ–‡ä»¶å¤¹å­˜åœ¨
             string categoryFolder = Path.Combine(prefabOutputPath, GetCategoryFolderName(itemData.itemCategory.ToString()));
             if (!Directory.Exists(categoryFolder))
             {
                 Directory.CreateDirectory(categoryFolder);
             }
 
-            // ±£´æÎªÔ¤ÖÆÌå
+            // ä¿å­˜ä¸ºé¢„åˆ¶ä½“
             string prefabPath = Path.Combine(categoryFolder, CleanFileName(itemData.itemName) + ".prefab");
-            prefabPath = prefabPath.Replace("\\", "/"); // Í³Ò»Â·¾¶·Ö¸ô·û
+            prefabPath = prefabPath.Replace("\\", "/"); // ç»Ÿä¸€è·¯å¾„åˆ†éš”ç¬¦
 
-            // ¼ì²éÊÇ·ñÒÑ´æÔÚÍ¬ÃûÔ¤ÖÆÌå
+            // æ£€æŸ¥æ˜¯å¦å·²å­˜åœ¨åŒåé¢„åˆ¶ä½“
             if (File.Exists(prefabPath))
             {
-                Debug.LogWarning($"Ô¤ÖÆÌåÒÑ´æÔÚ£¬½«¸²¸Ç: {prefabPath}");
+                Debug.LogWarning($"é¢„åˆ¶ä½“å·²å­˜åœ¨ï¼Œå°†è¦†ç›–: {prefabPath}");
             }
 
             GameObject prefab = PrefabUtility.SaveAsPrefabAsset(mainObject, prefabPath);
 
-            // ÇåÀíÁÙÊ±¶ÔÏó
+            // æ¸…ç†ä¸´æ—¶å¯¹è±¡
             DestroyImmediate(mainObject);
 
             if (prefab != null)
             {
-                Debug.Log($"³É¹¦´´½¨Ô¤ÖÆÌå: {prefabPath} (³ß´ç: {itemWidth}x{itemHeight})");
+                Debug.Log($"æˆåŠŸåˆ›å»ºé¢„åˆ¶ä½“: {prefabPath} (å°ºå¯¸: {itemWidth}x{itemHeight})");
                 return true;
             }
             else
             {
-                Debug.LogError($"´´½¨Ô¤ÖÆÌåÊ§°Ü: {itemData.itemName}");
+                Debug.LogError($"åˆ›å»ºé¢„åˆ¶ä½“å¤±è´¥: {itemData.itemName}");
                 return false;
             }
         }
         catch (System.Exception e)
         {
-            Debug.LogError($"´´½¨Ô¤ÖÆÌåÊ±·¢Éú´íÎó [{itemData.itemName}]: {e.Message}");
+            Debug.LogError($"åˆ›å»ºé¢„åˆ¶ä½“æ—¶å‘ç”Ÿé”™è¯¯ [{itemData.itemName}]: {e.Message}");
             return false;
         }
     }
 
-    // ¸ù¾İ±³¾°ÑÕÉ«×Ö·û´®»ñÈ¡Color
+    // æ ¹æ®èƒŒæ™¯é¢œè‰²å­—ç¬¦ä¸²è·å–Color
     private Color GetColorFromString(string colorName, float alpha = 255f)
     {
         Color baseColor;
@@ -259,7 +259,7 @@ public class ItemPrefabCreator : EditorWindow
                 ColorUtility.TryParseHtmlString("#350000", out baseColor);
                 break;
             default:
-                // ½«Ä¬ÈÏÑÕÉ«¸ÄÎªÍ¸Ã÷
+                // å°†é»˜è®¤é¢œè‰²æ”¹ä¸ºé€æ˜
                 baseColor = Color.clear;
                 break;
         }
@@ -268,29 +268,29 @@ public class ItemPrefabCreator : EditorWindow
         return baseColor;
     }
 
-    // »ñÈ¡·ÖÀàÎÄ¼ş¼ĞÃû³Æ
+    // è·å–åˆ†ç±»æ–‡ä»¶å¤¹åç§°
     private string GetCategoryFolderName(string category)
     {
         switch (category?.ToLower())
         {
-            case "helmet": return "Í·¿øHelmet";
-            case "armor": return "»¤¼×Armor";
-            case "backpack": return "±³°üBackpack";
-            case "tacticalrig": return "Õ½Êõ¹Ò¾ßTacticalRig";
-            case "weapon": return "ÎäÆ÷Weapon";
-            case "ammunition": return "µ¯Ò©Ammunition";
-            case "healing": return "ÖÎÁÆÓÃÆ·Healing";
-            case "hemostatic": return "Ö¹Ñª¼ÁHemostatic";
-            case "sedative": return "Õò¾²¼ÁSedative";
-            case "food": return "Ê³ÎïFood";
-            case "drink": return "ÒûÁÏDrink";
-            case "intelligence": return "Çé±¨Intelligence";
-            case "currency": return "»õ±ÒCurrency";
-            default: return "ÆäËûOther";
+            case "helmet": return "å¤´ç›”Helmet";
+            case "armor": return "æŠ¤ç”²Armor";
+            case "backpack": return "èƒŒåŒ…Backpack";
+            case "tacticalrig": return "æˆ˜æœ¯æŒ‚å…·TacticalRig";
+            case "weapon": return "æ­¦å™¨Weapon";
+            case "ammunition": return "å¼¹è¯Ammunition";
+            case "healing": return "æ²»ç–—ç”¨å“Healing";
+            case "hemostatic": return "æ­¢è¡€å‰‚Hemostatic";
+            case "sedative": return "é•‡é™å‰‚Sedative";
+            case "food": return "é£Ÿç‰©Food";
+            case "drink": return "é¥®æ–™Drink";
+            case "intelligence": return "æƒ…æŠ¥Intelligence";
+            case "currency": return "è´§å¸Currency";
+            default: return "å…¶ä»–Other";
         }
     }
 
-    // ÇåÀíÎÄ¼şÃû
+    // æ¸…ç†æ–‡ä»¶å
     private string CleanFileName(string fileName)
     {
         if (string.IsNullOrEmpty(fileName)) return "UnknownItem";
@@ -306,12 +306,12 @@ public class ItemPrefabCreator : EditorWindow
         return fileName.Trim();
     }
 
-    // ÇåÀíÏÖÓĞÔ¤ÖÆÌå
+    // æ¸…ç†ç°æœ‰é¢„åˆ¶ä½“
     private void ClearExistingPrefabs()
     {
-        if (EditorUtility.DisplayDialog("È·ÈÏÇåÀí",
-            "Õâ½«É¾³ıÊä³öÂ·¾¶ÏÂµÄËùÓĞÔ¤ÖÆÌåÎÄ¼ş£¬´Ë²Ù×÷²»¿É³·Ïú£¡\nÈ·¶¨Òª¼ÌĞøÂğ£¿",
-            "È·¶¨", "È¡Ïû"))
+        if (EditorUtility.DisplayDialog("ç¡®è®¤æ¸…ç†",
+            "è¿™å°†åˆ é™¤è¾“å‡ºè·¯å¾„ä¸‹çš„æ‰€æœ‰é¢„åˆ¶ä½“æ–‡ä»¶ï¼Œæ­¤æ“ä½œä¸å¯æ’¤é”€ï¼\nç¡®å®šè¦ç»§ç»­å—ï¼Ÿ",
+            "ç¡®å®š", "å–æ¶ˆ"))
         {
             try
             {
@@ -325,19 +325,19 @@ public class ItemPrefabCreator : EditorWindow
                     }
 
                     AssetDatabase.Refresh();
-                    Debug.Log($"ÒÑÇåÀí {prefabFiles.Length} ¸öÔ¤ÖÆÌåÎÄ¼ş¡£");
+                    Debug.Log($"å·²æ¸…ç† {prefabFiles.Length} ä¸ªé¢„åˆ¶ä½“æ–‡ä»¶ã€‚");
                 }
             }
             catch (System.Exception e)
             {
-                Debug.LogError($"ÇåÀíÔ¤ÖÆÌåÊ±·¢Éú´íÎó: {e.Message}");
+                Debug.LogError($"æ¸…ç†é¢„åˆ¶ä½“æ—¶å‘ç”Ÿé”™è¯¯: {e.Message}");
             }
         }
     }
 
     private void CreateDataDisplayObjects(GameObject backgroundParent, InventorySystemItemDataSO itemData, float itemWidth, float itemHeight)
     {
-        // ¸ù¾İÎïÆ·ÀàĞÍÈ·¶¨ĞèÒªÏÔÊ¾µÄÊı¾İ
+        // æ ¹æ®ç‰©å“ç±»å‹ç¡®å®šéœ€è¦æ˜¾ç¤ºçš„æ•°æ®
         string currentDataText = "";
         string maxDataText = "";
 
@@ -389,52 +389,52 @@ public class ItemPrefabCreator : EditorWindow
                 break;
 
             default:
-                return; // ÆäËûÀàĞÍ²»ÏÔÊ¾Êı¾İ
+                return; // å…¶ä»–ç±»å‹ä¸æ˜¾ç¤ºæ•°æ®
         }
 
-        // Èç¹ûÃ»ÓĞÊı¾İĞèÒªÏÔÊ¾£¬Ö±½Ó·µ»Ø
+        // å¦‚æœæ²¡æœ‰æ•°æ®éœ€è¦æ˜¾ç¤ºï¼Œç›´æ¥è¿”å›
         if (string.IsNullOrEmpty(currentDataText))
             return;
 
-        // ºÏ²¢ÏÔÊ¾ÎÄ±¾£¨Èç¹ûÓĞMaxDataµÄ»°£©
+        // åˆå¹¶æ˜¾ç¤ºæ–‡æœ¬ï¼ˆå¦‚æœæœ‰MaxDataçš„è¯ï¼‰
         string displayText = currentDataText + maxDataText;
 
-        // ´´½¨ÊıÖµÏÔÊ¾¶ÔÏó£¬¸¸¶ÔÏóÉèÖÃÎªÖ÷¶ÔÏó£¨ÓëUNTAR helmet±£³ÖÒ»ÖÂ£©
+        // åˆ›å»ºæ•°å€¼æ˜¾ç¤ºå¯¹è±¡ï¼Œçˆ¶å¯¹è±¡è®¾ç½®ä¸ºä¸»å¯¹è±¡ï¼ˆä¸UNTAR helmetä¿æŒä¸€è‡´ï¼‰
         GameObject dataDisplayObj = new GameObject("DataDisplay");
-        dataDisplayObj.transform.SetParent(backgroundParent.transform.parent); // ÉèÖÃÎªÖ÷¶ÔÏóµÄ×Ó¶ÔÏó
+        dataDisplayObj.transform.SetParent(backgroundParent.transform.parent); // è®¾ç½®ä¸ºä¸»å¯¹è±¡çš„å­å¯¹è±¡
         dataDisplayObj.layer = 5;
 
         RectTransform dataRect = dataDisplayObj.AddComponent<RectTransform>();
-        // ÉèÖÃÃªµãÎªÓÒÏÂ½Ç£¨ÓëUNTAR helmetÒ»ÖÂ£©
+        // è®¾ç½®é”šç‚¹ä¸ºå³ä¸‹è§’ï¼ˆä¸UNTAR helmetä¸€è‡´ï¼‰
         dataRect.anchorMin = new Vector2(1f, 0f);
         dataRect.anchorMax = new Vector2(1f, 0f);
         dataRect.pivot = new Vector2(1f, 0f);
-        // Î»ÖÃÉèÖÃÎªÓÒÏÂ½Ç£¨ÓëUNTAR helmetÒ»ÖÂ£©
+        // ä½ç½®è®¾ç½®ä¸ºå³ä¸‹è§’ï¼ˆä¸UNTAR helmetä¸€è‡´ï¼‰
         dataRect.anchoredPosition = new Vector2(0f, 0f);
-        // ³ß´çÉèÖÃ£¨ÓëUNTAR helmetÒ»ÖÂ£©
+        // å°ºå¯¸è®¾ç½®ï¼ˆä¸UNTAR helmetä¸€è‡´ï¼‰
         dataRect.sizeDelta = new Vector2(50, 2);
 
         CanvasRenderer dataRenderer = dataDisplayObj.AddComponent<CanvasRenderer>();
 
         TextMeshProUGUI dataTMP = dataDisplayObj.AddComponent<TextMeshProUGUI>();
         dataTMP.text = displayText;
-        // ÔÚCreateDataDisplayObjects·½·¨ÖĞ
-        dataTMP.fontSize = 18; // »ù´¡×ÖÌå´óĞ¡
-        dataTMP.fontSizeMin = 18; // ×îĞ¡×ÖÌå´óĞ¡
-        dataTMP.fontSizeMax = 20; // ×î´ó×ÖÌå´óĞ¡
-        dataTMP.enableAutoSizing = true; // ÆôÓÃ×Ô¶¯µ÷Õû´óĞ¡
+        // åœ¨CreateDataDisplayObjectsæ–¹æ³•ä¸­
+        dataTMP.fontSize = 18; // åŸºç¡€å­—ä½“å¤§å°
+        dataTMP.fontSizeMin = 18; // æœ€å°å­—ä½“å¤§å°
+        dataTMP.fontSizeMax = 20; // æœ€å¤§å­—ä½“å¤§å°
+        dataTMP.enableAutoSizing = true; // å¯ç”¨è‡ªåŠ¨è°ƒæ•´å¤§å°
         dataTMP.color = Color.white;
-        dataTMP.alignment = TextAlignmentOptions.BottomRight; // µ×²¿ÓÒ¶ÔÆë£¨ÓëUNTAR helmetÒ»ÖÂ£©
-        // ½ûÓÃ×Ô¶¯»»ĞĞ£¨ÓëUNTAR helmetÒ»ÖÂ£©
+        dataTMP.alignment = TextAlignmentOptions.BottomRight; // åº•éƒ¨å³å¯¹é½ï¼ˆä¸UNTAR helmetä¸€è‡´ï¼‰
+        // ç¦ç”¨è‡ªåŠ¨æ¢è¡Œï¼ˆä¸UNTAR helmetä¸€è‡´ï¼‰
         dataTMP.enableWordWrapping = false;
         dataTMP.overflowMode = TextOverflowModes.Overflow;
-        // ÆôÓÃ×Ô¶¯µ÷Õû´óĞ¡£¨ÓëUNTAR helmetÒ»ÖÂ£©
+        // å¯ç”¨è‡ªåŠ¨è°ƒæ•´å¤§å°ï¼ˆä¸UNTAR helmetä¸€è‡´ï¼‰
         dataTMP.enableAutoSizing = true;
         dataTMP.fontSizeMin = 18;
         dataTMP.fontSizeMax = 20;
-        // ÉèÖÃ×ÖÌåÈ¨ÖØ£¨ÓëUNTAR helmetÒ»ÖÂ£©
+        // è®¾ç½®å­—ä½“æƒé‡ï¼ˆä¸UNTAR helmetä¸€è‡´ï¼‰
         dataTMP.fontWeight = TMPro.FontWeight.Regular;
-        // ÉèÖÃË®Æ½ºÍ´¹Ö±¶ÔÆë£¨ÓëUNTAR helmetÒ»ÖÂ£©
+        // è®¾ç½®æ°´å¹³å’Œå‚ç›´å¯¹é½ï¼ˆä¸UNTAR helmetä¸€è‡´ï¼‰
         dataTMP.horizontalAlignment = TMPro.HorizontalAlignmentOptions.Right;
         dataTMP.verticalAlignment = TMPro.VerticalAlignmentOptions.Bottom;
     }

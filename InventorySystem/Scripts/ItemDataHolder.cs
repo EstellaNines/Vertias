@@ -1,82 +1,363 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-// ç‰©å“æ•°æ®å®¹å™¨ï¼šæŒ‚åœ¨ç‰©å“é¢„åˆ¶ä½“ä¸Šï¼Œè´Ÿè´£ä¸ InventorySystemItemDataSO äº¤äº’
+// ÎïÆ·Êı¾İ³ÖÓĞÕß£¬ÓÃÓÚÎïÆ·Ô¤ÖÆÌåÉÏ£¬³ÖÓĞ InventorySystemItemDataSO Êı¾İ
+// Ö§³ÖÊµÀıÊı¾İ´æ´¢ºÍ¶¯Ì¬ÊôĞÔ±£´æ
+[System.Serializable]
+public class ItemInstanceData
+{
+	// ¶¯Ì¬ÊôĞÔÊı¾İ
+	public float currentDurability = 100f; // µ±Ç°ÄÍ¾Ã¶È
+	public int currentStackCount = 1; // µ±Ç°¶ÑµşÊıÁ¿
+	public float currentHealAmount = 0f; // µ±Ç°ÖÎÁÆÁ¿
+	public int currentUsageCount = 0; // µ±Ç°Ê¹ÓÃ´ÎÊı
+	public bool isModified = false; // ÊÇ·ñ±»ĞŞ¸Ä¹ı
+	public Dictionary<string, object> customProperties = new Dictionary<string, object>(); // ×Ô¶¨ÒåÊôĞÔ
+
+	// ¹¹Ôìº¯Êı
+	public ItemInstanceData()
+	{
+		customProperties = new Dictionary<string, object>();
+	}
+
+	// ´ÓScriptableObject³õÊ¼»¯ÊµÀıÊı¾İ
+	public void InitializeFromItemData(InventorySystemItemDataSO itemData)
+	{
+		if (itemData == null) return;
+
+		currentDurability = itemData.durability;
+		currentStackCount = 1; // Ä¬ÈÏ¶ÑµşÊıÁ¿Îª1
+		currentHealAmount = itemData.maxHealAmount;
+		currentUsageCount = 0;
+		isModified = false;
+	}
+
+	// ÑéÖ¤Êı¾İÓĞĞ§ĞÔ
+	public bool ValidateData(InventorySystemItemDataSO itemData)
+	{
+		if (itemData == null) return false;
+
+		// ÑéÖ¤ÄÍ¾Ã¶È·¶Î§
+		if (currentDurability < 0 || currentDurability > itemData.durability)
+		{
+			currentDurability = Mathf.Clamp(currentDurability, 0, itemData.durability);
+			isModified = true;
+		}
+
+		// ÑéÖ¤¶ÑµşÊıÁ¿
+		if (currentStackCount < 1 || currentStackCount > itemData.maxStack)
+		{
+			currentStackCount = Mathf.Clamp(currentStackCount, 1, itemData.maxStack);
+			isModified = true;
+		}
+
+		// ÑéÖ¤ÖÎÁÆÁ¿
+		if (currentHealAmount < 0 || currentHealAmount > itemData.maxHealAmount)
+		{
+			currentHealAmount = Mathf.Clamp(currentHealAmount, 0, itemData.maxHealAmount);
+			isModified = true;
+		}
+
+		return true;
+	}
+
+	// ÖØÖÃÎªÄ¬ÈÏÖµ
+	public void ResetToDefault(InventorySystemItemDataSO itemData)
+	{
+		InitializeFromItemData(itemData);
+		customProperties.Clear();
+	}
+}
+
 public class ItemDataHolder : MonoBehaviour
 {
-	[Header("ç‰©å“æ•°æ®")]
+	[Header("ÎïÆ·Êı¾İ")]
 	[SerializeField] private InventorySystemItemDataSO itemData;
 
-	[Header("UI ç»„ä»¶å¼•ç”¨")]
+	[Header("ÊµÀıÊı¾İ")]
+	[SerializeField] private ItemInstanceData instanceData = new ItemInstanceData();
+
+	[Header("UI ×é¼şÒıÓÃ")]
 	[SerializeField] private Image itemIconImage;
 	[SerializeField] private RawImage backgroundImage;
 
 
 	private void Awake()
 	{
-		// å¦‚æœå·²æœ‰æ•°æ®ï¼Œè‡ªåŠ¨åˆ·æ–° UI æ˜¾ç¤º
+		// ³õÊ¼»¯ÊµÀıÊı¾İ
+		if (instanceData == null)
+		{
+			instanceData = new ItemInstanceData();
+		}
+
+		// Èç¹ûÓĞÊı¾İ£¬×Ô¶¯Ë¢ĞÂ UI ÏÔÊ¾
 		if (itemData != null)
 		{
+			// ³õÊ¼»¯ÊµÀıÊı¾İ
+			instanceData.InitializeFromItemData(itemData);
+			// ÑéÖ¤Êı¾İÓĞĞ§ĞÔ
+			instanceData.ValidateData(itemData);
 			UpdateItemDisplay();
 		}
 	}
 
-	// è·å–ç‰©å“æ•°æ®
+	// »ñÈ¡ÎïÆ·Êı¾İ
 	public InventorySystemItemDataSO GetItemData()
 	{
 		return itemData;
 	}
 
-	// è®¾ç½®ç‰©å“æ•°æ®
-	// data éœ€è¦ä¸º InventorySystemItemDataSO
+	// ÉèÖÃÎïÆ·Êı¾İ
+	// data ĞèÒªÎª InventorySystemItemDataSO
 	public void SetItemData(InventorySystemItemDataSO data)
 	{
 		itemData = data;
+		// ÖØĞÂ³õÊ¼»¯ÊµÀıÊı¾İ
+		if (instanceData == null)
+		{
+			instanceData = new ItemInstanceData();
+		}
+		instanceData.InitializeFromItemData(data);
 		UpdateItemDisplay();
 	}
 
-	// åˆ·æ–°ç‰©å“ UI æ˜¾ç¤º
+	// === ÊµÀıÊı¾İ¹ÜÀí·½·¨ ===
+
+	// »ñÈ¡ÊµÀıÊı¾İ
+	public ItemInstanceData GetInstanceData()
+	{
+		return instanceData;
+	}
+
+	// ÉèÖÃÊµÀıÊı¾İ
+	public void SetInstanceData(ItemInstanceData data)
+	{
+		if (data != null)
+		{
+			instanceData = data;
+			// ÑéÖ¤Êı¾İÓĞĞ§ĞÔ
+			instanceData.ValidateData(itemData);
+		}
+	}
+
+	// »ñÈ¡µ±Ç°ÄÍ¾Ã¶È
+	public float GetCurrentDurability()
+	{
+		return instanceData?.currentDurability ?? (itemData?.durability ?? 100f);
+	}
+
+	// ÉèÖÃµ±Ç°ÄÍ¾Ã¶È
+	public void SetCurrentDurability(float durability)
+	{
+		if (instanceData != null)
+		{
+			instanceData.currentDurability = durability;
+			instanceData.isModified = true;
+			// ÑéÖ¤Êı¾İÓĞĞ§ĞÔ
+			instanceData.ValidateData(itemData);
+		}
+	}
+
+	// »ñÈ¡µ±Ç°¶ÑµşÊıÁ¿
+	public int GetCurrentStackCount()
+	{
+		return instanceData?.currentStackCount ?? 1;
+	}
+
+	// ÉèÖÃµ±Ç°¶ÑµşÊıÁ¿
+	public void SetCurrentStackCount(int count)
+	{
+		if (instanceData != null)
+		{
+			instanceData.currentStackCount = count;
+			instanceData.isModified = true;
+			// ÑéÖ¤Êı¾İÓĞĞ§ĞÔ
+			instanceData.ValidateData(itemData);
+		}
+	}
+
+	// »ñÈ¡µ±Ç°ÖÎÁÆÁ¿
+	public float GetCurrentHealAmount()
+	{
+		return instanceData?.currentHealAmount ?? (itemData?.maxHealAmount ?? 0f);
+	}
+
+	// ÉèÖÃµ±Ç°ÖÎÁÆÁ¿
+	public void SetCurrentHealAmount(float amount)
+	{
+		if (instanceData != null)
+		{
+			instanceData.currentHealAmount = amount;
+			instanceData.isModified = true;
+			// ÑéÖ¤Êı¾İÓĞĞ§ĞÔ
+			instanceData.ValidateData(itemData);
+		}
+	}
+
+	// »ñÈ¡Ê¹ÓÃ´ÎÊı
+	public int GetCurrentUsageCount()
+	{
+		return instanceData?.currentUsageCount ?? 0;
+	}
+
+	// Ôö¼ÓÊ¹ÓÃ´ÎÊı
+	public void IncrementUsageCount()
+	{
+		if (instanceData != null)
+		{
+			instanceData.currentUsageCount++;
+			instanceData.isModified = true;
+		}
+	}
+
+	// ¼ì²éÎïÆ·ÊÇ·ñ±»ĞŞ¸Ä¹ı
+	public bool IsModified()
+	{
+		return instanceData?.isModified ?? false;
+	}
+
+	// ÉèÖÃ×Ô¶¨ÒåÊôĞÔ
+	public void SetCustomProperty(string key, object value)
+	{
+		if (instanceData != null && !string.IsNullOrEmpty(key))
+		{
+			instanceData.customProperties[key] = value;
+			instanceData.isModified = true;
+		}
+	}
+
+	// »ñÈ¡×Ô¶¨ÒåÊôĞÔ
+	public T GetCustomProperty<T>(string key, T defaultValue = default(T))
+	{
+		if (instanceData != null && !string.IsNullOrEmpty(key) && instanceData.customProperties.ContainsKey(key))
+		{
+			try
+			{
+				return (T)instanceData.customProperties[key];
+			}
+			catch
+			{
+				return defaultValue;
+			}
+		}
+		return defaultValue;
+	}
+
+	// ÑéÖ¤²¢ĞŞ¸´ÊµÀıÊı¾İ
+	public bool ValidateAndRepairInstanceData()
+	{
+		if (instanceData == null)
+		{
+			instanceData = new ItemInstanceData();
+			if (itemData != null)
+			{
+				instanceData.InitializeFromItemData(itemData);
+			}
+			return true;
+		}
+
+		return instanceData.ValidateData(itemData);
+	}
+
+	// ÖØÖÃÊµÀıÊı¾İÎªÄ¬ÈÏÖµ
+	public void ResetInstanceData()
+	{
+		if (instanceData != null && itemData != null)
+		{
+			instanceData.ResetToDefault(itemData);
+		}
+	}
+
+	// === ĞòÁĞ»¯Ö§³Ö·½·¨ ===
+
+	// ĞòÁĞ»¯ÊµÀıÊı¾İÎªJSON×Ö·û´®
+	public string SerializeInstanceData()
+	{
+		if (instanceData == null) return "";
+
+		try
+		{
+			return JsonUtility.ToJson(instanceData);
+		}
+		catch (System.Exception e)
+		{
+			Debug.LogError($"ĞòÁĞ»¯ÊµÀıÊı¾İÊ§°Ü: {e.Message}");
+			return "";
+		}
+	}
+
+	// ´ÓJSON×Ö·û´®·´ĞòÁĞ»¯ÊµÀıÊı¾İ
+	public bool DeserializeInstanceData(string jsonData)
+	{
+		if (string.IsNullOrEmpty(jsonData)) return false;
+
+		try
+		{
+			ItemInstanceData deserializedData = JsonUtility.FromJson<ItemInstanceData>(jsonData);
+			if (deserializedData != null)
+			{
+				instanceData = deserializedData;
+				// ÖØĞÂ³õÊ¼»¯×Öµä£¨JsonUtility²»Ö§³Ö×ÖµäĞòÁĞ»¯£©
+				if (instanceData.customProperties == null)
+				{
+					instanceData.customProperties = new Dictionary<string, object>();
+				}
+				// ÑéÖ¤Êı¾İÓĞĞ§ĞÔ
+				instanceData.ValidateData(itemData);
+				return true;
+			}
+		}
+		catch (System.Exception e)
+		{
+			Debug.LogError($"·´ĞòÁĞ»¯ÊµÀıÊı¾İÊ§°Ü: {e.Message}");
+		}
+
+		return false;
+	}
+
+	// Ë¢ĞÂÎïÆ· UI ÏÔÊ¾
 	public void UpdateItemDisplay()
 	{
 		if (itemData == null) return;
 
-		// æ›´æ–°ç‰©å“å›¾æ ‡
+		// ¸üĞÂÎïÆ·Í¼±ê
 		if (itemIconImage != null && itemData.itemIcon != null)
 		{
 			itemIconImage.sprite = itemData.itemIcon;
 		}
 
-		// æ›´æ–°èƒŒæ™¯é¢œè‰²
+		// ¸üĞÂ±³¾°ÑÕÉ«
 		if (backgroundImage != null)
 		{
 			backgroundImage.color = GetColorFromString(itemData.backgroundColor);
 		}
 
-		// æ›´æ–°é¢„åˆ¶ä½“å°ºå¯¸
+		// ¸üĞÂÔ¤ÖÆÌå³ß´ç
 		UpdatePrefabSize();
 	}
 
-	// æ ¹æ®ç‰©å“å°ºå¯¸æ›´æ–°é¢„åˆ¶ä½“å¤§å°
+	// ¸ù¾İÎïÆ·³ß´ç¸üĞÂÔ¤ÖÆÌå´óĞ¡
 	private void UpdatePrefabSize()
 	{
 		if (itemData == null) return;
 
-		// æ¯æ ¼ 64 åƒç´ ï¼Œä¸ç³»ç»Ÿç»Ÿä¸€
-		float cellSize = 64f; // ä» 80f è°ƒæ•´ä¸º 64f
+		// Ã¿¸ñ 64 ÏñËØ£¬ÓëÏµÍ³Í³Ò»
+		float cellSize = 64f; // ´Ó 80f µ÷ÕûÎª 64f
 		Vector2 newSize = new Vector2(
 			itemData.width * cellSize,
 			itemData.height * cellSize
 		);
 
-		// æ›´æ–°é¢„åˆ¶ä½“ RectTransform å°ºå¯¸
+		// ¸üĞÂÔ¤ÖÆÌå RectTransform ³ß´ç
 		RectTransform rectTransform = GetComponent<RectTransform>();
 		if (rectTransform != null)
 		{
 			rectTransform.sizeDelta = newSize;
 		}
 
-		// æ›´æ–°ç‰©å“å›¾æ ‡å°ºå¯¸
+		// ¸üĞÂÎïÆ·Í¼±ê³ß´ç
 		if (itemIconImage != null)
 		{
 			RectTransform iconRect = itemIconImage.GetComponent<RectTransform>();
@@ -86,7 +367,7 @@ public class ItemDataHolder : MonoBehaviour
 			}
 		}
 
-		// æ›´æ–°èƒŒæ™¯å›¾ç‰‡å°ºå¯¸
+		// ¸üĞÂ±³¾°Í¼Æ¬³ß´ç
 		if (backgroundImage != null)
 		{
 			RectTransform bgRect = backgroundImage.GetComponent<RectTransform>();
@@ -97,49 +378,49 @@ public class ItemDataHolder : MonoBehaviour
 		}
 	}
 
-	// å°†é¢œè‰²åç§°è½¬ä¸º Color
-	// colorNameï¼šé¢œè‰²å
-	// è¿”å›ï¼šå¯¹åº”çš„ Color å€¼
+	// ½«ÑÕÉ«Ãû³Æ×ªÎª Color
+	// colorName£ºÑÕÉ«Ãû
+	// ·µ»Ø£º¶ÔÓ¦µÄ Color Öµ
 	private Color GetColorFromString(string colorName)
 	{
 		Color baseColor;
 		switch (colorName?.ToLower())
 		{
 			case "blue":
-				baseColor = HexToColor("#2d3c4b"); // è“è‰²
+				baseColor = HexToColor("#2d3c4b"); // À¶É«
 				break;
 			case "violet":
 			case "purple":
-				baseColor = HexToColor("#583b80"); // ç´«è‰²
+				baseColor = HexToColor("#583b80"); // ×ÏÉ«
 				break;
 			case "yellow":
-				baseColor = HexToColor("#80550d"); // é»„è‰²
+				baseColor = HexToColor("#80550d"); // »ÆÉ«
 				break;
 			case "red":
-				baseColor = HexToColor("#350000"); // çº¢è‰²
+				baseColor = HexToColor("#350000"); // ºìÉ«
 				break;
 			default:
-				baseColor = Color.white; // é»˜è®¤ç™½è‰²
+				baseColor = Color.white; // Ä¬ÈÏ°×É«
 				break;
 		}
 
-		// è®¾ç½®é€æ˜åº¦ä¸º 225
-		baseColor.a = 225f / 255f; // é€æ˜åº¦
+		// ÉèÖÃÍ¸Ã÷¶ÈÎª 225
+		baseColor.a = 225f / 255f; // Í¸Ã÷¶È
 		return baseColor;
 	}
 
-	// åå…­è¿›åˆ¶é¢œè‰²è½¬ä¸º Color
-	// hexï¼šåå…­è¿›åˆ¶é¢œè‰²å€¼
-	// è¿”å›ï¼šColor å®ä¾‹
+	// Ê®Áù½øÖÆÑÕÉ«×ªÎª Color
+	// hex£ºÊ®Áù½øÖÆÑÕÉ«Öµ
+	// ·µ»Ø£ºColor ÊµÀı
 	private Color HexToColor(string hex)
 	{
-		// ç§»é™¤ #
+		// ÒÆ³ı #
 		if (hex.StartsWith("#"))
 			hex = hex.Substring(1);
 
-		// ç¡®ä¿ä¸º 6 ä½åå…­è¿›åˆ¶
+		// È·±£Îª 6 Î»Ê®Áù½øÖÆ
 		if (hex.Length != 6)
-			return new Color(1f, 1f, 1f, 225f / 255f); // é»˜è®¤ç™½è‰²ï¼Œé€æ˜åº¦ 225
+			return new Color(1f, 1f, 1f, 225f / 255f); // Ä¬ÈÏ°×É«£¬Í¸Ã÷¶È 225
 
 		try
 		{
@@ -147,88 +428,88 @@ public class ItemDataHolder : MonoBehaviour
 			byte g = System.Convert.ToByte(hex.Substring(2, 2), 16);
 			byte b = System.Convert.ToByte(hex.Substring(4, 2), 16);
 
-			return new Color32(r, g, b, 225); // é€æ˜åº¦è®¾ä¸º 225
+			return new Color32(r, g, b, 225); // Í¸Ã÷¶ÈÉèÎª 225
 		}
 		catch
 		{
-			return new Color(1f, 1f, 1f, 225f / 255f); // è½¬æ¢å¤±è´¥æ—¶è¿”å›ç™½è‰²ï¼Œé€æ˜åº¦ 225
+			return new Color(1f, 1f, 1f, 225f / 255f); // ×ª»»Ê§°ÜÊ±·µ»Ø°×É«£¬Í¸Ã÷¶È 225
 		}
 	}
 
-	// === æ•°æ®è®¿é—®å™¨ ===
+	// === Êı¾İ·ÃÎÊÆ÷ ===
 
-	// ç‰©å“ ID
+	// ÎïÆ· ID
 	public int ItemID => itemData?.id ?? 0;
 
-	// ç‰©å“åç§°
+	// ÎïÆ·Ãû³Æ
 	public string ItemName => itemData?.itemName ?? "";
 
-	// ç‰©å“é«˜åº¦
+	// ÎïÆ·¸ß¶È
 	public int ItemHeight => itemData?.height ?? 1;
 
-	// ç‰©å“å®½åº¦
+	// ÎïÆ·¿í¶È
 	public int ItemWidth => itemData?.width ?? 1;
 
-	// ç‰©å“ç¨€æœ‰åº¦
+	// ÎïÆ·Ï¡ÓĞ¶È
 	public string ItemRarity => itemData?.rarity ?? "";
 
-	// ç‰©å“ç±»åˆ«
+	// ÎïÆ·Àà±ğ
 	public string ItemCategory => itemData?.category ?? "";
 
-	// å¼¹è¯ç±»å‹
+	// µ¯Ò©ÀàĞÍ
 	public string BulletType => itemData?.BulletType ?? "";
 
-	// å®¹é‡é«˜åº¦ï¼ˆèƒŒåŒ…/æˆ˜æœ¯èƒŒå¿ƒï¼‰
+	// ÈİÁ¿¸ß¶È£¨±³°ü/Õ½Êõ±³ĞÄ£©
 	public int CellH => itemData?.CellH ?? 0;
 
-	// å®¹é‡å®½åº¦ï¼ˆèƒŒåŒ…/æˆ˜æœ¯èƒŒå¿ƒï¼‰
+	// ÈİÁ¿¿í¶È£¨±³°ü/Õ½Êõ±³ĞÄ£©
 	public int CellV => itemData?.CellV ?? 0;
 
-	// èƒŒæ™¯é¢œè‰²å
+	// ±³¾°ÑÕÉ«Ãû
 	public string BackgroundColor => itemData?.backgroundColor ?? "";
 
-	// ç‰©å“å›¾æ ‡
+	// ÎïÆ·Í¼±ê
 	public Sprite ItemIcon => itemData?.itemIcon;
 
-	// === å®ç”¨æ–¹æ³• ===
+	// === ÊµÓÃ·½·¨ ===
 
-	// æ˜¯å¦ä¸ºèƒŒåŒ…ç±»ç‰©å“
-	// è¿”å›ï¼šæ˜¯å¦ä¸ºèƒŒåŒ…
+	// ÊÇ·ñÎª±³°üÀàÎïÆ·
+	// ·µ»Ø£ºÊÇ·ñÎª±³°ü
 	public bool IsBackpack()
 	{
 		return itemData != null && itemData.category.ToLower().Contains("backpack");
 	}
 
-	// æ˜¯å¦ä¸ºæ­¦å™¨ç±»ç‰©å“
-	// è¿”å›ï¼šæ˜¯å¦ä¸ºæ­¦å™¨
+	// ÊÇ·ñÎªÎäÆ÷ÀàÎïÆ·
+	// ·µ»Ø£ºÊÇ·ñÎªÎäÆ÷
 	public bool IsWeapon()
 	{
 		return itemData != null && itemData.category.ToLower().Contains("weapon");
 	}
 
-	// æ˜¯å¦ä¸ºå¼¹è¯ç±»ç‰©å“
-	// è¿”å›ï¼šæ˜¯å¦ä¸ºå¼¹è¯
+	// ÊÇ·ñÎªµ¯Ò©ÀàÎïÆ·
+	// ·µ»Ø£ºÊÇ·ñÎªµ¯Ò©
 	public bool IsAmmunition()
 	{
 		return itemData != null && itemData.category.ToLower().Contains("ammunition");
 	}
 
-	// æ˜¯å¦å…·æœ‰å†…éƒ¨å®¹é‡ï¼ˆèƒŒåŒ…/æˆ˜æœ¯èƒŒå¿ƒï¼‰
-	// è¿”å›ï¼šæ˜¯å¦å…·æœ‰å®¹é‡
+	// ÊÇ·ñ¾ßÓĞÄÚ²¿ÈİÁ¿£¨±³°ü/Õ½Êõ±³ĞÄ£©
+	// ·µ»Ø£ºÊÇ·ñ¾ßÓĞÈİÁ¿
 	public bool HasCapacity()
 	{
 		return itemData != null && (itemData.CellH > 0 || itemData.CellV > 0);
 	}
 
-	// è·å–ç‰©å“æ€»å®¹é‡
-	// è¿”å›ï¼šå®¹é‡ï¼ˆæ¨ªÃ—çºµï¼‰
+	// »ñÈ¡ÎïÆ·×ÜÈİÁ¿
+	// ·µ»Ø£ºÈİÁ¿£¨ºá¡Á×İ£©
 	public int GetTotalCapacity()
 	{
 		return itemData != null ? itemData.CellH * itemData.CellV : 0;
 	}
 
-	// è·å–ç‰©å“å ç”¨çš„æ ¼å­æ•°
-	// è¿”å›ï¼šå ç”¨æ ¼æ•°
+	// »ñÈ¡ÎïÆ·Õ¼ÓÃµÄ¸ñ×ÓÊı
+	// ·µ»Ø£ºÕ¼ÓÃ¸ñÊı
 	public int GetOccupiedSlots()
 	{
 		return itemData != null ? itemData.height * itemData.width : 1;
@@ -236,24 +517,334 @@ public class ItemDataHolder : MonoBehaviour
 
 
 
-	// è°ƒè¯•ï¼šæ‰“å°ç‰©å“ä¿¡æ¯
-	[ContextMenu("æ‰“å°ç‰©å“ä¿¡æ¯")]
+	// µ÷ÊÔ£º´òÓ¡ÎïÆ·ĞÅÏ¢
+	[ContextMenu("´òÓ¡ÎïÆ·ĞÅÏ¢")]
 	public void LogItemInfo()
 	{
 		if (itemData == null)
 		{
-			Debug.Log("ç‰©å“æ•°æ®ä¸ºç©º");
+			Debug.Log("ÎïÆ·Êı¾İÎª¿Õ");
 			return;
 		}
 
-		Debug.Log($"ç‰©å“ä¿¡æ¯:\n" +
+		string instanceInfo = "";
+		if (instanceData != null)
+		{
+			instanceInfo = $"\n=== ÊµÀıÊı¾İ ===\n" +
+						   $"µ±Ç°ÄÍ¾Ã¶È: {instanceData.currentDurability}/{itemData.durability}\n" +
+						   $"µ±Ç°¶ÑµşÊıÁ¿: {instanceData.currentStackCount}\n" +
+						   $"µ±Ç°ÖÎÁÆÁ¿: {instanceData.currentHealAmount}\n" +
+						   $"Ê¹ÓÃ´ÎÊı: {instanceData.currentUsageCount}\n" +
+						   $"ÊÇ·ñ±»ĞŞ¸Ä: {instanceData.isModified}\n" +
+						   $"×Ô¶¨ÒåÊôĞÔÊıÁ¿: {instanceData.customProperties.Count}";
+		}
+
+		Debug.Log($"ÎïÆ·ĞÅÏ¢:\n" +
 				  $"ID: {itemData.id}\n" +
-				  $"åç§°: {itemData.itemName}\n" +
-				  $"å°ºå¯¸: {itemData.width}x{itemData.height}\n" +
-				  $"ç¨€æœ‰åº¦: {itemData.rarity}\n" +
-				  $"ç±»åˆ«: {itemData.category}\n" +
-				  $"èƒŒæ™¯é¢œè‰²: {itemData.backgroundColor}\n" +
-				  $"å®¹é‡: {itemData.CellH}x{itemData.CellV}\n" +
-				  $"å¼¹è¯ç±»å‹: {itemData.BulletType}");
+				  $"Ãû³Æ: {itemData.itemName}\n" +
+				  $"³ß´ç: {itemData.width}x{itemData.height}\n" +
+				  $"Ï¡ÓĞ¶È: {itemData.rarity}\n" +
+				  $"Àà±ğ: {itemData.category}\n" +
+				  $"±³¾°ÑÕÉ«: {itemData.backgroundColor}\n" +
+				  $"ÈİÁ¿: {itemData.CellH}x{itemData.CellV}\n" +
+				  $"µ¯Ò©ÀàĞÍ: {itemData.BulletType}" +
+				  instanceInfo);
+	}
+
+	// ²âÊÔ£ºÑéÖ¤ÊµÀıÊı¾İ
+	[ContextMenu("ÑéÖ¤ÊµÀıÊı¾İ")]
+	public void ValidateInstanceDataTest()
+	{
+		bool isValid = ValidateAndRepairInstanceData();
+		Debug.Log($"ÊµÀıÊı¾İÑéÖ¤½á¹û: {(isValid ? "ÓĞĞ§" : "ÎŞĞ§²¢ÒÑĞŞ¸´")}");
+		LogItemInfo();
+	}
+
+	// ²âÊÔ£ºÖØÖÃÊµÀıÊı¾İ
+	[ContextMenu("ÖØÖÃÊµÀıÊı¾İ")]
+	public void ResetInstanceDataTest()
+	{
+		ResetInstanceData();
+		Debug.Log("ÊµÀıÊı¾İÒÑÖØÖÃÎªÄ¬ÈÏÖµ");
+		LogItemInfo();
+	}
+
+	// ===== ISaveable½Ó¿ÚÊµÏÖ =====
+
+	/// <summary>
+	/// ÎïÆ·Êı¾İ³ÖÓĞÕß±£´æÊı¾İÀà
+	/// </summary>
+	[System.Serializable]
+	public class ItemDataHolderSaveData
+	{
+		public string itemDataPath; // ÎïÆ·Êı¾İ×ÊÔ´Â·¾¶
+		public string instanceDataJson; // ÊµÀıÊı¾İJSON×Ö·û´®
+		public bool isModified; // ÊÇ·ñ±»ĞŞ¸Ä¹ı
+		public float lastModifiedTime; // ×îºóĞŞ¸ÄÊ±¼ä
+		public Vector3 worldPosition; // ÊÀ½ç×ø±êÎ»ÖÃ
+		public Vector3 worldRotation; // ÊÀ½ç×ø±êĞı×ª
+		public bool isActive; // ÊÇ·ñ¼¤»î×´Ì¬
+	}
+
+	// ISaveable½Ó¿ÚÊµÏÖ
+	private string saveID = "";
+
+	/// <summary>
+	/// »ñÈ¡±£´æID
+	/// </summary>
+	public string GetSaveID()
+	{
+		if (string.IsNullOrEmpty(saveID))
+		{
+			GenerateNewSaveID();
+		}
+		return saveID;
+	}
+
+	/// <summary>
+	/// ÉèÖÃ±£´æID
+	/// </summary>
+	public void SetSaveID(string id)
+	{
+		if (!string.IsNullOrEmpty(id))
+		{
+			saveID = id;
+		}
+	}
+
+	/// <summary>
+	/// Éú³ÉĞÂµÄ±£´æID
+	/// ¸ñÊ½: ItemData_[ÎïÆ·Ãû³Æ]_[8Î»GUID]_[ÊµÀıID]
+	/// </summary>
+	public void GenerateNewSaveID()
+	{
+		string itemName = itemData != null ? itemData.itemName.Replace(" ", "").Replace("(", "").Replace(")", "") : "Unknown";
+		string guidPart = System.Guid.NewGuid().ToString("N").Substring(0, 8).ToUpper();
+		int instanceID = GetInstanceID();
+		saveID = $"ItemData_{itemName}_{guidPart}_{instanceID}";
+		
+		if (Application.isPlaying)
+		{
+			Debug.Log($"ÎªÎïÆ·Êı¾İ³ÖÓĞÕßÉú³ÉĞÂµÄ±£´æID: {saveID}");
+		}
+	}
+
+	/// <summary>
+	/// »ñÈ¡±£´æÊı¾İ
+	/// </summary>
+	public object GetSaveData()
+	{
+		ItemDataHolderSaveData saveData = new ItemDataHolderSaveData();
+		
+		// ±£´æÎïÆ·Êı¾İÂ·¾¶
+		if (itemData != null)
+		{
+#if UNITY_EDITOR
+			saveData.itemDataPath = UnityEditor.AssetDatabase.GetAssetPath(itemData);
+#else
+			saveData.itemDataPath = itemData.name; // ÔËĞĞÊ±Ê¹ÓÃÃû³Æ
+#endif
+		}
+		
+		// ±£´æÊµÀıÊı¾İ
+		saveData.instanceDataJson = SerializeInstanceData();
+		saveData.isModified = IsModified();
+		saveData.lastModifiedTime = Time.time;
+		
+		// ±£´æÊÀ½ç×ø±êĞÅÏ¢
+		if (transform != null)
+		{
+			saveData.worldPosition = transform.position;
+			saveData.worldRotation = transform.eulerAngles;
+		}
+		
+		saveData.isActive = gameObject.activeInHierarchy;
+		
+		return saveData;
+	}
+
+	/// <summary>
+	/// ¼ÓÔØ±£´æÊı¾İ
+	/// </summary>
+	public void LoadSaveData(object data)
+	{
+		if (data is ItemDataHolderSaveData saveData)
+		{
+			try
+			{
+				// »Ö¸´ÎïÆ·Êı¾İÒıÓÃ
+				if (!string.IsNullOrEmpty(saveData.itemDataPath))
+				{
+					RestoreItemDataReference(saveData.itemDataPath);
+				}
+				
+				// »Ö¸´ÊµÀıÊı¾İ
+				if (!string.IsNullOrEmpty(saveData.instanceDataJson))
+				{
+					DeserializeInstanceData(saveData.instanceDataJson);
+				}
+				
+				// »Ö¸´ÊÀ½ç×ø±ê
+				if (transform != null)
+				{
+					transform.position = saveData.worldPosition;
+					transform.eulerAngles = saveData.worldRotation;
+				}
+				
+				// »Ö¸´¼¤»î×´Ì¬
+				gameObject.SetActive(saveData.isActive);
+				
+				// ¸üĞÂÏÔÊ¾
+				UpdateItemDisplay();
+				
+				Debug.Log($"³É¹¦¼ÓÔØÎïÆ·Êı¾İ³ÖÓĞÕß±£´æÊı¾İ: {GetSaveID()}");
+			}
+			catch (System.Exception e)
+			{
+				Debug.LogError($"¼ÓÔØÎïÆ·Êı¾İ³ÖÓĞÕß±£´æÊı¾İÊ§°Ü: {e.Message}");
+			}
+		}
+		else
+		{
+			Debug.LogError("ÎŞĞ§µÄÎïÆ·Êı¾İ³ÖÓĞÕß±£´æÊı¾İ¸ñÊ½");
+		}
+	}
+
+	/// <summary>
+	/// »Ö¸´ÎïÆ·Êı¾İÒıÓÃ
+	/// </summary>
+	private void RestoreItemDataReference(string assetPath)
+	{
+		if (string.IsNullOrEmpty(assetPath)) return;
+		
+		try
+		{
+#if UNITY_EDITOR
+			// ±à¼­Æ÷Ä£Ê½ÏÂÍ¨¹ıÂ·¾¶¼ÓÔØ
+			InventorySystemItemDataSO loadedData = UnityEditor.AssetDatabase.LoadAssetAtPath<InventorySystemItemDataSO>(assetPath);
+			if (loadedData != null)
+			{
+				SetItemData(loadedData);
+				Debug.Log($"³É¹¦»Ö¸´ÎïÆ·Êı¾İÒıÓÃ: {loadedData.itemName}");
+			}
+			else
+			{
+				Debug.LogWarning($"ÎŞ·¨´ÓÂ·¾¶¼ÓÔØÎïÆ·Êı¾İ: {assetPath}");
+			}
+#else
+			// ÔËĞĞÊ±Í¨¹ıÃû³ÆÔÚResourcesÖĞ²éÕÒ
+			InventorySystemItemDataSO[] allItems = Resources.LoadAll<InventorySystemItemDataSO>("");
+			foreach (var item in allItems)
+			{
+				if (item.name == assetPath || item.itemName == assetPath)
+				{
+					SetItemData(item);
+					Debug.Log($"³É¹¦»Ö¸´ÎïÆ·Êı¾İÒıÓÃ: {item.itemName}");
+					return;
+				}
+			}
+			Debug.LogWarning($"ÎŞ·¨ÔÚResourcesÖĞÕÒµ½ÎïÆ·Êı¾İ: {assetPath}");
+#endif
+		}
+		catch (System.Exception e)
+		{
+			Debug.LogError($"»Ö¸´ÎïÆ·Êı¾İÒıÓÃÊ§°Ü: {e.Message}");
+		}
+	}
+
+	/// <summary>
+	/// ÑéÖ¤±£´æÊı¾İ
+	/// </summary>
+	public bool ValidateData()
+	{
+		bool isValid = true;
+		
+		// ÑéÖ¤±£´æID
+		if (string.IsNullOrEmpty(saveID))
+		{
+			GenerateNewSaveID();
+			isValid = false;
+			Debug.LogWarning("ÎïÆ·Êı¾İ³ÖÓĞÕß±£´æIDÎª¿Õ£¬ÒÑÖØĞÂÉú³É");
+		}
+		
+		// ÑéÖ¤ÎïÆ·Êı¾İÒıÓÃ
+		if (itemData == null)
+		{
+			isValid = false;
+			Debug.LogWarning("ÎïÆ·Êı¾İÒıÓÃÎª¿Õ");
+		}
+		
+		// ÑéÖ¤ÊµÀıÊı¾İ
+		if (instanceData == null)
+		{
+			instanceData = new ItemInstanceData();
+			if (itemData != null)
+			{
+				instanceData.InitializeFromItemData(itemData);
+			}
+			isValid = false;
+			Debug.LogWarning("ÊµÀıÊı¾İÎª¿Õ£¬ÒÑÖØĞÂ³õÊ¼»¯");
+		}
+		else
+		{
+			// ÑéÖ¤ÊµÀıÊı¾İÓĞĞ§ĞÔ
+			if (!instanceData.ValidateData(itemData))
+			{
+				isValid = false;
+				Debug.LogWarning("ÊµÀıÊı¾İÑéÖ¤Ê§°Ü£¬ÒÑĞŞ¸´");
+			}
+		}
+		
+		return isValid;
+	}
+
+	/// <summary>
+	/// ³õÊ¼»¯±£´æÏµÍ³
+	/// </summary>
+	public void InitializeSaveSystem()
+	{
+		// È·±£ÓĞÓĞĞ§µÄ±£´æID
+		if (string.IsNullOrEmpty(saveID))
+		{
+			GenerateNewSaveID();
+		}
+		
+		// ÑéÖ¤Êı¾İÍêÕûĞÔ
+		ValidateData();
+		
+		// ³õÊ¼»¯ÊµÀıÊı¾İ
+		if (instanceData == null)
+		{
+			instanceData = new ItemInstanceData();
+			if (itemData != null)
+			{
+				instanceData.InitializeFromItemData(itemData);
+			}
+		}
+		
+		Debug.Log($"ÎïÆ·Êı¾İ³ÖÓĞÕß±£´æÏµÍ³³õÊ¼»¯Íê³É: {saveID}");
+	}
+
+	/// <summary>
+	/// »ñÈ¡ÎïÆ·Êı¾İ³ÖÓĞÕß×´Ì¬ÕªÒª
+	/// </summary>
+	public string GetItemDataHolderStatusSummary()
+	{
+		string itemInfo = itemData != null ? $"{itemData.itemName} (ID:{itemData.id})" : "ÎŞÎïÆ·Êı¾İ";
+		string instanceInfo = instanceData != null ? $"ÄÍ¾Ã¶È:{instanceData.currentDurability}, ¶Ñµş:{instanceData.currentStackCount}" : "ÎŞÊµÀıÊı¾İ";
+		string modifiedStatus = IsModified() ? "ÒÑĞŞ¸Ä" : "Î´ĞŞ¸Ä";
+		
+		return $"ÎïÆ·Êı¾İ³ÖÓĞÕß [{saveID}] - ÎïÆ·:{itemInfo}, ÊµÀı:{instanceInfo}, ×´Ì¬:{modifiedStatus}";
+	}
+
+	/// <summary>
+	/// ÔÚStartÖĞ×Ô¶¯³õÊ¼»¯±£´æÏµÍ³
+	/// </summary>
+	private void Start()
+	{
+		if (Application.isPlaying)
+		{
+			InitializeSaveSystem();
+		}
 	}
 }
