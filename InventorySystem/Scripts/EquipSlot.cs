@@ -3,40 +3,40 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 /// <summary>
-/// ¹ÒÔÚ×°±¸À¸µÄÃ¿¸ö¸ñ×ÓÉÏ£¬¸ºÔğ½ÓÊÕÍÏ×§¹ıÀ´µÄÎïÆ·
+/// æŒ‚åœ¨è£…å¤‡æ çš„æ¯ä¸ªæ ¼å­ä¸Šï¼Œè´Ÿè´£æ¥æ”¶æ‹–æ‹½è¿‡æ¥çš„ç‰©å“
 /// </summary>
 public class EquipSlot : MonoBehaviour, IDropHandler
 {
-    [Header("Õâ¸ö¸ñ×ÓÖ»ÄÜ×°Ê²Ã´ÀàĞÍ£¿")]
+    [Header("è¿™ä¸ªæ ¼å­åªèƒ½è£…ä»€ä¹ˆç±»å‹ï¼Ÿ")]
     [SerializeField] private InventorySystemItemCategory acceptedType;
 
-    [Header("×°±¸À¸ÊÊÅäÉèÖÃ")]
+    [Header("è£…å¤‡æ é€‚é…è®¾ç½®")]
     [SerializeField] private float padding = 10f;
     [SerializeField] private bool autoResize = true;
     
-    [Header("¸ßÁÁÉèÖÃ")]
-    [SerializeField] private GameObject highlightPrefab; // ¸ßÁÁÔ¤ÖÆÌå
-    [SerializeField] private Color canEquipColor = new Color(0, 1, 0, 0.5f); // ¿É×°±¸ÑÕÉ«£¨ÂÌÉ«°ëÍ¸Ã÷£©
-    [SerializeField] private Color cannotEquipColor = new Color(1, 0, 0, 0.5f); // ²»¿É×°±¸ÑÕÉ«£¨ºìÉ«°ëÍ¸Ã÷£©
+    [Header("é«˜äº®è®¾ç½®")]
+    [SerializeField] private GameObject highlightPrefab; // é«˜äº®é¢„åˆ¶ä½“
+    [SerializeField] private Color canEquipColor = new Color(0, 1, 0, 0.5f); // å¯è£…å¤‡é¢œè‰²ï¼ˆç»¿è‰²åŠé€æ˜ï¼‰
+    [SerializeField] private Color cannotEquipColor = new Color(1, 0, 0, 0.5f); // ä¸å¯è£…å¤‡é¢œè‰²ï¼ˆçº¢è‰²åŠé€æ˜ï¼‰
 
-    // Íø¸ñÈİÆ÷ÒıÓÃ
-    [Header("Íø¸ñÈİÆ÷ÉèÖÃ")]
-    [SerializeField] private Transform backpackContainer; // BackpackContainerÒıÓÃ
-    [SerializeField] private Transform tacticalRigContainer; // TacticalRigContainerÒıÓÃ
+    // ç½‘æ ¼å®¹å™¨å¼•ç”¨
+    [Header("ç½‘æ ¼å®¹å™¨è®¾ç½®")]
+    [SerializeField] private Transform backpackContainer; // BackpackContainerå¼•ç”¨
+    [SerializeField] private Transform tacticalRigContainer; // TacticalRigContainerå¼•ç”¨
 
-    // Ìí¼ÓÔ¤ÖÆÌåÒıÓÃ
-    [Header("Íø¸ñÔ¤ÖÆÌåÒıÓÃ")]
-    [SerializeField] private GameObject backpackGridPrefab; // BackpackItemGridÔ¤ÖÆÌå
-    [SerializeField] private GameObject tacticalRigGridPrefab; // TacticalRigItemGridÔ¤ÖÆÌå
+    // æ·»åŠ é¢„åˆ¶ä½“å¼•ç”¨
+    [Header("ç½‘æ ¼é¢„åˆ¶ä½“å¼•ç”¨")]
+    [SerializeField] private GameObject backpackGridPrefab; // BackpackItemGridé¢„åˆ¶ä½“
+    [SerializeField] private GameObject tacticalRigGridPrefab; // TacticalRigItemGridé¢„åˆ¶ä½“
     
     private DraggableItem equippedItem;
-    private GameObject currentBackpackGrid; // µ±Ç°ÊµÀı»¯µÄ±³°üÍø¸ñ
-    private GameObject currentTacticalRigGrid; // µ±Ç°ÊµÀı»¯µÄÕ½Êõ¹Ò¾ßÍø¸ñ
+    private GameObject currentBackpackGrid; // å½“å‰å®ä¾‹åŒ–çš„èƒŒåŒ…ç½‘æ ¼
+    private GameObject currentTacticalRigGrid; // å½“å‰å®ä¾‹åŒ–çš„æˆ˜æœ¯æŒ‚å…·ç½‘æ ¼
     
-    // ¸ßÁÁÏà¹Ø
-    private GameObject currentHighlight; // µ±Ç°¸ßÁÁ¶ÔÏó
-    private Image highlightImage; // ¸ßÁÁÍ¼Ïñ×é¼ş
-    private RectTransform highlightRect; // ¸ßÁÁ¾ØĞÎ±ä»»
+    // é«˜äº®ç›¸å…³
+    private GameObject currentHighlight; // å½“å‰é«˜äº®å¯¹è±¡
+    private Image highlightImage; // é«˜äº®å›¾åƒç»„ä»¶
+    private RectTransform highlightRect; // é«˜äº®çŸ©å½¢å˜æ¢
 
     public void OnDrop(PointerEventData eventData)
     {
@@ -49,10 +49,10 @@ public class EquipSlot : MonoBehaviour, IDropHandler
         var item = draggable.GetComponent<InventorySystemItem>();
         if (item == null || item.Data.itemCategory != acceptedType) return;
 
-        // Èç¹û¸ñ×ÓÒÑÓĞÎïÆ·£¬½»»»
+        // å¦‚æœæ ¼å­å·²æœ‰ç‰©å“ï¼Œäº¤æ¢
         if (equippedItem != null)
         {
-            // ÒÆ³ı¾É×°±¸Ê±Çå¿Õ¶ÔÓ¦Íø¸ñ
+            // ç§»é™¤æ—§è£…å¤‡æ—¶æ¸…ç©ºå¯¹åº”ç½‘æ ¼
             RemoveEquippedItemGrid(equippedItem);
             
             RestoreOriginalSize(equippedItem);
@@ -61,7 +61,7 @@ public class EquipSlot : MonoBehaviour, IDropHandler
             equippedItem.GetComponent<CanvasGroup>().blocksRaycasts = true;
         }
 
-        // °ÑĞÂÎïÆ··Å½ø¸ñ×Ó
+        // æŠŠæ–°ç‰©å“æ”¾è¿›æ ¼å­
         draggable.transform.SetParent(transform, false);
         
         if (autoResize)
@@ -76,96 +76,96 @@ public class EquipSlot : MonoBehaviour, IDropHandler
         draggable.GetComponent<CanvasGroup>().blocksRaycasts = true;
         equippedItem = draggable;
         
-        // ×°±¸ĞÂÎïÆ·Ê±ÉèÖÃ¶ÔÓ¦Íø¸ñ
+        // è£…å¤‡æ–°ç‰©å“æ—¶è®¾ç½®å¯¹åº”ç½‘æ ¼
         SetEquippedItemGrid(item);
     }
     
-    // ÉèÖÃ×°±¸ÎïÆ·µÄÍø¸ñ
+    // è®¾ç½®è£…å¤‡ç‰©å“çš„ç½‘æ ¼
     private void SetEquippedItemGrid(InventorySystemItem item)
     {
         if (item.Data.itemCategory == InventorySystemItemCategory.Backpack && backpackContainer != null)
         {
-            // ÏÈÇåÀíÏÖÓĞµÄÍø¸ñ
+            // å…ˆæ¸…ç†ç°æœ‰çš„ç½‘æ ¼
             if (currentBackpackGrid != null)
             {
                 DestroyImmediate(currentBackpackGrid);
             }
             
-            // ÊµÀı»¯ĞÂµÄ±³°üÍø¸ñ
+            // å®ä¾‹åŒ–æ–°çš„èƒŒåŒ…ç½‘æ ¼
             if (backpackGridPrefab != null)
             {
                 currentBackpackGrid = Instantiate(backpackGridPrefab, backpackContainer);
                 
-                // ÉèÖÃÍø¸ñÎ»ÖÃºÍÃªµã
+                // è®¾ç½®ç½‘æ ¼ä½ç½®å’Œé”šç‚¹
                 RectTransform gridRect = currentBackpackGrid.GetComponent<RectTransform>();
                 if (gridRect != null)
                 {
-                    gridRect.anchorMin = new Vector2(0, 1); // ×óÉÏ½ÇÃªµã
+                    gridRect.anchorMin = new Vector2(0, 1); // å·¦ä¸Šè§’é”šç‚¹
                     gridRect.anchorMax = new Vector2(0, 1);
                     gridRect.pivot = new Vector2(0, 1);
-                    gridRect.anchoredPosition = Vector2.zero; // ¶¨Î»ÔÚÈİÆ÷×óÉÏ½Ç
+                    gridRect.anchoredPosition = Vector2.zero; // å®šä½åœ¨å®¹å™¨å·¦ä¸Šè§’
                 }
                 
-                // »ñÈ¡BackpackItemGrid×é¼ş²¢ÉèÖÃÊı¾İ
+                // è·å–BackpackItemGridç»„ä»¶å¹¶è®¾ç½®æ•°æ®
                 BackpackItemGrid backpackGrid = currentBackpackGrid.GetComponent<BackpackItemGrid>();
                 if (backpackGrid != null)
                 {
                     backpackGrid.SetBackpackData(item.Data);
-                    Debug.Log($"±³°ü {item.Data.itemName} ÒÑ×°±¸£¬Íø¸ñÒÑÊµÀı»¯£¬³ß´ç: {item.Data.CellH}x{item.Data.CellV}");
+                    Debug.Log($"èƒŒåŒ… {item.Data.itemName} å·²è£…å¤‡ï¼Œç½‘æ ¼å·²å®ä¾‹åŒ–ï¼Œå°ºå¯¸: {item.Data.CellH}x{item.Data.CellV}");
                 }
                 else
                 {
-                    Debug.LogError("BackpackItemGridÔ¤ÖÆÌåÈ±ÉÙBackpackItemGrid×é¼ş£¡");
+                    Debug.LogError("BackpackItemGridé¢„åˆ¶ä½“ç¼ºå°‘BackpackItemGridç»„ä»¶ï¼");
                 }
             }
             else
             {
-                Debug.LogError("BackpackItemGridÔ¤ÖÆÌåÒıÓÃÎª¿Õ£¡ÇëÔÚEquipSlotÖĞÉèÖÃbackpackGridPrefab");
+                Debug.LogError("BackpackItemGridé¢„åˆ¶ä½“å¼•ç”¨ä¸ºç©ºï¼è¯·åœ¨EquipSlotä¸­è®¾ç½®backpackGridPrefab");
             }
         }
         else if (item.Data.itemCategory == InventorySystemItemCategory.TacticalRig && tacticalRigContainer != null)
         {
-            // ÏÈÇåÀíÏÖÓĞµÄÍø¸ñ
+            // å…ˆæ¸…ç†ç°æœ‰çš„ç½‘æ ¼
             if (currentTacticalRigGrid != null)
             {
                 DestroyImmediate(currentTacticalRigGrid);
             }
             
-            // ÊµÀı»¯ĞÂµÄÕ½Êõ¹Ò¾ßÍø¸ñ
+            // å®ä¾‹åŒ–æ–°çš„æˆ˜æœ¯æŒ‚å…·ç½‘æ ¼
             if (tacticalRigGridPrefab != null)
             {
                 currentTacticalRigGrid = Instantiate(tacticalRigGridPrefab, tacticalRigContainer);
                 
-                // ÉèÖÃÍø¸ñÎ»ÖÃºÍÃªµã
+                // è®¾ç½®ç½‘æ ¼ä½ç½®å’Œé”šç‚¹
                 RectTransform gridRect = currentTacticalRigGrid.GetComponent<RectTransform>();
                 if (gridRect != null)
                 {
-                    gridRect.anchorMin = new Vector2(0, 1); // ×óÉÏ½ÇÃªµã
+                    gridRect.anchorMin = new Vector2(0, 1); // å·¦ä¸Šè§’é”šç‚¹
                     gridRect.anchorMax = new Vector2(0, 1);
                     gridRect.pivot = new Vector2(0, 1);
-                    gridRect.anchoredPosition = Vector2.zero; // ¶¨Î»ÔÚÈİÆ÷×óÉÏ½Ç
+                    gridRect.anchoredPosition = Vector2.zero; // å®šä½åœ¨å®¹å™¨å·¦ä¸Šè§’
                 }
                 
-                // »ñÈ¡TactiaclRigItemGrid×é¼ş²¢ÉèÖÃÊı¾İ
+                // è·å–TactiaclRigItemGridç»„ä»¶å¹¶è®¾ç½®æ•°æ®
                 TactiaclRigItemGrid tacticalRigGrid = currentTacticalRigGrid.GetComponent<TactiaclRigItemGrid>();
                 if (tacticalRigGrid != null)
                 {
                     tacticalRigGrid.SetTacticalRigData(item.Data);
-                    Debug.Log($"Õ½Êõ¹Ò¾ß {item.Data.itemName} ÒÑ×°±¸£¬Íø¸ñÒÑÊµÀı»¯£¬³ß´ç: {item.Data.CellH}x{item.Data.CellV}");
+                    Debug.Log($"æˆ˜æœ¯æŒ‚å…· {item.Data.itemName} å·²è£…å¤‡ï¼Œç½‘æ ¼å·²å®ä¾‹åŒ–ï¼Œå°ºå¯¸: {item.Data.CellH}x{item.Data.CellV}");
                 }
                 else
                 {
-                    Debug.LogError("TacticalRigItemGridÔ¤ÖÆÌåÈ±ÉÙTactiaclRigItemGrid×é¼ş£¡");
+                    Debug.LogError("TacticalRigItemGridé¢„åˆ¶ä½“ç¼ºå°‘TactiaclRigItemGridç»„ä»¶ï¼");
                 }
             }
             else
             {
-                Debug.LogError("TacticalRigItemGridÔ¤ÖÆÌåÒıÓÃÎª¿Õ£¡ÇëÔÚEquipSlotÖĞÉèÖÃtacticalRigGridPrefab");
+                Debug.LogError("TacticalRigItemGridé¢„åˆ¶ä½“å¼•ç”¨ä¸ºç©ºï¼è¯·åœ¨EquipSlotä¸­è®¾ç½®tacticalRigGridPrefab");
             }
         }
     }
     
-    // ÒÆ³ı×°±¸ÎïÆ·µÄÍø¸ñ
+    // ç§»é™¤è£…å¤‡ç‰©å“çš„ç½‘æ ¼
     private void RemoveEquippedItemGrid(DraggableItem item)
     {
         var itemComponent = item.GetComponent<InventorySystemItem>();
@@ -177,7 +177,7 @@ public class EquipSlot : MonoBehaviour, IDropHandler
             {
                 DestroyImmediate(currentBackpackGrid);
                 currentBackpackGrid = null;
-                Debug.Log("±³°üÒÑĞ¶ÏÂ£¬Íø¸ñÒÑÏú»Ù");
+                Debug.Log("èƒŒåŒ…å·²å¸ä¸‹ï¼Œç½‘æ ¼å·²é”€æ¯");
             }
         }
         else if (itemComponent.Data.itemCategory == InventorySystemItemCategory.TacticalRig)
@@ -186,7 +186,7 @@ public class EquipSlot : MonoBehaviour, IDropHandler
             {
                 DestroyImmediate(currentTacticalRigGrid);
                 currentTacticalRigGrid = null;
-                Debug.Log("Õ½Êõ¹Ò¾ßÒÑĞ¶ÏÂ£¬Íø¸ñÒÑÏú»Ù");
+                Debug.Log("æˆ˜æœ¯æŒ‚å…·å·²å¸ä¸‹ï¼Œç½‘æ ¼å·²é”€æ¯");
             }
         }
     }
@@ -200,7 +200,7 @@ public class EquipSlot : MonoBehaviour, IDropHandler
         equippedItem = null;
     }
 
-    /// ÈÃÎïÆ·ÊÊÅä×°±¸À¸´óĞ¡£¬±£³Ö¼ä¾à
+    /// è®©ç‰©å“é€‚é…è£…å¤‡æ å¤§å°ï¼Œä¿æŒé—´è·
     private void FitToEquipSlot(DraggableItem draggable)
     {
         RectTransform slotRect = GetComponent<RectTransform>();
@@ -208,7 +208,7 @@ public class EquipSlot : MonoBehaviour, IDropHandler
 
         if (slotRect == null || itemRect == null) return;
 
-        // ´æ´¢Ô­Ê¼´óĞ¡ºÍËõ·Å£¬ÓÃÓÚ»Ö¸´
+        // å­˜å‚¨åŸå§‹å¤§å°å’Œç¼©æ”¾ï¼Œç”¨äºæ¢å¤
         ItemSizeData sizeData = draggable.GetComponent<ItemSizeData>();
         if (sizeData == null)
         {
@@ -217,25 +217,25 @@ public class EquipSlot : MonoBehaviour, IDropHandler
         sizeData.originalSize = itemRect.sizeDelta;
         sizeData.originalScale = itemRect.localScale;
 
-        // ¼ÆËã×°±¸À¸¿ÉÓÃ¿Õ¼ä£¨¼õÈ¥¼ä¾à£©
+        // è®¡ç®—è£…å¤‡æ å¯ç”¨ç©ºé—´ï¼ˆå‡å»é—´è·ï¼‰
         Vector2 availableSize = slotRect.sizeDelta - new Vector2(padding * 2, padding * 2);
 
-        // »ñÈ¡ÎïÆ·Ô­Ê¼´óĞ¡
+        // è·å–ç‰©å“åŸå§‹å¤§å°
         Vector2 originalSize = sizeData.originalSize;
 
-        // ¼ÆËãËõ·Å±ÈÀı£¬±£³Ö¿í¸ß±È
+        // è®¡ç®—ç¼©æ”¾æ¯”ä¾‹ï¼Œä¿æŒå®½é«˜æ¯”
         float scaleX = availableSize.x / originalSize.x;
         float scaleY = availableSize.y / originalSize.y;
-        float scale = Mathf.Min(scaleX, scaleY, 1f); // ²»·Å´ó£¬Ö»ËõĞ¡
+        float scale = Mathf.Min(scaleX, scaleY, 1f); // ä¸æ”¾å¤§ï¼Œåªç¼©å°
 
-        // Ê¹ÓÃlocalScale½øĞĞËõ·Å£¬ÕâÑù»áÓ°ÏìËùÓĞ×Ó¶ÔÏó
+        // ä½¿ç”¨localScaleè¿›è¡Œç¼©æ”¾ï¼Œè¿™æ ·ä¼šå½±å“æ‰€æœ‰å­å¯¹è±¡
         itemRect.localScale = Vector3.one * scale;
 
-        // ¾ÓÖĞ¶¨Î»
+        // å±…ä¸­å®šä½
         itemRect.anchoredPosition = Vector2.zero;
     }
 
-    /// »Ö¸´ÎïÆ·Ô­Ê¼´óĞ¡
+    /// æ¢å¤ç‰©å“åŸå§‹å¤§å°
     private void RestoreOriginalSize(DraggableItem draggable)
     {
         if (draggable == null) return;
@@ -250,7 +250,7 @@ public class EquipSlot : MonoBehaviour, IDropHandler
         }
     }
 
-    // »ñÈ¡µ±Ç°×°±¸µÄÎïÆ·
+    // è·å–å½“å‰è£…å¤‡çš„ç‰©å“
     public DraggableItem GetEquippedItem()
     {
         return equippedItem;
@@ -269,31 +269,31 @@ public class EquipSlot : MonoBehaviour, IDropHandler
     }
     
     /// <summary>
-    /// ÏÔÊ¾×°±¸À¸¸ßÁÁÌáÊ¾
+    /// æ˜¾ç¤ºè£…å¤‡æ é«˜äº®æç¤º
     /// </summary>
-    /// <param name="canEquip">ÊÇ·ñ¿ÉÒÔ×°±¸</param>
+    /// <param name="canEquip">æ˜¯å¦å¯ä»¥è£…å¤‡</param>
     public void ShowEquipHighlight(bool canEquip)
     {
-        // Èç¹ûÃ»ÓĞ¸ßÁÁÔ¤ÖÆÌå£¬´´½¨Ä¬ÈÏ¸ßÁÁ
+        // å¦‚æœæ²¡æœ‰é«˜äº®é¢„åˆ¶ä½“ï¼Œåˆ›å»ºé»˜è®¤é«˜äº®
         if (highlightPrefab == null)
         {
             CreateDefaultHighlight();
         }
         
-        // Èç¹û»¹Ã»ÓĞ¸ßÁÁ¶ÔÏó£¬´´½¨Ò»¸ö
+        // å¦‚æœè¿˜æ²¡æœ‰é«˜äº®å¯¹è±¡ï¼Œåˆ›å»ºä¸€ä¸ª
         if (currentHighlight == null)
         {
             currentHighlight = Instantiate(highlightPrefab, transform);
             highlightRect = currentHighlight.GetComponent<RectTransform>();
             highlightImage = currentHighlight.GetComponent<Image>();
             
-            // È·±£¸ßÁÁ²»×èµ²ÉäÏß¼ì²â
+            // ç¡®ä¿é«˜äº®ä¸é˜»æŒ¡å°„çº¿æ£€æµ‹
             if (highlightImage != null)
             {
                 highlightImage.raycastTarget = false;
             }
             
-            // ÉèÖÃ¸ßÁÁ¸²¸ÇÕû¸ö×°±¸À¸
+            // è®¾ç½®é«˜äº®è¦†ç›–æ•´ä¸ªè£…å¤‡æ 
             if (highlightRect != null)
             {
                 highlightRect.anchorMin = Vector2.zero;
@@ -303,18 +303,18 @@ public class EquipSlot : MonoBehaviour, IDropHandler
             }
         }
         
-        // ÉèÖÃ¸ßÁÁÑÕÉ«
+        // è®¾ç½®é«˜äº®é¢œè‰²
         if (highlightImage != null)
         {
             highlightImage.color = canEquip ? canEquipColor : cannotEquipColor;
         }
         
-        // ÏÔÊ¾¸ßÁÁ
+        // æ˜¾ç¤ºé«˜äº®
         currentHighlight.SetActive(true);
     }
     
     /// <summary>
-    /// Òş²Ø×°±¸À¸¸ßÁÁÌáÊ¾
+    /// éšè—è£…å¤‡æ é«˜äº®æç¤º
     /// </summary>
     public void HideEquipHighlight()
     {
@@ -325,27 +325,27 @@ public class EquipSlot : MonoBehaviour, IDropHandler
     }
     
     /// <summary>
-    /// ´´½¨Ä¬ÈÏ¸ßÁÁÔ¤ÖÆÌå
+    /// åˆ›å»ºé»˜è®¤é«˜äº®é¢„åˆ¶ä½“
     /// </summary>
     private void CreateDefaultHighlight()
     {
-        // ´´½¨¸ßÁÁÓÎÏ·¶ÔÏó
+        // åˆ›å»ºé«˜äº®æ¸¸æˆå¯¹è±¡
         highlightPrefab = new GameObject("EquipSlotHighlight");
         
-        // Ìí¼ÓRectTransform×é¼ş
+        // æ·»åŠ RectTransformç»„ä»¶
         RectTransform rect = highlightPrefab.AddComponent<RectTransform>();
         
-        // Ìí¼ÓImage×é¼ş
+        // æ·»åŠ Imageç»„ä»¶
         Image img = highlightPrefab.AddComponent<Image>();
         img.color = canEquipColor;
-        img.raycastTarget = false; // ²»×èµ²ÉäÏß¼ì²â
+        img.raycastTarget = false; // ä¸é˜»æŒ¡å°„çº¿æ£€æµ‹
         
-        // ÉèÖÃÎª²»¼¤»î×´Ì¬
+        // è®¾ç½®ä¸ºä¸æ¿€æ´»çŠ¶æ€
         highlightPrefab.SetActive(false);
     }
     
     /// <summary>
-    /// ÇåÀí¸ßÁÁ×ÊÔ´
+    /// æ¸…ç†é«˜äº®èµ„æº
     /// </summary>
     private void OnDestroy()
     {
@@ -356,7 +356,7 @@ public class EquipSlot : MonoBehaviour, IDropHandler
     }
 }
 
-/// ÓÃÓÚ´æ´¢ÎïÆ·Ô­Ê¼´óĞ¡Êı¾İµÄ×é¼ş
+/// ç”¨äºå­˜å‚¨ç‰©å“åŸå§‹å¤§å°æ•°æ®çš„ç»„ä»¶
 public class ItemSizeData : MonoBehaviour
 {
     [HideInInspector] public Vector2 originalSize;
