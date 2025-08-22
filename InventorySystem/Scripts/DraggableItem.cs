@@ -216,11 +216,11 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
             out localPointerPosition);
 
         rectTransform.anchoredPosition = localPointerPosition;
-        
+
         // 检测装备栏并显示高亮提示
         CheckEquipSlotHighlight(eventData);
     }
-    
+
     /// <summary>
     /// 检测装备栏并显示高亮提示
     /// </summary>
@@ -230,9 +230,9 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         // 进行射线检测
         var results = new System.Collections.Generic.List<RaycastResult>();
         EventSystem.current.RaycastAll(eventData, results);
-        
+
         EquipSlot targetEquipSlot = null;
-        
+
         // 查找装备栏
         foreach (var result in results)
         {
@@ -243,7 +243,7 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
                 break;
             }
         }
-        
+
         // 如果找到装备栏，显示高亮提示
         if (targetEquipSlot != null)
         {
@@ -260,7 +260,7 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
             HideAllEquipSlotHighlights();
         }
     }
-    
+
     /// <summary>
     /// 隐藏所有装备栏高亮
     /// </summary>
@@ -556,7 +556,7 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         }
 
         isDragging = false; // 清除拖拽状态
-        
+
         // 在拖拽结束时更新状态
         UpdateStateOnDragEnd();
     }
@@ -824,7 +824,7 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     }
 
     // ==================== 拖拽状态保存扩展接口 ====================
-    
+
     [System.Serializable]
     public class DraggableItemSaveData
     {
@@ -844,22 +844,22 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         public string lastModified;
         public int saveVersion;
     }
-    
+
     [Header("拖拽状态保存设置")]
     [SerializeField] private string draggableItemID = "";
     [SerializeField] private bool autoGenerateID = true;
     [SerializeField] private int saveVersion = 1;
-    
+
     // 拖拽状态保存事件
     public System.Action<string> OnDragStateSaved;
     public System.Action<string> OnDragStateLoaded;
     public System.Action<string, string> OnDragStateError;
-    
+
     // 网格关联信息
     private string currentGridID = "";
     private string originalGridID = "";
     private Dictionary<string, Vector2Int> gridPositionHistory = new Dictionary<string, Vector2Int>();
-    
+
     /// <summary>
     /// 获取拖拽物品ID
     /// </summary>
@@ -871,7 +871,7 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         }
         return draggableItemID;
     }
-    
+
     /// <summary>
     /// 设置拖拽物品ID
     /// </summary>
@@ -882,7 +882,7 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
             draggableItemID = id;
         }
     }
-    
+
     /// <summary>
     /// 生成新的拖拽物品ID
     /// </summary>
@@ -890,7 +890,7 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     {
         draggableItemID = "DraggableItem_" + System.Guid.NewGuid().ToString("N")[..8];
     }
-    
+
     /// <summary>
     /// 验证拖拽物品ID是否有效
     /// </summary>
@@ -898,7 +898,7 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     {
         return !string.IsNullOrEmpty(draggableItemID) && draggableItemID.Length >= 8;
     }
-    
+
     /// <summary>
     /// 保存拖拽状态
     /// </summary>
@@ -924,7 +924,7 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
                 lastModified = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
                 saveVersion = saveVersion
             };
-            
+
             string jsonData = JsonUtility.ToJson(saveData, true);
             if (!string.IsNullOrEmpty(jsonData))
             {
@@ -932,7 +932,7 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
                 Debug.Log($"[DraggableItem] 拖拽状态保存成功：{GetDraggableItemID()}");
                 return true;
             }
-            
+
             return false;
         }
         catch (System.Exception ex)
@@ -942,7 +942,7 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
             return false;
         }
     }
-    
+
     /// <summary>
     /// 加载拖拽状态
     /// </summary>
@@ -955,20 +955,20 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
                 Debug.LogError("[DraggableItem] 加载数据为空");
                 return false;
             }
-            
+
             var saveData = JsonUtility.FromJson<DraggableItemSaveData>(jsonData);
             if (saveData == null)
             {
                 Debug.LogError("[DraggableItem] 反序列化拖拽状态数据失败");
                 return false;
             }
-            
+
             // 验证数据版本
             if (saveData.saveVersion > saveVersion)
             {
                 Debug.LogWarning($"[DraggableItem] 保存数据版本 ({saveData.saveVersion}) 高于当前版本 ({saveVersion})，可能存在兼容性问题");
             }
-            
+
             // 恢复拖拽状态
             draggableItemID = saveData.itemID;
             isDragging = saveData.isDragging;
@@ -980,7 +980,7 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
             originalAnchorMin = saveData.originalAnchorMin;
             originalAnchorMax = saveData.originalAnchorMax;
             originalPivot = saveData.originalPivot;
-            
+
             // 恢复位置
             if (rectTransform != null)
             {
@@ -991,10 +991,10 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
                 rectTransform.anchorMax = originalAnchorMax;
                 rectTransform.pivot = originalPivot;
             }
-            
+
             // 恢复父级关系
             RestoreParentRelationship(saveData.originalParentID, saveData.currentParentID);
-            
+
             OnDragStateLoaded?.Invoke(GetDraggableItemID());
             Debug.Log($"[DraggableItem] 拖拽状态加载成功：{GetDraggableItemID()}");
             return true;
@@ -1006,7 +1006,7 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
             return false;
         }
     }
-    
+
     /// <summary>
     /// 恢复父级关系
     /// </summary>
@@ -1023,7 +1023,7 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
                     originalParent = foundOriginalParent;
                 }
             }
-            
+
             // 根据ID查找并设置当前父级
             if (!string.IsNullOrEmpty(currentParentID))
             {
@@ -1039,7 +1039,7 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
             Debug.LogError($"[DraggableItem] 恢复父级关系时发生错误：{ex.Message}");
         }
     }
-    
+
     /// <summary>
     /// 根据ID查找Transform
     /// </summary>
@@ -1047,7 +1047,7 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     {
         if (string.IsNullOrEmpty(transformID))
             return null;
-            
+
         // 这里可以实现更复杂的ID查找逻辑
         // 目前简单地通过名称查找
         GameObject[] allObjects = FindObjectsOfType<GameObject>();
@@ -1058,10 +1058,10 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
                 return obj.transform;
             }
         }
-        
+
         return null;
     }
-    
+
     /// <summary>
     /// 获取Transform的ID
     /// </summary>
@@ -1069,7 +1069,7 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     {
         if (target == null)
             return "";
-            
+
         // 尝试获取组件的ID
         var gridComponent = target.GetComponent<BaseItemGrid>();
         if (gridComponent != null)
@@ -1081,11 +1081,11 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
                 return saveableGrid.GetSaveID();
             }
         }
-        
+
         // 否则使用GameObject名称和实例ID组合
         return $"{target.name}_{target.GetInstanceID()}";
     }
-    
+
     /// <summary>
     /// 更新网格关联信息
     /// </summary>
@@ -1097,7 +1097,7 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
             {
                 currentGridID = gridID;
                 gridPosition = position;
-                
+
                 // 记录位置历史
                 if (gridPositionHistory.ContainsKey(gridID))
                 {
@@ -1107,7 +1107,7 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
                 {
                     gridPositionHistory.Add(gridID, position);
                 }
-                
+
                 Debug.Log($"[DraggableItem] 更新网格关联：{gridID} 位置：{position}");
             }
         }
@@ -1116,7 +1116,7 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
             Debug.LogError($"[DraggableItem] 更新网格关联时发生错误：{ex.Message}");
         }
     }
-    
+
     /// <summary>
     /// 获取当前网格ID
     /// </summary>
@@ -1124,7 +1124,7 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     {
         return currentGridID;
     }
-    
+
     /// <summary>
     /// 获取原始网格ID
     /// </summary>
@@ -1132,7 +1132,7 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     {
         return originalGridID;
     }
-    
+
     /// <summary>
     /// 设置原始网格ID
     /// </summary>
@@ -1140,7 +1140,7 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     {
         originalGridID = gridID;
     }
-    
+
     /// <summary>
     /// 获取在指定网格中的历史位置
     /// </summary>
@@ -1148,7 +1148,7 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     {
         return gridPositionHistory.TryGetValue(gridID, out Vector2Int position) ? position : Vector2Int.zero;
     }
-    
+
     /// <summary>
     /// 清除网格位置历史
     /// </summary>
@@ -1157,7 +1157,7 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         gridPositionHistory.Clear();
         Debug.Log("[DraggableItem] 已清除网格位置历史");
     }
-    
+
     /// <summary>
     /// 恢复到原始位置
     /// </summary>
@@ -1169,7 +1169,7 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
             {
                 // 恢复父级
                 transform.SetParent(originalParent, false);
-                
+
                 // 恢复位置和属性
                 rectTransform.anchoredPosition = originalPos;
                 rectTransform.sizeDelta = originalSize;
@@ -1177,20 +1177,20 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
                 rectTransform.anchorMin = originalAnchorMin;
                 rectTransform.anchorMax = originalAnchorMax;
                 rectTransform.pivot = originalPivot;
-                
+
                 // 重置拖拽状态
                 isDragging = false;
-                
+
                 // 恢复网格关联
                 if (!string.IsNullOrEmpty(originalGridID))
                 {
                     currentGridID = originalGridID;
                 }
-                
+
                 Debug.Log($"[DraggableItem] 成功恢复到原始位置：{originalPos}");
                 return true;
             }
-            
+
             Debug.LogWarning("[DraggableItem] 无法恢复到原始位置：缺少必要的引用");
             return false;
         }
@@ -1200,7 +1200,7 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
             return false;
         }
     }
-    
+
     /// <summary>
     /// 验证拖拽状态数据
     /// </summary>
@@ -1214,26 +1214,26 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
                 Debug.LogError("[DraggableItem] RectTransform组件缺失");
                 return false;
             }
-            
+
             if (canvasGroup == null)
             {
                 Debug.LogError("[DraggableItem] CanvasGroup组件缺失");
                 return false;
             }
-            
+
             if (item == null)
             {
                 Debug.LogError("[DraggableItem] InventorySystemItem组件缺失");
                 return false;
             }
-            
+
             // 验证ID
             if (!IsDraggableItemIDValid())
             {
                 Debug.LogError("[DraggableItem] 拖拽物品ID无效");
                 return false;
             }
-            
+
             Debug.Log("[DraggableItem] 拖拽状态数据验证通过");
             return true;
         }
@@ -1243,7 +1243,7 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
             return false;
         }
     }
-    
+
     /// <summary>
     /// 获取拖拽状态摘要
     /// </summary>
@@ -1251,7 +1251,7 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     {
         return $"ID: {GetDraggableItemID()}, 拖拽中: {isDragging}, 当前网格: {currentGridID}, 位置: {gridPosition}";
     }
-    
+
     /// <summary>
     /// 在拖拽开始时保存状态
     /// </summary>
@@ -1266,11 +1266,11 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
                 originalGridID = GetTransformID(parentGrid);
             }
         }
-        
+
         // 自动保存拖拽状态
         SaveDragState();
     }
-    
+
     /// <summary>
     /// 在拖拽结束时更新状态
     /// </summary>
@@ -1283,11 +1283,11 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
             string newGridID = GetTransformID(currentGrid);
             UpdateGridAssociation(newGridID, gridPosition);
         }
-        
+
         // 自动保存拖拽状态
         SaveDragState();
     }
-    
+
     /// <summary>
     /// 初始化拖拽状态保存系统
     /// </summary>
@@ -1298,13 +1298,13 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         {
             GenerateNewDraggableItemID();
         }
-        
+
         // 初始化网格位置历史字典
         if (gridPositionHistory == null)
         {
             gridPositionHistory = new Dictionary<string, Vector2Int>();
         }
-        
+
         Debug.Log($"[DraggableItem] 拖拽状态保存系统初始化完成，ID：{GetDraggableItemID()}");
     }
 }

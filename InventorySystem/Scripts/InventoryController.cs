@@ -1,9 +1,11 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using InventorySystem.SaveSystem;
 
-public class InventoryController : MonoBehaviour
+public class InventoryController : MonoBehaviour, ISaveable
 {
     [Header("库存控制器设置")]
     public ItemGrid selectedItemGrid; // 当前选中的主网格
@@ -16,6 +18,16 @@ public class InventoryController : MonoBehaviour
     [Header("预览设置")]
     [SerializeField] private bool enablePreview = true; // 是否启用预览功能
     [SerializeField] private Vector2Int previewItemSize = new Vector2Int(2, 1); // 预览物品大小（用于测试）
+
+    [Header("保存协调器设置")]
+    [SerializeField] private bool enableSaveCoordination = true; // 是否启用保存协调功能
+    [SerializeField] private bool validateSaveOrder = true; // 是否验证保存顺序
+    [SerializeField] private bool logSaveProgress = true; // 是否记录保存进度
+    [SerializeField] private float saveTimeout = 30f; // 保存超时时间（秒）
+
+    // 保存依赖管理器引用
+    private SaveDependencyManager dependencyManager;
+    private ContainerUIStateManager containerUIManager;
 
     // 高亮组件
     private InventoryHighlight inventoryHighlight;
@@ -39,6 +51,9 @@ public class InventoryController : MonoBehaviour
     {
         // 初始化保存系统
         InitializeSaveSystem();
+
+        // 初始化保存协调器
+        InitializeSaveCoordinator();
     }
 
     private void Start()
@@ -56,6 +71,9 @@ public class InventoryController : MonoBehaviour
         {
             hoverHighlight = gameObject.AddComponent<HoverHighlight>();
         }
+
+        // 注册到保存系统
+        RegisterToSaveSystem();
     }
 
     private void Update()
@@ -496,7 +514,7 @@ public class InventoryController : MonoBehaviour
     }
 
     // ==================== 保存系统扩展接口 ====================
-    
+
     [System.Serializable]
     public class InventoryControllerSaveData
     {
@@ -507,23 +525,25 @@ public class InventoryController : MonoBehaviour
         public Vector2Int previewItemSize;
         public string lastModified;
         public int saveVersion;
+        public List<string> registeredGridIds;
+        public List<string> registeredItemIds;
     }
-    
+
     [Header("保存系统设置")]
     [SerializeField] private string controllerID = "";
     [SerializeField] private bool autoGenerateID = true;
     [SerializeField] private int saveVersion = 1;
-    
+
     // 注册的网格字典
     private Dictionary<string, ISaveable> registeredGrids = new Dictionary<string, ISaveable>();
     private Dictionary<string, ISaveable> registeredItems = new Dictionary<string, ISaveable>();
-    
+
     // 保存系统事件
     public System.Action<string> OnSaveCompleted;
     public System.Action<string> OnLoadCompleted;
     public System.Action<string, string> OnSaveError;
     public System.Action<string, string> OnLoadError;
-    
+
     /// <summary>
     /// 获取控制器ID
     /// </summary>
@@ -535,7 +555,7 @@ public class InventoryController : MonoBehaviour
         }
         return controllerID;
     }
-    
+
     /// <summary>
     /// 设置控制器ID
     /// </summary>
@@ -546,7 +566,7 @@ public class InventoryController : MonoBehaviour
             controllerID = id;
         }
     }
-    
+
     /// <summary>
     /// 生成新的控制器ID
     /// </summary>
@@ -554,7 +574,7 @@ public class InventoryController : MonoBehaviour
     {
         controllerID = "InventoryController_" + System.Guid.NewGuid().ToString("N")[..8];
     }
-    
+
     /// <summary>
     /// 验证控制器ID是否有效
     /// </summary>
@@ -562,7 +582,7 @@ public class InventoryController : MonoBehaviour
     {
         return !string.IsNullOrEmpty(controllerID) && controllerID.Length >= 8;
     }
-    
+
     /// <summary>
     /// 注册网格到保存系统
     /// </summary>
@@ -575,12 +595,12 @@ public class InventoryController : MonoBehaviour
                 Debug.LogError("[InventoryController] 注册网格失败：ID或网格对象为空");
                 return false;
             }
-            
+
             if (registeredGrids.ContainsKey(gridID))
             {
                 Debug.LogWarning($"[InventoryController] 网格ID '{gridID}' 已存在，将覆盖原有注册");
             }
-            
+
             registeredGrids[gridID] = grid;
             Debug.Log($"[InventoryController] 成功注册网格：{gridID}");
             return true;
@@ -591,7 +611,7 @@ public class InventoryController : MonoBehaviour
             return false;
         }
     }
-    
+
     /// <summary>
     /// 注册物品到保存系统
     /// </summary>
@@ -604,12 +624,12 @@ public class InventoryController : MonoBehaviour
                 Debug.LogError("[InventoryController] 注册物品失败：ID或物品对象为空");
                 return false;
             }
-            
+
             if (registeredItems.ContainsKey(itemID))
             {
                 Debug.LogWarning($"[InventoryController] 物品ID '{itemID}' 已存在，将覆盖原有注册");
             }
-            
+
             registeredItems[itemID] = item;
             Debug.Log($"[InventoryController] 成功注册物品：{itemID}");
             return true;
@@ -620,7 +640,7 @@ public class InventoryController : MonoBehaviour
             return false;
         }
     }
-    
+
     /// <summary>
     /// 取消注册网格
     /// </summary>
@@ -634,7 +654,7 @@ public class InventoryController : MonoBehaviour
         }
         return false;
     }
-    
+
     /// <summary>
     /// 取消注册物品
     /// </summary>
@@ -648,7 +668,7 @@ public class InventoryController : MonoBehaviour
         }
         return false;
     }
-    
+
     /// <summary>
     /// 分配新的网格ID
     /// </summary>
@@ -656,24 +676,24 @@ public class InventoryController : MonoBehaviour
     {
         string newID;
         int counter = 1;
-        
+
         do
         {
             newID = $"{baseName}_{counter:D3}_{System.Guid.NewGuid().ToString("N")[..6]}";
             counter++;
         }
         while (registeredGrids.ContainsKey(newID) && counter < 1000);
-        
+
         if (counter >= 1000)
         {
             // 如果计数器达到1000，使用完全随机的ID
             newID = $"{baseName}_{System.Guid.NewGuid().ToString("N")[..12]}";
         }
-        
+
         Debug.Log($"[InventoryController] 分配新网格ID：{newID}");
         return newID;
     }
-    
+
     /// <summary>
     /// 分配新的物品ID
     /// </summary>
@@ -681,24 +701,24 @@ public class InventoryController : MonoBehaviour
     {
         string newID;
         int counter = 1;
-        
+
         do
         {
             newID = $"{baseName}_{counter:D3}_{System.Guid.NewGuid().ToString("N")[..6]}";
             counter++;
         }
         while (registeredItems.ContainsKey(newID) && counter < 1000);
-        
+
         if (counter >= 1000)
         {
             // 如果计数器达到1000，使用完全随机的ID
             newID = $"{baseName}_{System.Guid.NewGuid().ToString("N")[..12]}";
         }
-        
+
         Debug.Log($"[InventoryController] 分配新物品ID：{newID}");
         return newID;
     }
-    
+
     /// <summary>
     /// 保存所有注册的对象
     /// </summary>
@@ -707,7 +727,7 @@ public class InventoryController : MonoBehaviour
         try
         {
             Debug.Log("[InventoryController] 开始保存所有注册对象...");
-            
+
             // 保存控制器自身数据
             string controllerData = CreateSaveData();
             if (string.IsNullOrEmpty(controllerData))
@@ -716,7 +736,7 @@ public class InventoryController : MonoBehaviour
                 OnSaveError?.Invoke(GetControllerID(), "创建控制器保存数据失败");
                 return false;
             }
-            
+
             // 保存所有注册的网格
             foreach (var kvp in registeredGrids)
             {
@@ -740,7 +760,7 @@ public class InventoryController : MonoBehaviour
                     Debug.LogError($"[InventoryController] 保存网格 '{kvp.Key}' 时发生错误：{ex.Message}");
                 }
             }
-            
+
             // 保存所有注册的物品
             foreach (var kvp in registeredItems)
             {
@@ -764,7 +784,7 @@ public class InventoryController : MonoBehaviour
                     Debug.LogError($"[InventoryController] 保存物品 '{kvp.Key}' 时发生错误：{ex.Message}");
                 }
             }
-            
+
             OnSaveCompleted?.Invoke(GetControllerID());
             return true;
         }
@@ -775,7 +795,7 @@ public class InventoryController : MonoBehaviour
             return false;
         }
     }
-    
+
     /// <summary>
     /// 加载所有注册的对象
     /// </summary>
@@ -784,7 +804,7 @@ public class InventoryController : MonoBehaviour
         try
         {
             Debug.Log("[InventoryController] 开始加载所有注册对象...");
-            
+
             // 加载所有注册的网格
             foreach (var kvp in registeredGrids)
             {
@@ -802,7 +822,7 @@ public class InventoryController : MonoBehaviour
                     Debug.LogError($"[InventoryController] 加载网格 '{kvp.Key}' 时发生错误：{ex.Message}");
                 }
             }
-            
+
             // 加载所有注册的物品
             foreach (var kvp in registeredItems)
             {
@@ -819,7 +839,7 @@ public class InventoryController : MonoBehaviour
                     Debug.LogError($"[InventoryController] 加载物品 '{kvp.Key}' 时发生错误：{ex.Message}");
                 }
             }
-            
+
             OnLoadCompleted?.Invoke(GetControllerID());
             return true;
         }
@@ -830,7 +850,7 @@ public class InventoryController : MonoBehaviour
             return false;
         }
     }
-    
+
     /// <summary>
     /// 创建控制器保存数据
     /// </summary>
@@ -848,7 +868,7 @@ public class InventoryController : MonoBehaviour
                 lastModified = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
                 saveVersion = saveVersion
             };
-            
+
             return JsonUtility.ToJson(saveData, true);
         }
         catch (System.Exception ex)
@@ -857,7 +877,7 @@ public class InventoryController : MonoBehaviour
             return null;
         }
     }
-    
+
     /// <summary>
     /// 从保存数据加载控制器状态
     /// </summary>
@@ -870,27 +890,27 @@ public class InventoryController : MonoBehaviour
                 Debug.LogError("[InventoryController] 加载数据为空");
                 return false;
             }
-            
+
             var saveData = JsonUtility.FromJson<InventoryControllerSaveData>(jsonData);
             if (saveData == null)
             {
                 Debug.LogError("[InventoryController] 反序列化保存数据失败");
                 return false;
             }
-            
+
             // 验证数据版本
             if (saveData.saveVersion > saveVersion)
             {
                 Debug.LogWarning($"[InventoryController] 保存数据版本 ({saveData.saveVersion}) 高于当前版本 ({saveVersion})，可能存在兼容性问题");
             }
-            
+
             // 恢复控制器状态
             controllerID = saveData.controllerID;
             currentActiveGrid = saveData.currentActiveGrid;
             enablePreview = saveData.enablePreview;
             showDebugInfo = saveData.showDebugInfo;
             previewItemSize = saveData.previewItemSize;
-            
+
             return true;
         }
         catch (System.Exception ex)
@@ -899,7 +919,7 @@ public class InventoryController : MonoBehaviour
             return false;
         }
     }
-    
+
     /// <summary>
     /// 验证保存数据的完整性
     /// </summary>
@@ -913,7 +933,7 @@ public class InventoryController : MonoBehaviour
                 Debug.LogError("[InventoryController] 控制器ID无效");
                 return false;
             }
-            
+
             // 验证注册的网格
             foreach (var kvp in registeredGrids)
             {
@@ -922,14 +942,14 @@ public class InventoryController : MonoBehaviour
                     Debug.LogError($"[InventoryController] 注册的网格 '{kvp.Key}' 对象为空");
                     return false;
                 }
-                
+
                 if (!kvp.Value.ValidateData())
                 {
                     Debug.LogError($"[InventoryController] 网格 '{kvp.Key}' 数据验证失败");
                     return false;
                 }
             }
-            
+
             // 验证注册的物品
             foreach (var kvp in registeredItems)
             {
@@ -938,14 +958,14 @@ public class InventoryController : MonoBehaviour
                     Debug.LogError($"[InventoryController] 注册的物品 '{kvp.Key}' 对象为空");
                     return false;
                 }
-                
+
                 if (!kvp.Value.ValidateData())
                 {
                     Debug.LogError($"[InventoryController] 物品 '{kvp.Key}' 数据验证失败");
                     return false;
                 }
             }
-            
+
             Debug.Log("[InventoryController] 保存数据验证通过");
             return true;
         }
@@ -955,7 +975,7 @@ public class InventoryController : MonoBehaviour
             return false;
         }
     }
-    
+
     /// <summary>
     /// 获取注册的网格数量
     /// </summary>
@@ -963,7 +983,7 @@ public class InventoryController : MonoBehaviour
     {
         return registeredGrids.Count;
     }
-    
+
     /// <summary>
     /// 获取注册的物品数量
     /// </summary>
@@ -971,7 +991,7 @@ public class InventoryController : MonoBehaviour
     {
         return registeredItems.Count;
     }
-    
+
     /// <summary>
     /// 清除所有注册的对象
     /// </summary>
@@ -981,7 +1001,7 @@ public class InventoryController : MonoBehaviour
         registeredItems.Clear();
         Debug.Log("[InventoryController] 已清除所有注册的对象");
     }
-    
+
     /// <summary>
     /// 获取所有注册的网格ID
     /// </summary>
@@ -989,7 +1009,7 @@ public class InventoryController : MonoBehaviour
     {
         return registeredGrids.Keys.ToArray();
     }
-    
+
     /// <summary>
     /// 获取所有注册的物品ID
     /// </summary>
@@ -997,7 +1017,7 @@ public class InventoryController : MonoBehaviour
     {
         return registeredItems.Keys.ToArray();
     }
-    
+
     /// <summary>
     /// 检查网格是否已注册
     /// </summary>
@@ -1005,7 +1025,7 @@ public class InventoryController : MonoBehaviour
     {
         return registeredGrids.ContainsKey(gridID);
     }
-    
+
     /// <summary>
     /// 检查物品是否已注册
     /// </summary>
@@ -1013,7 +1033,7 @@ public class InventoryController : MonoBehaviour
     {
         return registeredItems.ContainsKey(itemID);
     }
-    
+
     /// <summary>
     /// 获取注册的网格对象
     /// </summary>
@@ -1021,7 +1041,7 @@ public class InventoryController : MonoBehaviour
     {
         return registeredGrids.TryGetValue(gridID, out ISaveable grid) ? grid : null;
     }
-    
+
     /// <summary>
     /// 获取注册的物品对象
     /// </summary>
@@ -1029,7 +1049,7 @@ public class InventoryController : MonoBehaviour
     {
         return registeredItems.TryGetValue(itemID, out ISaveable item) ? item : null;
     }
-    
+
     /// <summary>
     /// 在Awake中初始化保存系统
     /// </summary>
@@ -1040,13 +1060,305 @@ public class InventoryController : MonoBehaviour
         {
             GenerateNewControllerID();
         }
-        
+
         // 初始化字典
         if (registeredGrids == null)
             registeredGrids = new Dictionary<string, ISaveable>();
         if (registeredItems == null)
             registeredItems = new Dictionary<string, ISaveable>();
-        
+
         Debug.Log($"[InventoryController] 保存系统初始化完成，控制器ID：{GetControllerID()}");
+    }
+
+    // ==================== ISaveable接口完整实现 ====================
+
+    /// <summary>
+    /// 获取对象的唯一标识ID (ISaveable接口实现)
+    /// </summary>
+    /// <returns>对象的唯一ID字符串</returns>
+    public string GetSaveID()
+    {
+        return GetControllerID();
+    }
+
+    /// <summary>
+    /// 设置对象的唯一标识ID (ISaveable接口实现)
+    /// </summary>
+    /// <param name="id">新的ID字符串</param>
+    public void SetSaveID(string id)
+    {
+        SetControllerID(id);
+    }
+
+    /// <summary>
+    /// 生成新的唯一保存ID (ISaveable接口实现)
+    /// </summary>
+    public void GenerateNewSaveID()
+    {
+        GenerateNewControllerID();
+    }
+
+    /// <summary>
+    /// 验证保存ID是否有效 (ISaveable接口实现)
+    /// </summary>
+    /// <returns>ID是否有效</returns>
+    public bool IsSaveIDValid()
+    {
+        return IsControllerIDValid();
+    }
+
+    /// <summary>
+    /// 获取保存数据 (ISaveable接口实现)
+    /// </summary>
+    /// <returns>保存数据对象</returns>
+    public InventoryControllerSaveData GetSaveData()
+    {
+        var saveData = new InventoryControllerSaveData
+        {
+            controllerID = this.controllerID,
+            registeredGridIds = new List<string>(registeredGrids.Keys),
+            registeredItemIds = new List<string>(registeredItems.Keys),
+            lastModified = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
+        };
+
+        return saveData;
+    }
+
+    /// <summary>
+    /// 加载保存数据 (ISaveable接口实现)
+    /// </summary>
+    /// <param name="saveData">保存数据对象</param>
+    /// <returns>是否成功加载</returns>
+    public bool LoadSaveData(InventoryControllerSaveData saveData)
+    {
+        try
+        {
+            if (saveData == null)
+            {
+                Debug.LogWarning("[InventoryController] 保存数据为空，无法加载");
+                return false;
+            }
+
+            // 加载控制器ID
+            this.controllerID = saveData.controllerID;
+
+            // 注意：网格和物品的实际重新注册应该由它们自己的Start方法处理
+            // 这里只是记录预期的注册对象ID，用于验证
+            Debug.Log($"[InventoryController] 已加载保存数据，控制器ID: {controllerID}");
+            Debug.Log($"[InventoryController] 预期注册网格数量: {saveData.registeredGridIds?.Count ?? 0}");
+            Debug.Log($"[InventoryController] 预期注册物品数量: {saveData.registeredItemIds?.Count ?? 0}");
+
+            MarkAsModified();
+            return true;
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[InventoryController] 加载保存数据失败: {ex.Message}");
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// 序列化对象为JSON字符串 (ISaveable接口实现)
+    /// </summary>
+    /// <returns>JSON字符串</returns>
+    public string SerializeToJson()
+    {
+        var saveData = GetSaveData();
+        return JsonUtility.ToJson(saveData, true);
+    }
+
+    /// <summary>
+    /// 从JSON字符串反序列化对象 (ISaveable接口实现)
+    /// </summary>
+    /// <param name="json">JSON字符串</param>
+    /// <returns>是否成功反序列化</returns>
+    public bool DeserializeFromJson(string json)
+    {
+        try
+        {
+            var saveData = JsonUtility.FromJson<InventoryControllerSaveData>(json);
+            return LoadSaveData(saveData);
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[InventoryController] JSON反序列化失败: {ex.Message}");
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// 标记对象为已修改 (ISaveable接口实现)
+    /// </summary>
+    public void MarkAsModified()
+    {
+        // InventoryController没有直接的修改标记，但可以触发保存事件
+        UpdateLastModified();
+        Debug.Log($"[InventoryController] 控制器已标记为修改: {controllerID}");
+    }
+
+    /// <summary>
+    /// 重置修改标记 (ISaveable接口实现)
+    /// </summary>
+    public void ResetModifiedFlag()
+    {
+        // InventoryController没有直接的修改标记，这里可以为空实现
+        Debug.Log($"[InventoryController] 重置修改标记: {controllerID}");
+    }
+
+    /// <summary>
+    /// 检查是否已修改 (ISaveable接口实现)
+    /// </summary>
+    /// <returns>是否已修改</returns>
+    public bool IsModified()
+    {
+        // InventoryController总是返回true，因为它管理动态状态
+        return true;
+    }
+
+    /// <summary>
+    /// 验证对象数据的完整性 (ISaveable接口实现)
+    /// </summary>
+    /// <returns>数据是否有效</returns>
+    public bool ValidateData()
+    {
+        // 验证控制器ID
+        if (!IsSaveIDValid())
+        {
+            Debug.LogError($"[InventoryController] 控制器ID无效: {controllerID}");
+            return false;
+        }
+
+        // 验证注册的网格和物品
+        foreach (var grid in registeredGrids.Values)
+        {
+            if (grid == null || !grid.ValidateData())
+            {
+                Debug.LogError($"[InventoryController] 注册的网格数据无效");
+                return false;
+            }
+        }
+
+        foreach (var item in registeredItems.Values)
+        {
+            if (item == null || !item.ValidateData())
+            {
+                Debug.LogError($"[InventoryController] 注册的物品数据无效");
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// 获取最后修改时间 (ISaveable接口实现)
+    /// </summary>
+    /// <returns>最后修改时间字符串</returns>
+    public string GetLastModified()
+    {
+        return System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+    }
+
+    /// <summary>
+    /// 更新最后修改时间 (ISaveable接口实现)
+    /// </summary>
+    public void UpdateLastModified()
+    {
+        // InventoryController的修改时间由其管理的对象决定
+        Debug.Log($"[InventoryController] 更新最后修改时间: {GetLastModified()}");
+    }
+
+    /// <summary>
+    /// 注册到保存系统
+    /// </summary>
+    private void RegisterToSaveSystem()
+    {
+        var saveManager = SaveManager.Instance;
+        if (saveManager != null)
+        {
+            saveManager.RegisterSaveable(this);
+            Debug.Log($"[InventoryController] 已注册到保存系统: {GetControllerID()}");
+        }
+        else
+        {
+            Debug.LogWarning("[InventoryController] SaveManager实例未找到，无法注册到保存系统");
+        }
+    }
+
+    /// <summary>
+    /// 从保存系统注销
+    /// </summary>
+    private void UnregisterFromSaveSystem()
+    {
+        var saveManager = SaveManager.Instance;
+        if (saveManager != null)
+        {
+            saveManager.UnregisterSaveable(this);
+            Debug.Log($"[InventoryController] 已从保存系统注销: {GetControllerID()}");
+        }
+    }
+
+    /// <summary>
+    /// 在对象销毁时注销保存系统
+    /// </summary>
+    private void OnDestroy()
+    {
+        // 从保存系统注销
+        UnregisterFromSaveSystem();
+
+        // 注销所有已注册的网格和物品
+        if (registeredGrids != null)
+        {
+            registeredGrids.Clear();
+        }
+
+        if (registeredItems != null)
+        {
+            registeredItems.Clear();
+        }
+
+        Debug.Log($"[InventoryController] 控制器已销毁并清理注册对象: {controllerID}");
+    }
+
+    /// <summary>
+    /// 初始化保存协调器
+    /// </summary>
+    private void InitializeSaveCoordinator()
+    {
+        if (!enableSaveCoordination)
+        {
+            Debug.Log("[InventoryController] 保存协调器功能已禁用");
+            return;
+        }
+
+        try
+        {
+            // 初始化保存依赖管理器
+            if (dependencyManager == null)
+            {
+                dependencyManager = GetComponent<SaveDependencyManager>();
+                if (dependencyManager == null)
+                {
+                    dependencyManager = gameObject.AddComponent<SaveDependencyManager>();
+                }
+            }
+
+            // 初始化容器UI状态管理器
+            if (containerUIManager == null)
+            {
+                containerUIManager = GetComponent<ContainerUIStateManager>();
+                if (containerUIManager == null)
+                {
+                    containerUIManager = gameObject.AddComponent<ContainerUIStateManager>();
+                }
+            }
+
+            Debug.Log("[InventoryController] 保存协调器初始化完成");
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[InventoryController] 初始化保存协调器时发生错误: {ex.Message}");
+        }
     }
 }

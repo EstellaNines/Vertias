@@ -9,69 +9,69 @@ using UnityEditor;
 
 public class ItemSpawner : BaseItemSpawn
 {
-    [Header("ç‰©å“ç±»å‹é€‰æ‹©")]
-    [SerializeField][FieldLabel("å¤´ç›”")] private bool spawnHelmet = true;
-    [SerializeField][FieldLabel("æŠ¤ç”²")] private bool spawnArmor = true;
-    [SerializeField][FieldLabel("æˆ˜æœ¯æŒ‚å…·")] private bool spawnTacticalRig = true;
-    [SerializeField][FieldLabel("èƒŒåŒ…")] private bool spawnBackpack = true;
-    [SerializeField][FieldLabel("æ­¦å™¨")] private bool spawnWeapon = true;
-    [SerializeField][FieldLabel("å¼¹è¯")] private bool spawnAmmunition = true;
-    [SerializeField][FieldLabel("é£Ÿç‰©")] private bool spawnFood = true;
-    [SerializeField][FieldLabel("é¥®æ–™")] private bool spawnDrink = true;
-    [SerializeField][FieldLabel("æ²»ç–—è¯ç‰©")] private bool spawnHealing = true;
-    [SerializeField][FieldLabel("æ­¢è¡€è¯ç‰©")] private bool spawnHemostatic = true;
-    [SerializeField][FieldLabel("é•‡é™è¯ç‰©")] private bool spawnSedative = true;
-    [SerializeField][FieldLabel("æƒ…æŠ¥")] private bool spawnIntelligence = true;
-    [SerializeField][FieldLabel("è´§å¸")] private bool spawnCurrency = true;
+    [Header("ÎïÆ·ÀàĞÍÑ¡Ôñ")]
+    [SerializeField][FieldLabel("Í·¿ø")] private bool spawnHelmet = true;
+    [SerializeField][FieldLabel("»¤¼×")] private bool spawnArmor = true;
+    [SerializeField][FieldLabel("Õ½Êõ¹Ò¾ß")] private bool spawnTacticalRig = true;
+    [SerializeField][FieldLabel("±³°ü")] private bool spawnBackpack = true;
+    [SerializeField][FieldLabel("ÎäÆ÷")] private bool spawnWeapon = true;
+    [SerializeField][FieldLabel("µ¯Ò©")] private bool spawnAmmunition = true;
+    [SerializeField][FieldLabel("Ê³Îï")] private bool spawnFood = true;
+    [SerializeField][FieldLabel("ÒûÁÏ")] private bool spawnDrink = true;
+    [SerializeField][FieldLabel("ÖÎÁÆÒ©Îï")] private bool spawnHealing = true;
+    [SerializeField][FieldLabel("Ö¹ÑªÒ©Îï")] private bool spawnHemostatic = true;
+    [SerializeField][FieldLabel("Õò¾²Ò©Îï")] private bool spawnSedative = true;
+    [SerializeField][FieldLabel("Çé±¨")] private bool spawnIntelligence = true;
+    [SerializeField][FieldLabel("»õ±Ò")] private bool spawnCurrency = true;
 
-    // ç”Ÿæˆå¤šä¸ªéšæœºç‰©å“
+    // Éú³É¶à¸öËæ»úÎïÆ·
     public override void SpawnRandomItems()
     {
-        // æ¯æ¬¡ç”Ÿæˆç‰©å“å‰éƒ½é‡æ–°æ£€æµ‹InventoryGridï¼Œç¡®ä¿åœ¨æ–°åœºæ™¯ä¸­èƒ½æ­£å¸¸å·¥ä½œ
+        // Ã¿´ÎÉú³ÉÎïÆ·Ç°¶¼ÖØĞÂ¼ì²âInventoryGrid£¬È·±£ÔÚĞÂ³¡¾°ÖĞÄÜÕı³£¹¤×÷
         DetectInventoryGrid();
 
         if (targetGrid == null)
         {
-            Debug.LogError("æœªæ‰¾åˆ°InventoryGridï¼æ— æ³•ç”Ÿæˆç‰©å“ã€‚");
+            Debug.LogError("Î´ÕÒµ½InventoryGrid£¡ÎŞ·¨Éú³ÉÎïÆ·¡£");
             return;
         }
 
         if (allItemData.Count == 0)
         {
-            Debug.LogError("æ²¡æœ‰åŠ è½½ä»»ä½•ç‰©å“æ•°æ®ï¼è¯·å…ˆè°ƒç”¨LoadAllItemsFromFolders()");
+            Debug.LogError("Ã»ÓĞ¼ÓÔØÈÎºÎÎïÆ·Êı¾İ£¡ÇëÏÈµ÷ÓÃLoadAllItemsFromFolders()");
             return;
         }
 
         List<InventorySystemItemDataSO> availableItems = GetAvailableItemsByCategory();
         if (availableItems.Count == 0)
         {
-            Debug.LogWarning("æ²¡æœ‰é€‰æ‹©ä»»ä½•ç‰©å“ç±»å‹ï¼");
+            Debug.LogWarning("Ã»ÓĞÑ¡ÔñÈÎºÎÎïÆ·ÀàĞÍ£¡");
             return;
         }
 
-        // æ£€æŸ¥ç½‘æ ¼æ˜¯å¦å·²åˆå§‹åŒ–
+        // ¼ì²éÍø¸ñÊÇ·ñÒÑ³õÊ¼»¯
         if (gridOccupancy == null)
         {
-            Debug.LogError("ç½‘æ ¼å ç”¨æ•°ç»„æœªåˆå§‹åŒ–ï¼è¯·æ£€æŸ¥ç½‘æ ¼è®¾ç½®ã€‚");
+            Debug.LogError("Íø¸ñÕ¼ÓÃÊı×éÎ´³õÊ¼»¯£¡Çë¼ì²éÍø¸ñÉèÖÃ¡£");
             return;
         }
 
-        // è®¡ç®—å¯ç”¨ç©ºé—´
+        // ¼ÆËã¿ÉÓÃ¿Õ¼ä
         int totalCells = gridOccupancy.GetLength(0) * gridOccupancy.GetLength(1);
         int occupiedCells = CountOccupiedCells();
         int availableCells = totalCells - occupiedCells;
 
         if (showDebugInfo)
         {
-            Debug.Log($"ç½‘æ ¼çŠ¶æ€: æ€»æ ¼å­ {totalCells}, å·²å ç”¨ {occupiedCells}, å¯ç”¨ {availableCells}");
+            Debug.Log($"Íø¸ñ×´Ì¬: ×Ü¸ñ×Ó {totalCells}, ÒÑÕ¼ÓÃ {occupiedCells}, ¿ÉÓÃ {availableCells}");
         }
 
-        // æŒ‰ç‰©å“å¤§å°æ’åºï¼Œä¼˜å…ˆç”Ÿæˆå°ç‰©å“
+        // °´ÎïÆ·´óĞ¡ÅÅĞò£¬ÓÅÏÈÉú³ÉĞ¡ÎïÆ·
         availableItems = availableItems.OrderBy(item => item.width * item.height).ToList();
 
         int successCount = 0;
         int attemptCount = 0;
-        int maxAttempts = spawnCount * 5; // å¢åŠ æœ€å¤§å°è¯•æ¬¡æ•°
+        int maxAttempts = spawnCount * 5; // Ôö¼Ó×î´ó³¢ÊÔ´ÎÊı
         int consecutiveFailures = 0;
         int maxConsecutiveFailures = 10;
 
@@ -79,7 +79,7 @@ public class ItemSpawner : BaseItemSpawn
         {
             attemptCount++;
 
-            // åŸºäºçè´µç¨‹åº¦é€‰æ‹©ç‰©å“
+            // »ùÓÚÕä¹ó³Ì¶ÈÑ¡ÔñÎïÆ·
             InventorySystemItemDataSO randomItemData = SelectItemByRarity(availableItems);
             GameObject prefab = FindPrefabForItemData(randomItemData);
 
@@ -89,7 +89,7 @@ public class ItemSpawner : BaseItemSpawn
                 if (spawnedItem != null)
                 {
                     successCount++;
-                    consecutiveFailures = 0; // é‡ç½®è¿ç»­å¤±è´¥è®¡æ•°
+                    consecutiveFailures = 0; // ÖØÖÃÁ¬ĞøÊ§°Ü¼ÆÊı
                 }
                 else
                 {
@@ -100,7 +100,7 @@ public class ItemSpawner : BaseItemSpawn
             {
                 if (showDebugInfo)
                 {
-                    Debug.LogWarning($"ç‰©å“ '{randomItemData.itemName}' æ²¡æœ‰å¯¹åº”çš„é¢„åˆ¶ä½“");
+                    Debug.LogWarning($"ÎïÆ· '{randomItemData.itemName}' Ã»ÓĞ¶ÔÓ¦µÄÔ¤ÖÆÌå");
                 }
                 consecutiveFailures++;
             }
@@ -108,10 +108,10 @@ public class ItemSpawner : BaseItemSpawn
 
         if (showDebugInfo)
         {
-            Debug.Log($"ç”Ÿæˆå®Œæˆ: æˆåŠŸç”Ÿæˆ {successCount}/{spawnCount} ä¸ªç‰©å“ï¼Œå°è¯•æ¬¡æ•°: {attemptCount}");
+            Debug.Log($"Éú³ÉÍê³É: ³É¹¦Éú³É {successCount}/{spawnCount} ¸öÎïÆ·£¬³¢ÊÔ´ÎÊı: {attemptCount}");
             if (consecutiveFailures >= maxConsecutiveFailures)
             {
-                Debug.LogWarning("ç”±äºè¿ç»­å¤±è´¥æ¬¡æ•°è¿‡å¤šï¼Œæå‰ç»“æŸç”Ÿæˆã€‚å¯èƒ½æ˜¯ç½‘æ ¼ç©ºé—´ä¸è¶³æˆ–é¢„åˆ¶ä½“ç¼ºå¤±ã€‚");
+                Debug.LogWarning("ÓÉÓÚÁ¬ĞøÊ§°Ü´ÎÊı¹ı¶à£¬ÌáÇ°½áÊøÉú³É¡£¿ÉÄÜÊÇÍø¸ñ¿Õ¼ä²»×ã»òÔ¤ÖÆÌåÈ±Ê§¡£");
             }
             if (showGridOccupancy)
             {
@@ -120,9 +120,9 @@ public class ItemSpawner : BaseItemSpawn
         }
     }
 
-    // CountOccupiedCellsæ–¹æ³•å·²åœ¨BaseItemSpawnä¸­å®ç°
+    // CountOccupiedCells·½·¨ÒÑÔÚBaseItemSpawnÖĞÊµÏÖ
 
-    // æ ¹æ®é€‰æ‹©çš„ç±»å‹è·å–å¯ç”¨ç‰©å“åˆ—è¡¨
+    // ¸ù¾İÑ¡ÔñµÄÀàĞÍ»ñÈ¡¿ÉÓÃÎïÆ·ÁĞ±í
     protected override List<InventorySystemItemDataSO> GetAvailableItemsByCategory()
     {
         List<InventorySystemItemDataSO> availableItems = new List<InventorySystemItemDataSO>();
@@ -184,54 +184,54 @@ public class ItemSpawner : BaseItemSpawn
         return availableItems;
     }
 
-    // è°ƒè¯•ä¿¡æ¯ï¼šæ˜¾ç¤ºå½“å‰çŠ¶æ€
-    [ContextMenu("æ˜¾ç¤ºè°ƒè¯•ä¿¡æ¯")]
+    // µ÷ÊÔĞÅÏ¢£ºÏÔÊ¾µ±Ç°×´Ì¬
+    [ContextMenu("ÏÔÊ¾µ÷ÊÔĞÅÏ¢")]
     public void ShowDebugInfo()
     {
-        Debug.Log("=== ItemSpawner è°ƒè¯•ä¿¡æ¯ ===");
+        Debug.Log("=== ItemSpawner µ÷ÊÔĞÅÏ¢ ===");
 
-        // ç½‘æ ¼ä¿¡æ¯
+        // Íø¸ñĞÅÏ¢
         if (targetGrid != null)
         {
-            Debug.Log($"ç›®æ ‡ç½‘æ ¼: {targetGrid.gameObject.name}");
+            Debug.Log($"Ä¿±êÍø¸ñ: {targetGrid.gameObject.name}");
             if (gridOccupancy != null)
             {
-                Debug.Log($"ç½‘æ ¼å°ºå¯¸: {gridOccupancy.GetLength(0)}x{gridOccupancy.GetLength(1)}");
+                Debug.Log($"Íø¸ñ³ß´ç: {gridOccupancy.GetLength(0)}x{gridOccupancy.GetLength(1)}");
             }
             else
             {
-                Debug.LogWarning("ç½‘æ ¼å ç”¨æ•°ç»„æœªåˆå§‹åŒ–ï¼");
+                Debug.LogWarning("Íø¸ñÕ¼ÓÃÊı×éÎ´³õÊ¼»¯£¡");
             }
         }
         else
         {
-            Debug.LogError("æœªæ‰¾åˆ°ç›®æ ‡ç½‘æ ¼ï¼");
+            Debug.LogError("Î´ÕÒµ½Ä¿±êÍø¸ñ£¡");
         }
 
-        // ç‰©å“æ•°æ®ä¿¡æ¯
-        Debug.Log($"å·²åŠ è½½ç‰©å“æ•°æ®: {allItemData.Count} ä¸ª");
-        foreach (var itemData in allItemData.Take(5)) // åªæ˜¾ç¤ºå‰5ä¸ª
+        // ÎïÆ·Êı¾İĞÅÏ¢
+        Debug.Log($"ÒÑ¼ÓÔØÎïÆ·Êı¾İ: {allItemData.Count} ¸ö");
+        foreach (var itemData in allItemData.Take(5)) // Ö»ÏÔÊ¾Ç°5¸ö
         {
             Debug.Log($"  - {itemData.itemName} ({itemData.width}x{itemData.height})");
         }
         if (allItemData.Count > 5)
         {
-            Debug.Log($"  ... è¿˜æœ‰ {allItemData.Count - 5} ä¸ªç‰©å“æ•°æ®");
+            Debug.Log($"  ... »¹ÓĞ {allItemData.Count - 5} ¸öÎïÆ·Êı¾İ");
         }
 
-        // é¢„åˆ¶ä½“ä¿¡æ¯
-        Debug.Log($"å·²åŠ è½½é¢„åˆ¶ä½“: {itemPrefabDict.Count} ä¸ª");
-        foreach (var kvp in itemPrefabDict.Take(5)) // åªæ˜¾ç¤ºå‰5ä¸ª
+        // Ô¤ÖÆÌåĞÅÏ¢
+        Debug.Log($"ÒÑ¼ÓÔØÔ¤ÖÆÌå: {itemPrefabDict.Count} ¸ö");
+        foreach (var kvp in itemPrefabDict.Take(5)) // Ö»ÏÔÊ¾Ç°5¸ö
         {
             Debug.Log($"  - Key: '{kvp.Key}' -> {kvp.Value.name}");
         }
         if (itemPrefabDict.Count > 5)
         {
-            Debug.Log($"  ... è¿˜æœ‰ {itemPrefabDict.Count - 5} ä¸ªé¢„åˆ¶ä½“");
+            Debug.Log($"  ... »¹ÓĞ {itemPrefabDict.Count - 5} ¸öÔ¤ÖÆÌå");
         }
 
-        // æ£€æŸ¥åŒ¹é…é—®é¢˜
-        Debug.Log("=== åŒ¹é…æ£€æŸ¥ ===");
+        // ¼ì²éÆ¥ÅäÎÊÌâ
+        Debug.Log("=== Æ¥Åä¼ì²é ===");
         int matchedCount = 0;
         int unmatchedCount = 0;
 
@@ -245,44 +245,44 @@ public class ItemSpawner : BaseItemSpawn
             else
             {
                 unmatchedCount++;
-                Debug.LogWarning($"æœªåŒ¹é…: '{itemData.itemName}' -> Key: '{dataKey}'");
+                Debug.LogWarning($"Î´Æ¥Åä: '{itemData.itemName}' -> Key: '{dataKey}'");
             }
         }
 
-        Debug.Log($"åŒ¹é…æˆåŠŸ: {matchedCount} ä¸ªï¼ŒæœªåŒ¹é…: {unmatchedCount} ä¸ª");
+        Debug.Log($"Æ¥Åä³É¹¦: {matchedCount} ¸ö£¬Î´Æ¥Åä: {unmatchedCount} ¸ö");
 
-        // çè´µç¨‹åº¦ç»Ÿè®¡ä¿¡æ¯
-        Debug.Log("=== çè´µç¨‹åº¦ç»Ÿè®¡ ===");
+        // Õä¹ó³Ì¶ÈÍ³¼ÆĞÅÏ¢
+        Debug.Log("=== Õä¹ó³Ì¶ÈÍ³¼Æ ===");
         ShowRarityStatistics();
 
-        // æä¾›è§£å†³æ–¹æ¡ˆå»ºè®®
+        // Ìá¹©½â¾ö·½°¸½¨Òé
         if (unmatchedCount > 0)
         {
-            Debug.Log("=== è§£å†³æ–¹æ¡ˆå»ºè®® ===");
-            Debug.Log("1. æ£€æŸ¥é¢„åˆ¶ä½“æ–‡ä»¶å¤¹è·¯å¾„æ˜¯å¦æ­£ç¡®");
-            Debug.Log("2. ç¡®ä¿é¢„åˆ¶ä½“æ–‡ä»¶åä¸ç‰©å“æ•°æ®åç§°åŒ¹é…");
-            Debug.Log("3. å¯ä»¥ä½¿ç”¨å³é”®èœå• 'åˆ›å»ºç¼ºå¤±é¢„åˆ¶ä½“' æ¥è‡ªåŠ¨åˆ›å»ºåŸºç¡€é¢„åˆ¶ä½“");
-            Debug.Log("4. æ£€æŸ¥ç‰©å“æ•°æ®æ˜¯å¦æ­£ç¡®åŠ è½½");
+            Debug.Log("=== ½â¾ö·½°¸½¨Òé ===");
+            Debug.Log("1. ¼ì²éÔ¤ÖÆÌåÎÄ¼ş¼ĞÂ·¾¶ÊÇ·ñÕıÈ·");
+            Debug.Log("2. È·±£Ô¤ÖÆÌåÎÄ¼şÃûÓëÎïÆ·Êı¾İÃû³ÆÆ¥Åä");
+            Debug.Log("3. ¿ÉÒÔÊ¹ÓÃÓÒ¼ü²Ëµ¥ '´´½¨È±Ê§Ô¤ÖÆÌå' À´×Ô¶¯´´½¨»ù´¡Ô¤ÖÆÌå");
+            Debug.Log("4. ¼ì²éÎïÆ·Êı¾İÊÇ·ñÕıÈ·¼ÓÔØ");
         }
 
         if (gridOccupancy == null)
         {
-            Debug.LogError("ç½‘æ ¼æœªåˆå§‹åŒ–ï¼è¯·æ£€æŸ¥InventoryGridæ˜¯å¦æ­£ç¡®è®¾ç½®ã€‚");
+            Debug.LogError("Íø¸ñÎ´³õÊ¼»¯£¡Çë¼ì²éInventoryGridÊÇ·ñÕıÈ·ÉèÖÃ¡£");
         }
 
-        Debug.Log("=== è°ƒè¯•ä¿¡æ¯ç»“æŸ ===");
+        Debug.Log("=== µ÷ÊÔĞÅÏ¢½áÊø ===");
     }
 
-    // æ˜¾ç¤ºçè´µç¨‹åº¦ç»Ÿè®¡ä¿¡æ¯
+    // ÏÔÊ¾Õä¹ó³Ì¶ÈÍ³¼ÆĞÅÏ¢
     private void ShowRarityStatistics()
     {
         if (allItemData.Count == 0)
         {
-            Debug.Log("æ²¡æœ‰ç‰©å“æ•°æ®å¯ç»Ÿè®¡");
+            Debug.Log("Ã»ÓĞÎïÆ·Êı¾İ¿ÉÍ³¼Æ");
             return;
         }
 
-        // æŒ‰ç±»åˆ«åˆ†ç»„ç»Ÿè®¡çè´µç¨‹åº¦
+        // °´Àà±ğ·Ö×éÍ³¼ÆÕä¹ó³Ì¶È
         var categoryStats = allItemData.GroupBy(item => item.itemCategory)
             .OrderBy(group => group.Key.ToString())
             .ToList();
@@ -292,9 +292,9 @@ public class ItemSpawner : BaseItemSpawn
             var category = categoryGroup.Key;
             var items = categoryGroup.ToList();
 
-            Debug.Log($"\nã€{GetCategoryDisplayName(category)}ã€‘ å…± {items.Count} ä¸ªç‰©å“:");
+            Debug.Log($"\n¡¾{GetCategoryDisplayName(category)}¡¿ ¹² {items.Count} ¸öÎïÆ·:");
 
-            // æŒ‰çè´µç¨‹åº¦åˆ†ç»„
+            // °´Õä¹ó³Ì¶È·Ö×é
             var rarityGroups = items.GroupBy(item => ParseRarityLevel(item.rarity))
                 .OrderBy(group => group.Key)
                 .ToList();
@@ -306,20 +306,20 @@ public class ItemSpawner : BaseItemSpawn
                 float weight = CalculateRarityWeight(rarityLevel);
                 string rarityName = GetRarityDisplayName(rarityLevel);
 
-                Debug.Log($"  {rarityName}(ç­‰çº§{rarityLevel}): {rarityItems.Count}ä¸ª - ç”Ÿæˆæƒé‡: {weight:P0}");
+                Debug.Log($"  {rarityName}(µÈ¼¶{rarityLevel}): {rarityItems.Count}¸ö - Éú³ÉÈ¨ÖØ: {weight:P0}");
 
-                // æ˜¾ç¤ºå…·ä½“ç‰©å“åç§°ï¼ˆæœ€å¤šæ˜¾ç¤º3ä¸ªï¼‰
+                // ÏÔÊ¾¾ßÌåÎïÆ·Ãû³Æ£¨×î¶àÏÔÊ¾3¸ö£©
                 var itemNames = rarityItems.Take(3).Select(item => item.itemName).ToList();
                 if (rarityItems.Count > 3)
                 {
-                    itemNames.Add($"...ç­‰{rarityItems.Count}ä¸ª");
+                    itemNames.Add($"...µÈ{rarityItems.Count}¸ö");
                 }
-                Debug.Log($"    ç‰©å“: {string.Join(", ", itemNames)}");
+                Debug.Log($"    ÎïÆ·: {string.Join(", ", itemNames)}");
             }
         }
 
-        // æ˜¾ç¤ºæ€»ä½“çè´µç¨‹åº¦åˆ†å¸ƒ
-        Debug.Log("\nã€æ€»ä½“çè´µç¨‹åº¦åˆ†å¸ƒã€‘:");
+        // ÏÔÊ¾×ÜÌåÕä¹ó³Ì¶È·Ö²¼
+        Debug.Log("\n¡¾×ÜÌåÕä¹ó³Ì¶È·Ö²¼¡¿:");
         var totalRarityStats = allItemData.GroupBy(item => ParseRarityLevel(item.rarity))
             .OrderBy(group => group.Key)
             .ToList();
@@ -332,47 +332,47 @@ public class ItemSpawner : BaseItemSpawn
             float weight = CalculateRarityWeight(rarityLevel);
             string rarityName = GetRarityDisplayName(rarityLevel);
 
-            Debug.Log($"  {rarityName}: {count}ä¸ª ({percentage:F1}%) - ç”Ÿæˆæƒé‡: {weight:P0}");
+            Debug.Log($"  {rarityName}: {count}¸ö ({percentage:F1}%) - Éú³ÉÈ¨ÖØ: {weight:P0}");
         }
     }
 
-    // è·å–ç±»åˆ«æ˜¾ç¤ºåç§°
+    // »ñÈ¡Àà±ğÏÔÊ¾Ãû³Æ
     private string GetCategoryDisplayName(InventorySystemItemCategory category)
     {
         switch (category)
         {
-            case InventorySystemItemCategory.Helmet: return "å¤´ç›”";
-            case InventorySystemItemCategory.Armor: return "æŠ¤ç”²";
-            case InventorySystemItemCategory.TacticalRig: return "æˆ˜æœ¯æŒ‚å…·";
-            case InventorySystemItemCategory.Backpack: return "èƒŒåŒ…";
-            case InventorySystemItemCategory.Weapon: return "æ­¦å™¨";
-            case InventorySystemItemCategory.Ammunition: return "å¼¹è¯";
-            case InventorySystemItemCategory.Food: return "é£Ÿç‰©";
-            case InventorySystemItemCategory.Drink: return "é¥®æ–™";
-            case InventorySystemItemCategory.Healing: return "æ²»ç–—ç”¨å“";
-            case InventorySystemItemCategory.Hemostatic: return "æ­¢è¡€å‰‚";
-            case InventorySystemItemCategory.Sedative: return "é•‡é™å‰‚";
-            case InventorySystemItemCategory.Intelligence: return "æƒ…æŠ¥";
-            case InventorySystemItemCategory.Currency: return "è´§å¸";
+            case InventorySystemItemCategory.Helmet: return "Í·¿ø";
+            case InventorySystemItemCategory.Armor: return "»¤¼×";
+            case InventorySystemItemCategory.TacticalRig: return "Õ½Êõ¹Ò¾ß";
+            case InventorySystemItemCategory.Backpack: return "±³°ü";
+            case InventorySystemItemCategory.Weapon: return "ÎäÆ÷";
+            case InventorySystemItemCategory.Ammunition: return "µ¯Ò©";
+            case InventorySystemItemCategory.Food: return "Ê³Îï";
+            case InventorySystemItemCategory.Drink: return "ÒûÁÏ";
+            case InventorySystemItemCategory.Healing: return "ÖÎÁÆÓÃÆ·";
+            case InventorySystemItemCategory.Hemostatic: return "Ö¹Ñª¼Á";
+            case InventorySystemItemCategory.Sedative: return "Õò¾²¼Á";
+            case InventorySystemItemCategory.Intelligence: return "Çé±¨";
+            case InventorySystemItemCategory.Currency: return "»õ±Ò";
             default: return category.ToString();
         }
     }
 
-    // è·å–çè´µç¨‹åº¦æ˜¾ç¤ºåç§°
+    // »ñÈ¡Õä¹ó³Ì¶ÈÏÔÊ¾Ãû³Æ
     private string GetRarityDisplayName(int rarityLevel)
     {
         switch (rarityLevel)
         {
-            case 1: return "æ™®é€š";
-            case 2: return "ç¨€æœ‰";
-            case 3: return "çè´µ";
-            case 4: return "å²è¯—";
-            default: return $"æœªçŸ¥({rarityLevel})";
+            case 1: return "ÆÕÍ¨";
+            case 2: return "Ï¡ÓĞ";
+            case 3: return "Õä¹ó";
+            case 4: return "Ê·Ê«";
+            default: return $"Î´Öª({rarityLevel})";
         }
     }
 
-    // åˆ›å»ºç¼ºå¤±çš„é¢„åˆ¶ä½“ï¼ˆåŸºç¡€ç‰ˆæœ¬ï¼‰
-    [ContextMenu("åˆ›å»ºç¼ºå¤±é¢„åˆ¶ä½“")]
+    // ´´½¨È±Ê§µÄÔ¤ÖÆÌå£¨»ù´¡°æ±¾£©
+    [ContextMenu("´´½¨È±Ê§Ô¤ÖÆÌå")]
     public void CreateMissingPrefabs()
     {
 #if UNITY_EDITOR
@@ -383,15 +383,15 @@ public class ItemSpawner : BaseItemSpawn
             string dataKey = GetItemKey(itemData.itemName);
             if (!itemPrefabDict.ContainsKey(dataKey))
             {
-                // åˆ›å»ºåŸºç¡€é¢„åˆ¶ä½“
+                // ´´½¨»ù´¡Ô¤ÖÆÌå
                 GameObject basicPrefab = CreateBasicItemPrefab(itemData);
                 if (basicPrefab != null)
                 {
-                    // ä¿å­˜é¢„åˆ¶ä½“
+                    // ±£´æÔ¤ÖÆÌå
                     string categoryFolder = GetCategoryFolderName(itemData.itemCategory);
                     string prefabFolder = $"{prefabPath}/{categoryFolder}";
 
-                    // ç¡®ä¿æ–‡ä»¶å¤¹å­˜åœ¨
+                    // È·±£ÎÄ¼ş¼Ğ´æÔÚ
                     if (!UnityEditor.AssetDatabase.IsValidFolder(prefabFolder))
                     {
                         UnityEditor.AssetDatabase.CreateFolder(prefabPath, categoryFolder);
@@ -400,11 +400,11 @@ public class ItemSpawner : BaseItemSpawn
                     string prefabPath_full = $"{prefabFolder}/{itemData.itemName}.prefab";
                     UnityEditor.PrefabUtility.SaveAsPrefabAsset(basicPrefab, prefabPath_full);
 
-                    // é”€æ¯ä¸´æ—¶å¯¹è±¡
+                    // Ïú»ÙÁÙÊ±¶ÔÏó
                     DestroyImmediate(basicPrefab);
 
                     createdCount++;
-                    Debug.Log($"åˆ›å»ºé¢„åˆ¶ä½“: {itemData.itemName}");
+                    Debug.Log($"´´½¨Ô¤ÖÆÌå: {itemData.itemName}");
                 }
             }
         }
@@ -412,50 +412,50 @@ public class ItemSpawner : BaseItemSpawn
         if (createdCount > 0)
         {
             UnityEditor.AssetDatabase.Refresh();
-            Debug.Log($"æˆåŠŸåˆ›å»º {createdCount} ä¸ªåŸºç¡€é¢„åˆ¶ä½“ï¼è¯·é‡æ–°åŠ è½½ç‰©å“æ•°æ®ã€‚");
+            Debug.Log($"³É¹¦´´½¨ {createdCount} ¸ö»ù´¡Ô¤ÖÆÌå£¡ÇëÖØĞÂ¼ÓÔØÎïÆ·Êı¾İ¡£");
 
-            // é‡æ–°åŠ è½½é¢„åˆ¶ä½“
+            // ÖØĞÂ¼ÓÔØÔ¤ÖÆÌå
             LoadPrefabsFromFolder();
         }
         else
         {
-            Debug.Log("æ²¡æœ‰éœ€è¦åˆ›å»ºçš„é¢„åˆ¶ä½“ã€‚");
+            Debug.Log("Ã»ÓĞĞèÒª´´½¨µÄÔ¤ÖÆÌå¡£");
         }
 #else
-        Debug.LogWarning("æ­¤åŠŸèƒ½ä»…åœ¨ç¼–è¾‘å™¨ä¸­å¯ç”¨ï¼");
+        Debug.LogWarning("´Ë¹¦ÄÜ½öÔÚ±à¼­Æ÷ÖĞ¿ÉÓÃ£¡");
 #endif
     }
 
 #if UNITY_EDITOR
-    // åˆ›å»ºåŸºç¡€ç‰©å“é¢„åˆ¶ä½“
+    // ´´½¨»ù´¡ÎïÆ·Ô¤ÖÆÌå
     private GameObject CreateBasicItemPrefab(InventorySystemItemDataSO itemData)
     {
-        // åˆ›å»ºæ ¹å¯¹è±¡
+        // ´´½¨¸ù¶ÔÏó
         GameObject root = new GameObject(itemData.itemName);
-        root.layer = 5; // UIå±‚
+        root.layer = 5; // UI²ã
 
-        // æ·»åŠ RectTransform
+        // Ìí¼ÓRectTransform
         RectTransform rectTransform = root.AddComponent<RectTransform>();
-        rectTransform.sizeDelta = new Vector2(itemData.width * 64, itemData.height * 64); // å‡è®¾æ¯æ ¼64åƒç´ 
+        rectTransform.sizeDelta = new Vector2(itemData.width * 64, itemData.height * 64); // ¼ÙÉèÃ¿¸ñ64ÏñËØ
 
-        // æ·»åŠ CanvasGroup
+        // Ìí¼ÓCanvasGroup
         root.AddComponent<CanvasGroup>();
 
-        // æ·»åŠ InventorySystemItemç»„ä»¶
+        // Ìí¼ÓInventorySystemItem×é¼ş
         var itemComponent = root.AddComponent<InventorySystemItem>();
 
-        // æ·»åŠ DraggableItemç»„ä»¶
+        // Ìí¼ÓDraggableItem×é¼ş
         try
         {
             var dragHandler = root.AddComponent<DraggableItem>();
-            // DraggableItemä¼šè‡ªåŠ¨å¤„ç†ä¸InventorySystemItemçš„å…³è”
+            // DraggableItem»á×Ô¶¯´¦ÀíÓëInventorySystemItemµÄ¹ØÁª
         }
         catch
         {
-            Debug.LogWarning($"æ— æ³•æ·»åŠ DraggableItemåˆ° {itemData.itemName}");
+            Debug.LogWarning($"ÎŞ·¨Ìí¼ÓDraggableItemµ½ {itemData.itemName}");
         }
 
-        // åˆ›å»ºèƒŒæ™¯
+        // ´´½¨±³¾°
         GameObject background = new GameObject("ItemBackground");
         background.transform.SetParent(root.transform);
         background.layer = 5;
@@ -469,7 +469,7 @@ public class ItemSpawner : BaseItemSpawn
         var bgImage = background.AddComponent<UnityEngine.UI.RawImage>();
         bgImage.color = new Color(0.345f, 0.231f, 0.502f, 0.8f);
 
-        // åˆ›å»ºå›¾æ ‡
+        // ´´½¨Í¼±ê
         GameObject icon = new GameObject("ItemSprite");
         icon.transform.SetParent(root.transform);
         icon.layer = 5;
@@ -484,7 +484,7 @@ public class ItemSpawner : BaseItemSpawn
         iconImage.sprite = itemData.itemIcon;
         iconImage.preserveAspect = true;
 
-        // åˆ›å»ºæ•°æ®æŒæœ‰è€…
+        // ´´½¨Êı¾İ³ÖÓĞÕß
         GameObject dataHolder = new GameObject("ItemScriptableObject");
         dataHolder.transform.SetParent(root.transform);
         dataHolder.layer = 5;
@@ -498,7 +498,7 @@ public class ItemSpawner : BaseItemSpawn
         var dataHolderComponent = dataHolder.AddComponent<ItemDataHolder>();
         dataHolderComponent.SetItemData(itemData);
 
-        // è®¾ç½®å¼•ç”¨
+        // ÉèÖÃÒıÓÃ
         try
         {
             var itemIconField = dataHolderComponent.GetType().GetField("itemIconImage");
@@ -515,44 +515,44 @@ public class ItemSpawner : BaseItemSpawn
         }
         catch
         {
-            Debug.LogWarning($"æ— æ³•è®¾ç½® {itemData.itemName} çš„ç»„ä»¶å¼•ç”¨");
+            Debug.LogWarning($"ÎŞ·¨ÉèÖÃ {itemData.itemName} µÄ×é¼şÒıÓÃ");
         }
 
         return root;
     }
 
-    // è·å–ç±»åˆ«æ–‡ä»¶å¤¹åç§°
+    // »ñÈ¡Àà±ğÎÄ¼ş¼ĞÃû³Æ
     private string GetCategoryFolderName(InventorySystemItemCategory category)
     {
         switch (category)
         {
-            case InventorySystemItemCategory.Helmet: return "å¤´ç›”Helmet";
-            case InventorySystemItemCategory.Armor: return "æŠ¤ç”²Armor";
-            case InventorySystemItemCategory.TacticalRig: return "æˆ˜æœ¯æŒ‚å…·TacticalRig";
-            case InventorySystemItemCategory.Backpack: return "èƒŒåŒ…Backpack";
-            case InventorySystemItemCategory.Weapon: return "æ­¦å™¨Weapon";
-            case InventorySystemItemCategory.Ammunition: return "å¼¹è¯Ammunition";
-            case InventorySystemItemCategory.Food: return "é£Ÿç‰©Food";
-            case InventorySystemItemCategory.Drink: return "é¥®æ–™Drink";
-            case InventorySystemItemCategory.Healing: return "æ²»ç–—ç”¨å“Healing";
-            case InventorySystemItemCategory.Hemostatic: return "æ­¢è¡€å‰‚Hemostatic";
-            case InventorySystemItemCategory.Sedative: return "é•‡é™å‰‚Sedative";
-            case InventorySystemItemCategory.Intelligence: return "æƒ…æŠ¥Intelligence";
-            case InventorySystemItemCategory.Currency: return "è´§å¸Currency";
-            default: return "å…¶ä»–Other";
+            case InventorySystemItemCategory.Helmet: return "Í·¿øHelmet";
+            case InventorySystemItemCategory.Armor: return "»¤¼×Armor";
+            case InventorySystemItemCategory.TacticalRig: return "Õ½Êõ¹Ò¾ßTacticalRig";
+            case InventorySystemItemCategory.Backpack: return "±³°üBackpack";
+            case InventorySystemItemCategory.Weapon: return "ÎäÆ÷Weapon";
+            case InventorySystemItemCategory.Ammunition: return "µ¯Ò©Ammunition";
+            case InventorySystemItemCategory.Food: return "Ê³ÎïFood";
+            case InventorySystemItemCategory.Drink: return "ÒûÁÏDrink";
+            case InventorySystemItemCategory.Healing: return "ÖÎÁÆÓÃÆ·Healing";
+            case InventorySystemItemCategory.Hemostatic: return "Ö¹Ñª¼ÁHemostatic";
+            case InventorySystemItemCategory.Sedative: return "Õò¾²¼ÁSedative";
+            case InventorySystemItemCategory.Intelligence: return "Çé±¨Intelligence";
+            case InventorySystemItemCategory.Currency: return "»õ±ÒCurrency";
+            default: return "ÆäËûOther";
         }
     }
 #endif
 
-    // ===== ISaveableæ¥å£æ‰©å±•å®ç° =====
+    // ===== ISaveable½Ó¿ÚÀ©Õ¹ÊµÏÖ =====
 
     /// <summary>
-    /// ç‰©å“ç”Ÿæˆå™¨ä¿å­˜æ•°æ®ç±»ï¼ˆç»§æ‰¿åŸºç±»ï¼‰
+    /// ÎïÆ·Éú³ÉÆ÷±£´æÊı¾İÀà£¨¼Ì³Ğ»ùÀà£©
     /// </summary>
     [System.Serializable]
     public class ItemSpawnerSaveData : BaseItemSpawnSaveData
     {
-        // ç‰©å“ç±»å‹é€‰æ‹©çŠ¶æ€
+        // ÎïÆ·ÀàĞÍÑ¡Ôñ×´Ì¬
         public bool spawnHelmet;
         public bool spawnArmor;
         public bool spawnTacticalRig;
@@ -567,29 +567,29 @@ public class ItemSpawner : BaseItemSpawn
         public bool spawnIntelligence;
         public bool spawnCurrency;
         
-        // ç”Ÿæˆå†å²è®°å½•
+        // Éú³ÉÀúÊ·¼ÇÂ¼
         public List<SpawnHistoryRecord> spawnHistory;
-        public int totalSpawnAttempts; // æ€»å°è¯•ç”Ÿæˆæ¬¡æ•°
-        public int successfulSpawns; // æˆåŠŸç”Ÿæˆæ¬¡æ•°
-        public float averageSpawnTime; // å¹³å‡ç”Ÿæˆæ—¶é—´
-        public string lastSpawnedCategory; // æœ€åç”Ÿæˆçš„ç‰©å“ç±»åˆ«
+        public int totalSpawnAttempts; // ×Ü³¢ÊÔÉú³É´ÎÊı
+        public int successfulSpawns; // ³É¹¦Éú³É´ÎÊı
+        public float averageSpawnTime; // Æ½¾ùÉú³ÉÊ±¼ä
+        public string lastSpawnedCategory; // ×îºóÉú³ÉµÄÎïÆ·Àà±ğ
     }
 
     /// <summary>
-    /// ç”Ÿæˆå†å²è®°å½•
+    /// Éú³ÉÀúÊ·¼ÇÂ¼
     /// </summary>
     [System.Serializable]
     public class SpawnHistoryRecord
     {
-        public float timestamp; // æ—¶é—´æˆ³
-        public string itemName; // ç‰©å“åç§°
-        public string itemCategory; // ç‰©å“ç±»åˆ«
-        public Vector2Int gridPosition; // ç½‘æ ¼ä½ç½®
-        public bool wasSuccessful; // æ˜¯å¦æˆåŠŸ
-        public string failureReason; // å¤±è´¥åŸå› ï¼ˆå¦‚æœæœ‰ï¼‰
+        public float timestamp; // Ê±¼ä´Á
+        public string itemName; // ÎïÆ·Ãû³Æ
+        public string itemCategory; // ÎïÆ·Àà±ğ
+        public Vector2Int gridPosition; // Íø¸ñÎ»ÖÃ
+        public bool wasSuccessful; // ÊÇ·ñ³É¹¦
+        public string failureReason; // Ê§°ÜÔ­Òò£¨Èç¹ûÓĞ£©
     }
 
-    // ç”Ÿæˆå†å²è·Ÿè¸ª
+    // Éú³ÉÀúÊ·¸ú×Ù
     private List<SpawnHistoryRecord> spawnHistory = new List<SpawnHistoryRecord>();
     private int totalSpawnAttempts = 0;
     private int successfulSpawns = 0;
@@ -597,8 +597,8 @@ public class ItemSpawner : BaseItemSpawn
     private string lastSpawnedCategory = "";
 
     /// <summary>
-    /// é‡å†™ç”Ÿæˆæ–°çš„ä¿å­˜IDæ–¹æ³•
-    /// æ ¼å¼: ItemSpawner_[ç”Ÿæˆå™¨åç§°]_[8ä½GUID]_[å®ä¾‹ID]
+    /// ÖØĞ´Éú³ÉĞÂµÄ±£´æID·½·¨
+    /// ¸ñÊ½: ItemSpawner_[Éú³ÉÆ÷Ãû³Æ]_[8Î»GUID]_[ÊµÀıID]
     /// </summary>
     public override void GenerateNewSaveID()
     {
@@ -610,18 +610,18 @@ public class ItemSpawner : BaseItemSpawn
         
         if (Application.isPlaying && showDebugInfo)
         {
-            Debug.Log($"ä¸ºç‰©å“ç”Ÿæˆå™¨ç”Ÿæˆæ–°çš„ä¿å­˜ID: {newSaveID}");
+            Debug.Log($"ÎªÎïÆ·Éú³ÉÆ÷Éú³ÉĞÂµÄ±£´æID: {newSaveID}");
         }
     }
 
     /// <summary>
-    /// é‡å†™è·å–ä¿å­˜æ•°æ®æ–¹æ³•
+    /// ÖØĞ´»ñÈ¡±£´æÊı¾İ·½·¨
     /// </summary>
     public override object GetSaveData()
     {
         ItemSpawnerSaveData saveData = new ItemSpawnerSaveData();
         
-        // ç»§æ‰¿åŸºç±»æ•°æ®
+        // ¼Ì³Ğ»ùÀàÊı¾İ
         BaseItemSpawnSaveData baseData = (BaseItemSpawnSaveData)base.GetSaveData();
         saveData.spawnerName = baseData.spawnerName;
         saveData.totalSpawnedCount = baseData.totalSpawnedCount;
@@ -632,7 +632,7 @@ public class ItemSpawner : BaseItemSpawn
         saveData.isActive = baseData.isActive;
         saveData.targetGridID = baseData.targetGridID;
         
-        // ä¿å­˜ç‰©å“ç±»å‹é€‰æ‹©çŠ¶æ€
+        // ±£´æÎïÆ·ÀàĞÍÑ¡Ôñ×´Ì¬
         saveData.spawnHelmet = this.spawnHelmet;
         saveData.spawnArmor = this.spawnArmor;
         saveData.spawnTacticalRig = this.spawnTacticalRig;
@@ -647,7 +647,7 @@ public class ItemSpawner : BaseItemSpawn
         saveData.spawnIntelligence = this.spawnIntelligence;
         saveData.spawnCurrency = this.spawnCurrency;
         
-        // ä¿å­˜ç”Ÿæˆå†å²å’Œç»Ÿè®¡æ•°æ®
+        // ±£´æÉú³ÉÀúÊ·ºÍÍ³¼ÆÊı¾İ
         saveData.spawnHistory = new List<SpawnHistoryRecord>(spawnHistory);
         saveData.totalSpawnAttempts = totalSpawnAttempts;
         saveData.successfulSpawns = successfulSpawns;
@@ -658,7 +658,7 @@ public class ItemSpawner : BaseItemSpawn
     }
 
     /// <summary>
-    /// é‡å†™åŠ è½½ä¿å­˜æ•°æ®æ–¹æ³•
+    /// ÖØĞ´¼ÓÔØ±£´æÊı¾İ·½·¨
     /// </summary>
     public override void LoadSaveData(object data)
     {
@@ -666,10 +666,10 @@ public class ItemSpawner : BaseItemSpawn
         {
             try
             {
-                // å…ˆè°ƒç”¨åŸºç±»åŠ è½½æ–¹æ³•
+                // ÏÈµ÷ÓÃ»ùÀà¼ÓÔØ·½·¨
                 base.LoadSaveData(saveData);
                 
-                // æ¢å¤ç‰©å“ç±»å‹é€‰æ‹©çŠ¶æ€
+                // »Ö¸´ÎïÆ·ÀàĞÍÑ¡Ôñ×´Ì¬
                 this.spawnHelmet = saveData.spawnHelmet;
                 this.spawnArmor = saveData.spawnArmor;
                 this.spawnTacticalRig = saveData.spawnTacticalRig;
@@ -684,7 +684,7 @@ public class ItemSpawner : BaseItemSpawn
                 this.spawnIntelligence = saveData.spawnIntelligence;
                 this.spawnCurrency = saveData.spawnCurrency;
                 
-                // æ¢å¤ç”Ÿæˆå†å²å’Œç»Ÿè®¡æ•°æ®
+                // »Ö¸´Éú³ÉÀúÊ·ºÍÍ³¼ÆÊı¾İ
                 if (saveData.spawnHistory != null)
                 {
                     spawnHistory = new List<SpawnHistoryRecord>(saveData.spawnHistory);
@@ -696,23 +696,23 @@ public class ItemSpawner : BaseItemSpawn
                 
                 if (showDebugInfo)
                 {
-                    Debug.Log($"æˆåŠŸåŠ è½½ç‰©å“ç”Ÿæˆå™¨ä¿å­˜æ•°æ®: {GetSaveID()}, å†å²è®°å½•: {spawnHistory.Count} æ¡");
+                    Debug.Log($"³É¹¦¼ÓÔØÎïÆ·Éú³ÉÆ÷±£´æÊı¾İ: {GetSaveID()}, ÀúÊ·¼ÇÂ¼: {spawnHistory.Count} Ìõ");
                 }
             }
             catch (System.Exception e)
             {
-                Debug.LogError($"åŠ è½½ç‰©å“ç”Ÿæˆå™¨ä¿å­˜æ•°æ®å¤±è´¥: {e.Message}");
+                Debug.LogError($"¼ÓÔØÎïÆ·Éú³ÉÆ÷±£´æÊı¾İÊ§°Ü: {e.Message}");
             }
         }
         else
         {
-            // å¦‚æœä¸æ˜¯ItemSpawnerSaveDataï¼Œå°è¯•è°ƒç”¨åŸºç±»æ–¹æ³•
+            // Èç¹û²»ÊÇItemSpawnerSaveData£¬³¢ÊÔµ÷ÓÃ»ùÀà·½·¨
             base.LoadSaveData(data);
         }
     }
 
     /// <summary>
-    /// è®°å½•ç”Ÿæˆå†å²
+    /// ¼ÇÂ¼Éú³ÉÀúÊ·
     /// </summary>
     private void RecordSpawnHistory(InventorySystemItemDataSO itemData, Vector2Int gridPos, bool success, string failureReason = "")
     {
@@ -737,7 +737,7 @@ public class ItemSpawner : BaseItemSpawn
             lastSpawnedCategory = record.itemCategory;
         }
         
-        // é™åˆ¶å†å²è®°å½•æ•°é‡ï¼Œé¿å…å†…å­˜è¿‡åº¦ä½¿ç”¨
+        // ÏŞÖÆÀúÊ·¼ÇÂ¼ÊıÁ¿£¬±ÜÃâÄÚ´æ¹ı¶ÈÊ¹ÓÃ
         if (spawnHistory.Count > 1000)
         {
             spawnHistory.RemoveAt(0);
@@ -745,12 +745,12 @@ public class ItemSpawner : BaseItemSpawn
         
         if (showDebugInfo && success)
         {
-            Debug.Log($"è®°å½•ç”Ÿæˆå†å²: {record.itemName} åœ¨ä½ç½® {gridPos}, æˆåŠŸç‡: {GetSuccessRate():F1}%");
+            Debug.Log($"¼ÇÂ¼Éú³ÉÀúÊ·: {record.itemName} ÔÚÎ»ÖÃ {gridPos}, ³É¹¦ÂÊ: {GetSuccessRate():F1}%");
         }
     }
 
     /// <summary>
-    /// é‡å†™SpawnItemAtPositionæ–¹æ³•ï¼Œæ·»åŠ å†å²è®°å½•
+    /// ÖØĞ´SpawnItemAtPosition·½·¨£¬Ìí¼ÓÀúÊ·¼ÇÂ¼
     /// </summary>
     public override GameObject SpawnItemAtPosition(GameObject prefab, InventorySystemItemDataSO itemData, Vector2Int gridPos)
     {
@@ -758,7 +758,7 @@ public class ItemSpawner : BaseItemSpawn
         GameObject result = base.SpawnItemAtPosition(prefab, itemData, gridPos);
         
         bool success = result != null;
-        string failureReason = success ? "" : "ç”Ÿæˆå¤±è´¥";
+        string failureReason = success ? "" : "Éú³ÉÊ§°Ü";
         
         RecordSpawnHistory(itemData, gridPos, success, failureReason);
         
@@ -766,7 +766,7 @@ public class ItemSpawner : BaseItemSpawn
     }
 
     /// <summary>
-    /// è·å–ç”ŸæˆæˆåŠŸç‡
+    /// »ñÈ¡Éú³É³É¹¦ÂÊ
     /// </summary>
     public float GetSuccessRate()
     {
@@ -774,7 +774,7 @@ public class ItemSpawner : BaseItemSpawn
     }
 
     /// <summary>
-    /// è·å–å¹³å‡ç”Ÿæˆæ—¶é—´
+    /// »ñÈ¡Æ½¾ùÉú³ÉÊ±¼ä
     /// </summary>
     public float GetAverageSpawnTime()
     {
@@ -782,7 +782,7 @@ public class ItemSpawner : BaseItemSpawn
     }
 
     /// <summary>
-    /// è·å–ç”Ÿæˆå†å²è®°å½•
+    /// »ñÈ¡Éú³ÉÀúÊ·¼ÇÂ¼
     /// </summary>
     public List<SpawnHistoryRecord> GetSpawnHistory()
     {
@@ -790,7 +790,7 @@ public class ItemSpawner : BaseItemSpawn
     }
 
     /// <summary>
-    /// è·å–æŒ‰ç±»åˆ«åˆ†ç»„çš„ç”Ÿæˆç»Ÿè®¡
+    /// »ñÈ¡°´Àà±ğ·Ö×éµÄÉú³ÉÍ³¼Æ
     /// </summary>
     public Dictionary<string, int> GetSpawnStatsByCategory()
     {
@@ -815,7 +815,7 @@ public class ItemSpawner : BaseItemSpawn
     }
 
     /// <summary>
-    /// æ¸…é™¤ç”Ÿæˆå†å²
+    /// Çå³ıÉú³ÉÀúÊ·
     /// </summary>
     public void ClearSpawnHistory()
     {
@@ -827,45 +827,45 @@ public class ItemSpawner : BaseItemSpawn
         
         if (showDebugInfo)
         {
-            Debug.Log("å·²æ¸…é™¤ç”Ÿæˆå†å²è®°å½•");
+            Debug.Log("ÒÑÇå³ıÉú³ÉÀúÊ·¼ÇÂ¼");
         }
     }
 
     /// <summary>
-    /// é‡å†™éªŒè¯æ•°æ®æ–¹æ³•
+    /// ÖØĞ´ÑéÖ¤Êı¾İ·½·¨
     /// </summary>
     public override bool ValidateData()
     {
         bool isValid = base.ValidateData();
         
-        // éªŒè¯ç”Ÿæˆå†å²åˆ—è¡¨
+        // ÑéÖ¤Éú³ÉÀúÊ·ÁĞ±í
         if (spawnHistory == null)
         {
             spawnHistory = new List<SpawnHistoryRecord>();
             isValid = false;
-            Debug.LogWarning("ç”Ÿæˆå†å²åˆ—è¡¨ä¸ºç©ºï¼Œå·²é‡æ–°åˆå§‹åŒ–");
+            Debug.LogWarning("Éú³ÉÀúÊ·ÁĞ±íÎª¿Õ£¬ÒÑÖØĞÂ³õÊ¼»¯");
         }
         
-        // éªŒè¯ç»Ÿè®¡æ•°æ®çš„ä¸€è‡´æ€§
+        // ÑéÖ¤Í³¼ÆÊı¾İµÄÒ»ÖÂĞÔ
         if (totalSpawnAttempts < 0 || successfulSpawns < 0 || successfulSpawns > totalSpawnAttempts)
         {
             totalSpawnAttempts = spawnHistory.Count;
             successfulSpawns = spawnHistory.Count(r => r.wasSuccessful);
             isValid = false;
-            Debug.LogWarning("ç»Ÿè®¡æ•°æ®ä¸ä¸€è‡´ï¼Œå·²é‡æ–°è®¡ç®—");
+            Debug.LogWarning("Í³¼ÆÊı¾İ²»Ò»ÖÂ£¬ÒÑÖØĞÂ¼ÆËã");
         }
         
         return isValid;
     }
 
     /// <summary>
-    /// é‡å†™åˆå§‹åŒ–ä¿å­˜ç³»ç»Ÿæ–¹æ³•
+    /// ÖØĞ´³õÊ¼»¯±£´æÏµÍ³·½·¨
     /// </summary>
     public override void InitializeSaveSystem()
     {
         base.InitializeSaveSystem();
         
-        // åˆå§‹åŒ–ç”Ÿæˆå†å²
+        // ³õÊ¼»¯Éú³ÉÀúÊ·
         if (spawnHistory == null)
         {
             spawnHistory = new List<SpawnHistoryRecord>();
@@ -873,12 +873,12 @@ public class ItemSpawner : BaseItemSpawn
         
         if (showDebugInfo)
         {
-            Debug.Log($"ç‰©å“ç”Ÿæˆå™¨ä¿å­˜ç³»ç»Ÿåˆå§‹åŒ–å®Œæˆ: {GetSaveID()}, å†å²è®°å½•: {spawnHistory.Count} æ¡");
+            Debug.Log($"ÎïÆ·Éú³ÉÆ÷±£´æÏµÍ³³õÊ¼»¯Íê³É: {GetSaveID()}, ÀúÊ·¼ÇÂ¼: {spawnHistory.Count} Ìõ");
         }
     }
 
     /// <summary>
-    /// é‡å†™è·å–çŠ¶æ€æ‘˜è¦æ–¹æ³•
+    /// ÖØĞ´»ñÈ¡×´Ì¬ÕªÒª·½·¨
     /// </summary>
     public override string GetSpawnerStatusSummary()
     {
@@ -887,31 +887,31 @@ public class ItemSpawner : BaseItemSpawn
         string avgTime = GetAverageSpawnTime().ToString("F2");
         string historyCount = spawnHistory.Count.ToString();
         
-        return $"{baseInfo}, æˆåŠŸç‡:{successRate}%, å¹³å‡æ—¶é—´:{avgTime}s, å†å²è®°å½•:{historyCount}æ¡";
+        return $"{baseInfo}, ³É¹¦ÂÊ:{successRate}%, Æ½¾ùÊ±¼ä:{avgTime}s, ÀúÊ·¼ÇÂ¼:{historyCount}Ìõ";
     }
 
     /// <summary>
-    /// è·å–å½“å‰é€‰æ‹©çš„ç‰©å“ç±»å‹æ‘˜è¦
+    /// »ñÈ¡µ±Ç°Ñ¡ÔñµÄÎïÆ·ÀàĞÍÕªÒª
     /// </summary>
     public string GetSelectedCategoriesSummary()
     {
         List<string> selectedCategories = new List<string>();
         
-        if (spawnHelmet) selectedCategories.Add("å¤´ç›”");
-        if (spawnArmor) selectedCategories.Add("æŠ¤ç”²");
-        if (spawnTacticalRig) selectedCategories.Add("æˆ˜æœ¯æŒ‚å…·");
-        if (spawnBackpack) selectedCategories.Add("èƒŒåŒ…");
-        if (spawnWeapon) selectedCategories.Add("æ­¦å™¨");
-        if (spawnAmmunition) selectedCategories.Add("å¼¹è¯");
-        if (spawnFood) selectedCategories.Add("é£Ÿç‰©");
-        if (spawnDrink) selectedCategories.Add("é¥®æ–™");
-        if (spawnHealing) selectedCategories.Add("æ²»ç–—");
-        if (spawnHemostatic) selectedCategories.Add("æ­¢è¡€");
-        if (spawnSedative) selectedCategories.Add("é•‡é™");
-        if (spawnIntelligence) selectedCategories.Add("æƒ…æŠ¥");
-        if (spawnCurrency) selectedCategories.Add("è´§å¸");
+        if (spawnHelmet) selectedCategories.Add("Í·¿ø");
+        if (spawnArmor) selectedCategories.Add("»¤¼×");
+        if (spawnTacticalRig) selectedCategories.Add("Õ½Êõ¹Ò¾ß");
+        if (spawnBackpack) selectedCategories.Add("±³°ü");
+        if (spawnWeapon) selectedCategories.Add("ÎäÆ÷");
+        if (spawnAmmunition) selectedCategories.Add("µ¯Ò©");
+        if (spawnFood) selectedCategories.Add("Ê³Îï");
+        if (spawnDrink) selectedCategories.Add("ÒûÁÏ");
+        if (spawnHealing) selectedCategories.Add("ÖÎÁÆ");
+        if (spawnHemostatic) selectedCategories.Add("Ö¹Ñª");
+        if (spawnSedative) selectedCategories.Add("Õò¾²");
+        if (spawnIntelligence) selectedCategories.Add("Çé±¨");
+        if (spawnCurrency) selectedCategories.Add("»õ±Ò");
         
-        return selectedCategories.Count > 0 ? string.Join(", ", selectedCategories) : "æ— é€‰æ‹©";
+        return selectedCategories.Count > 0 ? string.Join(", ", selectedCategories) : "ÎŞÑ¡Ôñ";
     }
 
 }

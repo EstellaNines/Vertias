@@ -3,57 +3,57 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-// ÎïÆ·Êı¾İ³ÖÓĞÕß£¬ÓÃÓÚÎïÆ·Ô¤ÖÆÌåÉÏ£¬³ÖÓĞ InventorySystemItemDataSO Êı¾İ
-// Ö§³ÖÊµÀıÊı¾İ´æ´¢ºÍ¶¯Ì¬ÊôĞÔ±£´æ
+// ç‰©å“æ•°æ®æŒæœ‰è€…ï¼Œç”¨äºç‰©å“é¢„åˆ¶ä½“ä¸Šï¼ŒæŒæœ‰ InventorySystemItemDataSO æ•°æ®
+// æ”¯æŒå®ä¾‹æ•°æ®å­˜å‚¨å’ŒåŠ¨æ€å±æ€§ä¿å­˜
 [System.Serializable]
 public class ItemInstanceData
 {
-	// ¶¯Ì¬ÊôĞÔÊı¾İ
-	public float currentDurability = 100f; // µ±Ç°ÄÍ¾Ã¶È
-	public int currentStackCount = 1; // µ±Ç°¶ÑµşÊıÁ¿
-	public float currentHealAmount = 0f; // µ±Ç°ÖÎÁÆÁ¿
-	public int currentUsageCount = 0; // µ±Ç°Ê¹ÓÃ´ÎÊı
-	public bool isModified = false; // ÊÇ·ñ±»ĞŞ¸Ä¹ı
-	public Dictionary<string, object> customProperties = new Dictionary<string, object>(); // ×Ô¶¨ÒåÊôĞÔ
+	// åŠ¨æ€å±æ€§æ•°æ®
+	public float currentDurability = 100f; // å½“å‰è€ä¹…åº¦
+	public int currentStackCount = 1; // å½“å‰å †å æ•°é‡
+	public float currentHealAmount = 0f; // å½“å‰æ²»ç–—é‡
+	public int currentUsageCount = 0; // å½“å‰ä½¿ç”¨æ¬¡æ•°
+	public bool isModified = false; // æ˜¯å¦è¢«ä¿®æ”¹è¿‡
+	public Dictionary<string, object> customProperties = new Dictionary<string, object>(); // è‡ªå®šä¹‰å±æ€§
 
-	// ¹¹Ôìº¯Êı
+	// æ„é€ å‡½æ•°
 	public ItemInstanceData()
 	{
 		customProperties = new Dictionary<string, object>();
 	}
 
-	// ´ÓScriptableObject³õÊ¼»¯ÊµÀıÊı¾İ
+	// ä»ScriptableObjectåˆå§‹åŒ–å®ä¾‹æ•°æ®
 	public void InitializeFromItemData(InventorySystemItemDataSO itemData)
 	{
 		if (itemData == null) return;
 
 		currentDurability = itemData.durability;
-		currentStackCount = 1; // Ä¬ÈÏ¶ÑµşÊıÁ¿Îª1
+		currentStackCount = 1; // é»˜è®¤å †å æ•°é‡ä¸º1
 		currentHealAmount = itemData.maxHealAmount;
 		currentUsageCount = 0;
 		isModified = false;
 	}
 
-	// ÑéÖ¤Êı¾İÓĞĞ§ĞÔ
+	// éªŒè¯æ•°æ®æœ‰æ•ˆæ€§
 	public bool ValidateData(InventorySystemItemDataSO itemData)
 	{
 		if (itemData == null) return false;
 
-		// ÑéÖ¤ÄÍ¾Ã¶È·¶Î§
+		// éªŒè¯è€ä¹…åº¦èŒƒå›´
 		if (currentDurability < 0 || currentDurability > itemData.durability)
 		{
 			currentDurability = Mathf.Clamp(currentDurability, 0, itemData.durability);
 			isModified = true;
 		}
 
-		// ÑéÖ¤¶ÑµşÊıÁ¿
+		// éªŒè¯å †å æ•°é‡
 		if (currentStackCount < 1 || currentStackCount > itemData.maxStack)
 		{
 			currentStackCount = Mathf.Clamp(currentStackCount, 1, itemData.maxStack);
 			isModified = true;
 		}
 
-		// ÑéÖ¤ÖÎÁÆÁ¿
+		// éªŒè¯æ²»ç–—é‡
 		if (currentHealAmount < 0 || currentHealAmount > itemData.maxHealAmount)
 		{
 			currentHealAmount = Mathf.Clamp(currentHealAmount, 0, itemData.maxHealAmount);
@@ -63,7 +63,7 @@ public class ItemInstanceData
 		return true;
 	}
 
-	// ÖØÖÃÎªÄ¬ÈÏÖµ
+	// é‡ç½®ä¸ºé»˜è®¤å€¼
 	public void ResetToDefault(InventorySystemItemDataSO itemData)
 	{
 		InitializeFromItemData(itemData);
@@ -73,48 +73,48 @@ public class ItemInstanceData
 
 public class ItemDataHolder : MonoBehaviour
 {
-	[Header("ÎïÆ·Êı¾İ")]
+	[Header("ç‰©å“æ•°æ®")]
 	[SerializeField] private InventorySystemItemDataSO itemData;
 
-	[Header("ÊµÀıÊı¾İ")]
+	[Header("å®ä¾‹æ•°æ®")]
 	[SerializeField] private ItemInstanceData instanceData = new ItemInstanceData();
 
-	[Header("UI ×é¼şÒıÓÃ")]
+	[Header("UI ç»„ä»¶å¼•ç”¨")]
 	[SerializeField] private Image itemIconImage;
 	[SerializeField] private RawImage backgroundImage;
 
 
 	private void Awake()
 	{
-		// ³õÊ¼»¯ÊµÀıÊı¾İ
+		// åˆå§‹åŒ–å®ä¾‹æ•°æ®
 		if (instanceData == null)
 		{
 			instanceData = new ItemInstanceData();
 		}
 
-		// Èç¹ûÓĞÊı¾İ£¬×Ô¶¯Ë¢ĞÂ UI ÏÔÊ¾
+		// å¦‚æœæœ‰æ•°æ®ï¼Œè‡ªåŠ¨åˆ·æ–° UI æ˜¾ç¤º
 		if (itemData != null)
 		{
-			// ³õÊ¼»¯ÊµÀıÊı¾İ
+			// åˆå§‹åŒ–å®ä¾‹æ•°æ®
 			instanceData.InitializeFromItemData(itemData);
-			// ÑéÖ¤Êı¾İÓĞĞ§ĞÔ
+			// éªŒè¯æ•°æ®æœ‰æ•ˆæ€§
 			instanceData.ValidateData(itemData);
 			UpdateItemDisplay();
 		}
 	}
 
-	// »ñÈ¡ÎïÆ·Êı¾İ
+	// è·å–ç‰©å“æ•°æ®
 	public InventorySystemItemDataSO GetItemData()
 	{
 		return itemData;
 	}
 
-	// ÉèÖÃÎïÆ·Êı¾İ
-	// data ĞèÒªÎª InventorySystemItemDataSO
+	// è®¾ç½®ç‰©å“æ•°æ®
+	// data éœ€è¦ä¸º InventorySystemItemDataSO
 	public void SetItemData(InventorySystemItemDataSO data)
 	{
 		itemData = data;
-		// ÖØĞÂ³õÊ¼»¯ÊµÀıÊı¾İ
+		// é‡æ–°åˆå§‹åŒ–å®ä¾‹æ•°æ®
 		if (instanceData == null)
 		{
 			instanceData = new ItemInstanceData();
@@ -123,86 +123,86 @@ public class ItemDataHolder : MonoBehaviour
 		UpdateItemDisplay();
 	}
 
-	// === ÊµÀıÊı¾İ¹ÜÀí·½·¨ ===
+	// === å®ä¾‹æ•°æ®ç®¡ç†æ–¹æ³• ===
 
-	// »ñÈ¡ÊµÀıÊı¾İ
+	// è·å–å®ä¾‹æ•°æ®
 	public ItemInstanceData GetInstanceData()
 	{
 		return instanceData;
 	}
 
-	// ÉèÖÃÊµÀıÊı¾İ
+	// è®¾ç½®å®ä¾‹æ•°æ®
 	public void SetInstanceData(ItemInstanceData data)
 	{
 		if (data != null)
 		{
 			instanceData = data;
-			// ÑéÖ¤Êı¾İÓĞĞ§ĞÔ
+			// éªŒè¯æ•°æ®æœ‰æ•ˆæ€§
 			instanceData.ValidateData(itemData);
 		}
 	}
 
-	// »ñÈ¡µ±Ç°ÄÍ¾Ã¶È
+	// è·å–å½“å‰è€ä¹…åº¦
 	public float GetCurrentDurability()
 	{
 		return instanceData?.currentDurability ?? (itemData?.durability ?? 100f);
 	}
 
-	// ÉèÖÃµ±Ç°ÄÍ¾Ã¶È
+	// è®¾ç½®å½“å‰è€ä¹…åº¦
 	public void SetCurrentDurability(float durability)
 	{
 		if (instanceData != null)
 		{
 			instanceData.currentDurability = durability;
 			instanceData.isModified = true;
-			// ÑéÖ¤Êı¾İÓĞĞ§ĞÔ
+			// éªŒè¯æ•°æ®æœ‰æ•ˆæ€§
 			instanceData.ValidateData(itemData);
 		}
 	}
 
-	// »ñÈ¡µ±Ç°¶ÑµşÊıÁ¿
+	// è·å–å½“å‰å †å æ•°é‡
 	public int GetCurrentStackCount()
 	{
 		return instanceData?.currentStackCount ?? 1;
 	}
 
-	// ÉèÖÃµ±Ç°¶ÑµşÊıÁ¿
+	// è®¾ç½®å½“å‰å †å æ•°é‡
 	public void SetCurrentStackCount(int count)
 	{
 		if (instanceData != null)
 		{
 			instanceData.currentStackCount = count;
 			instanceData.isModified = true;
-			// ÑéÖ¤Êı¾İÓĞĞ§ĞÔ
+			// éªŒè¯æ•°æ®æœ‰æ•ˆæ€§
 			instanceData.ValidateData(itemData);
 		}
 	}
 
-	// »ñÈ¡µ±Ç°ÖÎÁÆÁ¿
+	// è·å–å½“å‰æ²»ç–—é‡
 	public float GetCurrentHealAmount()
 	{
 		return instanceData?.currentHealAmount ?? (itemData?.maxHealAmount ?? 0f);
 	}
 
-	// ÉèÖÃµ±Ç°ÖÎÁÆÁ¿
+	// è®¾ç½®å½“å‰æ²»ç–—é‡
 	public void SetCurrentHealAmount(float amount)
 	{
 		if (instanceData != null)
 		{
 			instanceData.currentHealAmount = amount;
 			instanceData.isModified = true;
-			// ÑéÖ¤Êı¾İÓĞĞ§ĞÔ
+			// éªŒè¯æ•°æ®æœ‰æ•ˆæ€§
 			instanceData.ValidateData(itemData);
 		}
 	}
 
-	// »ñÈ¡Ê¹ÓÃ´ÎÊı
+	// è·å–ä½¿ç”¨æ¬¡æ•°
 	public int GetCurrentUsageCount()
 	{
 		return instanceData?.currentUsageCount ?? 0;
 	}
 
-	// Ôö¼ÓÊ¹ÓÃ´ÎÊı
+	// å¢åŠ ä½¿ç”¨æ¬¡æ•°
 	public void IncrementUsageCount()
 	{
 		if (instanceData != null)
@@ -212,13 +212,13 @@ public class ItemDataHolder : MonoBehaviour
 		}
 	}
 
-	// ¼ì²éÎïÆ·ÊÇ·ñ±»ĞŞ¸Ä¹ı
+	// æ£€æŸ¥ç‰©å“æ˜¯å¦è¢«ä¿®æ”¹è¿‡
 	public bool IsModified()
 	{
 		return instanceData?.isModified ?? false;
 	}
 
-	// ÉèÖÃ×Ô¶¨ÒåÊôĞÔ
+	// è®¾ç½®è‡ªå®šä¹‰å±æ€§
 	public void SetCustomProperty(string key, object value)
 	{
 		if (instanceData != null && !string.IsNullOrEmpty(key))
@@ -228,7 +228,7 @@ public class ItemDataHolder : MonoBehaviour
 		}
 	}
 
-	// »ñÈ¡×Ô¶¨ÒåÊôĞÔ
+	// è·å–è‡ªå®šä¹‰å±æ€§
 	public T GetCustomProperty<T>(string key, T defaultValue = default(T))
 	{
 		if (instanceData != null && !string.IsNullOrEmpty(key) && instanceData.customProperties.ContainsKey(key))
@@ -245,7 +245,7 @@ public class ItemDataHolder : MonoBehaviour
 		return defaultValue;
 	}
 
-	// ÑéÖ¤²¢ĞŞ¸´ÊµÀıÊı¾İ
+	// éªŒè¯å¹¶ä¿®å¤å®ä¾‹æ•°æ®
 	public bool ValidateAndRepairInstanceData()
 	{
 		if (instanceData == null)
@@ -261,7 +261,7 @@ public class ItemDataHolder : MonoBehaviour
 		return instanceData.ValidateData(itemData);
 	}
 
-	// ÖØÖÃÊµÀıÊı¾İÎªÄ¬ÈÏÖµ
+	// é‡ç½®å®ä¾‹æ•°æ®ä¸ºé»˜è®¤å€¼
 	public void ResetInstanceData()
 	{
 		if (instanceData != null && itemData != null)
@@ -270,9 +270,9 @@ public class ItemDataHolder : MonoBehaviour
 		}
 	}
 
-	// === ĞòÁĞ»¯Ö§³Ö·½·¨ ===
+	// === åºåˆ—åŒ–æ”¯æŒæ–¹æ³• ===
 
-	// ĞòÁĞ»¯ÊµÀıÊı¾İÎªJSON×Ö·û´®
+	// åºåˆ—åŒ–å®ä¾‹æ•°æ®ä¸ºJSONå­—ç¬¦ä¸²
 	public string SerializeInstanceData()
 	{
 		if (instanceData == null) return "";
@@ -283,12 +283,12 @@ public class ItemDataHolder : MonoBehaviour
 		}
 		catch (System.Exception e)
 		{
-			Debug.LogError($"ĞòÁĞ»¯ÊµÀıÊı¾İÊ§°Ü: {e.Message}");
+			Debug.LogError($"åºåˆ—åŒ–å®ä¾‹æ•°æ®å¤±è´¥: {e.Message}");
 			return "";
 		}
 	}
 
-	// ´ÓJSON×Ö·û´®·´ĞòÁĞ»¯ÊµÀıÊı¾İ
+	// ä»JSONå­—ç¬¦ä¸²ååºåˆ—åŒ–å®ä¾‹æ•°æ®
 	public bool DeserializeInstanceData(string jsonData)
 	{
 		if (string.IsNullOrEmpty(jsonData)) return false;
@@ -299,65 +299,65 @@ public class ItemDataHolder : MonoBehaviour
 			if (deserializedData != null)
 			{
 				instanceData = deserializedData;
-				// ÖØĞÂ³õÊ¼»¯×Öµä£¨JsonUtility²»Ö§³Ö×ÖµäĞòÁĞ»¯£©
+				// é‡æ–°åˆå§‹åŒ–å­—å…¸ï¼ˆJsonUtilityä¸æ”¯æŒå­—å…¸åºåˆ—åŒ–ï¼‰
 				if (instanceData.customProperties == null)
 				{
 					instanceData.customProperties = new Dictionary<string, object>();
 				}
-				// ÑéÖ¤Êı¾İÓĞĞ§ĞÔ
+				// éªŒè¯æ•°æ®æœ‰æ•ˆæ€§
 				instanceData.ValidateData(itemData);
 				return true;
 			}
 		}
 		catch (System.Exception e)
 		{
-			Debug.LogError($"·´ĞòÁĞ»¯ÊµÀıÊı¾İÊ§°Ü: {e.Message}");
+			Debug.LogError($"ååºåˆ—åŒ–å®ä¾‹æ•°æ®å¤±è´¥: {e.Message}");
 		}
 
 		return false;
 	}
 
-	// Ë¢ĞÂÎïÆ· UI ÏÔÊ¾
+	// åˆ·æ–°ç‰©å“ UI æ˜¾ç¤º
 	public void UpdateItemDisplay()
 	{
 		if (itemData == null) return;
 
-		// ¸üĞÂÎïÆ·Í¼±ê
+		// æ›´æ–°ç‰©å“å›¾æ ‡
 		if (itemIconImage != null && itemData.itemIcon != null)
 		{
 			itemIconImage.sprite = itemData.itemIcon;
 		}
 
-		// ¸üĞÂ±³¾°ÑÕÉ«
+		// æ›´æ–°èƒŒæ™¯é¢œè‰²
 		if (backgroundImage != null)
 		{
 			backgroundImage.color = GetColorFromString(itemData.backgroundColor);
 		}
 
-		// ¸üĞÂÔ¤ÖÆÌå³ß´ç
+		// æ›´æ–°é¢„åˆ¶ä½“å°ºå¯¸
 		UpdatePrefabSize();
 	}
 
-	// ¸ù¾İÎïÆ·³ß´ç¸üĞÂÔ¤ÖÆÌå´óĞ¡
+	// æ ¹æ®ç‰©å“å°ºå¯¸æ›´æ–°é¢„åˆ¶ä½“å¤§å°
 	private void UpdatePrefabSize()
 	{
 		if (itemData == null) return;
 
-		// Ã¿¸ñ 64 ÏñËØ£¬ÓëÏµÍ³Í³Ò»
-		float cellSize = 64f; // ´Ó 80f µ÷ÕûÎª 64f
+		// æ¯æ ¼ 64 åƒç´ ï¼Œä¸ç³»ç»Ÿç»Ÿä¸€
+		float cellSize = 64f; // ä» 80f è°ƒæ•´ä¸º 64f
 		Vector2 newSize = new Vector2(
 			itemData.width * cellSize,
 			itemData.height * cellSize
 		);
 
-		// ¸üĞÂÔ¤ÖÆÌå RectTransform ³ß´ç
+		// æ›´æ–°é¢„åˆ¶ä½“ RectTransform å°ºå¯¸
 		RectTransform rectTransform = GetComponent<RectTransform>();
 		if (rectTransform != null)
 		{
 			rectTransform.sizeDelta = newSize;
 		}
 
-		// ¸üĞÂÎïÆ·Í¼±ê³ß´ç
+		// æ›´æ–°ç‰©å“å›¾æ ‡å°ºå¯¸
 		if (itemIconImage != null)
 		{
 			RectTransform iconRect = itemIconImage.GetComponent<RectTransform>();
@@ -367,7 +367,7 @@ public class ItemDataHolder : MonoBehaviour
 			}
 		}
 
-		// ¸üĞÂ±³¾°Í¼Æ¬³ß´ç
+		// æ›´æ–°èƒŒæ™¯å›¾ç‰‡å°ºå¯¸
 		if (backgroundImage != null)
 		{
 			RectTransform bgRect = backgroundImage.GetComponent<RectTransform>();
@@ -378,49 +378,49 @@ public class ItemDataHolder : MonoBehaviour
 		}
 	}
 
-	// ½«ÑÕÉ«Ãû³Æ×ªÎª Color
-	// colorName£ºÑÕÉ«Ãû
-	// ·µ»Ø£º¶ÔÓ¦µÄ Color Öµ
+	// å°†é¢œè‰²åç§°è½¬ä¸º Color
+	// colorNameï¼šé¢œè‰²å
+	// è¿”å›ï¼šå¯¹åº”çš„ Color å€¼
 	private Color GetColorFromString(string colorName)
 	{
 		Color baseColor;
 		switch (colorName?.ToLower())
 		{
 			case "blue":
-				baseColor = HexToColor("#2d3c4b"); // À¶É«
+				baseColor = HexToColor("#2d3c4b"); // è“è‰²
 				break;
 			case "violet":
 			case "purple":
-				baseColor = HexToColor("#583b80"); // ×ÏÉ«
+				baseColor = HexToColor("#583b80"); // ç´«è‰²
 				break;
 			case "yellow":
-				baseColor = HexToColor("#80550d"); // »ÆÉ«
+				baseColor = HexToColor("#80550d"); // é»„è‰²
 				break;
 			case "red":
-				baseColor = HexToColor("#350000"); // ºìÉ«
+				baseColor = HexToColor("#350000"); // çº¢è‰²
 				break;
 			default:
-				baseColor = Color.white; // Ä¬ÈÏ°×É«
+				baseColor = Color.white; // é»˜è®¤ç™½è‰²
 				break;
 		}
 
-		// ÉèÖÃÍ¸Ã÷¶ÈÎª 225
-		baseColor.a = 225f / 255f; // Í¸Ã÷¶È
+		// è®¾ç½®é€æ˜åº¦ä¸º 225
+		baseColor.a = 225f / 255f; // é€æ˜åº¦
 		return baseColor;
 	}
 
-	// Ê®Áù½øÖÆÑÕÉ«×ªÎª Color
-	// hex£ºÊ®Áù½øÖÆÑÕÉ«Öµ
-	// ·µ»Ø£ºColor ÊµÀı
+	// åå…­è¿›åˆ¶é¢œè‰²è½¬ä¸º Color
+	// hexï¼šåå…­è¿›åˆ¶é¢œè‰²å€¼
+	// è¿”å›ï¼šColor å®ä¾‹
 	private Color HexToColor(string hex)
 	{
-		// ÒÆ³ı #
+		// ç§»é™¤ #
 		if (hex.StartsWith("#"))
 			hex = hex.Substring(1);
 
-		// È·±£Îª 6 Î»Ê®Áù½øÖÆ
+		// ç¡®ä¿ä¸º 6 ä½åå…­è¿›åˆ¶
 		if (hex.Length != 6)
-			return new Color(1f, 1f, 1f, 225f / 255f); // Ä¬ÈÏ°×É«£¬Í¸Ã÷¶È 225
+			return new Color(1f, 1f, 1f, 225f / 255f); // é»˜è®¤ç™½è‰²ï¼Œé€æ˜åº¦ 225
 
 		try
 		{
@@ -428,88 +428,88 @@ public class ItemDataHolder : MonoBehaviour
 			byte g = System.Convert.ToByte(hex.Substring(2, 2), 16);
 			byte b = System.Convert.ToByte(hex.Substring(4, 2), 16);
 
-			return new Color32(r, g, b, 225); // Í¸Ã÷¶ÈÉèÎª 225
+			return new Color32(r, g, b, 225); // é€æ˜åº¦è®¾ä¸º 225
 		}
 		catch
 		{
-			return new Color(1f, 1f, 1f, 225f / 255f); // ×ª»»Ê§°ÜÊ±·µ»Ø°×É«£¬Í¸Ã÷¶È 225
+			return new Color(1f, 1f, 1f, 225f / 255f); // è½¬æ¢å¤±è´¥æ—¶è¿”å›ç™½è‰²ï¼Œé€æ˜åº¦ 225
 		}
 	}
 
-	// === Êı¾İ·ÃÎÊÆ÷ ===
+	// === æ•°æ®è®¿é—®å™¨ ===
 
-	// ÎïÆ· ID
+	// ç‰©å“ ID
 	public int ItemID => itemData?.id ?? 0;
 
-	// ÎïÆ·Ãû³Æ
+	// ç‰©å“åç§°
 	public string ItemName => itemData?.itemName ?? "";
 
-	// ÎïÆ·¸ß¶È
+	// ç‰©å“é«˜åº¦
 	public int ItemHeight => itemData?.height ?? 1;
 
-	// ÎïÆ·¿í¶È
+	// ç‰©å“å®½åº¦
 	public int ItemWidth => itemData?.width ?? 1;
 
-	// ÎïÆ·Ï¡ÓĞ¶È
+	// ç‰©å“ç¨€æœ‰åº¦
 	public string ItemRarity => itemData?.rarity ?? "";
 
-	// ÎïÆ·Àà±ğ
+	// ç‰©å“ç±»åˆ«
 	public string ItemCategory => itemData?.category ?? "";
 
-	// µ¯Ò©ÀàĞÍ
+	// å¼¹è¯ç±»å‹
 	public string BulletType => itemData?.BulletType ?? "";
 
-	// ÈİÁ¿¸ß¶È£¨±³°ü/Õ½Êõ±³ĞÄ£©
+	// å®¹é‡é«˜åº¦ï¼ˆèƒŒåŒ…/æˆ˜æœ¯èƒŒå¿ƒï¼‰
 	public int CellH => itemData?.CellH ?? 0;
 
-	// ÈİÁ¿¿í¶È£¨±³°ü/Õ½Êõ±³ĞÄ£©
+	// å®¹é‡å®½åº¦ï¼ˆèƒŒåŒ…/æˆ˜æœ¯èƒŒå¿ƒï¼‰
 	public int CellV => itemData?.CellV ?? 0;
 
-	// ±³¾°ÑÕÉ«Ãû
+	// èƒŒæ™¯é¢œè‰²å
 	public string BackgroundColor => itemData?.backgroundColor ?? "";
 
-	// ÎïÆ·Í¼±ê
+	// ç‰©å“å›¾æ ‡
 	public Sprite ItemIcon => itemData?.itemIcon;
 
-	// === ÊµÓÃ·½·¨ ===
+	// === å®ç”¨æ–¹æ³• ===
 
-	// ÊÇ·ñÎª±³°üÀàÎïÆ·
-	// ·µ»Ø£ºÊÇ·ñÎª±³°ü
+	// æ˜¯å¦ä¸ºèƒŒåŒ…ç±»ç‰©å“
+	// è¿”å›ï¼šæ˜¯å¦ä¸ºèƒŒåŒ…
 	public bool IsBackpack()
 	{
 		return itemData != null && itemData.category.ToLower().Contains("backpack");
 	}
 
-	// ÊÇ·ñÎªÎäÆ÷ÀàÎïÆ·
-	// ·µ»Ø£ºÊÇ·ñÎªÎäÆ÷
+	// æ˜¯å¦ä¸ºæ­¦å™¨ç±»ç‰©å“
+	// è¿”å›ï¼šæ˜¯å¦ä¸ºæ­¦å™¨
 	public bool IsWeapon()
 	{
 		return itemData != null && itemData.category.ToLower().Contains("weapon");
 	}
 
-	// ÊÇ·ñÎªµ¯Ò©ÀàÎïÆ·
-	// ·µ»Ø£ºÊÇ·ñÎªµ¯Ò©
+	// æ˜¯å¦ä¸ºå¼¹è¯ç±»ç‰©å“
+	// è¿”å›ï¼šæ˜¯å¦ä¸ºå¼¹è¯
 	public bool IsAmmunition()
 	{
 		return itemData != null && itemData.category.ToLower().Contains("ammunition");
 	}
 
-	// ÊÇ·ñ¾ßÓĞÄÚ²¿ÈİÁ¿£¨±³°ü/Õ½Êõ±³ĞÄ£©
-	// ·µ»Ø£ºÊÇ·ñ¾ßÓĞÈİÁ¿
+	// æ˜¯å¦å…·æœ‰å†…éƒ¨å®¹é‡ï¼ˆèƒŒåŒ…/æˆ˜æœ¯èƒŒå¿ƒï¼‰
+	// è¿”å›ï¼šæ˜¯å¦å…·æœ‰å®¹é‡
 	public bool HasCapacity()
 	{
 		return itemData != null && (itemData.CellH > 0 || itemData.CellV > 0);
 	}
 
-	// »ñÈ¡ÎïÆ·×ÜÈİÁ¿
-	// ·µ»Ø£ºÈİÁ¿£¨ºá¡Á×İ£©
+	// è·å–ç‰©å“æ€»å®¹é‡
+	// è¿”å›ï¼šå®¹é‡ï¼ˆæ¨ªÃ—çºµï¼‰
 	public int GetTotalCapacity()
 	{
 		return itemData != null ? itemData.CellH * itemData.CellV : 0;
 	}
 
-	// »ñÈ¡ÎïÆ·Õ¼ÓÃµÄ¸ñ×ÓÊı
-	// ·µ»Ø£ºÕ¼ÓÃ¸ñÊı
+	// è·å–ç‰©å“å ç”¨çš„æ ¼å­æ•°
+	// è¿”å›ï¼šå ç”¨æ ¼æ•°
 	public int GetOccupiedSlots()
 	{
 		return itemData != null ? itemData.height * itemData.width : 1;
@@ -517,80 +517,80 @@ public class ItemDataHolder : MonoBehaviour
 
 
 
-	// µ÷ÊÔ£º´òÓ¡ÎïÆ·ĞÅÏ¢
-	[ContextMenu("´òÓ¡ÎïÆ·ĞÅÏ¢")]
+	// è°ƒè¯•ï¼šæ‰“å°ç‰©å“ä¿¡æ¯
+	[ContextMenu("æ‰“å°ç‰©å“ä¿¡æ¯")]
 	public void LogItemInfo()
 	{
 		if (itemData == null)
 		{
-			Debug.Log("ÎïÆ·Êı¾İÎª¿Õ");
+			Debug.Log("ç‰©å“æ•°æ®ä¸ºç©º");
 			return;
 		}
 
 		string instanceInfo = "";
 		if (instanceData != null)
 		{
-			instanceInfo = $"\n=== ÊµÀıÊı¾İ ===\n" +
-						   $"µ±Ç°ÄÍ¾Ã¶È: {instanceData.currentDurability}/{itemData.durability}\n" +
-						   $"µ±Ç°¶ÑµşÊıÁ¿: {instanceData.currentStackCount}\n" +
-						   $"µ±Ç°ÖÎÁÆÁ¿: {instanceData.currentHealAmount}\n" +
-						   $"Ê¹ÓÃ´ÎÊı: {instanceData.currentUsageCount}\n" +
-						   $"ÊÇ·ñ±»ĞŞ¸Ä: {instanceData.isModified}\n" +
-						   $"×Ô¶¨ÒåÊôĞÔÊıÁ¿: {instanceData.customProperties.Count}";
+			instanceInfo = $"\n=== å®ä¾‹æ•°æ® ===\n" +
+						   $"å½“å‰è€ä¹…åº¦: {instanceData.currentDurability}/{itemData.durability}\n" +
+						   $"å½“å‰å †å æ•°é‡: {instanceData.currentStackCount}\n" +
+						   $"å½“å‰æ²»ç–—é‡: {instanceData.currentHealAmount}\n" +
+						   $"ä½¿ç”¨æ¬¡æ•°: {instanceData.currentUsageCount}\n" +
+						   $"æ˜¯å¦è¢«ä¿®æ”¹: {instanceData.isModified}\n" +
+						   $"è‡ªå®šä¹‰å±æ€§æ•°é‡: {instanceData.customProperties.Count}";
 		}
 
-		Debug.Log($"ÎïÆ·ĞÅÏ¢:\n" +
+		Debug.Log($"ç‰©å“ä¿¡æ¯:\n" +
 				  $"ID: {itemData.id}\n" +
-				  $"Ãû³Æ: {itemData.itemName}\n" +
-				  $"³ß´ç: {itemData.width}x{itemData.height}\n" +
-				  $"Ï¡ÓĞ¶È: {itemData.rarity}\n" +
-				  $"Àà±ğ: {itemData.category}\n" +
-				  $"±³¾°ÑÕÉ«: {itemData.backgroundColor}\n" +
-				  $"ÈİÁ¿: {itemData.CellH}x{itemData.CellV}\n" +
-				  $"µ¯Ò©ÀàĞÍ: {itemData.BulletType}" +
+				  $"åç§°: {itemData.itemName}\n" +
+				  $"å°ºå¯¸: {itemData.width}x{itemData.height}\n" +
+				  $"ç¨€æœ‰åº¦: {itemData.rarity}\n" +
+				  $"ç±»åˆ«: {itemData.category}\n" +
+				  $"èƒŒæ™¯é¢œè‰²: {itemData.backgroundColor}\n" +
+				  $"å®¹é‡: {itemData.CellH}x{itemData.CellV}\n" +
+				  $"å¼¹è¯ç±»å‹: {itemData.BulletType}" +
 				  instanceInfo);
 	}
 
-	// ²âÊÔ£ºÑéÖ¤ÊµÀıÊı¾İ
-	[ContextMenu("ÑéÖ¤ÊµÀıÊı¾İ")]
+	// æµ‹è¯•ï¼šéªŒè¯å®ä¾‹æ•°æ®
+	[ContextMenu("éªŒè¯å®ä¾‹æ•°æ®")]
 	public void ValidateInstanceDataTest()
 	{
 		bool isValid = ValidateAndRepairInstanceData();
-		Debug.Log($"ÊµÀıÊı¾İÑéÖ¤½á¹û: {(isValid ? "ÓĞĞ§" : "ÎŞĞ§²¢ÒÑĞŞ¸´")}");
+		Debug.Log($"å®ä¾‹æ•°æ®éªŒè¯ç»“æœ: {(isValid ? "æœ‰æ•ˆ" : "æ— æ•ˆå¹¶å·²ä¿®å¤")}");
 		LogItemInfo();
 	}
 
-	// ²âÊÔ£ºÖØÖÃÊµÀıÊı¾İ
-	[ContextMenu("ÖØÖÃÊµÀıÊı¾İ")]
+	// æµ‹è¯•ï¼šé‡ç½®å®ä¾‹æ•°æ®
+	[ContextMenu("é‡ç½®å®ä¾‹æ•°æ®")]
 	public void ResetInstanceDataTest()
 	{
 		ResetInstanceData();
-		Debug.Log("ÊµÀıÊı¾İÒÑÖØÖÃÎªÄ¬ÈÏÖµ");
+		Debug.Log("å®ä¾‹æ•°æ®å·²é‡ç½®ä¸ºé»˜è®¤å€¼");
 		LogItemInfo();
 	}
 
-	// ===== ISaveable½Ó¿ÚÊµÏÖ =====
+	// ===== ISaveableæ¥å£å®ç° =====
 
 	/// <summary>
-	/// ÎïÆ·Êı¾İ³ÖÓĞÕß±£´æÊı¾İÀà
+	/// ç‰©å“æ•°æ®æŒæœ‰è€…ä¿å­˜æ•°æ®ç±»
 	/// </summary>
 	[System.Serializable]
 	public class ItemDataHolderSaveData
 	{
-		public string itemDataPath; // ÎïÆ·Êı¾İ×ÊÔ´Â·¾¶
-		public string instanceDataJson; // ÊµÀıÊı¾İJSON×Ö·û´®
-		public bool isModified; // ÊÇ·ñ±»ĞŞ¸Ä¹ı
-		public float lastModifiedTime; // ×îºóĞŞ¸ÄÊ±¼ä
-		public Vector3 worldPosition; // ÊÀ½ç×ø±êÎ»ÖÃ
-		public Vector3 worldRotation; // ÊÀ½ç×ø±êĞı×ª
-		public bool isActive; // ÊÇ·ñ¼¤»î×´Ì¬
+		public string itemDataPath; // ç‰©å“æ•°æ®èµ„æºè·¯å¾„
+		public string instanceDataJson; // å®ä¾‹æ•°æ®JSONå­—ç¬¦ä¸²
+		public bool isModified; // æ˜¯å¦è¢«ä¿®æ”¹è¿‡
+		public float lastModifiedTime; // æœ€åä¿®æ”¹æ—¶é—´
+		public Vector3 worldPosition; // ä¸–ç•Œåæ ‡ä½ç½®
+		public Vector3 worldRotation; // ä¸–ç•Œåæ ‡æ—‹è½¬
+		public bool isActive; // æ˜¯å¦æ¿€æ´»çŠ¶æ€
 	}
 
-	// ISaveable½Ó¿ÚÊµÏÖ
+	// ISaveableæ¥å£å®ç°
 	private string saveID = "";
 
 	/// <summary>
-	/// »ñÈ¡±£´æID
+	/// è·å–ä¿å­˜ID
 	/// </summary>
 	public string GetSaveID()
 	{
@@ -602,7 +602,7 @@ public class ItemDataHolder : MonoBehaviour
 	}
 
 	/// <summary>
-	/// ÉèÖÃ±£´æID
+	/// è®¾ç½®ä¿å­˜ID
 	/// </summary>
 	public void SetSaveID(string id)
 	{
@@ -613,8 +613,8 @@ public class ItemDataHolder : MonoBehaviour
 	}
 
 	/// <summary>
-	/// Éú³ÉĞÂµÄ±£´æID
-	/// ¸ñÊ½: ItemData_[ÎïÆ·Ãû³Æ]_[8Î»GUID]_[ÊµÀıID]
+	/// ç”Ÿæˆæ–°çš„ä¿å­˜ID
+	/// æ ¼å¼: ItemData_[ç‰©å“åç§°]_[8ä½GUID]_[å®ä¾‹ID]
 	/// </summary>
 	public void GenerateNewSaveID()
 	{
@@ -622,49 +622,49 @@ public class ItemDataHolder : MonoBehaviour
 		string guidPart = System.Guid.NewGuid().ToString("N").Substring(0, 8).ToUpper();
 		int instanceID = GetInstanceID();
 		saveID = $"ItemData_{itemName}_{guidPart}_{instanceID}";
-		
+
 		if (Application.isPlaying)
 		{
-			Debug.Log($"ÎªÎïÆ·Êı¾İ³ÖÓĞÕßÉú³ÉĞÂµÄ±£´æID: {saveID}");
+			Debug.Log($"ä¸ºç‰©å“æ•°æ®æŒæœ‰è€…ç”Ÿæˆæ–°çš„ä¿å­˜ID: {saveID}");
 		}
 	}
 
 	/// <summary>
-	/// »ñÈ¡±£´æÊı¾İ
+	/// è·å–ä¿å­˜æ•°æ®
 	/// </summary>
 	public object GetSaveData()
 	{
 		ItemDataHolderSaveData saveData = new ItemDataHolderSaveData();
-		
-		// ±£´æÎïÆ·Êı¾İÂ·¾¶
+
+		// ä¿å­˜ç‰©å“æ•°æ®è·¯å¾„
 		if (itemData != null)
 		{
 #if UNITY_EDITOR
 			saveData.itemDataPath = UnityEditor.AssetDatabase.GetAssetPath(itemData);
 #else
-			saveData.itemDataPath = itemData.name; // ÔËĞĞÊ±Ê¹ÓÃÃû³Æ
+			saveData.itemDataPath = itemData.name; // è¿è¡Œæ—¶ä½¿ç”¨åç§°
 #endif
 		}
-		
-		// ±£´æÊµÀıÊı¾İ
+
+		// ä¿å­˜å®ä¾‹æ•°æ®
 		saveData.instanceDataJson = SerializeInstanceData();
 		saveData.isModified = IsModified();
 		saveData.lastModifiedTime = Time.time;
-		
-		// ±£´æÊÀ½ç×ø±êĞÅÏ¢
+
+		// ä¿å­˜ä¸–ç•Œåæ ‡ä¿¡æ¯
 		if (transform != null)
 		{
 			saveData.worldPosition = transform.position;
 			saveData.worldRotation = transform.eulerAngles;
 		}
-		
+
 		saveData.isActive = gameObject.activeInHierarchy;
-		
+
 		return saveData;
 	}
 
 	/// <summary>
-	/// ¼ÓÔØ±£´æÊı¾İ
+	/// åŠ è½½ä¿å­˜æ•°æ®
 	/// </summary>
 	public void LoadSaveData(object data)
 	{
@@ -672,109 +672,109 @@ public class ItemDataHolder : MonoBehaviour
 		{
 			try
 			{
-				// »Ö¸´ÎïÆ·Êı¾İÒıÓÃ
+				// æ¢å¤ç‰©å“æ•°æ®å¼•ç”¨
 				if (!string.IsNullOrEmpty(saveData.itemDataPath))
 				{
 					RestoreItemDataReference(saveData.itemDataPath);
 				}
-				
-				// »Ö¸´ÊµÀıÊı¾İ
+
+				// æ¢å¤å®ä¾‹æ•°æ®
 				if (!string.IsNullOrEmpty(saveData.instanceDataJson))
 				{
 					DeserializeInstanceData(saveData.instanceDataJson);
 				}
-				
-				// »Ö¸´ÊÀ½ç×ø±ê
+
+				// æ¢å¤ä¸–ç•Œåæ ‡
 				if (transform != null)
 				{
 					transform.position = saveData.worldPosition;
 					transform.eulerAngles = saveData.worldRotation;
 				}
-				
-				// »Ö¸´¼¤»î×´Ì¬
+
+				// æ¢å¤æ¿€æ´»çŠ¶æ€
 				gameObject.SetActive(saveData.isActive);
-				
-				// ¸üĞÂÏÔÊ¾
+
+				// æ›´æ–°æ˜¾ç¤º
 				UpdateItemDisplay();
-				
-				Debug.Log($"³É¹¦¼ÓÔØÎïÆ·Êı¾İ³ÖÓĞÕß±£´æÊı¾İ: {GetSaveID()}");
+
+				Debug.Log($"æˆåŠŸåŠ è½½ç‰©å“æ•°æ®æŒæœ‰è€…ä¿å­˜æ•°æ®: {GetSaveID()}");
 			}
 			catch (System.Exception e)
 			{
-				Debug.LogError($"¼ÓÔØÎïÆ·Êı¾İ³ÖÓĞÕß±£´æÊı¾İÊ§°Ü: {e.Message}");
+				Debug.LogError($"åŠ è½½ç‰©å“æ•°æ®æŒæœ‰è€…ä¿å­˜æ•°æ®å¤±è´¥: {e.Message}");
 			}
 		}
 		else
 		{
-			Debug.LogError("ÎŞĞ§µÄÎïÆ·Êı¾İ³ÖÓĞÕß±£´æÊı¾İ¸ñÊ½");
+			Debug.LogError("æ— æ•ˆçš„ç‰©å“æ•°æ®æŒæœ‰è€…ä¿å­˜æ•°æ®æ ¼å¼");
 		}
 	}
 
 	/// <summary>
-	/// »Ö¸´ÎïÆ·Êı¾İÒıÓÃ
+	/// æ¢å¤ç‰©å“æ•°æ®å¼•ç”¨
 	/// </summary>
 	private void RestoreItemDataReference(string assetPath)
 	{
 		if (string.IsNullOrEmpty(assetPath)) return;
-		
+
 		try
 		{
 #if UNITY_EDITOR
-			// ±à¼­Æ÷Ä£Ê½ÏÂÍ¨¹ıÂ·¾¶¼ÓÔØ
+			// ç¼–è¾‘å™¨æ¨¡å¼ä¸‹é€šè¿‡è·¯å¾„åŠ è½½
 			InventorySystemItemDataSO loadedData = UnityEditor.AssetDatabase.LoadAssetAtPath<InventorySystemItemDataSO>(assetPath);
 			if (loadedData != null)
 			{
 				SetItemData(loadedData);
-				Debug.Log($"³É¹¦»Ö¸´ÎïÆ·Êı¾İÒıÓÃ: {loadedData.itemName}");
+				Debug.Log($"æˆåŠŸæ¢å¤ç‰©å“æ•°æ®å¼•ç”¨: {loadedData.itemName}");
 			}
 			else
 			{
-				Debug.LogWarning($"ÎŞ·¨´ÓÂ·¾¶¼ÓÔØÎïÆ·Êı¾İ: {assetPath}");
+				Debug.LogWarning($"æ— æ³•ä»è·¯å¾„åŠ è½½ç‰©å“æ•°æ®: {assetPath}");
 			}
 #else
-			// ÔËĞĞÊ±Í¨¹ıÃû³ÆÔÚResourcesÖĞ²éÕÒ
+			// è¿è¡Œæ—¶é€šè¿‡åç§°åœ¨Resourcesä¸­æŸ¥æ‰¾
 			InventorySystemItemDataSO[] allItems = Resources.LoadAll<InventorySystemItemDataSO>("");
 			foreach (var item in allItems)
 			{
 				if (item.name == assetPath || item.itemName == assetPath)
 				{
 					SetItemData(item);
-					Debug.Log($"³É¹¦»Ö¸´ÎïÆ·Êı¾İÒıÓÃ: {item.itemName}");
+					Debug.Log($"æˆåŠŸæ¢å¤ç‰©å“æ•°æ®å¼•ç”¨: {item.itemName}");
 					return;
 				}
 			}
-			Debug.LogWarning($"ÎŞ·¨ÔÚResourcesÖĞÕÒµ½ÎïÆ·Êı¾İ: {assetPath}");
+			Debug.LogWarning($"æ— æ³•åœ¨Resourcesä¸­æ‰¾åˆ°ç‰©å“æ•°æ®: {assetPath}");
 #endif
 		}
 		catch (System.Exception e)
 		{
-			Debug.LogError($"»Ö¸´ÎïÆ·Êı¾İÒıÓÃÊ§°Ü: {e.Message}");
+			Debug.LogError($"æ¢å¤ç‰©å“æ•°æ®å¼•ç”¨å¤±è´¥: {e.Message}");
 		}
 	}
 
 	/// <summary>
-	/// ÑéÖ¤±£´æÊı¾İ
+	/// éªŒè¯ä¿å­˜æ•°æ®
 	/// </summary>
 	public bool ValidateData()
 	{
 		bool isValid = true;
-		
-		// ÑéÖ¤±£´æID
+
+		// éªŒè¯ä¿å­˜ID
 		if (string.IsNullOrEmpty(saveID))
 		{
 			GenerateNewSaveID();
 			isValid = false;
-			Debug.LogWarning("ÎïÆ·Êı¾İ³ÖÓĞÕß±£´æIDÎª¿Õ£¬ÒÑÖØĞÂÉú³É");
+			Debug.LogWarning("ç‰©å“æ•°æ®æŒæœ‰è€…ä¿å­˜IDä¸ºç©ºï¼Œå·²é‡æ–°ç”Ÿæˆ");
 		}
-		
-		// ÑéÖ¤ÎïÆ·Êı¾İÒıÓÃ
+
+		// éªŒè¯ç‰©å“æ•°æ®å¼•ç”¨
 		if (itemData == null)
 		{
 			isValid = false;
-			Debug.LogWarning("ÎïÆ·Êı¾İÒıÓÃÎª¿Õ");
+			Debug.LogWarning("ç‰©å“æ•°æ®å¼•ç”¨ä¸ºç©º");
 		}
-		
-		// ÑéÖ¤ÊµÀıÊı¾İ
+
+		// éªŒè¯å®ä¾‹æ•°æ®
 		if (instanceData == null)
 		{
 			instanceData = new ItemInstanceData();
@@ -783,36 +783,36 @@ public class ItemDataHolder : MonoBehaviour
 				instanceData.InitializeFromItemData(itemData);
 			}
 			isValid = false;
-			Debug.LogWarning("ÊµÀıÊı¾İÎª¿Õ£¬ÒÑÖØĞÂ³õÊ¼»¯");
+			Debug.LogWarning("å®ä¾‹æ•°æ®ä¸ºç©ºï¼Œå·²é‡æ–°åˆå§‹åŒ–");
 		}
 		else
 		{
-			// ÑéÖ¤ÊµÀıÊı¾İÓĞĞ§ĞÔ
+			// éªŒè¯å®ä¾‹æ•°æ®æœ‰æ•ˆæ€§
 			if (!instanceData.ValidateData(itemData))
 			{
 				isValid = false;
-				Debug.LogWarning("ÊµÀıÊı¾İÑéÖ¤Ê§°Ü£¬ÒÑĞŞ¸´");
+				Debug.LogWarning("å®ä¾‹æ•°æ®éªŒè¯å¤±è´¥ï¼Œå·²ä¿®å¤");
 			}
 		}
-		
+
 		return isValid;
 	}
 
 	/// <summary>
-	/// ³õÊ¼»¯±£´æÏµÍ³
+	/// åˆå§‹åŒ–ä¿å­˜ç³»ç»Ÿ
 	/// </summary>
 	public void InitializeSaveSystem()
 	{
-		// È·±£ÓĞÓĞĞ§µÄ±£´æID
+		// ç¡®ä¿æœ‰æœ‰æ•ˆçš„ä¿å­˜ID
 		if (string.IsNullOrEmpty(saveID))
 		{
 			GenerateNewSaveID();
 		}
-		
-		// ÑéÖ¤Êı¾İÍêÕûĞÔ
+
+		// éªŒè¯æ•°æ®å®Œæ•´æ€§
 		ValidateData();
-		
-		// ³õÊ¼»¯ÊµÀıÊı¾İ
+
+		// åˆå§‹åŒ–å®ä¾‹æ•°æ®
 		if (instanceData == null)
 		{
 			instanceData = new ItemInstanceData();
@@ -821,24 +821,24 @@ public class ItemDataHolder : MonoBehaviour
 				instanceData.InitializeFromItemData(itemData);
 			}
 		}
-		
-		Debug.Log($"ÎïÆ·Êı¾İ³ÖÓĞÕß±£´æÏµÍ³³õÊ¼»¯Íê³É: {saveID}");
+
+		Debug.Log($"ç‰©å“æ•°æ®æŒæœ‰è€…ä¿å­˜ç³»ç»Ÿåˆå§‹åŒ–å®Œæˆ: {saveID}");
 	}
 
 	/// <summary>
-	/// »ñÈ¡ÎïÆ·Êı¾İ³ÖÓĞÕß×´Ì¬ÕªÒª
+	/// è·å–ç‰©å“æ•°æ®æŒæœ‰è€…çŠ¶æ€æ‘˜è¦
 	/// </summary>
 	public string GetItemDataHolderStatusSummary()
 	{
-		string itemInfo = itemData != null ? $"{itemData.itemName} (ID:{itemData.id})" : "ÎŞÎïÆ·Êı¾İ";
-		string instanceInfo = instanceData != null ? $"ÄÍ¾Ã¶È:{instanceData.currentDurability}, ¶Ñµş:{instanceData.currentStackCount}" : "ÎŞÊµÀıÊı¾İ";
-		string modifiedStatus = IsModified() ? "ÒÑĞŞ¸Ä" : "Î´ĞŞ¸Ä";
-		
-		return $"ÎïÆ·Êı¾İ³ÖÓĞÕß [{saveID}] - ÎïÆ·:{itemInfo}, ÊµÀı:{instanceInfo}, ×´Ì¬:{modifiedStatus}";
+		string itemInfo = itemData != null ? $"{itemData.itemName} (ID:{itemData.id})" : "æ— ç‰©å“æ•°æ®";
+		string instanceInfo = instanceData != null ? $"è€ä¹…åº¦:{instanceData.currentDurability}, å †å :{instanceData.currentStackCount}" : "æ— å®ä¾‹æ•°æ®";
+		string modifiedStatus = IsModified() ? "å·²ä¿®æ”¹" : "æœªä¿®æ”¹";
+
+		return $"ç‰©å“æ•°æ®æŒæœ‰è€… [{saveID}] - ç‰©å“:{itemInfo}, å®ä¾‹:{instanceInfo}, çŠ¶æ€:{modifiedStatus}";
 	}
 
 	/// <summary>
-	/// ÔÚStartÖĞ×Ô¶¯³õÊ¼»¯±£´æÏµÍ³
+	/// åœ¨Startä¸­è‡ªåŠ¨åˆå§‹åŒ–ä¿å­˜ç³»ç»Ÿ
 	/// </summary>
 	private void Start()
 	{

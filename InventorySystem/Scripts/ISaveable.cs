@@ -2,77 +2,77 @@ using System;
 using UnityEngine;
 
 /// <summary>
-/// 可保存接口 - 为需要保存和加载数据的对象提供统一的保存接口
-/// 实现此接口的类可以支持数据的序列化、反序列化和状态管理
+/// �ɱ���ӿ� - Ϊ��Ҫ����ͼ������ݵĶ����ṩͳһ�ı���ӿ�
+/// ʵ�ִ˽ӿڵ������֧�����ݵ����л��������л���״̬����
 /// </summary>
 public interface ISaveable
 {
     /// <summary>
-    /// 获取对象的唯一标识ID
+    /// ��ȡ�����Ψһ��ʶID
     /// </summary>
-    /// <returns>对象的唯一ID字符串</returns>
+    /// <returns>�����ΨһID�ַ���</returns>
     string GetSaveID();
 
     /// <summary>
-    /// 设置对象的唯一标识ID
+    /// ���ö����Ψһ��ʶID
     /// </summary>
-    /// <param name="id">新的ID字符串</param>
+    /// <param name="id">�µ�ID�ַ���</param>
     void SetSaveID(string id);
 
     /// <summary>
-    /// 生成新的唯一标识ID
+    /// �����µ�Ψһ��ʶID
     /// </summary>
     void GenerateNewSaveID();
 
     /// <summary>
-    /// 验证保存ID是否有效
+    /// ��֤����ID�Ƿ���Ч
     /// </summary>
-    /// <returns>ID是否有效</returns>
+    /// <returns>ID�Ƿ���Ч</returns>
     bool IsSaveIDValid();
 
     /// <summary>
-    /// 序列化对象数据为JSON字符串
+    /// ���л���������ΪJSON�ַ���
     /// </summary>
-    /// <returns>序列化后的JSON字符串</returns>
+    /// <returns>���л����JSON�ַ���</returns>
     string SerializeToJson();
 
     /// <summary>
-    /// 从JSON字符串反序列化对象数据
+    /// ��JSON�ַ��������л���������
     /// </summary>
-    /// <param name="jsonData">JSON数据字符串</param>
-    /// <returns>反序列化是否成功</returns>
+    /// <param name="jsonData">JSON�����ַ���</param>
+    /// <returns>�����л��Ƿ�ɹ�</returns>
     bool DeserializeFromJson(string jsonData);
 
     /// <summary>
-    /// 标记对象为已修改状态
+    /// ��Ƕ���Ϊ���޸�״̬
     /// </summary>
     void MarkAsModified();
 
     /// <summary>
-    /// 重置修改标记
+    /// �����޸ı��
     /// </summary>
     void ResetModifiedFlag();
 
     /// <summary>
-    /// 检查对象是否已被修改
+    /// �������Ƿ��ѱ��޸�
     /// </summary>
-    /// <returns>是否已修改</returns>
+    /// <returns>�Ƿ����޸�</returns>
     bool IsModified();
 
     /// <summary>
-    /// 验证对象数据的完整性
+    /// ��֤�������ݵ�������
     /// </summary>
-    /// <returns>数据是否有效</returns>
+    /// <returns>�����Ƿ���Ч</returns>
     bool ValidateData();
 
     /// <summary>
-    /// 获取对象的最后修改时间
+    /// ��ȡ���������޸�ʱ��
     /// </summary>
-    /// <returns>最后修改时间字符串</returns>
+    /// <returns>����޸�ʱ���ַ���</returns>
     string GetLastModified();
 
     /// <summary>
-    /// 更新最后修改时间为当前时间
+    /// ��������޸�ʱ��Ϊ��ǰʱ��
     /// </summary>
     void UpdateLastModified();
 }

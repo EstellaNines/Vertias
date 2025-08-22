@@ -3,42 +3,44 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using InventorySystem.SaveSystem;
+using InventorySystem.Grid;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
 
 [ExecuteInEditMode]
-public abstract class BaseItemGrid : MonoBehaviour, IDropHandler
+public abstract class BaseItemGrid : MonoBehaviour, IDropHandler, ISaveable
 {
-    [Header("Íø¸ñÏµÍ³»ù´¡ÉèÖÃ")]
+    [Header("ç½‘æ ¼ç³»ç»ŸåŸºç¡€è®¾ç½®")]
     [SerializeField] protected GridConfig gridConfig;
 
-    // Íø¸ñ³ß´ç
+    // ç½‘æ ¼å°ºå¯¸
     protected int width;
     protected int height;
 
-    // Íø¸ñÕ¼ÓÃ×´Ì¬ - ¶àÖÖÓÅ»¯·½°¸
-    protected bool[,] gridOccupancy;  // Ô­Ê¼boolÊı×é
-    protected int[,] prefixSum;       // ¶şÎ¬Ç°×ººÍÊı×é
-    protected HashSet<Vector2Int> occupiedCells; // HashSet´æ´¢Õ¼ÓÃ×ø±ê
+    // ç½‘æ ¼å ç”¨çŠ¶æ€ - å¤šç§ä¼˜åŒ–æ–¹æ¡ˆ
+    protected bool[,] gridOccupancy;  // åŸå§‹boolæ•°ç»„
+    protected int[,] prefixSum;       // äºŒç»´å‰ç¼€å’Œæ•°ç»„
+    protected HashSet<Vector2Int> occupiedCells; // HashSetå­˜å‚¨å ç”¨åæ ‡
     protected List<PlacedItem> placedItems = new List<PlacedItem>();
 
     protected RectTransform rectTransform;
     protected Canvas canvas;
 
-    // ÑÓ³Ù¸üĞÂÏà¹Ø
+    // å»¶è¿Ÿæ›´æ–°ç›¸å…³
     protected bool needsUpdate = false;
     protected int pendingWidth;
     protected int pendingHeight;
 
-    // ·ÀÖ¹ÎŞÏŞÑ­»·µÄ±ê¼Ç
+    // é˜²æ­¢æ— é™å¾ªç¯çš„æ ‡è®°
     protected bool isUpdatingFromConfig = false;
 
     [System.Serializable]
     public class PlacedItem
     {
         public GameObject itemObject;
-        public InventorySystemItem item;  // Ìí¼ÓitemÊôĞÔÓÃÓÚ¼æÈİĞÔ
+        public InventorySystemItem item;  // æ·»åŠ itemå±æ€§ç”¨äºå…¼å®¹æ€§
         public Vector2Int position;
         public Vector2Int size;
     }
@@ -63,12 +65,14 @@ public abstract class BaseItemGrid : MonoBehaviour, IDropHandler
         {
             canvas = FindObjectOfType<Canvas>();
             InitializeGridArrays();
+            // åˆå§‹åŒ–ä¿å­˜ç³»ç»Ÿ
+            InitializeSaveSystem();
         }
 
         Init(width, height);
     }
 
-    // ³õÊ¼»¯ËùÓĞÍø¸ñÊı×é
+    // åˆå§‹åŒ–æ‰€æœ‰ç½‘æ ¼æ•°ç»„
     protected virtual void InitializeGridArrays()
     {
         gridOccupancy = new bool[width, height];
@@ -133,10 +137,10 @@ public abstract class BaseItemGrid : MonoBehaviour, IDropHandler
         }
     }
 
-    // ³éÏó·½·¨£¬ÓÉ×ÓÀàÊµÏÖ¾ßÌåµÄ³õÊ¼»¯Âß¼­
+    // æŠ½è±¡æ–¹æ³•ï¼Œç”±å­ç±»å®ç°å…·ä½“çš„åˆå§‹åŒ–é€»è¾‘
     protected abstract void Init(int width, int height);
 
-    // ¼ÓÔØÄ¬ÈÏGridConfig
+    // åŠ è½½é»˜è®¤GridConfig
     protected virtual void LoadDefaultGridConfig()
     {
         if (gridConfig == null)
@@ -144,7 +148,7 @@ public abstract class BaseItemGrid : MonoBehaviour, IDropHandler
             gridConfig = Resources.Load<GridConfig>("DefaultGridConfig");
             if (gridConfig == null)
             {
-                string defaultConfigPath = "Assets/InventorySystem/Database/Íø¸ñÏµÍ³²ÎÊıGridSystemSO/DefaultGridConfig.asset";
+                string defaultConfigPath = "Assets/InventorySystem/Database/ç½‘æ ¼ç³»ç»Ÿå‚æ•°GridSystemSO/DefaultGridConfig.asset";
 #if UNITY_EDITOR
                 gridConfig = UnityEditor.AssetDatabase.LoadAssetAtPath<GridConfig>(defaultConfigPath);
 #endif
@@ -152,7 +156,7 @@ public abstract class BaseItemGrid : MonoBehaviour, IDropHandler
         }
     }
 
-    // ¸ù¾İÊó±êÎ»ÖÃ¼ÆËãÔÚ¸ñ×ÓÖĞµÄÎ»ÖÃ
+    // æ ¹æ®é¼ æ ‡ä½ç½®è®¡ç®—åœ¨æ ¼å­ä¸­çš„ä½ç½®
     public virtual Vector2Int GetTileGridPosition(Vector2 screenMousePos)
     {
         if (canvas == null && Application.isPlaying)
@@ -176,7 +180,7 @@ public abstract class BaseItemGrid : MonoBehaviour, IDropHandler
         return new Vector2Int(x, y);
     }
 
-    // ÊµÏÖIDropHandler½Ó¿Ú
+    // å®ç°IDropHandleræ¥å£
     public virtual void OnDrop(PointerEventData eventData)
     {
         var dropped = eventData.pointerDrag;
@@ -197,17 +201,17 @@ public abstract class BaseItemGrid : MonoBehaviour, IDropHandler
         }
     }
 
-    // ÓÅ»¯ºóµÄ¼ì²éÊÇ·ñ¿ÉÒÔÔÚÖ¸¶¨Î»ÖÃ·ÅÖÃÎïÆ· - Ê¹ÓÃHashSet O(1)²éÑ¯
+    // ä¼˜åŒ–åçš„æ£€æŸ¥æ˜¯å¦å¯ä»¥åœ¨æŒ‡å®šä½ç½®æ”¾ç½®ç‰©å“ - ä½¿ç”¨HashSet O(1)æŸ¥è¯¢
     public virtual bool CanPlaceItem(Vector2Int position, Vector2Int size)
     {
-        // ±ß½ç¼ì²é
+        // è¾¹ç•Œæ£€æŸ¥
         if (position.x < 0 || position.y < 0 ||
             position.x + size.x > width || position.y + size.y > height)
         {
             return false;
         }
 
-        // Ê¹ÓÃHashSet½øĞĞO(1)²éÑ¯
+        // ä½¿ç”¨HashSetè¿›è¡ŒO(1)æŸ¥è¯¢
         for (int x = position.x; x < position.x + size.x; x++)
         {
             for (int y = position.y; y < position.y + size.y; y++)
@@ -222,33 +226,33 @@ public abstract class BaseItemGrid : MonoBehaviour, IDropHandler
         return true;
     }
 
-    // ÖÇÄÜ¼ì²âÎïÆ··ÅÖÃ£¨»ñÈ¡ÎïÆ·³ß´ç£©
+    // æ™ºèƒ½æ£€æµ‹ç‰©å“æ”¾ç½®ï¼ˆè·å–ç‰©å“å°ºå¯¸ï¼‰
     public virtual bool CanPlaceItem(GameObject itemObject, Vector2Int position)
     {
-        // ³¢ÊÔ»ñÈ¡InventorySystemItem
+        // å°è¯•è·å–InventorySystemItem
         var inventoryItem = itemObject.GetComponent<InventorySystemItem>();
         if (inventoryItem != null && inventoryItem.Data != null)
         {
-            // Ê¹ÓÃÔ­Ê¼³ß´ç
+            // ä½¿ç”¨åŸå§‹å°ºå¯¸
             Vector2Int originalSize = new Vector2Int(inventoryItem.Data.width, inventoryItem.Data.height);
             return CanPlaceItem(position, originalSize);
         }
-        
-        // Ä¬ÈÏÊ¹ÓÃ1x1³ß´ç
+
+        // é»˜è®¤ä½¿ç”¨1x1å°ºå¯¸
         return CanPlaceItem(position, Vector2Int.one);
     }
 
-    // Ê¹ÓÃÇ°×ººÍÊı×éµÄ¿ìËÙ¼ì²é·½·¨ - O(1)²éÑ¯
+    // ä½¿ç”¨å‰ç¼€å’Œæ•°ç»„çš„å¿«é€Ÿæ£€æŸ¥æ–¹æ³• - O(1)æŸ¥è¯¢
     public virtual bool CanPlaceItemFast(Vector2Int position, Vector2Int size)
     {
-        // ±ß½ç¼ì²é
+        // è¾¹ç•Œæ£€æŸ¥
         if (position.x < 0 || position.y < 0 ||
             position.x + size.x > width || position.y + size.y > height)
         {
             return false;
         }
 
-        // Ê¹ÓÃ¶şÎ¬Ç°×ººÍ½øĞĞO(1)²éÑ¯
+        // ä½¿ç”¨äºŒç»´å‰ç¼€å’Œè¿›è¡ŒO(1)æŸ¥è¯¢
         int x1 = position.x, y1 = position.y;
         int x2 = position.x + size.x - 1, y2 = position.y + size.y - 1;
 
@@ -260,7 +264,7 @@ public abstract class BaseItemGrid : MonoBehaviour, IDropHandler
         return occupiedCount == 0;
     }
 
-    // 0/1±ê¼Ç·¨¼ì²âÕ¼ÓÃÇé¿ö
+    // 0/1æ ‡è®°æ³•æ£€æµ‹å ç”¨æƒ…å†µ
     public virtual int[,] GetOccupancyMatrix()
     {
         int[,] matrix = new int[width, height];
@@ -274,13 +278,13 @@ public abstract class BaseItemGrid : MonoBehaviour, IDropHandler
         return matrix;
     }
 
-    // »ñÈ¡Ö¸¶¨ÇøÓòµÄÕ¼ÓÃ×´Ì¬
+    // è·å–æŒ‡å®šåŒºåŸŸçš„å ç”¨çŠ¶æ€
     public virtual bool IsAreaOccupied(Vector2Int position, Vector2Int size)
     {
         return !CanPlaceItem(position, size);
     }
 
-    // ·ÅÖÃÎïÆ·µ½Íø¸ñÖĞ - ¸ÄÎªpublic
+    // æ”¾ç½®ç‰©å“åˆ°ç½‘æ ¼ä¸­ - æ”¹ä¸ºpublic
     public virtual void PlaceItem(GameObject itemObject, Vector2Int position, Vector2Int size)
     {
         RectTransform itemRect = itemObject.GetComponent<RectTransform>();
@@ -301,31 +305,31 @@ public abstract class BaseItemGrid : MonoBehaviour, IDropHandler
 
         MarkGridOccupied(position, size, true);
 
-        // »ñÈ¡InventorySystemItem×é¼şÓÃÓÚ¼æÈİĞÔ
+        // è·å–InventorySystemItemç»„ä»¶ç”¨äºå…¼å®¹æ€§
         var inventoryItem = itemObject.GetComponent<InventorySystemItem>();
-        
+
         placedItems.Add(new PlacedItem
         {
             itemObject = itemObject,
-            item = inventoryItem,  // ÉèÖÃitemÊôĞÔÓÃÓÚ¼æÈİĞÔ
+            item = inventoryItem,  // è®¾ç½®itemå±æ€§ç”¨äºå…¼å®¹æ€§
             position = position,
             size = size
         });
 
-        Debug.Log($"ÎïÆ··ÅÖÃµ½Íø¸ñÎ»ÖÃ: ({position.x}, {position.y}), UIÎ»ÖÃ: {itemPosition}, ÎïÆ·³ß´ç: {size.x}x{size.y}");
+        Debug.Log($"ç‰©å“æ”¾ç½®åˆ°ç½‘æ ¼ä½ç½®: ({position.x}, {position.y}), UIä½ç½®: {itemPosition}, ç‰©å“å°ºå¯¸: {size.x}x{size.y}");
     }
 
-    // ÓÅ»¯ºóµÄ±ê¼ÇÍø¸ñÕ¼ÓÃ×´Ì¬
+    // ä¼˜åŒ–åçš„æ ‡è®°ç½‘æ ¼å ç”¨çŠ¶æ€
     protected virtual void MarkGridOccupied(Vector2Int position, Vector2Int size, bool occupied)
     {
         for (int x = position.x; x < position.x + size.x; x++)
         {
             for (int y = position.y; y < position.y + size.y; y++)
             {
-                // ¸üĞÂboolÊı×é
+                // æ›´æ–°boolæ•°ç»„
                 gridOccupancy[x, y] = occupied;
 
-                // ¸üĞÂHashSet
+                // æ›´æ–°HashSet
                 Vector2Int cell = new Vector2Int(x, y);
                 if (occupied)
                 {
@@ -338,14 +342,14 @@ public abstract class BaseItemGrid : MonoBehaviour, IDropHandler
             }
         }
 
-        // ¸üĞÂÇ°×ººÍÊı×é
+        // æ›´æ–°å‰ç¼€å’Œæ•°ç»„
         UpdatePrefixSum();
     }
 
-    // ¸üĞÂ¶şÎ¬Ç°×ººÍÊı×é
+    // æ›´æ–°äºŒç»´å‰ç¼€å’Œæ•°ç»„
     protected virtual void UpdatePrefixSum()
     {
-        // ÖØÖÃÇ°×ººÍÊı×é
+        // é‡ç½®å‰ç¼€å’Œæ•°ç»„
         for (int i = 0; i <= width; i++)
         {
             for (int j = 0; j <= height; j++)
@@ -354,7 +358,7 @@ public abstract class BaseItemGrid : MonoBehaviour, IDropHandler
             }
         }
 
-        // ¼ÆËãÇ°×ººÍ
+        // è®¡ç®—å‰ç¼€å’Œ
         for (int i = 1; i <= width; i++)
         {
             for (int j = 1; j <= height; j++)
@@ -365,7 +369,7 @@ public abstract class BaseItemGrid : MonoBehaviour, IDropHandler
         }
     }
 
-    // ÒÆ³ıÎïÆ·
+    // ç§»é™¤ç‰©å“
     public virtual void RemoveItem(GameObject item)
     {
         PlacedItem placedItem = placedItems.Find(p => p.itemObject == item);
@@ -376,41 +380,41 @@ public abstract class BaseItemGrid : MonoBehaviour, IDropHandler
         }
     }
 
-    // »ñÈ¡Íø¸ñ³ß´ç
+    // è·å–ç½‘æ ¼å°ºå¯¸
     public virtual Vector2Int GetGridSize()
     {
         return new Vector2Int(width, height);
     }
 
-    // Ìí¼Ó¹«¹²·ÃÎÊÆ÷ÓÃÓÚÏòºó¼æÈİ
+    // æ·»åŠ å…¬å…±è®¿é—®å™¨ç”¨äºå‘åå…¼å®¹
     public virtual int Width => width;
     public virtual int Height => height;
 
-    // »ñÈ¡Íø¸ñÕ¼ÓÃ×´Ì¬
+    // è·å–ç½‘æ ¼å ç”¨çŠ¶æ€
     public virtual bool[,] GetGridOccupancy()
     {
         return gridOccupancy;
     }
 
-    // »ñÈ¡µ¥Ôª¸ñ´óĞ¡
+    // è·å–å•å…ƒæ ¼å¤§å°
     public virtual float GetCellSize()
     {
         return gridConfig != null ? gridConfig.cellSize : 64f;
     }
 
-    // ÉèÖÃGridConfig
+    // è®¾ç½®GridConfig
     public virtual void SetGridConfig(GridConfig config)
     {
         gridConfig = config;
     }
 
-    // »ñÈ¡GridConfig
+    // è·å–GridConfig
     public virtual GridConfig GetGridConfig()
     {
         return gridConfig;
     }
 
-    // °´¸ñ×Ó×ø±ê»ñÈ¡ÎïÆ·
+    // æŒ‰æ ¼å­åæ ‡è·å–ç‰©å“
     public virtual InventorySystemItem GetItem(int x, int y)
     {
         if (x < 0 || x >= width || y < 0 || y >= height)
@@ -430,20 +434,20 @@ public abstract class BaseItemGrid : MonoBehaviour, IDropHandler
         return null;
     }
 
-    // ¸ù¾İÊó±êÆÁÄ»Î»ÖÃ»ñÈ¡ÎïÆ·
+    // æ ¹æ®é¼ æ ‡å±å¹•ä½ç½®è·å–ç‰©å“
     public virtual InventorySystemItem GetItemAtScreenPosition(Vector2 screenMousePos)
     {
         Vector2Int gridPos = GetTileGridPosition(screenMousePos);
         return GetItem(gridPos.x, gridPos.y);
     }
 
-    // »ñÈ¡ËùÓĞÒÑ·ÅÖÃµÄÎïÆ·
+    // è·å–æ‰€æœ‰å·²æ”¾ç½®çš„ç‰©å“
     public virtual List<PlacedItem> GetPlacedItems()
     {
         return new List<PlacedItem>(placedItems);
     }
 
-    // Çå¿ÕÍø¸ñÖĞµÄËùÓĞÎïÆ· - ÓÅ»¯°æ±¾
+    // æ¸…ç©ºç½‘æ ¼ä¸­çš„æ‰€æœ‰ç‰©å“ - ä¼˜åŒ–ç‰ˆæœ¬
     public virtual void ClearGrid()
     {
         if (gridOccupancy != null)
@@ -457,7 +461,7 @@ public abstract class BaseItemGrid : MonoBehaviour, IDropHandler
             }
         }
 
-        // Çå¿ÕHashSetºÍÇ°×ººÍÊı×é
+        // æ¸…ç©ºHashSetå’Œå‰ç¼€å’Œæ•°ç»„
         occupiedCells?.Clear();
         if (prefixSum != null)
         {
@@ -473,20 +477,378 @@ public abstract class BaseItemGrid : MonoBehaviour, IDropHandler
         placedItems.Clear();
     }
 
-    // »ñÈ¡Õ¼ÓÃµÄ×ø±ê¼¯ºÏ
+    // è·å–å ç”¨çš„åæ ‡é›†åˆ
     public virtual HashSet<Vector2Int> GetOccupiedCells()
     {
         return new HashSet<Vector2Int>(occupiedCells);
     }
 
-    // »ñÈ¡Õ¼ÓÃÂÊ
+    // è·å–å ç”¨ç‡
     public virtual float GetOccupancyRate()
     {
         if (width * height == 0) return 0f;
         return (float)occupiedCells.Count / (width * height);
     }
 
-    // °´¸ñ×Ó×ø±ê×ª»¯ÎªUI×ø±êÎ»ÖÃ
+    // ==================== ç½‘æ ¼æ£€æµ‹å™¨æ‰©å±•åŠŸèƒ½ ====================
+
+    /// <summary>
+    /// è·å–ç½‘æ ¼è¯¦ç»†çŠ¶æ€ä¿¡æ¯
+    /// åŒ…å«ç½‘æ ¼åŸºæœ¬ä¿¡æ¯ã€å ç”¨çŠ¶æ€ã€ç‰©å“åˆ†å¸ƒç­‰è¯¦ç»†æ•°æ®
+    /// </summary>
+    /// <returns>ç½‘æ ¼çŠ¶æ€è¯¦ç»†ä¿¡æ¯</returns>
+    public virtual GridDetectorInfo GetGridDetectorInfo()
+    {
+        var detectorInfo = new GridDetectorInfo
+        {
+            // åŸºæœ¬ç½‘æ ¼ä¿¡æ¯
+            gridID = GetSaveID(),
+            gridType = GetType().Name,
+            gridSize = new Vector2Int(width, height),
+            totalCells = width * height,
+
+            // å ç”¨çŠ¶æ€ä¿¡æ¯
+            occupiedCellsCount = occupiedCells.Count,
+            occupancyRate = GetOccupancyRate(),
+            availableCells = width * height - occupiedCells.Count,
+
+            // ç‰©å“åˆ†å¸ƒä¿¡æ¯
+            placedItemsCount = placedItems.Count,
+            itemDistribution = GetItemDistributionMap(),
+            occupancyMatrix = GetOccupancyMatrix(),
+
+            // æ—¶é—´æˆ³ä¿¡æ¯
+            lastModified = GetLastModified(),
+            detectionTime = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+
+            // ç½‘æ ¼é…ç½®ä¿¡æ¯
+            cellSize = new Vector2(GetCellSize(), GetCellSize()),
+            gridWorldPosition = transform.position,
+            isActive = gameObject.activeInHierarchy
+        };
+
+        return detectorInfo;
+    }
+
+    /// <summary>
+    /// è·å–ç‰©å“åˆ†å¸ƒæ˜ å°„è¡¨
+    /// è¿”å›æ¯ä¸ªç‰©å“åœ¨ç½‘æ ¼ä¸­çš„è¯¦ç»†ä½ç½®å’Œå°ºå¯¸ä¿¡æ¯
+    /// </summary>
+    /// <returns>ç‰©å“åˆ†å¸ƒæ˜ å°„å­—å…¸</returns>
+    public virtual Dictionary<string, ItemPlacementInfo> GetItemDistributionMap()
+    {
+        var distributionMap = new Dictionary<string, ItemPlacementInfo>();
+
+        for (int i = 0; i < placedItems.Count; i++)
+        {
+            var placedItem = placedItems[i];
+            if (placedItem.itemObject == null) continue;
+
+            string itemKey = $"Item_{i}_{placedItem.itemObject.GetInstanceID()}";
+
+            var placementInfo = new ItemPlacementInfo
+            {
+                itemInstanceID = objectToInstanceID.ContainsKey(placedItem.itemObject) ?
+                    objectToInstanceID[placedItem.itemObject] : "",
+                itemName = placedItem.itemObject.name,
+                gridPosition = placedItem.position,
+                itemSize = placedItem.size,
+                occupiedCells = GetItemOccupiedCells(placedItem.position, placedItem.size),
+                placementIndex = i,
+                itemGameObject = placedItem.itemObject
+            };
+
+            // è·å–ç‰©å“æ•°æ®ä¿¡æ¯
+            var inventoryItem = placedItem.itemObject.GetComponent<InventorySystemItem>();
+            if (inventoryItem != null && inventoryItem.Data != null)
+            {
+                placementInfo.itemDataName = inventoryItem.Data.itemName;
+                placementInfo.itemDataPath = GetItemDataPath(inventoryItem.Data);
+            }
+
+            distributionMap[itemKey] = placementInfo;
+        }
+
+        return distributionMap;
+    }
+
+    /// <summary>
+    /// è·å–æŒ‡å®šç‰©å“å ç”¨çš„æ‰€æœ‰ç½‘æ ¼åæ ‡
+    /// </summary>
+    /// <param name="position">ç‰©å“èµ·å§‹ä½ç½®</param>
+    /// <param name="size">ç‰©å“å°ºå¯¸</param>
+    /// <returns>å ç”¨çš„ç½‘æ ¼åæ ‡åˆ—è¡¨</returns>
+    public virtual List<Vector2Int> GetItemOccupiedCells(Vector2Int position, Vector2Int size)
+    {
+        var occupiedCells = new List<Vector2Int>();
+
+        for (int x = position.x; x < position.x + size.x; x++)
+        {
+            for (int y = position.y; y < position.y + size.y; y++)
+            {
+                if (x >= 0 && x < width && y >= 0 && y < height)
+                {
+                    occupiedCells.Add(new Vector2Int(x, y));
+                }
+            }
+        }
+
+        return occupiedCells;
+    }
+
+    /// <summary>
+    /// æ£€æµ‹æŒ‡å®šåŒºåŸŸçš„å ç”¨è¯¦æƒ…
+    /// è¿”å›åŒºåŸŸå†…æ¯ä¸ªæ ¼å­çš„å ç”¨çŠ¶æ€å’Œå ç”¨ç‰©å“ä¿¡æ¯
+    /// </summary>
+    /// <param name="startPos">æ£€æµ‹åŒºåŸŸèµ·å§‹ä½ç½®</param>
+    /// <param name="areaSize">æ£€æµ‹åŒºåŸŸå°ºå¯¸</param>
+    /// <returns>åŒºåŸŸå ç”¨è¯¦æƒ…</returns>
+    public virtual AreaOccupancyInfo DetectAreaOccupancy(Vector2Int startPos, Vector2Int areaSize)
+    {
+        var areaInfo = new AreaOccupancyInfo
+        {
+            areaPosition = startPos,
+            areaSize = areaSize,
+            totalCells = areaSize.x * areaSize.y,
+            occupiedCells = new List<CellOccupancyInfo>(),
+            freeCells = new List<Vector2Int>(),
+            canPlaceItem = true
+        };
+
+        // è¾¹ç•Œæ£€æŸ¥
+        if (startPos.x < 0 || startPos.y < 0 ||
+            startPos.x + areaSize.x > width || startPos.y + areaSize.y > height)
+        {
+            areaInfo.canPlaceItem = false;
+            areaInfo.errorMessage = "åŒºåŸŸè¶…å‡ºç½‘æ ¼è¾¹ç•Œ";
+            return areaInfo;
+        }
+
+        // æ£€æµ‹æ¯ä¸ªæ ¼å­çš„å ç”¨çŠ¶æ€
+        for (int x = startPos.x; x < startPos.x + areaSize.x; x++)
+        {
+            for (int y = startPos.y; y < startPos.y + areaSize.y; y++)
+            {
+                Vector2Int cellPos = new Vector2Int(x, y);
+
+                if (occupiedCells.Contains(cellPos))
+                {
+                    // æ‰¾åˆ°å ç”¨æ­¤æ ¼å­çš„ç‰©å“
+                    var occupyingItem = FindItemAtPosition(cellPos);
+
+                    var cellInfo = new CellOccupancyInfo
+                    {
+                        cellPosition = cellPos,
+                        isOccupied = true,
+                        occupyingItemName = occupyingItem?.itemObject?.name ?? "æœªçŸ¥ç‰©å“",
+                        occupyingItemInstanceID = occupyingItem != null &&
+                            objectToInstanceID.ContainsKey(occupyingItem.itemObject) ?
+                            objectToInstanceID[occupyingItem.itemObject] : ""
+                    };
+
+                    areaInfo.occupiedCells.Add(cellInfo);
+                    areaInfo.canPlaceItem = false;
+                }
+                else
+                {
+                    areaInfo.freeCells.Add(cellPos);
+                }
+            }
+        }
+
+        areaInfo.occupiedCellsCount = areaInfo.occupiedCells.Count;
+        areaInfo.freeCellsCount = areaInfo.freeCells.Count;
+
+        return areaInfo;
+    }
+
+    /// <summary>
+    /// æŸ¥æ‰¾æŒ‡å®šä½ç½®çš„ç‰©å“
+    /// </summary>
+    /// <param name="position">ç½‘æ ¼ä½ç½®</param>
+    /// <returns>æ‰¾åˆ°çš„ç‰©å“ä¿¡æ¯ï¼Œå¦‚æœæ²¡æœ‰åˆ™è¿”å›null</returns>
+    public virtual PlacedItem FindItemAtPosition(Vector2Int position)
+    {
+        foreach (var placedItem in placedItems)
+        {
+            if (position.x >= placedItem.position.x &&
+                position.x < placedItem.position.x + placedItem.size.x &&
+                position.y >= placedItem.position.y &&
+                position.y < placedItem.position.y + placedItem.size.y)
+            {
+                return placedItem;
+            }
+        }
+        return null;
+    }
+
+    /// <summary>
+    /// è·å–ç½‘æ ¼ä¸­æ‰€æœ‰å¯ç”¨çš„è¿ç»­ç©ºé—´åŒºåŸŸ
+    /// ç”¨äºæ™ºèƒ½ç‰©å“æ”¾ç½®å»ºè®®
+    /// </summary>
+    /// <returns>å¯ç”¨ç©ºé—´åŒºåŸŸåˆ—è¡¨</returns>
+    public virtual List<AvailableSpaceInfo> GetAvailableSpaces()
+    {
+        var availableSpaces = new List<AvailableSpaceInfo>();
+        bool[,] visited = new bool[width, height];
+
+        // ä½¿ç”¨æ´ªæ°´å¡«å……ç®—æ³•æ‰¾åˆ°æ‰€æœ‰è¿ç»­çš„ç©ºé—²åŒºåŸŸ
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                if (!visited[x, y] && !occupiedCells.Contains(new Vector2Int(x, y)))
+                {
+                    var spaceInfo = FloodFillAvailableSpace(new Vector2Int(x, y), visited);
+                    if (spaceInfo.totalCells > 0)
+                    {
+                        availableSpaces.Add(spaceInfo);
+                    }
+                }
+            }
+        }
+
+        // æŒ‰å¯ç”¨ç©ºé—´å¤§å°æ’åº
+        availableSpaces.Sort((a, b) => b.totalCells.CompareTo(a.totalCells));
+
+        return availableSpaces;
+    }
+
+    /// <summary>
+    /// æ´ªæ°´å¡«å……ç®—æ³•è®¡ç®—è¿ç»­å¯ç”¨ç©ºé—´
+    /// </summary>
+    /// <param name="startPos">èµ·å§‹ä½ç½®</param>
+    /// <param name="visited">è®¿é—®æ ‡è®°æ•°ç»„</param>
+    /// <returns>å¯ç”¨ç©ºé—´ä¿¡æ¯</returns>
+    private AvailableSpaceInfo FloodFillAvailableSpace(Vector2Int startPos, bool[,] visited)
+    {
+        var spaceInfo = new AvailableSpaceInfo
+        {
+            startPosition = startPos,
+            availableCells = new List<Vector2Int>()
+        };
+
+        var queue = new Queue<Vector2Int>();
+        queue.Enqueue(startPos);
+        visited[startPos.x, startPos.y] = true;
+
+        int minX = startPos.x, maxX = startPos.x;
+        int minY = startPos.y, maxY = startPos.y;
+
+        while (queue.Count > 0)
+        {
+            var current = queue.Dequeue();
+            spaceInfo.availableCells.Add(current);
+
+            // æ›´æ–°è¾¹ç•Œ
+            minX = Mathf.Min(minX, current.x);
+            maxX = Mathf.Max(maxX, current.x);
+            minY = Mathf.Min(minY, current.y);
+            maxY = Mathf.Max(maxY, current.y);
+
+            // æ£€æŸ¥å››ä¸ªæ–¹å‘çš„ç›¸é‚»æ ¼å­
+            Vector2Int[] directions = {
+                new Vector2Int(0, 1), new Vector2Int(0, -1),
+                new Vector2Int(1, 0), new Vector2Int(-1, 0)
+            };
+
+            foreach (var dir in directions)
+            {
+                Vector2Int neighbor = current + dir;
+
+                if (neighbor.x >= 0 && neighbor.x < width &&
+                    neighbor.y >= 0 && neighbor.y < height &&
+                    !visited[neighbor.x, neighbor.y] &&
+                    !occupiedCells.Contains(neighbor))
+                {
+                    visited[neighbor.x, neighbor.y] = true;
+                    queue.Enqueue(neighbor);
+                }
+            }
+        }
+
+        spaceInfo.totalCells = spaceInfo.availableCells.Count;
+        spaceInfo.boundingBox = new RectInt(minX, minY, maxX - minX + 1, maxY - minY + 1);
+        spaceInfo.maxItemSize = CalculateMaxItemSize(spaceInfo.availableCells);
+
+        return spaceInfo;
+    }
+
+    /// <summary>
+    /// è®¡ç®—æŒ‡å®šåŒºåŸŸèƒ½å®¹çº³çš„æœ€å¤§ç‰©å“å°ºå¯¸
+    /// </summary>
+    /// <param name="availableCells">å¯ç”¨æ ¼å­åˆ—è¡¨</param>
+    /// <returns>æœ€å¤§ç‰©å“å°ºå¯¸</returns>
+    private Vector2Int CalculateMaxItemSize(List<Vector2Int> availableCells)
+    {
+        if (availableCells.Count == 0) return Vector2Int.zero;
+
+        // åˆ›å»ºä¸´æ—¶å ç”¨çŸ©é˜µ
+        bool[,] tempOccupancy = new bool[width, height];
+        foreach (var cell in availableCells)
+        {
+            tempOccupancy[cell.x, cell.y] = true;
+        }
+
+        Vector2Int maxSize = Vector2Int.zero;
+
+        // å¯¹æ¯ä¸ªå¯ç”¨æ ¼å­ï¼Œå°è¯•æ‰¾åˆ°ä»¥å®ƒä¸ºèµ·ç‚¹çš„æœ€å¤§çŸ©å½¢
+        foreach (var startCell in availableCells)
+        {
+            for (int w = 1; startCell.x + w <= width; w++)
+            {
+                for (int h = 1; startCell.y + h <= height; h++)
+                {
+                    bool canFit = true;
+
+                    // æ£€æŸ¥è¿™ä¸ªå°ºå¯¸çš„çŸ©å½¢æ˜¯å¦å®Œå…¨åœ¨å¯ç”¨åŒºåŸŸå†…
+                    for (int x = startCell.x; x < startCell.x + w && canFit; x++)
+                    {
+                        for (int y = startCell.y; y < startCell.y + h && canFit; y++)
+                        {
+                            if (!tempOccupancy[x, y])
+                            {
+                                canFit = false;
+                            }
+                        }
+                    }
+
+                    if (canFit && w * h > maxSize.x * maxSize.y)
+                    {
+                        maxSize = new Vector2Int(w, h);
+                    }
+                }
+            }
+        }
+
+        return maxSize;
+    }
+
+    /// <summary>
+    /// è·å–ç‰©å“æ•°æ®çš„èµ„æºè·¯å¾„
+    /// </summary>
+    /// <param name="itemData">ç‰©å“æ•°æ®</param>
+    /// <returns>èµ„æºè·¯å¾„</returns>
+    private string GetItemDataPath(InventorySystemItemDataSO itemData)
+    {
+        if (itemData == null) return "";
+
+#if UNITY_EDITOR
+        string assetPath = UnityEditor.AssetDatabase.GetAssetPath(itemData);
+        if (!string.IsNullOrEmpty(assetPath) && assetPath.StartsWith("Assets/Resources/"))
+        {
+            string resourcePath = assetPath.Substring("Assets/Resources/".Length);
+            if (resourcePath.EndsWith(".asset"))
+            {
+                resourcePath = resourcePath.Substring(0, resourcePath.Length - ".asset".Length);
+            }
+            return resourcePath;
+        }
+#endif
+        return itemData.name;
+    }
+
+    // æŒ‰æ ¼å­åæ ‡è½¬åŒ–ä¸ºUIåæ ‡ä½ç½®
     public virtual Vector2 CalculatePositionOnGrid(InventorySystemItem item, int posX, int posY)
     {
         Vector2 position = new Vector2();
@@ -499,7 +861,7 @@ public abstract class BaseItemGrid : MonoBehaviour, IDropHandler
         }
         else
         {
-            // Èç¹ûÃ»ÓĞÎïÆ·Êı¾İ£¬Ê¹ÓÃÄ¬ÈÏ1x1´óĞ¡
+            // å¦‚æœæ²¡æœ‰ç‰©å“æ•°æ®ï¼Œä½¿ç”¨é»˜è®¤1x1å¤§å°
             position.x = posX * cellSize + cellSize / 2;
             position.y = -(posY * cellSize + cellSize / 2);
         }
@@ -507,7 +869,7 @@ public abstract class BaseItemGrid : MonoBehaviour, IDropHandler
         return position;
     }
 
-    // ÖØÔØ·½·¨£ºÖ±½ÓÖ¸¶¨ÎïÆ·´óĞ¡
+    // é‡è½½æ–¹æ³•ï¼šç›´æ¥æŒ‡å®šç‰©å“å¤§å°
     public virtual Vector2 CalculatePositionOnGrid(int itemWidth, int itemHeight, int posX, int posY)
     {
         Vector2 position = new Vector2();
@@ -519,7 +881,7 @@ public abstract class BaseItemGrid : MonoBehaviour, IDropHandler
         return position;
     }
 
-    // ±ß½ç¼ì²é·½·¨
+    // è¾¹ç•Œæ£€æŸ¥æ–¹æ³•
     public virtual bool BoundryCheck(int posX, int posY, int width, int height)
     {
         if (posX < 0 || posY < 0) return false;
@@ -528,24 +890,24 @@ public abstract class BaseItemGrid : MonoBehaviour, IDropHandler
     }
 
 
-    // Ö§³ÖĞı×ªµÄCanPlaceItemÖØÔØ
+    // æ”¯æŒæ—‹è½¬çš„CanPlaceItemé‡è½½
     public virtual bool CanPlaceItem(Vector2Int position, Vector2Int size, GameObject excludeItem)
     {
-        // ±ß½ç¼ì²é
+        // è¾¹ç•Œæ£€æŸ¥
         if (position.x < 0 || position.y < 0 ||
             position.x + size.x > width || position.y + size.y > height)
         {
             return false;
         }
 
-        // ¼ì²éÕ¼ÓÃ×´Ì¬£¬ÅÅ³ıÖ¸¶¨ÎïÆ·
+        // æ£€æŸ¥å ç”¨çŠ¶æ€ï¼Œæ’é™¤æŒ‡å®šç‰©å“
         for (int x = position.x; x < position.x + size.x; x++)
         {
             for (int y = position.y; y < position.y + size.y; y++)
             {
                 if (occupiedCells.Contains(new Vector2Int(x, y)))
                 {
-                    // ¼ì²éÊÇ·ñÊÇ±»ÅÅ³ıµÄÎïÆ·Õ¼ÓÃ
+                    // æ£€æŸ¥æ˜¯å¦æ˜¯è¢«æ’é™¤çš„ç‰©å“å ç”¨
                     PlacedItem occupyingItem = placedItems.Find(item =>
                         x >= item.position.x && x < item.position.x + item.size.x &&
                         y >= item.position.y && y < item.position.y + item.size.y);
@@ -561,43 +923,43 @@ public abstract class BaseItemGrid : MonoBehaviour, IDropHandler
         return true;
     }
 
-    // ==================== ISaveable½Ó¿ÚÊµÏÖ ====================
-    
+    // ==================== ISaveableæ¥å£å®ç° ====================
+
     [System.Serializable]
     public class BaseItemGridSaveData
     {
-        public string gridID;                    // Íø¸ñÎ¨Ò»±êÊ¶ID
-        public int saveVersion;                  // ±£´æÊı¾İ°æ±¾
-        public int gridWidth;                    // Íø¸ñ¿í¶È
-        public int gridHeight;                   // Íø¸ñ¸ß¶È
-        public PlacedItemSaveData[] placedItems; // ÒÑ·ÅÖÃÎïÆ·µÄ±£´æÊı¾İ
-        public string lastModified;             // ×îºóĞŞ¸ÄÊ±¼ä
-        public bool isModified;                  // ÊÇ·ñÒÑĞŞ¸Ä
-        
+        public string gridID;                    // ç½‘æ ¼å”¯ä¸€æ ‡è¯†ID
+        public int saveVersion;                  // ä¿å­˜æ•°æ®ç‰ˆæœ¬
+        public int gridWidth;                    // ç½‘æ ¼å®½åº¦
+        public int gridHeight;                   // ç½‘æ ¼é«˜åº¦
+        public PlacedItemSaveData[] placedItems; // å·²æ”¾ç½®ç‰©å“çš„ä¿å­˜æ•°æ®
+        public string lastModified;             // æœ€åä¿®æ”¹æ—¶é—´
+        public bool isModified;                  // æ˜¯å¦å·²ä¿®æ”¹
+
         [System.Serializable]
         public class PlacedItemSaveData
         {
-            public string itemInstanceID;       // ÎïÆ·ÊµÀıID
-            public Vector2Int position;         // ÎïÆ·ÔÚÍø¸ñÖĞµÄÎ»ÖÃ
-            public Vector2Int size;             // ÎïÆ·³ß´ç
-            public string itemDataPath;         // ÎïÆ·Êı¾İ×ÊÔ´Â·¾¶
+            public string itemInstanceID;       // ç‰©å“å®ä¾‹ID
+            public Vector2Int position;         // ç‰©å“åœ¨ç½‘æ ¼ä¸­çš„ä½ç½®
+            public Vector2Int size;             // ç‰©å“å°ºå¯¸
+            public string itemDataPath;         // ç‰©å“æ•°æ®èµ„æºè·¯å¾„
         }
     }
-    
-    [Header("±£´æÏµÍ³ÉèÖÃ")]
-    [SerializeField] protected string gridID = "";           // Íø¸ñÎ¨Ò»±êÊ¶ID
-    [SerializeField] protected int saveVersion = 1;         // ±£´æÊı¾İ°æ±¾
-    [SerializeField] protected bool isModified = false;     // ÊÇ·ñÒÑĞŞ¸Ä±ê¼Ç
-    [SerializeField] protected string lastModified = "";    // ×îºóĞŞ¸ÄÊ±¼ä
-    
-    // ÎïÆ·ÊµÀıID¹ÜÀí
+
+    [Header("ä¿å­˜ç³»ç»Ÿè®¾ç½®")]
+    [SerializeField] protected string gridID = "";           // ç½‘æ ¼å”¯ä¸€æ ‡è¯†ID
+    [SerializeField] protected int saveVersion = 1;         // ä¿å­˜æ•°æ®ç‰ˆæœ¬
+    [SerializeField] protected bool isModified = false;     // æ˜¯å¦å·²ä¿®æ”¹æ ‡è®°
+    [SerializeField] protected string lastModified = "";    // æœ€åä¿®æ”¹æ—¶é—´
+
+    // ç‰©å“å®ä¾‹IDç®¡ç†
     protected Dictionary<string, GameObject> itemInstanceMap = new Dictionary<string, GameObject>();
     protected Dictionary<GameObject, string> objectToInstanceID = new Dictionary<GameObject, string>();
-    
+
     /// <summary>
-    /// »ñÈ¡Íø¸ñµÄÎ¨Ò»±êÊ¶ID
+    /// è·å–ç½‘æ ¼çš„å”¯ä¸€æ ‡è¯†ID
     /// </summary>
-    /// <returns>Íø¸ñID×Ö·û´®</returns>
+    /// <returns>ç½‘æ ¼IDå­—ç¬¦ä¸²</returns>
     public virtual string GetGridID()
     {
         if (string.IsNullOrEmpty(gridID))
@@ -606,11 +968,11 @@ public abstract class BaseItemGrid : MonoBehaviour, IDropHandler
         }
         return gridID;
     }
-    
+
     /// <summary>
-    /// ÉèÖÃÍø¸ñµÄÎ¨Ò»±êÊ¶ID
+    /// è®¾ç½®ç½‘æ ¼çš„å”¯ä¸€æ ‡è¯†ID
     /// </summary>
-    /// <param name="id">ĞÂµÄÍø¸ñID</param>
+    /// <param name="id">æ–°çš„ç½‘æ ¼ID</param>
     public virtual void SetGridID(string id)
     {
         if (!string.IsNullOrEmpty(id) && id != gridID)
@@ -619,47 +981,47 @@ public abstract class BaseItemGrid : MonoBehaviour, IDropHandler
             MarkAsModified();
         }
     }
-    
+
     /// <summary>
-    /// »ñÈ¡¶ÔÏóµÄÎ¨Ò»±êÊ¶ID£¨ISaveable½Ó¿ÚÊµÏÖ£©
+    /// è·å–å¯¹è±¡çš„å”¯ä¸€æ ‡è¯†IDï¼ˆISaveableæ¥å£å®ç°ï¼‰
     /// </summary>
-    /// <returns>¶ÔÏóµÄÎ¨Ò»ID×Ö·û´®</returns>
+    /// <returns>å¯¹è±¡çš„å”¯ä¸€IDå­—ç¬¦ä¸²</returns>
     public virtual string GetSaveID()
     {
         return GetGridID();
     }
-    
+
     /// <summary>
-    /// ÉèÖÃ¶ÔÏóµÄÎ¨Ò»±êÊ¶ID£¨ISaveable½Ó¿ÚÊµÏÖ£©
+    /// è®¾ç½®å¯¹è±¡çš„å”¯ä¸€æ ‡è¯†IDï¼ˆISaveableæ¥å£å®ç°ï¼‰
     /// </summary>
-    /// <param name="id">ĞÂµÄID×Ö·û´®</param>
+    /// <param name="id">æ–°çš„IDå­—ç¬¦ä¸²</param>
     public virtual void SetSaveID(string id)
     {
         SetGridID(id);
     }
-    
+
     /// <summary>
-    /// Éú³ÉĞÂµÄÎ¨Ò»±êÊ¶ID
+    /// ç”Ÿæˆæ–°çš„å”¯ä¸€æ ‡è¯†ID
     /// </summary>
     public virtual void GenerateNewSaveID()
     {
         gridID = "Grid_" + System.Guid.NewGuid().ToString("N")[..8] + "_" + GetInstanceID();
         MarkAsModified();
     }
-    
+
     /// <summary>
-    /// ÑéÖ¤±£´æIDÊÇ·ñÓĞĞ§
+    /// éªŒè¯ä¿å­˜IDæ˜¯å¦æœ‰æ•ˆ
     /// </summary>
-    /// <returns>IDÊÇ·ñÓĞĞ§</returns>
+    /// <returns>IDæ˜¯å¦æœ‰æ•ˆ</returns>
     public virtual bool IsSaveIDValid()
     {
         return !string.IsNullOrEmpty(gridID) && gridID.Length >= 8;
     }
-    
+
     /// <summary>
-    /// ĞòÁĞ»¯Íø¸ñÊı¾İÎªJSON×Ö·û´®
+    /// åºåˆ—åŒ–ç½‘æ ¼æ•°æ®ä¸ºJSONå­—ç¬¦ä¸²
     /// </summary>
-    /// <returns>ĞòÁĞ»¯ºóµÄJSON×Ö·û´®</returns>
+    /// <returns>åºåˆ—åŒ–åçš„JSONå­—ç¬¦ä¸²</returns>
     public virtual string SerializeToJson()
     {
         try
@@ -669,125 +1031,125 @@ public abstract class BaseItemGrid : MonoBehaviour, IDropHandler
         }
         catch (System.Exception ex)
         {
-            Debug.LogError($"Íø¸ñÊı¾İĞòÁĞ»¯Ê§°Ü: {ex.Message}");
+            Debug.LogError($"ç½‘æ ¼æ•°æ®åºåˆ—åŒ–å¤±è´¥: {ex.Message}");
             return "";
         }
     }
-    
+
     /// <summary>
-    /// ´ÓJSON×Ö·û´®·´ĞòÁĞ»¯Íø¸ñÊı¾İ
+    /// ä»JSONå­—ç¬¦ä¸²ååºåˆ—åŒ–ç½‘æ ¼æ•°æ®
     /// </summary>
-    /// <param name="jsonData">JSONÊı¾İ×Ö·û´®</param>
-    /// <returns>·´ĞòÁĞ»¯ÊÇ·ñ³É¹¦</returns>
+    /// <param name="jsonData">JSONæ•°æ®å­—ç¬¦ä¸²</param>
+    /// <returns>ååºåˆ—åŒ–æ˜¯å¦æˆåŠŸ</returns>
     public virtual bool DeserializeFromJson(string jsonData)
     {
         try
         {
             if (string.IsNullOrEmpty(jsonData))
             {
-                Debug.LogWarning("³¢ÊÔ·´ĞòÁĞ»¯¿ÕµÄJSONÊı¾İ");
+                Debug.LogWarning("å°è¯•ååºåˆ—åŒ–ç©ºçš„JSONæ•°æ®");
                 return false;
             }
-            
+
             BaseItemGridSaveData saveData = JsonUtility.FromJson<BaseItemGridSaveData>(jsonData);
             return LoadSaveData(saveData);
         }
         catch (System.Exception ex)
         {
-            Debug.LogError($"Íø¸ñÊı¾İ·´ĞòÁĞ»¯Ê§°Ü: {ex.Message}");
+            Debug.LogError($"ç½‘æ ¼æ•°æ®ååºåˆ—åŒ–å¤±è´¥: {ex.Message}");
             return false;
         }
     }
-    
+
     /// <summary>
-    /// ±ê¼ÇÍø¸ñÎªÒÑĞŞ¸Ä×´Ì¬
+    /// æ ‡è®°ç½‘æ ¼ä¸ºå·²ä¿®æ”¹çŠ¶æ€
     /// </summary>
     public virtual void MarkAsModified()
     {
         isModified = true;
         UpdateLastModified();
     }
-    
+
     /// <summary>
-    /// ÖØÖÃĞŞ¸Ä±ê¼Ç
+    /// é‡ç½®ä¿®æ”¹æ ‡è®°
     /// </summary>
     public virtual void ResetModifiedFlag()
     {
         isModified = false;
     }
-    
+
     /// <summary>
-    /// ¼ì²éÍø¸ñÊÇ·ñÒÑ±»ĞŞ¸Ä
+    /// æ£€æŸ¥ç½‘æ ¼æ˜¯å¦å·²è¢«ä¿®æ”¹
     /// </summary>
-    /// <returns>ÊÇ·ñÒÑĞŞ¸Ä</returns>
+    /// <returns>æ˜¯å¦å·²ä¿®æ”¹</returns>
     public virtual bool IsModified()
     {
         return isModified;
     }
-    
+
     /// <summary>
-    /// ÑéÖ¤Íø¸ñÊı¾İµÄÍêÕûĞÔ
+    /// éªŒè¯ç½‘æ ¼æ•°æ®çš„å®Œæ•´æ€§
     /// </summary>
-    /// <returns>Êı¾İÊÇ·ñÓĞĞ§</returns>
+    /// <returns>æ•°æ®æ˜¯å¦æœ‰æ•ˆ</returns>
     public virtual bool ValidateData()
     {
-        // ¼ì²é»ù±¾ÊôĞÔ
+        // æ£€æŸ¥åŸºæœ¬å±æ€§
         if (width <= 0 || height <= 0)
         {
-            Debug.LogError("Íø¸ñ³ß´çÎŞĞ§");
+            Debug.LogError("ç½‘æ ¼å°ºå¯¸æ— æ•ˆ");
             return false;
         }
-        
-        // ¼ì²éÍø¸ñID
+
+        // æ£€æŸ¥ç½‘æ ¼ID
         if (!IsSaveIDValid())
         {
-            Debug.LogError("Íø¸ñIDÎŞĞ§");
+            Debug.LogError("ç½‘æ ¼IDæ— æ•ˆ");
             return false;
         }
-        
-        // ¼ì²éÒÑ·ÅÖÃÎïÆ·µÄÓĞĞ§ĞÔ
+
+        // æ£€æŸ¥å·²æ”¾ç½®ç‰©å“çš„æœ‰æ•ˆæ€§
         foreach (PlacedItem placedItem in placedItems)
         {
             if (placedItem.itemObject == null)
             {
-                Debug.LogError("·¢ÏÖÎŞĞ§µÄÒÑ·ÅÖÃÎïÆ·");
+                Debug.LogError("å‘ç°æ— æ•ˆçš„å·²æ”¾ç½®ç‰©å“");
                 return false;
             }
-            
-            // ¼ì²éÎ»ÖÃÊÇ·ñÔÚÍø¸ñ·¶Î§ÄÚ
+
+            // æ£€æŸ¥ä½ç½®æ˜¯å¦åœ¨ç½‘æ ¼èŒƒå›´å†…
             if (placedItem.position.x < 0 || placedItem.position.y < 0 ||
                 placedItem.position.x + placedItem.size.x > width ||
                 placedItem.position.y + placedItem.size.y > height)
             {
-                Debug.LogError($"ÎïÆ·Î»ÖÃ³¬³öÍø¸ñ·¶Î§: {placedItem.position}");
+                Debug.LogError($"ç‰©å“ä½ç½®è¶…å‡ºç½‘æ ¼èŒƒå›´: {placedItem.position}");
                 return false;
             }
         }
-        
+
         return true;
     }
-    
+
     /// <summary>
-    /// »ñÈ¡Íø¸ñµÄ×îºóĞŞ¸ÄÊ±¼ä
+    /// è·å–ç½‘æ ¼çš„æœ€åä¿®æ”¹æ—¶é—´
     /// </summary>
-    /// <returns>×îºóĞŞ¸ÄÊ±¼ä×Ö·û´®</returns>
+    /// <returns>æœ€åä¿®æ”¹æ—¶é—´å­—ç¬¦ä¸²</returns>
     public virtual string GetLastModified()
     {
         return lastModified;
     }
-    
+
     /// <summary>
-    /// ¸üĞÂ×îºóĞŞ¸ÄÊ±¼äÎªµ±Ç°Ê±¼ä
+    /// æ›´æ–°æœ€åä¿®æ”¹æ—¶é—´ä¸ºå½“å‰æ—¶é—´
     /// </summary>
     public virtual void UpdateLastModified()
     {
         lastModified = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
     }
-    
+
     /// <summary>
-    /// »ñÈ¡Íø¸ñµÄ±£´æÊı¾İ
+    /// è·å–ç½‘æ ¼çš„ä¿å­˜æ•°æ®
     /// </summary>
-    /// <returns>Íø¸ñ±£´æÊı¾İ¶ÔÏó</returns>
+    /// <returns>ç½‘æ ¼ä¿å­˜æ•°æ®å¯¹è±¡</returns>
     public virtual BaseItemGridSaveData GetSaveData()
     {
         BaseItemGridSaveData saveData = new BaseItemGridSaveData
@@ -799,18 +1161,18 @@ public abstract class BaseItemGrid : MonoBehaviour, IDropHandler
             lastModified = GetLastModified(),
             isModified = IsModified()
         };
-        
-        // ±£´æÒÑ·ÅÖÃÎïÆ·µÄÊı¾İ
+
+        // ä¿å­˜å·²æ”¾ç½®ç‰©å“çš„æ•°æ®
         List<BaseItemGridSaveData.PlacedItemSaveData> itemSaveDataList = new List<BaseItemGridSaveData.PlacedItemSaveData>();
-        
+
         foreach (PlacedItem placedItem in placedItems)
         {
             if (placedItem.itemObject != null)
             {
                 string instanceID = GetItemInstanceID(placedItem.itemObject);
                 string itemDataPath = "";
-                
-                // ³¢ÊÔ»ñÈ¡ÎïÆ·Êı¾İÂ·¾¶
+
+                // å°è¯•è·å–ç‰©å“æ•°æ®è·¯å¾„
                 var inventoryItem = placedItem.itemObject.GetComponent<InventorySystemItem>();
                 if (inventoryItem != null && inventoryItem.Data != null)
                 {
@@ -818,7 +1180,7 @@ public abstract class BaseItemGrid : MonoBehaviour, IDropHandler
                     itemDataPath = UnityEditor.AssetDatabase.GetAssetPath(inventoryItem.Data);
 #endif
                 }
-                
+
                 BaseItemGridSaveData.PlacedItemSaveData itemSaveData = new BaseItemGridSaveData.PlacedItemSaveData
                 {
                     itemInstanceID = instanceID,
@@ -826,157 +1188,189 @@ public abstract class BaseItemGrid : MonoBehaviour, IDropHandler
                     size = placedItem.size,
                     itemDataPath = itemDataPath
                 };
-                
+
                 itemSaveDataList.Add(itemSaveData);
             }
         }
-        
+
         saveData.placedItems = itemSaveDataList.ToArray();
         return saveData;
     }
-    
+
     /// <summary>
-    /// ´Ó±£´æÊı¾İ¼ÓÔØÍø¸ñ×´Ì¬
+    /// ä»ä¿å­˜æ•°æ®åŠ è½½ç½‘æ ¼çŠ¶æ€
     /// </summary>
-    /// <param name="saveData">±£´æÊı¾İ¶ÔÏó</param>
-    /// <returns>¼ÓÔØÊÇ·ñ³É¹¦</returns>
+    /// <param name="saveData">ä¿å­˜æ•°æ®å¯¹è±¡</param>
+    /// <returns>åŠ è½½æ˜¯å¦æˆåŠŸ</returns>
     public virtual bool LoadSaveData(BaseItemGridSaveData saveData)
     {
         try
         {
             if (saveData == null)
             {
-                Debug.LogError("±£´æÊı¾İÎª¿Õ");
+                Debug.LogError("ä¿å­˜æ•°æ®ä¸ºç©º");
                 return false;
             }
-            
-            // ÑéÖ¤±£´æÊı¾İ°æ±¾
+
+            // éªŒè¯ä¿å­˜æ•°æ®ç‰ˆæœ¬
             if (saveData.saveVersion > saveVersion)
             {
-                Debug.LogWarning($"±£´æÊı¾İ°æ±¾({saveData.saveVersion})¸ßÓÚµ±Ç°°æ±¾({saveVersion})£¬¿ÉÄÜ´æÔÚ¼æÈİĞÔÎÊÌâ");
+                Debug.LogWarning($"ä¿å­˜æ•°æ®ç‰ˆæœ¬({saveData.saveVersion})é«˜äºå½“å‰ç‰ˆæœ¬({saveVersion})ï¼Œå¯èƒ½å­˜åœ¨å…¼å®¹æ€§é—®é¢˜");
             }
-            
-            // ¼ÓÔØ»ù±¾ÊôĞÔ
+
+            // åŠ è½½åŸºæœ¬å±æ€§
             gridID = saveData.gridID;
             lastModified = saveData.lastModified;
             isModified = saveData.isModified;
-            
-            // Èç¹ûÍø¸ñ³ß´ç·¢Éú±ä»¯£¬ÖØĞÂ³õÊ¼»¯
+
+            // å¦‚æœç½‘æ ¼å°ºå¯¸å‘ç”Ÿå˜åŒ–ï¼Œé‡æ–°åˆå§‹åŒ–
             if (width != saveData.gridWidth || height != saveData.gridHeight)
             {
                 width = saveData.gridWidth;
                 height = saveData.gridHeight;
                 InitializeGridArrays();
             }
-            
-            // Çå¿Õµ±Ç°Íø¸ñ
+
+            // æ¸…ç©ºå½“å‰ç½‘æ ¼
             ClearGrid();
-            
-            // ¼ÓÔØÒÑ·ÅÖÃµÄÎïÆ·£¨ÕâÀïÖ»ÊÇ»Ö¸´Î»ÖÃĞÅÏ¢£¬Êµ¼ÊÎïÆ·¶ÔÏóĞèÒªÍâ²¿ÏµÍ³´¦Àí£©
-            if (saveData.placedItems != null)
+
+            // ä½¿ç”¨ç‰©å“æ¢å¤ç³»ç»Ÿæ¢å¤å·²æ”¾ç½®çš„ç‰©å“
+            if (saveData.placedItems != null && saveData.placedItems.Length > 0)
             {
+                // ç¡®ä¿ç‰©å“æ¢å¤ç³»ç»Ÿå·²åˆå§‹åŒ–
+                if (ItemRestorationSystem.Instance == null)
+                {
+                    Debug.LogWarning("ç‰©å“æ¢å¤ç³»ç»Ÿæœªåˆå§‹åŒ–ï¼Œå°è¯•åˆå§‹åŒ–...");
+                    ItemRestorationSystem.Instance.InitializeSystem();
+                }
+
+                int restoredCount = 0;
+                int failedCount = 0;
+
                 foreach (var itemSaveData in saveData.placedItems)
                 {
-                    // ÕâÀïÖ»¼ÇÂ¼ÎïÆ·ÊµÀıIDºÍÎ»ÖÃĞÅÏ¢
-                    // Êµ¼ÊµÄÎïÆ·¶ÔÏó»Ö¸´ĞèÒªÅäºÏInventoryControllerµÈÏµÍ³
-                    Debug.Log($"ĞèÒª»Ö¸´ÎïÆ·: ID={itemSaveData.itemInstanceID}, Î»ÖÃ={itemSaveData.position}, ³ß´ç={itemSaveData.size}");
+                    // æ„å»ºç‰©å“ä¿å­˜æ•°æ®
+                    ItemSaveData itemData = new ItemSaveData
+                    {
+                        instanceID = itemSaveData.itemInstanceID,
+                        gridPosition = itemSaveData.position,
+                        itemDataPath = itemSaveData.itemDataPath,
+                        isDraggable = true, // é»˜è®¤å¯æ‹–æ‹½
+                        instanceDataJson = "" // å®ä¾‹æ•°æ®å°†åœ¨æ¢å¤åå•ç‹¬å¤„ç†
+                    };
+
+                    // ä½¿ç”¨ç‰©å“æ¢å¤ç³»ç»Ÿæ¢å¤ç‰©å“
+                    GameObject restoredItem = ItemRestorationSystem.Instance.RestoreItem(itemData, this, itemSaveData.position);
+
+                    if (restoredItem != null)
+                    {
+                        restoredCount++;
+                        Debug.Log($"æˆåŠŸæ¢å¤ç‰©å“: ID={itemSaveData.itemInstanceID}, ä½ç½®={itemSaveData.position}");
+                    }
+                    else
+                    {
+                        failedCount++;
+                        Debug.LogWarning($"æ¢å¤ç‰©å“å¤±è´¥: ID={itemSaveData.itemInstanceID}, ä½ç½®={itemSaveData.position}");
+                    }
                 }
+
+                Debug.Log($"ç‰©å“æ¢å¤å®Œæˆ: æˆåŠŸ={restoredCount}, å¤±è´¥={failedCount}");
             }
-            
-            Debug.Log($"Íø¸ñÊı¾İ¼ÓÔØ³É¹¦: {gridID}");
+
+            Debug.Log($"ç½‘æ ¼æ•°æ®åŠ è½½æˆåŠŸ: {gridID}");
             return true;
         }
         catch (System.Exception ex)
         {
-            Debug.LogError($"Íø¸ñÊı¾İ¼ÓÔØÊ§°Ü: {ex.Message}");
+            Debug.LogError($"ç½‘æ ¼æ•°æ®åŠ è½½å¤±è´¥: {ex.Message}");
             return false;
         }
     }
-    
-    // ==================== ÎïÆ·ÊµÀıID¹ÜÀí¹¦ÄÜ ====================
-    
+
+    // ==================== ç‰©å“å®ä¾‹IDç®¡ç†åŠŸèƒ½ ====================
+
     /// <summary>
-    /// ÎªÎïÆ·¶ÔÏó·ÖÅäÊµÀıID
+    /// ä¸ºç‰©å“å¯¹è±¡åˆ†é…å®ä¾‹ID
     /// </summary>
-    /// <param name="itemObject">ÎïÆ·¶ÔÏó</param>
-    /// <returns>·ÖÅäµÄÊµÀıID</returns>
+    /// <param name="itemObject">ç‰©å“å¯¹è±¡</param>
+    /// <returns>åˆ†é…çš„å®ä¾‹ID</returns>
     public virtual string AllocateItemInstanceID(GameObject itemObject)
     {
         if (itemObject == null)
         {
-            Debug.LogError("³¢ÊÔÎª¿ÕÎïÆ·¶ÔÏó·ÖÅäÊµÀıID");
+            Debug.LogError("å°è¯•ä¸ºç©ºç‰©å“å¯¹è±¡åˆ†é…å®ä¾‹ID");
             return "";
         }
-        
-        // ¼ì²éÊÇ·ñÒÑ¾­ÓĞÊµÀıID
+
+        // æ£€æŸ¥æ˜¯å¦å·²ç»æœ‰å®ä¾‹ID
         if (objectToInstanceID.ContainsKey(itemObject))
         {
             return objectToInstanceID[itemObject];
         }
-        
-        // Éú³ÉĞÂµÄÊµÀıID
+
+        // ç”Ÿæˆæ–°çš„å®ä¾‹ID
         string instanceID = "Item_" + System.Guid.NewGuid().ToString("N")[..8] + "_" + itemObject.GetInstanceID();
-        
-        // ×¢²áÊµÀıIDÓ³Éä
+
+        // æ³¨å†Œå®ä¾‹IDæ˜ å°„
         itemInstanceMap[instanceID] = itemObject;
         objectToInstanceID[itemObject] = instanceID;
-        
+
         MarkAsModified();
         return instanceID;
     }
-    
+
     /// <summary>
-    /// »ñÈ¡ÎïÆ·¶ÔÏóµÄÊµÀıID
+    /// è·å–ç‰©å“å¯¹è±¡çš„å®ä¾‹ID
     /// </summary>
-    /// <param name="itemObject">ÎïÆ·¶ÔÏó</param>
-    /// <returns>ÊµÀıID£¬Èç¹û²»´æÔÚÔò·µ»Ø¿Õ×Ö·û´®</returns>
+    /// <param name="itemObject">ç‰©å“å¯¹è±¡</param>
+    /// <returns>å®ä¾‹IDï¼Œå¦‚æœä¸å­˜åœ¨åˆ™è¿”å›ç©ºå­—ç¬¦ä¸²</returns>
     public virtual string GetItemInstanceID(GameObject itemObject)
     {
         if (itemObject == null)
         {
             return "";
         }
-        
+
         if (objectToInstanceID.ContainsKey(itemObject))
         {
             return objectToInstanceID[itemObject];
         }
-        
-        // Èç¹ûÃ»ÓĞÊµÀıID£¬×Ô¶¯·ÖÅäÒ»¸ö
+
+        // å¦‚æœæ²¡æœ‰å®ä¾‹IDï¼Œè‡ªåŠ¨åˆ†é…ä¸€ä¸ª
         return AllocateItemInstanceID(itemObject);
     }
-    
+
     /// <summary>
-    /// ¸ù¾İÊµÀıID»ñÈ¡ÎïÆ·¶ÔÏó
+    /// æ ¹æ®å®ä¾‹IDè·å–ç‰©å“å¯¹è±¡
     /// </summary>
-    /// <param name="instanceID">ÊµÀıID</param>
-    /// <returns>ÎïÆ·¶ÔÏó£¬Èç¹û²»´æÔÚÔò·µ»Ønull</returns>
+    /// <param name="instanceID">å®ä¾‹ID</param>
+    /// <returns>ç‰©å“å¯¹è±¡ï¼Œå¦‚æœä¸å­˜åœ¨åˆ™è¿”å›null</returns>
     public virtual GameObject GetItemByInstanceID(string instanceID)
     {
         if (string.IsNullOrEmpty(instanceID))
         {
             return null;
         }
-        
+
         if (itemInstanceMap.ContainsKey(instanceID))
         {
             return itemInstanceMap[instanceID];
         }
-        
+
         return null;
     }
-    
+
     /// <summary>
-    /// ÒÆ³ıÎïÆ·µÄÊµÀıIDÓ³Éä
+    /// ç§»é™¤ç‰©å“çš„å®ä¾‹IDæ˜ å°„
     /// </summary>
-    /// <param name="itemObject">ÎïÆ·¶ÔÏó</param>
+    /// <param name="itemObject">ç‰©å“å¯¹è±¡</param>
     public virtual void RemoveItemInstanceID(GameObject itemObject)
     {
         if (itemObject == null)
         {
             return;
         }
-        
+
         if (objectToInstanceID.ContainsKey(itemObject))
         {
             string instanceID = objectToInstanceID[itemObject];
@@ -985,33 +1379,33 @@ public abstract class BaseItemGrid : MonoBehaviour, IDropHandler
             MarkAsModified();
         }
     }
-    
+
     /// <summary>
-    /// ÑéÖ¤ÊµÀıIDÊÇ·ñÓĞĞ§
+    /// éªŒè¯å®ä¾‹IDæ˜¯å¦æœ‰æ•ˆ
     /// </summary>
-    /// <param name="instanceID">ÊµÀıID</param>
-    /// <returns>ÊÇ·ñÓĞĞ§</returns>
+    /// <param name="instanceID">å®ä¾‹ID</param>
+    /// <returns>æ˜¯å¦æœ‰æ•ˆ</returns>
     public virtual bool IsItemInstanceIDValid(string instanceID)
     {
         return !string.IsNullOrEmpty(instanceID) && instanceID.StartsWith("Item_") && instanceID.Length >= 12;
     }
-    
+
     /// <summary>
-    /// »ñÈ¡ËùÓĞÒÑ×¢²áµÄÎïÆ·ÊµÀıID
+    /// è·å–æ‰€æœ‰å·²æ³¨å†Œçš„ç‰©å“å®ä¾‹ID
     /// </summary>
-    /// <returns>ÊµÀıIDÊı×é</returns>
+    /// <returns>å®ä¾‹IDæ•°ç»„</returns>
     public virtual string[] GetAllItemInstanceIDs()
     {
         return itemInstanceMap.Keys.ToArray();
     }
-    
+
     /// <summary>
-    /// ÇåÀíÎŞĞ§µÄÊµÀıIDÓ³Éä
+    /// æ¸…ç†æ— æ•ˆçš„å®ä¾‹IDæ˜ å°„
     /// </summary>
     public virtual void CleanupInvalidInstanceIDs()
     {
         List<string> invalidIDs = new List<string>();
-        
+
         foreach (var kvp in itemInstanceMap)
         {
             if (kvp.Value == null)
@@ -1019,13 +1413,13 @@ public abstract class BaseItemGrid : MonoBehaviour, IDropHandler
                 invalidIDs.Add(kvp.Key);
             }
         }
-        
+
         foreach (string invalidID in invalidIDs)
         {
             itemInstanceMap.Remove(invalidID);
         }
-        
-        // ÇåÀí·´ÏòÓ³ÉäÖĞµÄÎŞĞ§ÌõÄ¿
+
+        // æ¸…ç†åå‘æ˜ å°„ä¸­çš„æ— æ•ˆæ¡ç›®
         List<GameObject> invalidObjects = new List<GameObject>();
         foreach (var kvp in objectToInstanceID)
         {
@@ -1034,66 +1428,66 @@ public abstract class BaseItemGrid : MonoBehaviour, IDropHandler
                 invalidObjects.Add(kvp.Key);
             }
         }
-        
+
         foreach (GameObject invalidObject in invalidObjects)
         {
             objectToInstanceID.Remove(invalidObject);
         }
-        
+
         if (invalidIDs.Count > 0 || invalidObjects.Count > 0)
         {
             MarkAsModified();
-            Debug.Log($"ÇåÀíÁË {invalidIDs.Count} ¸öÎŞĞ§ÊµÀıIDÓ³Éä");
+            Debug.Log($"æ¸…ç†äº† {invalidIDs.Count} ä¸ªæ— æ•ˆå®ä¾‹IDæ˜ å°„");
         }
     }
-    
+
     /// <summary>
-    /// À©Õ¹PlaceItem·½·¨ÒÔÖ§³ÖÊµÀıID¹ÜÀí
+    /// æ‰©å±•PlaceItemæ–¹æ³•ä»¥æ”¯æŒå®ä¾‹IDç®¡ç†
     /// </summary>
     public virtual void PlaceItemWithInstanceID(GameObject itemObject, Vector2Int position, Vector2Int size)
     {
-        // µ÷ÓÃÔ­ÓĞPlaceItem·½·¨
+        // è°ƒç”¨åŸæœ‰PlaceItemæ–¹æ³•
         PlaceItem(itemObject, position, size);
-        
-        // ÎªÎïÆ··ÖÅäÊµÀıID
+
+        // ä¸ºç‰©å“åˆ†é…å®ä¾‹ID
         AllocateItemInstanceID(itemObject);
     }
-    
+
     /// <summary>
-    /// À©Õ¹RemoveItem·½·¨ÒÔÖ§³ÖÊµÀıID¹ÜÀí
+    /// æ‰©å±•RemoveItemæ–¹æ³•ä»¥æ”¯æŒå®ä¾‹IDç®¡ç†
     /// </summary>
     public virtual void RemoveItemWithInstanceID(GameObject item)
     {
-        // ÒÆ³ıÊµÀıIDÓ³Éä
+        // ç§»é™¤å®ä¾‹IDæ˜ å°„
         RemoveItemInstanceID(item);
-        
-        // µ÷ÓÃÔ­ÓĞRemoveItem·½·¨
+
+        // è°ƒç”¨åŸæœ‰RemoveItemæ–¹æ³•
         RemoveItem(item);
     }
-    
+
     /// <summary>
-    /// ³õÊ¼»¯±£´æÏµÍ³
+    /// åˆå§‹åŒ–ä¿å­˜ç³»ç»Ÿ
     /// </summary>
     protected virtual void InitializeSaveSystem()
     {
-        // È·±£ÓĞÓĞĞ§µÄÍø¸ñID
+        // ç¡®ä¿æœ‰æœ‰æ•ˆçš„ç½‘æ ¼ID
         if (!IsSaveIDValid())
         {
             GenerateNewSaveID();
         }
-        
-        // ³õÊ¼»¯ÊµÀıIDÓ³Éä×Öµä
+
+        // åˆå§‹åŒ–å®ä¾‹IDæ˜ å°„å­—å…¸
         if (itemInstanceMap == null)
         {
             itemInstanceMap = new Dictionary<string, GameObject>();
         }
-        
+
         if (objectToInstanceID == null)
         {
             objectToInstanceID = new Dictionary<GameObject, string>();
         }
-        
-        // ÎªÏÖÓĞÎïÆ··ÖÅäÊµÀıID
+
+        // ä¸ºç°æœ‰ç‰©å“åˆ†é…å®ä¾‹ID
         foreach (PlacedItem placedItem in placedItems)
         {
             if (placedItem.itemObject != null)
@@ -1101,9 +1495,9 @@ public abstract class BaseItemGrid : MonoBehaviour, IDropHandler
                 AllocateItemInstanceID(placedItem.itemObject);
             }
         }
-        
+
         UpdateLastModified();
-        Debug.Log($"Íø¸ñ±£´æÏµÍ³³õÊ¼»¯Íê³É: {GetGridID()}");
+        Debug.Log($"ç½‘æ ¼ä¿å­˜ç³»ç»Ÿåˆå§‹åŒ–å®Œæˆ: {GetGridID()}");
     }
 
 }

@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 5031052305317961567}
   - component: {fileID: 1421864522321834296}
   - component: {fileID: 5204804620851408900}
+  - component: {fileID: 1751062834568649790}
   m_Layer: 5
   m_Name: InventoryGrid
   m_TagString: Untagged
@@ -90,8 +91,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   gridConfig: {fileID: 11400000, guid: ddde6bc56023bc2478936a7672d21141, type: 2}
+  gridID: 
+  saveVersion: 1
+  isModified: 0
+  lastModified: 
   inventoryWidth: 10
   inventoryHeight: 30
+  showDebugInfo: 1
 --- !u!114 &5204804620851408900
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -105,3 +111,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   gridPriority: 0
+  gridInteractID: 
+  autoGenerateID: 1
+  saveVersion: 1
+  enableStatePersistence: 1
+--- !u!114 &1751062834568649790
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5515042047201907054}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e08aac8cb53b25849a0657cf7f4e1849, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  enableDebugLogs: 1
