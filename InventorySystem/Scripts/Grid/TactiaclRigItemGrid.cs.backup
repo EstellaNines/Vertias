@@ -124,6 +124,7 @@ public class TactiaclRigItemGrid : BaseItemGrid
     /// <summary>
     /// 获取战术挂具网格的保存数据
     /// 包含挂具数据路径和动态尺寸信息
+    /// 集成BackpackOccupancyMapManager进行异步保存
     /// </summary>
     public override BaseItemGridSaveData GetSaveData()
     {
@@ -144,8 +145,22 @@ public class TactiaclRigItemGrid : BaseItemGrid
             tacticalRigDataPath = GetTacticalRigDataPath(),
             defaultWidth = defaultWidth,
             defaultHeight = defaultHeight,
-            hasActiveTacticalRig = currentTacticalRigData != null
+            hasActiveTacticalRig = currentTacticalRigData != null,
+            occupancyRate = GetTacticalRigOccupancyRate(),
+
+            // 保存网格占用图谱数据
+            occupancyMapData = SaveOccupancyMap()
         };
+
+        // 使用BackpackOccupancyMapManager进行异步保存
+        if (BackpackOccupancyMapManager.Instance != null && tacticalRigSaveData.occupancyMapData != null)
+        {
+            string rigID = GetStableTacticalRigID();
+            // 将战术挂具占用图谱数据转换为BackpackGridSaveData.GridOccupancyMapData格式
+            var backpackMapData = ConvertToBackpackMapData(tacticalRigSaveData.occupancyMapData);
+            BackpackOccupancyMapManager.Instance.SaveOccupancyMap(rigID, backpackMapData, false);
+            Debug.Log($"战术挂具占用图谱已提交到管理器进行异步保存: {rigID}");
+        }
 
         return tacticalRigSaveData;
     }
@@ -153,6 +168,7 @@ public class TactiaclRigItemGrid : BaseItemGrid
     /// <summary>
     /// 从保存数据加载战术挂具网格状态
     /// 恢复挂具数据关联和网格配置
+    /// 集成BackpackOccupancyMapManager进行异步加载
     /// </summary>
     public override bool LoadSaveData(BaseItemGridSaveData saveData)
     {
@@ -186,6 +202,61 @@ public class TactiaclRigItemGrid : BaseItemGrid
                     defaultHeight = tacticalRigData.defaultHeight;
                     currentTacticalRigData = null;
                     LoadFromTacticalRigData();
+                }
+
+                // 尝试从BackpackOccupancyMapManager异步加载占用图谱
+                bool mapLoadResult = false;
+                if (BackpackOccupancyMapManager.Instance != null)
+                {
+                    string rigID = GetStableTacticalRigID();
+                    var managerMapData = BackpackOccupancyMapManager.Instance.GetOccupancyMap(rigID);
+
+                    if (managerMapData != null)
+                    {
+                        var rigMapData = ConvertFromBackpackMapData(managerMapData);
+                        mapLoadResult = LoadOccupancyMap(rigMapData);
+                        if (mapLoadResult)
+                        {
+                            Debug.Log($"从管理器异步加载战术挂具占用图谱成功: {managerMapData.totalOccupiedCells}个占用单元格");
+                        }
+                    }
+                    else if (tacticalRigData.occupancyMapData != null)
+                    {
+                        // 回退到保存数据中的占用图谱
+                        mapLoadResult = LoadOccupancyMap(tacticalRigData.occupancyMapData);
+                        if (mapLoadResult)
+                        {
+                            Debug.Log($"从保存数据加载战术挂具占用图谱: {tacticalRigData.occupancyMapData.totalOccupiedCells}个占用单元格");
+                            // 将数据同步到管理器
+                            var backpackMapData = ConvertToBackpackMapData(tacticalRigData.occupancyMapData);
+                            BackpackOccupancyMapManager.Instance.SaveOccupancyMap(rigID, backpackMapData, false);
+                        }
+                    }
+                }
+                else
+                {
+                    // 管理器不可用，使用传统方式加载
+                    if (tacticalRigData.occupancyMapData != null)
+                    {
+                        mapLoadResult = LoadOccupancyMap(tacticalRigData.occupancyMapData);
+                        if (mapLoadResult)
+                        {
+                            Debug.Log($"传统方式加载战术挂具占用图谱: {tacticalRigData.occupancyMapData.totalOccupiedCells}个占用单元格");
+                        }
+                    }
+                }
+
+                // 验证占用图谱数据一致性
+                if (mapLoadResult)
+                {
+                    if (!ValidateOccupancyMapConsistency())
+                    {
+                        Debug.LogWarning("战术挂具网格占用图谱数据一致性验证失败，可能存在数据损坏");
+                    }
+                }
+                else
+                {
+                    Debug.LogWarning("战术挂具网格占用图谱加载失败，将使用默认空白状态");
                 }
             }
 
@@ -237,6 +308,255 @@ public class TactiaclRigItemGrid : BaseItemGrid
         catch (System.Exception ex)
         {
             Debug.LogError($"战术挂具卸载数据清理失败: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// 保存战术挂具网格占用图谱
+    /// 将当前网格占用状态序列化为保存数据
+    /// </summary>
+    /// <returns>占用图谱数据，如果失败则返回null</returns>
+    public TacticalRigGridSaveData.GridOccupancyMapData SaveOccupancyMap()
+    {
+        try
+        {
+            var mapData = new TacticalRigGridSaveData.GridOccupancyMapData
+            {
+                gridOccupancy = new int[width, height],
+                prefixSum = new int[width + 1, height + 1],
+                occupiedCells = new List<Vector2Int>(occupiedCells),
+                totalOccupiedCells = occupiedCells.Count,
+                occupancyRate = GetTacticalRigOccupancyRate(),
+                lastUpdateTime = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+                mapVersion = 1
+            };
+
+            // 复制网格占用状态
+            for (int x = 0; x < width; x++)
+            {
+                for (int y = 0; y < height; y++)
+                {
+                    mapData.gridOccupancy[x, y] = gridOccupancy[x, y];
+                }
+            }
+
+            // 复制前缀和矩阵
+            for (int x = 0; x <= width; x++)
+            {
+                for (int y = 0; y <= height; y++)
+                {
+                    mapData.prefixSum[x, y] = prefixSum[x, y];
+                }
+            }
+
+            Debug.Log($"战术挂具网格占用图谱保存成功: {mapData.totalOccupiedCells}个占用单元格");
+            return mapData;
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"战术挂具网格占用图谱保存失败: {ex.Message}");
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// 加载战术挂具网格占用图谱
+    /// 从保存数据恢复网格占用状态
+    /// </summary>
+    /// <param name="mapData">占用图谱数据</param>
+    /// <returns>加载是否成功</returns>
+    public bool LoadOccupancyMap(TacticalRigGridSaveData.GridOccupancyMapData mapData)
+    {
+        try
+        {
+            if (mapData == null)
+            {
+                Debug.LogWarning("战术挂具网格占用图谱数据为空");
+                return false;
+            }
+
+            // 验证数据尺寸
+            if (mapData.gridOccupancy.GetLength(0) != width || mapData.gridOccupancy.GetLength(1) != height)
+            {
+                Debug.LogWarning($"战术挂具网格占用图谱尺寸不匹配: 期望{width}x{height}，实际{mapData.gridOccupancy.GetLength(0)}x{mapData.gridOccupancy.GetLength(1)}");
+                return false;
+            }
+
+            // 恢复网格占用状态
+            for (int x = 0; x < width; x++)
+            {
+                for (int y = 0; y < height; y++)
+                {
+                    gridOccupancy[x, y] = mapData.gridOccupancy[x, y];
+                }
+            }
+
+            // 恢复前缀和矩阵
+            for (int x = 0; x <= width; x++)
+            {
+                for (int y = 0; y <= height; y++)
+                {
+                    prefixSum[x, y] = mapData.prefixSum[x, y];
+                }
+            }
+
+            // 恢复已占用单元格列表
+            occupiedCells.Clear();
+            if (mapData.occupiedCells != null)
+            {
+                occupiedCells.AddRange(mapData.occupiedCells);
+            }
+
+            Debug.Log($"战术挂具网格占用图谱加载成功: {mapData.totalOccupiedCells}个占用单元格，占用率{mapData.occupancyRate:P2}");
+            return true;
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"战术挂具网格占用图谱加载失败: {ex.Message}");
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// 获取稳定的战术挂具标识符
+    /// 用于BackpackOccupancyMapManager的缓存键
+    /// </summary>
+    private string GetStableTacticalRigID()
+    {
+        if (currentTacticalRigData != null)
+        {
+            // 使用战术挂具数据的资源路径作为稳定ID
+#if UNITY_EDITOR
+            string resourcePath = UnityEditor.AssetDatabase.GetAssetPath(currentTacticalRigData);
+            if (!string.IsNullOrEmpty(resourcePath))
+            {
+                return $"tacticalrig_{resourcePath.GetHashCode():X8}";
+            }
+#endif
+
+            // 备用方案：使用战术挂具数据名称
+            return $"tacticalrig_{currentTacticalRigData.name}";
+        }
+
+        // 默认战术挂具ID
+        return $"default_tacticalrig_{width}x{height}";
+    }
+
+    /// <summary>
+    /// 将战术挂具占用图谱数据转换为背包管理器兼容格式
+    /// </summary>
+    /// <param name="rigMapData">战术挂具占用图谱数据</param>
+    /// <returns>背包管理器兼容的占用图谱数据</returns>
+    private BackpackGridSaveData.GridOccupancyMapData ConvertToBackpackMapData(TacticalRigGridSaveData.GridOccupancyMapData rigMapData)
+    {
+        if (rigMapData == null) return null;
+
+        return new BackpackGridSaveData.GridOccupancyMapData
+        {
+            gridOccupancy = rigMapData.gridOccupancy,
+            prefixSum = rigMapData.prefixSum,
+            occupiedCells = rigMapData.occupiedCells,
+            totalOccupiedCells = rigMapData.totalOccupiedCells,
+            occupancyRate = rigMapData.occupancyRate,
+            lastUpdateTime = rigMapData.lastUpdateTime,
+            mapVersion = rigMapData.mapVersion
+        };
+    }
+
+    /// <summary>
+    /// 将背包管理器格式的占用图谱数据转换为战术挂具格式
+    /// </summary>
+    /// <param name="backpackMapData">背包管理器占用图谱数据</param>
+    /// <returns>战术挂具占用图谱数据</returns>
+    private TacticalRigGridSaveData.GridOccupancyMapData ConvertFromBackpackMapData(BackpackGridSaveData.GridOccupancyMapData backpackMapData)
+    {
+        if (backpackMapData == null) return null;
+
+        return new TacticalRigGridSaveData.GridOccupancyMapData
+        {
+            gridOccupancy = backpackMapData.gridOccupancy,
+            prefixSum = backpackMapData.prefixSum,
+            occupiedCells = backpackMapData.occupiedCells,
+            totalOccupiedCells = backpackMapData.totalOccupiedCells,
+            occupancyRate = backpackMapData.occupancyRate,
+            lastUpdateTime = backpackMapData.lastUpdateTime,
+            mapVersion = backpackMapData.mapVersion
+        };
+    }
+
+    /// <summary>
+    /// 验证战术挂具网格占用图谱数据的一致性
+    /// 检查占用状态矩阵、前缀和矩阵以及已占用单元格列表的一致性
+    /// </summary>
+    private bool ValidateOccupancyMapConsistency()
+    {
+        try
+        {
+            if (gridOccupancy == null || prefixSum == null || occupiedCells == null)
+            {
+                Debug.LogWarning("战术挂具网格占用图谱数据为空，无法验证一致性");
+                return false;
+            }
+
+            int expectedOccupiedCount = 0;
+
+            // 验证占用状态矩阵与已占用单元格列表的一致性
+            for (int x = 0; x < gridOccupancy.GetLength(0); x++)
+            {
+                for (int y = 0; y < gridOccupancy.GetLength(1); y++)
+                {
+                    if (gridOccupancy[x, y])
+                    {
+                        expectedOccupiedCount++;
+
+                        // 检查该位置是否在已占用单元格列表中
+                        bool foundInList = false;
+                        foreach (var cell in occupiedCells)
+                        {
+                            if (cell.x == x && cell.y == y)
+                            {
+                                foundInList = true;
+                                break;
+                            }
+                        }
+
+                        if (!foundInList)
+                        {
+                            Debug.LogError($"战术挂具网格占用图谱不一致: 位置({x},{y})在占用矩阵中为true但不在占用列表中");
+                            return false;
+                        }
+                    }
+                }
+            }
+
+            // 验证已占用单元格数量的一致性
+            if (expectedOccupiedCount != occupiedCells.Count)
+            {
+                Debug.LogError($"战术挂具网格占用图谱不一致: 占用矩阵显示{expectedOccupiedCount}个占用单元格，但占用列表有{occupiedCells.Count}个");
+                return false;
+            }
+
+            // 验证前缀和矩阵的正确性（抽样检查）
+            if (prefixSum.GetLength(0) > 0 && prefixSum.GetLength(1) > 0)
+            {
+                int lastX = prefixSum.GetLength(0) - 1;
+                int lastY = prefixSum.GetLength(1) - 1;
+                int totalFromPrefixSum = prefixSum[lastX, lastY];
+
+                if (totalFromPrefixSum != expectedOccupiedCount)
+                {
+                    Debug.LogError($"战术挂具网格前缀和矩阵不一致: 前缀和显示{totalFromPrefixSum}个占用单元格，实际有{expectedOccupiedCount}个");
+                    return false;
+                }
+            }
+
+            Debug.Log($"战术挂具网格占用图谱一致性验证通过: {expectedOccupiedCount}个占用单元格");
+            return true;
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"战术挂具网格占用图谱一致性验证异常: {ex.Message}");
+            return false;
         }
     }
 
@@ -1053,7 +1373,7 @@ public class TactiaclRigItemGrid : BaseItemGrid
         public bool hasActiveTacticalRig;     // 是否有活动的战术挂具
         public float occupancyRate;           // 占用率
         public GridOccupancyMapData occupancyMapData; // 网格占用图谱数据
-        
+
         /// <summary>
         /// 战术挂具网格占用图谱数据结构
         /// </summary>

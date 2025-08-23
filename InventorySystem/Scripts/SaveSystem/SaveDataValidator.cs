@@ -7,13 +7,13 @@ using Newtonsoft.Json;
 namespace InventorySystem.SaveSystem
 {
     /// <summary>
-    /// ä¿å­˜æ•°æ®éªŒè¯å™¨
-    /// è´Ÿè´£éªŒè¯ä¿å­˜æ•°æ®çš„å®Œæ•´æ€§ã€ä¸€è‡´æ€§å’Œæœ‰æ•ˆæ€§
-    /// é‡‡ç”¨éä¾µå…¥å¼è®¾è®¡ï¼Œä¸ä¿®æ”¹ç°æœ‰ç±»ç»“æ„
+    /// ±£´æÊı¾İÑéÖ¤Æ÷
+    /// ¸ºÔğÑéÖ¤±£´æÊı¾İµÄÍêÕûĞÔ¡¢Ò»ÖÂĞÔºÍÓĞĞ§ĞÔ
+    /// ²ÉÓÃ·ÇÇÖÈëÊ½Éè¼Æ£¬²»ĞŞ¸ÄÏÖÓĞÀà½á¹¹
     /// </summary>
     public class SaveDataValidator : MonoBehaviour
     {
-        #region å•ä¾‹æ¨¡å¼
+        #region µ¥ÀıÄ£Ê½
         private static SaveDataValidator _instance;
         public static SaveDataValidator Instance
         {
@@ -27,7 +27,7 @@ namespace InventorySystem.SaveSystem
                         GameObject go = new GameObject("SaveDataValidator");
                         _instance = go.AddComponent<SaveDataValidator>();
 
-                        // è®¾ç½®ä¸ºSaveSystemçš„å­å¯¹è±¡
+                        // ÉèÖÃÎªSaveSystemµÄ×Ó¶ÔÏó
                         var saveSystemPersistence = FindObjectOfType<SaveSystemPersistence>();
                         if (saveSystemPersistence != null)
                         {
@@ -40,32 +40,32 @@ namespace InventorySystem.SaveSystem
         }
         #endregion
 
-        #region é…ç½®å­—æ®µ
-        [Header("éªŒè¯é…ç½®")]
+        #region ÅäÖÃ×Ö¶Î
+        [Header("ÑéÖ¤ÅäÖÃ")]
         [SerializeField]
-        [Tooltip("æ˜¯å¦å¯ç”¨ä¸¥æ ¼éªŒè¯æ¨¡å¼")]
+        [Tooltip("ÊÇ·ñÆôÓÃÑÏ¸ñÑéÖ¤Ä£Ê½")]
         private bool enableStrictValidation = true;
 
         [SerializeField]
-        [Tooltip("æ˜¯å¦å¯ç”¨å¼•ç”¨å®Œæ•´æ€§æ£€æŸ¥")]
+        [Tooltip("ÊÇ·ñÆôÓÃÒıÓÃÍêÕûĞÔ¼ì²é")]
         private bool enableReferenceIntegrityCheck = true;
 
         [SerializeField]
-        [Tooltip("æ˜¯å¦å¯ç”¨IDå”¯ä¸€æ€§æ£€æŸ¥")]
+        [Tooltip("ÊÇ·ñÆôÓÃIDÎ¨Ò»ĞÔ¼ì²é")]
         private bool enableIDUniquenessCheck = true;
 
         [SerializeField]
-        [Tooltip("æ˜¯å¦å¯ç”¨æ•°æ®ç±»å‹éªŒè¯")]
+        [Tooltip("ÊÇ·ñÆôÓÃÊı¾İÀàĞÍÑéÖ¤")]
         private bool enableDataTypeValidation = true;
 
         [SerializeField]
-        [Tooltip("æ˜¯å¦å¯ç”¨è°ƒè¯•æ—¥å¿—")]
+        [Tooltip("ÊÇ·ñÆôÓÃµ÷ÊÔÈÕÖ¾")]
         private bool enableDebugLog = true;
         #endregion
 
-        #region éªŒè¯ç»“æœæ•°æ®ç»“æ„
+        #region ÑéÖ¤½á¹ûÊı¾İ½á¹¹
         /// <summary>
-        /// éªŒè¯ç»“æœ
+        /// ÑéÖ¤½á¹û
         /// </summary>
         [System.Serializable]
         public class ValidationResult
@@ -84,7 +84,7 @@ namespace InventorySystem.SaveSystem
         }
 
         /// <summary>
-        /// éªŒè¯é”™è¯¯
+        /// ÑéÖ¤´íÎó
         /// </summary>
         [System.Serializable]
         public class ValidationError
@@ -106,7 +106,7 @@ namespace InventorySystem.SaveSystem
         }
 
         /// <summary>
-        /// éªŒè¯è­¦å‘Š
+        /// ÑéÖ¤¾¯¸æ
         /// </summary>
         [System.Serializable]
         public class ValidationWarning
@@ -126,7 +126,7 @@ namespace InventorySystem.SaveSystem
         }
 
         /// <summary>
-        /// éªŒè¯ä¸¥é‡ç¨‹åº¦
+        /// ÑéÖ¤ÑÏÖØ³Ì¶È
         /// </summary>
         public enum ValidationSeverity
         {
@@ -137,18 +137,18 @@ namespace InventorySystem.SaveSystem
         }
         #endregion
 
-        #region äº‹ä»¶å®šä¹‰
-        // éªŒè¯äº‹ä»¶
+        #region ÊÂ¼ş¶¨Òå
+        // ÑéÖ¤ÊÂ¼ş
         public event Action<ValidationResult> OnValidationComplete;
         public event Action<string, float> OnValidationProgress;
         public event Action<ValidationError> OnValidationError;
         public event Action<ValidationWarning> OnValidationWarning;
         #endregion
 
-        #region Unityç”Ÿå‘½å‘¨æœŸ
+        #region UnityÉúÃüÖÜÆÚ
         private void Awake()
         {
-            // ç¡®ä¿å•ä¾‹å”¯ä¸€æ€§
+            // È·±£µ¥ÀıÎ¨Ò»ĞÔ
             if (_instance != null && _instance != this)
             {
                 Destroy(gameObject);
@@ -156,60 +156,60 @@ namespace InventorySystem.SaveSystem
             }
 
             _instance = this;
-            LogDebug("SaveDataValidatorå·²åˆå§‹åŒ–");
+            LogDebug("SaveDataValidatorÒÑ³õÊ¼»¯");
         }
         #endregion
 
-        #region ä¸»è¦éªŒè¯æ–¹æ³•
+        #region Ö÷ÒªÑéÖ¤·½·¨
         /// <summary>
-        /// éªŒè¯ä¿å­˜å‰æ•°æ®
+        /// ÑéÖ¤±£´æÇ°Êı¾İ
         /// </summary>
-        /// <param name="saveableObjects">è¦ä¿å­˜çš„å¯¹è±¡å­—å…¸</param>
-        /// <returns>éªŒè¯ç»“æœ</returns>
+        /// <param name="saveableObjects">Òª±£´æµÄ¶ÔÏó×Öµä</param>
+        /// <returns>ÑéÖ¤½á¹û</returns>
         public ValidationResult ValidateBeforeSave(Dictionary<string, ISaveable> saveableObjects)
         {
             var startTime = Time.realtimeSinceStartup;
             var result = new ValidationResult();
 
-            LogDebug($"å¼€å§‹ä¿å­˜å‰éªŒè¯ï¼Œå¯¹è±¡æ•°é‡: {saveableObjects.Count}");
+            LogDebug($"¿ªÊ¼±£´æÇ°ÑéÖ¤£¬¶ÔÏóÊıÁ¿: {saveableObjects.Count}");
 
             try
             {
-                // 1. åŸºç¡€æ•°æ®éªŒè¯
+                // 1. »ù´¡Êı¾İÑéÖ¤
                 ValidateBasicData(saveableObjects, result);
 
-                // 2. IDå”¯ä¸€æ€§æ£€æŸ¥
+                // 2. IDÎ¨Ò»ĞÔ¼ì²é
                 if (enableIDUniquenessCheck)
                 {
                     ValidateIDUniqueness(saveableObjects, result);
                 }
 
-                // 3. å¼•ç”¨å®Œæ•´æ€§æ£€æŸ¥
+                // 3. ÒıÓÃÍêÕûĞÔ¼ì²é
                 if (enableReferenceIntegrityCheck)
                 {
                     ValidateReferenceIntegrity(saveableObjects, result);
                 }
 
-                // 4. æ•°æ®ç±»å‹éªŒè¯
+                // 4. Êı¾İÀàĞÍÑéÖ¤
                 if (enableDataTypeValidation)
                 {
                     ValidateDataTypes(saveableObjects, result);
                 }
 
-                // 5. ä¸šåŠ¡é€»è¾‘éªŒè¯
+                // 5. ÒµÎñÂß¼­ÑéÖ¤
                 ValidateBusinessLogic(saveableObjects, result);
 
                 result.isValid = result.errors.Count == 0;
                 result.objectsValidated = saveableObjects.Count;
                 result.validationTime = Time.realtimeSinceStartup - startTime;
 
-                LogDebug($"ä¿å­˜å‰éªŒè¯å®Œæˆï¼Œç»“æœ: {(result.isValid ? "é€šè¿‡" : "å¤±è´¥")}, é”™è¯¯æ•°: {result.errors.Count}, è­¦å‘Šæ•°: {result.warnings.Count}");
+                LogDebug($"±£´æÇ°ÑéÖ¤Íê³É£¬½á¹û: {(result.isValid ? "Í¨¹ı" : "Ê§°Ü")}, ´íÎóÊı: {result.errors.Count}, ¾¯¸æÊı: {result.warnings.Count}");
             }
             catch (Exception ex)
             {
-                result.errors.Add(new ValidationError("", "ValidationException", $"éªŒè¯è¿‡ç¨‹ä¸­å‘ç”Ÿå¼‚å¸¸: {ex.Message}", "æ£€æŸ¥éªŒè¯å™¨é…ç½®å’Œæ•°æ®æ ¼å¼", ValidationSeverity.Critical));
+                result.errors.Add(new ValidationError("", "ValidationException", $"ÑéÖ¤¹ı³ÌÖĞ·¢ÉúÒì³£: {ex.Message}", "¼ì²éÑéÖ¤Æ÷ÅäÖÃºÍÊı¾İ¸ñÊ½", ValidationSeverity.Critical));
                 result.isValid = false;
-                LogError($"éªŒè¯è¿‡ç¨‹ä¸­å‘ç”Ÿå¼‚å¸¸: {ex.Message}");
+                LogError($"ÑéÖ¤¹ı³ÌÖĞ·¢ÉúÒì³£: {ex.Message}");
             }
 
             OnValidationComplete?.Invoke(result);
@@ -217,42 +217,42 @@ namespace InventorySystem.SaveSystem
         }
 
         /// <summary>
-        /// éªŒè¯åŠ è½½åæ•°æ®
+        /// ÑéÖ¤¼ÓÔØºóÊı¾İ
         /// </summary>
-        /// <param name="loadedObjects">å·²åŠ è½½çš„å¯¹è±¡å­—å…¸</param>
-        /// <returns>éªŒè¯ç»“æœ</returns>
+        /// <param name="loadedObjects">ÒÑ¼ÓÔØµÄ¶ÔÏó×Öµä</param>
+        /// <returns>ÑéÖ¤½á¹û</returns>
         public ValidationResult ValidateAfterLoad(Dictionary<string, ISaveable> loadedObjects)
         {
             var startTime = Time.realtimeSinceStartup;
             var result = new ValidationResult();
 
-            LogDebug($"å¼€å§‹åŠ è½½åéªŒè¯ï¼Œå¯¹è±¡æ•°é‡: {loadedObjects.Count}");
+            LogDebug($"¿ªÊ¼¼ÓÔØºóÑéÖ¤£¬¶ÔÏóÊıÁ¿: {loadedObjects.Count}");
 
             try
             {
-                // 1. æ•°æ®å®Œæ•´æ€§éªŒè¯
+                // 1. Êı¾İÍêÕûĞÔÑéÖ¤
                 ValidateDataIntegrity(loadedObjects, result);
 
-                // 2. å¼•ç”¨æœ‰æ•ˆæ€§éªŒè¯
+                // 2. ÒıÓÃÓĞĞ§ĞÔÑéÖ¤
                 ValidateReferenceValidity(loadedObjects, result);
 
-                // 3. çŠ¶æ€ä¸€è‡´æ€§éªŒè¯
+                // 3. ×´Ì¬Ò»ÖÂĞÔÑéÖ¤
                 ValidateStateConsistency(loadedObjects, result);
 
-                // 4. ç‰ˆæœ¬å…¼å®¹æ€§éªŒè¯
+                // 4. °æ±¾¼æÈİĞÔÑéÖ¤
                 ValidateVersionCompatibility(loadedObjects, result);
 
                 result.isValid = result.errors.Count == 0;
                 result.objectsValidated = loadedObjects.Count;
                 result.validationTime = Time.realtimeSinceStartup - startTime;
 
-                LogDebug($"åŠ è½½åéªŒè¯å®Œæˆï¼Œç»“æœ: {(result.isValid ? "é€šè¿‡" : "å¤±è´¥")}, é”™è¯¯æ•°: {result.errors.Count}, è­¦å‘Šæ•°: {result.warnings.Count}");
+                LogDebug($"¼ÓÔØºóÑéÖ¤Íê³É£¬½á¹û: {(result.isValid ? "Í¨¹ı" : "Ê§°Ü")}, ´íÎóÊı: {result.errors.Count}, ¾¯¸æÊı: {result.warnings.Count}");
             }
             catch (Exception ex)
             {
-                result.errors.Add(new ValidationError("", "ValidationException", $"éªŒè¯è¿‡ç¨‹ä¸­å‘ç”Ÿå¼‚å¸¸: {ex.Message}", "æ£€æŸ¥åŠ è½½çš„æ•°æ®æ ¼å¼å’Œå®Œæ•´æ€§", ValidationSeverity.Critical));
+                result.errors.Add(new ValidationError("", "ValidationException", $"ÑéÖ¤¹ı³ÌÖĞ·¢ÉúÒì³£: {ex.Message}", "¼ì²é¼ÓÔØµÄÊı¾İ¸ñÊ½ºÍÍêÕûĞÔ", ValidationSeverity.Critical));
                 result.isValid = false;
-                LogError($"éªŒè¯è¿‡ç¨‹ä¸­å‘ç”Ÿå¼‚å¸¸: {ex.Message}");
+                LogError($"ÑéÖ¤¹ı³ÌÖĞ·¢ÉúÒì³£: {ex.Message}");
             }
 
             OnValidationComplete?.Invoke(result);
@@ -260,9 +260,9 @@ namespace InventorySystem.SaveSystem
         }
         #endregion
 
-        #region å…·ä½“éªŒè¯å®ç°
+        #region ¾ßÌåÑéÖ¤ÊµÏÖ
         /// <summary>
-        /// éªŒè¯åŸºç¡€æ•°æ®
+        /// ÑéÖ¤»ù´¡Êı¾İ
         /// </summary>
         private void ValidateBasicData(Dictionary<string, ISaveable> objects, ValidationResult result)
         {
@@ -271,38 +271,38 @@ namespace InventorySystem.SaveSystem
                 var objectId = kvp.Key;
                 var saveable = kvp.Value;
 
-                // æ£€æŸ¥SaveIDæ˜¯å¦æœ‰æ•ˆ
+                // ¼ì²éSaveIDÊÇ·ñÓĞĞ§
                 if (string.IsNullOrEmpty(objectId))
                 {
-                    result.errors.Add(new ValidationError(objectId, "InvalidSaveID", "ä¿å­˜IDä¸ºç©ºæˆ–æ— æ•ˆ", "é‡æ–°ç”Ÿæˆä¿å­˜ID"));
+                    result.errors.Add(new ValidationError(objectId, "InvalidSaveID", "±£´æIDÎª¿Õ»òÎŞĞ§", "ÖØĞÂÉú³É±£´æID"));
                     continue;
                 }
 
-                // æ£€æŸ¥å¯¹è±¡æ˜¯å¦ä¸ºnull
+                // ¼ì²é¶ÔÏóÊÇ·ñÎªnull
                 if (saveable == null)
                 {
-                    result.errors.Add(new ValidationError(objectId, "NullObject", "ä¿å­˜å¯¹è±¡ä¸ºnull", "ç§»é™¤æ— æ•ˆçš„å¯¹è±¡å¼•ç”¨"));
+                    result.errors.Add(new ValidationError(objectId, "NullObject", "±£´æ¶ÔÏóÎªnull", "ÒÆ³ıÎŞĞ§µÄ¶ÔÏóÒıÓÃ"));
                     continue;
                 }
 
-                // æ£€æŸ¥ä¿å­˜æ•°æ®æ˜¯å¦å¯è·å–
+                // ¼ì²é±£´æÊı¾İÊÇ·ñ¿É»ñÈ¡
                 try
                 {
                     var saveData = saveable.SerializeToJson();
                     if (saveData == null)
                     {
-                        result.warnings.Add(new ValidationWarning(objectId, "NullSaveData", "å¯¹è±¡è¿”å›çš„ä¿å­˜æ•°æ®ä¸ºnull", "æ£€æŸ¥å¯¹è±¡çš„SerializeToJsonå®ç°"));
+                        result.warnings.Add(new ValidationWarning(objectId, "NullSaveData", "¶ÔÏó·µ»ØµÄ±£´æÊı¾İÎªnull", "¼ì²é¶ÔÏóµÄSerializeToJsonÊµÏÖ"));
                     }
                 }
                 catch (Exception ex)
                 {
-                    result.errors.Add(new ValidationError(objectId, "SaveDataException", $"è·å–ä¿å­˜æ•°æ®æ—¶å‘ç”Ÿå¼‚å¸¸: {ex.Message}", "æ£€æŸ¥å¯¹è±¡çš„SerializeToJsonæ–¹æ³•å®ç°"));
+                    result.errors.Add(new ValidationError(objectId, "SaveDataException", $"»ñÈ¡±£´æÊı¾İÊ±·¢ÉúÒì³£: {ex.Message}", "¼ì²é¶ÔÏóµÄSerializeToJson·½·¨ÊµÏÖ"));
                 }
             }
         }
 
         /// <summary>
-        /// éªŒè¯IDå”¯ä¸€æ€§
+        /// ÑéÖ¤IDÎ¨Ò»ĞÔ
         /// </summary>
         private void ValidateIDUniqueness(Dictionary<string, ISaveable> objects, ValidationResult result)
         {
@@ -324,22 +324,22 @@ namespace InventorySystem.SaveSystem
 
             foreach (var duplicateId in duplicateIds)
             {
-                result.errors.Add(new ValidationError(duplicateId, "DuplicateID", $"å‘ç°é‡å¤çš„ä¿å­˜ID: {duplicateId}, å‡ºç°æ¬¡æ•°: {idCounts[duplicateId]}", "ä¸ºé‡å¤å¯¹è±¡é‡æ–°ç”Ÿæˆå”¯ä¸€ID"));
+                result.errors.Add(new ValidationError(duplicateId, "DuplicateID", $"·¢ÏÖÖØ¸´µÄ±£´æID: {duplicateId}, ³öÏÖ´ÎÊı: {idCounts[duplicateId]}", "ÎªÖØ¸´¶ÔÏóÖØĞÂÉú³ÉÎ¨Ò»ID"));
             }
         }
 
         /// <summary>
-        /// éªŒè¯å¼•ç”¨å®Œæ•´æ€§
+        /// ÑéÖ¤ÒıÓÃÍêÕûĞÔ
         /// </summary>
         private void ValidateReferenceIntegrity(Dictionary<string, ISaveable> objects, ValidationResult result)
         {
-            // æ£€æŸ¥ç‰©å“ä¸ç½‘æ ¼çš„å¼•ç”¨å…³ç³»
+            // ¼ì²éÎïÆ·ÓëÍø¸ñµÄÒıÓÃ¹ØÏµ
             var itemDataHolders = objects.Values.OfType<ItemDataHolder>().ToList();
             var itemGrids = objects.Values.OfType<BaseItemGrid>().ToList();
 
             foreach (var itemHolder in itemDataHolders)
             {
-                // æ£€æŸ¥ç‰©å“æ˜¯å¦åœ¨æŸä¸ªç½‘æ ¼ä¸­
+                // ¼ì²éÎïÆ·ÊÇ·ñÔÚÄ³¸öÍø¸ñÖĞ
                 bool foundInGrid = false;
                 foreach (var grid in itemGrids)
                 {
@@ -352,13 +352,13 @@ namespace InventorySystem.SaveSystem
 
                 if (!foundInGrid)
                 {
-                    result.warnings.Add(new ValidationWarning(itemHolder.GetSaveID(), "OrphanedItem", "ç‰©å“æœªåœ¨ä»»ä½•ç½‘æ ¼ä¸­æ‰¾åˆ°", "æ£€æŸ¥ç‰©å“çš„ä½ç½®å’Œç½‘æ ¼å…³è”"));
+                    result.warnings.Add(new ValidationWarning(itemHolder.GetSaveID(), "OrphanedItem", "ÎïÆ·Î´ÔÚÈÎºÎÍø¸ñÖĞÕÒµ½", "¼ì²éÎïÆ·µÄÎ»ÖÃºÍÍø¸ñ¹ØÁª"));
                 }
             }
         }
 
         /// <summary>
-        /// éªŒè¯æ•°æ®ç±»å‹
+        /// ÑéÖ¤Êı¾İÀàĞÍ
         /// </summary>
         private void ValidateDataTypes(Dictionary<string, ISaveable> objects, ValidationResult result)
         {
@@ -372,27 +372,27 @@ namespace InventorySystem.SaveSystem
                     var saveData = saveable.SerializeToJson();
                     if (saveData != null)
                     {
-                        // å°è¯•åºåˆ—åŒ–æ•°æ®ä»¥éªŒè¯ç±»å‹å…¼å®¹æ€§
+                        // ³¢ÊÔĞòÁĞ»¯Êı¾İÒÔÑéÖ¤ÀàĞÍ¼æÈİĞÔ
                         var serialized = JsonConvert.SerializeObject(saveData);
                         if (string.IsNullOrEmpty(serialized))
                         {
-                            result.warnings.Add(new ValidationWarning(objectId, "SerializationIssue", "å¯¹è±¡æ•°æ®åºåˆ—åŒ–ç»“æœä¸ºç©º", "æ£€æŸ¥æ•°æ®ç»“æ„å’Œåºåˆ—åŒ–è®¾ç½®"));
+                            result.warnings.Add(new ValidationWarning(objectId, "SerializationIssue", "¶ÔÏóÊı¾İĞòÁĞ»¯½á¹ûÎª¿Õ", "¼ì²éÊı¾İ½á¹¹ºÍĞòÁĞ»¯ÉèÖÃ"));
                         }
                     }
                 }
                 catch (Exception ex)
                 {
-                    result.errors.Add(new ValidationError(objectId, "SerializationError", $"æ•°æ®åºåˆ—åŒ–å¤±è´¥: {ex.Message}", "æ£€æŸ¥æ•°æ®ç±»å‹å’Œåºåˆ—åŒ–å…¼å®¹æ€§"));
+                    result.errors.Add(new ValidationError(objectId, "SerializationError", $"Êı¾İĞòÁĞ»¯Ê§°Ü: {ex.Message}", "¼ì²éÊı¾İÀàĞÍºÍĞòÁĞ»¯¼æÈİĞÔ"));
                 }
             }
         }
 
         /// <summary>
-        /// éªŒè¯ä¸šåŠ¡é€»è¾‘
+        /// ÑéÖ¤ÒµÎñÂß¼­
         /// </summary>
         private void ValidateBusinessLogic(Dictionary<string, ISaveable> objects, ValidationResult result)
         {
-            // éªŒè¯ç‰©å“æ•°æ®çš„ä¸šåŠ¡é€»è¾‘
+            // ÑéÖ¤ÎïÆ·Êı¾İµÄÒµÎñÂß¼­
             var itemDataHolders = objects.Values.OfType<ItemDataHolder>().ToList();
             foreach (var itemHolder in itemDataHolders)
             {
@@ -401,23 +401,23 @@ namespace InventorySystem.SaveSystem
 
                 if (itemData != null && instanceData != null)
                 {
-                    // æ£€æŸ¥è€ä¹…åº¦æ˜¯å¦åˆç†
+                    // ¼ì²éÄÍ¾Ã¶ÈÊÇ·ñºÏÀí
                     if (instanceData.currentDurability > itemData.durability)
                     {
-                        result.warnings.Add(new ValidationWarning(itemHolder.GetSaveID(), "InvalidDurability", "å½“å‰è€ä¹…åº¦è¶…è¿‡æœ€å¤§è€ä¹…åº¦", "é‡ç½®è€ä¹…åº¦åˆ°åˆç†èŒƒå›´"));
+                        result.warnings.Add(new ValidationWarning(itemHolder.GetSaveID(), "InvalidDurability", "µ±Ç°ÄÍ¾Ã¶È³¬¹ı×î´óÄÍ¾Ã¶È", "ÖØÖÃÄÍ¾Ã¶Èµ½ºÏÀí·¶Î§"));
                     }
 
-                    // æ£€æŸ¥å †å æ•°é‡æ˜¯å¦åˆç†
+                    // ¼ì²é¶ÑµşÊıÁ¿ÊÇ·ñºÏÀí
                     if (instanceData.currentStackCount > itemData.maxStack)
                     {
-                        result.warnings.Add(new ValidationWarning(itemHolder.GetSaveID(), "InvalidStackCount", "å½“å‰å †å æ•°é‡è¶…è¿‡æœ€å¤§å †å æ•°é‡", "è°ƒæ•´å †å æ•°é‡åˆ°åˆç†èŒƒå›´"));
+                        result.warnings.Add(new ValidationWarning(itemHolder.GetSaveID(), "InvalidStackCount", "µ±Ç°¶ÑµşÊıÁ¿³¬¹ı×î´ó¶ÑµşÊıÁ¿", "µ÷Õû¶ÑµşÊıÁ¿µ½ºÏÀí·¶Î§"));
                     }
                 }
             }
         }
 
         /// <summary>
-        /// éªŒè¯æ•°æ®å®Œæ•´æ€§
+        /// ÑéÖ¤Êı¾İÍêÕûĞÔ
         /// </summary>
         private void ValidateDataIntegrity(Dictionary<string, ISaveable> objects, ValidationResult result)
         {
@@ -426,27 +426,27 @@ namespace InventorySystem.SaveSystem
                 var objectId = kvp.Key;
                 var saveable = kvp.Value;
 
-                // æ£€æŸ¥å¯¹è±¡æ˜¯å¦æ­£ç¡®åŠ è½½
+                // ¼ì²é¶ÔÏóÊÇ·ñÕıÈ·¼ÓÔØ
                 if (saveable == null)
                 {
-                    result.errors.Add(new ValidationError(objectId, "LoadFailure", "å¯¹è±¡åŠ è½½å¤±è´¥", "æ£€æŸ¥ä¿å­˜æ•°æ®æ ¼å¼å’ŒåŠ è½½é€»è¾‘"));
+                    result.errors.Add(new ValidationError(objectId, "LoadFailure", "¶ÔÏó¼ÓÔØÊ§°Ü", "¼ì²é±£´æÊı¾İ¸ñÊ½ºÍ¼ÓÔØÂß¼­"));
                     continue;
                 }
 
-                // æ£€æŸ¥å…³é”®ç»„ä»¶æ˜¯å¦å­˜åœ¨
+                // ¼ì²é¹Ø¼ü×é¼şÊÇ·ñ´æÔÚ
                 if (saveable is MonoBehaviour mb && mb == null)
                 {
-                    result.errors.Add(new ValidationError(objectId, "MissingComponent", "MonoBehaviourç»„ä»¶ä¸¢å¤±", "é‡æ–°åˆ›å»ºæˆ–ä¿®å¤ç»„ä»¶å¼•ç”¨"));
+                    result.errors.Add(new ValidationError(objectId, "MissingComponent", "MonoBehaviour×é¼ş¶ªÊ§", "ÖØĞÂ´´½¨»òĞŞ¸´×é¼şÒıÓÃ"));
                 }
             }
         }
 
         /// <summary>
-        /// éªŒè¯å¼•ç”¨æœ‰æ•ˆæ€§
+        /// ÑéÖ¤ÒıÓÃÓĞĞ§ĞÔ
         /// </summary>
         private void ValidateReferenceValidity(Dictionary<string, ISaveable> objects, ValidationResult result)
         {
-            // éªŒè¯åŠ è½½åçš„å¼•ç”¨æ˜¯å¦ä»ç„¶æœ‰æ•ˆ
+            // ÑéÖ¤¼ÓÔØºóµÄÒıÓÃÊÇ·ñÈÔÈ»ÓĞĞ§
             foreach (var kvp in objects)
             {
                 var objectId = kvp.Key;
@@ -454,65 +454,65 @@ namespace InventorySystem.SaveSystem
 
                 if (saveable is ItemDataHolder itemHolder)
                 {
-                    // æ£€æŸ¥ç‰©å“æ•°æ®å¼•ç”¨
+                    // ¼ì²éÎïÆ·Êı¾İÒıÓÃ
                     if (itemHolder.GetItemData() == null)
                     {
-                        result.errors.Add(new ValidationError(objectId, "MissingItemData", "ç‰©å“æ•°æ®å¼•ç”¨ä¸¢å¤±", "é‡æ–°è®¾ç½®ç‰©å“æ•°æ®å¼•ç”¨"));
+                        result.errors.Add(new ValidationError(objectId, "MissingItemData", "ÎïÆ·Êı¾İÒıÓÃ¶ªÊ§", "ÖØĞÂÉèÖÃÎïÆ·Êı¾İÒıÓÃ"));
                     }
                 }
             }
         }
 
         /// <summary>
-        /// éªŒè¯çŠ¶æ€ä¸€è‡´æ€§
+        /// ÑéÖ¤×´Ì¬Ò»ÖÂĞÔ
         /// </summary>
         private void ValidateStateConsistency(Dictionary<string, ISaveable> objects, ValidationResult result)
         {
-            // éªŒè¯å¯¹è±¡çŠ¶æ€çš„ä¸€è‡´æ€§
+            // ÑéÖ¤¶ÔÏó×´Ì¬µÄÒ»ÖÂĞÔ
             var itemGrids = objects.Values.OfType<BaseItemGrid>().ToList();
             foreach (var grid in itemGrids)
             {
-                // æ£€æŸ¥ç½‘æ ¼çŠ¶æ€ä¸€è‡´æ€§
+                // ¼ì²éÍø¸ñ×´Ì¬Ò»ÖÂĞÔ
                 var gridItems = grid.GetPlacedItems().ConvertAll(item => item.itemObject);
                 foreach (var item in gridItems)
                 {
                     if (item == null)
                     {
-                        result.warnings.Add(new ValidationWarning(grid.GetSaveID(), "NullItemInGrid", "ç½‘æ ¼ä¸­å­˜åœ¨nullç‰©å“å¼•ç”¨", "æ¸…ç†æ— æ•ˆçš„ç‰©å“å¼•ç”¨"));
+                        result.warnings.Add(new ValidationWarning(grid.GetSaveID(), "NullItemInGrid", "Íø¸ñÖĞ´æÔÚnullÎïÆ·ÒıÓÃ", "ÇåÀíÎŞĞ§µÄÎïÆ·ÒıÓÃ"));
                     }
                 }
             }
         }
 
         /// <summary>
-        /// éªŒè¯ç‰ˆæœ¬å…¼å®¹æ€§
+        /// ÑéÖ¤°æ±¾¼æÈİĞÔ
         /// </summary>
         private void ValidateVersionCompatibility(Dictionary<string, ISaveable> objects, ValidationResult result)
         {
-            // æ£€æŸ¥ä¿å­˜æ•°æ®ç‰ˆæœ¬å…¼å®¹æ€§
-            // è¿™é‡Œå¯ä»¥æ ¹æ®å…·ä½“éœ€æ±‚å®ç°ç‰ˆæœ¬æ£€æŸ¥é€»è¾‘
-            LogDebug("ç‰ˆæœ¬å…¼å®¹æ€§éªŒè¯å®Œæˆ");
+            // ¼ì²é±£´æÊı¾İ°æ±¾¼æÈİĞÔ
+            // ÕâÀï¿ÉÒÔ¸ù¾İ¾ßÌåĞèÇóÊµÏÖ°æ±¾¼ì²éÂß¼­
+            LogDebug("°æ±¾¼æÈİĞÔÑéÖ¤Íê³É");
         }
         #endregion
 
-        #region å…¬å…±å·¥å…·æ–¹æ³•
+        #region ¹«¹²¹¤¾ß·½·¨
         /// <summary>
-        /// è·å–éªŒè¯ç»Ÿè®¡ä¿¡æ¯
+        /// »ñÈ¡ÑéÖ¤Í³¼ÆĞÅÏ¢
         /// </summary>
-        /// <returns>éªŒè¯ç»Ÿè®¡ä¿¡æ¯å­—ç¬¦ä¸²</returns>
+        /// <returns>ÑéÖ¤Í³¼ÆĞÅÏ¢×Ö·û´®</returns>
         public string GetValidationStatistics()
         {
             var stats = new System.Text.StringBuilder();
-            stats.AppendLine("=== éªŒè¯å™¨ç»Ÿè®¡ä¿¡æ¯ ===");
-            stats.AppendLine($"ä¸¥æ ¼éªŒè¯æ¨¡å¼: {(enableStrictValidation ? "å¯ç”¨" : "ç¦ç”¨")}");
-            stats.AppendLine($"å¼•ç”¨å®Œæ•´æ€§æ£€æŸ¥: {(enableReferenceIntegrityCheck ? "å¯ç”¨" : "ç¦ç”¨")}");
-            stats.AppendLine($"IDå”¯ä¸€æ€§æ£€æŸ¥: {(enableIDUniquenessCheck ? "å¯ç”¨" : "ç¦ç”¨")}");
-            stats.AppendLine($"æ•°æ®ç±»å‹éªŒè¯: {(enableDataTypeValidation ? "å¯ç”¨" : "ç¦ç”¨")}");
+            stats.AppendLine("=== ÑéÖ¤Æ÷Í³¼ÆĞÅÏ¢ ===");
+            stats.AppendLine($"ÑÏ¸ñÑéÖ¤Ä£Ê½: {(enableStrictValidation ? "ÆôÓÃ" : "½ûÓÃ")}");
+            stats.AppendLine($"ÒıÓÃÍêÕûĞÔ¼ì²é: {(enableReferenceIntegrityCheck ? "ÆôÓÃ" : "½ûÓÃ")}");
+            stats.AppendLine($"IDÎ¨Ò»ĞÔ¼ì²é: {(enableIDUniquenessCheck ? "ÆôÓÃ" : "½ûÓÃ")}");
+            stats.AppendLine($"Êı¾İÀàĞÍÑéÖ¤: {(enableDataTypeValidation ? "ÆôÓÃ" : "½ûÓÃ")}");
             return stats.ToString();
         }
 
         /// <summary>
-        /// é‡ç½®éªŒè¯å™¨é…ç½®
+        /// ÖØÖÃÑéÖ¤Æ÷ÅäÖÃ
         /// </summary>
         public void ResetValidatorConfiguration()
         {
@@ -520,15 +520,15 @@ namespace InventorySystem.SaveSystem
             enableReferenceIntegrityCheck = true;
             enableIDUniquenessCheck = true;
             enableDataTypeValidation = true;
-            LogDebug("éªŒè¯å™¨é…ç½®å·²é‡ç½®ä¸ºé»˜è®¤å€¼");
+            LogDebug("ÑéÖ¤Æ÷ÅäÖÃÒÑÖØÖÃÎªÄ¬ÈÏÖµ");
         }
         #endregion
 
-        #region è°ƒè¯•æ–¹æ³•
+        #region µ÷ÊÔ·½·¨
         /// <summary>
-        /// è¾“å‡ºè°ƒè¯•æ—¥å¿—
+        /// Êä³öµ÷ÊÔÈÕÖ¾
         /// </summary>
-        /// <param name="message">æ—¥å¿—æ¶ˆæ¯</param>
+        /// <param name="message">ÈÕÖ¾ÏûÏ¢</param>
         private void LogDebug(string message)
         {
             if (enableDebugLog)
@@ -538,9 +538,9 @@ namespace InventorySystem.SaveSystem
         }
 
         /// <summary>
-        /// è¾“å‡ºé”™è¯¯æ—¥å¿—
+        /// Êä³ö´íÎóÈÕÖ¾
         /// </summary>
-        /// <param name="message">é”™è¯¯æ¶ˆæ¯</param>
+        /// <param name="message">´íÎóÏûÏ¢</param>
         private void LogError(string message)
         {
             Debug.LogError($"[SaveDataValidator] {message}");

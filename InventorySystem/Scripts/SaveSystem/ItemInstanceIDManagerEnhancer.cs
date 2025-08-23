@@ -8,13 +8,13 @@ using Newtonsoft.Json;
 namespace InventorySystem.SaveSystem
 {
     /// <summary>
-    /// ç‰©å“å®ä¾‹IDç®¡ç†å™¨å¢å¼ºå™¨
-    /// ä¸ºç°æœ‰ItemInstanceIDManageræä¾›é«˜çº§å†²çªæ£€æµ‹ã€è§£å†³å’Œè·¨åœºæ™¯åŒæ­¥åŠŸèƒ½
-    /// é‡‡ç”¨éä¾µå…¥å¼è®¾è®¡ï¼Œé€šè¿‡ç»„åˆæ¨¡å¼æ‰©å±•ç°æœ‰åŠŸèƒ½
+    /// ÎïÆ·ÊµÀıID¹ÜÀíÆ÷ÔöÇ¿Æ÷
+    /// ÎªÏÖÓĞItemInstanceIDManagerÌá¹©¸ß¼¶³åÍ»¼ì²â¡¢½â¾öºÍ¿ç³¡¾°Í¬²½¹¦ÄÜ
+    /// ²ÉÓÃ·ÇÇÖÈëÊ½Éè¼Æ£¬Í¨¹ı×éºÏÄ£Ê½À©Õ¹ÏÖÓĞ¹¦ÄÜ
     /// </summary>
     public class ItemInstanceIDManagerEnhancer : MonoBehaviour
     {
-        #region å•ä¾‹æ¨¡å¼
+        #region µ¥ÀıÄ£Ê½
         private static ItemInstanceIDManagerEnhancer _instance;
         public static ItemInstanceIDManagerEnhancer Instance
         {
@@ -28,7 +28,7 @@ namespace InventorySystem.SaveSystem
                         GameObject go = new GameObject("ItemInstanceIDManagerEnhancer");
                         _instance = go.AddComponent<ItemInstanceIDManagerEnhancer>();
 
-                        // è®¾ç½®ä¸ºSaveSystemçš„å­å¯¹è±¡
+                        // ÉèÖÃÎªSaveSystemµÄ×Ó¶ÔÏó
                         var saveSystemPersistence = FindObjectOfType<SaveSystemPersistence>();
                         if (saveSystemPersistence != null)
                         {
@@ -41,44 +41,44 @@ namespace InventorySystem.SaveSystem
         }
         #endregion
 
-        #region é…ç½®å­—æ®µ
-        [Header("IDç®¡ç†å¢å¼ºé…ç½®")]
+        #region ÅäÖÃ×Ö¶Î
+        [Header("ID¹ÜÀíÔöÇ¿ÅäÖÃ")]
         [SerializeField]
-        [Tooltip("æ˜¯å¦å¯ç”¨é«˜çº§å†²çªæ£€æµ‹")]
+        [Tooltip("ÊÇ·ñÆôÓÃ¸ß¼¶³åÍ»¼ì²â")]
         private bool enableAdvancedConflictDetection = true;
 
         [SerializeField]
-        [Tooltip("æ˜¯å¦å¯ç”¨è‡ªåŠ¨å†²çªè§£å†³")]
+        [Tooltip("ÊÇ·ñÆôÓÃ×Ô¶¯³åÍ»½â¾ö")]
         private bool enableAutoConflictResolution = true;
 
         [SerializeField]
-        [Tooltip("æ˜¯å¦å¯ç”¨è·¨åœºæ™¯åŒæ­¥")]
+        [Tooltip("ÊÇ·ñÆôÓÃ¿ç³¡¾°Í¬²½")]
         private bool enableCrossSceneSync = true;
 
         [SerializeField]
-        [Tooltip("æ˜¯å¦å¯ç”¨IDå†å²è¿½è¸ª")]
+        [Tooltip("ÊÇ·ñÆôÓÃIDÀúÊ·×·×Ù")]
         private bool enableIdHistoryTracking = true;
 
         [SerializeField]
-        [Tooltip("æ˜¯å¦å¯ç”¨æ€§èƒ½ç›‘æ§")]
+        [Tooltip("ÊÇ·ñÆôÓÃĞÔÄÜ¼à¿Ø")]
         private bool enablePerformanceMonitoring = true;
 
         [SerializeField]
-        [Tooltip("å†²çªæ£€æµ‹é—´éš”ï¼ˆç§’ï¼‰")]
+        [Tooltip("³åÍ»¼ì²â¼ä¸ô£¨Ãë£©")]
         private float conflictDetectionInterval = 5f;
 
         [SerializeField]
-        [Tooltip("æœ€å¤§IDå†å²è®°å½•æ•°")]
+        [Tooltip("×î´óIDÀúÊ·¼ÇÂ¼Êı")]
         private int maxIdHistoryCount = 1000;
 
         [SerializeField]
-        [Tooltip("æ˜¯å¦å¯ç”¨è°ƒè¯•æ—¥å¿—")]
+        [Tooltip("ÊÇ·ñÆôÓÃµ÷ÊÔÈÕÖ¾")]
         private bool enableDebugLog = true;
         #endregion
 
-        #region æ•°æ®ç»“æ„
+        #region Êı¾İ½á¹¹
         /// <summary>
-        /// IDå†²çªä¿¡æ¯
+        /// ID³åÍ»ĞÅÏ¢
         /// </summary>
         [System.Serializable]
         public class IdConflictInfo
@@ -103,20 +103,20 @@ namespace InventorySystem.SaveSystem
         }
 
         /// <summary>
-        /// å†²çªç±»å‹
+        /// ³åÍ»ÀàĞÍ
         /// </summary>
         public enum ConflictType
         {
-            DuplicateId,        // é‡å¤ID
-            InvalidFormat,      // æ— æ•ˆæ ¼å¼
-            OrphanedReference,  // å­¤ç«‹å¼•ç”¨
-            CircularReference,  // å¾ªç¯å¼•ç”¨
-            MissingReference,   // ç¼ºå¤±å¼•ç”¨
-            InconsistentState   // çŠ¶æ€ä¸ä¸€è‡´
+            DuplicateId,        // ÖØ¸´ID
+            InvalidFormat,      // ÎŞĞ§¸ñÊ½
+            OrphanedReference,  // ¹ÂÁ¢ÒıÓÃ
+            CircularReference,  // Ñ­»·ÒıÓÃ
+            MissingReference,   // È±Ê§ÒıÓÃ
+            InconsistentState   // ×´Ì¬²»Ò»ÖÂ
         }
 
         /// <summary>
-        /// å†²çªä¸¥é‡ç¨‹åº¦
+        /// ³åÍ»ÑÏÖØ³Ì¶È
         /// </summary>
         public enum ConflictSeverity
         {
@@ -127,7 +127,7 @@ namespace InventorySystem.SaveSystem
         }
 
         /// <summary>
-        /// IDå†å²è®°å½•
+        /// IDÀúÊ·¼ÇÂ¼
         /// </summary>
         [System.Serializable]
         public class IdHistoryRecord
@@ -153,7 +153,7 @@ namespace InventorySystem.SaveSystem
         }
 
         /// <summary>
-        /// æ€§èƒ½ç›‘æ§æ•°æ®
+        /// ĞÔÄÜ¼à¿ØÊı¾İ
         /// </summary>
         [System.Serializable]
         public class PerformanceMetrics
@@ -174,7 +174,7 @@ namespace InventorySystem.SaveSystem
         }
 
         /// <summary>
-        /// åŒæ­¥çŠ¶æ€
+        /// Í¬²½×´Ì¬
         /// </summary>
         public enum SyncStatus
         {
@@ -185,7 +185,7 @@ namespace InventorySystem.SaveSystem
         }
         #endregion
 
-        #region ç§æœ‰å­—æ®µ
+        #region Ë½ÓĞ×Ö¶Î
         private ItemInstanceIDManager idManager;
         private Dictionary<string, IdConflictInfo> activeConflicts;
         private List<IdHistoryRecord> idHistory;
@@ -193,14 +193,14 @@ namespace InventorySystem.SaveSystem
         private Coroutine conflictDetectionCoroutine;
         private SyncStatus currentSyncStatus = SyncStatus.Idle;
 
-        // ç¼“å­˜æ•°æ®
+        // »º´æÊı¾İ
         private Dictionary<string, GameObject> idToObjectCache;
         private Dictionary<GameObject, string> objectToIdCache;
         private HashSet<string> knownValidIds;
         #endregion
 
-        #region äº‹ä»¶å®šä¹‰
-        // IDç®¡ç†äº‹ä»¶
+        #region ÊÂ¼ş¶¨Òå
+        // ID¹ÜÀíÊÂ¼ş
         public event Action<IdConflictInfo> OnConflictDetected;
         public event Action<IdConflictInfo> OnConflictResolved;
         public event Action<IdHistoryRecord> OnIdChanged;
@@ -209,10 +209,10 @@ namespace InventorySystem.SaveSystem
         public event Action<string, float> OnSyncProgress;
         #endregion
 
-        #region Unityç”Ÿå‘½å‘¨æœŸ
+        #region UnityÉúÃüÖÜÆÚ
         private void Awake()
         {
-            // ç¡®ä¿å•ä¾‹å”¯ä¸€æ€§
+            // È·±£µ¥ÀıÎ¨Ò»ĞÔ
             if (_instance != null && _instance != this)
             {
                 Destroy(gameObject);
@@ -225,7 +225,7 @@ namespace InventorySystem.SaveSystem
 
         private void Start()
         {
-            // å¯åŠ¨å†²çªæ£€æµ‹
+            // Æô¶¯³åÍ»¼ì²â
             if (enableAdvancedConflictDetection)
             {
                 StartConflictDetection();
@@ -234,7 +234,7 @@ namespace InventorySystem.SaveSystem
 
         private void OnDestroy()
         {
-            // åœæ­¢å†²çªæ£€æµ‹
+            // Í£Ö¹³åÍ»¼ì²â
             if (conflictDetectionCoroutine != null)
             {
                 StopCoroutine(conflictDetectionCoroutine);
@@ -247,9 +247,9 @@ namespace InventorySystem.SaveSystem
         }
         #endregion
 
-        #region åˆå§‹åŒ–
+        #region ³õÊ¼»¯
         /// <summary>
-        /// åˆå§‹åŒ–å¢å¼ºå™¨
+        /// ³õÊ¼»¯ÔöÇ¿Æ÷
         /// </summary>
         private void InitializeEnhancer()
         {
@@ -261,21 +261,21 @@ namespace InventorySystem.SaveSystem
             objectToIdCache = new Dictionary<GameObject, string>();
             knownValidIds = new HashSet<string>();
 
-            // è·å–ä¾èµ–ç»„ä»¶
+            // »ñÈ¡ÒÀÀµ×é¼ş
             idManager = ItemInstanceIDManager.Instance;
 
-            // åˆå§‹åŒ–ç¼“å­˜
+            // ³õÊ¼»¯»º´æ
             RefreshIdCache();
 
-            LogDebug("ItemInstanceIDManagerEnhancerå·²åˆå§‹åŒ–");
+            LogDebug("ItemInstanceIDManagerEnhancerÒÑ³õÊ¼»¯");
         }
         #endregion
 
-        #region ä¸»è¦å¢å¼ºæ–¹æ³•
+        #region Ö÷ÒªÔöÇ¿·½·¨
         /// <summary>
-        /// æ‰§è¡Œé«˜çº§å†²çªæ£€æµ‹
+        /// Ö´ĞĞ¸ß¼¶³åÍ»¼ì²â
         /// </summary>
-        /// <returns>æ£€æµ‹åˆ°çš„å†²çªåˆ—è¡¨</returns>
+        /// <returns>¼ì²âµ½µÄ³åÍ»ÁĞ±í</returns>
         public List<IdConflictInfo> PerformAdvancedConflictDetection()
         {
             var startTime = Time.realtimeSinceStartup;
@@ -283,33 +283,33 @@ namespace InventorySystem.SaveSystem
 
             try
             {
-                LogDebug("å¼€å§‹é«˜çº§å†²çªæ£€æµ‹");
+                LogDebug("¿ªÊ¼¸ß¼¶³åÍ»¼ì²â");
 
-                // 1. æ£€æµ‹é‡å¤ID
+                // 1. ¼ì²âÖØ¸´ID
                 var duplicateConflicts = DetectDuplicateIds();
                 conflicts.AddRange(duplicateConflicts);
 
-                // 2. æ£€æµ‹æ— æ•ˆæ ¼å¼
+                // 2. ¼ì²âÎŞĞ§¸ñÊ½
                 var formatConflicts = DetectInvalidFormats();
                 conflicts.AddRange(formatConflicts);
 
-                // 3. æ£€æµ‹å­¤ç«‹å¼•ç”¨
+                // 3. ¼ì²â¹ÂÁ¢ÒıÓÃ
                 var orphanedConflicts = DetectOrphanedReferences();
                 conflicts.AddRange(orphanedConflicts);
 
-                // 4. æ£€æµ‹å¾ªç¯å¼•ç”¨
+                // 4. ¼ì²âÑ­»·ÒıÓÃ
                 var circularConflicts = DetectCircularReferences();
                 conflicts.AddRange(circularConflicts);
 
-                // 5. æ£€æµ‹ç¼ºå¤±å¼•ç”¨
+                // 5. ¼ì²âÈ±Ê§ÒıÓÃ
                 var missingConflicts = DetectMissingReferences();
                 conflicts.AddRange(missingConflicts);
 
-                // 6. æ£€æµ‹çŠ¶æ€ä¸ä¸€è‡´
+                // 6. ¼ì²â×´Ì¬²»Ò»ÖÂ
                 var inconsistentConflicts = DetectInconsistentStates();
                 conflicts.AddRange(inconsistentConflicts);
 
-                // æ›´æ–°æ´»è·ƒå†²çªåˆ—è¡¨
+                // ¸üĞÂ»îÔ¾³åÍ»ÁĞ±í
                 foreach (var conflict in conflicts)
                 {
                     if (!activeConflicts.ContainsKey(conflict.conflictId))
@@ -319,7 +319,7 @@ namespace InventorySystem.SaveSystem
                     }
                 }
 
-                // æ›´æ–°æ€§èƒ½æŒ‡æ ‡
+                // ¸üĞÂĞÔÄÜÖ¸±ê
                 if (enablePerformanceMonitoring)
                 {
                     performanceMetrics.conflictsDetected += conflicts.Count;
@@ -341,21 +341,21 @@ namespace InventorySystem.SaveSystem
                     OnPerformanceUpdate?.Invoke(performanceMetrics);
                 }
 
-                LogDebug($"å†²çªæ£€æµ‹å®Œæˆï¼Œå‘ç°{conflicts.Count}ä¸ªå†²çªï¼Œè€—æ—¶{Time.realtimeSinceStartup - startTime:F3}ç§’");
+                LogDebug($"³åÍ»¼ì²âÍê³É£¬·¢ÏÖ{conflicts.Count}¸ö³åÍ»£¬ºÄÊ±{Time.realtimeSinceStartup - startTime:F3}Ãë");
             }
             catch (Exception ex)
             {
-                LogError($"å†²çªæ£€æµ‹è¿‡ç¨‹ä¸­å‘ç”Ÿå¼‚å¸¸: {ex.Message}");
+                LogError($"³åÍ»¼ì²â¹ı³ÌÖĞ·¢ÉúÒì³£: {ex.Message}");
             }
 
             return conflicts;
         }
 
         /// <summary>
-        /// è‡ªåŠ¨è§£å†³å†²çª
+        /// ×Ô¶¯½â¾ö³åÍ»
         /// </summary>
-        /// <param name="conflicts">è¦è§£å†³çš„å†²çªåˆ—è¡¨</param>
-        /// <returns>è§£å†³ç»“æœ</returns>
+        /// <param name="conflicts">Òª½â¾öµÄ³åÍ»ÁĞ±í</param>
+        /// <returns>½â¾ö½á¹û</returns>
         public Dictionary<string, bool> AutoResolveConflicts(List<IdConflictInfo> conflicts = null)
         {
             var results = new Dictionary<string, bool>();
@@ -363,7 +363,7 @@ namespace InventorySystem.SaveSystem
 
             var startTime = Time.realtimeSinceStartup;
 
-            LogDebug($"å¼€å§‹è‡ªåŠ¨è§£å†³{conflictsToResolve.Count}ä¸ªå†²çª");
+            LogDebug($"¿ªÊ¼×Ô¶¯½â¾ö{conflictsToResolve.Count}¸ö³åÍ»");
 
             foreach (var conflict in conflictsToResolve)
             {
@@ -387,7 +387,7 @@ namespace InventorySystem.SaveSystem
                 catch (Exception ex)
                 {
                     results[conflict.conflictId] = false;
-                    LogError($"è§£å†³å†²çª{conflict.conflictId}æ—¶å‘ç”Ÿå¼‚å¸¸: {ex.Message}");
+                    LogError($"½â¾ö³åÍ»{conflict.conflictId}Ê±·¢ÉúÒì³£: {ex.Message}");
                 }
             }
 
@@ -397,19 +397,19 @@ namespace InventorySystem.SaveSystem
                 OnPerformanceUpdate?.Invoke(performanceMetrics);
             }
 
-            LogDebug($"å†²çªè§£å†³å®Œæˆï¼ŒæˆåŠŸè§£å†³{results.Values.Count(r => r)}ä¸ªå†²çª");
+            LogDebug($"³åÍ»½â¾öÍê³É£¬³É¹¦½â¾ö{results.Values.Count(r => r)}¸ö³åÍ»");
             return results;
         }
 
         /// <summary>
-        /// æ‰§è¡Œè·¨åœºæ™¯IDåŒæ­¥
+        /// Ö´ĞĞ¿ç³¡¾°IDÍ¬²½
         /// </summary>
-        /// <returns>åŒæ­¥åç¨‹</returns>
+        /// <returns>Í¬²½Ğ­³Ì</returns>
         public Coroutine PerformCrossSceneSync()
         {
             if (currentSyncStatus != SyncStatus.Idle)
             {
-                LogDebug("åŒæ­¥æ“ä½œå·²åœ¨è¿›è¡Œä¸­");
+                LogDebug("Í¬²½²Ù×÷ÒÑÔÚ½øĞĞÖĞ");
                 return null;
             }
 
@@ -417,7 +417,7 @@ namespace InventorySystem.SaveSystem
         }
 
         /// <summary>
-        /// å¼ºåˆ¶åˆ·æ–°IDç¼“å­˜
+        /// Ç¿ÖÆË¢ĞÂID»º´æ
         /// </summary>
         public void RefreshIdCache()
         {
@@ -427,7 +427,7 @@ namespace InventorySystem.SaveSystem
                 objectToIdCache.Clear();
                 knownValidIds.Clear();
 
-                // æ”¶é›†æ‰€æœ‰ISaveableå¯¹è±¡çš„ID
+                // ÊÕ¼¯ËùÓĞISaveable¶ÔÏóµÄID
                 var saveableObjects = FindObjectsOfType<MonoBehaviour>().OfType<ISaveable>().ToList();
 
                 foreach (var saveable in saveableObjects)
@@ -448,28 +448,28 @@ namespace InventorySystem.SaveSystem
                     }
                     catch (Exception ex)
                     {
-                        LogError($"è·å–å¯¹è±¡{saveable}çš„ä¿å­˜IDæ—¶å‘ç”Ÿå¼‚å¸¸: {ex.Message}");
+                        LogError($"»ñÈ¡¶ÔÏó{saveable}µÄ±£´æIDÊ±·¢ÉúÒì³£: {ex.Message}");
                     }
                 }
 
-                // æ›´æ–°æ€§èƒ½æŒ‡æ ‡
+                // ¸üĞÂĞÔÄÜÖ¸±ê
                 if (enablePerformanceMonitoring)
                 {
                     performanceMetrics.totalIdsManaged = knownValidIds.Count;
                 }
 
-                LogDebug($"IDç¼“å­˜å·²åˆ·æ–°ï¼Œç®¡ç†{knownValidIds.Count}ä¸ªID");
+                LogDebug($"ID»º´æÒÑË¢ĞÂ£¬¹ÜÀí{knownValidIds.Count}¸öID");
             }
             catch (Exception ex)
             {
-                LogError($"åˆ·æ–°IDç¼“å­˜æ—¶å‘ç”Ÿå¼‚å¸¸: {ex.Message}");
+                LogError($"Ë¢ĞÂID»º´æÊ±·¢ÉúÒì³£: {ex.Message}");
             }
         }
         #endregion
 
-        #region å†²çªæ£€æµ‹å®ç°
+        #region ³åÍ»¼ì²âÊµÏÖ
         /// <summary>
-        /// æ£€æµ‹é‡å¤ID
+        /// ¼ì²âÖØ¸´ID
         /// </summary>
         private List<IdConflictInfo> DetectDuplicateIds()
         {
@@ -491,7 +491,7 @@ namespace InventorySystem.SaveSystem
         }
 
         /// <summary>
-        /// æ£€æµ‹æ— æ•ˆæ ¼å¼
+        /// ¼ì²âÎŞĞ§¸ñÊ½
         /// </summary>
         private List<IdConflictInfo> DetectInvalidFormats()
         {
@@ -502,7 +502,7 @@ namespace InventorySystem.SaveSystem
                 var id = kvp.Key;
                 var obj = kvp.Value;
 
-                // æ£€æŸ¥IDæ ¼å¼æ˜¯å¦æœ‰æ•ˆ
+                // ¼ì²éID¸ñÊ½ÊÇ·ñÓĞĞ§
                 if (!IsValidIdFormat(id))
                 {
                     var conflict = new IdConflictInfo(id, ConflictType.InvalidFormat)
@@ -518,13 +518,13 @@ namespace InventorySystem.SaveSystem
         }
 
         /// <summary>
-        /// æ£€æµ‹å­¤ç«‹å¼•ç”¨
+        /// ¼ì²â¹ÂÁ¢ÒıÓÃ
         /// </summary>
         private List<IdConflictInfo> DetectOrphanedReferences()
         {
             var conflicts = new List<IdConflictInfo>();
 
-            // æ£€æŸ¥ç¼“å­˜ä¸­çš„å¯¹è±¡æ˜¯å¦ä»ç„¶å­˜åœ¨
+            // ¼ì²é»º´æÖĞµÄ¶ÔÏóÊÇ·ñÈÔÈ»´æÔÚ
             var orphanedIds = new List<string>();
 
             foreach (var kvp in idToObjectCache)
@@ -548,26 +548,26 @@ namespace InventorySystem.SaveSystem
         }
 
         /// <summary>
-        /// æ£€æµ‹å¾ªç¯å¼•ç”¨
+        /// ¼ì²âÑ­»·ÒıÓÃ
         /// </summary>
         private List<IdConflictInfo> DetectCircularReferences()
         {
             var conflicts = new List<IdConflictInfo>();
 
-            // è¿™é‡Œå¯ä»¥æ ¹æ®å…·ä½“çš„å¼•ç”¨å…³ç³»æ¥æ£€æµ‹å¾ªç¯å¼•ç”¨
-            // ç›®å‰ç®€åŒ–å®ç°
+            // ÕâÀï¿ÉÒÔ¸ù¾İ¾ßÌåµÄÒıÓÃ¹ØÏµÀ´¼ì²âÑ­»·ÒıÓÃ
+            // Ä¿Ç°¼ò»¯ÊµÏÖ
 
             return conflicts;
         }
 
         /// <summary>
-        /// æ£€æµ‹ç¼ºå¤±å¼•ç”¨
+        /// ¼ì²âÈ±Ê§ÒıÓÃ
         /// </summary>
         private List<IdConflictInfo> DetectMissingReferences()
         {
             var conflicts = new List<IdConflictInfo>();
 
-            // æ£€æŸ¥ItemDataHolderä¸­çš„å¼•ç”¨
+            // ¼ì²éItemDataHolderÖĞµÄÒıÓÃ
             var itemHolders = FindObjectsOfType<ItemDataHolder>();
 
             foreach (var holder in itemHolders)
@@ -576,7 +576,7 @@ namespace InventorySystem.SaveSystem
                 {
                     var saveId = holder.GetSaveID();
 
-                    // æ£€æŸ¥ç‰©å“æ•°æ®å¼•ç”¨
+                    // ¼ì²éÎïÆ·Êı¾İÒıÓÃ
                     if (holder.GetItemData() == null)
                     {
                         var conflict = new IdConflictInfo(saveId, ConflictType.MissingReference)
@@ -587,7 +587,7 @@ namespace InventorySystem.SaveSystem
                         conflicts.Add(conflict);
                     }
 
-                    // æ£€æŸ¥å®ä¾‹æ•°æ®å¼•ç”¨
+                    // ¼ì²éÊµÀıÊı¾İÒıÓÃ
                     if (holder.GetInstanceData() == null)
                     {
                         var conflict = new IdConflictInfo(saveId, ConflictType.MissingReference)
@@ -600,7 +600,7 @@ namespace InventorySystem.SaveSystem
                 }
                 catch (Exception ex)
                 {
-                    LogError($"æ£€æµ‹ç¼ºå¤±å¼•ç”¨æ—¶å‘ç”Ÿå¼‚å¸¸: {ex.Message}");
+                    LogError($"¼ì²âÈ±Ê§ÒıÓÃÊ±·¢ÉúÒì³£: {ex.Message}");
                 }
             }
 
@@ -608,13 +608,13 @@ namespace InventorySystem.SaveSystem
         }
 
         /// <summary>
-        /// æ£€æµ‹çŠ¶æ€ä¸ä¸€è‡´
+        /// ¼ì²â×´Ì¬²»Ò»ÖÂ
         /// </summary>
         private List<IdConflictInfo> DetectInconsistentStates()
         {
             var conflicts = new List<IdConflictInfo>();
 
-            // æ£€æŸ¥å¯¹è±¡çš„æ¿€æ´»çŠ¶æ€ä¸ä¿å­˜æ•°æ®çš„ä¸€è‡´æ€§
+            // ¼ì²é¶ÔÏóµÄ¼¤»î×´Ì¬Óë±£´æÊı¾İµÄÒ»ÖÂĞÔ
             foreach (var kvp in idToObjectCache)
             {
                 var id = kvp.Key;
@@ -628,8 +628,8 @@ namespace InventorySystem.SaveSystem
                         try
                         {
                             var saveData = saveable.SerializeToJson();
-                            // è¿™é‡Œå¯ä»¥æ ¹æ®å…·ä½“çš„ä¿å­˜æ•°æ®ç»“æ„æ¥æ£€æŸ¥çŠ¶æ€ä¸€è‡´æ€§
-                            // ç›®å‰ç®€åŒ–å®ç°
+                            // ÕâÀï¿ÉÒÔ¸ù¾İ¾ßÌåµÄ±£´æÊı¾İ½á¹¹À´¼ì²é×´Ì¬Ò»ÖÂĞÔ
+                            // Ä¿Ç°¼ò»¯ÊµÏÖ
                         }
                         catch (Exception)
                         {
@@ -648,9 +648,9 @@ namespace InventorySystem.SaveSystem
         }
         #endregion
 
-        #region å†²çªè§£å†³å®ç°
+        #region ³åÍ»½â¾öÊµÏÖ
         /// <summary>
-        /// è§£å†³å•ä¸ªå†²çª
+        /// ½â¾öµ¥¸ö³åÍ»
         /// </summary>
         private bool ResolveConflict(IdConflictInfo conflict)
         {
@@ -674,20 +674,20 @@ namespace InventorySystem.SaveSystem
             }
             catch (Exception ex)
             {
-                LogError($"è§£å†³å†²çª{conflict.conflictId}æ—¶å‘ç”Ÿå¼‚å¸¸: {ex.Message}");
+                LogError($"½â¾ö³åÍ»{conflict.conflictId}Ê±·¢ÉúÒì³£: {ex.Message}");
                 return false;
             }
         }
 
         /// <summary>
-        /// è§£å†³é‡å¤IDå†²çª
+        /// ½â¾öÖØ¸´ID³åÍ»
         /// </summary>
         private bool ResolveDuplicateId(IdConflictInfo conflict)
         {
             if (conflict.conflictingObjects.Count <= 1)
                 return true;
 
-            // ä¿ç•™ç¬¬ä¸€ä¸ªå¯¹è±¡ï¼Œä¸ºå…¶ä»–å¯¹è±¡é‡æ–°ç”ŸæˆID
+            // ±£ÁôµÚÒ»¸ö¶ÔÏó£¬ÎªÆäËû¶ÔÏóÖØĞÂÉú³ÉID
             for (int i = 1; i < conflict.conflictingObjects.Count; i++)
             {
                 var obj = conflict.conflictingObjects[i];
@@ -699,36 +699,36 @@ namespace InventorySystem.SaveSystem
                         var oldId = conflict.conflictId;
                         var newId = GenerateUniqueId();
 
-                        // è¿™é‡Œéœ€è¦æ ¹æ®å…·ä½“çš„ISaveableå®ç°æ¥è®¾ç½®æ–°ID
-                        // ç”±äºISaveableæ¥å£å¯èƒ½æ²¡æœ‰SetSaveIDæ–¹æ³•ï¼Œæˆ‘ä»¬éœ€è¦ç‰¹æ®Šå¤„ç†
+                        // ÕâÀïĞèÒª¸ù¾İ¾ßÌåµÄISaveableÊµÏÖÀ´ÉèÖÃĞÂID
+                        // ÓÉÓÚISaveable½Ó¿Ú¿ÉÄÜÃ»ÓĞSetSaveID·½·¨£¬ÎÒÃÇĞèÒªÌØÊâ´¦Àí
                         if (TrySetObjectId(saveable, newId))
                         {
-                            // æ›´æ–°ç¼“å­˜
+                            // ¸üĞÂ»º´æ
                             idToObjectCache.Remove(oldId);
                             idToObjectCache[newId] = obj;
                             objectToIdCache[obj] = newId;
                             knownValidIds.Add(newId);
 
-                            // è®°å½•å†å²
+                            // ¼ÇÂ¼ÀúÊ·
                             if (enableIdHistoryTracking)
                             {
-                                var historyRecord = new IdHistoryRecord(obj.name, oldId, newId, "ResolveDuplicateId", "è§£å†³é‡å¤IDå†²çª");
+                                var historyRecord = new IdHistoryRecord(obj.name, oldId, newId, "ResolveDuplicateId", "½â¾öÖØ¸´ID³åÍ»");
                                 idHistory.Add(historyRecord);
                                 OnIdChanged?.Invoke(historyRecord);
                             }
 
-                            conflict.resolutionActions.Add($"ä¸ºå¯¹è±¡{obj.name}é‡æ–°ç”ŸæˆID: {newId}");
+                            conflict.resolutionActions.Add($"Îª¶ÔÏó{obj.name}ÖØĞÂÉú³ÉID: {newId}");
                         }
                     }
                 }
             }
 
-            conflict.resolutionMethod = "é‡æ–°ç”Ÿæˆé‡å¤å¯¹è±¡çš„ID";
+            conflict.resolutionMethod = "ÖØĞÂÉú³ÉÖØ¸´¶ÔÏóµÄID";
             return true;
         }
 
         /// <summary>
-        /// è§£å†³æ— æ•ˆæ ¼å¼å†²çª
+        /// ½â¾öÎŞĞ§¸ñÊ½³åÍ»
         /// </summary>
         private bool ResolveInvalidFormat(IdConflictInfo conflict)
         {
@@ -744,76 +744,76 @@ namespace InventorySystem.SaveSystem
 
                         if (TrySetObjectId(saveable, newId))
                         {
-                            // æ›´æ–°ç¼“å­˜
+                            // ¸üĞÂ»º´æ
                             idToObjectCache.Remove(oldId);
                             idToObjectCache[newId] = obj;
                             objectToIdCache[obj] = newId;
                             knownValidIds.Remove(oldId);
                             knownValidIds.Add(newId);
 
-                            // è®°å½•å†å²
+                            // ¼ÇÂ¼ÀúÊ·
                             if (enableIdHistoryTracking)
                             {
-                                var historyRecord = new IdHistoryRecord(obj.name, oldId, newId, "ResolveInvalidFormat", "ä¿®å¤æ— æ•ˆIDæ ¼å¼");
+                                var historyRecord = new IdHistoryRecord(obj.name, oldId, newId, "ResolveInvalidFormat", "ĞŞ¸´ÎŞĞ§ID¸ñÊ½");
                                 idHistory.Add(historyRecord);
                                 OnIdChanged?.Invoke(historyRecord);
                             }
 
-                            conflict.resolutionActions.Add($"ä¸ºå¯¹è±¡{obj.name}ç”Ÿæˆæœ‰æ•ˆæ ¼å¼ID: {newId}");
+                            conflict.resolutionActions.Add($"Îª¶ÔÏó{obj.name}Éú³ÉÓĞĞ§¸ñÊ½ID: {newId}");
                         }
                     }
                 }
             }
 
-            conflict.resolutionMethod = "é‡æ–°ç”Ÿæˆæœ‰æ•ˆæ ¼å¼çš„ID";
+            conflict.resolutionMethod = "ÖØĞÂÉú³ÉÓĞĞ§¸ñÊ½µÄID";
             return true;
         }
 
         /// <summary>
-        /// è§£å†³å­¤ç«‹å¼•ç”¨å†²çª
+        /// ½â¾ö¹ÂÁ¢ÒıÓÃ³åÍ»
         /// </summary>
         private bool ResolveOrphanedReference(IdConflictInfo conflict)
         {
-            // ä»ç¼“å­˜ä¸­ç§»é™¤å­¤ç«‹å¼•ç”¨
+            // ´Ó»º´æÖĞÒÆ³ı¹ÂÁ¢ÒıÓÃ
             idToObjectCache.Remove(conflict.conflictId);
             knownValidIds.Remove(conflict.conflictId);
 
-            conflict.resolutionMethod = "æ¸…ç†å­¤ç«‹å¼•ç”¨";
-            conflict.resolutionActions.Add($"ä»ç¼“å­˜ä¸­ç§»é™¤å­¤ç«‹ID: {conflict.conflictId}");
+            conflict.resolutionMethod = "ÇåÀí¹ÂÁ¢ÒıÓÃ";
+            conflict.resolutionActions.Add($"´Ó»º´æÖĞÒÆ³ı¹ÂÁ¢ID: {conflict.conflictId}");
 
             return true;
         }
 
         /// <summary>
-        /// è§£å†³ç¼ºå¤±å¼•ç”¨å†²çª
+        /// ½â¾öÈ±Ê§ÒıÓÃ³åÍ»
         /// </summary>
         private bool ResolveMissingReference(IdConflictInfo conflict)
         {
-            // è¿™é‡Œéœ€è¦æ ¹æ®å…·ä½“çš„ä¸šåŠ¡é€»è¾‘æ¥ä¿®å¤ç¼ºå¤±å¼•ç”¨
-            // ç›®å‰ç®€åŒ–å®ç°ï¼Œåªæ˜¯è®°å½•é—®é¢˜
-            conflict.resolutionMethod = "è®°å½•ç¼ºå¤±å¼•ç”¨é—®é¢˜";
-            conflict.resolutionActions.Add($"æ£€æµ‹åˆ°ç¼ºå¤±å¼•ç”¨: {conflict.conflictId}");
+            // ÕâÀïĞèÒª¸ù¾İ¾ßÌåµÄÒµÎñÂß¼­À´ĞŞ¸´È±Ê§ÒıÓÃ
+            // Ä¿Ç°¼ò»¯ÊµÏÖ£¬Ö»ÊÇ¼ÇÂ¼ÎÊÌâ
+            conflict.resolutionMethod = "¼ÇÂ¼È±Ê§ÒıÓÃÎÊÌâ";
+            conflict.resolutionActions.Add($"¼ì²âµ½È±Ê§ÒıÓÃ: {conflict.conflictId}");
 
-            return false; // éœ€è¦æ‰‹åŠ¨å¤„ç†
+            return false; // ĞèÒªÊÖ¶¯´¦Àí
         }
 
         /// <summary>
-        /// è§£å†³çŠ¶æ€ä¸ä¸€è‡´å†²çª
+        /// ½â¾ö×´Ì¬²»Ò»ÖÂ³åÍ»
         /// </summary>
         private bool ResolveInconsistentState(IdConflictInfo conflict)
         {
-            // è¿™é‡Œéœ€è¦æ ¹æ®å…·ä½“çš„çŠ¶æ€ä¸ä¸€è‡´ç±»å‹æ¥ä¿®å¤
-            // ç›®å‰ç®€åŒ–å®ç°
-            conflict.resolutionMethod = "è®°å½•çŠ¶æ€ä¸ä¸€è‡´é—®é¢˜";
-            conflict.resolutionActions.Add($"æ£€æµ‹åˆ°çŠ¶æ€ä¸ä¸€è‡´: {conflict.conflictId}");
+            // ÕâÀïĞèÒª¸ù¾İ¾ßÌåµÄ×´Ì¬²»Ò»ÖÂÀàĞÍÀ´ĞŞ¸´
+            // Ä¿Ç°¼ò»¯ÊµÏÖ
+            conflict.resolutionMethod = "¼ÇÂ¼×´Ì¬²»Ò»ÖÂÎÊÌâ";
+            conflict.resolutionActions.Add($"¼ì²âµ½×´Ì¬²»Ò»ÖÂ: {conflict.conflictId}");
 
-            return false; // éœ€è¦æ‰‹åŠ¨å¤„ç†
+            return false; // ĞèÒªÊÖ¶¯´¦Àí
         }
         #endregion
 
-        #region è·¨åœºæ™¯åŒæ­¥
+        #region ¿ç³¡¾°Í¬²½
         /// <summary>
-        /// è·¨åœºæ™¯åŒæ­¥åç¨‹
+        /// ¿ç³¡¾°Í¬²½Ğ­³Ì
         /// </summary>
         private IEnumerator CrossSceneSyncCoroutine()
         {
@@ -822,40 +822,40 @@ namespace InventorySystem.SaveSystem
             bool syncSuccess = false;
             string errorMessage = "";
 
-            // æ‰§è¡ŒåŒæ­¥æ“ä½œ
+            // Ö´ĞĞÍ¬²½²Ù×÷
             yield return StartCoroutine(PerformSyncOperations((success, error) =>
             {
                 syncSuccess = success;
                 errorMessage = error;
             }));
 
-            // å¤„ç†åŒæ­¥ç»“æœ
+            // ´¦ÀíÍ¬²½½á¹û
             if (syncSuccess)
             {
                 SetSyncStatus(SyncStatus.Completed);
-                LogDebug("è·¨åœºæ™¯åŒæ­¥å®Œæˆ");
+                LogDebug("¿ç³¡¾°Í¬²½Íê³É");
             }
             else
             {
                 SetSyncStatus(SyncStatus.Failed);
-                LogError($"è·¨åœºæ™¯åŒæ­¥å¤±è´¥: {errorMessage}");
+                LogError($"¿ç³¡¾°Í¬²½Ê§°Ü: {errorMessage}");
             }
         }
 
         /// <summary>
-        /// æ‰§è¡ŒåŒæ­¥æ“ä½œ
+        /// Ö´ĞĞÍ¬²½²Ù×÷
         /// </summary>
         private IEnumerator PerformSyncOperations(System.Action<bool, string> callback)
         {
             string errorMessage = "";
             bool hasError = false;
 
-            // æ­¥éª¤1: å¼€å§‹åŒæ­¥
-            OnSyncProgress?.Invoke("å¼€å§‹è·¨åœºæ™¯åŒæ­¥", 0.1f);
+            // ²½Öè1: ¿ªÊ¼Í¬²½
+            OnSyncProgress?.Invoke("¿ªÊ¼¿ç³¡¾°Í¬²½", 0.1f);
             yield return null;
 
-            // æ­¥éª¤2: æ”¶é›†å½“å‰åœºæ™¯çš„æ‰€æœ‰ID
-            OnSyncProgress?.Invoke("æ”¶é›†å½“å‰åœºæ™¯ID", 0.3f);
+            // ²½Öè2: ÊÕ¼¯µ±Ç°³¡¾°µÄËùÓĞID
+            OnSyncProgress?.Invoke("ÊÕ¼¯µ±Ç°³¡¾°ID", 0.3f);
             try
             {
                 RefreshIdCache();
@@ -863,7 +863,7 @@ namespace InventorySystem.SaveSystem
             catch (Exception ex)
             {
                 hasError = true;
-                errorMessage = $"åˆ·æ–°IDç¼“å­˜å¤±è´¥: {ex.Message}";
+                errorMessage = $"Ë¢ĞÂID»º´æÊ§°Ü: {ex.Message}";
             }
             yield return null;
 
@@ -873,8 +873,8 @@ namespace InventorySystem.SaveSystem
                 yield break;
             }
 
-            // æ­¥éª¤3: æ£€æµ‹å†²çª
-            OnSyncProgress?.Invoke("æ£€æµ‹IDå†²çª", 0.5f);
+            // ²½Öè3: ¼ì²â³åÍ»
+            OnSyncProgress?.Invoke("¼ì²âID³åÍ»", 0.5f);
             List<IdConflictInfo> conflicts = null;
             try
             {
@@ -883,7 +883,7 @@ namespace InventorySystem.SaveSystem
             catch (Exception ex)
             {
                 hasError = true;
-                errorMessage = $"å†²çªæ£€æµ‹å¤±è´¥: {ex.Message}";
+                errorMessage = $"³åÍ»¼ì²âÊ§°Ü: {ex.Message}";
             }
             yield return null;
 
@@ -893,10 +893,10 @@ namespace InventorySystem.SaveSystem
                 yield break;
             }
 
-            // æ­¥éª¤4: è§£å†³å†²çª
+            // ²½Öè4: ½â¾ö³åÍ»
             if (conflicts != null && conflicts.Count > 0 && enableAutoConflictResolution)
             {
-                OnSyncProgress?.Invoke("è§£å†³IDå†²çª", 0.7f);
+                OnSyncProgress?.Invoke("½â¾öID³åÍ»", 0.7f);
                 try
                 {
                     AutoResolveConflicts(conflicts);
@@ -904,7 +904,7 @@ namespace InventorySystem.SaveSystem
                 catch (Exception ex)
                 {
                     hasError = true;
-                    errorMessage = $"å†²çªè§£å†³å¤±è´¥: {ex.Message}";
+                    errorMessage = $"³åÍ»½â¾öÊ§°Ü: {ex.Message}";
                 }
                 yield return null;
 
@@ -915,17 +915,17 @@ namespace InventorySystem.SaveSystem
                 }
             }
 
-            // æ­¥éª¤5: æ›´æ–°å…¨å±€IDæ³¨å†Œè¡¨
-            OnSyncProgress?.Invoke("æ›´æ–°å…¨å±€æ³¨å†Œè¡¨", 0.9f);
+            // ²½Öè5: ¸üĞÂÈ«¾ÖID×¢²á±í
+            OnSyncProgress?.Invoke("¸üĞÂÈ«¾Ö×¢²á±í", 0.9f);
             try
             {
-                // è¿™é‡Œå¯ä»¥ä¸ItemInstanceIDManagerè¿›è¡ŒåŒæ­¥
-                // ç›®å‰ç®€åŒ–å®ç°
+                // ÕâÀï¿ÉÒÔÓëItemInstanceIDManager½øĞĞÍ¬²½
+                // Ä¿Ç°¼ò»¯ÊµÏÖ
             }
             catch (Exception ex)
             {
                 hasError = true;
-                errorMessage = $"æ›´æ–°å…¨å±€æ³¨å†Œè¡¨å¤±è´¥: {ex.Message}";
+                errorMessage = $"¸üĞÂÈ«¾Ö×¢²á±íÊ§°Ü: {ex.Message}";
             }
             yield return null;
 
@@ -935,27 +935,27 @@ namespace InventorySystem.SaveSystem
                 yield break;
             }
 
-            // æ­¥éª¤6: å®ŒæˆåŒæ­¥
-            OnSyncProgress?.Invoke("åŒæ­¥å®Œæˆ", 1.0f);
+            // ²½Öè6: Íê³ÉÍ¬²½
+            OnSyncProgress?.Invoke("Í¬²½Íê³É", 1.0f);
             callback?.Invoke(true, "");
         }
         #endregion
 
-        #region å†²çªæ£€æµ‹åç¨‹
+        #region ³åÍ»¼ì²âĞ­³Ì
         /// <summary>
-        /// å¯åŠ¨å†²çªæ£€æµ‹
+        /// Æô¶¯³åÍ»¼ì²â
         /// </summary>
         private void StartConflictDetection()
         {
             if (conflictDetectionCoroutine == null)
             {
                 conflictDetectionCoroutine = StartCoroutine(ConflictDetectionCoroutine());
-                LogDebug("å†²çªæ£€æµ‹å·²å¯åŠ¨");
+                LogDebug("³åÍ»¼ì²âÒÑÆô¶¯");
             }
         }
 
         /// <summary>
-        /// åœæ­¢å†²çªæ£€æµ‹
+        /// Í£Ö¹³åÍ»¼ì²â
         /// </summary>
         private void StopConflictDetection()
         {
@@ -963,12 +963,12 @@ namespace InventorySystem.SaveSystem
             {
                 StopCoroutine(conflictDetectionCoroutine);
                 conflictDetectionCoroutine = null;
-                LogDebug("å†²çªæ£€æµ‹å·²åœæ­¢");
+                LogDebug("³åÍ»¼ì²âÒÑÍ£Ö¹");
             }
         }
 
         /// <summary>
-        /// å†²çªæ£€æµ‹åç¨‹
+        /// ³åÍ»¼ì²âĞ­³Ì
         /// </summary>
         private IEnumerator ConflictDetectionCoroutine()
         {
@@ -978,13 +978,13 @@ namespace InventorySystem.SaveSystem
 
                 try
                 {
-                    // åˆ·æ–°ç¼“å­˜
+                    // Ë¢ĞÂ»º´æ
                     RefreshIdCache();
 
-                    // æ‰§è¡Œå†²çªæ£€æµ‹
+                    // Ö´ĞĞ³åÍ»¼ì²â
                     var conflicts = PerformAdvancedConflictDetection();
 
-                    // è‡ªåŠ¨è§£å†³å†²çª
+                    // ×Ô¶¯½â¾ö³åÍ»
                     if (conflicts.Count > 0 && enableAutoConflictResolution)
                     {
                         AutoResolveConflicts(conflicts);
@@ -992,15 +992,15 @@ namespace InventorySystem.SaveSystem
                 }
                 catch (Exception ex)
                 {
-                    LogError($"å®šæœŸå†²çªæ£€æµ‹è¿‡ç¨‹ä¸­å‘ç”Ÿå¼‚å¸¸: {ex.Message}");
+                    LogError($"¶¨ÆÚ³åÍ»¼ì²â¹ı³ÌÖĞ·¢ÉúÒì³£: {ex.Message}");
                 }
             }
         }
         #endregion
 
-        #region è¾…åŠ©æ–¹æ³•
+        #region ¸¨Öú·½·¨
         /// <summary>
-        /// è®¾ç½®åŒæ­¥çŠ¶æ€
+        /// ÉèÖÃÍ¬²½×´Ì¬
         /// </summary>
         private void SetSyncStatus(SyncStatus status)
         {
@@ -1012,18 +1012,18 @@ namespace InventorySystem.SaveSystem
         }
 
         /// <summary>
-        /// æ£€æŸ¥IDæ ¼å¼æ˜¯å¦æœ‰æ•ˆ
+        /// ¼ì²éID¸ñÊ½ÊÇ·ñÓĞĞ§
         /// </summary>
         private bool IsValidIdFormat(string id)
         {
             if (string.IsNullOrEmpty(id))
                 return false;
 
-            // æ£€æŸ¥æ˜¯å¦åŒ…å«æ— æ•ˆå­—ç¬¦
+            // ¼ì²éÊÇ·ñ°üº¬ÎŞĞ§×Ö·û
             if (id.Contains("\0") || id.Contains("\n") || id.Contains("\r"))
                 return false;
 
-            // æ£€æŸ¥é•¿åº¦
+            // ¼ì²é³¤¶È
             if (id.Length < 5 || id.Length > 200)
                 return false;
 
@@ -1031,7 +1031,7 @@ namespace InventorySystem.SaveSystem
         }
 
         /// <summary>
-        /// ç”Ÿæˆå”¯ä¸€ID
+        /// Éú³ÉÎ¨Ò»ID
         /// </summary>
         private string GenerateUniqueId()
         {
@@ -1045,14 +1045,14 @@ namespace InventorySystem.SaveSystem
         }
 
         /// <summary>
-        /// å°è¯•è®¾ç½®å¯¹è±¡ID
+        /// ³¢ÊÔÉèÖÃ¶ÔÏóID
         /// </summary>
         private bool TrySetObjectId(ISaveable saveable, string newId)
         {
             try
             {
-                // è¿™é‡Œéœ€è¦æ ¹æ®å…·ä½“çš„ISaveableå®ç°æ¥è®¾ç½®ID
-                // ç”±äºæ¥å£å¯èƒ½æ²¡æœ‰SetSaveIDæ–¹æ³•ï¼Œæˆ‘ä»¬ä½¿ç”¨åå°„
+                // ÕâÀïĞèÒª¸ù¾İ¾ßÌåµÄISaveableÊµÏÖÀ´ÉèÖÃID
+                // ÓÉÓÚ½Ó¿Ú¿ÉÄÜÃ»ÓĞSetSaveID·½·¨£¬ÎÒÃÇÊ¹ÓÃ·´Éä
                 var type = saveable.GetType();
                 var setIdMethod = type.GetMethod("SetSaveID");
 
@@ -1062,7 +1062,7 @@ namespace InventorySystem.SaveSystem
                     return true;
                 }
 
-                // å¦‚æœæ²¡æœ‰SetSaveIDæ–¹æ³•ï¼Œå°è¯•è®¾ç½®å­—æ®µ
+                // Èç¹ûÃ»ÓĞSetSaveID·½·¨£¬³¢ÊÔÉèÖÃ×Ö¶Î
                 var idField = type.GetField("saveID", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
                 if (idField != null)
                 {
@@ -1074,15 +1074,15 @@ namespace InventorySystem.SaveSystem
             }
             catch (Exception ex)
             {
-                LogError($"è®¾ç½®å¯¹è±¡IDæ—¶å‘ç”Ÿå¼‚å¸¸: {ex.Message}");
+                LogError($"ÉèÖÃ¶ÔÏóIDÊ±·¢ÉúÒì³£: {ex.Message}");
                 return false;
             }
         }
         #endregion
 
-        #region å…¬å…±æŸ¥è¯¢æ–¹æ³•
+        #region ¹«¹²²éÑ¯·½·¨
         /// <summary>
-        /// è·å–æ´»è·ƒå†²çª
+        /// »ñÈ¡»îÔ¾³åÍ»
         /// </summary>
         public Dictionary<string, IdConflictInfo> GetActiveConflicts()
         {
@@ -1090,7 +1090,7 @@ namespace InventorySystem.SaveSystem
         }
 
         /// <summary>
-        /// è·å–IDå†å²è®°å½•
+        /// »ñÈ¡IDÀúÊ·¼ÇÂ¼
         /// </summary>
         public List<IdHistoryRecord> GetIdHistory(int maxCount = -1)
         {
@@ -1101,7 +1101,7 @@ namespace InventorySystem.SaveSystem
         }
 
         /// <summary>
-        /// è·å–æ€§èƒ½æŒ‡æ ‡
+        /// »ñÈ¡ĞÔÄÜÖ¸±ê
         /// </summary>
         public PerformanceMetrics GetPerformanceMetrics()
         {
@@ -1109,7 +1109,7 @@ namespace InventorySystem.SaveSystem
         }
 
         /// <summary>
-        /// è·å–å½“å‰åŒæ­¥çŠ¶æ€
+        /// »ñÈ¡µ±Ç°Í¬²½×´Ì¬
         /// </summary>
         public SyncStatus GetSyncStatus()
         {
@@ -1117,47 +1117,47 @@ namespace InventorySystem.SaveSystem
         }
 
         /// <summary>
-        /// æ¸…é™¤å†å²è®°å½•
+        /// Çå³ıÀúÊ·¼ÇÂ¼
         /// </summary>
         public void ClearHistory()
         {
             idHistory.Clear();
-            LogDebug("IDå†å²è®°å½•å·²æ¸…é™¤");
+            LogDebug("IDÀúÊ·¼ÇÂ¼ÒÑÇå³ı");
         }
 
         /// <summary>
-        /// è·å–å¢å¼ºå™¨ç»Ÿè®¡ä¿¡æ¯
+        /// »ñÈ¡ÔöÇ¿Æ÷Í³¼ÆĞÅÏ¢
         /// </summary>
         public string GetEnhancerStatistics()
         {
             var stats = new System.Text.StringBuilder();
-            stats.AppendLine("=== IDç®¡ç†å™¨å¢å¼ºå™¨ç»Ÿè®¡ä¿¡æ¯ ===");
-            stats.AppendLine($"é«˜çº§å†²çªæ£€æµ‹: {(enableAdvancedConflictDetection ? "å¯ç”¨" : "ç¦ç”¨")}");
-            stats.AppendLine($"è‡ªåŠ¨å†²çªè§£å†³: {(enableAutoConflictResolution ? "å¯ç”¨" : "ç¦ç”¨")}");
-            stats.AppendLine($"è·¨åœºæ™¯åŒæ­¥: {(enableCrossSceneSync ? "å¯ç”¨" : "ç¦ç”¨")}");
-            stats.AppendLine($"IDå†å²è¿½è¸ª: {(enableIdHistoryTracking ? "å¯ç”¨" : "ç¦ç”¨")}");
-            stats.AppendLine($"æ€§èƒ½ç›‘æ§: {(enablePerformanceMonitoring ? "å¯ç”¨" : "ç¦ç”¨")}");
-            stats.AppendLine($"å½“å‰åŒæ­¥çŠ¶æ€: {currentSyncStatus}");
-            stats.AppendLine($"ç®¡ç†çš„IDæ•°é‡: {knownValidIds.Count}");
-            stats.AppendLine($"æ´»è·ƒå†²çªæ•°: {activeConflicts.Count}");
-            stats.AppendLine($"å†å²è®°å½•æ•°: {idHistory.Count}");
-            stats.AppendLine($"å†²çªæ£€æµ‹é—´éš”: {conflictDetectionInterval}ç§’");
+            stats.AppendLine("=== ID¹ÜÀíÆ÷ÔöÇ¿Æ÷Í³¼ÆĞÅÏ¢ ===");
+            stats.AppendLine($"¸ß¼¶³åÍ»¼ì²â: {(enableAdvancedConflictDetection ? "ÆôÓÃ" : "½ûÓÃ")}");
+            stats.AppendLine($"×Ô¶¯³åÍ»½â¾ö: {(enableAutoConflictResolution ? "ÆôÓÃ" : "½ûÓÃ")}");
+            stats.AppendLine($"¿ç³¡¾°Í¬²½: {(enableCrossSceneSync ? "ÆôÓÃ" : "½ûÓÃ")}");
+            stats.AppendLine($"IDÀúÊ·×·×Ù: {(enableIdHistoryTracking ? "ÆôÓÃ" : "½ûÓÃ")}");
+            stats.AppendLine($"ĞÔÄÜ¼à¿Ø: {(enablePerformanceMonitoring ? "ÆôÓÃ" : "½ûÓÃ")}");
+            stats.AppendLine($"µ±Ç°Í¬²½×´Ì¬: {currentSyncStatus}");
+            stats.AppendLine($"¹ÜÀíµÄIDÊıÁ¿: {knownValidIds.Count}");
+            stats.AppendLine($"»îÔ¾³åÍ»Êı: {activeConflicts.Count}");
+            stats.AppendLine($"ÀúÊ·¼ÇÂ¼Êı: {idHistory.Count}");
+            stats.AppendLine($"³åÍ»¼ì²â¼ä¸ô: {conflictDetectionInterval}Ãë");
 
             if (enablePerformanceMonitoring)
             {
-                stats.AppendLine($"æ£€æµ‹åˆ°çš„å†²çªæ€»æ•°: {performanceMetrics.conflictsDetected}");
-                stats.AppendLine($"è§£å†³çš„å†²çªæ€»æ•°: {performanceMetrics.conflictsResolved}");
-                stats.AppendLine($"å¹³å‡æ£€æµ‹æ—¶é—´: {performanceMetrics.averageDetectionTime:F3}ç§’");
-                stats.AppendLine($"å¹³å‡è§£å†³æ—¶é—´: {performanceMetrics.averageResolutionTime:F3}ç§’");
+                stats.AppendLine($"¼ì²âµ½µÄ³åÍ»×ÜÊı: {performanceMetrics.conflictsDetected}");
+                stats.AppendLine($"½â¾öµÄ³åÍ»×ÜÊı: {performanceMetrics.conflictsResolved}");
+                stats.AppendLine($"Æ½¾ù¼ì²âÊ±¼ä: {performanceMetrics.averageDetectionTime:F3}Ãë");
+                stats.AppendLine($"Æ½¾ù½â¾öÊ±¼ä: {performanceMetrics.averageResolutionTime:F3}Ãë");
             }
 
             return stats.ToString();
         }
         #endregion
 
-        #region è°ƒè¯•æ–¹æ³•
+        #region µ÷ÊÔ·½·¨
         /// <summary>
-        /// è¾“å‡ºè°ƒè¯•æ—¥å¿—
+        /// Êä³öµ÷ÊÔÈÕÖ¾
         /// </summary>
         private void LogDebug(string message)
         {
@@ -1168,7 +1168,7 @@ namespace InventorySystem.SaveSystem
         }
 
         /// <summary>
-        /// è¾“å‡ºé”™è¯¯æ—¥å¿—
+        /// Êä³ö´íÎóÈÕÖ¾
         /// </summary>
         private void LogError(string message)
         {

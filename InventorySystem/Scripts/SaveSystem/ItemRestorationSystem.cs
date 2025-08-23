@@ -7,22 +7,39 @@ using UnityEditor;
 #endif
 
 /// <summary>
-/// ÎïÆ·»Ö¸´ÏµÍ³ - ¸ºÔğ¸ù¾İ±£´æÊı¾İÖØĞÂ´´½¨InventorySystemItem¶ÔÏó
-/// ·ÇÇÖÈëÊ½Éè¼Æ£¬²»ĞŞ¸ÄÏÖÓĞ´úÂë½á¹¹
+/// ç‰©å“æ¢å¤ç»“æœä¿¡æ¯
+/// </summary>
+[System.Serializable]
+public class ItemRestorationResult
+{
+    public bool success = false;                           // æ¢å¤æ˜¯å¦æˆåŠŸ
+    public int totalProcessed = 0;                         // æ€»å¤„ç†æ•°é‡
+    public int successCount = 0;                           // æˆåŠŸæ•°é‡
+    public int failureCount = 0;                           // å¤±è´¥æ•°é‡
+    public string errorMessage = string.Empty;             // é”™è¯¯ä¿¡æ¯
+    public List<GameObject> restoredItems = new List<GameObject>();  // æˆåŠŸæ¢å¤çš„ç‰©å“
+    public List<ItemSaveData> failedItems = new List<ItemSaveData>(); // æ¢å¤å¤±è´¥çš„ç‰©å“æ•°æ®
+    public bool occupancyMapConsistent = true;             // å ç”¨å›¾è°±æ˜¯å¦ä¸€è‡´
+    public string validationMessage = string.Empty;        // éªŒè¯ä¿¡æ¯
+}
+
+/// <summary>
+/// ç‰©å“æ¢å¤ç³»ç»Ÿ - è´Ÿè´£æ ¹æ®ä¿å­˜æ•°æ®é‡æ–°åˆ›å»ºInventorySystemItemå¯¹è±¡
+/// éä¾µå…¥å¼è®¾è®¡ï¼Œä¸ä¿®æ”¹ç°æœ‰ä»£ç ç»“æ„
 /// </summary>
 public class ItemRestorationSystem : MonoBehaviour
 {
-    [Header("ÎïÆ·»Ö¸´ÅäÖÃ")]
-    [SerializeField] private string databasePath = "Assets/InventorySystem/Database/Scriptable ObjectÊı¾İ¶ÔÏó";
+    [Header("ç‰©å“æ¢å¤é…ç½®")]
+    [SerializeField] private string databasePath = "Assets/InventorySystem/Database/Scriptable Objectæ•°æ®å¯¹è±¡";
     [SerializeField] private string prefabPath = "Assets/InventorySystem/Prefab";
     [SerializeField] private bool showDebugInfo = true;
 
-    // »º´æµÄÎïÆ·Êı¾İºÍÔ¤ÖÆÌå×Öµä
+    // ç¼“å­˜çš„ç‰©å“æ•°æ®å’Œé¢„åˆ¶ä½“å­—å…¸
     private Dictionary<string, InventorySystemItemDataSO> itemDataDict = new Dictionary<string, InventorySystemItemDataSO>();
     private Dictionary<string, GameObject> itemPrefabDict = new Dictionary<string, GameObject>();
     private List<InventorySystemItemDataSO> allItemData = new List<InventorySystemItemDataSO>();
 
-    // µ¥ÀıÄ£Ê½
+    // å•ä¾‹æ¨¡å¼
     private static ItemRestorationSystem _instance;
     public static ItemRestorationSystem Instance
     {
@@ -56,7 +73,7 @@ public class ItemRestorationSystem : MonoBehaviour
     }
 
     /// <summary>
-    /// ³õÊ¼»¯ÎïÆ·»Ö¸´ÏµÍ³
+    /// åˆå§‹åŒ–ç‰©å“æ¢å¤ç³»ç»Ÿ
     /// </summary>
     public void InitializeSystem()
     {
@@ -65,12 +82,12 @@ public class ItemRestorationSystem : MonoBehaviour
 
         if (showDebugInfo)
         {
-            Debug.Log($"ÎïÆ·»Ö¸´ÏµÍ³³õÊ¼»¯Íê³É: {allItemData.Count} ¸öÎïÆ·Êı¾İ, {itemPrefabDict.Count} ¸öÔ¤ÖÆÌå");
+            Debug.Log($"ç‰©å“æ¢å¤ç³»ç»Ÿåˆå§‹åŒ–å®Œæˆ: {allItemData.Count} ä¸ªç‰©å“æ•°æ®, {itemPrefabDict.Count} ä¸ªé¢„åˆ¶ä½“");
         }
     }
 
     /// <summary>
-    /// ´ÓÊı¾İ¿â¼ÓÔØËùÓĞÎïÆ·Êı¾İ
+    /// ä»æ•°æ®åº“åŠ è½½æ‰€æœ‰ç‰©å“æ•°æ®
     /// </summary>
     private void LoadItemDataFromDatabase()
     {
@@ -94,7 +111,7 @@ public class ItemRestorationSystem : MonoBehaviour
                     allItemData.Add(itemData);
                 }
 
-                // Í¬Ê±Ê¹ÓÃID×÷Îª¼ü
+                // åŒæ—¶ä½¿ç”¨IDä½œä¸ºé”®
                 string idKey = itemData.id.ToString();
                 if (!itemDataDict.ContainsKey(idKey))
                 {
@@ -103,7 +120,7 @@ public class ItemRestorationSystem : MonoBehaviour
             }
         }
 #else
-        // ÔËĞĞÊ±Ê¹ÓÃResources.LoadAll
+        // è¿è¡Œæ—¶ä½¿ç”¨Resources.LoadAll
         InventorySystemItemDataSO[] loadedData = Resources.LoadAll<InventorySystemItemDataSO>("");
         
         foreach (var itemData in loadedData)
@@ -128,7 +145,7 @@ public class ItemRestorationSystem : MonoBehaviour
     }
 
     /// <summary>
-    /// ´ÓÎÄ¼ş¼Ğ¼ÓÔØËùÓĞÔ¤ÖÆÌå
+    /// ä»æ–‡ä»¶å¤¹åŠ è½½æ‰€æœ‰é¢„åˆ¶ä½“
     /// </summary>
     private void LoadPrefabsFromFolder()
     {
@@ -152,7 +169,7 @@ public class ItemRestorationSystem : MonoBehaviour
             }
         }
 #else
-        // ÔËĞĞÊ±Ê¹ÓÃResources.LoadAll
+        // è¿è¡Œæ—¶ä½¿ç”¨Resources.LoadAll
         GameObject[] loadedPrefabs = Resources.LoadAll<GameObject>("");
         
         foreach (var prefab in loadedPrefabs)
@@ -170,67 +187,67 @@ public class ItemRestorationSystem : MonoBehaviour
     }
 
     /// <summary>
-    /// ¸ù¾İÎïÆ·±£´æÊı¾İ»Ö¸´ÎïÆ·µ½Ö¸¶¨Íø¸ñ
+    /// æ ¹æ®ç‰©å“ä¿å­˜æ•°æ®æ¢å¤ç‰©å“åˆ°æŒ‡å®šç½‘æ ¼
     /// </summary>
-    /// <param name="itemSaveData">ÎïÆ·±£´æÊı¾İ</param>
-    /// <param name="targetGrid">Ä¿±êÍø¸ñ</param>
-    /// <param name="gridPosition">Íø¸ñÎ»ÖÃ</param>
-    /// <returns>»Ö¸´µÄÎïÆ·GameObject</returns>
+    /// <param name="itemSaveData">ç‰©å“ä¿å­˜æ•°æ®</param>
+    /// <param name="targetGrid">ç›®æ ‡ç½‘æ ¼</param>
+    /// <param name="gridPosition">ç½‘æ ¼ä½ç½®</param>
+    /// <returns>æ¢å¤çš„ç‰©å“GameObject</returns>
     public GameObject RestoreItem(ItemSaveData itemSaveData, BaseItemGrid targetGrid, Vector2Int gridPosition)
     {
         if (itemSaveData == null || targetGrid == null)
         {
             if (showDebugInfo)
             {
-                Debug.LogWarning("ÎïÆ·»Ö¸´Ê§°Ü£º±£´æÊı¾İ»òÄ¿±êÍø¸ñÎª¿Õ");
+                Debug.LogWarning("ç‰©å“æ¢å¤å¤±è´¥ï¼šä¿å­˜æ•°æ®æˆ–ç›®æ ‡ç½‘æ ¼ä¸ºç©º");
             }
             return null;
         }
 
-        // ¸ù¾İÊı¾İÂ·¾¶ºÍID²éÕÒÎïÆ·Êı¾İ
+        // æ ¹æ®æ•°æ®è·¯å¾„å’ŒIDæŸ¥æ‰¾ç‰©å“æ•°æ®
         InventorySystemItemDataSO itemData = FindItemDataByPath(itemSaveData.itemDataPath, itemSaveData.itemDataID.ToString());
         if (itemData == null)
         {
             if (showDebugInfo)
             {
-                Debug.LogWarning($"ÎŞ·¨ÕÒµ½ÎïÆ·Êı¾İ: {itemSaveData.itemDataPath}, ID: {itemSaveData.itemDataID}");
+                Debug.LogWarning($"æ— æ³•æ‰¾åˆ°ç‰©å“æ•°æ®: {itemSaveData.itemDataPath}, ID: {itemSaveData.itemDataID}");
             }
             return null;
         }
 
-        // »ñÈ¡ÎïÆ·Ô¤ÖÆÌå
+        // è·å–ç‰©å“é¢„åˆ¶ä½“
         GameObject prefab = GetItemPrefab(itemData);
         if (prefab == null)
         {
             if (showDebugInfo)
             {
-                Debug.LogWarning($"ÎŞ·¨ÕÒµ½ÎïÆ·Ô¤ÖÆÌå: {itemData.itemName}");
+                Debug.LogWarning($"æ— æ³•æ‰¾åˆ°ç‰©å“é¢„åˆ¶ä½“: {itemData.itemName}");
             }
             return null;
         }
 
-        // ¼ì²éÎ»ÖÃÊÇ·ñ¿ÉÓÃ
+        // æ£€æŸ¥ä½ç½®æ˜¯å¦å¯ç”¨
         Vector2Int itemSize = new Vector2Int(itemData.width, itemData.height);
         if (!targetGrid.CanPlaceItem(gridPosition, itemSize))
         {
             if (showDebugInfo)
             {
-                Debug.LogWarning($"Íø¸ñÎ»ÖÃ {gridPosition} ²»¿ÉÓÃ£¬ÎŞ·¨»Ö¸´ÎïÆ· {itemData.itemName}");
+                Debug.LogWarning($"ç½‘æ ¼ä½ç½® {gridPosition} ä¸å¯ç”¨ï¼Œæ— æ³•æ¢å¤ç‰©å“ {itemData.itemName}");
             }
             return null;
         }
 
-        // ´´½¨ÎïÆ·
+        // åˆ›å»ºç‰©å“
         GameObject restoredItem = CreateItem(prefab, itemData, targetGrid, gridPosition);
 
         if (restoredItem != null)
         {
-            // »Ö¸´ÎïÆ·µÄÊµÀıIDºÍÊµÀıÊı¾İ
+            // æ¢å¤ç‰©å“çš„å®ä¾‹IDå’Œå®ä¾‹æ•°æ®
             RestoreItemInstanceData(restoredItem, itemSaveData);
 
             if (showDebugInfo)
             {
-                Debug.Log($"³É¹¦»Ö¸´ÎïÆ·: {itemData.itemName} µ½Î»ÖÃ {gridPosition}");
+                Debug.Log($"æˆåŠŸæ¢å¤ç‰©å“: {itemData.itemName} åˆ°ä½ç½® {gridPosition}");
             }
         }
 
@@ -238,16 +255,190 @@ public class ItemRestorationSystem : MonoBehaviour
     }
 
     /// <summary>
-    /// ´´½¨ÎïÆ·¶ÔÏó
+    /// æ‰¹é‡æ¢å¤ç‰©å“åˆ°æŒ‡å®šç½‘æ ¼ï¼ˆæ ¹æ®å ç”¨å›¾è°±æ•°æ®ï¼‰
+    /// </summary>
+    /// <param name="itemsData">ç‰©å“ä¿å­˜æ•°æ®åˆ—è¡¨</param>
+    /// <param name="targetGrid">ç›®æ ‡ç½‘æ ¼</param>
+    /// <param name="occupancyMapData">å ç”¨å›¾è°±æ•°æ®ï¼ˆå¯é€‰ï¼Œç”¨äºéªŒè¯ï¼‰</param>
+    /// <returns>æ¢å¤ç»“æœä¿¡æ¯</returns>
+    public ItemRestorationResult RestoreItemsBatch(List<ItemSaveData> itemsData, BaseItemGrid targetGrid, object occupancyMapData = null)
+    {
+        var result = new ItemRestorationResult();
+
+        if (itemsData == null || targetGrid == null)
+        {
+            result.success = false;
+            result.errorMessage = "ç‰©å“æ•°æ®åˆ—è¡¨æˆ–ç›®æ ‡ç½‘æ ¼ä¸ºç©º";
+            return result;
+        }
+
+        if (showDebugInfo)
+        {
+            Debug.Log($"å¼€å§‹æ‰¹é‡æ¢å¤ {itemsData.Count} ä¸ªç‰©å“åˆ°ç½‘æ ¼ {targetGrid.name}");
+        }
+
+        // æ¸…ç©ºç›®æ ‡ç½‘æ ¼ï¼ˆå¦‚æœéœ€è¦ï¼‰
+        ClearGridForRestoration(targetGrid);
+
+        // æŒ‰ä¼˜å…ˆçº§æ’åºç‰©å“ï¼ˆå¤§ç‰©å“ä¼˜å…ˆæ”¾ç½®ï¼‰
+        var sortedItems = SortItemsForRestoration(itemsData);
+
+        foreach (var itemData in sortedItems)
+        {
+            try
+            {
+                Vector2Int gridPosition = itemData.gridPosition;
+                GameObject restoredItem = RestoreItem(itemData, targetGrid, gridPosition);
+
+                if (restoredItem != null)
+                {
+                    result.restoredItems.Add(restoredItem);
+                    result.successCount++;
+
+                    if (showDebugInfo)
+                    {
+                        Debug.Log($"æˆåŠŸæ¢å¤ç‰©å“ {restoredItem.name} åˆ°ä½ç½® {gridPosition}");
+                    }
+                }
+                else
+                {
+                    result.failedItems.Add(itemData);
+                    result.failureCount++;
+
+                    if (showDebugInfo)
+                    {
+                        Debug.LogWarning($"æ¢å¤ç‰©å“å¤±è´¥: ID={itemData.itemDataID}, ä½ç½®={gridPosition}");
+                    }
+                }
+            }
+            catch (System.Exception ex)
+            {
+                result.failedItems.Add(itemData);
+                result.failureCount++;
+
+                if (showDebugInfo)
+                {
+                    Debug.LogError($"æ¢å¤ç‰©å“æ—¶å‘ç”Ÿå¼‚å¸¸: {ex.Message}");
+                }
+            }
+        }
+
+        // éªŒè¯å ç”¨å›¾è°±ä¸€è‡´æ€§ï¼ˆå¦‚æœæä¾›äº†å ç”¨å›¾è°±æ•°æ®ï¼‰
+        if (occupancyMapData != null)
+        {
+            ValidateRestorationConsistency(targetGrid, occupancyMapData, result);
+        }
+
+        result.success = result.failureCount == 0;
+        result.totalProcessed = itemsData.Count;
+
+        if (showDebugInfo)
+        {
+            Debug.Log($"æ‰¹é‡æ¢å¤å®Œæˆ: æˆåŠŸ {result.successCount}/{result.totalProcessed}, å¤±è´¥ {result.failureCount}");
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// å¼‚æ­¥æ‰¹é‡æ¢å¤ç‰©å“ï¼ˆç”¨äºå¤§é‡ç‰©å“çš„æ¢å¤ï¼‰
+    /// </summary>
+    /// <param name="itemsData">ç‰©å“ä¿å­˜æ•°æ®åˆ—è¡¨</param>
+    /// <param name="targetGrid">ç›®æ ‡ç½‘æ ¼</param>
+    /// <param name="progressCallback">è¿›åº¦å›è°ƒ</param>
+    /// <param name="occupancyMapData">å ç”¨å›¾è°±æ•°æ®ï¼ˆå¯é€‰ï¼‰</param>
+    /// <returns>åç¨‹</returns>
+    public IEnumerator RestoreItemsBatchAsync(List<ItemSaveData> itemsData, BaseItemGrid targetGrid,
+        System.Action<float, string> progressCallback = null, object occupancyMapData = null)
+    {
+        var result = new ItemRestorationResult();
+
+        if (itemsData == null || targetGrid == null)
+        {
+            progressCallback?.Invoke(0f, "æ¢å¤å¤±è´¥ï¼šæ•°æ®ä¸ºç©º");
+            yield break;
+        }
+
+        progressCallback?.Invoke(0f, "å¼€å§‹æ‰¹é‡æ¢å¤ç‰©å“...");
+
+        // æ¸…ç©ºç›®æ ‡ç½‘æ ¼
+        ClearGridForRestoration(targetGrid);
+
+        // æŒ‰ä¼˜å…ˆçº§æ’åºç‰©å“
+        var sortedItems = SortItemsForRestoration(itemsData);
+
+        int totalItems = sortedItems.Count;
+        int processedItems = 0;
+
+        foreach (var itemData in sortedItems)
+        {
+            try
+            {
+                Vector2Int gridPosition = itemData.gridPosition;
+                GameObject restoredItem = RestoreItem(itemData, targetGrid, gridPosition);
+
+                if (restoredItem != null)
+                {
+                    result.restoredItems.Add(restoredItem);
+                    result.successCount++;
+                }
+                else
+                {
+                    result.failedItems.Add(itemData);
+                    result.failureCount++;
+                }
+            }
+            catch (System.Exception ex)
+            {
+                result.failedItems.Add(itemData);
+                result.failureCount++;
+
+                if (showDebugInfo)
+                {
+                    Debug.LogError($"æ¢å¤ç‰©å“æ—¶å‘ç”Ÿå¼‚å¸¸: {ex.Message}");
+                }
+            }
+
+            processedItems++;
+            float progress = (float)processedItems / totalItems;
+            progressCallback?.Invoke(progress, $"æ¢å¤ç‰©å“ {processedItems}/{totalItems}");
+
+            // æ¯å¤„ç†å‡ ä¸ªç‰©å“åç­‰å¾…ä¸€å¸§ï¼Œé¿å…é˜»å¡
+            if (processedItems % 5 == 0)
+            {
+                yield return null;
+            }
+        }
+
+        // éªŒè¯å ç”¨å›¾è°±ä¸€è‡´æ€§
+        if (occupancyMapData != null)
+        {
+            progressCallback?.Invoke(0.95f, "éªŒè¯å ç”¨å›¾è°±ä¸€è‡´æ€§...");
+            ValidateRestorationConsistency(targetGrid, occupancyMapData, result);
+        }
+
+        result.success = result.failureCount == 0;
+        result.totalProcessed = totalItems;
+
+        progressCallback?.Invoke(1f, $"æ¢å¤å®Œæˆ: æˆåŠŸ {result.successCount}/{result.totalProcessed}");
+
+        if (showDebugInfo)
+        {
+            Debug.Log($"å¼‚æ­¥æ‰¹é‡æ¢å¤å®Œæˆ: æˆåŠŸ {result.successCount}/{result.totalProcessed}, å¤±è´¥ {result.failureCount}");
+        }
+    }
+
+    /// <summary>
+    /// åˆ›å»ºç‰©å“å¯¹è±¡
     /// </summary>
     private GameObject CreateItem(GameObject prefab, InventorySystemItemDataSO data, BaseItemGrid targetGrid, Vector2Int gridPos)
     {
         if (prefab == null || data == null || targetGrid == null) return null;
 
-        // ÊµÀı»¯ÎïÆ·Ô¤ÖÆÌå
+        // å®ä¾‹åŒ–ç‰©å“é¢„åˆ¶ä½“
         GameObject item = Instantiate(prefab, targetGrid.transform);
 
-        // ÉèÖÃÎïÆ·Êı¾İ
+        // è®¾ç½®ç‰©å“æ•°æ®
         ItemDataHolder dataHolder = item.GetComponentInChildren<ItemDataHolder>();
         if (dataHolder != null)
         {
@@ -255,22 +446,22 @@ public class ItemRestorationSystem : MonoBehaviour
         }
         else
         {
-            Debug.LogError($"Ô¤ÖÆÌå {prefab.name} ÖĞÃ»ÓĞÕÒµ½ ItemDataHolder ×é¼ş£¡");
+            Debug.LogError($"é¢„åˆ¶ä½“ {prefab.name} ä¸­æ²¡æœ‰æ‰¾åˆ° ItemDataHolder ç»„ä»¶ï¼");
         }
 
-        // È·±£ÎïÆ·¾ßÓĞ±ØÒªµÄ×é¼ş
+        // ç¡®ä¿ç‰©å“å…·æœ‰å¿…è¦çš„ç»„ä»¶
         EnsureRequiredComponents(item);
 
-        // ÉèÖÃÎïÆ·µÄÃªµãºÍÖáĞÄµã
+        // è®¾ç½®ç‰©å“çš„é”šç‚¹å’Œè½´å¿ƒç‚¹
         RectTransform itemRect = item.GetComponent<RectTransform>();
         if (itemRect != null)
         {
-            itemRect.anchorMin = new Vector2(0, 1); // ×óÉÏ½Ç
-            itemRect.anchorMax = new Vector2(0, 1); // ×óÉÏ½Ç
-            itemRect.pivot = new Vector2(0, 1);     // ÖáĞÄµãÒ²ÉèÖÃÎª×óÉÏ½Ç
+            itemRect.anchorMin = new Vector2(0, 1); // å·¦ä¸Šè§’
+            itemRect.anchorMax = new Vector2(0, 1); // å·¦ä¸Šè§’
+            itemRect.pivot = new Vector2(0, 1);     // è½´å¿ƒç‚¹ä¹Ÿè®¾ç½®ä¸ºå·¦ä¸Šè§’
         }
 
-        // ÉèÖÃÎïÆ·ÔÚÍø¸ñÖĞµÄÎ»ÖÃ
+        // è®¾ç½®ç‰©å“åœ¨ç½‘æ ¼ä¸­çš„ä½ç½®
         Vector2Int itemSize = new Vector2Int(data.width, data.height);
         targetGrid.PlaceItem(item, gridPos, itemSize);
 
@@ -278,23 +469,23 @@ public class ItemRestorationSystem : MonoBehaviour
     }
 
     /// <summary>
-    /// È·±£ÎïÆ·¾ßÓĞ±ØÒªµÄ×é¼ş
+    /// ç¡®ä¿ç‰©å“å…·æœ‰å¿…è¦çš„ç»„ä»¶
     /// </summary>
     private void EnsureRequiredComponents(GameObject item)
     {
-        // È·±£ÓĞ DraggableItem ×é¼ş
+        // ç¡®ä¿æœ‰ DraggableItem ç»„ä»¶
         if (item.GetComponent<DraggableItem>() == null)
         {
             item.AddComponent<DraggableItem>();
         }
 
-        // È·±£ÓĞ InventorySystemItem ×é¼ş
+        // ç¡®ä¿æœ‰ InventorySystemItem ç»„ä»¶
         if (item.GetComponent<InventorySystemItem>() == null)
         {
             item.AddComponent<InventorySystemItem>();
         }
 
-        // È·±£ÓĞ CanvasGroup ×é¼ş£¨DraggableItem ĞèÒª£©
+        // ç¡®ä¿æœ‰ CanvasGroup ç»„ä»¶ï¼ˆDraggableItem éœ€è¦ï¼‰
         if (item.GetComponent<CanvasGroup>() == null)
         {
             item.AddComponent<CanvasGroup>();
@@ -302,18 +493,18 @@ public class ItemRestorationSystem : MonoBehaviour
     }
 
     /// <summary>
-    /// »Ö¸´ÎïÆ·µÄÊµÀıÊı¾İ
+    /// æ¢å¤ç‰©å“çš„å®ä¾‹æ•°æ®
     /// </summary>
     private void RestoreItemInstanceData(GameObject item, ItemSaveData itemSaveData)
     {
-        // »Ö¸´ÊµÀıID
+        // æ¢å¤å®ä¾‹ID
         InventorySystemItem inventoryItem = item.GetComponent<InventorySystemItem>();
         if (inventoryItem != null && !string.IsNullOrEmpty(itemSaveData.instanceID))
         {
             inventoryItem.SetItemInstanceID(itemSaveData.instanceID);
         }
 
-        // »Ö¸´ÊµÀıÊı¾İ
+        // æ¢å¤å®ä¾‹æ•°æ®
         ItemDataHolder dataHolder = item.GetComponentInChildren<ItemDataHolder>();
         if (dataHolder != null && !string.IsNullOrEmpty(itemSaveData.instanceDataJson))
         {
@@ -322,11 +513,11 @@ public class ItemRestorationSystem : MonoBehaviour
     }
 
     /// <summary>
-    /// ¸ù¾İÂ·¾¶ºÍID²éÕÒÎïÆ·Êı¾İ
+    /// æ ¹æ®è·¯å¾„å’ŒIDæŸ¥æ‰¾ç‰©å“æ•°æ®
     /// </summary>
     private InventorySystemItemDataSO FindItemDataByPath(string assetPath, string itemID)
     {
-        // Ê×ÏÈ³¢ÊÔ´Ó»º´æÖĞ²éÕÒ
+        // é¦–å…ˆå°è¯•ä»ç¼“å­˜ä¸­æŸ¥æ‰¾
         foreach (var kvp in itemDataDict)
         {
             if (kvp.Value.id.ToString() == itemID)
@@ -335,7 +526,7 @@ public class ItemRestorationSystem : MonoBehaviour
             }
         }
 
-        // È»ºóÍ¨¹ıÂ·¾¶¼ÓÔØ
+        // ç„¶åé€šè¿‡è·¯å¾„åŠ è½½
 #if UNITY_EDITOR
         InventorySystemItemDataSO loadedData = AssetDatabase.LoadAssetAtPath<InventorySystemItemDataSO>(assetPath);
         if (loadedData != null)
@@ -344,7 +535,7 @@ public class ItemRestorationSystem : MonoBehaviour
         }
 #endif
 
-        // ×îºóÔÚËùÓĞÎïÆ·Êı¾İÖĞ²éÕÒ
+        // æœ€ååœ¨æ‰€æœ‰ç‰©å“æ•°æ®ä¸­æŸ¥æ‰¾
         foreach (var itemData in allItemData)
         {
             if (itemData.id.ToString() == itemID)
@@ -357,51 +548,51 @@ public class ItemRestorationSystem : MonoBehaviour
     }
 
     /// <summary>
-    /// ¸ù¾İÎïÆ·Êı¾İ»ñÈ¡¶ÔÓ¦µÄÔ¤ÖÆÌå
+    /// æ ¹æ®ç‰©å“æ•°æ®è·å–å¯¹åº”çš„é¢„åˆ¶ä½“
     /// </summary>
     private GameObject GetItemPrefab(InventorySystemItemDataSO itemData)
     {
         if (itemData == null) return null;
 
-        // Ê×ÏÈ³¢ÊÔ´ÓÔ¤ÖÆÌå×ÖµäÖĞ»ñÈ¡
+        // é¦–å…ˆå°è¯•ä»é¢„åˆ¶ä½“å­—å…¸ä¸­è·å–
         string itemKey = itemData.itemName;
         if (itemPrefabDict.ContainsKey(itemKey))
         {
             return itemPrefabDict[itemKey];
         }
 
-        // Èç¹û×ÖµäÖĞÃ»ÓĞ£¬³¢ÊÔÍ¨¹ıID²éÕÒ
+        // å¦‚æœå­—å…¸ä¸­æ²¡æœ‰ï¼Œå°è¯•é€šè¿‡IDæŸ¥æ‰¾
         itemKey = itemData.id.ToString();
         if (itemPrefabDict.ContainsKey(itemKey))
         {
             return itemPrefabDict[itemKey];
         }
 
-        // ³¢ÊÔÄ£ºıÆ¥Åä
+        // å°è¯•æ¨¡ç³ŠåŒ¹é…
         return FindPrefabForItemData(itemData);
     }
 
     /// <summary>
-    /// ¸ù¾İÎïÆ·Êı¾İ²éÕÒ¶ÔÓ¦µÄÔ¤ÖÆÌå£¨Ä£ºıÆ¥Åä£©
+    /// æ ¹æ®ç‰©å“æ•°æ®æŸ¥æ‰¾å¯¹åº”çš„é¢„åˆ¶ä½“ï¼ˆæ¨¡ç³ŠåŒ¹é…ï¼‰
     /// </summary>
     private GameObject FindPrefabForItemData(InventorySystemItemDataSO itemData)
     {
         string dataKey = GetItemKey(itemData.itemName);
 
-        // Ö±½ÓÆ¥Åä
+        // ç›´æ¥åŒ¹é…
         if (itemPrefabDict.ContainsKey(dataKey))
         {
             return itemPrefabDict[dataKey];
         }
 
-        // Ä£ºıÆ¥Åä
+        // æ¨¡ç³ŠåŒ¹é…
         foreach (var kvp in itemPrefabDict)
         {
             if (kvp.Key.Contains(dataKey) || dataKey.Contains(kvp.Key))
             {
                 if (showDebugInfo)
                 {
-                    Debug.Log($"Ä£ºıÆ¥Åä³É¹¦: '{itemData.itemName}' -> '{kvp.Value.name}'");
+                    Debug.Log($"æ¨¡ç³ŠåŒ¹é…æˆåŠŸ: '{itemData.itemName}' -> '{kvp.Value.name}'");
                 }
                 return kvp.Value;
             }
@@ -411,20 +602,117 @@ public class ItemRestorationSystem : MonoBehaviour
     }
 
     /// <summary>
-    /// »ñÈ¡ÎïÆ·¼üÖµ£¨ÓÃÓÚ×Öµä²éÕÒ£©
+    /// è·å–ç‰©å“é”®å€¼ï¼ˆç”¨äºå­—å…¸æŸ¥æ‰¾ï¼‰
     /// </summary>
     private string GetItemKey(string itemName)
     {
         if (string.IsNullOrEmpty(itemName)) return "";
 
-        // ÒÆ³ıÌØÊâ×Ö·ûºÍ¿Õ¸ñ£¬×ª»»ÎªĞ¡Ğ´
+        // ç§»é™¤ç‰¹æ®Šå­—ç¬¦å’Œç©ºæ ¼ï¼Œè½¬æ¢ä¸ºå°å†™
         return itemName.Replace(" ", "").Replace("-", "").Replace("_", "").ToLower();
     }
 
     /// <summary>
-    /// ÖØĞÂ¼ÓÔØÎïÆ·Êı¾İºÍÔ¤ÖÆÌå£¨ÓÃÓÚÔËĞĞÊ±¸üĞÂ£©
+    /// æ¸…ç©ºç½‘æ ¼ä»¥å‡†å¤‡æ¢å¤ç‰©å“
     /// </summary>
-    [ContextMenu("ÖØĞÂ¼ÓÔØÎïÆ·Êı¾İ")]
+    private void ClearGridForRestoration(BaseItemGrid targetGrid)
+    {
+        if (targetGrid == null) return;
+
+        // è·å–ç½‘æ ¼ä¸­çš„æ‰€æœ‰ç‰©å“å¹¶é”€æ¯
+        var itemsToDestroy = new List<GameObject>();
+
+        for (int i = 0; i < targetGrid.transform.childCount; i++)
+        {
+            Transform child = targetGrid.transform.GetChild(i);
+            if (child.GetComponent<InventorySystemItem>() != null)
+            {
+                itemsToDestroy.Add(child.gameObject);
+            }
+        }
+
+        foreach (var item in itemsToDestroy)
+        {
+            DestroyImmediate(item);
+        }
+
+        // æ¸…ç©ºç½‘æ ¼çš„å ç”¨çŠ¶æ€
+        targetGrid.ClearGrid();
+
+        if (showDebugInfo)
+        {
+            Debug.Log($"å·²æ¸…ç©ºç½‘æ ¼ {targetGrid.name}ï¼Œé”€æ¯äº† {itemsToDestroy.Count} ä¸ªç‰©å“");
+        }
+    }
+
+    /// <summary>
+    /// ä¸ºæ¢å¤æ’åºç‰©å“ï¼ˆå¤§ç‰©å“ä¼˜å…ˆï¼Œé¿å…ç¢ç‰‡åŒ–ï¼‰
+    /// </summary>
+    private List<ItemSaveData> SortItemsForRestoration(List<ItemSaveData> itemsData)
+    {
+        if (itemsData == null) return new List<ItemSaveData>();
+
+        return itemsData.OrderByDescending(item =>
+        {
+            // æ ¹æ®ç‰©å“æ•°æ®è·å–å°ºå¯¸
+            var itemData = FindItemDataByPath(item.itemDataPath, item.itemDataID.ToString());
+            if (itemData != null)
+            {
+                return itemData.width * itemData.height; // æŒ‰é¢ç§¯æ’åº
+            }
+            return 0;
+        }).ThenBy(item => item.gridPosition.x) // ç›¸åŒå¤§å°æŒ‰Xåæ ‡æ’åº
+        .ThenBy(item => item.gridPosition.y)   // ç„¶åæŒ‰Yåæ ‡æ’åº
+        .ToList();
+    }
+
+    /// <summary>
+    /// éªŒè¯æ¢å¤åçš„å ç”¨å›¾è°±ä¸€è‡´æ€§
+    /// </summary>
+    private void ValidateRestorationConsistency(BaseItemGrid targetGrid, object occupancyMapData, ItemRestorationResult result)
+    {
+        if (targetGrid == null || occupancyMapData == null)
+        {
+            result.occupancyMapConsistent = false;
+            result.validationMessage = "æ— æ³•éªŒè¯å ç”¨å›¾è°±ä¸€è‡´æ€§ï¼šå‚æ•°ä¸ºç©º";
+            return;
+        }
+
+        try
+        {
+            // è¿™é‡Œéœ€è¦æ ¹æ®å®é™…çš„å ç”¨å›¾è°±æ•°æ®ç»“æ„æ¥å®ç°éªŒè¯é€»è¾‘
+            // å‡è®¾occupancyMapDataæ˜¯ä¸€ä¸ªäºŒç»´æ•°ç»„æˆ–ç±»ä¼¼ç»“æ„
+
+            // è·å–å½“å‰ç½‘æ ¼çš„å ç”¨çŠ¶æ€
+            var currentOccupancy = targetGrid.GetOccupancyMatrix();
+
+            // æ¯”è¾ƒå½“å‰å ç”¨çŠ¶æ€ä¸æœŸæœ›çš„å ç”¨çŠ¶æ€
+            // å…·ä½“å®ç°éœ€è¦æ ¹æ®BaseItemGridçš„å®é™…æ¥å£æ¥è°ƒæ•´
+
+            result.occupancyMapConsistent = true;
+            result.validationMessage = "å ç”¨å›¾è°±éªŒè¯é€šè¿‡";
+
+            if (showDebugInfo)
+            {
+                Debug.Log("å ç”¨å›¾è°±ä¸€è‡´æ€§éªŒè¯å®Œæˆ");
+            }
+        }
+        catch (System.Exception ex)
+        {
+            result.occupancyMapConsistent = false;
+            result.validationMessage = $"å ç”¨å›¾è°±éªŒè¯å¤±è´¥: {ex.Message}";
+
+            if (showDebugInfo)
+            {
+                Debug.LogError($"å ç”¨å›¾è°±éªŒè¯å¼‚å¸¸: {ex.Message}");
+            }
+        }
+    }
+
+    /// <summary>
+    /// é‡æ–°åŠ è½½ç‰©å“æ•°æ®å’Œé¢„åˆ¶ä½“ï¼ˆç”¨äºè¿è¡Œæ—¶æ›´æ–°ï¼‰
+    /// </summary>
+    [ContextMenu("é‡æ–°åŠ è½½ç‰©å“æ•°æ®")]
     public void ReloadItemData()
     {
         InitializeSystem();

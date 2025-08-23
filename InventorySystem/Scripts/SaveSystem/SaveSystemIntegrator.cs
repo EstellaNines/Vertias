@@ -8,14 +8,14 @@ using Newtonsoft.Json;
 namespace InventorySystem.SaveSystem
 {
     /// <summary>
-    /// ä¿å­˜ç³»ç»Ÿé›†æˆå™¨
-    /// å°†æ‰€æœ‰å¢å¼ºç»„ä»¶ï¼ˆéªŒè¯å™¨ã€äº‹åŠ¡ç®¡ç†å™¨ã€å®Œæ•´æ€§æ£€æŸ¥å™¨ã€IDç®¡ç†å™¨å¢å¼ºå™¨ï¼‰
-    /// æ•´åˆåˆ°ç°æœ‰çš„ä¿å­˜ç³»ç»Ÿä¸­ï¼Œæä¾›ç»Ÿä¸€çš„å¢å¼ºä¿å­˜/åŠ è½½æ¥å£
-    /// é‡‡ç”¨éä¾µå…¥å¼è®¾è®¡ï¼Œä¸ä¿®æ”¹ç°æœ‰SaveManagerä»£ç 
+    /// ±£´æÏµÍ³¼¯³ÉÆ÷
+    /// ½«ËùÓĞÔöÇ¿×é¼ş£¨ÑéÖ¤Æ÷¡¢ÊÂÎñ¹ÜÀíÆ÷¡¢ÍêÕûĞÔ¼ì²éÆ÷¡¢ID¹ÜÀíÆ÷ÔöÇ¿Æ÷£©
+    /// ÕûºÏµ½ÏÖÓĞµÄ±£´æÏµÍ³ÖĞ£¬Ìá¹©Í³Ò»µÄÔöÇ¿±£´æ/¼ÓÔØ½Ó¿Ú
+    /// ²ÉÓÃ·ÇÇÖÈëÊ½Éè¼Æ£¬²»ĞŞ¸ÄÏÖÓĞSaveManager´úÂë
     /// </summary>
     public class SaveSystemIntegrator : MonoBehaviour
     {
-        #region å•ä¾‹æ¨¡å¼
+        #region µ¥ÀıÄ£Ê½
         private static SaveSystemIntegrator _instance;
         public static SaveSystemIntegrator Instance
         {
@@ -29,7 +29,7 @@ namespace InventorySystem.SaveSystem
                         GameObject go = new GameObject("SaveSystemIntegrator");
                         _instance = go.AddComponent<SaveSystemIntegrator>();
 
-                        // è®¾ç½®ä¸ºSaveSystemçš„å­å¯¹è±¡
+                        // ÉèÖÃÎªSaveSystemµÄ×Ó¶ÔÏó
                         var saveSystemPersistence = FindObjectOfType<SaveSystemPersistence>();
                         if (saveSystemPersistence != null)
                         {
@@ -42,52 +42,52 @@ namespace InventorySystem.SaveSystem
         }
         #endregion
 
-        #region é…ç½®å­—æ®µ
-        [Header("ä¿å­˜ç³»ç»Ÿé›†æˆé…ç½®")]
+        #region ÅäÖÃ×Ö¶Î
+        [Header("±£´æÏµÍ³¼¯³ÉÅäÖÃ")]
         [SerializeField]
-        [Tooltip("æ˜¯å¦å¯ç”¨å¢å¼ºä¿å­˜åŠŸèƒ½")]
+        [Tooltip("ÊÇ·ñÆôÓÃÔöÇ¿±£´æ¹¦ÄÜ")]
         private bool enableEnhancedSave = true;
 
         [SerializeField]
-        [Tooltip("æ˜¯å¦å¯ç”¨å¢å¼ºåŠ è½½åŠŸèƒ½")]
+        [Tooltip("ÊÇ·ñÆôÓÃÔöÇ¿¼ÓÔØ¹¦ÄÜ")]
         private bool enableEnhancedLoad = true;
 
         [SerializeField]
-        [Tooltip("æ˜¯å¦å¯ç”¨è‡ªåŠ¨åˆå§‹åŒ–")]
+        [Tooltip("ÊÇ·ñÆôÓÃ×Ô¶¯³õÊ¼»¯")]
         private bool enableAutoInitialization = true;
 
         [SerializeField]
-        [Tooltip("æ˜¯å¦å¯ç”¨ç»„ä»¶å¥åº·æ£€æŸ¥")]
+        [Tooltip("ÊÇ·ñÆôÓÃ×é¼ş½¡¿µ¼ì²é")]
         private bool enableComponentHealthCheck = true;
 
         [SerializeField]
-        [Tooltip("æ˜¯å¦å¯ç”¨æ€§èƒ½ç›‘æ§")]
+        [Tooltip("ÊÇ·ñÆôÓÃĞÔÄÜ¼à¿Ø")]
         private bool enablePerformanceMonitoring = true;
 
         [SerializeField]
-        [Tooltip("å¥åº·æ£€æŸ¥é—´éš”ï¼ˆç§’ï¼‰")]
+        [Tooltip("½¡¿µ¼ì²é¼ä¸ô£¨Ãë£©")]
         private float healthCheckInterval = 30f;
 
         [SerializeField]
-        [Tooltip("æ˜¯å¦å¯ç”¨è°ƒè¯•æ—¥å¿—")]
+        [Tooltip("ÊÇ·ñÆôÓÃµ÷ÊÔÈÕÖ¾")]
         private bool enableDebugLog = true;
         #endregion
 
-        #region æ•°æ®ç»“æ„
+        #region Êı¾İ½á¹¹
         /// <summary>
-        /// é›†æˆçŠ¶æ€
+        /// ¼¯³É×´Ì¬
         /// </summary>
         public enum IntegrationStatus
         {
-            NotInitialized,     // æœªåˆå§‹åŒ–
-            Initializing,       // åˆå§‹åŒ–ä¸­
-            Ready,              // å°±ç»ª
-            Error,              // é”™è¯¯
-            Disabled            // ç¦ç”¨
+            NotInitialized,     // Î´³õÊ¼»¯
+            Initializing,       // ³õÊ¼»¯ÖĞ
+            Ready,              // ¾ÍĞ÷
+            Error,              // ´íÎó
+            Disabled            // ½ûÓÃ
         }
 
         /// <summary>
-        /// ç»„ä»¶å¥åº·çŠ¶æ€
+        /// ×é¼ş½¡¿µ×´Ì¬
         /// </summary>
         [System.Serializable]
         public class ComponentHealth
@@ -108,7 +108,7 @@ namespace InventorySystem.SaveSystem
         }
 
         /// <summary>
-        /// é›†æˆæ“ä½œç»“æœ
+        /// ¼¯³É²Ù×÷½á¹û
         /// </summary>
         [System.Serializable]
         public class IntegrationResult
@@ -131,7 +131,7 @@ namespace InventorySystem.SaveSystem
         }
 
         /// <summary>
-        /// æ€§èƒ½ç»Ÿè®¡
+        /// ĞÔÄÜÍ³¼Æ
         /// </summary>
         [System.Serializable]
         public class PerformanceStats
@@ -153,8 +153,8 @@ namespace InventorySystem.SaveSystem
         }
         #endregion
 
-        #region ç§æœ‰å­—æ®µ
-        // æ ¸å¿ƒç»„ä»¶å¼•ç”¨
+        #region Ë½ÓĞ×Ö¶Î
+        // ºËĞÄ×é¼şÒıÓÃ
         private SaveManager saveManager;
         private SaveManagerEnhancer saveManagerEnhancer;
         private SaveDataValidator saveDataValidator;
@@ -162,7 +162,7 @@ namespace InventorySystem.SaveSystem
         private SaveDataIntegrityChecker saveDataIntegrityChecker;
         private ItemInstanceIDManagerEnhancer idManagerEnhancer;
 
-        // çŠ¶æ€ç®¡ç†
+        // ×´Ì¬¹ÜÀí
         private IntegrationStatus currentStatus = IntegrationStatus.NotInitialized;
         private Dictionary<string, ComponentHealth> componentHealthMap;
         private PerformanceStats performanceStats;
@@ -170,8 +170,8 @@ namespace InventorySystem.SaveSystem
         private bool isInitialized = false;
         #endregion
 
-        #region äº‹ä»¶å®šä¹‰
-        // é›†æˆçŠ¶æ€äº‹ä»¶
+        #region ÊÂ¼ş¶¨Òå
+        // ¼¯³É×´Ì¬ÊÂ¼ş
         public event Action<IntegrationStatus> OnStatusChanged;
         public event Action<ComponentHealth> OnComponentHealthChanged;
         public event Action<IntegrationResult> OnOperationCompleted;
@@ -180,10 +180,10 @@ namespace InventorySystem.SaveSystem
         public event Action<string, string> OnError;
         #endregion
 
-        #region Unityç”Ÿå‘½å‘¨æœŸ
+        #region UnityÉúÃüÖÜÆÚ
         private void Awake()
         {
-            // ç¡®ä¿å•ä¾‹å”¯ä¸€æ€§
+            // È·±£µ¥ÀıÎ¨Ò»ĞÔ
             if (_instance != null && _instance != this)
             {
                 Destroy(gameObject);
@@ -204,7 +204,7 @@ namespace InventorySystem.SaveSystem
 
         private void OnDestroy()
         {
-            // åœæ­¢å¥åº·æ£€æŸ¥
+            // Í£Ö¹½¡¿µ¼ì²é
             if (healthCheckCoroutine != null)
             {
                 StopCoroutine(healthCheckCoroutine);
@@ -217,9 +217,9 @@ namespace InventorySystem.SaveSystem
         }
         #endregion
 
-        #region åˆå§‹åŒ–
+        #region ³õÊ¼»¯
         /// <summary>
-        /// åˆå§‹åŒ–é›†æˆå™¨
+        /// ³õÊ¼»¯¼¯³ÉÆ÷
         /// </summary>
         private void InitializeIntegrator()
         {
@@ -227,65 +227,65 @@ namespace InventorySystem.SaveSystem
             performanceStats = new PerformanceStats();
 
             SetStatus(IntegrationStatus.NotInitialized);
-            LogDebug("SaveSystemIntegratorå·²åˆ›å»º");
+            LogDebug("SaveSystemIntegratorÒÑ´´½¨");
         }
 
         /// <summary>
-        /// è‡ªåŠ¨åˆå§‹åŒ–åç¨‹
+        /// ×Ô¶¯³õÊ¼»¯Ğ­³Ì
         /// </summary>
         private IEnumerator AutoInitializeCoroutine()
         {
             SetStatus(IntegrationStatus.Initializing);
-            LogDebug("å¼€å§‹è‡ªåŠ¨åˆå§‹åŒ–ä¿å­˜ç³»ç»Ÿé›†æˆå™¨");
+            LogDebug("¿ªÊ¼×Ô¶¯³õÊ¼»¯±£´æÏµÍ³¼¯³ÉÆ÷");
 
-            // ç­‰å¾…ä¸€å¸§ç¡®ä¿æ‰€æœ‰ç»„ä»¶éƒ½å·²åˆ›å»º
+            // µÈ´ıÒ»Ö¡È·±£ËùÓĞ×é¼ş¶¼ÒÑ´´½¨
             yield return null;
 
-            // 1. è·å–æ ¸å¿ƒç»„ä»¶å¼•ç”¨
+            // 1. »ñÈ¡ºËĞÄ×é¼şÒıÓÃ
             yield return StartCoroutine(InitializeComponentReferences());
 
             try
             {
-                // 2. åˆå§‹åŒ–ç»„ä»¶å¥åº·ç›‘æ§
+                // 2. ³õÊ¼»¯×é¼ş½¡¿µ¼à¿Ø
                 InitializeComponentHealth();
 
-                // 3. å¯åŠ¨å¥åº·æ£€æŸ¥
+                // 3. Æô¶¯½¡¿µ¼ì²é
                 if (enableComponentHealthCheck)
                 {
                     StartHealthCheck();
                 }
 
-                // 4. è®¾ç½®äº‹ä»¶ç›‘å¬
+                // 4. ÉèÖÃÊÂ¼ş¼àÌı
                 SetupEventListeners();
 
                 isInitialized = true;
                 SetStatus(IntegrationStatus.Ready);
-                LogDebug("ä¿å­˜ç³»ç»Ÿé›†æˆå™¨åˆå§‹åŒ–å®Œæˆ");
+                LogDebug("±£´æÏµÍ³¼¯³ÉÆ÷³õÊ¼»¯Íê³É");
             }
             catch (Exception ex)
             {
                 SetStatus(IntegrationStatus.Error);
-                LogError($"åˆå§‹åŒ–è¿‡ç¨‹ä¸­å‘ç”Ÿå¼‚å¸¸: {ex.Message}");
+                LogError($"³õÊ¼»¯¹ı³ÌÖĞ·¢ÉúÒì³£: {ex.Message}");
             }
         }
 
         /// <summary>
-        /// åˆå§‹åŒ–ç»„ä»¶å¼•ç”¨
+        /// ³õÊ¼»¯×é¼şÒıÓÃ
         /// </summary>
         private IEnumerator InitializeComponentReferences()
         {
-            LogDebug("æ­£åœ¨è·å–ç»„ä»¶å¼•ç”¨...");
+            LogDebug("ÕıÔÚ»ñÈ¡×é¼şÒıÓÃ...");
 
-            // è·å–SaveManager
+            // »ñÈ¡SaveManager
             saveManager = SaveManager.Instance;
             if (saveManager == null)
             {
-                LogError("æ— æ³•æ‰¾åˆ°SaveManagerå®ä¾‹");
+                LogError("ÎŞ·¨ÕÒµ½SaveManagerÊµÀı");
                 yield break;
             }
             yield return null;
 
-            // è·å–æˆ–åˆ›å»ºå¢å¼ºç»„ä»¶
+            // »ñÈ¡»ò´´½¨ÔöÇ¿×é¼ş
             saveManagerEnhancer = SaveManagerEnhancer.Instance;
             saveDataValidator = SaveDataValidator.Instance;
             saveTransactionManager = SaveTransactionManager.Instance;
@@ -294,11 +294,11 @@ namespace InventorySystem.SaveSystem
 
             yield return null;
 
-            LogDebug("ç»„ä»¶å¼•ç”¨è·å–å®Œæˆ");
+            LogDebug("×é¼şÒıÓÃ»ñÈ¡Íê³É");
         }
 
         /// <summary>
-        /// åˆå§‹åŒ–ç»„ä»¶å¥åº·ç›‘æ§
+        /// ³õÊ¼»¯×é¼ş½¡¿µ¼à¿Ø
         /// </summary>
         private void InitializeComponentHealth()
         {
@@ -317,77 +317,77 @@ namespace InventorySystem.SaveSystem
                 componentHealthMap[componentName] = new ComponentHealth(componentName);
             }
 
-            LogDebug("ç»„ä»¶å¥åº·ç›‘æ§å·²åˆå§‹åŒ–");
+            LogDebug("×é¼ş½¡¿µ¼à¿ØÒÑ³õÊ¼»¯");
         }
 
         /// <summary>
-        /// è®¾ç½®äº‹ä»¶ç›‘å¬
+        /// ÉèÖÃÊÂ¼ş¼àÌı
         /// </summary>
         private void SetupEventListeners()
         {
             try
             {
-                // ç›‘å¬SaveManagerEnhanceräº‹ä»¶
+                // ¼àÌıSaveManagerEnhancerÊÂ¼ş
                 if (saveManagerEnhancer != null)
                 {
                     saveManagerEnhancer.OnEnhancedSaveComplete += OnEnhancedSaveCompleted;
                     saveManagerEnhancer.OnEnhancedLoadComplete += OnEnhancedLoadCompleted;
                 }
 
-                // ç›‘å¬SaveDataValidatoräº‹ä»¶
+                // ¼àÌıSaveDataValidatorÊÂ¼ş
                 if (saveDataValidator != null)
                 {
                     saveDataValidator.OnValidationComplete += OnValidationComplete;
                     saveDataValidator.OnValidationError += OnValidationError;
                 }
 
-                // ç›‘å¬SaveTransactionManageräº‹ä»¶
+                // ¼àÌıSaveTransactionManagerÊÂ¼ş
                 if (saveTransactionManager != null)
                 {
                     saveTransactionManager.OnTransactionCompleted += OnTransactionCompleted;
                     saveTransactionManager.OnTransactionFailed += OnTransactionFailed;
                 }
 
-                // ç›‘å¬SaveDataIntegrityCheckeräº‹ä»¶
+                // ¼àÌıSaveDataIntegrityCheckerÊÂ¼ş
                 if (saveDataIntegrityChecker != null)
                 {
                     saveDataIntegrityChecker.OnIntegrityCheckComplete += OnIntegrityCheckCompleted;
                 }
 
-                // ç›‘å¬ItemInstanceIDManagerEnhanceräº‹ä»¶
+                // ¼àÌıItemInstanceIDManagerEnhancerÊÂ¼ş
                 if (idManagerEnhancer != null)
                 {
                     idManagerEnhancer.OnConflictDetected += OnIdConflictDetected;
                     idManagerEnhancer.OnConflictResolved += OnIdConflictResolved;
                 }
 
-                LogDebug("äº‹ä»¶ç›‘å¬å™¨è®¾ç½®å®Œæˆ");
+                LogDebug("ÊÂ¼ş¼àÌıÆ÷ÉèÖÃÍê³É");
             }
             catch (Exception ex)
             {
-                LogError($"è®¾ç½®äº‹ä»¶ç›‘å¬å™¨æ—¶å‘ç”Ÿå¼‚å¸¸: {ex.Message}");
+                LogError($"ÉèÖÃÊÂ¼ş¼àÌıÆ÷Ê±·¢ÉúÒì³£: {ex.Message}");
             }
         }
         #endregion
 
-        #region ä¸»è¦é›†æˆæ–¹æ³•
+        #region Ö÷Òª¼¯³É·½·¨
         /// <summary>
-        /// æ‰§è¡Œå¢å¼ºä¿å­˜æ“ä½œ
+        /// Ö´ĞĞÔöÇ¿±£´æ²Ù×÷
         /// </summary>
-        /// <param name="saveSlot">ä¿å­˜æ§½ä½</param>
-        /// <param name="useTransaction">æ˜¯å¦ä½¿ç”¨äº‹åŠ¡</param>
-        /// <returns>ä¿å­˜ç»“æœ</returns>
+        /// <param name="saveSlot">±£´æ²ÛÎ»</param>
+        /// <param name="useTransaction">ÊÇ·ñÊ¹ÓÃÊÂÎñ</param>
+        /// <returns>±£´æ½á¹û</returns>
         public Coroutine PerformEnhancedSave(string saveSlot = "default", bool useTransaction = true)
         {
             if (!IsReady())
             {
-                LogError("é›†æˆå™¨æœªå°±ç»ªï¼Œæ— æ³•æ‰§è¡Œå¢å¼ºä¿å­˜");
+                LogError("¼¯³ÉÆ÷Î´¾ÍĞ÷£¬ÎŞ·¨Ö´ĞĞÔöÇ¿±£´æ");
                 return null;
             }
 
             if (!enableEnhancedSave)
             {
-                LogDebug("å¢å¼ºä¿å­˜åŠŸèƒ½å·²ç¦ç”¨ï¼Œä½¿ç”¨æ ‡å‡†ä¿å­˜");
+                LogDebug("ÔöÇ¿±£´æ¹¦ÄÜÒÑ½ûÓÃ£¬Ê¹ÓÃ±ê×¼±£´æ");
                 return saveManager.SaveAll(saveSlot);
             }
 
@@ -395,22 +395,22 @@ namespace InventorySystem.SaveSystem
         }
 
         /// <summary>
-        /// æ‰§è¡Œå¢å¼ºåŠ è½½æ“ä½œ
+        /// Ö´ĞĞÔöÇ¿¼ÓÔØ²Ù×÷
         /// </summary>
-        /// <param name="saveSlot">ä¿å­˜æ§½ä½</param>
-        /// <param name="validateData">æ˜¯å¦éªŒè¯æ•°æ®</param>
-        /// <returns>åŠ è½½ç»“æœ</returns>
+        /// <param name="saveSlot">±£´æ²ÛÎ»</param>
+        /// <param name="validateData">ÊÇ·ñÑéÖ¤Êı¾İ</param>
+        /// <returns>¼ÓÔØ½á¹û</returns>
         public Coroutine PerformEnhancedLoad(string saveSlot = "default", bool validateData = true)
         {
             if (!IsReady())
             {
-                LogError("é›†æˆå™¨æœªå°±ç»ªï¼Œæ— æ³•æ‰§è¡Œå¢å¼ºåŠ è½½");
+                LogError("¼¯³ÉÆ÷Î´¾ÍĞ÷£¬ÎŞ·¨Ö´ĞĞÔöÇ¿¼ÓÔØ");
                 return null;
             }
 
             if (!enableEnhancedLoad)
             {
-                LogDebug("å¢å¼ºåŠ è½½åŠŸèƒ½å·²ç¦ç”¨ï¼Œä½¿ç”¨æ ‡å‡†åŠ è½½");
+                LogDebug("ÔöÇ¿¼ÓÔØ¹¦ÄÜÒÑ½ûÓÃ£¬Ê¹ÓÃ±ê×¼¼ÓÔØ");
                 return saveManager.LoadSave(saveSlot);
             }
 
@@ -418,9 +418,9 @@ namespace InventorySystem.SaveSystem
         }
 
         /// <summary>
-        /// æ‰§è¡Œå®Œæ•´çš„ç³»ç»Ÿå¥åº·æ£€æŸ¥
+        /// Ö´ĞĞÍêÕûµÄÏµÍ³½¡¿µ¼ì²é
         /// </summary>
-        /// <returns>å¥åº·æ£€æŸ¥ç»“æœ</returns>
+        /// <returns>½¡¿µ¼ì²é½á¹û</returns>
         public IntegrationResult PerformSystemHealthCheck()
         {
             var result = new IntegrationResult();
@@ -428,17 +428,17 @@ namespace InventorySystem.SaveSystem
 
             try
             {
-                LogDebug("å¼€å§‹ç³»ç»Ÿå¥åº·æ£€æŸ¥");
+                LogDebug("¿ªÊ¼ÏµÍ³½¡¿µ¼ì²é");
 
-                // æ£€æŸ¥æ‰€æœ‰ç»„ä»¶
+                // ¼ì²éËùÓĞ×é¼ş
                 CheckAllComponentsHealth();
 
-                // ç»Ÿè®¡å¥åº·çŠ¶æ€
+                // Í³¼Æ½¡¿µ×´Ì¬
                 var healthyComponents = componentHealthMap.Values.Count(h => h.isWorking);
                 var totalComponents = componentHealthMap.Count;
 
                 result.success = healthyComponents == totalComponents;
-                result.message = $"å¥åº·æ£€æŸ¥å®Œæˆ: {healthyComponents}/{totalComponents} ç»„ä»¶æ­£å¸¸å·¥ä½œ";
+                result.message = $"½¡¿µ¼ì²éÍê³É: {healthyComponents}/{totalComponents} ×é¼şÕı³£¹¤×÷";
                 result.data["healthyComponents"] = healthyComponents;
                 result.data["totalComponents"] = totalComponents;
                 result.data["componentHealth"] = componentHealthMap;
@@ -446,17 +446,17 @@ namespace InventorySystem.SaveSystem
                 if (!result.success)
                 {
                     var unhealthyComponents = componentHealthMap.Values.Where(h => !h.isWorking).Select(h => h.componentName);
-                    result.warnings.Add($"ä»¥ä¸‹ç»„ä»¶å·¥ä½œå¼‚å¸¸: {string.Join(", ", unhealthyComponents)}");
+                    result.warnings.Add($"ÒÔÏÂ×é¼ş¹¤×÷Òì³£: {string.Join(", ", unhealthyComponents)}");
                 }
 
-                LogDebug($"ç³»ç»Ÿå¥åº·æ£€æŸ¥å®Œæˆ: {result.message}");
+                LogDebug($"ÏµÍ³½¡¿µ¼ì²éÍê³É: {result.message}");
             }
             catch (Exception ex)
             {
                 result.success = false;
-                result.message = "å¥åº·æ£€æŸ¥è¿‡ç¨‹ä¸­å‘ç”Ÿå¼‚å¸¸";
+                result.message = "½¡¿µ¼ì²é¹ı³ÌÖĞ·¢ÉúÒì³£";
                 result.errors.Add(ex.Message);
-                LogError($"å¥åº·æ£€æŸ¥å¼‚å¸¸: {ex.Message}");
+                LogError($"½¡¿µ¼ì²éÒì³£: {ex.Message}");
             }
             finally
             {
@@ -468,42 +468,42 @@ namespace InventorySystem.SaveSystem
         }
 
         /// <summary>
-        /// å¼ºåˆ¶é‡æ–°åˆå§‹åŒ–æ‰€æœ‰ç»„ä»¶
+        /// Ç¿ÖÆÖØĞÂ³õÊ¼»¯ËùÓĞ×é¼ş
         /// </summary>
-        /// <returns>é‡æ–°åˆå§‹åŒ–åç¨‹</returns>
+        /// <returns>ÖØĞÂ³õÊ¼»¯Ğ­³Ì</returns>
         public Coroutine ForceReinitialize()
         {
-            LogDebug("å¼ºåˆ¶é‡æ–°åˆå§‹åŒ–æ‰€æœ‰ç»„ä»¶");
+            LogDebug("Ç¿ÖÆÖØĞÂ³õÊ¼»¯ËùÓĞ×é¼ş");
             isInitialized = false;
             SetStatus(IntegrationStatus.Initializing);
             return StartCoroutine(AutoInitializeCoroutine());
         }
         #endregion
 
-        #region åç¨‹å®ç°
+        #region Ğ­³ÌÊµÏÖ
         /// <summary>
-        /// å¢å¼ºä¿å­˜åç¨‹
+        /// ÔöÇ¿±£´æĞ­³Ì
         /// </summary>
         private IEnumerator EnhancedSaveCoroutine(string saveSlot, bool useTransaction)
         {
             var result = new IntegrationResult();
             var startTime = Time.realtimeSinceStartup;
 
-            LogDebug($"å¼€å§‹å¢å¼ºä¿å­˜æ“ä½œ: {saveSlot}");
+            LogDebug($"¿ªÊ¼ÔöÇ¿±£´æ²Ù×÷: {saveSlot}");
 
-            // 1. é¢„ä¿å­˜éªŒè¯
+            // 1. Ô¤±£´æÑéÖ¤
             try
             {
                 if (saveDataValidator != null)
                 {
-                    LogDebug("æ‰§è¡Œä¿å­˜å‰æ•°æ®éªŒè¯");
+                    LogDebug("Ö´ĞĞ±£´æÇ°Êı¾İÑéÖ¤");
                     var registeredObjects = GetRegisteredSaveableObjects();
                     var validationResult = saveDataValidator.ValidateBeforeSave(registeredObjects);
 
                     if (!validationResult.isValid)
                     {
                         result.success = false;
-                        result.message = "ä¿å­˜å‰æ•°æ®éªŒè¯å¤±è´¥";
+                        result.message = "±£´æÇ°Êı¾İÑéÖ¤Ê§°Ü";
                         result.errors.AddRange(validationResult.errors.Select(e => e.message));
                         result.executionTime = Time.realtimeSinceStartup - startTime;
                         OnOperationCompleted?.Invoke(result);
@@ -514,56 +514,56 @@ namespace InventorySystem.SaveSystem
             catch (Exception ex)
             {
                 result.success = false;
-                result.message = "é¢„ä¿å­˜éªŒè¯è¿‡ç¨‹ä¸­å‘ç”Ÿå¼‚å¸¸";
+                result.message = "Ô¤±£´æÑéÖ¤¹ı³ÌÖĞ·¢ÉúÒì³£";
                 result.errors.Add(ex.Message);
-                LogError($"é¢„ä¿å­˜éªŒè¯å¼‚å¸¸: {ex.Message}");
+                LogError($"Ô¤±£´æÑéÖ¤Òì³£: {ex.Message}");
                 result.executionTime = Time.realtimeSinceStartup - startTime;
                 OnOperationCompleted?.Invoke(result);
                 yield break;
             }
 
-            // 2. IDå†²çªæ£€æµ‹å’Œè§£å†³
+            // 2. ID³åÍ»¼ì²âºÍ½â¾ö
             try
             {
                 if (idManagerEnhancer != null)
                 {
-                    LogDebug("æ‰§è¡ŒIDå†²çªæ£€æµ‹");
+                    LogDebug("Ö´ĞĞID³åÍ»¼ì²â");
                     var conflicts = idManagerEnhancer.PerformAdvancedConflictDetection();
                     if (conflicts.Count > 0)
                     {
-                        LogDebug($"æ£€æµ‹åˆ°{conflicts.Count}ä¸ªIDå†²çªï¼Œå°è¯•è‡ªåŠ¨è§£å†³");
+                        LogDebug($"¼ì²âµ½{conflicts.Count}¸öID³åÍ»£¬³¢ÊÔ×Ô¶¯½â¾ö");
                         var resolutionResults = idManagerEnhancer.AutoResolveConflicts(conflicts);
                         var unresolvedCount = resolutionResults.Values.Count(r => !r);
 
                         if (unresolvedCount > 0)
                         {
-                            result.warnings.Add($"æœ‰{unresolvedCount}ä¸ªIDå†²çªæ— æ³•è‡ªåŠ¨è§£å†³");
+                            result.warnings.Add($"ÓĞ{unresolvedCount}¸öID³åÍ»ÎŞ·¨×Ô¶¯½â¾ö");
                         }
                     }
                 }
             }
             catch (Exception ex)
             {
-                result.warnings.Add($"IDå†²çªæ£€æµ‹å¼‚å¸¸: {ex.Message}");
-                LogError($"IDå†²çªæ£€æµ‹å¼‚å¸¸: {ex.Message}");
+                result.warnings.Add($"ID³åÍ»¼ì²âÒì³£: {ex.Message}");
+                LogError($"ID³åÍ»¼ì²âÒì³£: {ex.Message}");
             }
 
             yield return null;
 
-            // 3. æ‰§è¡Œäº‹åŠ¡æ€§ä¿å­˜æˆ–æ ‡å‡†ä¿å­˜
+            // 3. Ö´ĞĞÊÂÎñĞÔ±£´æ»ò±ê×¼±£´æ
             Coroutine saveCoroutine = null;
             try
             {
                 if (useTransaction && saveTransactionManager != null)
                 {
-                    LogDebug("æ‰§è¡Œäº‹åŠ¡æ€§ä¿å­˜");
+                    LogDebug("Ö´ĞĞÊÂÎñĞÔ±£´æ");
                     var registeredObjects = GetRegisteredSaveableObjects();
                     var transactionResult = saveTransactionManager.BeginTransactionalSave(registeredObjects);
 
                     if (!transactionResult.success)
                     {
                         result.success = false;
-                        result.message = "äº‹åŠ¡æ€§ä¿å­˜å¤±è´¥";
+                        result.message = "ÊÂÎñĞÔ±£´æÊ§°Ü";
                         result.errors.Add(transactionResult.message);
                         result.executionTime = Time.realtimeSinceStartup - startTime;
                         OnOperationCompleted?.Invoke(result);
@@ -572,61 +572,61 @@ namespace InventorySystem.SaveSystem
                 }
                 else if (saveManagerEnhancer != null)
                 {
-                    LogDebug("æ‰§è¡Œå¢å¼ºä¿å­˜");
+                    LogDebug("Ö´ĞĞÔöÇ¿±£´æ");
                     saveCoroutine = saveManagerEnhancer.PerformEnhancedSave(saveSlot);
                 }
                 else
                 {
-                    LogDebug("æ‰§è¡Œæ ‡å‡†ä¿å­˜");
+                    LogDebug("Ö´ĞĞ±ê×¼±£´æ");
                     saveCoroutine = saveManager.SaveAll(saveSlot);
                 }
             }
             catch (Exception ex)
             {
                 result.success = false;
-                result.message = "ä¿å­˜æ‰§è¡Œè¿‡ç¨‹ä¸­å‘ç”Ÿå¼‚å¸¸";
+                result.message = "±£´æÖ´ĞĞ¹ı³ÌÖĞ·¢ÉúÒì³£";
                 result.errors.Add(ex.Message);
-                LogError($"ä¿å­˜æ‰§è¡Œå¼‚å¸¸: {ex.Message}");
+                LogError($"±£´æÖ´ĞĞÒì³£: {ex.Message}");
                 result.executionTime = Time.realtimeSinceStartup - startTime;
                 OnOperationCompleted?.Invoke(result);
                 yield break;
             }
 
-            // æ‰§è¡Œä¿å­˜åç¨‹
+            // Ö´ĞĞ±£´æĞ­³Ì
             if (saveCoroutine != null)
             {
                 yield return saveCoroutine;
             }
 
-            // 4. ä¿å­˜åå®Œæ•´æ€§æ£€æŸ¥
+            // 4. ±£´æºóÍêÕûĞÔ¼ì²é
             try
             {
                 if (saveDataIntegrityChecker != null)
                 {
-                    LogDebug("æ‰§è¡Œä¿å­˜åå®Œæ•´æ€§æ£€æŸ¥");
+                    LogDebug("Ö´ĞĞ±£´æºóÍêÕûĞÔ¼ì²é");
                     var registeredObjects = GetRegisteredSaveableObjects();
                     var integrityResult = saveDataIntegrityChecker.PerformIntegrityCheck(registeredObjects);
 
                     if (!integrityResult.isIntact)
                     {
-                        result.warnings.Add("ä¿å­˜åå®Œæ•´æ€§æ£€æŸ¥å‘ç°é—®é¢˜");
+                        result.warnings.Add("±£´æºóÍêÕûĞÔ¼ì²é·¢ÏÖÎÊÌâ");
                         result.warnings.AddRange(integrityResult.issues.Select(i => i.description));
                     }
                 }
             }
             catch (Exception ex)
             {
-                result.warnings.Add($"å®Œæ•´æ€§æ£€æŸ¥å¼‚å¸¸: {ex.Message}");
-                LogError($"å®Œæ•´æ€§æ£€æŸ¥å¼‚å¸¸: {ex.Message}");
+                result.warnings.Add($"ÍêÕûĞÔ¼ì²éÒì³£: {ex.Message}");
+                LogError($"ÍêÕûĞÔ¼ì²éÒì³£: {ex.Message}");
             }
 
-            // 5. å®Œæˆä¿å­˜æ“ä½œ
+            // 5. Íê³É±£´æ²Ù×÷
             try
             {
                 result.success = true;
-                result.message = "å¢å¼ºä¿å­˜æ“ä½œå®Œæˆ";
+                result.message = "ÔöÇ¿±£´æ²Ù×÷Íê³É";
 
-                // æ›´æ–°æ€§èƒ½ç»Ÿè®¡
+                // ¸üĞÂĞÔÄÜÍ³¼Æ
                 if (enablePerformanceMonitoring)
                 {
                     performanceStats.totalSaveOperations++;
@@ -636,12 +636,12 @@ namespace InventorySystem.SaveSystem
                     OnPerformanceUpdate?.Invoke(performanceStats);
                 }
 
-                LogDebug($"å¢å¼ºä¿å­˜å®Œæˆ: {saveSlot}");
+                LogDebug($"ÔöÇ¿±£´æÍê³É: {saveSlot}");
             }
             catch (Exception ex)
             {
-                result.warnings.Add($"æ€§èƒ½ç»Ÿè®¡æ›´æ–°å¼‚å¸¸: {ex.Message}");
-                LogError($"æ€§èƒ½ç»Ÿè®¡æ›´æ–°å¼‚å¸¸: {ex.Message}");
+                result.warnings.Add($"ĞÔÄÜÍ³¼Æ¸üĞÂÒì³£: {ex.Message}");
+                LogError($"ĞÔÄÜÍ³¼Æ¸üĞÂÒì³£: {ex.Message}");
             }
             finally
             {
@@ -651,21 +651,21 @@ namespace InventorySystem.SaveSystem
         }
 
         /// <summary>
-        /// å¢å¼ºåŠ è½½åç¨‹
+        /// ÔöÇ¿¼ÓÔØĞ­³Ì
         /// </summary>
         private IEnumerator EnhancedLoadCoroutine(string saveSlot, bool validateData)
         {
             var result = new IntegrationResult();
             var startTime = Time.realtimeSinceStartup;
 
-            LogDebug($"å¼€å§‹å¢å¼ºåŠ è½½æ“ä½œ: {saveSlot}");
+            LogDebug($"¿ªÊ¼ÔöÇ¿¼ÓÔØ²Ù×÷: {saveSlot}");
 
-            // 1. åŠ è½½å‰å®Œæ•´æ€§æ£€æŸ¥
+            // 1. ¼ÓÔØÇ°ÍêÕûĞÔ¼ì²é
             try
             {
                 if (saveDataIntegrityChecker != null)
                 {
-                    LogDebug("æ‰§è¡ŒåŠ è½½å‰å®Œæ•´æ€§æ£€æŸ¥");
+                    LogDebug("Ö´ĞĞ¼ÓÔØÇ°ÍêÕûĞÔ¼ì²é");
                     var registeredObjects = GetRegisteredSaveableObjects();
                     var integrityResult = saveDataIntegrityChecker.PerformIntegrityCheck(registeredObjects);
 
@@ -675,7 +675,7 @@ namespace InventorySystem.SaveSystem
                         if (criticalIssues.Count > 0)
                         {
                             result.success = false;
-                            result.message = "åŠ è½½å‰å®Œæ•´æ€§æ£€æŸ¥å‘ç°ä¸¥é‡é—®é¢˜";
+                            result.message = "¼ÓÔØÇ°ÍêÕûĞÔ¼ì²é·¢ÏÖÑÏÖØÎÊÌâ";
                             result.errors.AddRange(criticalIssues.Select(i => i.description));
                             result.executionTime = Time.realtimeSinceStartup - startTime;
                             OnOperationCompleted?.Invoke(result);
@@ -683,7 +683,7 @@ namespace InventorySystem.SaveSystem
                         }
                         else
                         {
-                            result.warnings.Add("åŠ è½½å‰å®Œæ•´æ€§æ£€æŸ¥å‘ç°éä¸¥é‡é—®é¢˜");
+                            result.warnings.Add("¼ÓÔØÇ°ÍêÕûĞÔ¼ì²é·¢ÏÖ·ÇÑÏÖØÎÊÌâ");
                             result.warnings.AddRange(integrityResult.issues.Select(i => i.description));
                         }
                     }
@@ -691,93 +691,93 @@ namespace InventorySystem.SaveSystem
             }
             catch (Exception ex)
             {
-                result.warnings.Add($"å®Œæ•´æ€§æ£€æŸ¥å¼‚å¸¸: {ex.Message}");
-                LogError($"å®Œæ•´æ€§æ£€æŸ¥å¼‚å¸¸: {ex.Message}");
+                result.warnings.Add($"ÍêÕûĞÔ¼ì²éÒì³£: {ex.Message}");
+                LogError($"ÍêÕûĞÔ¼ì²éÒì³£: {ex.Message}");
             }
 
-            // 2. æ‰§è¡Œå¢å¼ºåŠ è½½æˆ–æ ‡å‡†åŠ è½½
+            // 2. Ö´ĞĞÔöÇ¿¼ÓÔØ»ò±ê×¼¼ÓÔØ
             Coroutine loadCoroutine = null;
             try
             {
                 if (saveManagerEnhancer != null)
                 {
-                    LogDebug("æ‰§è¡Œå¢å¼ºåŠ è½½");
+                    LogDebug("Ö´ĞĞÔöÇ¿¼ÓÔØ");
                     loadCoroutine = saveManagerEnhancer.PerformEnhancedLoad(saveSlot);
                 }
                 else
                 {
-                    LogDebug("æ‰§è¡Œæ ‡å‡†åŠ è½½");
+                    LogDebug("Ö´ĞĞ±ê×¼¼ÓÔØ");
                     loadCoroutine = saveManager.LoadSave(saveSlot);
                 }
             }
             catch (Exception ex)
             {
                 result.success = false;
-                result.message = "åŠ è½½æ‰§è¡Œè¿‡ç¨‹ä¸­å‘ç”Ÿå¼‚å¸¸";
+                result.message = "¼ÓÔØÖ´ĞĞ¹ı³ÌÖĞ·¢ÉúÒì³£";
                 result.errors.Add(ex.Message);
-                LogError($"åŠ è½½æ‰§è¡Œå¼‚å¸¸: {ex.Message}");
+                LogError($"¼ÓÔØÖ´ĞĞÒì³£: {ex.Message}");
                 result.executionTime = Time.realtimeSinceStartup - startTime;
                 OnOperationCompleted?.Invoke(result);
                 yield break;
             }
 
-            // æ‰§è¡ŒåŠ è½½åç¨‹
+            // Ö´ĞĞ¼ÓÔØĞ­³Ì
             if (loadCoroutine != null)
             {
                 yield return loadCoroutine;
             }
 
-            // 3. åŠ è½½åæ•°æ®éªŒè¯
+            // 3. ¼ÓÔØºóÊı¾İÑéÖ¤
             try
             {
                 if (validateData && saveDataValidator != null)
                 {
-                    LogDebug("æ‰§è¡ŒåŠ è½½åæ•°æ®éªŒè¯");
+                    LogDebug("Ö´ĞĞ¼ÓÔØºóÊı¾İÑéÖ¤");
                     var registeredObjects = GetRegisteredSaveableObjects();
                     var validationResult = saveDataValidator.ValidateAfterLoad(registeredObjects);
 
                     if (!validationResult.isValid)
                     {
-                        result.warnings.Add("åŠ è½½åæ•°æ®éªŒè¯å‘ç°é—®é¢˜");
+                        result.warnings.Add("¼ÓÔØºóÊı¾İÑéÖ¤·¢ÏÖÎÊÌâ");
                         result.warnings.AddRange(validationResult.errors.Select(e => e.message));
                     }
                 }
             }
             catch (Exception ex)
             {
-                result.warnings.Add($"æ•°æ®éªŒè¯å¼‚å¸¸: {ex.Message}");
-                LogError($"æ•°æ®éªŒè¯å¼‚å¸¸: {ex.Message}");
+                result.warnings.Add($"Êı¾İÑéÖ¤Òì³£: {ex.Message}");
+                LogError($"Êı¾İÑéÖ¤Òì³£: {ex.Message}");
             }
 
-            // 4. è·¨åœºæ™¯IDåŒæ­¥
+            // 4. ¿ç³¡¾°IDÍ¬²½
             Coroutine syncCoroutine = null;
             try
             {
                 if (idManagerEnhancer != null)
                 {
-                    LogDebug("æ‰§è¡Œè·¨åœºæ™¯IDåŒæ­¥");
+                    LogDebug("Ö´ĞĞ¿ç³¡¾°IDÍ¬²½");
                     syncCoroutine = idManagerEnhancer.PerformCrossSceneSync();
                 }
             }
             catch (Exception ex)
             {
-                result.warnings.Add($"è·¨åœºæ™¯IDåŒæ­¥å¼‚å¸¸: {ex.Message}");
-                LogError($"è·¨åœºæ™¯IDåŒæ­¥å¼‚å¸¸: {ex.Message}");
+                result.warnings.Add($"¿ç³¡¾°IDÍ¬²½Òì³£: {ex.Message}");
+                LogError($"¿ç³¡¾°IDÍ¬²½Òì³£: {ex.Message}");
             }
 
-            // æ‰§è¡Œè·¨åœºæ™¯åŒæ­¥åç¨‹
+            // Ö´ĞĞ¿ç³¡¾°Í¬²½Ğ­³Ì
             if (syncCoroutine != null)
             {
                 yield return syncCoroutine;
             }
 
-            // 5. å®ŒæˆåŠ è½½æ“ä½œ
+            // 5. Íê³É¼ÓÔØ²Ù×÷
             try
             {
                 result.success = true;
-                result.message = "å¢å¼ºåŠ è½½æ“ä½œå®Œæˆ";
+                result.message = "ÔöÇ¿¼ÓÔØ²Ù×÷Íê³É";
 
-                // æ›´æ–°æ€§èƒ½ç»Ÿè®¡
+                // ¸üĞÂĞÔÄÜÍ³¼Æ
                 if (enablePerformanceMonitoring)
                 {
                     performanceStats.totalLoadOperations++;
@@ -787,14 +787,14 @@ namespace InventorySystem.SaveSystem
                     OnPerformanceUpdate?.Invoke(performanceStats);
                 }
 
-                LogDebug($"å¢å¼ºåŠ è½½å®Œæˆ: {saveSlot}");
+                LogDebug($"ÔöÇ¿¼ÓÔØÍê³É: {saveSlot}");
             }
             catch (Exception ex)
             {
                 result.success = false;
-                result.message = "å¢å¼ºåŠ è½½è¿‡ç¨‹ä¸­å‘ç”Ÿå¼‚å¸¸";
+                result.message = "ÔöÇ¿¼ÓÔØ¹ı³ÌÖĞ·¢ÉúÒì³£";
                 result.errors.Add(ex.Message);
-                LogError($"å¢å¼ºåŠ è½½å¼‚å¸¸: {ex.Message}");
+                LogError($"ÔöÇ¿¼ÓÔØÒì³£: {ex.Message}");
             }
             finally
             {
@@ -804,21 +804,21 @@ namespace InventorySystem.SaveSystem
         }
         #endregion
 
-        #region å¥åº·æ£€æŸ¥
+        #region ½¡¿µ¼ì²é
         /// <summary>
-        /// å¯åŠ¨å¥åº·æ£€æŸ¥
+        /// Æô¶¯½¡¿µ¼ì²é
         /// </summary>
         private void StartHealthCheck()
         {
             if (healthCheckCoroutine == null)
             {
                 healthCheckCoroutine = StartCoroutine(HealthCheckCoroutine());
-                LogDebug("ç»„ä»¶å¥åº·æ£€æŸ¥å·²å¯åŠ¨");
+                LogDebug("×é¼ş½¡¿µ¼ì²éÒÑÆô¶¯");
             }
         }
 
         /// <summary>
-        /// åœæ­¢å¥åº·æ£€æŸ¥
+        /// Í£Ö¹½¡¿µ¼ì²é
         /// </summary>
         private void StopHealthCheck()
         {
@@ -826,12 +826,12 @@ namespace InventorySystem.SaveSystem
             {
                 StopCoroutine(healthCheckCoroutine);
                 healthCheckCoroutine = null;
-                LogDebug("ç»„ä»¶å¥åº·æ£€æŸ¥å·²åœæ­¢");
+                LogDebug("×é¼ş½¡¿µ¼ì²éÒÑÍ£Ö¹");
             }
         }
 
         /// <summary>
-        /// å¥åº·æ£€æŸ¥åç¨‹
+        /// ½¡¿µ¼ì²éĞ­³Ì
         /// </summary>
         private IEnumerator HealthCheckCoroutine()
         {
@@ -845,37 +845,37 @@ namespace InventorySystem.SaveSystem
                 }
                 catch (Exception ex)
                 {
-                    LogError($"å®šæœŸå¥åº·æ£€æŸ¥è¿‡ç¨‹ä¸­å‘ç”Ÿå¼‚å¸¸: {ex.Message}");
+                    LogError($"¶¨ÆÚ½¡¿µ¼ì²é¹ı³ÌÖĞ·¢ÉúÒì³£: {ex.Message}");
                 }
             }
         }
 
         /// <summary>
-        /// æ£€æŸ¥æ‰€æœ‰ç»„ä»¶å¥åº·çŠ¶æ€
+        /// ¼ì²éËùÓĞ×é¼ş½¡¿µ×´Ì¬
         /// </summary>
         private void CheckAllComponentsHealth()
         {
             var startTime = Time.realtimeSinceStartup;
 
-            // æ£€æŸ¥SaveManager
+            // ¼ì²éSaveManager
             CheckComponentHealth("SaveManager", () => saveManager != null && saveManager.isActiveAndEnabled);
 
-            // æ£€æŸ¥SaveManagerEnhancer
+            // ¼ì²éSaveManagerEnhancer
             CheckComponentHealth("SaveManagerEnhancer", () => saveManagerEnhancer != null && saveManagerEnhancer.isActiveAndEnabled);
 
-            // æ£€æŸ¥SaveDataValidator
+            // ¼ì²éSaveDataValidator
             CheckComponentHealth("SaveDataValidator", () => saveDataValidator != null && saveDataValidator.isActiveAndEnabled);
 
-            // æ£€æŸ¥SaveTransactionManager
+            // ¼ì²éSaveTransactionManager
             CheckComponentHealth("SaveTransactionManager", () => saveTransactionManager != null && saveTransactionManager.isActiveAndEnabled);
 
-            // æ£€æŸ¥SaveDataIntegrityChecker
+            // ¼ì²éSaveDataIntegrityChecker
             CheckComponentHealth("SaveDataIntegrityChecker", () => saveDataIntegrityChecker != null && saveDataIntegrityChecker.isActiveAndEnabled);
 
-            // æ£€æŸ¥ItemInstanceIDManagerEnhancer
+            // ¼ì²éItemInstanceIDManagerEnhancer
             CheckComponentHealth("ItemInstanceIDManagerEnhancer", () => idManagerEnhancer != null && idManagerEnhancer.isActiveAndEnabled);
 
-            // æ›´æ–°æ€§èƒ½ç»Ÿè®¡
+            // ¸üĞÂĞÔÄÜÍ³¼Æ
             if (enablePerformanceMonitoring)
             {
                 var checkTime = Time.realtimeSinceStartup - startTime;
@@ -884,7 +884,7 @@ namespace InventorySystem.SaveSystem
         }
 
         /// <summary>
-        /// æ£€æŸ¥å•ä¸ªç»„ä»¶å¥åº·çŠ¶æ€
+        /// ¼ì²éµ¥¸ö×é¼ş½¡¿µ×´Ì¬
         /// </summary>
         private void CheckComponentHealth(string componentName, Func<bool> healthCheck)
         {
@@ -906,18 +906,18 @@ namespace InventorySystem.SaveSystem
                 health.lastCheckTime = DateTime.Now;
                 health.responseTime = Time.realtimeSinceStartup - startTime;
 
-                // å¦‚æœçŠ¶æ€å‘ç”Ÿå˜åŒ–ï¼Œè§¦å‘äº‹ä»¶
+                // Èç¹û×´Ì¬·¢Éú±ä»¯£¬´¥·¢ÊÂ¼ş
                 if (wasWorking != health.isWorking)
                 {
                     OnComponentHealthChanged?.Invoke(health);
 
                     if (health.isWorking)
                     {
-                        LogDebug($"ç»„ä»¶{componentName}æ¢å¤æ­£å¸¸");
+                        LogDebug($"×é¼ş{componentName}»Ö¸´Õı³£");
                     }
                     else
                     {
-                        LogError($"ç»„ä»¶{componentName}å·¥ä½œå¼‚å¸¸");
+                        LogError($"×é¼ş{componentName}¹¤×÷Òì³£");
                     }
                 }
             }
@@ -931,98 +931,98 @@ namespace InventorySystem.SaveSystem
                 health.responseTime = Time.realtimeSinceStartup - startTime;
 
                 OnComponentHealthChanged?.Invoke(health);
-                LogError($"æ£€æŸ¥ç»„ä»¶{componentName}å¥åº·çŠ¶æ€æ—¶å‘ç”Ÿå¼‚å¸¸: {ex.Message}");
+                LogError($"¼ì²é×é¼ş{componentName}½¡¿µ×´Ì¬Ê±·¢ÉúÒì³£: {ex.Message}");
             }
         }
         #endregion
 
-        #region äº‹ä»¶å¤„ç†
+        #region ÊÂ¼ş´¦Àí
         /// <summary>
-        /// å¤„ç†å¢å¼ºä¿å­˜å®Œæˆäº‹ä»¶
+        /// ´¦ÀíÔöÇ¿±£´æÍê³ÉÊÂ¼ş
         /// </summary>
         private void OnEnhancedSaveCompleted(SaveManagerEnhancer.EnhancedSaveResult result)
         {
-            var status = result.success ? "æˆåŠŸ" : "å¤±è´¥";
-            var errorInfo = result.errors.Count > 0 ? $", é”™è¯¯: {string.Join(", ", result.errors)}" : "";
-            LogDebug($"å¢å¼ºä¿å­˜å®Œæˆ: {status}, è€—æ—¶: {result.totalTime:F2}ç§’{errorInfo}");
+            var status = result.success ? "³É¹¦" : "Ê§°Ü";
+            var errorInfo = result.errors.Count > 0 ? $", ´íÎó: {string.Join(", ", result.errors)}" : "";
+            LogDebug($"ÔöÇ¿±£´æÍê³É: {status}, ºÄÊ±: {result.totalTime:F2}Ãë{errorInfo}");
         }
 
         /// <summary>
-        /// å¤„ç†å¢å¼ºåŠ è½½å®Œæˆäº‹ä»¶
+        /// ´¦ÀíÔöÇ¿¼ÓÔØÍê³ÉÊÂ¼ş
         /// </summary>
         private void OnEnhancedLoadCompleted(SaveManagerEnhancer.EnhancedLoadResult result)
         {
-            var status = result.success ? "æˆåŠŸ" : "å¤±è´¥";
-            var errorInfo = result.errors.Count > 0 ? $", é”™è¯¯: {string.Join(", ", result.errors)}" : "";
-            LogDebug($"å¢å¼ºåŠ è½½å®Œæˆ: {status}, è€—æ—¶: {result.totalTime:F2}ç§’{errorInfo}");
+            var status = result.success ? "³É¹¦" : "Ê§°Ü";
+            var errorInfo = result.errors.Count > 0 ? $", ´íÎó: {string.Join(", ", result.errors)}" : "";
+            LogDebug($"ÔöÇ¿¼ÓÔØÍê³É: {status}, ºÄÊ±: {result.totalTime:F2}Ãë{errorInfo}");
         }
 
         /// <summary>
-        /// å¤„ç†éªŒè¯å®Œæˆäº‹ä»¶
+        /// ´¦ÀíÑéÖ¤Íê³ÉÊÂ¼ş
         /// </summary>
         private void OnValidationComplete(SaveDataValidator.ValidationResult result)
         {
             if (!result.isValid)
             {
-                OnWarning?.Invoke("æ•°æ®éªŒè¯", $"éªŒè¯å‘ç°{result.errors.Count}ä¸ªé”™è¯¯å’Œ{result.warnings.Count}ä¸ªè­¦å‘Š");
+                OnWarning?.Invoke("Êı¾İÑéÖ¤", $"ÑéÖ¤·¢ÏÖ{result.errors.Count}¸ö´íÎóºÍ{result.warnings.Count}¸ö¾¯¸æ");
             }
         }
 
         /// <summary>
-        /// å¤„ç†éªŒè¯é”™è¯¯äº‹ä»¶
+        /// ´¦ÀíÑéÖ¤´íÎóÊÂ¼ş
         /// </summary>
         private void OnValidationError(SaveDataValidator.ValidationError error)
         {
-            OnError?.Invoke("æ•°æ®éªŒè¯", error.message);
+            OnError?.Invoke("Êı¾İÑéÖ¤", error.message);
         }
 
         /// <summary>
-        /// å¤„ç†äº‹åŠ¡å®Œæˆäº‹ä»¶
+        /// ´¦ÀíÊÂÎñÍê³ÉÊÂ¼ş
         /// </summary>
         private void OnTransactionCompleted(SaveTransactionManager.SaveTransaction transaction)
         {
-            LogDebug($"äº‹åŠ¡å®Œæˆ: {transaction.transactionId}");
+            LogDebug($"ÊÂÎñÍê³É: {transaction.transactionId}");
         }
 
         /// <summary>
-        /// å¤„ç†äº‹åŠ¡å¤±è´¥äº‹ä»¶
+        /// ´¦ÀíÊÂÎñÊ§°ÜÊÂ¼ş
         /// </summary>
         private void OnTransactionFailed(SaveTransactionManager.SaveTransaction transaction)
         {
-            OnError?.Invoke("äº‹åŠ¡ç®¡ç†", transaction.errorMessage ?? "äº‹åŠ¡å¤±è´¥");
+            OnError?.Invoke("ÊÂÎñ¹ÜÀí", transaction.errorMessage ?? "ÊÂÎñÊ§°Ü");
         }
 
         /// <summary>
-        /// å¤„ç†å®Œæ•´æ€§æ£€æŸ¥å®Œæˆäº‹ä»¶
+        /// ´¦ÀíÍêÕûĞÔ¼ì²éÍê³ÉÊÂ¼ş
         /// </summary>
         private void OnIntegrityCheckCompleted(SaveDataIntegrityChecker.IntegrityCheckResult result)
         {
             if (!result.isIntact)
             {
-                OnWarning?.Invoke("å®Œæ•´æ€§æ£€æŸ¥", $"å‘ç°{result.issues.Count}ä¸ªå®Œæ•´æ€§é—®é¢˜");
+                OnWarning?.Invoke("ÍêÕûĞÔ¼ì²é", $"·¢ÏÖ{result.issues.Count}¸öÍêÕûĞÔÎÊÌâ");
             }
         }
 
         /// <summary>
-        /// å¤„ç†IDå†²çªæ£€æµ‹äº‹ä»¶
+        /// ´¦ÀíID³åÍ»¼ì²âÊÂ¼ş
         /// </summary>
         private void OnIdConflictDetected(ItemInstanceIDManagerEnhancer.IdConflictInfo conflict)
         {
-            OnWarning?.Invoke("IDç®¡ç†", $"æ£€æµ‹åˆ°IDå†²çª: {conflict.conflictId} ({conflict.type})");
+            OnWarning?.Invoke("ID¹ÜÀí", $"¼ì²âµ½ID³åÍ»: {conflict.conflictId} ({conflict.type})");
         }
 
         /// <summary>
-        /// å¤„ç†IDå†²çªè§£å†³äº‹ä»¶
+        /// ´¦ÀíID³åÍ»½â¾öÊÂ¼ş
         /// </summary>
         private void OnIdConflictResolved(ItemInstanceIDManagerEnhancer.IdConflictInfo conflict)
         {
-            LogDebug($"IDå†²çªå·²è§£å†³: {conflict.conflictId}");
+            LogDebug($"ID³åÍ»ÒÑ½â¾ö: {conflict.conflictId}");
         }
         #endregion
 
-        #region è¾…åŠ©æ–¹æ³•
+        #region ¸¨Öú·½·¨
         /// <summary>
-        /// è®¾ç½®é›†æˆçŠ¶æ€
+        /// ÉèÖÃ¼¯³É×´Ì¬
         /// </summary>
         private void SetStatus(IntegrationStatus status)
         {
@@ -1030,12 +1030,12 @@ namespace InventorySystem.SaveSystem
             {
                 currentStatus = status;
                 OnStatusChanged?.Invoke(status);
-                LogDebug($"é›†æˆçŠ¶æ€å˜æ›´: {status}");
+                LogDebug($"¼¯³É×´Ì¬±ä¸ü: {status}");
             }
         }
 
         /// <summary>
-        /// æ£€æŸ¥é›†æˆå™¨æ˜¯å¦å°±ç»ª
+        /// ¼ì²é¼¯³ÉÆ÷ÊÇ·ñ¾ÍĞ÷
         /// </summary>
         private bool IsReady()
         {
@@ -1043,9 +1043,9 @@ namespace InventorySystem.SaveSystem
         }
         #endregion
 
-        #region å…¬å…±æŸ¥è¯¢æ–¹æ³•
+        #region ¹«¹²²éÑ¯·½·¨
         /// <summary>
-        /// è·å–å½“å‰é›†æˆçŠ¶æ€
+        /// »ñÈ¡µ±Ç°¼¯³É×´Ì¬
         /// </summary>
         public IntegrationStatus GetCurrentStatus()
         {
@@ -1053,7 +1053,7 @@ namespace InventorySystem.SaveSystem
         }
 
         /// <summary>
-        /// è·å–ç»„ä»¶å¥åº·çŠ¶æ€
+        /// »ñÈ¡×é¼ş½¡¿µ×´Ì¬
         /// </summary>
         public Dictionary<string, ComponentHealth> GetComponentHealth()
         {
@@ -1061,7 +1061,7 @@ namespace InventorySystem.SaveSystem
         }
 
         /// <summary>
-        /// è·å–æ€§èƒ½ç»Ÿè®¡
+        /// »ñÈ¡ĞÔÄÜÍ³¼Æ
         /// </summary>
         public PerformanceStats GetPerformanceStats()
         {
@@ -1069,70 +1069,70 @@ namespace InventorySystem.SaveSystem
         }
 
         /// <summary>
-        /// è·å–é›†æˆå™¨ç»Ÿè®¡ä¿¡æ¯
+        /// »ñÈ¡¼¯³ÉÆ÷Í³¼ÆĞÅÏ¢
         /// </summary>
         public string GetIntegratorStatistics()
         {
             var stats = new System.Text.StringBuilder();
-            stats.AppendLine("=== ä¿å­˜ç³»ç»Ÿé›†æˆå™¨ç»Ÿè®¡ä¿¡æ¯ ===");
-            stats.AppendLine($"å½“å‰çŠ¶æ€: {currentStatus}");
-            stats.AppendLine($"æ˜¯å¦å·²åˆå§‹åŒ–: {isInitialized}");
-            stats.AppendLine($"å¢å¼ºä¿å­˜: {(enableEnhancedSave ? "å¯ç”¨" : "ç¦ç”¨")}");
-            stats.AppendLine($"å¢å¼ºåŠ è½½: {(enableEnhancedLoad ? "å¯ç”¨" : "ç¦ç”¨")}");
-            stats.AppendLine($"ç»„ä»¶å¥åº·æ£€æŸ¥: {(enableComponentHealthCheck ? "å¯ç”¨" : "ç¦ç”¨")}");
-            stats.AppendLine($"æ€§èƒ½ç›‘æ§: {(enablePerformanceMonitoring ? "å¯ç”¨" : "ç¦ç”¨")}");
-            stats.AppendLine($"å¥åº·æ£€æŸ¥é—´éš”: {healthCheckInterval}ç§’");
+            stats.AppendLine("=== ±£´æÏµÍ³¼¯³ÉÆ÷Í³¼ÆĞÅÏ¢ ===");
+            stats.AppendLine($"µ±Ç°×´Ì¬: {currentStatus}");
+            stats.AppendLine($"ÊÇ·ñÒÑ³õÊ¼»¯: {isInitialized}");
+            stats.AppendLine($"ÔöÇ¿±£´æ: {(enableEnhancedSave ? "ÆôÓÃ" : "½ûÓÃ")}");
+            stats.AppendLine($"ÔöÇ¿¼ÓÔØ: {(enableEnhancedLoad ? "ÆôÓÃ" : "½ûÓÃ")}");
+            stats.AppendLine($"×é¼ş½¡¿µ¼ì²é: {(enableComponentHealthCheck ? "ÆôÓÃ" : "½ûÓÃ")}");
+            stats.AppendLine($"ĞÔÄÜ¼à¿Ø: {(enablePerformanceMonitoring ? "ÆôÓÃ" : "½ûÓÃ")}");
+            stats.AppendLine($"½¡¿µ¼ì²é¼ä¸ô: {healthCheckInterval}Ãë");
 
-            stats.AppendLine("\n=== ç»„ä»¶å¥åº·çŠ¶æ€ ===");
+            stats.AppendLine("\n=== ×é¼ş½¡¿µ×´Ì¬ ===");
             foreach (var kvp in componentHealthMap)
             {
                 var health = kvp.Value;
-                var status = health.isWorking ? "æ­£å¸¸" : "å¼‚å¸¸";
-                stats.AppendLine($"{health.componentName}: {status} (å“åº”æ—¶é—´: {health.responseTime:F3}ç§’)");
+                var status = health.isWorking ? "Õı³£" : "Òì³£";
+                stats.AppendLine($"{health.componentName}: {status} (ÏìÓ¦Ê±¼ä: {health.responseTime:F3}Ãë)");
                 if (!string.IsNullOrEmpty(health.lastError))
                 {
-                    stats.AppendLine($"  æœ€åé”™è¯¯: {health.lastError}");
+                    stats.AppendLine($"  ×îºó´íÎó: {health.lastError}");
                 }
             }
 
             if (enablePerformanceMonitoring)
             {
-                stats.AppendLine("\n=== æ€§èƒ½ç»Ÿè®¡ ===");
-                stats.AppendLine($"æ€»ä¿å­˜æ“ä½œ: {performanceStats.totalSaveOperations}");
-                stats.AppendLine($"æˆåŠŸä¿å­˜: {performanceStats.successfulSaves}");
-                stats.AppendLine($"æ€»åŠ è½½æ“ä½œ: {performanceStats.totalLoadOperations}");
-                stats.AppendLine($"æˆåŠŸåŠ è½½: {performanceStats.successfulLoads}");
-                stats.AppendLine($"å¹³å‡ä¿å­˜æ—¶é—´: {performanceStats.averageSaveTime:F3}ç§’");
-                stats.AppendLine($"å¹³å‡åŠ è½½æ—¶é—´: {performanceStats.averageLoadTime:F3}ç§’");
-                stats.AppendLine($"æœ€åæ“ä½œæ—¶é—´: {performanceStats.lastOperationTime}");
+                stats.AppendLine("\n=== ĞÔÄÜÍ³¼Æ ===");
+                stats.AppendLine($"×Ü±£´æ²Ù×÷: {performanceStats.totalSaveOperations}");
+                stats.AppendLine($"³É¹¦±£´æ: {performanceStats.successfulSaves}");
+                stats.AppendLine($"×Ü¼ÓÔØ²Ù×÷: {performanceStats.totalLoadOperations}");
+                stats.AppendLine($"³É¹¦¼ÓÔØ: {performanceStats.successfulLoads}");
+                stats.AppendLine($"Æ½¾ù±£´æÊ±¼ä: {performanceStats.averageSaveTime:F3}Ãë");
+                stats.AppendLine($"Æ½¾ù¼ÓÔØÊ±¼ä: {performanceStats.averageLoadTime:F3}Ãë");
+                stats.AppendLine($"×îºó²Ù×÷Ê±¼ä: {performanceStats.lastOperationTime}");
             }
 
             return stats.ToString();
         }
 
         /// <summary>
-        /// é‡ç½®æ€§èƒ½ç»Ÿè®¡
+        /// ÖØÖÃĞÔÄÜÍ³¼Æ
         /// </summary>
         public void ResetPerformanceStats()
         {
             performanceStats = new PerformanceStats();
-            LogDebug("æ€§èƒ½ç»Ÿè®¡å·²é‡ç½®");
+            LogDebug("ĞÔÄÜÍ³¼ÆÒÑÖØÖÃ");
         }
 
         /// <summary>
-        /// å¯ç”¨/ç¦ç”¨å¢å¼ºåŠŸèƒ½
+        /// ÆôÓÃ/½ûÓÃÔöÇ¿¹¦ÄÜ
         /// </summary>
         public void SetEnhancedFeatures(bool enableSave, bool enableLoad)
         {
             enableEnhancedSave = enableSave;
             enableEnhancedLoad = enableLoad;
-            LogDebug($"å¢å¼ºåŠŸèƒ½è®¾ç½®: ä¿å­˜={enableSave}, åŠ è½½={enableLoad}");
+            LogDebug($"ÔöÇ¿¹¦ÄÜÉèÖÃ: ±£´æ={enableSave}, ¼ÓÔØ={enableLoad}");
         }
         #endregion
 
-        #region è°ƒè¯•æ–¹æ³•
+        #region µ÷ÊÔ·½·¨
         /// <summary>
-        /// è¾“å‡ºè°ƒè¯•æ—¥å¿—
+        /// Êä³öµ÷ÊÔÈÕÖ¾
         /// </summary>
         private void LogDebug(string message)
         {
@@ -1143,7 +1143,7 @@ namespace InventorySystem.SaveSystem
         }
 
         /// <summary>
-        /// è¾“å‡ºé”™è¯¯æ—¥å¿—
+        /// Êä³ö´íÎóÈÕÖ¾
         /// </summary>
         private void LogError(string message)
         {
@@ -1151,7 +1151,7 @@ namespace InventorySystem.SaveSystem
         }
 
         /// <summary>
-        /// è·å–å·²æ³¨å†Œçš„å¯ä¿å­˜å¯¹è±¡
+        /// »ñÈ¡ÒÑ×¢²áµÄ¿É±£´æ¶ÔÏó
         /// </summary>
         private Dictionary<string, ISaveable> GetRegisteredSaveableObjects()
         {
@@ -1159,7 +1159,7 @@ namespace InventorySystem.SaveSystem
 
             if (saveManager != null)
             {
-                // é€šè¿‡åå°„è·å–SaveManagerä¸­çš„æ³¨å†Œå¯¹è±¡
+                // Í¨¹ı·´Éä»ñÈ¡SaveManagerÖĞµÄ×¢²á¶ÔÏó
                 try
                 {
                     var saveManagerType = typeof(SaveManager);
@@ -1180,7 +1180,7 @@ namespace InventorySystem.SaveSystem
                 }
                 catch (Exception ex)
                 {
-                    LogError($"è·å–æ³¨å†Œå¯¹è±¡æ—¶å‘ç”Ÿå¼‚å¸¸: {ex.Message}");
+                    LogError($"»ñÈ¡×¢²á¶ÔÏóÊ±·¢ÉúÒì³£: {ex.Message}");
                 }
             }
 

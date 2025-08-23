@@ -1,103 +1,103 @@
-# 动态网格监控器算法设计文档
+# ��̬���������㷨����ĵ�
 
-## 概述
+## ����
 
-动态网格监控器使用了一套**三重数据结构优化算法**来高效记录和查询网格占用情况，实现了实时的网格状态监控和可视化显示。
+��̬��������ʹ����һ��**�������ݽṹ�Ż��㷨**����Ч��¼�Ͳ�ѯ����ռ�������ʵ����ʵʱ������״̬��غͿ��ӻ���ʾ��
 
-## 核心算法架构
+## �����㷨�ܹ�
 
-### 1. 数据结构设计
+### 1. ���ݽṹ���
 
-#### 1.1 三重数据结构
+#### 1.1 �������ݽṹ
 
-系统采用三种互补的数据结构来存储网格占用状态：
+ϵͳ�������ֻ��������ݽṹ���洢����ռ��״̬��
 
 ```csharp
-// 核心数据结构
-protected bool[,] gridOccupancy;          // 二维布尔数组 - 直接状态存储
-protected int[,] prefixSum;               // 二维前缀和数组 - 快速区域查询
-protected HashSet<Vector2Int> occupiedCells; // 哈希集合 - 快速单点查询
+// �������ݽṹ
+protected bool[,] gridOccupancy;          // ��ά�������� - ֱ��״̬�洢
+protected int[,] prefixSum;               // ��άǰ׺������ - ���������ѯ
+protected HashSet<Vector2Int> occupiedCells; // ��ϣ���� - ���ٵ����ѯ
 ```
 
-#### 1.2 数据结构特性对比
+#### 1.2 ���ݽṹ���ԶԱ�
 
-| 数据结构 | 空间复杂度 | 单点查询 | 区域查询 | 占用率计算 | 更新复杂度 |
-|---------|-----------|---------|---------|-----------|----------|
-| bool[,] | O(w×h) | O(1) | O(w×h) | O(w×h) | O(1) |
-| int[,] prefixSum | O((w+1)×(h+1)) | O(1) | O(1) | O(1) | O(w×h) |
-| HashSet<Vector2Int> | O(占用格子数) | O(1) | O(占用格子数) | O(1) | O(1) |
+| ���ݽṹ            | �ռ临�Ӷ�     | �����ѯ | �����ѯ      | ռ���ʼ��� | ���¸��Ӷ� |
+| ------------------- | -------------- | -------- | ------------- | ---------- | ---------- |
+| bool[,]             | O(w��h)         | O(1)     | O(w��h)        | O(w��h)     | O(1)       |
+| int[,] prefixSum    | O((w+1)��(h+1)) | O(1)     | O(1)          | O(1)       | O(w��h)     |
+| HashSet<Vector2Int> | O(ռ�ø�����)  | O(1)     | O(ռ�ø�����) | O(1)       | O(1)       |
 
-### 2. 初始化算法
+### 2. ��ʼ���㷨
 
-#### 2.1 网格数组初始化
+#### 2.1 ���������ʼ��
 
 ```csharp
 protected virtual void InitializeGridArrays()
 {
-    // 初始化布尔数组 - 记录每个格子的占用状态
+    // ��ʼ���������� - ��¼ÿ�����ӵ�ռ��״̬
     gridOccupancy = new bool[width, height];
-    
-    // 初始化前缀和数组 - 多分配一行一列用于边界处理
+
+    // ��ʼ��ǰ׺������ - �����һ��һ�����ڱ߽紦��
     prefixSum = new int[width + 1, height + 1];
-    
-    // 初始化哈希集合 - 存储被占用格子的坐标
+
+    // ��ʼ����ϣ���� - �洢��ռ�ø��ӵ�����
     occupiedCells = new HashSet<Vector2Int>();
 }
 ```
 
-#### 2.2 初始化时机
+#### 2.2 ��ʼ��ʱ��
 
-- **Awake阶段**: 加载默认网格配置
-- **Start阶段**: 初始化数据结构和保存系统
-- **OnValidate阶段**: 处理编辑器中的参数变更
+- **Awake �׶�**: ����Ĭ����������
+- **Start �׶�**: ��ʼ�����ݽṹ�ͱ���ϵͳ
+- **OnValidate �׶�**: �����༭���еĲ������
 
-### 3. 占用状态更新算法
+### 3. ռ��״̬�����㷨
 
-#### 3.1 核心更新方法
+#### 3.1 ���ĸ��·���
 
 ```csharp
 protected virtual void MarkGridOccupied(Vector2Int position, Vector2Int size, bool occupied)
 {
-    // 遍历物品覆盖的所有格子
+    // ������Ʒ���ǵ����и���
     for (int x = position.x; x < position.x + size.x; x++)
     {
         for (int y = position.y; y < position.y + size.y; y++)
         {
-            // 1. 更新布尔数组
+            // 1. ���²�������
             gridOccupancy[x, y] = occupied;
 
-            // 2. 更新哈希集合
+            // 2. ���¹�ϣ����
             Vector2Int cell = new Vector2Int(x, y);
             if (occupied)
             {
-                occupiedCells.Add(cell);     // 添加占用格子
+                occupiedCells.Add(cell);     // ����ռ�ø���
             }
             else
             {
-                occupiedCells.Remove(cell);  // 移除占用格子
+                occupiedCells.Remove(cell);  // �Ƴ�ռ�ø���
             }
         }
     }
 
-    // 3. 重新计算前缀和数组
+    // 3. ���¼���ǰ׺������
     UpdatePrefixSum();
 }
 ```
 
-#### 3.2 更新算法特点
+#### 3.2 �����㷨�ص�
 
-- **同步更新**: 三种数据结构同时更新，保证数据一致性
-- **增量更新**: 只更新物品覆盖的格子，避免全量更新
-- **延迟计算**: 前缀和数组在所有格子更新完成后统一重算
+- **ͬ������**: �������ݽṹͬʱ���£���֤����һ����
+- **��������**: ֻ������Ʒ���ǵĸ��ӣ�����ȫ������
+- **�ӳټ���**: ǰ׺�����������и��Ӹ�����ɺ�ͳһ����
 
-### 4. 前缀和优化算法
+### 4. ǰ׺���Ż��㷨
 
-#### 4.1 二维前缀和计算
+#### 4.1 ��άǰ׺�ͼ���
 
 ```csharp
 protected virtual void UpdatePrefixSum()
 {
-    // 1. 重置前缀和数组
+    // 1. ����ǰ׺������
     for (int i = 0; i <= width; i++)
     {
         for (int j = 0; j <= height; j++)
@@ -106,43 +106,44 @@ protected virtual void UpdatePrefixSum()
         }
     }
 
-    // 2. 计算前缀和
+    // 2. ����ǰ׺��
     for (int i = 1; i <= width; i++)
     {
         for (int j = 1; j <= height; j++)
         {
             int cellValue = gridOccupancy[i - 1, j - 1] ? 1 : 0;
-            prefixSum[i, j] = cellValue + prefixSum[i - 1, j] + 
+            prefixSum[i, j] = cellValue + prefixSum[i - 1, j] +
                              prefixSum[i, j - 1] - prefixSum[i - 1, j - 1];
         }
     }
 }
 ```
 
-#### 4.2 前缀和算法原理
+#### 4.2 ǰ׺���㷨ԭ��
 
-前缀和数组`prefixSum[i][j]`存储从`(0,0)`到`(i-1,j-1)`矩形区域内所有占用格子的总数。
+ǰ׺������`prefixSum[i][j]`�洢��`(0,0)`��`(i-1,j-1)`��������������ռ�ø��ӵ�������
 
-**递推公式**:
+**���ƹ�ʽ**:
+
 ```
 prefixSum[i][j] = cellValue + prefixSum[i-1][j] + prefixSum[i][j-1] - prefixSum[i-1][j-1]
 ```
 
-### 5. 快速查询算法
+### 5. ���ٲ�ѯ�㷨
 
-#### 5.1 O(1)区域占用检测
+#### 5.1 O(1)����ռ�ü��
 
 ```csharp
 public virtual bool CanPlaceItemFast(Vector2Int position, Vector2Int size)
 {
-    // 边界检查
+    // �߽���
     if (position.x < 0 || position.y < 0 ||
         position.x + size.x > width || position.y + size.y > height)
     {
         return false;
     }
 
-    // 使用二维前缀和进行O(1)查询
+    // ʹ�ö�άǰ׺�ͽ���O(1)��ѯ
     int x1 = position.x, y1 = position.y;
     int x2 = position.x + size.x - 1, y2 = position.y + size.y - 1;
 
@@ -155,53 +156,53 @@ public virtual bool CanPlaceItemFast(Vector2Int position, Vector2Int size)
 }
 ```
 
-#### 5.2 区域查询公式推导
+#### 5.2 �����ѯ��ʽ�Ƶ�
 
-对于矩形区域`(x1,y1)`到`(x2,y2)`，占用格子数计算公式：
+���ھ�������`(x1,y1)`��`(x2,y2)`��ռ�ø��������㹫ʽ��
 
 ```
 occupiedCount = S(x2+1, y2+1) - S(x1, y2+1) - S(x2+1, y1) + S(x1, y1)
 ```
 
-其中`S(i,j) = prefixSum[i][j]`表示从`(0,0)`到`(i-1,j-1)`的前缀和。
+����`S(i,j) = prefixSum[i][j]`��ʾ��`(0,0)`��`(i-1,j-1)`��ǰ׺�͡�
 
-### 6. 性能优化策略
+### 6. �����Ż�����
 
-#### 6.1 时间复杂度分析
+#### 6.1 ʱ�临�Ӷȷ���
 
-| 操作类型 | 传统方法 | 优化后方法 | 性能提升 |
-|---------|---------|-----------|----------|
-| 单格子查询 | O(1) | O(1) | 无变化 |
-| 区域占用检测 | O(w×h) | O(1) | 显著提升 |
-| 占用率计算 | O(w×h) | O(1) | 显著提升 |
-| 状态更新 | O(物品大小) | O(w×h) | 略有下降 |
+| ��������     | ��ͳ����    | �Ż��󷽷� | �������� |
+| ------------ | ----------- | ---------- | -------- |
+| �����Ӳ�ѯ   | O(1)        | O(1)       | �ޱ仯   |
+| ����ռ�ü�� | O(w��h)      | O(1)       | �������� |
+| ռ���ʼ���   | O(w��h)      | O(1)       | �������� |
+| ״̬����     | O(��Ʒ��С) | O(w��h)     | �����½� |
 
-#### 6.2 空间复杂度权衡
+#### 6.2 �ռ临�Ӷ�Ȩ��
 
-- **额外空间开销**: 约2倍原始网格大小
-- **性能收益**: 查询操作从O(n?)降至O(1)
-- **适用场景**: 查询频繁、更新相对较少的场景
+- **����ռ俪��**: Լ 2 ��ԭʼ�����С
+- **��������**: ��ѯ������ O(n?)���� O(1)
+- **���ó���**: ��ѯƵ����������Խ��ٵĳ���
 
-### 7. 可视化渲染算法
+### 7. ���ӻ���Ⱦ�㷨
 
-#### 7.1 网格绘制流程
+#### 7.1 �����������
 
 ```csharp
 private void DrawGridVisualization(BaseItemGrid grid, Vector2Int gridSize)
 {
-    // 1. 获取占用状态数据
+    // 1. ��ȡռ��״̬����
     bool[,] occupancy = grid.GetGridOccupancy();
-    
-    // 2. 计算显示尺寸
+
+    // 2. ������ʾ�ߴ�
     float maxDisplaySize = 150f;
     float cellDisplaySize = Mathf.Min(maxDisplaySize / Mathf.Max(gridSize.x, gridSize.y), 8f);
     cellDisplaySize = Mathf.Max(cellDisplaySize, 2f);
-    
-    // 3. 绘制网格背景
+
+    // 3. �������񱳾�
     Rect gridRect = GUILayoutUtility.GetRect(gridSize.x * cellDisplaySize, gridSize.y * cellDisplaySize);
     EditorGUI.DrawRect(gridRect, new Color(0.3f, 0.3f, 0.3f, 1f));
-    
-    // 4. 绘制每个格子
+
+    // 4. ����ÿ������
     for (int y = 0; y < gridSize.y; y++)
     {
         for (int x = 0; x < gridSize.x; x++)
@@ -212,51 +213,51 @@ private void DrawGridVisualization(BaseItemGrid grid, Vector2Int gridSize)
                 cellDisplaySize - 1f,
                 cellDisplaySize - 1f
             );
-            
-            // 根据占用状态选择颜色
+
+            // ����ռ��״̬ѡ����ɫ
             Color cellColor = occupancy[x, y] ? Color.red : Color.white;
             EditorGUI.DrawRect(cellRect, cellColor);
         }
     }
-    
-    // 5. 绘制网格线
+
+    // 5. ����������
     DrawGridLines(gridRect, gridSize, cellDisplaySize);
 }
 ```
 
-#### 7.2 自适应显示算法
+#### 7.2 ����Ӧ��ʾ�㷨
 
-- **尺寸计算**: 根据网格大小自动调整显示尺寸
-- **最大限制**: 防止大网格占用过多屏幕空间
-- **最小保证**: 确保小网格仍然可见
+- **�ߴ����**: ���������С�Զ�������ʾ�ߴ�
+- **�������**: ��ֹ������ռ�ù�����Ļ�ռ�
+- **��С��֤**: ȷ��С������Ȼ�ɼ�
 
-### 8. 算法优势总结
+### 8. �㷨�����ܽ�
 
-#### 8.1 性能优势
+#### 8.1 ��������
 
-1. **查询效率**: O(1)时间复杂度的区域查询
-2. **内存优化**: 三种数据结构各司其职，避免冗余计算
-3. **实时响应**: 支持实时的网格状态监控
+1. **��ѯЧ��**: O(1)ʱ�临�Ӷȵ������ѯ
+2. **�ڴ��Ż�**: �������ݽṹ��˾��ְ�������������
+3. **ʵʱ��Ӧ**: ֧��ʵʱ������״̬���
 
-#### 8.2 扩展性优势
+#### 8.2 ��չ������
 
-1. **模块化设计**: 各算法模块独立，易于维护
-2. **接口统一**: 提供统一的查询接口
-3. **可视化支持**: 内置可视化渲染支持
+1. **ģ�黯���**: ���㷨ģ�����������ά��
+2. **�ӿ�ͳһ**: �ṩͳһ�Ĳ�ѯ�ӿ�
+3. **���ӻ�֧��**: ���ÿ��ӻ���Ⱦ֧��
 
-#### 8.3 适用场景
+#### 8.3 ���ó���
 
-- **库存管理系统**: 快速检测物品放置位置
-- **地图编辑器**: 实时显示地块占用状态
-- **游戏背包系统**: 高效的物品排列算法
-- **资源分配系统**: 快速查找可用空间
+- **������ϵͳ**: ���ټ����Ʒ����λ��
+- **��ͼ�༭��**: ʵʱ��ʾ�ؿ�ռ��״̬
+- **��Ϸ����ϵͳ**: ��Ч����Ʒ�����㷨
+- **��Դ����ϵͳ**: ���ٲ��ҿ��ÿռ�
 
-## 结论
+## ����
 
-该算法设计通过三重数据结构的协同工作，实现了高效的网格占用状态管理。在保证查询性能的同时，提供了完整的可视化支持，为Unity游戏开发中的网格系统提供了强有力的技术支撑。
+���㷨���ͨ���������ݽṹ��Эͬ������ʵ���˸�Ч������ռ��״̬�������ڱ�֤��ѯ���ܵ�ͬʱ���ṩ�������Ŀ��ӻ�֧�֣�Ϊ Unity ��Ϸ�����е�����ϵͳ�ṩ��ǿ�����ļ���֧�š�
 
 ---
 
-*文档版本: 1.0*  
-*创建日期: 2024年*  
-*适用项目: TPS v0.1-1 Unity项目*
+_�ĵ��汾: 1.0_  
+_��������: 2024 ��_  
+_������Ŀ: TPS v0.1-1 Unity ��Ŀ_

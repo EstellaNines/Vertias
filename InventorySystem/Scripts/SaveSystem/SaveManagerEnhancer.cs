@@ -8,13 +8,13 @@ using Newtonsoft.Json;
 namespace InventorySystem.SaveSystem
 {
     /// <summary>
-    /// ä¿å­˜ç®¡ç†å™¨å¢å¼ºå™¨
-    /// ä¸ºç°æœ‰SaveManageræä¾›äº‹åŠ¡æ€§ä¿å­˜ã€æ•°æ®éªŒè¯å’Œå®Œæ•´æ€§æ£€æŸ¥åŠŸèƒ½
-    /// é‡‡ç”¨éä¾µå…¥å¼è®¾è®¡ï¼Œé€šè¿‡ç»„åˆæ¨¡å¼æ‰©å±•ç°æœ‰åŠŸèƒ½
+    /// ±£´æ¹ÜÀíÆ÷ÔöÇ¿Æ÷
+    /// ÎªÏÖÓĞSaveManagerÌá¹©ÊÂÎñĞÔ±£´æ¡¢Êı¾İÑéÖ¤ºÍÍêÕûĞÔ¼ì²é¹¦ÄÜ
+    /// ²ÉÓÃ·ÇÇÖÈëÊ½Éè¼Æ£¬Í¨¹ı×éºÏÄ£Ê½À©Õ¹ÏÖÓĞ¹¦ÄÜ
     /// </summary>
     public class SaveManagerEnhancer : MonoBehaviour
     {
-        #region å•ä¾‹æ¨¡å¼
+        #region µ¥ÀıÄ£Ê½
         private static SaveManagerEnhancer _instance;
         public static SaveManagerEnhancer Instance
         {
@@ -28,7 +28,7 @@ namespace InventorySystem.SaveSystem
                         GameObject go = new GameObject("SaveManagerEnhancer");
                         _instance = go.AddComponent<SaveManagerEnhancer>();
 
-                        // è®¾ç½®ä¸ºSaveSystemçš„å­å¯¹è±¡
+                        // ÉèÖÃÎªSaveSystemµÄ×Ó¶ÔÏó
                         var saveSystemPersistence = FindObjectOfType<SaveSystemPersistence>();
                         if (saveSystemPersistence != null)
                         {
@@ -41,40 +41,40 @@ namespace InventorySystem.SaveSystem
         }
         #endregion
 
-        #region é…ç½®å­—æ®µ
-        [Header("å¢å¼ºåŠŸèƒ½é…ç½®")]
+        #region ÅäÖÃ×Ö¶Î
+        [Header("ÔöÇ¿¹¦ÄÜÅäÖÃ")]
         [SerializeField]
-        [Tooltip("æ˜¯å¦å¯ç”¨äº‹åŠ¡æ€§ä¿å­˜")]
+        [Tooltip("ÊÇ·ñÆôÓÃÊÂÎñĞÔ±£´æ")]
         private bool enableTransactionalSave = true;
 
         [SerializeField]
-        [Tooltip("æ˜¯å¦å¯ç”¨ä¿å­˜å‰éªŒè¯")]
+        [Tooltip("ÊÇ·ñÆôÓÃ±£´æÇ°ÑéÖ¤")]
         private bool enablePreSaveValidation = true;
 
         [SerializeField]
-        [Tooltip("æ˜¯å¦å¯ç”¨ä¿å­˜åéªŒè¯")]
+        [Tooltip("ÊÇ·ñÆôÓÃ±£´æºóÑéÖ¤")]
         private bool enablePostSaveValidation = true;
 
         [SerializeField]
-        [Tooltip("æ˜¯å¦å¯ç”¨å®Œæ•´æ€§æ£€æŸ¥")]
+        [Tooltip("ÊÇ·ñÆôÓÃÍêÕûĞÔ¼ì²é")]
         private bool enableIntegrityCheck = true;
 
         [SerializeField]
-        [Tooltip("æ˜¯å¦å¯ç”¨è‡ªåŠ¨å›æ»š")]
+        [Tooltip("ÊÇ·ñÆôÓÃ×Ô¶¯»Ø¹ö")]
         private bool enableAutoRollback = true;
 
         [SerializeField]
-        [Tooltip("ä¿å­˜è¶…æ—¶æ—¶é—´ï¼ˆç§’ï¼‰")]
+        [Tooltip("±£´æ³¬Ê±Ê±¼ä£¨Ãë£©")]
         private float saveTimeout = 30f;
 
         [SerializeField]
-        [Tooltip("æ˜¯å¦å¯ç”¨è°ƒè¯•æ—¥å¿—")]
+        [Tooltip("ÊÇ·ñÆôÓÃµ÷ÊÔÈÕÖ¾")]
         private bool enableDebugLog = true;
         #endregion
 
-        #region æ•°æ®ç»“æ„
+        #region Êı¾İ½á¹¹
         /// <summary>
-        /// å¢å¼ºä¿å­˜ç»“æœ
+        /// ÔöÇ¿±£´æ½á¹û
         /// </summary>
         [System.Serializable]
         public class EnhancedSaveResult
@@ -99,13 +99,13 @@ namespace InventorySystem.SaveSystem
         }
 
         /// <summary>
-        /// å¢å¼ºåŠ è½½ç»“æœ
+        /// ÔöÇ¿¼ÓÔØ½á¹û
         /// </summary>
         [System.Serializable]
         public class EnhancedLoadResult
         {
             public bool success;
-            // æ³¨é‡Šæ‰ä¸å­˜åœ¨çš„LoadResultç±»å‹
+            // ×¢ÊÍµô²»´æÔÚµÄLoadResultÀàĞÍ
             // public SaveManager.LoadResult originalResult;
             public SaveDataValidator.ValidationResult validationResult;
             public SaveDataIntegrityChecker.IntegrityCheckResult integrityResult;
@@ -123,7 +123,7 @@ namespace InventorySystem.SaveSystem
         }
 
         /// <summary>
-        /// ä¿å­˜æ“ä½œçŠ¶æ€
+        /// ±£´æ²Ù×÷×´Ì¬
         /// </summary>
         public enum SaveOperationStatus
         {
@@ -137,7 +137,7 @@ namespace InventorySystem.SaveSystem
         }
         #endregion
 
-        #region ç§æœ‰å­—æ®µ
+        #region Ë½ÓĞ×Ö¶Î
         private SaveManager saveManager;
         private SaveDataValidator validator;
         private SaveDataIntegrityChecker integrityChecker;
@@ -150,8 +150,8 @@ namespace InventorySystem.SaveSystem
         private Dictionary<string, EnhancedLoadResult> loadHistory;
         #endregion
 
-        #region äº‹ä»¶å®šä¹‰
-        // å¢å¼ºä¿å­˜äº‹ä»¶
+        #region ÊÂ¼ş¶¨Òå
+        // ÔöÇ¿±£´æÊÂ¼ş
         public event Action<EnhancedSaveResult> OnEnhancedSaveComplete;
         public event Action<EnhancedLoadResult> OnEnhancedLoadComplete;
         public event Action<SaveOperationStatus> OnSaveStatusChanged;
@@ -160,10 +160,10 @@ namespace InventorySystem.SaveSystem
         public event Action<string> OnSaveError;
         #endregion
 
-        #region Unityç”Ÿå‘½å‘¨æœŸ
+        #region UnityÉúÃüÖÜÆÚ
         private void Awake()
         {
-            // ç¡®ä¿å•ä¾‹å”¯ä¸€æ€§
+            // È·±£µ¥ÀıÎ¨Ò»ĞÔ
             if (_instance != null && _instance != this)
             {
                 Destroy(gameObject);
@@ -176,7 +176,7 @@ namespace InventorySystem.SaveSystem
 
         private void OnDestroy()
         {
-            // æ¸…ç†å½“å‰æ“ä½œ
+            // ÇåÀíµ±Ç°²Ù×÷
             if (currentSaveOperation != null)
             {
                 StopCoroutine(currentSaveOperation);
@@ -189,39 +189,39 @@ namespace InventorySystem.SaveSystem
         }
         #endregion
 
-        #region åˆå§‹åŒ–
+        #region ³õÊ¼»¯
         /// <summary>
-        /// åˆå§‹åŒ–å¢å¼ºå™¨
+        /// ³õÊ¼»¯ÔöÇ¿Æ÷
         /// </summary>
         private void InitializeEnhancer()
         {
             saveHistory = new Dictionary<string, EnhancedSaveResult>();
             loadHistory = new Dictionary<string, EnhancedLoadResult>();
 
-            // è·å–ä¾èµ–ç»„ä»¶
+            // »ñÈ¡ÒÀÀµ×é¼ş
             saveManager = SaveManager.Instance;
             validator = SaveDataValidator.Instance;
             integrityChecker = SaveDataIntegrityChecker.Instance;
             transactionManager = SaveTransactionManager.Instance;
 
-            LogDebug("SaveManagerEnhancerå·²åˆå§‹åŒ–");
+            LogDebug("SaveManagerEnhancerÒÑ³õÊ¼»¯");
         }
         #endregion
 
-        #region ä¸»è¦å¢å¼ºæ–¹æ³•
+        #region Ö÷ÒªÔöÇ¿·½·¨
         /// <summary>
-        /// æ‰§è¡Œå¢å¼ºä¿å­˜
+        /// Ö´ĞĞÔöÇ¿±£´æ
         /// </summary>
-        /// <param name="saveSlot">ä¿å­˜æ§½ä½</param>
-        /// <param name="onComplete">å®Œæˆå›è°ƒ</param>
-        /// <returns>æ“ä½œåç¨‹</returns>
+        /// <param name="saveSlot">±£´æ²ÛÎ»</param>
+        /// <param name="onComplete">Íê³É»Øµ÷</param>
+        /// <returns>²Ù×÷Ğ­³Ì</returns>
         public Coroutine PerformEnhancedSave(string saveSlot = "default", Action<EnhancedSaveResult> onComplete = null)
         {
             if (currentStatus != SaveOperationStatus.Idle)
             {
                 var errorResult = new EnhancedSaveResult();
                 errorResult.success = false;
-                errorResult.errors.Add("å¦ä¸€ä¸ªä¿å­˜æ“ä½œæ­£åœ¨è¿›è¡Œä¸­");
+                errorResult.errors.Add("ÁíÒ»¸ö±£´æ²Ù×÷ÕıÔÚ½øĞĞÖĞ");
                 onComplete?.Invoke(errorResult);
                 return null;
             }
@@ -231,18 +231,18 @@ namespace InventorySystem.SaveSystem
         }
 
         /// <summary>
-        /// æ‰§è¡Œå¢å¼ºåŠ è½½
+        /// Ö´ĞĞÔöÇ¿¼ÓÔØ
         /// </summary>
-        /// <param name="saveSlot">ä¿å­˜æ§½ä½</param>
-        /// <param name="onComplete">å®Œæˆå›è°ƒ</param>
-        /// <returns>æ“ä½œåç¨‹</returns>
+        /// <param name="saveSlot">±£´æ²ÛÎ»</param>
+        /// <param name="onComplete">Íê³É»Øµ÷</param>
+        /// <returns>²Ù×÷Ğ­³Ì</returns>
         public Coroutine PerformEnhancedLoad(string saveSlot = "default", Action<EnhancedLoadResult> onComplete = null)
         {
             if (currentStatus != SaveOperationStatus.Idle)
             {
                 var errorResult = new EnhancedLoadResult();
                 errorResult.success = false;
-                errorResult.errors.Add("ä¿å­˜æ“ä½œæ­£åœ¨è¿›è¡Œä¸­ï¼Œæ— æ³•åŠ è½½");
+                errorResult.errors.Add("±£´æ²Ù×÷ÕıÔÚ½øĞĞÖĞ£¬ÎŞ·¨¼ÓÔØ");
                 onComplete?.Invoke(errorResult);
                 return null;
             }
@@ -251,7 +251,7 @@ namespace InventorySystem.SaveSystem
         }
 
         /// <summary>
-        /// å–æ¶ˆå½“å‰ä¿å­˜æ“ä½œ
+        /// È¡Ïûµ±Ç°±£´æ²Ù×÷
         /// </summary>
         public void CancelCurrentSave()
         {
@@ -260,34 +260,34 @@ namespace InventorySystem.SaveSystem
                 StopCoroutine(currentSaveOperation);
                 currentSaveOperation = null;
 
-                // å¦‚æœæœ‰æ´»è·ƒäº‹åŠ¡ï¼Œæ‰§è¡Œå›æ»š
+                // Èç¹ûÓĞ»îÔ¾ÊÂÎñ£¬Ö´ĞĞ»Ø¹ö
                 if (!string.IsNullOrEmpty(currentTransactionId) && enableAutoRollback)
                 {
                     transactionManager.RollbackToTransaction(currentTransactionId);
                 }
 
                 SetStatus(SaveOperationStatus.Idle);
-                LogDebug("ä¿å­˜æ“ä½œå·²å–æ¶ˆ");
+                LogDebug("±£´æ²Ù×÷ÒÑÈ¡Ïû");
             }
         }
         #endregion
 
-        #region åç¨‹å®ç°
+        #region Ğ­³ÌÊµÏÖ
         /// <summary>
-        /// å¢å¼ºä¿å­˜åç¨‹
+        /// ÔöÇ¿±£´æĞ­³Ì
         /// </summary>
         private IEnumerator EnhancedSaveCoroutine(string saveSlot, Action<EnhancedSaveResult> onComplete)
         {
             var result = new EnhancedSaveResult();
             var startTime = Time.realtimeSinceStartup;
 
-            LogDebug($"å¼€å§‹å¢å¼ºä¿å­˜æ“ä½œï¼Œæ§½ä½: {saveSlot}");
+            LogDebug($"¿ªÊ¼ÔöÇ¿±£´æ²Ù×÷£¬²ÛÎ»: {saveSlot}");
 
-            // 1. å¼€å§‹äº‹åŠ¡
+            // 1. ¿ªÊ¼ÊÂÎñ
             if (enableTransactionalSave)
             {
                 SetStatus(SaveOperationStatus.Validating);
-                OnSaveProgress?.Invoke("å¼€å§‹äº‹åŠ¡", 0.1f);
+                OnSaveProgress?.Invoke("¿ªÊ¼ÊÂÎñ", 0.1f);
 
                 var registeredObjects = GetRegisteredSaveableObjects();
                 var transactionResult = transactionManager.BeginTransactionalSave(registeredObjects);
@@ -296,7 +296,7 @@ namespace InventorySystem.SaveSystem
                 if (!transactionResult.success)
                 {
                     result.success = false;
-                    result.errors.Add($"äº‹åŠ¡å¼€å§‹å¤±è´¥: {transactionResult.message}");
+                    result.errors.Add($"ÊÂÎñ¿ªÊ¼Ê§°Ü: {transactionResult.message}");
                     SetStatus(SaveOperationStatus.Failed);
                     onComplete?.Invoke(result);
                     yield break;
@@ -306,11 +306,11 @@ namespace InventorySystem.SaveSystem
                 result.transactionId = currentTransactionId;
             }
 
-            // 2. ä¿å­˜å‰éªŒè¯
+            // 2. ±£´æÇ°ÑéÖ¤
             if (enablePreSaveValidation)
             {
                 SetStatus(SaveOperationStatus.Validating);
-                OnSaveProgress?.Invoke("ä¿å­˜å‰éªŒè¯", 0.2f);
+                OnSaveProgress?.Invoke("±£´æÇ°ÑéÖ¤", 0.2f);
 
                 var registeredObjects = GetRegisteredSaveableObjects();
                 result.preValidationResult = validator.ValidateBeforeSave(registeredObjects);
@@ -334,33 +334,33 @@ namespace InventorySystem.SaveSystem
                         yield break;
                     }
 
-                    // æ·»åŠ è­¦å‘Š
+                    // Ìí¼Ó¾¯¸æ
                     var warnings = result.preValidationResult.errors.Where(e => e.severity < SaveDataValidator.ValidationSeverity.Error).ToList();
                     result.warnings.AddRange(warnings.Select(w => w.message));
                 }
             }
 
-            // 3. æ‰§è¡Œä¿å­˜
+            // 3. Ö´ĞĞ±£´æ
             SetStatus(SaveOperationStatus.Saving);
-            OnSaveProgress?.Invoke("æ‰§è¡Œä¿å­˜", 0.5f);
+            OnSaveProgress?.Invoke("Ö´ĞĞ±£´æ", 0.5f);
 
-            // ä½¿ç”¨SaveManagerçš„SaveAllæ–¹æ³•
+            // Ê¹ÓÃSaveManagerµÄSaveAll·½·¨
             var saveCoroutine = saveManager.SaveAll(saveSlot);
             yield return saveCoroutine;
 
-            // ä¿å­˜æ“ä½œå·²å®Œæˆï¼Œæ£€æŸ¥æ˜¯å¦æˆåŠŸ
-            // ç”±äºSaveManagerçš„SaveAllæ–¹æ³•æ˜¯åç¨‹ï¼Œå½“åç¨‹å®Œæˆæ—¶ä¿å­˜å°±å·²ç»å®Œæˆ
-            // è¿™é‡Œæˆ‘ä»¬å‡è®¾ä¿å­˜æˆåŠŸï¼Œå¦‚æœéœ€è¦æ›´ç²¾ç¡®çš„é”™è¯¯æ£€æµ‹ï¼Œå¯ä»¥ç›‘å¬SaveManagerçš„äº‹ä»¶
+            // ±£´æ²Ù×÷ÒÑÍê³É£¬¼ì²éÊÇ·ñ³É¹¦
+            // ÓÉÓÚSaveManagerµÄSaveAll·½·¨ÊÇĞ­³Ì£¬µ±Ğ­³ÌÍê³ÉÊ±±£´æ¾ÍÒÑ¾­Íê³É
+            // ÕâÀïÎÒÃÇ¼ÙÉè±£´æ³É¹¦£¬Èç¹ûĞèÒª¸ü¾«È·µÄ´íÎó¼ì²â£¬¿ÉÒÔ¼àÌıSaveManagerµÄÊÂ¼ş
             result.success = true;
 
-            // ä¿å­˜æˆåŠŸ
-            LogDebug($"ä¿å­˜æ“ä½œå®Œæˆ: {saveSlot}");
+            // ±£´æ³É¹¦
+            LogDebug($"±£´æ²Ù×÷Íê³É: {saveSlot}");
 
-            // 4. ä¿å­˜åéªŒè¯å’Œå®Œæ•´æ€§æ£€æŸ¥
+            // 4. ±£´æºóÑéÖ¤ºÍÍêÕûĞÔ¼ì²é
             if (enablePostSaveValidation || enableIntegrityCheck)
             {
                 SetStatus(SaveOperationStatus.VerifyingIntegrity);
-                OnSaveProgress?.Invoke("éªŒè¯ä¿å­˜ç»“æœ", 0.8f);
+                OnSaveProgress?.Invoke("ÑéÖ¤±£´æ½á¹û", 0.8f);
 
                 var registeredObjects = GetRegisteredSaveableObjects();
 
@@ -373,7 +373,7 @@ namespace InventorySystem.SaveSystem
                         var criticalErrors = result.postValidationResult.errors.Where(e => e.severity >= SaveDataValidator.ValidationSeverity.Error).ToList();
                         if (criticalErrors.Any())
                         {
-                            result.warnings.Add("ä¿å­˜åéªŒè¯å‘ç°é—®é¢˜ï¼Œä½†ä¿å­˜å·²å®Œæˆ");
+                            result.warnings.Add("±£´æºóÑéÖ¤·¢ÏÖÎÊÌâ£¬µ«±£´æÒÑÍê³É");
                             result.warnings.AddRange(criticalErrors.Select(e => e.message));
                         }
                     }
@@ -385,20 +385,20 @@ namespace InventorySystem.SaveSystem
 
                     if (!result.integrityResult.isIntact)
                     {
-                        result.warnings.Add("å®Œæ•´æ€§æ£€æŸ¥å‘ç°é—®é¢˜ï¼Œä½†ä¿å­˜å·²å®Œæˆ");
+                        result.warnings.Add("ÍêÕûĞÔ¼ì²é·¢ÏÖÎÊÌâ£¬µ«±£´æÒÑÍê³É");
                         var criticalIssues = result.integrityResult.issues.Where(i => i.severity >= SaveDataIntegrityChecker.IssueSeverity.Error).ToList();
                         result.warnings.AddRange(criticalIssues.Select(i => i.description));
                     }
                 }
             }
 
-            // 5. å®Œæˆäº‹åŠ¡
+            // 5. Íê³ÉÊÂÎñ
             if (enableTransactionalSave && !string.IsNullOrEmpty(currentTransactionId))
             {
                 SetStatus(SaveOperationStatus.Completing);
-                OnSaveProgress?.Invoke("å®Œæˆäº‹åŠ¡", 0.9f);
+                OnSaveProgress?.Invoke("Íê³ÉÊÂÎñ", 0.9f);
 
-                // äº‹åŠ¡ä¼šè‡ªåŠ¨æäº¤ï¼Œè¿™é‡Œåªæ˜¯æ¸…ç†
+                // ÊÂÎñ»á×Ô¶¯Ìá½»£¬ÕâÀïÖ»ÊÇÇåÀí
                 currentTransactionId = null;
             }
 
@@ -406,14 +406,14 @@ namespace InventorySystem.SaveSystem
             result.totalTime = Time.realtimeSinceStartup - startTime;
 
             SetStatus(SaveOperationStatus.Idle);
-            OnSaveProgress?.Invoke("ä¿å­˜å®Œæˆ", 1.0f);
+            OnSaveProgress?.Invoke("±£´æÍê³É", 1.0f);
 
-            LogDebug($"å¢å¼ºä¿å­˜å®Œæˆï¼Œè€—æ—¶: {result.totalTime:F2}ç§’");
+            LogDebug($"ÔöÇ¿±£´æÍê³É£¬ºÄÊ±: {result.totalTime:F2}Ãë");
 
-            // è®°å½•ä¿å­˜å†å²
+            // ¼ÇÂ¼±£´æÀúÊ·
             saveHistory[saveSlot] = result;
 
-            // è§¦å‘äº‹ä»¶
+            // ´¥·¢ÊÂ¼ş
             OnEnhancedSaveComplete?.Invoke(result);
             onComplete?.Invoke(result);
 
@@ -427,34 +427,34 @@ namespace InventorySystem.SaveSystem
         }
 
         /// <summary>
-        /// å¢å¼ºåŠ è½½åç¨‹
+        /// ÔöÇ¿¼ÓÔØĞ­³Ì
         /// </summary>
         private IEnumerator EnhancedLoadCoroutine(string saveSlot, Action<EnhancedLoadResult> onComplete)
         {
             var result = new EnhancedLoadResult();
             var startTime = Time.realtimeSinceStartup;
 
-            LogDebug($"å¼€å§‹å¢å¼ºåŠ è½½æ“ä½œï¼Œæ§½ä½: {saveSlot}");
+            LogDebug($"¿ªÊ¼ÔöÇ¿¼ÓÔØ²Ù×÷£¬²ÛÎ»: {saveSlot}");
 
-            // 1. æ‰§è¡ŒåŠ è½½
-            OnSaveProgress?.Invoke("æ‰§è¡ŒåŠ è½½", 0.3f);
+            // 1. Ö´ĞĞ¼ÓÔØ
+            OnSaveProgress?.Invoke("Ö´ĞĞ¼ÓÔØ", 0.3f);
 
-            // ä½¿ç”¨SaveManagerçš„LoadSaveæ–¹æ³•
+            // Ê¹ÓÃSaveManagerµÄLoadSave·½·¨
             var loadCoroutine = saveManager.LoadSave(saveSlot);
             yield return loadCoroutine;
 
-            // åŠ è½½æ“ä½œå·²å®Œæˆï¼Œæ£€æŸ¥æ˜¯å¦æˆåŠŸ
-            // ç”±äºSaveManagerçš„LoadSaveæ–¹æ³•æ˜¯åç¨‹ï¼Œå½“åç¨‹å®Œæˆæ—¶åŠ è½½å°±å·²ç»å®Œæˆ
-            // è¿™é‡Œæˆ‘ä»¬å‡è®¾åŠ è½½æˆåŠŸï¼Œå¦‚æœéœ€è¦æ›´ç²¾ç¡®çš„é”™è¯¯æ£€æµ‹ï¼Œå¯ä»¥ç›‘å¬SaveManagerçš„äº‹ä»¶
+            // ¼ÓÔØ²Ù×÷ÒÑÍê³É£¬¼ì²éÊÇ·ñ³É¹¦
+            // ÓÉÓÚSaveManagerµÄLoadSave·½·¨ÊÇĞ­³Ì£¬µ±Ğ­³ÌÍê³ÉÊ±¼ÓÔØ¾ÍÒÑ¾­Íê³É
+            // ÕâÀïÎÒÃÇ¼ÙÉè¼ÓÔØ³É¹¦£¬Èç¹ûĞèÒª¸ü¾«È·µÄ´íÎó¼ì²â£¬¿ÉÒÔ¼àÌıSaveManagerµÄÊÂ¼ş
             result.success = true;
 
-            // åŠ è½½æˆåŠŸ
-            LogDebug($"åŠ è½½æ“ä½œå®Œæˆ: {saveSlot}");
+            // ¼ÓÔØ³É¹¦
+            LogDebug($"¼ÓÔØ²Ù×÷Íê³É: {saveSlot}");
 
-            // 2. åŠ è½½åéªŒè¯
+            // 2. ¼ÓÔØºóÑéÖ¤
             if (enablePostSaveValidation)
             {
-                OnSaveProgress?.Invoke("åŠ è½½åéªŒè¯", 0.7f);
+                OnSaveProgress?.Invoke("¼ÓÔØºóÑéÖ¤", 0.7f);
 
                 var registeredObjects = GetRegisteredSaveableObjects();
                 result.validationResult = validator.ValidateAfterLoad(registeredObjects);
@@ -464,23 +464,23 @@ namespace InventorySystem.SaveSystem
                     var criticalErrors = result.validationResult.errors.Where(e => e.severity >= SaveDataValidator.ValidationSeverity.Error).ToList();
                     if (criticalErrors.Any())
                     {
-                        result.warnings.Add("åŠ è½½åéªŒè¯å‘ç°é—®é¢˜");
+                        result.warnings.Add("¼ÓÔØºóÑéÖ¤·¢ÏÖÎÊÌâ");
                         result.warnings.AddRange(criticalErrors.Select(e => e.message));
                     }
                 }
             }
 
-            // 3. å®Œæ•´æ€§æ£€æŸ¥
+            // 3. ÍêÕûĞÔ¼ì²é
             if (enableIntegrityCheck)
             {
-                OnSaveProgress?.Invoke("å®Œæ•´æ€§æ£€æŸ¥", 0.9f);
+                OnSaveProgress?.Invoke("ÍêÕûĞÔ¼ì²é", 0.9f);
 
                 var registeredObjects = GetRegisteredSaveableObjects();
                 result.integrityResult = integrityChecker.PerformIntegrityCheck(registeredObjects);
 
                 if (!result.integrityResult.isIntact)
                 {
-                    result.warnings.Add("å®Œæ•´æ€§æ£€æŸ¥å‘ç°é—®é¢˜");
+                    result.warnings.Add("ÍêÕûĞÔ¼ì²é·¢ÏÖÎÊÌâ");
                     var criticalIssues = result.integrityResult.issues.Where(i => i.severity >= SaveDataIntegrityChecker.IssueSeverity.Error).ToList();
                     result.warnings.AddRange(criticalIssues.Select(i => i.description));
                 }
@@ -489,21 +489,21 @@ namespace InventorySystem.SaveSystem
             result.success = true;
             result.totalTime = Time.realtimeSinceStartup - startTime;
 
-            OnSaveProgress?.Invoke("åŠ è½½å®Œæˆ", 1.0f);
-            LogDebug($"å¢å¼ºåŠ è½½å®Œæˆï¼Œè€—æ—¶: {result.totalTime:F2}ç§’");
+            OnSaveProgress?.Invoke("¼ÓÔØÍê³É", 1.0f);
+            LogDebug($"ÔöÇ¿¼ÓÔØÍê³É£¬ºÄÊ±: {result.totalTime:F2}Ãë");
 
-            // è®°å½•åŠ è½½å†å²
+            // ¼ÇÂ¼¼ÓÔØÀúÊ·
             loadHistory[saveSlot] = result;
 
-            // è§¦å‘äº‹ä»¶
+            // ´¥·¢ÊÂ¼ş
             OnEnhancedLoadComplete?.Invoke(result);
             onComplete?.Invoke(result);
         }
         #endregion
 
-        #region è¾…åŠ©æ–¹æ³•
+        #region ¸¨Öú·½·¨
         /// <summary>
-        /// è®¾ç½®æ“ä½œçŠ¶æ€
+        /// ÉèÖÃ²Ù×÷×´Ì¬
         /// </summary>
         private void SetStatus(SaveOperationStatus status)
         {
@@ -511,19 +511,19 @@ namespace InventorySystem.SaveSystem
             {
                 currentStatus = status;
                 OnSaveStatusChanged?.Invoke(status);
-                LogDebug($"ä¿å­˜çŠ¶æ€å˜æ›´: {status}");
+                LogDebug($"±£´æ×´Ì¬±ä¸ü: {status}");
             }
         }
 
         /// <summary>
-        /// è·å–å·²æ³¨å†Œçš„å¯ä¿å­˜å¯¹è±¡
+        /// »ñÈ¡ÒÑ×¢²áµÄ¿É±£´æ¶ÔÏó
         /// </summary>
         private Dictionary<string, ISaveable> GetRegisteredSaveableObjects()
         {
             var objects = new Dictionary<string, ISaveable>();
 
-            // é€šè¿‡åå°„è·å–SaveManagerä¸­çš„æ³¨å†Œå¯¹è±¡
-            // è¿™é‡Œéœ€è¦æ ¹æ®SaveManagerçš„å…·ä½“å®ç°æ¥è°ƒæ•´
+            // Í¨¹ı·´Éä»ñÈ¡SaveManagerÖĞµÄ×¢²á¶ÔÏó
+            // ÕâÀïĞèÒª¸ù¾İSaveManagerµÄ¾ßÌåÊµÏÖÀ´µ÷Õû
             try
             {
                 var saveManagerType = typeof(SaveManager);
@@ -544,16 +544,16 @@ namespace InventorySystem.SaveSystem
             }
             catch (Exception ex)
             {
-                LogError($"è·å–æ³¨å†Œå¯¹è±¡æ—¶å‘ç”Ÿå¼‚å¸¸: {ex.Message}");
+                LogError($"»ñÈ¡×¢²á¶ÔÏóÊ±·¢ÉúÒì³£: {ex.Message}");
             }
 
             return objects;
         }
         #endregion
 
-        #region å…¬å…±æŸ¥è¯¢æ–¹æ³•
+        #region ¹«¹²²éÑ¯·½·¨
         /// <summary>
-        /// è·å–å½“å‰æ“ä½œçŠ¶æ€
+        /// »ñÈ¡µ±Ç°²Ù×÷×´Ì¬
         /// </summary>
         public SaveOperationStatus GetCurrentStatus()
         {
@@ -561,7 +561,7 @@ namespace InventorySystem.SaveSystem
         }
 
         /// <summary>
-        /// è·å–ä¿å­˜å†å²
+        /// »ñÈ¡±£´æÀúÊ·
         /// </summary>
         public Dictionary<string, EnhancedSaveResult> GetSaveHistory()
         {
@@ -569,7 +569,7 @@ namespace InventorySystem.SaveSystem
         }
 
         /// <summary>
-        /// è·å–åŠ è½½å†å²
+        /// »ñÈ¡¼ÓÔØÀúÊ·
         /// </summary>
         public Dictionary<string, EnhancedLoadResult> GetLoadHistory()
         {
@@ -577,7 +577,7 @@ namespace InventorySystem.SaveSystem
         }
 
         /// <summary>
-        /// è·å–æœ€è¿‘çš„ä¿å­˜ç»“æœ
+        /// »ñÈ¡×î½üµÄ±£´æ½á¹û
         /// </summary>
         public EnhancedSaveResult GetLastSaveResult(string saveSlot = "default")
         {
@@ -585,7 +585,7 @@ namespace InventorySystem.SaveSystem
         }
 
         /// <summary>
-        /// è·å–æœ€è¿‘çš„åŠ è½½ç»“æœ
+        /// »ñÈ¡×î½üµÄ¼ÓÔØ½á¹û
         /// </summary>
         public EnhancedLoadResult GetLastLoadResult(string saveSlot = "default")
         {
@@ -593,38 +593,38 @@ namespace InventorySystem.SaveSystem
         }
 
         /// <summary>
-        /// æ¸…é™¤å†å²è®°å½•
+        /// Çå³ıÀúÊ·¼ÇÂ¼
         /// </summary>
         public void ClearHistory()
         {
             saveHistory.Clear();
             loadHistory.Clear();
-            LogDebug("å·²æ¸…é™¤æ‰€æœ‰å†å²è®°å½•");
+            LogDebug("ÒÑÇå³ıËùÓĞÀúÊ·¼ÇÂ¼");
         }
 
         /// <summary>
-        /// è·å–å¢å¼ºå™¨ç»Ÿè®¡ä¿¡æ¯
+        /// »ñÈ¡ÔöÇ¿Æ÷Í³¼ÆĞÅÏ¢
         /// </summary>
         public string GetEnhancerStatistics()
         {
             var stats = new System.Text.StringBuilder();
-            stats.AppendLine("=== ä¿å­˜ç®¡ç†å™¨å¢å¼ºå™¨ç»Ÿè®¡ä¿¡æ¯ ===");
-            stats.AppendLine($"äº‹åŠ¡æ€§ä¿å­˜: {(enableTransactionalSave ? "å¯ç”¨" : "ç¦ç”¨")}");
-            stats.AppendLine($"ä¿å­˜å‰éªŒè¯: {(enablePreSaveValidation ? "å¯ç”¨" : "ç¦ç”¨")}");
-            stats.AppendLine($"ä¿å­˜åéªŒè¯: {(enablePostSaveValidation ? "å¯ç”¨" : "ç¦ç”¨")}");
-            stats.AppendLine($"å®Œæ•´æ€§æ£€æŸ¥: {(enableIntegrityCheck ? "å¯ç”¨" : "ç¦ç”¨")}");
-            stats.AppendLine($"è‡ªåŠ¨å›æ»š: {(enableAutoRollback ? "å¯ç”¨" : "ç¦ç”¨")}");
-            stats.AppendLine($"å½“å‰çŠ¶æ€: {currentStatus}");
-            stats.AppendLine($"ä¿å­˜å†å²è®°å½•æ•°: {saveHistory.Count}");
-            stats.AppendLine($"åŠ è½½å†å²è®°å½•æ•°: {loadHistory.Count}");
-            stats.AppendLine($"ä¿å­˜è¶…æ—¶æ—¶é—´: {saveTimeout}ç§’");
+            stats.AppendLine("=== ±£´æ¹ÜÀíÆ÷ÔöÇ¿Æ÷Í³¼ÆĞÅÏ¢ ===");
+            stats.AppendLine($"ÊÂÎñĞÔ±£´æ: {(enableTransactionalSave ? "ÆôÓÃ" : "½ûÓÃ")}");
+            stats.AppendLine($"±£´æÇ°ÑéÖ¤: {(enablePreSaveValidation ? "ÆôÓÃ" : "½ûÓÃ")}");
+            stats.AppendLine($"±£´æºóÑéÖ¤: {(enablePostSaveValidation ? "ÆôÓÃ" : "½ûÓÃ")}");
+            stats.AppendLine($"ÍêÕûĞÔ¼ì²é: {(enableIntegrityCheck ? "ÆôÓÃ" : "½ûÓÃ")}");
+            stats.AppendLine($"×Ô¶¯»Ø¹ö: {(enableAutoRollback ? "ÆôÓÃ" : "½ûÓÃ")}");
+            stats.AppendLine($"µ±Ç°×´Ì¬: {currentStatus}");
+            stats.AppendLine($"±£´æÀúÊ·¼ÇÂ¼Êı: {saveHistory.Count}");
+            stats.AppendLine($"¼ÓÔØÀúÊ·¼ÇÂ¼Êı: {loadHistory.Count}");
+            stats.AppendLine($"±£´æ³¬Ê±Ê±¼ä: {saveTimeout}Ãë");
             return stats.ToString();
         }
         #endregion
 
-        #region è°ƒè¯•æ–¹æ³•
+        #region µ÷ÊÔ·½·¨
         /// <summary>
-        /// è¾“å‡ºè°ƒè¯•æ—¥å¿—
+        /// Êä³öµ÷ÊÔÈÕÖ¾
         /// </summary>
         private void LogDebug(string message)
         {
@@ -635,7 +635,7 @@ namespace InventorySystem.SaveSystem
         }
 
         /// <summary>
-        /// è¾“å‡ºé”™è¯¯æ—¥å¿—
+        /// Êä³ö´íÎóÈÕÖ¾
         /// </summary>
         private void LogError(string message)
         {

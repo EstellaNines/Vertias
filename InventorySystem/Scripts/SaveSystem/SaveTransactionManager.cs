@@ -8,13 +8,13 @@ using Newtonsoft.Json;
 namespace InventorySystem.SaveSystem
 {
     /// <summary>
-    /// ä¿å­˜äº‹åŠ¡ç®¡ç†å™¨
-    /// æä¾›äº‹åŠ¡æ€§ä¿å­˜æ“ä½œï¼Œæ”¯æŒå›æ»šå’ŒåŸå­æ€§ä¿è¯
-    /// é‡‡ç”¨éä¾µå…¥å¼è®¾è®¡ï¼Œæ‰©å±•ç°æœ‰ä¿å­˜ç³»ç»ŸåŠŸèƒ½
+    /// ±£´æÊÂÎñ¹ÜÀíÆ÷
+    /// Ìá¹©ÊÂÎñĞÔ±£´æ²Ù×÷£¬Ö§³Ö»Ø¹öºÍÔ­×ÓĞÔ±£Ö¤
+    /// ²ÉÓÃ·ÇÇÖÈëÊ½Éè¼Æ£¬À©Õ¹ÏÖÓĞ±£´æÏµÍ³¹¦ÄÜ
     /// </summary>
     public class SaveTransactionManager : MonoBehaviour
     {
-        #region å•ä¾‹æ¨¡å¼
+        #region µ¥ÀıÄ£Ê½
         private static SaveTransactionManager _instance;
         public static SaveTransactionManager Instance
         {
@@ -28,7 +28,7 @@ namespace InventorySystem.SaveSystem
                         GameObject go = new GameObject("SaveTransactionManager");
                         _instance = go.AddComponent<SaveTransactionManager>();
 
-                        // è®¾ç½®ä¸ºSaveSystemçš„å­å¯¹è±¡
+                        // ÉèÖÃÎªSaveSystemµÄ×Ó¶ÔÏó
                         var saveSystemPersistence = FindObjectOfType<SaveSystemPersistence>();
                         if (saveSystemPersistence != null)
                         {
@@ -41,32 +41,32 @@ namespace InventorySystem.SaveSystem
         }
         #endregion
 
-        #region é…ç½®å­—æ®µ
-        [Header("äº‹åŠ¡é…ç½®")]
+        #region ÅäÖÃ×Ö¶Î
+        [Header("ÊÂÎñÅäÖÃ")]
         [SerializeField]
-        [Tooltip("æ˜¯å¦å¯ç”¨äº‹åŠ¡æ€§ä¿å­˜")]
+        [Tooltip("ÊÇ·ñÆôÓÃÊÂÎñĞÔ±£´æ")]
         private bool enableTransactionalSave = true;
 
         [SerializeField]
-        [Tooltip("æœ€å¤§å¤‡ä»½ä¿ç•™æ•°é‡")]
+        [Tooltip("×î´ó±¸·İ±£ÁôÊıÁ¿")]
         private int maxBackupCount = 5;
 
         [SerializeField]
-        [Tooltip("äº‹åŠ¡è¶…æ—¶æ—¶é—´ï¼ˆç§’ï¼‰")]
+        [Tooltip("ÊÂÎñ³¬Ê±Ê±¼ä£¨Ãë£©")]
         private float transactionTimeout = 30f;
 
         [SerializeField]
-        [Tooltip("æ˜¯å¦å¯ç”¨è‡ªåŠ¨å›æ»š")]
+        [Tooltip("ÊÇ·ñÆôÓÃ×Ô¶¯»Ø¹ö")]
         private bool enableAutoRollback = true;
 
         [SerializeField]
-        [Tooltip("æ˜¯å¦å¯ç”¨è°ƒè¯•æ—¥å¿—")]
+        [Tooltip("ÊÇ·ñÆôÓÃµ÷ÊÔÈÕÖ¾")]
         private bool enableDebugLog = true;
         #endregion
 
-        #region äº‹åŠ¡æ•°æ®ç»“æ„
+        #region ÊÂÎñÊı¾İ½á¹¹
         /// <summary>
-        /// ä¿å­˜äº‹åŠ¡
+        /// ±£´æÊÂÎñ
         /// </summary>
         [System.Serializable]
         public class SaveTransaction
@@ -94,23 +94,23 @@ namespace InventorySystem.SaveSystem
         }
 
         /// <summary>
-        /// äº‹åŠ¡çŠ¶æ€
+        /// ÊÂÎñ×´Ì¬
         /// </summary>
         public enum TransactionStatus
         {
-            Pending,        // å¾…å¤„ç†
-            InProgress,     // è¿›è¡Œä¸­
-            Validating,     // éªŒè¯ä¸­
-            Committing,     // æäº¤ä¸­
-            Committed,      // å·²æäº¤
-            RollingBack,    // å›æ»šä¸­
-            RolledBack,     // å·²å›æ»š
-            Failed,         // å¤±è´¥
-            Timeout         // è¶…æ—¶
+            Pending,        // ´ı´¦Àí
+            InProgress,     // ½øĞĞÖĞ
+            Validating,     // ÑéÖ¤ÖĞ
+            Committing,     // Ìá½»ÖĞ
+            Committed,      // ÒÑÌá½»
+            RollingBack,    // »Ø¹öÖĞ
+            RolledBack,     // ÒÑ»Ø¹ö
+            Failed,         // Ê§°Ü
+            Timeout         // ³¬Ê±
         }
 
         /// <summary>
-        /// äº‹åŠ¡ç»“æœ
+        /// ÊÂÎñ½á¹û
         /// </summary>
         [System.Serializable]
         public class TransactionResult
@@ -132,15 +132,15 @@ namespace InventorySystem.SaveSystem
         }
         #endregion
 
-        #region ç§æœ‰å­—æ®µ
+        #region Ë½ÓĞ×Ö¶Î
         private Dictionary<string, SaveTransaction> activeTransactions;
         private Queue<string> transactionHistory;
         private SaveDataValidator validator;
         private SaveManager saveManager;
         #endregion
 
-        #region äº‹ä»¶å®šä¹‰
-        // äº‹åŠ¡äº‹ä»¶
+        #region ÊÂ¼ş¶¨Òå
+        // ÊÂÎñÊÂ¼ş
         public event Action<SaveTransaction> OnTransactionStarted;
         public event Action<SaveTransaction> OnTransactionCompleted;
         public event Action<SaveTransaction> OnTransactionFailed;
@@ -148,10 +148,10 @@ namespace InventorySystem.SaveSystem
         public event Action<string, float> OnTransactionProgress;
         #endregion
 
-        #region Unityç”Ÿå‘½å‘¨æœŸ
+        #region UnityÉúÃüÖÜÆÚ
         private void Awake()
         {
-            // ç¡®ä¿å•ä¾‹å”¯ä¸€æ€§
+            // È·±£µ¥ÀıÎ¨Ò»ĞÔ
             if (_instance != null && _instance != this)
             {
                 Destroy(gameObject);
@@ -164,46 +164,46 @@ namespace InventorySystem.SaveSystem
 
         private void Update()
         {
-            // æ£€æŸ¥äº‹åŠ¡è¶…æ—¶
+            // ¼ì²éÊÂÎñ³¬Ê±
             CheckTransactionTimeouts();
         }
 
         private void OnDestroy()
         {
-            // æ¸…ç†æ´»è·ƒäº‹åŠ¡
+            // ÇåÀí»îÔ¾ÊÂÎñ
             CleanupActiveTransactions();
         }
         #endregion
 
-        #region åˆå§‹åŒ–
+        #region ³õÊ¼»¯
         /// <summary>
-        /// åˆå§‹åŒ–äº‹åŠ¡ç®¡ç†å™¨
+        /// ³õÊ¼»¯ÊÂÎñ¹ÜÀíÆ÷
         /// </summary>
         private void InitializeTransactionManager()
         {
             activeTransactions = new Dictionary<string, SaveTransaction>();
             transactionHistory = new Queue<string>();
 
-            // è·å–ä¾èµ–ç»„ä»¶
+            // »ñÈ¡ÒÀÀµ×é¼ş
             validator = SaveDataValidator.Instance;
             saveManager = SaveManager.Instance;
 
-            LogDebug("SaveTransactionManagerå·²åˆå§‹åŒ–");
+            LogDebug("SaveTransactionManagerÒÑ³õÊ¼»¯");
         }
         #endregion
 
-        #region ä¸»è¦äº‹åŠ¡æ–¹æ³•
+        #region Ö÷ÒªÊÂÎñ·½·¨
         /// <summary>
-        /// å¼€å§‹äº‹åŠ¡æ€§ä¿å­˜
+        /// ¿ªÊ¼ÊÂÎñĞÔ±£´æ
         /// </summary>
-        /// <param name="saveableObjects">è¦ä¿å­˜çš„å¯¹è±¡</param>
-        /// <returns>äº‹åŠ¡ç»“æœ</returns>
+        /// <param name="saveableObjects">Òª±£´æµÄ¶ÔÏó</param>
+        /// <returns>ÊÂÎñ½á¹û</returns>
         public TransactionResult BeginTransactionalSave(Dictionary<string, ISaveable> saveableObjects)
         {
             if (!enableTransactionalSave)
             {
-                LogDebug("äº‹åŠ¡æ€§ä¿å­˜å·²ç¦ç”¨ï¼Œä½¿ç”¨æ ‡å‡†ä¿å­˜æµç¨‹");
-                return CreateSimpleTransactionResult(false, "äº‹åŠ¡æ€§ä¿å­˜å·²ç¦ç”¨");
+                LogDebug("ÊÂÎñĞÔ±£´æÒÑ½ûÓÃ£¬Ê¹ÓÃ±ê×¼±£´æÁ÷³Ì");
+                return CreateSimpleTransactionResult(false, "ÊÂÎñĞÔ±£´æÒÑ½ûÓÃ");
             }
 
             var transaction = new SaveTransaction();
@@ -212,56 +212,56 @@ namespace InventorySystem.SaveSystem
 
             try
             {
-                LogDebug($"å¼€å§‹äº‹åŠ¡æ€§ä¿å­˜ï¼Œäº‹åŠ¡ID: {transaction.transactionId}");
+                LogDebug($"¿ªÊ¼ÊÂÎñĞÔ±£´æ£¬ÊÂÎñID: {transaction.transactionId}");
 
-                // 1. æ³¨å†Œäº‹åŠ¡
+                // 1. ×¢²áÊÂÎñ
                 activeTransactions[transaction.transactionId] = transaction;
                 transaction.status = TransactionStatus.InProgress;
                 OnTransactionStarted?.Invoke(transaction);
 
-                // 2. åˆ›å»ºå¤‡ä»½
+                // 2. ´´½¨±¸·İ
                 if (!CreateBackup(transaction, saveableObjects))
                 {
-                    return RollbackTransaction(transaction, "åˆ›å»ºå¤‡ä»½å¤±è´¥");
+                    return RollbackTransaction(transaction, "´´½¨±¸·İÊ§°Ü");
                 }
 
-                // 3. éªŒè¯æ•°æ®
+                // 3. ÑéÖ¤Êı¾İ
                 transaction.status = TransactionStatus.Validating;
                 var validationResult = validator.ValidateBeforeSave(saveableObjects);
                 if (!validationResult.isValid)
                 {
-                    var errorMsg = $"æ•°æ®éªŒè¯å¤±è´¥: {string.Join(", ", validationResult.errors.Select(e => e.message))}";
+                    var errorMsg = $"Êı¾İÑéÖ¤Ê§°Ü: {string.Join(", ", validationResult.errors.Select(e => e.message))}";
                     return RollbackTransaction(transaction, errorMsg);
                 }
 
-                // 4. æ‰§è¡Œä¿å­˜
+                // 4. Ö´ĞĞ±£´æ
                 transaction.status = TransactionStatus.Committing;
                 if (!ExecuteSave(transaction, saveableObjects))
                 {
-                    return RollbackTransaction(transaction, "ä¿å­˜æ‰§è¡Œå¤±è´¥");
+                    return RollbackTransaction(transaction, "±£´æÖ´ĞĞÊ§°Ü");
                 }
 
-                // 5. éªŒè¯ä¿å­˜ç»“æœ
+                // 5. ÑéÖ¤±£´æ½á¹û
                 if (!ValidateSaveResult(transaction, saveableObjects))
                 {
-                    return RollbackTransaction(transaction, "ä¿å­˜ç»“æœéªŒè¯å¤±è´¥");
+                    return RollbackTransaction(transaction, "±£´æ½á¹ûÑéÖ¤Ê§°Ü");
                 }
 
-                // 6. æäº¤äº‹åŠ¡
+                // 6. Ìá½»ÊÂÎñ
                 return CommitTransaction(transaction, saveableObjects.Count);
             }
             catch (Exception ex)
             {
-                LogError($"äº‹åŠ¡æ€§ä¿å­˜è¿‡ç¨‹ä¸­å‘ç”Ÿå¼‚å¸¸: {ex.Message}");
-                return RollbackTransaction(transaction, $"å¼‚å¸¸: {ex.Message}");
+                LogError($"ÊÂÎñĞÔ±£´æ¹ı³ÌÖĞ·¢ÉúÒì³£: {ex.Message}");
+                return RollbackTransaction(transaction, $"Òì³£: {ex.Message}");
             }
         }
 
         /// <summary>
-        /// å›æ»šåˆ°æŒ‡å®šäº‹åŠ¡
+        /// »Ø¹öµ½Ö¸¶¨ÊÂÎñ
         /// </summary>
-        /// <param name="transactionId">äº‹åŠ¡ID</param>
-        /// <returns>å›æ»šç»“æœ</returns>
+        /// <param name="transactionId">ÊÂÎñID</param>
+        /// <returns>»Ø¹ö½á¹û</returns>
         public TransactionResult RollbackToTransaction(string transactionId)
         {
             var result = new TransactionResult();
@@ -269,47 +269,47 @@ namespace InventorySystem.SaveSystem
 
             try
             {
-                LogDebug($"å¼€å§‹å›æ»šåˆ°äº‹åŠ¡: {transactionId}");
+                LogDebug($"¿ªÊ¼»Ø¹öµ½ÊÂÎñ: {transactionId}");
 
-                // æŸ¥æ‰¾äº‹åŠ¡è®°å½•
+                // ²éÕÒÊÂÎñ¼ÇÂ¼
                 if (!activeTransactions.ContainsKey(transactionId))
                 {
                     result.success = false;
-                    result.message = "æœªæ‰¾åˆ°æŒ‡å®šçš„äº‹åŠ¡è®°å½•";
+                    result.message = "Î´ÕÒµ½Ö¸¶¨µÄÊÂÎñ¼ÇÂ¼";
                     return result;
                 }
 
                 var transaction = activeTransactions[transactionId];
-                return RollbackTransaction(transaction, "ç”¨æˆ·è¯·æ±‚å›æ»š");
+                return RollbackTransaction(transaction, "ÓÃ»§ÇëÇó»Ø¹ö");
             }
             catch (Exception ex)
             {
-                LogError($"å›æ»šè¿‡ç¨‹ä¸­å‘ç”Ÿå¼‚å¸¸: {ex.Message}");
+                LogError($"»Ø¹ö¹ı³ÌÖĞ·¢ÉúÒì³£: {ex.Message}");
                 result.success = false;
-                result.message = $"å›æ»šå¼‚å¸¸: {ex.Message}";
+                result.message = $"»Ø¹öÒì³£: {ex.Message}";
                 return result;
             }
         }
         #endregion
 
-        #region äº‹åŠ¡æ“ä½œå®ç°
+        #region ÊÂÎñ²Ù×÷ÊµÏÖ
         /// <summary>
-        /// åˆ›å»ºå¤‡ä»½
+        /// ´´½¨±¸·İ
         /// </summary>
         private bool CreateBackup(SaveTransaction transaction, Dictionary<string, ISaveable> saveableObjects)
         {
             try
             {
-                LogDebug($"ä¸ºäº‹åŠ¡ {transaction.transactionId} åˆ›å»ºå¤‡ä»½");
+                LogDebug($"ÎªÊÂÎñ {transaction.transactionId} ´´½¨±¸·İ");
 
-                // è·å–å½“å‰ä¿å­˜æ•°æ®
+                // »ñÈ¡µ±Ç°±£´æÊı¾İ
                 foreach (var kvp in saveableObjects)
                 {
                     var saveData = kvp.Value.SerializeToJson();
                     transaction.originalData[kvp.Key] = saveData;
                 }
 
-                // åˆ›å»ºæ–‡ä»¶å¤‡ä»½
+                // ´´½¨ÎÄ¼ş±¸·İ
                 var saveFilePath = GetCurrentSaveFilePath();
                 if (File.Exists(saveFilePath))
                 {
@@ -317,80 +317,80 @@ namespace InventorySystem.SaveSystem
                     transaction.backupFiles.Add(backupPath);
                 }
 
-                LogDebug($"å¤‡ä»½åˆ›å»ºå®Œæˆï¼Œå¤‡ä»½æ–‡ä»¶æ•°: {transaction.backupFiles.Count}");
+                LogDebug($"±¸·İ´´½¨Íê³É£¬±¸·İÎÄ¼şÊı: {transaction.backupFiles.Count}");
                 return true;
             }
             catch (Exception ex)
             {
-                LogError($"åˆ›å»ºå¤‡ä»½å¤±è´¥: {ex.Message}");
-                transaction.errorMessage = $"å¤‡ä»½å¤±è´¥: {ex.Message}";
+                LogError($"´´½¨±¸·İÊ§°Ü: {ex.Message}");
+                transaction.errorMessage = $"±¸·İÊ§°Ü: {ex.Message}";
                 return false;
             }
         }
 
         /// <summary>
-        /// æ‰§è¡Œä¿å­˜
+        /// Ö´ĞĞ±£´æ
         /// </summary>
         private bool ExecuteSave(SaveTransaction transaction, Dictionary<string, ISaveable> saveableObjects)
         {
             try
             {
-                LogDebug($"æ‰§è¡Œäº‹åŠ¡ {transaction.transactionId} çš„ä¿å­˜æ“ä½œ");
+                LogDebug($"Ö´ĞĞÊÂÎñ {transaction.transactionId} µÄ±£´æ²Ù×÷");
 
-                // æ”¶é›†æ–°æ•°æ®
+                // ÊÕ¼¯ĞÂÊı¾İ
                 foreach (var kvp in saveableObjects)
                 {
                     var saveData = kvp.Value.SerializeToJson();
                     transaction.newData[kvp.Key] = saveData;
                 }
 
-                // è§¦å‘ä¿å­˜ç®¡ç†å™¨çš„ä¿å­˜æ“ä½œ
+                // ´¥·¢±£´æ¹ÜÀíÆ÷µÄ±£´æ²Ù×÷
                 saveManager.SaveAll("transaction_save");
 
-                // ç­‰å¾…ä¿å­˜å®Œæˆï¼ˆè¿™é‡Œå¯ä»¥æ ¹æ®å®é™…æƒ…å†µè°ƒæ•´ï¼‰
-                // åœ¨å®é™…å®ç°ä¸­ï¼Œå¯èƒ½éœ€è¦ç›‘å¬SaveManagerçš„ä¿å­˜å®Œæˆäº‹ä»¶
+                // µÈ´ı±£´æÍê³É£¨ÕâÀï¿ÉÒÔ¸ù¾İÊµ¼ÊÇé¿öµ÷Õû£©
+                // ÔÚÊµ¼ÊÊµÏÖÖĞ£¬¿ÉÄÜĞèÒª¼àÌıSaveManagerµÄ±£´æÍê³ÉÊÂ¼ş
 
-                LogDebug($"äº‹åŠ¡ {transaction.transactionId} ä¿å­˜æ“ä½œå®Œæˆ");
+                LogDebug($"ÊÂÎñ {transaction.transactionId} ±£´æ²Ù×÷Íê³É");
                 return true;
             }
             catch (Exception ex)
             {
-                LogError($"æ‰§è¡Œä¿å­˜å¤±è´¥: {ex.Message}");
-                transaction.errorMessage = $"ä¿å­˜å¤±è´¥: {ex.Message}";
+                LogError($"Ö´ĞĞ±£´æÊ§°Ü: {ex.Message}");
+                transaction.errorMessage = $"±£´æÊ§°Ü: {ex.Message}";
                 return false;
             }
         }
 
         /// <summary>
-        /// éªŒè¯ä¿å­˜ç»“æœ
+        /// ÑéÖ¤±£´æ½á¹û
         /// </summary>
         private bool ValidateSaveResult(SaveTransaction transaction, Dictionary<string, ISaveable> saveableObjects)
         {
             try
             {
-                LogDebug($"éªŒè¯äº‹åŠ¡ {transaction.transactionId} çš„ä¿å­˜ç»“æœ");
+                LogDebug($"ÑéÖ¤ÊÂÎñ {transaction.transactionId} µÄ±£´æ½á¹û");
 
-                // é‡æ–°åŠ è½½æ•°æ®è¿›è¡ŒéªŒè¯
+                // ÖØĞÂ¼ÓÔØÊı¾İ½øĞĞÑéÖ¤
                 var validationResult = validator.ValidateAfterLoad(saveableObjects);
                 if (!validationResult.isValid)
                 {
-                    transaction.errorMessage = $"ä¿å­˜ç»“æœéªŒè¯å¤±è´¥: {string.Join(", ", validationResult.errors.Select(e => e.message))}";
+                    transaction.errorMessage = $"±£´æ½á¹ûÑéÖ¤Ê§°Ü: {string.Join(", ", validationResult.errors.Select(e => e.message))}";
                     return false;
                 }
 
-                LogDebug($"äº‹åŠ¡ {transaction.transactionId} ä¿å­˜ç»“æœéªŒè¯é€šè¿‡");
+                LogDebug($"ÊÂÎñ {transaction.transactionId} ±£´æ½á¹ûÑéÖ¤Í¨¹ı");
                 return true;
             }
             catch (Exception ex)
             {
-                LogError($"éªŒè¯ä¿å­˜ç»“æœå¤±è´¥: {ex.Message}");
-                transaction.errorMessage = $"éªŒè¯å¤±è´¥: {ex.Message}";
+                LogError($"ÑéÖ¤±£´æ½á¹ûÊ§°Ü: {ex.Message}");
+                transaction.errorMessage = $"ÑéÖ¤Ê§°Ü: {ex.Message}";
                 return false;
             }
         }
 
         /// <summary>
-        /// æäº¤äº‹åŠ¡
+        /// Ìá½»ÊÂÎñ
         /// </summary>
         private TransactionResult CommitTransaction(SaveTransaction transaction, int objectCount)
         {
@@ -405,12 +405,12 @@ namespace InventorySystem.SaveSystem
                 result.objectsProcessed = objectCount;
                 result.success = true;
                 result.finalStatus = TransactionStatus.Committed;
-                result.message = "äº‹åŠ¡æäº¤æˆåŠŸ";
+                result.message = "ÊÂÎñÌá½»³É¹¦";
 
-                // æ¸…ç†æ—§å¤‡ä»½
+                // ÇåÀí¾É±¸·İ
                 CleanupOldBackups();
 
-                // ç§»åŠ¨åˆ°å†å²è®°å½•
+                // ÒÆ¶¯µ½ÀúÊ·¼ÇÂ¼
                 transactionHistory.Enqueue(transaction.transactionId);
                 if (transactionHistory.Count > maxBackupCount)
                 {
@@ -418,13 +418,13 @@ namespace InventorySystem.SaveSystem
                 }
 
                 OnTransactionCompleted?.Invoke(transaction);
-                LogDebug($"äº‹åŠ¡ {transaction.transactionId} æäº¤æˆåŠŸ");
+                LogDebug($"ÊÂÎñ {transaction.transactionId} Ìá½»³É¹¦");
             }
             catch (Exception ex)
             {
-                LogError($"æäº¤äº‹åŠ¡å¤±è´¥: {ex.Message}");
+                LogError($"Ìá½»ÊÂÎñÊ§°Ü: {ex.Message}");
                 result.success = false;
-                result.message = $"æäº¤å¤±è´¥: {ex.Message}";
+                result.message = $"Ìá½»Ê§°Ü: {ex.Message}";
                 result.errors.Add(ex.Message);
             }
 
@@ -432,7 +432,7 @@ namespace InventorySystem.SaveSystem
         }
 
         /// <summary>
-        /// å›æ»šäº‹åŠ¡
+        /// »Ø¹öÊÂÎñ
         /// </summary>
         private TransactionResult RollbackTransaction(SaveTransaction transaction, string reason)
         {
@@ -441,27 +441,27 @@ namespace InventorySystem.SaveSystem
 
             try
             {
-                LogDebug($"å¼€å§‹å›æ»šäº‹åŠ¡ {transaction.transactionId}ï¼ŒåŸå› : {reason}");
+                LogDebug($"¿ªÊ¼»Ø¹öÊÂÎñ {transaction.transactionId}£¬Ô­Òò: {reason}");
 
                 transaction.status = TransactionStatus.RollingBack;
                 transaction.errorMessage = reason;
 
-                // æ¢å¤å¤‡ä»½æ–‡ä»¶
+                // »Ö¸´±¸·İÎÄ¼ş
                 foreach (var backupFile in transaction.backupFiles)
                 {
                     if (File.Exists(backupFile))
                     {
                         var originalPath = GetOriginalPathFromBackup(backupFile);
                         File.Copy(backupFile, originalPath, true);
-                        LogDebug($"å·²æ¢å¤å¤‡ä»½æ–‡ä»¶: {backupFile} -> {originalPath}");
+                        LogDebug($"ÒÑ»Ö¸´±¸·İÎÄ¼ş: {backupFile} -> {originalPath}");
                     }
                 }
 
-                // æ¢å¤å¯¹è±¡æ•°æ®
+                // »Ö¸´¶ÔÏóÊı¾İ
                 foreach (var kvp in transaction.originalData)
                 {
-                    // è¿™é‡Œéœ€è¦æ ¹æ®å…·ä½“çš„ISaveableå®ç°æ¥æ¢å¤æ•°æ®
-                    // å¯èƒ½éœ€è¦é‡æ–°åŠ è½½æˆ–é‡ç½®å¯¹è±¡çŠ¶æ€
+                    // ÕâÀïĞèÒª¸ù¾İ¾ßÌåµÄISaveableÊµÏÖÀ´»Ö¸´Êı¾İ
+                    // ¿ÉÄÜĞèÒªÖØĞÂ¼ÓÔØ»òÖØÖÃ¶ÔÏó×´Ì¬
                 }
 
                 transaction.status = TransactionStatus.RolledBack;
@@ -469,18 +469,18 @@ namespace InventorySystem.SaveSystem
                 result.executionTime = (float)(transaction.endTime.Value - transaction.startTime).TotalSeconds;
                 result.success = false;
                 result.finalStatus = TransactionStatus.RolledBack;
-                result.message = $"äº‹åŠ¡å·²å›æ»š: {reason}";
+                result.message = $"ÊÂÎñÒÑ»Ø¹ö: {reason}";
                 result.errors.Add(reason);
 
                 OnTransactionRolledBack?.Invoke(transaction);
-                LogDebug($"äº‹åŠ¡ {transaction.transactionId} å›æ»šå®Œæˆ");
+                LogDebug($"ÊÂÎñ {transaction.transactionId} »Ø¹öÍê³É");
             }
             catch (Exception ex)
             {
-                LogError($"å›æ»šäº‹åŠ¡å¤±è´¥: {ex.Message}");
+                LogError($"»Ø¹öÊÂÎñÊ§°Ü: {ex.Message}");
                 transaction.status = TransactionStatus.Failed;
                 result.success = false;
-                result.message = $"å›æ»šå¤±è´¥: {ex.Message}";
+                result.message = $"»Ø¹öÊ§°Ü: {ex.Message}";
                 result.errors.Add(ex.Message);
                 OnTransactionFailed?.Invoke(transaction);
             }
@@ -489,9 +489,9 @@ namespace InventorySystem.SaveSystem
         }
         #endregion
 
-        #region è¾…åŠ©æ–¹æ³•
+        #region ¸¨Öú·½·¨
         /// <summary>
-        /// æ£€æŸ¥äº‹åŠ¡è¶…æ—¶
+        /// ¼ì²éÊÂÎñ³¬Ê±
         /// </summary>
         private void CheckTransactionTimeouts()
         {
@@ -512,13 +512,13 @@ namespace InventorySystem.SaveSystem
             foreach (var transactionId in timeoutTransactions)
             {
                 var transaction = activeTransactions[transactionId];
-                LogDebug($"äº‹åŠ¡ {transactionId} è¶…æ—¶ï¼Œå¼€å§‹è‡ªåŠ¨å›æ»š");
-                RollbackTransaction(transaction, "äº‹åŠ¡è¶…æ—¶");
+                LogDebug($"ÊÂÎñ {transactionId} ³¬Ê±£¬¿ªÊ¼×Ô¶¯»Ø¹ö");
+                RollbackTransaction(transaction, "ÊÂÎñ³¬Ê±");
             }
         }
 
         /// <summary>
-        /// æ¸…ç†æ´»è·ƒäº‹åŠ¡
+        /// ÇåÀí»îÔ¾ÊÂÎñ
         /// </summary>
         private void CleanupActiveTransactions()
         {
@@ -526,14 +526,14 @@ namespace InventorySystem.SaveSystem
             {
                 if (transaction.status == TransactionStatus.InProgress || transaction.status == TransactionStatus.Validating || transaction.status == TransactionStatus.Committing)
                 {
-                    RollbackTransaction(transaction, "ç³»ç»Ÿå…³é—­");
+                    RollbackTransaction(transaction, "ÏµÍ³¹Ø±Õ");
                 }
             }
             activeTransactions.Clear();
         }
 
         /// <summary>
-        /// åˆ›å»ºå¤‡ä»½æ–‡ä»¶
+        /// ´´½¨±¸·İÎÄ¼ş
         /// </summary>
         private string CreateBackupFile(string originalPath, string transactionId)
         {
@@ -544,7 +544,7 @@ namespace InventorySystem.SaveSystem
             var backupFileName = $"{fileName}_backup_{timestamp}_{transactionId.Substring(0, 8)}{extension}";
             var backupPath = Path.Combine(directory, "Backups", backupFileName);
 
-            // ç¡®ä¿å¤‡ä»½ç›®å½•å­˜åœ¨
+            // È·±£±¸·İÄ¿Â¼´æÔÚ
             var backupDir = Path.GetDirectoryName(backupPath);
             if (!Directory.Exists(backupDir))
             {
@@ -556,12 +556,12 @@ namespace InventorySystem.SaveSystem
         }
 
         /// <summary>
-        /// ä»å¤‡ä»½è·¯å¾„è·å–åŸå§‹è·¯å¾„
+        /// ´Ó±¸·İÂ·¾¶»ñÈ¡Ô­Ê¼Â·¾¶
         /// </summary>
         private string GetOriginalPathFromBackup(string backupPath)
         {
-            // è¿™é‡Œéœ€è¦æ ¹æ®å¤‡ä»½æ–‡ä»¶çš„å‘½åè§„åˆ™æ¥æ¨å¯¼åŸå§‹è·¯å¾„
-            var directory = Path.GetDirectoryName(Path.GetDirectoryName(backupPath)); // å»æ‰Backupsç›®å½•
+            // ÕâÀïĞèÒª¸ù¾İ±¸·İÎÄ¼şµÄÃüÃû¹æÔòÀ´ÍÆµ¼Ô­Ê¼Â·¾¶
+            var directory = Path.GetDirectoryName(Path.GetDirectoryName(backupPath)); // È¥µôBackupsÄ¿Â¼
             var fileName = Path.GetFileName(backupPath);
             var parts = fileName.Split('_');
             if (parts.Length >= 3)
@@ -574,17 +574,17 @@ namespace InventorySystem.SaveSystem
         }
 
         /// <summary>
-        /// è·å–å½“å‰ä¿å­˜æ–‡ä»¶è·¯å¾„
+        /// »ñÈ¡µ±Ç°±£´æÎÄ¼şÂ·¾¶
         /// </summary>
         private string GetCurrentSaveFilePath()
         {
-            // è¿™é‡Œéœ€è¦æ ¹æ®SaveManagerçš„å®ç°æ¥è·å–å½“å‰ä¿å­˜æ–‡ä»¶è·¯å¾„
-            // æš‚æ—¶è¿”å›ä¸€ä¸ªé»˜è®¤è·¯å¾„
+            // ÕâÀïĞèÒª¸ù¾İSaveManagerµÄÊµÏÖÀ´»ñÈ¡µ±Ç°±£´æÎÄ¼şÂ·¾¶
+            // ÔİÊ±·µ»ØÒ»¸öÄ¬ÈÏÂ·¾¶
             return Path.Combine(Application.persistentDataPath, "SaveData", "save.json");
         }
 
         /// <summary>
-        /// æ¸…ç†æ—§å¤‡ä»½
+        /// ÇåÀí¾É±¸·İ
         /// </summary>
         private void CleanupOldBackups()
         {
@@ -598,21 +598,21 @@ namespace InventorySystem.SaveSystem
                     .OrderByDescending(f => f.CreationTime)
                     .ToList();
 
-                // ä¿ç•™æœ€æ–°çš„å¤‡ä»½æ–‡ä»¶
+                // ±£Áô×îĞÂµÄ±¸·İÎÄ¼ş
                 for (int i = maxBackupCount; i < backupFiles.Count; i++)
                 {
                     backupFiles[i].Delete();
-                    LogDebug($"å·²åˆ é™¤æ—§å¤‡ä»½æ–‡ä»¶: {backupFiles[i].Name}");
+                    LogDebug($"ÒÑÉ¾³ı¾É±¸·İÎÄ¼ş: {backupFiles[i].Name}");
                 }
             }
             catch (Exception ex)
             {
-                LogError($"æ¸…ç†æ—§å¤‡ä»½å¤±è´¥: {ex.Message}");
+                LogError($"ÇåÀí¾É±¸·İÊ§°Ü: {ex.Message}");
             }
         }
 
         /// <summary>
-        /// åˆ›å»ºç®€å•äº‹åŠ¡ç»“æœ
+        /// ´´½¨¼òµ¥ÊÂÎñ½á¹û
         /// </summary>
         private TransactionResult CreateSimpleTransactionResult(bool success, string message)
         {
@@ -626,48 +626,48 @@ namespace InventorySystem.SaveSystem
         }
         #endregion
 
-        #region å…¬å…±æŸ¥è¯¢æ–¹æ³•
+        #region ¹«¹²²éÑ¯·½·¨
         /// <summary>
-        /// è·å–æ´»è·ƒäº‹åŠ¡åˆ—è¡¨
+        /// »ñÈ¡»îÔ¾ÊÂÎñÁĞ±í
         /// </summary>
-        /// <returns>æ´»è·ƒäº‹åŠ¡åˆ—è¡¨</returns>
+        /// <returns>»îÔ¾ÊÂÎñÁĞ±í</returns>
         public List<SaveTransaction> GetActiveTransactions()
         {
             return activeTransactions.Values.ToList();
         }
 
         /// <summary>
-        /// è·å–äº‹åŠ¡å†å²
+        /// »ñÈ¡ÊÂÎñÀúÊ·
         /// </summary>
-        /// <returns>äº‹åŠ¡å†å²IDåˆ—è¡¨</returns>
+        /// <returns>ÊÂÎñÀúÊ·IDÁĞ±í</returns>
         public List<string> GetTransactionHistory()
         {
             return transactionHistory.ToList();
         }
 
         /// <summary>
-        /// è·å–äº‹åŠ¡ç»Ÿè®¡ä¿¡æ¯
+        /// »ñÈ¡ÊÂÎñÍ³¼ÆĞÅÏ¢
         /// </summary>
-        /// <returns>ç»Ÿè®¡ä¿¡æ¯å­—ç¬¦ä¸²</returns>
+        /// <returns>Í³¼ÆĞÅÏ¢×Ö·û´®</returns>
         public string GetTransactionStatistics()
         {
             var stats = new System.Text.StringBuilder();
-            stats.AppendLine("=== äº‹åŠ¡ç®¡ç†å™¨ç»Ÿè®¡ä¿¡æ¯ ===");
-            stats.AppendLine($"äº‹åŠ¡æ€§ä¿å­˜: {(enableTransactionalSave ? "å¯ç”¨" : "ç¦ç”¨")}");
-            stats.AppendLine($"æ´»è·ƒäº‹åŠ¡æ•°: {activeTransactions.Count}");
-            stats.AppendLine($"å†å²äº‹åŠ¡æ•°: {transactionHistory.Count}");
-            stats.AppendLine($"æœ€å¤§å¤‡ä»½æ•°: {maxBackupCount}");
-            stats.AppendLine($"äº‹åŠ¡è¶…æ—¶æ—¶é—´: {transactionTimeout}ç§’");
-            stats.AppendLine($"è‡ªåŠ¨å›æ»š: {(enableAutoRollback ? "å¯ç”¨" : "ç¦ç”¨")}");
+            stats.AppendLine("=== ÊÂÎñ¹ÜÀíÆ÷Í³¼ÆĞÅÏ¢ ===");
+            stats.AppendLine($"ÊÂÎñĞÔ±£´æ: {(enableTransactionalSave ? "ÆôÓÃ" : "½ûÓÃ")}");
+            stats.AppendLine($"»îÔ¾ÊÂÎñÊı: {activeTransactions.Count}");
+            stats.AppendLine($"ÀúÊ·ÊÂÎñÊı: {transactionHistory.Count}");
+            stats.AppendLine($"×î´ó±¸·İÊı: {maxBackupCount}");
+            stats.AppendLine($"ÊÂÎñ³¬Ê±Ê±¼ä: {transactionTimeout}Ãë");
+            stats.AppendLine($"×Ô¶¯»Ø¹ö: {(enableAutoRollback ? "ÆôÓÃ" : "½ûÓÃ")}");
             return stats.ToString();
         }
         #endregion
 
-        #region è°ƒè¯•æ–¹æ³•
+        #region µ÷ÊÔ·½·¨
         /// <summary>
-        /// è¾“å‡ºè°ƒè¯•æ—¥å¿—
+        /// Êä³öµ÷ÊÔÈÕÖ¾
         /// </summary>
-        /// <param name="message">æ—¥å¿—æ¶ˆæ¯</param>
+        /// <param name="message">ÈÕÖ¾ÏûÏ¢</param>
         private void LogDebug(string message)
         {
             if (enableDebugLog)
@@ -677,9 +677,9 @@ namespace InventorySystem.SaveSystem
         }
 
         /// <summary>
-        /// è¾“å‡ºé”™è¯¯æ—¥å¿—
+        /// Êä³ö´íÎóÈÕÖ¾
         /// </summary>
-        /// <param name="message">é”™è¯¯æ¶ˆæ¯</param>
+        /// <param name="message">´íÎóÏûÏ¢</param>
         private void LogError(string message)
         {
             Debug.LogError($"[SaveTransactionManager] {message}");
