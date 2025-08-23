@@ -3,104 +3,113 @@ using System.Collections.Generic;
 
 public class BackpackGridManager : MonoBehaviour
 {
-    [Header("背包网格配置")]
-    [SerializeField] private GridConfig backpackGridConfig;
-    [SerializeField] private ItemGrid backpackGrid;
-    [SerializeField] private InventoryController inventoryController;
-
-    [Header("网格系统组件")]
-    [SerializeField] private GridInteract gridInteract;
+    [Header("背包基础配置")]
+    [SerializeField] private int backpackWidth = 10; // 背包宽度（格子数）
+    [SerializeField] private int backpackHeight = 6; // 背包高度（格子数）
+    [SerializeField] private Transform itemContainer; // 物品容器
+    
+    [Header("背包物品列表")]
+    private List<GameObject> backpackItems = new List<GameObject>(); // 背包中的物品列表
 
     private void Start()
     {
-        InitializeBackpackGrid();
+        InitializeBackpack();
     }
 
-    private void InitializeBackpackGrid()
+    private void InitializeBackpack()
     {
-        if (backpackGrid != null && backpackGridConfig != null)
-        {
-            // 设置网格配置
-            backpackGrid.SetGridConfig(backpackGridConfig);
-
-            // 初始化网格
-            backpackGrid.LoadFromGridConfig();
-
-            // 设置库存控制器 - 修复：使用新的API
-            if (inventoryController != null)
-            {
-                inventoryController.SetSelectedMainGrid(backpackGrid);
-            }
-
-            Debug.Log("背包网格系统初始化完成");
-        }
-        else
-        {
-            Debug.LogError("背包网格配置或网格组件未设置！");
-        }
-    }
-
-    // 获取背包网格
-    public ItemGrid GetBackpackGrid()
-    {
-        return backpackGrid;
-    }
-
-    // 设置网格配置
-    public void SetGridConfig(GridConfig config)
-    {
-        backpackGridConfig = config;
-        if (backpackGrid != null)
-        {
-            backpackGrid.SetGridConfig(config);
-            backpackGrid.LoadFromGridConfig();
-        }
-    }
-
-    // 清空背包网格
-    public void ClearBackpackGrid()
-    {
-        if (backpackGrid != null)
-        {
-            // 获取所有已放置的物品
-            var placedItems = new List<ItemGrid.PlacedItem>();
-            // 注意：需要根据ItemGrid的实际API调整这里的代码
-
-            for (int i = placedItems.Count - 1; i >= 0; i--)
-            {
-                if (placedItems[i].itemObject != null)
-                {
-                    backpackGrid.RemoveItem(placedItems[i].itemObject);
-                    Destroy(placedItems[i].itemObject);
-                }
-            }
-        }
-    }
-
-    // 保存背包状态
-    public void SaveBackpackState()
-    {
-        if (backpackGrid != null)
-        {
-            backpackGrid.SaveToGridConfig();
-        }
-    }
-
-    // 新增：切换到背包网格模式的方法
-    public void SwitchToBackpackMode()
-    {
-        if (inventoryController != null && backpackGrid != null)
-        {
-            inventoryController.SetSelectedMainGrid(backpackGrid);
-        }
-    }
-
-    // 新增：获取当前是否为活跃网格
-    public bool IsActiveGrid()
-    {
-        if (inventoryController == null) return false;
+        // 初始化背包物品列表
+        backpackItems = new List<GameObject>();
         
-        return inventoryController.GetActiveGridType() == InventoryController.ActiveGridType.MainGrid &&
-               inventoryController.selectedItemGrid == backpackGrid;
+        // 如果没有设置物品容器，尝试找到子对象作为容器
+        if (itemContainer == null)
+        {
+            itemContainer = transform;
+        }
+        
+        Debug.Log($"背包系统初始化完成 - 容量: {backpackWidth}x{backpackHeight}");
+    }
+
+    // 获取背包容量
+    public int GetBackpackCapacity()
+    {
+        return backpackWidth * backpackHeight;
+    }
+    
+    // 获取当前物品数量
+    public int GetCurrentItemCount()
+    {
+        return backpackItems.Count;
+    }
+
+    // 设置背包尺寸
+    public void SetBackpackSize(int width, int height)
+    {
+        backpackWidth = width;
+        backpackHeight = height;
+        Debug.Log($"背包尺寸已更新为: {backpackWidth}x{backpackHeight}");
+    }
+
+    // 清空背包
+    public void ClearBackpack()
+    {
+        // 销毁所有背包中的物品
+        for (int i = backpackItems.Count - 1; i >= 0; i--)
+        {
+            if (backpackItems[i] != null)
+            {
+                Destroy(backpackItems[i]);
+            }
+        }
+        
+        // 清空物品列表
+        backpackItems.Clear();
+        Debug.Log("背包已清空");
+    }
+
+    // 添加物品到背包
+    public bool AddItem(GameObject item)
+    {
+        if (GetCurrentItemCount() >= GetBackpackCapacity())
+        {
+            Debug.LogWarning("背包已满，无法添加更多物品");
+            return false;
+        }
+        
+        if (item != null)
+        {
+            // 将物品设置为容器的子对象
+            item.transform.SetParent(itemContainer);
+            backpackItems.Add(item);
+            Debug.Log($"物品已添加到背包: {item.name}");
+            return true;
+        }
+        
+        return false;
+    }
+    
+    // 从背包移除物品
+    public bool RemoveItem(GameObject item)
+    {
+        if (backpackItems.Contains(item))
+        {
+            backpackItems.Remove(item);
+            Debug.Log($"物品已从背包移除: {item.name}");
+            return true;
+        }
+        
+        return false;
+    }
+    
+    // 获取背包中的所有物品
+    public List<GameObject> GetAllItems()
+    {
+        return new List<GameObject>(backpackItems);
+    }
+    
+    // 检查背包是否已满
+    public bool IsBackpackFull()
+    {
+        return GetCurrentItemCount() >= GetBackpackCapacity();
     }
 }
