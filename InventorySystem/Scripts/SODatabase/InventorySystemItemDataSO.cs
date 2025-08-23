@@ -1,68 +1,150 @@
 using UnityEngine;
+using System;
+using System.Collections.Generic;
+
+// ÎïÆ·Êı¾İ°æ±¾ĞÅÏ¢
+[System.Serializable]
+public class ItemDataVersion
+{
+    public int majorVersion = 1;     // Ö÷°æ±¾ºÅ
+    public int minorVersion = 0;     // ´Î°æ±¾ºÅ
+    public int patchVersion = 0;     // ²¹¶¡°æ±¾ºÅ
+    public string buildDate = "";    // ¹¹½¨ÈÕÆÚ
+
+    public ItemDataVersion()
+    {
+        buildDate = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+    }
+
+    public string GetVersionString()
+    {
+        return $"{majorVersion}.{minorVersion}.{patchVersion}";
+    }
+
+    public bool IsCompatibleWith(ItemDataVersion other)
+    {
+        // Ö÷°æ±¾ºÅÏàÍ¬²Å¼æÈİ
+        return majorVersion == other.majorVersion;
+    }
+}
+
+// MODĞÅÏ¢
+[System.Serializable]
+public class ModInfo
+{
+    public string modID = "";           // MODÎ¨Ò»±êÊ¶
+    public string modName = "";         // MODÃû³Æ
+    public string modVersion = "";      // MOD°æ±¾
+    public string authorName = "";      // ×÷ÕßÃû³Æ
+    public List<string> dependencies = new List<string>(); // ÒÀÀµµÄÆäËûMOD
+
+    public bool IsValid()
+    {
+        return !string.IsNullOrEmpty(modID) && !string.IsNullOrEmpty(modName);
+    }
+}
+
+// Êı¾İÍêÕûĞÔÑéÖ¤½á¹û
+[System.Serializable]
+public class DataValidationResult
+{
+    public bool isValid = true;
+    public List<string> errors = new List<string>();
+    public List<string> warnings = new List<string>();
+
+    public void AddError(string error)
+    {
+        isValid = false;
+        errors.Add(error);
+    }
+
+    public void AddWarning(string warning)
+    {
+        warnings.Add(warning);
+    }
+
+    public string GetSummary()
+    {
+        string summary = isValid ? "ÑéÖ¤Í¨¹ı" : "ÑéÖ¤Ê§°Ü";
+        if (errors.Count > 0) summary += $" - {errors.Count}¸ö´íÎó";
+        if (warnings.Count > 0) summary += $" - {warnings.Count}¸ö¾¯¸æ";
+        return summary;
+    }
+}
 
 public enum InventorySystemItemCategory
 {
-    Helmet,         // å¤´ç›”
-    Armor,          // æŠ¤ç”²
-    TacticalRig,    // æˆ˜æœ¯æŒ‚å…·
-    Backpack,       // èƒŒåŒ…
-    Weapon,         // æ­¦å™¨
-    Ammunition,     // å¼¹è¯
-    Food,           // é£Ÿç‰©
-    Drink,          // é¥®æ–™
-    Sedative,       // é•‡é™å‰‚
-    Hemostatic,     // æ­¢è¡€å‰‚
-    Healing,        // æ²»ç–—ç”¨å“
-    Intelligence,   // æƒ…æŠ¥
-    Currency        // è´§å¸
+    Helmet,         // Í·¿ø
+    Armor,          // »¤¼×
+    TacticalRig,    // Õ½Êõ¹Ò¾ß
+    Backpack,       // ±³°ü
+    Weapon,         // ÎäÆ÷
+    Ammunition,     // µ¯Ò©
+    Food,           // Ê³Îï
+    Drink,          // ÒûÁÏ
+    Sedative,       // Õò¾²¼Á
+    Hemostatic,     // Ö¹Ñª¼Á
+    Healing,        // ÖÎÁÆÓÃÆ·
+    Intelligence,   // Çé±¨
+    Currency        // »õ±Ò
 }
 
 [CreateAssetMenu(fileName = "New Item", menuName = "Inventory System/Item Data")]
 public class InventorySystemItemDataSO : ScriptableObject
 {
-    [Header("åŸºæœ¬ä¿¡æ¯")]
+    [Header("°æ±¾ĞÅÏ¢")]
+    [SerializeField] private ItemDataVersion dataVersion = new ItemDataVersion();
+
+    [Header("MODĞÅÏ¢")]
+    [SerializeField] private ModInfo modInfo = new ModInfo();
+
+    [Header("Êı¾İĞ£Ñé")]
+    [SerializeField] private string dataChecksum = "";     // Êı¾İĞ£ÑéºÍ
+    [SerializeField] private bool isModified = false;      // ÊÇ·ñ±»ĞŞ¸Ä¹ı
+
+    [Header("»ù±¾ĞÅÏ¢")]
     public int id;
     public string itemName;
 
-    [Header("ç‰©å“ç±»åˆ«")]
+    [Header("ÎïÆ·Àà±ğ")]
     public InventorySystemItemCategory itemCategory = InventorySystemItemCategory.Helmet;
 
-    [Header("ç½‘æ ¼å°ºå¯¸")]
+    [Header("Íø¸ñ³ß´ç")]
     public int height = 1;
     public int width = 1;
 
-    [Header("çè´µç¨‹åº¦")]
+    [Header("Õä¹ó³Ì¶È")]
     public string rarity;
 
-    [Header("å®¹é‡ä¿¡æ¯(èƒŒåŒ…/æˆ˜æœ¯æŒ‚å…·)")]
+    [Header("ÈİÁ¿ĞÅÏ¢(±³°ü/Õ½Êõ¹Ò¾ß)")]
     [SerializeField] private int cellH;
     [SerializeField] private int cellV;
 
-    [Header("å­å¼¹ç±»å‹(å¼¹è¯/æ­¦å™¨)")]
+    [Header("×Óµ¯ÀàĞÍ(µ¯Ò©/ÎäÆ÷)")]
     [SerializeField] private string bulletType;
 
-    [Header("èƒŒæ™¯é¢œè‰²")]
+    [Header("±³¾°ÑÕÉ«")]
     public string backgroundColor;
 
-    [Header("ç‰©å“å›¾æ ‡")]
+    [Header("ÎïÆ·Í¼±ê")]
     public Sprite itemIcon;
 
-    [Header("ç¼©å†™åç§°")]
+    [Header("ËõĞ´Ãû³Æ")]
     public string shortName;
 
-    [Header("è€ä¹…å€¼(å¤´ç›”/æŠ¤ç”²)")]
+    [Header("ÄÍ¾ÃÖµ(Í·¿ø/»¤¼×)")]
     public int durability;
 
-    [Header("ä½¿ç”¨æ¬¡æ•°(é£Ÿå“/é¥®æ–™/åŒ»ç–—ç”¨å“)")]
+    [Header("Ê¹ÓÃ´ÎÊı(Ê³Æ·/ÒûÁÏ/Ò½ÁÆÓÃÆ·)")]
     public int usageCount;
 
-    [Header("æœ€å¤§å›å¤è¡€é‡(æ²»ç–—ç”¨å“)")]
+    [Header("×î´ó»Ø¸´ÑªÁ¿(ÖÎÁÆÓÃÆ·)")]
     public int maxHealAmount;
 
-    [Header("å †å ä¸Šé™(è´§å¸/å¼¹è¯)")]
+    [Header("¶ÑµşÉÏÏŞ(»õ±Ò/µ¯Ò©)")]
     public int maxStack;
 
-    [Header("æƒ…æŠ¥å€¼(æƒ…æŠ¥ç‰©å“)")]
+    [Header("Çé±¨Öµ(Çé±¨ÎïÆ·)")]
     public int intelligenceValue;
 
     [HideInInspector]
@@ -116,10 +198,230 @@ public class InventorySystemItemDataSO : ScriptableObject
         return itemCategory == InventorySystemItemCategory.Weapon || itemCategory == InventorySystemItemCategory.Ammunition;
     }
 
+    // °æ±¾ĞÅÏ¢ÊôĞÔ
+    public ItemDataVersion DataVersion
+    {
+        get => dataVersion;
+        set => dataVersion = value;
+    }
+
+    // MODĞÅÏ¢ÊôĞÔ
+    public ModInfo ModInfo
+    {
+        get => modInfo;
+        set => modInfo = value;
+    }
+
+    // Êı¾İĞ£ÑéºÍÊôĞÔ
+    public string DataChecksum
+    {
+        get => dataChecksum;
+        set => dataChecksum = value;
+    }
+
+    // ÊÇ·ñ±»ĞŞ¸ÄÊôĞÔ
+    public bool IsModified
+    {
+        get => isModified;
+        set => isModified = value;
+    }
+
+    // ¼ÆËãÊı¾İĞ£ÑéºÍ
+    public string CalculateChecksum()
+    {
+        string dataString = $"{id}_{itemName}_{itemCategory}_{height}_{width}_{durability}_{maxStack}_{maxHealAmount}";
+        return dataString.GetHashCode().ToString();
+    }
+
+    // ÑéÖ¤Êı¾İÍêÕûĞÔ
+    public DataValidationResult ValidateData()
+    {
+        DataValidationResult result = new DataValidationResult();
+
+        // ÑéÖ¤»ù±¾ĞÅÏ¢
+        if (id <= 0)
+        {
+            result.AddError("ÎïÆ·ID±ØĞë´óÓÚ0");
+        }
+
+        if (string.IsNullOrEmpty(itemName))
+        {
+            result.AddError("ÎïÆ·Ãû³Æ²»ÄÜÎª¿Õ");
+        }
+
+        // ÑéÖ¤Íø¸ñ³ß´ç
+        if (!IsValidGridSize())
+        {
+            result.AddError("Íø¸ñ³ß´çÎŞĞ§£¬¸ß¶ÈºÍ¿í¶È±ØĞë´óÓÚ0");
+        }
+
+        // ÑéÖ¤ÈİÆ÷³ß´ç£¨Èç¹ûÊÇÈİÆ÷ÀàĞÍ£©
+        if (IsContainer() && !IsValidContainerSize())
+        {
+            result.AddError("ÈİÆ÷³ß´çÎŞĞ§£¬ÈİÆ÷µÄ¸ß¶ÈºÍ¿í¶È±ØĞë´óÓÚ0");
+        }
+
+        // ÑéÖ¤ÄÍ¾ÃÖµ
+        if (durability < 0)
+        {
+            result.AddWarning("ÄÍ¾ÃÖµ²»Ó¦Îª¸ºÊı");
+        }
+
+        // ÑéÖ¤¶ÑµşÉÏÏŞ
+        if (maxStack < 0)
+        {
+            result.AddWarning("¶ÑµşÉÏÏŞ²»Ó¦Îª¸ºÊı");
+        }
+
+        // ÑéÖ¤ÖÎÁÆÁ¿
+        if (maxHealAmount < 0)
+        {
+            result.AddWarning("ÖÎÁÆÁ¿²»Ó¦Îª¸ºÊı");
+        }
+
+        // ÑéÖ¤Ê¹ÓÃ´ÎÊı
+        if (usageCount < 0)
+        {
+            result.AddWarning("Ê¹ÓÃ´ÎÊı²»Ó¦Îª¸ºÊı");
+        }
+
+        // ÑéÖ¤Í¼±ê
+        if (itemIcon == null)
+        {
+            result.AddWarning("ÎïÆ·Í¼±êÎ´ÉèÖÃ");
+        }
+
+        // ÑéÖ¤Êı¾İĞ£ÑéºÍ
+        string currentChecksum = CalculateChecksum();
+        if (!string.IsNullOrEmpty(dataChecksum) && dataChecksum != currentChecksum)
+        {
+            result.AddWarning("Êı¾İĞ£ÑéºÍ²»Æ¥Åä£¬Êı¾İ¿ÉÄÜÒÑ±»ĞŞ¸Ä");
+            isModified = true;
+        }
+
+        return result;
+    }
+
+    // ¼ì²éMOD¼æÈİĞÔ
+    public bool CheckModCompatibility(List<ModInfo> installedMods)
+    {
+        if (!modInfo.IsValid())
+        {
+            return true; // ·ÇMODÎïÆ·£¬Ä¬ÈÏ¼æÈİ
+        }
+
+        // ¼ì²éÒÀÀµµÄMODÊÇ·ñ¶¼ÒÑ°²×°
+        foreach (string dependency in modInfo.dependencies)
+        {
+            bool dependencyFound = false;
+            foreach (ModInfo installedMod in installedMods)
+            {
+                if (installedMod.modID == dependency)
+                {
+                    dependencyFound = true;
+                    break;
+                }
+            }
+
+            if (!dependencyFound)
+            {
+                Debug.LogWarning($"ÎïÆ· {itemName} ÒÀÀµµÄMOD {dependency} Î´ÕÒµ½");
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    // ¸üĞÂ°æ±¾ĞÅÏ¢
+    public void UpdateVersion(int major = -1, int minor = -1, int patch = -1)
+    {
+        if (major >= 0) dataVersion.majorVersion = major;
+        if (minor >= 0) dataVersion.minorVersion = minor;
+        if (patch >= 0) dataVersion.patchVersion = patch;
+
+        dataVersion.buildDate = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+
+        // ¸üĞÂĞ£ÑéºÍ
+        dataChecksum = CalculateChecksum();
+        isModified = false;
+    }
+
+    // ÉèÖÃMODĞÅÏ¢
+    public void SetModInfo(string modID, string modName, string modVersion, string authorName, List<string> dependencies = null)
+    {
+        modInfo.modID = modID;
+        modInfo.modName = modName;
+        modInfo.modVersion = modVersion;
+        modInfo.authorName = authorName;
+
+        if (dependencies != null)
+        {
+            modInfo.dependencies = new List<string>(dependencies);
+        }
+
+        // ¸üĞÂĞ£ÑéºÍ
+        dataChecksum = CalculateChecksum();
+        isModified = false;
+    }
+
+    // »ñÈ¡ÎïÆ·ÏêÏ¸ĞÅÏ¢
+    public string GetDetailedInfo()
+    {
+        string info = $"ÎïÆ·: {itemName} (ID: {id})\n";
+        info += $"Àà±ğ: {itemCategory}\n";
+        info += $"³ß´ç: {width}x{height}\n";
+        info += $"°æ±¾: {dataVersion.GetVersionString()}\n";
+
+        if (modInfo.IsValid())
+        {
+            info += $"MOD: {modInfo.modName} v{modInfo.modVersion}\n";
+            info += $"×÷Õß: {modInfo.authorName}\n";
+        }
+
+        info += $"Êı¾İ×´Ì¬: {(isModified ? "ÒÑĞŞ¸Ä" : "Ô­Ê¼")}\n";
+
+        return info;
+    }
+
+    // ²âÊÔÊı¾İÑéÖ¤¹¦ÄÜ
+    [ContextMenu("ÑéÖ¤Êı¾İÍêÕûĞÔ")]
+    public void TestDataValidation()
+    {
+        DataValidationResult result = ValidateData();
+        Debug.Log($"Êı¾İÑéÖ¤½á¹û: {result.GetSummary()}");
+
+        foreach (string error in result.errors)
+        {
+            Debug.LogError($"´íÎó: {error}");
+        }
+
+        foreach (string warning in result.warnings)
+        {
+            Debug.LogWarning($"¾¯¸æ: {warning}");
+        }
+    }
+
+    // ²âÊÔ°æ±¾¸üĞÂ
+    [ContextMenu("¸üĞÂ°æ±¾ĞÅÏ¢")]
+    public void TestUpdateVersion()
+    {
+        UpdateVersion(patch: dataVersion.patchVersion + 1);
+        Debug.Log($"°æ±¾ÒÑ¸üĞÂÎª: {dataVersion.GetVersionString()}");
+    }
+
     private void OnValidate()
     {
         category = itemCategory.ToString();
+
+        // ÔÚ±à¼­Æ÷ÖĞĞŞ¸ÄÊ±±ê¼ÇÎªÒÑĞŞ¸Ä
+        if (!string.IsNullOrEmpty(dataChecksum))
+        {
+            string currentChecksum = CalculateChecksum();
+            if (dataChecksum != currentChecksum)
+            {
+                isModified = true;
+            }
+        }
     }
-
-
 }

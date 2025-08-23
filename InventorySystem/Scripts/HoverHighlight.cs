@@ -3,18 +3,18 @@ using UnityEngine.UI;
 
 public class HoverHighlight : MonoBehaviour
 {
-    [Header("ĞüÍ£¸ßÁÁÉèÖÃ")]
-    [SerializeField] private GameObject hoverHighlightPrefab; // ĞüÍ£¸ßÁÁÔ¤ÖÆÌå
-    [SerializeField] private Color hoverColor = new Color(1, 1, 0, 0.3f); // ĞüÍ£ÑÕÉ«£¨»ÆÉ«°ëÍ¸Ã÷£©
+    [Header("æ‚¬åœé«˜äº®è®¾ç½®")]
+    [SerializeField] private GameObject hoverHighlightPrefab; // æ‚¬åœé«˜äº®é¢„åˆ¶ä½“
+    [SerializeField] private Color hoverColor = new Color(1, 1, 0, 0.3f); // æ‚¬åœé¢œè‰²ï¼ˆé»„è‰²åŠé€æ˜ï¼‰
 
-    private GameObject currentHoverHighlight; // µ±Ç°ĞüÍ£¸ßÁÁ¶ÔÏó
-    private Image hoverHighlightImage; // ĞüÍ£¸ßÁÁÍ¼Ïñ×é¼ş
-    private RectTransform hoverHighlightRect; // ĞüÍ£¸ßÁÁ¾ØĞÎ±ä»»
-    private Transform currentParent; // µ±Ç°¸¸¼¶Íø¸ñ
+    private GameObject currentHoverHighlight; // å½“å‰æ‚¬åœé«˜äº®å¯¹è±¡
+    private Image hoverHighlightImage; // æ‚¬åœé«˜äº®å›¾åƒç»„ä»¶
+    private RectTransform hoverHighlightRect; // æ‚¬åœé«˜äº®çŸ©å½¢å˜æ¢
+    private Transform currentParent; // å½“å‰çˆ¶çº§ç½‘æ ¼
 
     private void Awake()
     {
-        // Èç¹ûÃ»ÓĞÖ¸¶¨Ô¤ÖÆÌå£¬´´½¨Ä¬ÈÏµÄĞüÍ£¸ßÁÁ¶ÔÏó
+        // å¦‚æœæ²¡æœ‰æŒ‡å®šé¢„åˆ¶ä½“ï¼Œåˆ›å»ºé»˜è®¤çš„æ‚¬åœé«˜äº®å¯¹è±¡
         if (hoverHighlightPrefab == null)
         {
             CreateDefaultHoverHighlight();
@@ -22,51 +22,51 @@ public class HoverHighlight : MonoBehaviour
     }
 
     /// <summary>
-    /// ´´½¨Ä¬ÈÏµÄĞüÍ£¸ßÁÁÔ¤ÖÆÌå
+    /// åˆ›å»ºé»˜è®¤çš„æ‚¬åœé«˜äº®é¢„åˆ¶ä½“
     /// </summary>
     private void CreateDefaultHoverHighlight()
     {
-        // ´´½¨¸ßÁÁ¶ÔÏó
+        // åˆ›å»ºé«˜äº®å¯¹è±¡
         hoverHighlightPrefab = new GameObject("HoverHighlight");
 
-        // Ìí¼ÓRectTransform×é¼ş
+        // æ·»åŠ RectTransformç»„ä»¶
         var rectTransform = hoverHighlightPrefab.AddComponent<RectTransform>();
 
-        // Ìí¼ÓImage×é¼ş
+        // æ·»åŠ Imageç»„ä»¶
         var image = hoverHighlightPrefab.AddComponent<Image>();
         image.color = hoverColor;
-        image.raycastTarget = false; // ²»×èµ²ÉäÏß¼ì²â
+        image.raycastTarget = false; // ä¸é˜»æŒ¡å°„çº¿æ£€æµ‹
 
-        // ÉèÖÃÎªÔ¤ÖÆÌå£¨ÔÚÔËĞĞÊ±²»ĞèÒªÕæÕıµÄÔ¤ÖÆÌå£¬Ö»ÊÇ×÷ÎªÄ£°å£©
+        // è®¾ç½®ä¸ºé¢„åˆ¶ä½“ï¼ˆåœ¨è¿è¡Œæ—¶ä¸éœ€è¦çœŸæ­£çš„é¢„åˆ¶ä½“ï¼Œåªæ˜¯ä½œä¸ºæ¨¡æ¿ï¼‰
         hoverHighlightPrefab.SetActive(false);
     }
 
     /// <summary>
-    /// ÏÔÊ¾ĞüÍ£¸ßÁÁ
+    /// æ˜¾ç¤ºæ‚¬åœé«˜äº®
     /// </summary>
-    /// <param name="item">Òª¸ßÁÁµÄÎïÆ·</param>
-    /// <param name="parentGrid">¸¸¼¶Íø¸ñ</param>
+    /// <param name="item">è¦é«˜äº®çš„ç‰©å“</param>
+    /// <param name="parentGrid">çˆ¶çº§ç½‘æ ¼</param>
     public void ShowHoverHighlight(InventorySystemItem item, Transform parentGrid)
     {
         ShowHoverHighlight(item, parentGrid, null);
     }
 
     /// <summary>
-    /// ÏÔÊ¾ĞüÍ£¸ßÁÁ£¨×°±¸À¸°æ±¾£©
+    /// æ˜¾ç¤ºæ‚¬åœé«˜äº®ï¼ˆè£…å¤‡æ ç‰ˆæœ¬ï¼‰
     /// </summary>
-    /// <param name="item">Òª¸ßÁÁµÄÎïÆ·</param>
-    /// <param name="parentGrid">¸¸¼¶Íø¸ñ</param>
-    /// <param name="equipSlot">×°±¸À¸ÒıÓÃ£¬Èç¹ûÎªnullÔòÊ¹ÓÃÎïÆ·Ô­Ê¼´óĞ¡</param>
+    /// <param name="item">è¦é«˜äº®çš„ç‰©å“</param>
+    /// <param name="parentGrid">çˆ¶çº§ç½‘æ ¼</param>
+    /// <param name="equipSlot">è£…å¤‡æ å¼•ç”¨ï¼Œå¦‚æœä¸ºnullåˆ™ä½¿ç”¨ç‰©å“åŸå§‹å¤§å°</param>
     public void ShowHoverHighlight(InventorySystemItem item, Transform parentGrid, EquipSlot equipSlot)
     {
         if (item == null || parentGrid == null) return;
 
-        Debug.Log($"ÏÔÊ¾ĞüÍ£¸ßÁÁ - ÎïÆ·: {item.name}, ¸¸¼¶Íø¸ñ: {parentGrid.name}, ×°±¸À¸: {(equipSlot != null ? equipSlot.name : "ÎŞ")}");
+        Debug.Log($"æ˜¾ç¤ºæ‚¬åœé«˜äº® - ç‰©å“: {item.name}, çˆ¶çº§ç½‘æ ¼: {parentGrid.name}, è£…å¤‡æ : {(equipSlot != null ? equipSlot.name : "æ— ")}");
 
-        // Èç¹ûÒÑ¾­ÓĞ¸ßÁÁ¶ÔÏóÇÒ¸¸¼¶ÏàÍ¬£¬Ö±½Ó¸üĞÂ
+        // å¦‚æœå·²ç»æœ‰é«˜äº®å¯¹è±¡ä¸”çˆ¶çº§ç›¸åŒï¼Œç›´æ¥æ›´æ–°
         if (currentHoverHighlight != null && currentParent == parentGrid)
         {
-            Debug.Log("Ê¹ÓÃÏÖÓĞ¸ßÁÁ¶ÔÏó£¬Ö±½Ó¸üĞÂ");
+            Debug.Log("ä½¿ç”¨ç°æœ‰é«˜äº®å¯¹è±¡ï¼Œç›´æ¥æ›´æ–°");
             if (equipSlot != null)
             {
                 UpdateHighlightForEquipSlot(item, equipSlot);
@@ -78,26 +78,26 @@ public class HoverHighlight : MonoBehaviour
             return;
         }
 
-        // Òş²ØÖ®Ç°µÄ¸ßÁÁ
+        // éšè—ä¹‹å‰çš„é«˜äº®
         HideHoverHighlight();
 
-        // ´´½¨ĞÂµÄ¸ßÁÁ¶ÔÏó
+        // åˆ›å»ºæ–°çš„é«˜äº®å¯¹è±¡
         currentHoverHighlight = Instantiate(hoverHighlightPrefab, parentGrid);
         currentHoverHighlight.SetActive(true);
         currentParent = parentGrid;
 
-        // »ñÈ¡×é¼şÒıÓÃ
+        // è·å–ç»„ä»¶å¼•ç”¨
         hoverHighlightRect = currentHoverHighlight.GetComponent<RectTransform>();
         hoverHighlightImage = currentHoverHighlight.GetComponent<Image>();
 
-        // È·±£²»×èµ²ÉäÏß¼ì²â
+        // ç¡®ä¿ä¸é˜»æŒ¡å°„çº¿æ£€æµ‹
         if (hoverHighlightImage != null)
         {
             hoverHighlightImage.raycastTarget = false;
             hoverHighlightImage.color = hoverColor;
         }
 
-        // ¸ù¾İÊÇ·ñÔÚ×°±¸À¸ÖĞÉèÖÃ¸ßÁÁÎ»ÖÃºÍ´óĞ¡
+        // æ ¹æ®æ˜¯å¦åœ¨è£…å¤‡æ ä¸­è®¾ç½®é«˜äº®ä½ç½®å’Œå¤§å°
         if (equipSlot != null)
         {
             UpdateHighlightForEquipSlot(item, equipSlot);
@@ -107,31 +107,31 @@ public class HoverHighlight : MonoBehaviour
             UpdateHighlightForItem(item);
         }
 
-        // È·±£¸ßÁÁÔÚÎïÆ·ÉÏ·½
+        // ç¡®ä¿é«˜äº®åœ¨ç‰©å“ä¸Šæ–¹
         currentHoverHighlight.transform.SetAsLastSibling();
 
-        Debug.Log($"ĞüÍ£¸ßÁÁ´´½¨Íê³É - ¸ßÁÁ¶ÔÏó: {currentHoverHighlight.name}, ¸¸¼¶: {currentHoverHighlight.transform.parent?.name}");
+        Debug.Log($"æ‚¬åœé«˜äº®åˆ›å»ºå®Œæˆ - é«˜äº®å¯¹è±¡: {currentHoverHighlight.name}, çˆ¶çº§: {currentHoverHighlight.transform.parent?.name}");
     }
 
     /// <summary>
-    /// ¸üĞÂ¸ßÁÁĞ§¹ûÒÔÆ¥ÅäÎïÆ·
+    /// æ›´æ–°é«˜äº®æ•ˆæœä»¥åŒ¹é…ç‰©å“
     /// </summary>
-    /// <param name="item">Ä¿±êÎïÆ·</param>
+    /// <param name="item">ç›®æ ‡ç‰©å“</param>
     public void UpdateHighlightForItem(InventorySystemItem item)
     {
         if (hoverHighlightRect == null || item == null) return;
 
-        // ÑéÖ¤ÎïÆ·µÄÖáĞÄÉèÖÃºÍÎ»ÖÃĞÅÏ¢
+        // éªŒè¯ç‰©å“çš„è½´å¿ƒè®¾ç½®å’Œä½ç½®ä¿¡æ¯
         ValidateItemPivotAndPosition(item);
 
-        // »ñÈ¡ÎïÆ·µÄRectTransform
+        // è·å–ç‰©å“çš„RectTransform
         RectTransform itemRect = item.GetComponent<RectTransform>();
         if (itemRect == null) return;
 
-        // »ñÈ¡ÎïÆ·µÄ³ß´ç
-        Vector2Int itemSize = Vector2Int.one; // Ä¬ÈÏ³ß´ç
+        // è·å–ç‰©å“çš„å°ºå¯¸
+        Vector2Int itemSize = Vector2Int.one; // é»˜è®¤å°ºå¯¸
 
-        // ³¢ÊÔ´ÓItemDataHolder»ñÈ¡³ß´çĞÅÏ¢
+        // å°è¯•ä»ItemDataHolderè·å–å°ºå¯¸ä¿¡æ¯
         var itemDataHolder = item.GetComponent<ItemDataHolder>();
         if (itemDataHolder != null)
         {
@@ -139,74 +139,74 @@ public class HoverHighlight : MonoBehaviour
         }
         else if (item.Data != null)
         {
-            // Èç¹ûÃ»ÓĞItemDataHolder£¬Ê¹ÓÃÔ­Ê¼Êı¾İ
+            // å¦‚æœæ²¡æœ‰ItemDataHolderï¼Œä½¿ç”¨åŸå§‹æ•°æ®
             itemSize = new Vector2Int(item.Data.width, item.Data.height);
         }
 
-        // ¼ÆËãÊµ¼Ê³ß´ç£¨ÏñËØ£©
-        float cellSize = 64f; // ÓëÍø¸ñÍ³Ò»
+        // è®¡ç®—å®é™…å°ºå¯¸ï¼ˆåƒç´ ï¼‰
+        float cellSize = 64f; // ä¸ç½‘æ ¼ç»Ÿä¸€
         Vector2 pixelSize = new Vector2(
             itemSize.x * cellSize,
             itemSize.y * cellSize
         );
 
-        // ÉèÖÃ¸ßÁÁ¿òµÄ³ß´ç
+        // è®¾ç½®é«˜äº®æ¡†çš„å°ºå¯¸
         hoverHighlightRect.sizeDelta = pixelSize;
 
-        // »ñÈ¡ÎïÆ·ÔÚÍø¸ñÖĞµÄÊµ¼ÊÕ¼Î»Î»ÖÃ£¨»ùÓÚÍø¸ñ×ø±ê£©
+        // è·å–ç‰©å“åœ¨ç½‘æ ¼ä¸­çš„å®é™…å ä½ä½ç½®ï¼ˆåŸºäºç½‘æ ¼åæ ‡ï¼‰
         Vector2Int gridPosition = GetItemActualGridPosition(item);
 
-        // Ê¹ÓÃÍø¸ñ×ø±ê¼ÆËã¸ßÁÁ¿òµÄ×óÉÏ½ÇÎ»ÖÃ
+        // ä½¿ç”¨ç½‘æ ¼åæ ‡è®¡ç®—é«˜äº®æ¡†çš„å·¦ä¸Šè§’ä½ç½®
         Vector2 highlightPosition = new Vector2(
             gridPosition.x * cellSize,
             -gridPosition.y * cellSize
         );
 
-        // Í³Ò»Ê¹ÓÃ×óÉÏ½ÇÖáĞÄÉèÖÃ
+        // ç»Ÿä¸€ä½¿ç”¨å·¦ä¸Šè§’è½´å¿ƒè®¾ç½®
         hoverHighlightRect.anchorMin = new Vector2(0, 1);
         hoverHighlightRect.anchorMax = new Vector2(0, 1);
-        hoverHighlightRect.pivot = new Vector2(0f, 1f);  // ¸ÄÎª×óÉÏ½ÇÖáĞÄ
+        hoverHighlightRect.pivot = new Vector2(0f, 1f);  // æ”¹ä¸ºå·¦ä¸Šè§’è½´å¿ƒ
 
-        // ÉèÖÃ¸ßÁÁ¿òµÄ×óÉÏ½ÇÎ»ÖÃ
+        // è®¾ç½®é«˜äº®æ¡†çš„å·¦ä¸Šè§’ä½ç½®
         hoverHighlightRect.anchoredPosition = highlightPosition;
 
-        // ¸ßÁÁ¿ò²»ĞèÒªĞı×ª
+        // é«˜äº®æ¡†ä¸éœ€è¦æ—‹è½¬
         hoverHighlightRect.localRotation = Quaternion.identity;
 
-        // ÑéÖ¤¸ßÁÁ¿òÊÇ·ñÕıÈ·¶ÔÆë
+        // éªŒè¯é«˜äº®æ¡†æ˜¯å¦æ­£ç¡®å¯¹é½
         ValidateAlignment(item);
 
-        // Ç¿ÖÆË¢ĞÂ¸ßÁÁ¶ÔÏó£¬È·±£ÕıÈ·ÏÔÊ¾
+        // å¼ºåˆ¶åˆ·æ–°é«˜äº®å¯¹è±¡ï¼Œç¡®ä¿æ­£ç¡®æ˜¾ç¤º
         ForceRefresh();
 
-        // µ÷ÊÔĞÅÏ¢
-        Debug.Log($"ĞüÍ£¸ßÁÁ¸üĞÂ - Íø¸ñÎ»ÖÃ: ({gridPosition.x}, {gridPosition.y}), ³ß´ç: {itemSize.x}x{itemSize.y}, ÖáĞÄ: ×óÉÏ½Ç");
+        // è°ƒè¯•ä¿¡æ¯
+        Debug.Log($"æ‚¬åœé«˜äº®æ›´æ–° - ç½‘æ ¼ä½ç½®: ({gridPosition.x}, {gridPosition.y}), å°ºå¯¸: {itemSize.x}x{itemSize.y}, è½´å¿ƒ: å·¦ä¸Šè§’");
     }
 
     /// <summary>
-    /// Ç¿ÖÆË¢ĞÂ¸ßÁÁ¶ÔÏó
+    /// å¼ºåˆ¶åˆ·æ–°é«˜äº®å¯¹è±¡
     /// </summary>
     public void ForceRefresh()
     {
         if (currentHoverHighlight != null && hoverHighlightRect != null)
         {
-            // Ç¿ÖÆË¢ĞÂCanvas
+            // å¼ºåˆ¶åˆ·æ–°Canvas
             Canvas.ForceUpdateCanvases();
 
-            // È·±£¶ÔÏó¼¤»î
+            // ç¡®ä¿å¯¹è±¡æ¿€æ´»
             currentHoverHighlight.SetActive(true);
 
-            // Ç¿ÖÆ¸üĞÂ²¼¾Ö
+            // å¼ºåˆ¶æ›´æ–°å¸ƒå±€
             LayoutRebuilder.ForceRebuildLayoutImmediate(hoverHighlightRect);
 
-            Debug.Log($"Ç¿ÖÆË¢ĞÂĞüÍ£¸ßÁÁ - ¼¤»î×´Ì¬: {currentHoverHighlight.activeInHierarchy}, ÊÀ½çÎ»ÖÃ: {hoverHighlightRect.position}, ³ß´ç: {hoverHighlightRect.sizeDelta}, ¸¸¼¶: {hoverHighlightRect.parent?.name}");
+            Debug.Log($"å¼ºåˆ¶åˆ·æ–°æ‚¬åœé«˜äº® - æ¿€æ´»çŠ¶æ€: {currentHoverHighlight.activeInHierarchy}, ä¸–ç•Œä½ç½®: {hoverHighlightRect.position}, å°ºå¯¸: {hoverHighlightRect.sizeDelta}, çˆ¶çº§: {hoverHighlightRect.parent?.name}");
         }
     }
 
     /// <summary>
-    /// ÑéÖ¤¸ßÁÁ¿òÊÇ·ñÕıÈ·¶ÔÆë
+    /// éªŒè¯é«˜äº®æ¡†æ˜¯å¦æ­£ç¡®å¯¹é½
     /// </summary>
-    /// <param name="item">Ä¿±êÎïÆ·</param>
+    /// <param name="item">ç›®æ ‡ç‰©å“</param>
     public void ValidateAlignment(InventorySystemItem item)
     {
         if (hoverHighlightRect == null || item == null) return;
@@ -214,40 +214,40 @@ public class HoverHighlight : MonoBehaviour
         RectTransform itemRect = item.GetComponent<RectTransform>();
         if (itemRect == null) return;
 
-        // »ñÈ¡ÎïÆ·ºÍ¸ßÁÁ¿òµÄÍø¸ñÎ»ÖÃĞÅÏ¢
+        // è·å–ç‰©å“å’Œé«˜äº®æ¡†çš„ç½‘æ ¼ä½ç½®ä¿¡æ¯
         Vector2Int itemGridPos = GetItemActualGridPosition(item);
         Vector2Int highlightGridPos = GetHighlightGridPosition();
 
-        // »ñÈ¡³ß´çĞÅÏ¢
+        // è·å–å°ºå¯¸ä¿¡æ¯
         Vector2 itemSize = itemRect.sizeDelta;
         Vector2 highlightSize = hoverHighlightRect.sizeDelta;
         Vector3 itemRotation = itemRect.localRotation.eulerAngles;
         Vector3 highlightRotation = hoverHighlightRect.localRotation.eulerAngles;
 
-        // ¼ÆËãÍø¸ñÎ»ÖÃ²îÒì
+        // è®¡ç®—ç½‘æ ¼ä½ç½®å·®å¼‚
         Vector2Int gridPositionDiff = highlightGridPos - itemGridPos;
         Vector2 sizeDiff = highlightSize - itemSize;
         Vector3 rotationDiff = highlightRotation - itemRotation;
 
-        Debug.Log($"=== ¸ßÁÁ¿ò¶ÔÆëÑéÖ¤£¨Íø¸ñ×ø±ê£©===\n" +
-                  $"ÎïÆ·Íø¸ñÎ»ÖÃ: {itemGridPos}, ³ß´ç: {itemSize}, Ğı×ª: {itemRotation}\n" +
-                  $"¸ßÁÁÍø¸ñÎ»ÖÃ: {highlightGridPos}, ³ß´ç: {highlightSize}, Ğı×ª: {highlightRotation}\n" +
-                  $"Íø¸ñÎ»ÖÃ²îÒì: {gridPositionDiff}\n" +
-                  $"³ß´ç²îÒì: {sizeDiff}\n" +
-                  $"Ğı×ª²îÒì: {rotationDiff}\n" +
-                  $"¶ÔÆë×´Ì¬: {(gridPositionDiff == Vector2Int.zero ? "7½7 ÒÑ¶ÔÆë" : "7¾1 Î´¶ÔÆë")}");
+        Debug.Log($"=== é«˜äº®æ¡†å¯¹é½éªŒè¯ï¼ˆç½‘æ ¼åæ ‡ï¼‰===\n" +
+                  $"ç‰©å“ç½‘æ ¼ä½ç½®: {itemGridPos}, å°ºå¯¸: {itemSize}, æ—‹è½¬: {itemRotation}\n" +
+                  $"é«˜äº®ç½‘æ ¼ä½ç½®: {highlightGridPos}, å°ºå¯¸: {highlightSize}, æ—‹è½¬: {highlightRotation}\n" +
+                  $"ç½‘æ ¼ä½ç½®å·®å¼‚: {gridPositionDiff}\n" +
+                  $"å°ºå¯¸å·®å¼‚: {sizeDiff}\n" +
+                  $"æ—‹è½¬å·®å¼‚: {rotationDiff}\n" +
+                  $"å¯¹é½çŠ¶æ€: {(gridPositionDiff == Vector2Int.zero ? "ï¿½7ï¿½7 å·²å¯¹é½" : "ï¿½7ï¿½1 æœªå¯¹é½")}");
 
-        // Èç¹ûÍø¸ñÎ»ÖÃ²îÒìÌ«´ó£¬¼ÇÂ¼¾¯¸æ
+        // å¦‚æœç½‘æ ¼ä½ç½®å·®å¼‚å¤ªå¤§ï¼Œè®°å½•è­¦å‘Š
         if (Mathf.Abs(gridPositionDiff.x) > 1 || Mathf.Abs(gridPositionDiff.y) > 1)
         {
-            Debug.LogWarning($"Íø¸ñÎ»ÖÃ²îÒì¹ı´ó: {gridPositionDiff}£¬Çë¼ì²éÍø¸ñ×ø±ê¼ÆËã");
+            Debug.LogWarning($"ç½‘æ ¼ä½ç½®å·®å¼‚è¿‡å¤§: {gridPositionDiff}ï¼Œè¯·æ£€æŸ¥ç½‘æ ¼åæ ‡è®¡ç®—");
         }
     }
 
     /// <summary>
-    /// ÑéÖ¤ÎïÆ·µÄÖáĞÄÉèÖÃºÍÎ»ÖÃĞÅÏ¢
+    /// éªŒè¯ç‰©å“çš„è½´å¿ƒè®¾ç½®å’Œä½ç½®ä¿¡æ¯
     /// </summary>
-    /// <param name="item">Ä¿±êÎïÆ·</param>
+    /// <param name="item">ç›®æ ‡ç‰©å“</param>
     public void ValidateItemPivotAndPosition(InventorySystemItem item)
     {
         if (item == null) return;
@@ -263,82 +263,82 @@ public class HoverHighlight : MonoBehaviour
             itemSize = new Vector2Int(itemDataHolder.ItemWidth, itemDataHolder.ItemHeight);
         }
 
-        Debug.Log($"=== ÎïÆ·ÖáĞÄÑéÖ¤ ===\n" +
-                  $"ÎïÆ·Ãû³Æ: {item.name}\n" +
-                  $"ÖáĞÄÉèÖÃ: {itemRect.pivot}\n" +
-                  $"ÃªµãÉèÖÃ: {itemRect.anchorMin} - {itemRect.anchorMax}\n" +
+        Debug.Log($"=== ç‰©å“è½´å¿ƒéªŒè¯ ===\n" +
+                  $"ç‰©å“åç§°: {item.name}\n" +
+                  $"è½´å¿ƒè®¾ç½®: {itemRect.pivot}\n" +
+                  $"é”šç‚¹è®¾ç½®: {itemRect.anchorMin} - {itemRect.anchorMax}\n" +
                   $"anchoredPosition: {itemRect.anchoredPosition}\n" +
-                  $"ÊÀ½çÎ»ÖÃ: {itemRect.position}\n" +
-                  $"ÎïÆ·³ß´ç: {itemSize.x}x{itemSize.y}\n" +
-                  $"ÖáĞÄÀàĞÍ: {(itemRect.pivot == new Vector2(0f, 1f) ? "×óÉÏ½ÇÖáĞÄ" : "ÆäËûÖáĞÄ")}");
+                  $"ä¸–ç•Œä½ç½®: {itemRect.position}\n" +
+                  $"ç‰©å“å°ºå¯¸: {itemSize.x}x{itemSize.y}\n" +
+                  $"è½´å¿ƒç±»å‹: {(itemRect.pivot == new Vector2(0f, 1f) ? "å·¦ä¸Šè§’è½´å¿ƒ" : "å…¶ä»–è½´å¿ƒ")}");
     }
 
     /// <summary>
-    /// »ñÈ¡ÎïÆ·ÔÚÍø¸ñÖĞµÄÎ»ÖÃ
+    /// è·å–ç‰©å“åœ¨ç½‘æ ¼ä¸­çš„ä½ç½®
     /// </summary>
-    /// <param name="item">ÎïÆ·</param>
-    /// <returns>Íø¸ñ×ø±ê</returns>
+    /// <param name="item">ç‰©å“</param>
+    /// <returns>ç½‘æ ¼åæ ‡</returns>
     private Vector2Int GetItemGridPosition(InventorySystemItem item)
     {
-        // ³¢ÊÔ´Ó¸¸¼¶Íø¸ñ»ñÈ¡Î»ÖÃĞÅÏ¢
+        // å°è¯•ä»çˆ¶çº§ç½‘æ ¼è·å–ä½ç½®ä¿¡æ¯
         var parentGrid = item.GetComponentInParent<BaseItemGrid>();
         if (parentGrid != null)
         {
-            // Ê¹ÓÃÍø¸ñµÄGetCellSize·½·¨»ñÈ¡×¼È·µÄ¸ñ×Ó´óĞ¡
+            // ä½¿ç”¨ç½‘æ ¼çš„GetCellSizeæ–¹æ³•è·å–å‡†ç¡®çš„æ ¼å­å¤§å°
             float cellSize = parentGrid.GetCellSize();
 
-            // »ñÈ¡ÎïÆ·µÄRectTransform
+            // è·å–ç‰©å“çš„RectTransform
             RectTransform itemRect = item.GetComponent<RectTransform>();
             if (itemRect != null)
             {
-                // ¸ù¾İÎïÆ·µÄanchoredPosition·´ÍÆÍø¸ñÎ»ÖÃ
-                // ×¢Òâ£ºÍø¸ñÏµÍ³Ê¹ÓÃ×óÉÏ½Ç×÷ÎªÔ­µã£¬YÖáÏòÏÂÎªÕı
+                // æ ¹æ®ç‰©å“çš„anchoredPositionåæ¨ç½‘æ ¼ä½ç½®
+                // æ³¨æ„ï¼šç½‘æ ¼ç³»ç»Ÿä½¿ç”¨å·¦ä¸Šè§’ä½œä¸ºåŸç‚¹ï¼ŒYè½´å‘ä¸‹ä¸ºæ­£
                 int gridX = Mathf.RoundToInt(itemRect.anchoredPosition.x / cellSize);
                 int gridY = Mathf.RoundToInt(-itemRect.anchoredPosition.y / cellSize);
 
-                // È·±£Íø¸ñ×ø±ê²»Îª¸ºÊı
+                // ç¡®ä¿ç½‘æ ¼åæ ‡ä¸ä¸ºè´Ÿæ•°
                 gridX = Mathf.Max(0, gridX);
                 gridY = Mathf.Max(0, gridY);
 
-                Debug.Log($"ÎïÆ·Íø¸ñÎ»ÖÃ¼ÆËã - anchoredPosition: {itemRect.anchoredPosition}, cellSize: {cellSize}, ¼ÆËãÍø¸ñ×ø±ê: ({gridX}, {gridY})");
+                Debug.Log($"ç‰©å“ç½‘æ ¼ä½ç½®è®¡ç®— - anchoredPosition: {itemRect.anchoredPosition}, cellSize: {cellSize}, è®¡ç®—ç½‘æ ¼åæ ‡: ({gridX}, {gridY})");
 
                 return new Vector2Int(gridX, gridY);
             }
         }
 
-        // Èç¹ûÎŞ·¨»ñÈ¡Íø¸ñÎ»ÖÃ£¬·µ»ØÄ¬ÈÏÖµ
-        Debug.LogWarning($"ÎŞ·¨»ñÈ¡ÎïÆ· {item.name} µÄÍø¸ñÎ»ÖÃ£¬Ê¹ÓÃÄ¬ÈÏÖµ (0,0)");
+        // å¦‚æœæ— æ³•è·å–ç½‘æ ¼ä½ç½®ï¼Œè¿”å›é»˜è®¤å€¼
+        Debug.LogWarning($"æ— æ³•è·å–ç‰©å“ {item.name} çš„ç½‘æ ¼ä½ç½®ï¼Œä½¿ç”¨é»˜è®¤å€¼ (0,0)");
         return Vector2Int.zero;
     }
 
     /// <summary>
-    /// »ñÈ¡ÎïÆ·ÔÚÍø¸ñÖĞµÄÊµ¼ÊÕ¼Î»Î»ÖÃ£¨»ùÓÚÍø¸ñ×ø±ê£¬²»ÊÇÊÓ¾õÎ»ÖÃ£©
+    /// è·å–ç‰©å“åœ¨ç½‘æ ¼ä¸­çš„å®é™…å ä½ä½ç½®ï¼ˆåŸºäºç½‘æ ¼åæ ‡ï¼Œä¸æ˜¯è§†è§‰ä½ç½®ï¼‰
     /// </summary>
-    /// <param name="item">ÎïÆ·</param>
-    /// <returns>Íø¸ñ×ø±ê</returns>
+    /// <param name="item">ç‰©å“</param>
+    /// <returns>ç½‘æ ¼åæ ‡</returns>
     private Vector2Int GetItemActualGridPosition(InventorySystemItem item)
     {
-        // ³¢ÊÔ´Ó¸¸¼¶Íø¸ñ»ñÈ¡Î»ÖÃĞÅÏ¢
+        // å°è¯•ä»çˆ¶çº§ç½‘æ ¼è·å–ä½ç½®ä¿¡æ¯
         var parentGrid = item.GetComponentInParent<BaseItemGrid>();
         if (parentGrid != null)
         {
-            // Ê¹ÓÃÍø¸ñµÄGetCellSize·½·¨»ñÈ¡×¼È·µÄ¸ñ×Ó´óĞ¡
+            // ä½¿ç”¨ç½‘æ ¼çš„GetCellSizeæ–¹æ³•è·å–å‡†ç¡®çš„æ ¼å­å¤§å°
             float cellSize = parentGrid.GetCellSize();
 
-            // »ñÈ¡ÎïÆ·µÄRectTransform
+            // è·å–ç‰©å“çš„RectTransform
             RectTransform itemRect = item.GetComponent<RectTransform>();
             if (itemRect != null)
             {
-                // Í³Ò»Ê¹ÓÃ×óÉÏ½ÇÖáĞÄ¼ÆËãÍø¸ñÎ»ÖÃ
-                // Ö±½Ó·´ÍÆÍø¸ñÎ»ÖÃ£¨ËùÓĞÎïÆ·ÏÖÔÚ¶¼Ê¹ÓÃ×óÉÏ½ÇÖáĞÄ£©
+                // ç»Ÿä¸€ä½¿ç”¨å·¦ä¸Šè§’è½´å¿ƒè®¡ç®—ç½‘æ ¼ä½ç½®
+                // ç›´æ¥åæ¨ç½‘æ ¼ä½ç½®ï¼ˆæ‰€æœ‰ç‰©å“ç°åœ¨éƒ½ä½¿ç”¨å·¦ä¸Šè§’è½´å¿ƒï¼‰
                 int gridX = Mathf.RoundToInt(itemRect.anchoredPosition.x / cellSize);
                 int gridY = Mathf.RoundToInt(-itemRect.anchoredPosition.y / cellSize);
 
                 Vector2Int gridPosition = new Vector2Int(gridX, gridY);
 
-                Debug.Log($"×óÉÏ½ÇÖáĞÄÎïÆ·Íø¸ñÎ»ÖÃ¼ÆËã - anchoredPosition: {itemRect.anchoredPosition}, cellSize: {cellSize}, Íø¸ñ×ø±ê: ({gridX}, {gridY})");
+                Debug.Log($"å·¦ä¸Šè§’è½´å¿ƒç‰©å“ç½‘æ ¼ä½ç½®è®¡ç®— - anchoredPosition: {itemRect.anchoredPosition}, cellSize: {cellSize}, ç½‘æ ¼åæ ‡: ({gridX}, {gridY})");
 
-                // È·±£Íø¸ñ×ø±ê²»Îª¸ºÊı
+                // ç¡®ä¿ç½‘æ ¼åæ ‡ä¸ä¸ºè´Ÿæ•°
                 gridPosition.x = Mathf.Max(0, gridPosition.x);
                 gridPosition.y = Mathf.Max(0, gridPosition.y);
 
@@ -346,30 +346,30 @@ public class HoverHighlight : MonoBehaviour
             }
         }
 
-        // Èç¹ûÎŞ·¨»ñÈ¡Íø¸ñÎ»ÖÃ£¬·µ»ØÄ¬ÈÏÖµ
-        Debug.LogWarning($"ÎŞ·¨»ñÈ¡ÎïÆ· {item.name} µÄÍø¸ñÎ»ÖÃ£¬Ê¹ÓÃÄ¬ÈÏÖµ (0,0)");
+        // å¦‚æœæ— æ³•è·å–ç½‘æ ¼ä½ç½®ï¼Œè¿”å›é»˜è®¤å€¼
+        Debug.LogWarning($"æ— æ³•è·å–ç‰©å“ {item.name} çš„ç½‘æ ¼ä½ç½®ï¼Œä½¿ç”¨é»˜è®¤å€¼ (0,0)");
         return Vector2Int.zero;
     }
 
     /// <summary>
-    /// »ñÈ¡¸ßÁÁ¿òÔÚÍø¸ñÖĞµÄÎ»ÖÃ
+    /// è·å–é«˜äº®æ¡†åœ¨ç½‘æ ¼ä¸­çš„ä½ç½®
     /// </summary>
-    /// <returns>Íø¸ñ×ø±ê</returns>
+    /// <returns>ç½‘æ ¼åæ ‡</returns>
     private Vector2Int GetHighlightGridPosition()
     {
         if (hoverHighlightRect == null) return Vector2Int.zero;
 
-        // ³¢ÊÔ´Ó¸¸¼¶Íø¸ñ»ñÈ¡Î»ÖÃĞÅÏ¢
+        // å°è¯•ä»çˆ¶çº§ç½‘æ ¼è·å–ä½ç½®ä¿¡æ¯
         var parentGrid = hoverHighlightRect.GetComponentInParent<BaseItemGrid>();
         if (parentGrid != null)
         {
             float cellSize = parentGrid.GetCellSize();
 
-            // ¸ù¾İ¸ßÁÁ¿òµÄanchoredPosition·´ÍÆÍø¸ñÎ»ÖÃ
+            // æ ¹æ®é«˜äº®æ¡†çš„anchoredPositionåæ¨ç½‘æ ¼ä½ç½®
             int gridX = Mathf.RoundToInt(hoverHighlightRect.anchoredPosition.x / cellSize);
             int gridY = Mathf.RoundToInt(-hoverHighlightRect.anchoredPosition.y / cellSize);
 
-            // È·±£Íø¸ñ×ø±ê²»Îª¸ºÊı
+            // ç¡®ä¿ç½‘æ ¼åæ ‡ä¸ä¸ºè´Ÿæ•°
             gridX = Mathf.Max(0, gridX);
             gridY = Mathf.Max(0, gridY);
 
@@ -380,33 +380,33 @@ public class HoverHighlight : MonoBehaviour
     }
 
     /// <summary>
-    /// ¸üĞÂ¸ßÁÁĞ§¹ûÒÔÆ¥Åä×°±¸À¸´óĞ¡
+    /// æ›´æ–°é«˜äº®æ•ˆæœä»¥åŒ¹é…è£…å¤‡æ å¤§å°
     /// </summary>
-    /// <param name="item">Ä¿±êÎïÆ·</param>
-    /// <param name="equipSlot">×°±¸À¸ÒıÓÃ</param>
+    /// <param name="item">ç›®æ ‡ç‰©å“</param>
+    /// <param name="equipSlot">è£…å¤‡æ å¼•ç”¨</param>
     public void UpdateHighlightForEquipSlot(InventorySystemItem item, EquipSlot equipSlot)
     {
         if (hoverHighlightRect == null || item == null || equipSlot == null) return;
 
-        // »ñÈ¡×°±¸À¸µÄRectTransform
+        // è·å–è£…å¤‡æ çš„RectTransform
         RectTransform equipSlotRect = equipSlot.GetComponent<RectTransform>();
         if (equipSlotRect == null) return;
 
-        // Ê¹ÓÃ×°±¸À¸µÄ´óĞ¡×÷Îª¸ßÁÁ¿ò´óĞ¡
+        // ä½¿ç”¨è£…å¤‡æ çš„å¤§å°ä½œä¸ºé«˜äº®æ¡†å¤§å°
         Vector2 equipSlotSize = equipSlotRect.sizeDelta;
         hoverHighlightRect.sizeDelta = equipSlotSize;
 
-        // ÉèÖÃ¸ßÁÁ¿òµÄÃªµãºÍÖáĞÄÓë×°±¸À¸Ò»ÖÂ
+        // è®¾ç½®é«˜äº®æ¡†çš„é”šç‚¹å’Œè½´å¿ƒä¸è£…å¤‡æ ä¸€è‡´
         hoverHighlightRect.anchorMin = equipSlotRect.anchorMin;
         hoverHighlightRect.anchorMax = equipSlotRect.anchorMax;
         hoverHighlightRect.pivot = equipSlotRect.pivot;
 
-        // ÓÉÓÚ¸ßÁÁ¿òÊÇ×°±¸À¸¸¸¼¶µÄ×Ó¶ÔÏó£¬ĞèÒª½«×°±¸À¸µÄÊÀ½çÎ»ÖÃ×ª»»ÎªÏà¶ÔÓÚ¸¸¼¶µÄ±¾µØÎ»ÖÃ
-        // »ñÈ¡×°±¸À¸ÔÚÆä¸¸¼¶×ø±êÏµÖĞµÄÎ»ÖÃ
+        // ç”±äºé«˜äº®æ¡†æ˜¯è£…å¤‡æ çˆ¶çº§çš„å­å¯¹è±¡ï¼Œéœ€è¦å°†è£…å¤‡æ çš„ä¸–ç•Œä½ç½®è½¬æ¢ä¸ºç›¸å¯¹äºçˆ¶çº§çš„æœ¬åœ°ä½ç½®
+        // è·å–è£…å¤‡æ åœ¨å…¶çˆ¶çº§åæ ‡ç³»ä¸­çš„ä½ç½®
         Vector3 worldPosition = equipSlotRect.TransformPoint(Vector3.zero);
         Vector3 localPosition;
-        
-        // ½«ÊÀ½ç×ø±ê×ª»»Îª¸ßÁÁ¿ò¸¸¼¶µÄ±¾µØ×ø±ê
+
+        // å°†ä¸–ç•Œåæ ‡è½¬æ¢ä¸ºé«˜äº®æ¡†çˆ¶çº§çš„æœ¬åœ°åæ ‡
         RectTransform parentRect = hoverHighlightRect.parent.GetComponent<RectTransform>();
         if (parentRect != null)
         {
@@ -415,22 +415,22 @@ public class HoverHighlight : MonoBehaviour
         }
         else
         {
-            // Èç¹ûÃ»ÓĞ¸¸¼¶RectTransform£¬Ö±½ÓÊ¹ÓÃ×°±¸À¸µÄÎ»ÖÃ
+            // å¦‚æœæ²¡æœ‰çˆ¶çº§RectTransformï¼Œç›´æ¥ä½¿ç”¨è£…å¤‡æ çš„ä½ç½®
             hoverHighlightRect.anchoredPosition = Vector2.zero;
         }
 
-        // ¸ßÁÁ¿ò²»ĞèÒªĞı×ª
+        // é«˜äº®æ¡†ä¸éœ€è¦æ—‹è½¬
         hoverHighlightRect.localRotation = Quaternion.identity;
 
-        // Ç¿ÖÆË¢ĞÂ¸ßÁÁ¶ÔÏó£¬È·±£ÕıÈ·ÏÔÊ¾
+        // å¼ºåˆ¶åˆ·æ–°é«˜äº®å¯¹è±¡ï¼Œç¡®ä¿æ­£ç¡®æ˜¾ç¤º
         ForceRefresh();
 
-        // µ÷ÊÔĞÅÏ¢
-        Debug.Log($"×°±¸À¸ĞüÍ£¸ßÁÁ¸üĞÂ - ×°±¸À¸: {equipSlot.name}, ´óĞ¡: {equipSlotSize}, ±¾µØÎ»ÖÃ: {hoverHighlightRect.anchoredPosition}");
+        // è°ƒè¯•ä¿¡æ¯
+        Debug.Log($"è£…å¤‡æ æ‚¬åœé«˜äº®æ›´æ–° - è£…å¤‡æ : {equipSlot.name}, å¤§å°: {equipSlotSize}, æœ¬åœ°ä½ç½®: {hoverHighlightRect.anchoredPosition}");
     }
 
     /// <summary>
-    /// Òş²ØĞüÍ£¸ßÁÁ
+    /// éšè—æ‚¬åœé«˜äº®
     /// </summary>
     public void HideHoverHighlight()
     {
@@ -445,9 +445,9 @@ public class HoverHighlight : MonoBehaviour
     }
 
     /// <summary>
-    /// ÉèÖÃĞüÍ£¸ßÁÁÑÕÉ«
+    /// è®¾ç½®æ‚¬åœé«˜äº®é¢œè‰²
     /// </summary>
-    /// <param name="color">ÑÕÉ«</param>
+    /// <param name="color">é¢œè‰²</param>
     public void SetHoverColor(Color color)
     {
         hoverColor = color;
@@ -458,7 +458,7 @@ public class HoverHighlight : MonoBehaviour
     }
 
     /// <summary>
-    /// ÇåÀí×ÊÔ´
+    /// æ¸…ç†èµ„æº
     /// </summary>
     private void OnDestroy()
     {

@@ -11,7 +11,7 @@ using UnityEditor;
 /// 物品生成器基类 - 提供物品生成的核心功能
 /// 可以被继承来实现不同类型的生成器
 /// </summary>
-public abstract class BaseItemSpawn : MonoBehaviour
+public abstract class BaseItemSpawn : MonoBehaviour, ISaveable
 {
     [Header("基础生成器设置")]
     [SerializeField] protected ItemGrid targetGrid; // 目标网格
@@ -52,6 +52,7 @@ public abstract class BaseItemSpawn : MonoBehaviour
         public Vector2Int gridPosition;
         public Vector2Int size;
         public InventorySystemItemDataSO itemData;
+        public float spawnTime; // 生成时间
     }
 
     #region Unity生命周期方法
@@ -65,6 +66,16 @@ public abstract class BaseItemSpawn : MonoBehaviour
     protected virtual void Start()
     {
         InitializeItemSpawner();
+
+        if (Application.isPlaying)
+        {
+            InitializeSaveSystem();
+
+            if (autoLoadOnStart)
+            {
+                InitializeItemSpawner();
+            }
+        }
     }
 
     protected virtual void Update()
@@ -744,7 +755,7 @@ public abstract class BaseItemSpawn : MonoBehaviour
     /// <summary>
     /// 在指定位置生成物品
     /// </summary>
-    public GameObject SpawnItemAtPosition(GameObject prefab, InventorySystemItemDataSO data, Vector2Int gridPos)
+    public virtual GameObject SpawnItemAtPosition(GameObject prefab, InventorySystemItemDataSO data, Vector2Int gridPos)
     {
         // 确保InventoryGrid是最新的
         DetectInventoryGrid();
@@ -781,7 +792,8 @@ public abstract class BaseItemSpawn : MonoBehaviour
                 itemObject = spawnedItem,
                 gridPosition = gridPos,
                 size = itemSize,
-                itemData = data
+                itemData = data,
+                spawnTime = Time.time // 设置生成时间
             });
 
             if (showDebugInfo)
@@ -1056,6 +1068,68 @@ public abstract class BaseItemSpawn : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 刷新网格占用状态
+    /// </summary>
+    protected void RefreshGridOccupancy()
+    {
+        if (gridOccupancy == null || targetGrid == null) return;
+
+        // 重置网格占用状态
+        int width = gridOccupancy.GetLength(0);
+        int height = gridOccupancy.GetLength(1);
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                gridOccupancy[x, y] = 0;
+            }
+        }
+
+        // 根据当前生成的物品重新标记占用状态
+        foreach (var spawnedItem in spawnedItems)
+        {
+            if (spawnedItem.itemObject != null)
+            {
+                MarkGridOccupied(spawnedItem.gridPosition, spawnedItem.size, 1);
+            }
+        }
+
+        if (showDebugInfo)
+        {
+            Debug.Log("网格占用状态已刷新");
+        }
+    }
+
+    /// <summary>
+    /// 根据物品数据获取对应的预制体
+    /// </summary>
+    protected GameObject GetItemPrefab(InventorySystemItemDataSO itemData)
+    {
+        if (itemData == null) return null;
+
+        // 首先尝试从预制体字典中获取
+        string itemKey = itemData.itemName;
+        if (itemPrefabDict.ContainsKey(itemKey))
+        {
+            return itemPrefabDict[itemKey];
+        }
+
+        // 如果字典中没有，尝试通过ID查找
+        itemKey = itemData.id.ToString();
+        if (itemPrefabDict.ContainsKey(itemKey))
+        {
+            return itemPrefabDict[itemKey];
+        }
+
+        // 如果还是没有找到，返回null并记录警告
+        if (showDebugInfo)
+        {
+            Debug.LogWarning($"无法找到物品 {itemData.itemName} 的预制体");
+        }
+        return null;
+    }
+
     #endregion
 
     #region 调试和信息方法
@@ -1100,4 +1174,551 @@ public abstract class BaseItemSpawn : MonoBehaviour
     }
 
     #endregion
+
+    // ===== ISaveable接口实现 =====
+
+    /// <summary>
+    /// 基础物品生成器保存数据类
+    /// </summary>
+    [System.Serializable]
+    public class BaseItemSpawnSaveData
+    {
+        public string spawnerName; // 生成器名称
+        public int totalSpawnedCount; // 总生成数量
+        public float lastSpawnTime; // 最后生成时间
+        public List<SpawnedItemSaveInfo> spawnedItemsData; // 生成的物品数据
+        public Vector3 spawnerPosition; // 生成器位置
+        public Vector3 spawnerRotation; // 生成器旋转
+        public bool isActive; // 是否激活
+        public string targetGridID; // 目标网格ID
+    }
+
+    /// <summary>
+    /// 生成物品保存信息
+    /// </summary>
+    [System.Serializable]
+    public class SpawnedItemSaveInfo
+    {
+        public string itemID; // 物品ID
+        public string instanceID; // 实例ID
+        public Vector2Int gridPosition; // 网格位置
+        public float spawnTime; // 生成时间
+        public string itemDataPath; // 物品数据路径
+        public bool isValid; // 是否有效
+    }
+
+    // ISaveable接口实现
+    private string saveID = "";
+    private int totalSpawnedCount = 0; // 总生成计数
+    private Dictionary<string, string> spawnedItemInstanceIDs = new Dictionary<string, string>(); // 生成物品的实例ID映射
+
+    /// <summary>
+    /// 获取保存ID
+    /// </summary>
+    public string GetSaveID()
+    {
+        if (string.IsNullOrEmpty(saveID))
+        {
+            GenerateNewSaveID();
+        }
+        return saveID;
+    }
+
+    /// <summary>
+    /// 设置保存ID
+    /// </summary>
+    public void SetSaveID(string id)
+    {
+        if (!string.IsNullOrEmpty(id))
+        {
+            saveID = id;
+        }
+    }
+
+    /// <summary>
+    /// 生成新的保存ID
+    /// 格式: BaseSpawner_[生成器名称]_[8位GUID]_[实例ID]
+    /// </summary>
+    public virtual void GenerateNewSaveID()
+    {
+        string spawnerName = gameObject.name.Replace(" ", "").Replace("(", "").Replace(")", "");
+        string guidPart = System.Guid.NewGuid().ToString("N").Substring(0, 8).ToUpper();
+        int instanceID = GetInstanceID();
+        saveID = $"BaseSpawner_{spawnerName}_{guidPart}_{instanceID}";
+        
+        if (Application.isPlaying && showDebugInfo)
+        {
+            Debug.Log($"为基础物品生成器生成新的保存ID: {saveID}");
+        }
+    }
+
+    /// <summary>
+    /// 为生成的物品分配实例ID
+    /// </summary>
+    protected string AllocateItemInstanceID(InventorySystemItemDataSO itemData, Vector2Int gridPos)
+    {
+        if (itemData == null) return "";
+        
+        totalSpawnedCount++;
+        string instanceID = $"Item_{itemData.id}_{totalSpawnedCount}_{Time.time:F2}_{UnityEngine.Random.Range(1000, 9999)}";
+        
+        // 记录实例ID映射
+        string itemKey = $"{itemData.id}_{gridPos.x}_{gridPos.y}";
+        spawnedItemInstanceIDs[itemKey] = instanceID;
+        
+        if (showDebugInfo)
+        {
+            Debug.Log($"为物品 {itemData.itemName} 分配实例ID: {instanceID}");
+        }
+        
+        return instanceID;
+    }
+
+    /// <summary>
+    /// 获取保存数据
+    /// </summary>
+    public virtual object GetSaveData()
+    {
+        BaseItemSpawnSaveData saveData = new BaseItemSpawnSaveData();
+        
+        // 保存基础信息
+        saveData.spawnerName = gameObject.name;
+        saveData.totalSpawnedCount = totalSpawnedCount;
+        saveData.lastSpawnTime = Time.time;
+        
+        // 保存位置和旋转
+        saveData.spawnerPosition = transform.position;
+        saveData.spawnerRotation = transform.eulerAngles;
+        saveData.isActive = gameObject.activeInHierarchy;
+        
+        // 保存目标网格ID
+        if (targetGrid != null && targetGrid is ISaveable saveableGrid)
+        {
+            saveData.targetGridID = saveableGrid.GetSaveID();
+        }
+        
+        // 保存生成的物品数据
+        saveData.spawnedItemsData = new List<SpawnedItemSaveInfo>();
+        foreach (var spawnedItem in spawnedItems)
+        {
+            if (spawnedItem.itemData != null)
+            {
+                SpawnedItemSaveInfo itemSaveInfo = new SpawnedItemSaveInfo();
+                itemSaveInfo.itemID = spawnedItem.itemData.id.ToString();
+                itemSaveInfo.gridPosition = spawnedItem.gridPosition;
+                itemSaveInfo.spawnTime = spawnedItem.spawnTime;
+                itemSaveInfo.isValid = spawnedItem.itemObject != null;
+                
+                // 获取物品数据路径
+#if UNITY_EDITOR
+                itemSaveInfo.itemDataPath = UnityEditor.AssetDatabase.GetAssetPath(spawnedItem.itemData);
+#else
+                itemSaveInfo.itemDataPath = spawnedItem.itemData.name;
+#endif
+                
+                // 获取实例ID
+                string itemKey = $"{spawnedItem.itemData.id}_{spawnedItem.gridPosition.x}_{spawnedItem.gridPosition.y}";
+                if (spawnedItemInstanceIDs.ContainsKey(itemKey))
+                {
+                    itemSaveInfo.instanceID = spawnedItemInstanceIDs[itemKey];
+                }
+                
+                saveData.spawnedItemsData.Add(itemSaveInfo);
+            }
+        }
+        
+        return saveData;
+    }
+
+    /// <summary>
+    /// 加载保存数据
+    /// </summary>
+    public virtual void LoadSaveData(object data)
+    {
+        if (data is BaseItemSpawnSaveData saveData)
+        {
+            try
+            {
+                // 恢复基础信息
+                totalSpawnedCount = saveData.totalSpawnedCount;
+                
+                // 恢复位置和旋转
+                transform.position = saveData.spawnerPosition;
+                transform.eulerAngles = saveData.spawnerRotation;
+                gameObject.SetActive(saveData.isActive);
+                
+                // 恢复目标网格引用
+                if (!string.IsNullOrEmpty(saveData.targetGridID))
+                {
+                    RestoreTargetGridReference(saveData.targetGridID);
+                }
+                
+                // 恢复生成的物品
+                if (saveData.spawnedItemsData != null && saveData.spawnedItemsData.Count > 0)
+                {
+                    StartCoroutine(RestoreSpawnedItemsCoroutine(saveData.spawnedItemsData));
+                }
+                
+                if (showDebugInfo)
+                {
+                    Debug.Log($"成功加载基础物品生成器保存数据: {GetSaveID()}, 恢复 {saveData.spawnedItemsData?.Count ?? 0} 个物品");
+                }
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError($"加载基础物品生成器保存数据失败: {e.Message}");
+            }
+        }
+        else
+        {
+            Debug.LogError("无效的基础物品生成器保存数据格式");
+        }
+    }
+
+    /// <summary>
+    /// 恢复目标网格引用
+    /// </summary>
+    private void RestoreTargetGridReference(string gridID)
+    {
+        if (string.IsNullOrEmpty(gridID)) return;
+        
+        // 在场景中查找具有指定ID的网格
+        ItemGrid[] allGrids = FindObjectsOfType<ItemGrid>();
+        foreach (var grid in allGrids)
+        {
+            if (grid is ISaveable saveableGrid && saveableGrid.GetSaveID() == gridID)
+            {
+                targetGrid = grid;
+                if (showDebugInfo)
+                {
+                    Debug.Log($"成功恢复目标网格引用: {gridID}");
+                }
+                return;
+            }
+        }
+        
+        Debug.LogWarning($"无法找到ID为 {gridID} 的目标网格");
+    }
+
+    /// <summary>
+    /// 协程：恢复生成的物品
+    /// </summary>
+    private IEnumerator RestoreSpawnedItemsCoroutine(List<SpawnedItemSaveInfo> itemsData)
+    {
+        if (targetGrid == null)
+        {
+            Debug.LogWarning("目标网格为空，无法恢复生成的物品");
+            yield break;
+        }
+        
+        // 等待一帧确保网格初始化完成
+        yield return null;
+        
+        int restoredCount = 0;
+        foreach (var itemSaveInfo in itemsData)
+        {
+            if (RestoreSpawnedItem(itemSaveInfo))
+            {
+                restoredCount++;
+            }
+            
+            // 每恢复几个物品等待一帧，避免卡顿
+            if (restoredCount % 5 == 0)
+            {
+                yield return null;
+            }
+        }
+        
+        // 更新网格占用状态
+        RefreshGridOccupancy();
+        
+        if (showDebugInfo)
+        {
+            Debug.Log($"物品恢复完成，成功恢复 {restoredCount}/{itemsData.Count} 个物品");
+        }
+    }
+
+    /// <summary>
+    /// 恢复单个生成的物品
+    /// </summary>
+    private bool RestoreSpawnedItem(SpawnedItemSaveInfo itemSaveInfo)
+    {
+        try
+        {
+            // 查找物品数据
+            InventorySystemItemDataSO itemData = FindItemDataByPath(itemSaveInfo.itemDataPath, itemSaveInfo.itemID);
+            if (itemData == null)
+            {
+                Debug.LogWarning($"无法找到物品数据: {itemSaveInfo.itemDataPath}");
+                return false;
+            }
+            
+            // 检查网格位置是否可用
+            Vector2Int itemSize = new Vector2Int(itemData.width, itemData.height);
+            if (!IsPositionAvailable(itemSaveInfo.gridPosition, itemSize))
+            {
+                Debug.LogWarning($"网格位置 {itemSaveInfo.gridPosition} 不可用，跳过物品 {itemData.itemName}");
+                return false;
+            }
+            
+            // 查找物品预制体
+            GameObject prefab = GetItemPrefab(itemData);
+            if (prefab == null)
+            {
+                Debug.LogWarning($"无法找到物品预制体: {itemData.itemName}");
+                return false;
+            }
+            
+            // 生成物品
+            GameObject spawnedItem = SpawnItemAtPosition(prefab, itemData, itemSaveInfo.gridPosition);
+            if (spawnedItem != null)
+            {
+                // 恢复实例ID
+                if (!string.IsNullOrEmpty(itemSaveInfo.instanceID))
+                {
+                    string itemKey = $"{itemData.id}_{itemSaveInfo.gridPosition.x}_{itemSaveInfo.gridPosition.y}";
+                    spawnedItemInstanceIDs[itemKey] = itemSaveInfo.instanceID;
+                    
+                    // 如果物品有ItemDataHolder组件，设置实例ID
+                    ItemDataHolder dataHolder = spawnedItem.GetComponent<ItemDataHolder>();
+                    if (dataHolder != null && dataHolder is ISaveable saveableHolder)
+                    {
+                        saveableHolder.SetSaveID(itemSaveInfo.instanceID);
+                    }
+                }
+                
+                return true;
+            }
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError($"恢复物品失败: {e.Message}");
+        }
+        
+        return false;
+    }
+
+    /// <summary>
+    /// 根据路径和ID查找物品数据
+    /// </summary>
+    private InventorySystemItemDataSO FindItemDataByPath(string assetPath, string itemID)
+    {
+        // 首先尝试从缓存中查找
+        foreach (var kvp in itemDataDict)
+        {
+            if (kvp.Value.id.ToString() == itemID)
+            {
+                return kvp.Value;
+            }
+        }
+        
+        // 尝试通过路径加载
+#if UNITY_EDITOR
+        InventorySystemItemDataSO loadedData = UnityEditor.AssetDatabase.LoadAssetAtPath<InventorySystemItemDataSO>(assetPath);
+        if (loadedData != null)
+        {
+            return loadedData;
+        }
+#endif
+        
+        // 最后尝试在所有物品数据中查找
+        foreach (var itemData in allItemData)
+        {
+            if (itemData.id.ToString() == itemID)
+            {
+                return itemData;
+            }
+        }
+        
+        return null;
+    }
+
+    /// <summary>
+    /// 验证保存数据
+    /// </summary>
+    public virtual bool ValidateData()
+    {
+        bool isValid = true;
+        
+        // 验证保存ID
+        if (string.IsNullOrEmpty(saveID))
+        {
+            GenerateNewSaveID();
+            isValid = false;
+            Debug.LogWarning("基础物品生成器保存ID为空，已重新生成");
+        }
+        
+        // 验证目标网格
+        if (targetGrid == null)
+        {
+            isValid = false;
+            Debug.LogWarning("目标网格引用为空");
+        }
+        
+        // 验证生成的物品列表
+        if (spawnedItems == null)
+        {
+            spawnedItems = new List<SpawnedItemInfo>();
+            isValid = false;
+            Debug.LogWarning("生成物品列表为空，已重新初始化");
+        }
+        
+        // 验证实例ID映射
+        if (spawnedItemInstanceIDs == null)
+        {
+            spawnedItemInstanceIDs = new Dictionary<string, string>();
+            isValid = false;
+            Debug.LogWarning("实例ID映射为空，已重新初始化");
+        }
+        
+        return isValid;
+    }
+
+    /// <summary>
+    /// 初始化保存系统
+    /// </summary>
+    public virtual void InitializeSaveSystem()
+    {
+        // 确保有有效的保存ID
+        if (string.IsNullOrEmpty(saveID))
+        {
+            GenerateNewSaveID();
+        }
+        
+        // 验证数据完整性
+        ValidateData();
+        
+        // 初始化实例ID映射
+        if (spawnedItemInstanceIDs == null)
+        {
+            spawnedItemInstanceIDs = new Dictionary<string, string>();
+        }
+        
+        if (showDebugInfo)
+        {
+            Debug.Log($"基础物品生成器保存系统初始化完成: {saveID}");
+        }
+    }
+
+    /// <summary>
+    /// 获取生成器状态摘要
+    /// </summary>
+    public virtual string GetSpawnerStatusSummary()
+    {
+        string gridInfo = targetGrid != null ? targetGrid.name : "无目标网格";
+        string itemCount = spawnedItems != null ? spawnedItems.Count.ToString() : "0";
+        string totalCount = totalSpawnedCount.ToString();
+        
+        return $"基础物品生成器 [{saveID}] - 目标网格:{gridInfo}, 当前物品:{itemCount}, 总生成数:{totalCount}";
+    }
+
+    // ===== ISaveable接口的其他必需方法 =====
+    
+    private bool isModified = false;
+    private string lastModified = "";
+    
+    /// <summary>
+    /// 验证保存ID是否有效
+    /// </summary>
+    public bool IsSaveIDValid()
+    {
+        return !string.IsNullOrEmpty(saveID) && saveID.Contains("BaseSpawner_");
+    }
+    
+    /// <summary>
+    /// 序列化对象数据为JSON字符串
+    /// </summary>
+    public string SerializeToJson()
+    {
+        try
+        {
+            var saveData = GetSaveData() as BaseItemSpawnSaveData;
+            return JsonUtility.ToJson(saveData, true);
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError($"序列化基础物品生成器数据失败: {e.Message}");
+            return "";
+        }
+    }
+    
+    /// <summary>
+    /// 从JSON字符串反序列化对象数据
+    /// </summary>
+    public bool DeserializeFromJson(string jsonData)
+    {
+        try
+        {
+            if (string.IsNullOrEmpty(jsonData)) return false;
+            
+            BaseItemSpawnSaveData saveData = JsonUtility.FromJson<BaseItemSpawnSaveData>(jsonData);
+            if (saveData != null)
+            {
+                LoadSaveData(saveData);
+                return true;
+            }
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError($"反序列化基础物品生成器数据失败: {e.Message}");
+        }
+        return false;
+    }
+    
+    /// <summary>
+    /// 标记对象为已修改状态
+    /// </summary>
+    public void MarkAsModified()
+    {
+        isModified = true;
+        UpdateLastModified();
+        
+        if (showDebugInfo)
+        {
+            Debug.Log($"基础物品生成器已标记为修改: {saveID}");
+        }
+    }
+    
+    /// <summary>
+    /// 重置修改标记
+    /// </summary>
+    public void ResetModifiedFlag()
+    {
+        isModified = false;
+        
+        if (showDebugInfo)
+        {
+            Debug.Log($"基础物品生成器修改标记已重置: {saveID}");
+        }
+    }
+    
+    /// <summary>
+    /// 检查对象是否已被修改
+    /// </summary>
+    public bool IsModified()
+    {
+        return isModified;
+    }
+    
+    /// <summary>
+    /// 获取对象的最后修改时间
+    /// </summary>
+    public string GetLastModified()
+    {
+        return lastModified;
+    }
+    
+    /// <summary>
+    /// 更新最后修改时间为当前时间
+    /// </summary>
+    public void UpdateLastModified()
+    {
+        lastModified = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+        
+        if (showDebugInfo)
+        {
+            Debug.Log($"基础物品生成器最后修改时间已更新: {lastModified}");
+        }
+    }
+    
 }

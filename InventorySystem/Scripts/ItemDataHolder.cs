@@ -1,12 +1,83 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-// 物品数据容器：挂在物品预制体上，负责与 InventorySystemItemDataSO 交互
+// 物品数据持有者，用于物品预制体上，持有 InventorySystemItemDataSO 数据
+// 支持实例数据存储和动态属性保存
+[System.Serializable]
+public class ItemInstanceData
+{
+	// 动态属性数据
+	public float currentDurability = 100f; // 当前耐久度
+	public int currentStackCount = 1; // 当前堆叠数量
+	public float currentHealAmount = 0f; // 当前治疗量
+	public int currentUsageCount = 0; // 当前使用次数
+	public bool isModified = false; // 是否被修改过
+	public Dictionary<string, object> customProperties = new Dictionary<string, object>(); // 自定义属性
+
+	// 构造函数
+	public ItemInstanceData()
+	{
+		customProperties = new Dictionary<string, object>();
+	}
+
+	// 从ScriptableObject初始化实例数据
+	public void InitializeFromItemData(InventorySystemItemDataSO itemData)
+	{
+		if (itemData == null) return;
+
+		currentDurability = itemData.durability;
+		currentStackCount = 1; // 默认堆叠数量为1
+		currentHealAmount = itemData.maxHealAmount;
+		currentUsageCount = 0;
+		isModified = false;
+	}
+
+	// 验证数据有效性
+	public bool ValidateData(InventorySystemItemDataSO itemData)
+	{
+		if (itemData == null) return false;
+
+		// 验证耐久度范围
+		if (currentDurability < 0 || currentDurability > itemData.durability)
+		{
+			currentDurability = Mathf.Clamp(currentDurability, 0, itemData.durability);
+			isModified = true;
+		}
+
+		// 验证堆叠数量
+		if (currentStackCount < 1 || currentStackCount > itemData.maxStack)
+		{
+			currentStackCount = Mathf.Clamp(currentStackCount, 1, itemData.maxStack);
+			isModified = true;
+		}
+
+		// 验证治疗量
+		if (currentHealAmount < 0 || currentHealAmount > itemData.maxHealAmount)
+		{
+			currentHealAmount = Mathf.Clamp(currentHealAmount, 0, itemData.maxHealAmount);
+			isModified = true;
+		}
+
+		return true;
+	}
+
+	// 重置为默认值
+	public void ResetToDefault(InventorySystemItemDataSO itemData)
+	{
+		InitializeFromItemData(itemData);
+		customProperties.Clear();
+	}
+}
+
 public class ItemDataHolder : MonoBehaviour
 {
 	[Header("物品数据")]
 	[SerializeField] private InventorySystemItemDataSO itemData;
+
+	[Header("实例数据")]
+	[SerializeField] private ItemInstanceData instanceData = new ItemInstanceData();
 
 	[Header("UI 组件引用")]
 	[SerializeField] private Image itemIconImage;
@@ -15,9 +86,19 @@ public class ItemDataHolder : MonoBehaviour
 
 	private void Awake()
 	{
-		// 如果已有数据，自动刷新 UI 显示
+		// 初始化实例数据
+		if (instanceData == null)
+		{
+			instanceData = new ItemInstanceData();
+		}
+
+		// 如果有数据，自动刷新 UI 显示
 		if (itemData != null)
 		{
+			// 初始化实例数据
+			instanceData.InitializeFromItemData(itemData);
+			// 验证数据有效性
+			instanceData.ValidateData(itemData);
 			UpdateItemDisplay();
 		}
 	}
@@ -33,7 +114,207 @@ public class ItemDataHolder : MonoBehaviour
 	public void SetItemData(InventorySystemItemDataSO data)
 	{
 		itemData = data;
+		// 重新初始化实例数据
+		if (instanceData == null)
+		{
+			instanceData = new ItemInstanceData();
+		}
+		instanceData.InitializeFromItemData(data);
 		UpdateItemDisplay();
+	}
+
+	// === 实例数据管理方法 ===
+
+	// 获取实例数据
+	public ItemInstanceData GetInstanceData()
+	{
+		return instanceData;
+	}
+
+	// 设置实例数据
+	public void SetInstanceData(ItemInstanceData data)
+	{
+		if (data != null)
+		{
+			instanceData = data;
+			// 验证数据有效性
+			instanceData.ValidateData(itemData);
+		}
+	}
+
+	// 获取当前耐久度
+	public float GetCurrentDurability()
+	{
+		return instanceData?.currentDurability ?? (itemData?.durability ?? 100f);
+	}
+
+	// 设置当前耐久度
+	public void SetCurrentDurability(float durability)
+	{
+		if (instanceData != null)
+		{
+			instanceData.currentDurability = durability;
+			instanceData.isModified = true;
+			// 验证数据有效性
+			instanceData.ValidateData(itemData);
+		}
+	}
+
+	// 获取当前堆叠数量
+	public int GetCurrentStackCount()
+	{
+		return instanceData?.currentStackCount ?? 1;
+	}
+
+	// 设置当前堆叠数量
+	public void SetCurrentStackCount(int count)
+	{
+		if (instanceData != null)
+		{
+			instanceData.currentStackCount = count;
+			instanceData.isModified = true;
+			// 验证数据有效性
+			instanceData.ValidateData(itemData);
+		}
+	}
+
+	// 获取当前治疗量
+	public float GetCurrentHealAmount()
+	{
+		return instanceData?.currentHealAmount ?? (itemData?.maxHealAmount ?? 0f);
+	}
+
+	// 设置当前治疗量
+	public void SetCurrentHealAmount(float amount)
+	{
+		if (instanceData != null)
+		{
+			instanceData.currentHealAmount = amount;
+			instanceData.isModified = true;
+			// 验证数据有效性
+			instanceData.ValidateData(itemData);
+		}
+	}
+
+	// 获取使用次数
+	public int GetCurrentUsageCount()
+	{
+		return instanceData?.currentUsageCount ?? 0;
+	}
+
+	// 增加使用次数
+	public void IncrementUsageCount()
+	{
+		if (instanceData != null)
+		{
+			instanceData.currentUsageCount++;
+			instanceData.isModified = true;
+		}
+	}
+
+	// 检查物品是否被修改过
+	public bool IsModified()
+	{
+		return instanceData?.isModified ?? false;
+	}
+
+	// 设置自定义属性
+	public void SetCustomProperty(string key, object value)
+	{
+		if (instanceData != null && !string.IsNullOrEmpty(key))
+		{
+			instanceData.customProperties[key] = value;
+			instanceData.isModified = true;
+		}
+	}
+
+	// 获取自定义属性
+	public T GetCustomProperty<T>(string key, T defaultValue = default(T))
+	{
+		if (instanceData != null && !string.IsNullOrEmpty(key) && instanceData.customProperties.ContainsKey(key))
+		{
+			try
+			{
+				return (T)instanceData.customProperties[key];
+			}
+			catch
+			{
+				return defaultValue;
+			}
+		}
+		return defaultValue;
+	}
+
+	// 验证并修复实例数据
+	public bool ValidateAndRepairInstanceData()
+	{
+		if (instanceData == null)
+		{
+			instanceData = new ItemInstanceData();
+			if (itemData != null)
+			{
+				instanceData.InitializeFromItemData(itemData);
+			}
+			return true;
+		}
+
+		return instanceData.ValidateData(itemData);
+	}
+
+	// 重置实例数据为默认值
+	public void ResetInstanceData()
+	{
+		if (instanceData != null && itemData != null)
+		{
+			instanceData.ResetToDefault(itemData);
+		}
+	}
+
+	// === 序列化支持方法 ===
+
+	// 序列化实例数据为JSON字符串
+	public string SerializeInstanceData()
+	{
+		if (instanceData == null) return "";
+
+		try
+		{
+			return JsonUtility.ToJson(instanceData);
+		}
+		catch (System.Exception e)
+		{
+			Debug.LogError($"序列化实例数据失败: {e.Message}");
+			return "";
+		}
+	}
+
+	// 从JSON字符串反序列化实例数据
+	public bool DeserializeInstanceData(string jsonData)
+	{
+		if (string.IsNullOrEmpty(jsonData)) return false;
+
+		try
+		{
+			ItemInstanceData deserializedData = JsonUtility.FromJson<ItemInstanceData>(jsonData);
+			if (deserializedData != null)
+			{
+				instanceData = deserializedData;
+				// 重新初始化字典（JsonUtility不支持字典序列化）
+				if (instanceData.customProperties == null)
+				{
+					instanceData.customProperties = new Dictionary<string, object>();
+				}
+				// 验证数据有效性
+				instanceData.ValidateData(itemData);
+				return true;
+			}
+		}
+		catch (System.Exception e)
+		{
+			Debug.LogError($"反序列化实例数据失败: {e.Message}");
+		}
+
+		return false;
 	}
 
 	// 刷新物品 UI 显示
@@ -246,6 +527,18 @@ public class ItemDataHolder : MonoBehaviour
 			return;
 		}
 
+		string instanceInfo = "";
+		if (instanceData != null)
+		{
+			instanceInfo = $"\n=== 实例数据 ===\n" +
+						   $"当前耐久度: {instanceData.currentDurability}/{itemData.durability}\n" +
+						   $"当前堆叠数量: {instanceData.currentStackCount}\n" +
+						   $"当前治疗量: {instanceData.currentHealAmount}\n" +
+						   $"使用次数: {instanceData.currentUsageCount}\n" +
+						   $"是否被修改: {instanceData.isModified}\n" +
+						   $"自定义属性数量: {instanceData.customProperties.Count}";
+		}
+
 		Debug.Log($"物品信息:\n" +
 				  $"ID: {itemData.id}\n" +
 				  $"名称: {itemData.itemName}\n" +
@@ -254,6 +547,304 @@ public class ItemDataHolder : MonoBehaviour
 				  $"类别: {itemData.category}\n" +
 				  $"背景颜色: {itemData.backgroundColor}\n" +
 				  $"容量: {itemData.CellH}x{itemData.CellV}\n" +
-				  $"弹药类型: {itemData.BulletType}");
+				  $"弹药类型: {itemData.BulletType}" +
+				  instanceInfo);
+	}
+
+	// 测试：验证实例数据
+	[ContextMenu("验证实例数据")]
+	public void ValidateInstanceDataTest()
+	{
+		bool isValid = ValidateAndRepairInstanceData();
+		Debug.Log($"实例数据验证结果: {(isValid ? "有效" : "无效并已修复")}");
+		LogItemInfo();
+	}
+
+	// 测试：重置实例数据
+	[ContextMenu("重置实例数据")]
+	public void ResetInstanceDataTest()
+	{
+		ResetInstanceData();
+		Debug.Log("实例数据已重置为默认值");
+		LogItemInfo();
+	}
+
+	// ===== ISaveable接口实现 =====
+
+	/// <summary>
+	/// 物品数据持有者保存数据类
+	/// </summary>
+	[System.Serializable]
+	public class ItemDataHolderSaveData
+	{
+		public string itemDataPath; // 物品数据资源路径
+		public string instanceDataJson; // 实例数据JSON字符串
+		public bool isModified; // 是否被修改过
+		public float lastModifiedTime; // 最后修改时间
+		public Vector3 worldPosition; // 世界坐标位置
+		public Vector3 worldRotation; // 世界坐标旋转
+		public bool isActive; // 是否激活状态
+	}
+
+	// ISaveable接口实现
+	private string saveID = "";
+
+	/// <summary>
+	/// 获取保存ID
+	/// </summary>
+	public string GetSaveID()
+	{
+		if (string.IsNullOrEmpty(saveID))
+		{
+			GenerateNewSaveID();
+		}
+		return saveID;
+	}
+
+	/// <summary>
+	/// 设置保存ID
+	/// </summary>
+	public void SetSaveID(string id)
+	{
+		if (!string.IsNullOrEmpty(id))
+		{
+			saveID = id;
+		}
+	}
+
+	/// <summary>
+	/// 生成新的保存ID
+	/// 格式: ItemData_[物品名称]_[8位GUID]_[实例ID]
+	/// </summary>
+	public void GenerateNewSaveID()
+	{
+		string itemName = itemData != null ? itemData.itemName.Replace(" ", "").Replace("(", "").Replace(")", "") : "Unknown";
+		string guidPart = System.Guid.NewGuid().ToString("N").Substring(0, 8).ToUpper();
+		int instanceID = GetInstanceID();
+		saveID = $"ItemData_{itemName}_{guidPart}_{instanceID}";
+
+		if (Application.isPlaying)
+		{
+			Debug.Log($"为物品数据持有者生成新的保存ID: {saveID}");
+		}
+	}
+
+	/// <summary>
+	/// 获取保存数据
+	/// </summary>
+	public object GetSaveData()
+	{
+		ItemDataHolderSaveData saveData = new ItemDataHolderSaveData();
+
+		// 保存物品数据路径
+		if (itemData != null)
+		{
+#if UNITY_EDITOR
+			saveData.itemDataPath = UnityEditor.AssetDatabase.GetAssetPath(itemData);
+#else
+			saveData.itemDataPath = itemData.name; // 运行时使用名称
+#endif
+		}
+
+		// 保存实例数据
+		saveData.instanceDataJson = SerializeInstanceData();
+		saveData.isModified = IsModified();
+		saveData.lastModifiedTime = Time.time;
+
+		// 保存世界坐标信息
+		if (transform != null)
+		{
+			saveData.worldPosition = transform.position;
+			saveData.worldRotation = transform.eulerAngles;
+		}
+
+		saveData.isActive = gameObject.activeInHierarchy;
+
+		return saveData;
+	}
+
+	/// <summary>
+	/// 加载保存数据
+	/// </summary>
+	public void LoadSaveData(object data)
+	{
+		if (data is ItemDataHolderSaveData saveData)
+		{
+			try
+			{
+				// 恢复物品数据引用
+				if (!string.IsNullOrEmpty(saveData.itemDataPath))
+				{
+					RestoreItemDataReference(saveData.itemDataPath);
+				}
+
+				// 恢复实例数据
+				if (!string.IsNullOrEmpty(saveData.instanceDataJson))
+				{
+					DeserializeInstanceData(saveData.instanceDataJson);
+				}
+
+				// 恢复世界坐标
+				if (transform != null)
+				{
+					transform.position = saveData.worldPosition;
+					transform.eulerAngles = saveData.worldRotation;
+				}
+
+				// 恢复激活状态
+				gameObject.SetActive(saveData.isActive);
+
+				// 更新显示
+				UpdateItemDisplay();
+
+				Debug.Log($"成功加载物品数据持有者保存数据: {GetSaveID()}");
+			}
+			catch (System.Exception e)
+			{
+				Debug.LogError($"加载物品数据持有者保存数据失败: {e.Message}");
+			}
+		}
+		else
+		{
+			Debug.LogError("无效的物品数据持有者保存数据格式");
+		}
+	}
+
+	/// <summary>
+	/// 恢复物品数据引用
+	/// </summary>
+	private void RestoreItemDataReference(string assetPath)
+	{
+		if (string.IsNullOrEmpty(assetPath)) return;
+
+		try
+		{
+#if UNITY_EDITOR
+			// 编辑器模式下通过路径加载
+			InventorySystemItemDataSO loadedData = UnityEditor.AssetDatabase.LoadAssetAtPath<InventorySystemItemDataSO>(assetPath);
+			if (loadedData != null)
+			{
+				SetItemData(loadedData);
+				Debug.Log($"成功恢复物品数据引用: {loadedData.itemName}");
+			}
+			else
+			{
+				Debug.LogWarning($"无法从路径加载物品数据: {assetPath}");
+			}
+#else
+			// 运行时通过名称在Resources中查找
+			InventorySystemItemDataSO[] allItems = Resources.LoadAll<InventorySystemItemDataSO>("");
+			foreach (var item in allItems)
+			{
+				if (item.name == assetPath || item.itemName == assetPath)
+				{
+					SetItemData(item);
+					Debug.Log($"成功恢复物品数据引用: {item.itemName}");
+					return;
+				}
+			}
+			Debug.LogWarning($"无法在Resources中找到物品数据: {assetPath}");
+#endif
+		}
+		catch (System.Exception e)
+		{
+			Debug.LogError($"恢复物品数据引用失败: {e.Message}");
+		}
+	}
+
+	/// <summary>
+	/// 验证保存数据
+	/// </summary>
+	public bool ValidateData()
+	{
+		bool isValid = true;
+
+		// 验证保存ID
+		if (string.IsNullOrEmpty(saveID))
+		{
+			GenerateNewSaveID();
+			isValid = false;
+			Debug.LogWarning("物品数据持有者保存ID为空，已重新生成");
+		}
+
+		// 验证物品数据引用
+		if (itemData == null)
+		{
+			isValid = false;
+			Debug.LogWarning("物品数据引用为空");
+		}
+
+		// 验证实例数据
+		if (instanceData == null)
+		{
+			instanceData = new ItemInstanceData();
+			if (itemData != null)
+			{
+				instanceData.InitializeFromItemData(itemData);
+			}
+			isValid = false;
+			Debug.LogWarning("实例数据为空，已重新初始化");
+		}
+		else
+		{
+			// 验证实例数据有效性
+			if (!instanceData.ValidateData(itemData))
+			{
+				isValid = false;
+				Debug.LogWarning("实例数据验证失败，已修复");
+			}
+		}
+
+		return isValid;
+	}
+
+	/// <summary>
+	/// 初始化保存系统
+	/// </summary>
+	public void InitializeSaveSystem()
+	{
+		// 确保有有效的保存ID
+		if (string.IsNullOrEmpty(saveID))
+		{
+			GenerateNewSaveID();
+		}
+
+		// 验证数据完整性
+		ValidateData();
+
+		// 初始化实例数据
+		if (instanceData == null)
+		{
+			instanceData = new ItemInstanceData();
+			if (itemData != null)
+			{
+				instanceData.InitializeFromItemData(itemData);
+			}
+		}
+
+		Debug.Log($"物品数据持有者保存系统初始化完成: {saveID}");
+	}
+
+	/// <summary>
+	/// 获取物品数据持有者状态摘要
+	/// </summary>
+	public string GetItemDataHolderStatusSummary()
+	{
+		string itemInfo = itemData != null ? $"{itemData.itemName} (ID:{itemData.id})" : "无物品数据";
+		string instanceInfo = instanceData != null ? $"耐久度:{instanceData.currentDurability}, 堆叠:{instanceData.currentStackCount}" : "无实例数据";
+		string modifiedStatus = IsModified() ? "已修改" : "未修改";
+
+		return $"物品数据持有者 [{saveID}] - 物品:{itemInfo}, 实例:{instanceInfo}, 状态:{modifiedStatus}";
+	}
+
+	/// <summary>
+	/// 在Start中自动初始化保存系统
+	/// </summary>
+	private void Start()
+	{
+		if (Application.isPlaying)
+		{
+			InitializeSaveSystem();
+		}
 	}
 }

@@ -10,9 +10,9 @@ public class GridInteract : MonoBehaviour
         TacticalRigGrid
     }
 
-    [Header("ç½‘æ ¼ä¼˜å…ˆçº§ (æ•°å€¼è¶Šå°ä¼˜å…ˆçº§è¶Šé«˜)")]
+    [Header("Íø¸ñÓÅÏÈ¼¶ (ÊıÖµÔ½Ğ¡ÓÅÏÈ¼¶Ô½¸ß)")]
     public int gridPriority = 0;
-    
+
     private InventoryController inventoryController;
     private ItemGrid itemGrid;
     private BackpackItemGrid backpackGrid;
@@ -21,34 +21,34 @@ public class GridInteract : MonoBehaviour
     private Canvas canvas;
     private bool wasInGrid = false;
     private GridType currentGridType;
-    
-    // é™æ€å˜é‡ç”¨äºè·Ÿè¸ªå½“å‰æ´»è·ƒçš„ç½‘æ ¼
+
+    // ¾²Ì¬±äÁ¿ÓÃÓÚ¸ú×Ùµ±Ç°»îÔ¾µÄÍø¸ñ
     private static GridInteract currentActiveGridInteract;
 
     private void Awake()
     {
         inventoryController = FindObjectOfType<InventoryController>();
 
-        // æ£€æµ‹å½“å‰GameObjectä¸Šçš„ç½‘æ ¼ç±»å‹
+        // ¼ì²âµ±Ç°GameObjectÉÏµÄÍø¸ñÀàĞÍ
         itemGrid = GetComponent<ItemGrid>();
         backpackGrid = GetComponent<BackpackItemGrid>();
         tacticalRigGrid = GetComponent<TactiaclRigItemGrid>();
 
-        // ç¡®å®šç½‘æ ¼ç±»å‹å’Œé»˜è®¤ä¼˜å…ˆçº§
+        // È·¶¨Íø¸ñÀàĞÍºÍÄ¬ÈÏÓÅÏÈ¼¶
         if (itemGrid != null)
         {
             currentGridType = GridType.MainGrid;
-            if (gridPriority == 0) gridPriority = 1; // ä¸»ç½‘æ ¼é»˜è®¤ä¼˜å…ˆçº§
+            if (gridPriority == 0) gridPriority = 1; // Ö÷Íø¸ñÄ¬ÈÏÓÅÏÈ¼¶
         }
         else if (backpackGrid != null)
         {
             currentGridType = GridType.BackpackGrid;
-            if (gridPriority == 0) gridPriority = 2; // èƒŒåŒ…ç½‘æ ¼é»˜è®¤ä¼˜å…ˆçº§
+            if (gridPriority == 0) gridPriority = 2; // ±³°üÍø¸ñÄ¬ÈÏÓÅÏÈ¼¶
         }
         else if (tacticalRigGrid != null)
         {
             currentGridType = GridType.TacticalRigGrid;
-            if (gridPriority == 0) gridPriority = 3; // æˆ˜æœ¯æŒ‚å…·é»˜è®¤ä¼˜å…ˆçº§
+            if (gridPriority == 0) gridPriority = 3; // Õ½Êõ¹Ò¾ßÄ¬ÈÏÓÅÏÈ¼¶
         }
         else
         {
@@ -59,6 +59,9 @@ public class GridInteract : MonoBehaviour
 
         rectTransform = GetComponent<RectTransform>();
         canvas = FindObjectOfType<Canvas>();
+
+        // ³õÊ¼»¯Íø¸ñ×´Ì¬±£´æÏµÍ³
+        InitializeGridStateSaveSystem();
 
         Debug.Log($"GridInteract initialized on {gameObject.name} as {currentGridType} with priority {gridPriority}");
     }
@@ -74,18 +77,18 @@ public class GridInteract : MonoBehaviour
         {
             if (isInGrid)
             {
-                // æ£€æŸ¥æ˜¯å¦æœ‰æ›´é«˜ä¼˜å…ˆçº§çš„ç½‘æ ¼å·²ç»æ¿€æ´»
+                // ¼ì²éÊÇ·ñÓĞ¸ü¸ßÓÅÏÈ¼¶µÄÍø¸ñÒÑ¾­¼¤»î
                 if (currentActiveGridInteract == null || gridPriority < currentActiveGridInteract.gridPriority)
                 {
-                    // æ¸…é™¤ä¹‹å‰çš„é€‰æ‹©
+                    // Çå³ıÖ®Ç°µÄÑ¡Ôñ
                     if (currentActiveGridInteract != null)
                     {
                         currentActiveGridInteract.ForceExit();
                     }
-                    
+
                     currentActiveGridInteract = this;
                     SetAsSelectedGrid();
-                    Debug.Log($"é¼ æ ‡è¿›å…¥{currentGridType}ç½‘æ ¼: {gameObject.name} (ä¼˜å…ˆçº§: {gridPriority})");
+                    Debug.Log($"Êó±ê½øÈë{currentGridType}Íø¸ñ: {gameObject.name} (ÓÅÏÈ¼¶: {gridPriority})");
                 }
             }
             else
@@ -94,7 +97,7 @@ public class GridInteract : MonoBehaviour
                 {
                     ClearIfSelected();
                     currentActiveGridInteract = null;
-                    Debug.Log($"é¼ æ ‡ç¦»å¼€{currentGridType}ç½‘æ ¼: {gameObject.name}");
+                    Debug.Log($"Êó±êÀë¿ª{currentGridType}Íø¸ñ: {gameObject.name}");
                 }
             }
 
@@ -110,10 +113,10 @@ public class GridInteract : MonoBehaviour
 
     private void SetAsSelectedGrid()
     {
-        // é¦–å…ˆæ¸…é™¤æ‰€æœ‰ç½‘æ ¼é€‰æ‹©å¹¶é‡ç½®æ´»è·ƒç½‘æ ¼ç±»å‹
+        // Ê×ÏÈÇå³ıËùÓĞÍø¸ñÑ¡Ôñ²¢ÖØÖÃ»îÔ¾Íø¸ñÀàĞÍ
         inventoryController.ClearSelectedGrid();
-        
-        // ç„¶åè®¾ç½®å½“å‰ç½‘æ ¼
+
+        // È»ºóÉèÖÃµ±Ç°Íø¸ñ
         switch (currentGridType)
         {
             case GridType.MainGrid:
@@ -178,10 +181,463 @@ public class GridInteract : MonoBehaviour
     {
         return currentGridType;
     }
-    
-    // é™æ€æ–¹æ³•ç”¨äºæ¸…é™¤æ‰€æœ‰ç½‘æ ¼é€‰æ‹©
+
+    // ¾²Ì¬·½·¨ÓÃÓÚÇå³ıËùÓĞÍø¸ñÑ¡Ôñ
     public static void ClearAllGridSelections()
     {
         currentActiveGridInteract = null;
+    }
+
+    // ==================== Íø¸ñ×´Ì¬±£´æÀ©Õ¹½Ó¿Ú ====================
+
+    [System.Serializable]
+    public class GridInteractSaveData
+    {
+        public string gridID;
+        public GridType gridType;
+        public int gridPriority;
+        public bool isActive;
+        public bool wasInGrid;
+        public Vector2 gridPosition;
+        public Vector2 gridSize;
+        public string gridName;
+        public bool isSelected;
+        public string lastInteractionTime;
+        public int interactionCount;
+        public string lastModified;
+        public int saveVersion;
+    }
+
+    [Header("Íø¸ñ×´Ì¬±£´æÉèÖÃ")]
+    [SerializeField] private string gridInteractID = "";
+    [SerializeField] private bool autoGenerateID = true;
+    [SerializeField] private int saveVersion = 1;
+    [SerializeField] private bool enableStatePersistence = true;
+
+    // Íø¸ñ×´Ì¬±£´æÊÂ¼ş
+    public System.Action<string> OnGridStateSaved;
+    public System.Action<string> OnGridStateLoaded;
+    public System.Action<string, string> OnGridStateError;
+
+    // ½»»¥×´Ì¬¸ú×Ù
+    private int interactionCount = 0;
+    private string lastInteractionTime = "";
+    private bool isGridSelected = false;
+    private Vector2 lastKnownPosition;
+    private Vector2 lastKnownSize;
+
+    /// <summary>
+    /// »ñÈ¡Íø¸ñ½»»¥ID
+    /// </summary>
+    public string GetGridInteractID()
+    {
+        if (string.IsNullOrEmpty(gridInteractID) && autoGenerateID)
+        {
+            GenerateNewGridInteractID();
+        }
+        return gridInteractID;
+    }
+
+    /// <summary>
+    /// ÉèÖÃÍø¸ñ½»»¥ID
+    /// </summary>
+    public void SetGridInteractID(string id)
+    {
+        if (!string.IsNullOrEmpty(id))
+        {
+            gridInteractID = id;
+        }
+    }
+
+    /// <summary>
+    /// Éú³ÉĞÂµÄÍø¸ñ½»»¥ID
+    /// </summary>
+    public void GenerateNewGridInteractID()
+    {
+        gridInteractID = $"GridInteract_{currentGridType}_{System.Guid.NewGuid().ToString("N")[..8]}";
+    }
+
+    /// <summary>
+    /// ÑéÖ¤Íø¸ñ½»»¥IDÊÇ·ñÓĞĞ§
+    /// </summary>
+    public bool IsGridInteractIDValid()
+    {
+        return !string.IsNullOrEmpty(gridInteractID) && gridInteractID.Length >= 8;
+    }
+
+    /// <summary>
+    /// ±£´æÍø¸ñ×´Ì¬
+    /// </summary>
+    public bool SaveGridState()
+    {
+        if (!enableStatePersistence)
+        {
+            Debug.Log("[GridInteract] ×´Ì¬³Ö¾Ã»¯ÒÑ½ûÓÃ");
+            return false;
+        }
+
+        try
+        {
+            UpdateCurrentStateInfo();
+
+            var saveData = new GridInteractSaveData
+            {
+                gridID = GetGridInteractID(),
+                gridType = currentGridType,
+                gridPriority = gridPriority,
+                isActive = currentActiveGridInteract == this,
+                wasInGrid = wasInGrid,
+                gridPosition = lastKnownPosition,
+                gridSize = lastKnownSize,
+                gridName = gameObject.name,
+                isSelected = isGridSelected,
+                lastInteractionTime = lastInteractionTime,
+                interactionCount = interactionCount,
+                lastModified = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+                saveVersion = saveVersion
+            };
+
+            string jsonData = JsonUtility.ToJson(saveData, true);
+            if (!string.IsNullOrEmpty(jsonData))
+            {
+                OnGridStateSaved?.Invoke(GetGridInteractID());
+                return true;
+            }
+
+            return false;
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[GridInteract] ±£´æÍø¸ñ×´Ì¬Ê±·¢Éú´íÎó£º{ex.Message}");
+            OnGridStateError?.Invoke(GetGridInteractID(), ex.Message);
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// ¼ÓÔØÍø¸ñ×´Ì¬
+    /// </summary>
+    public bool LoadGridState(string jsonData)
+    {
+        if (!enableStatePersistence)
+        {
+            Debug.Log("[GridInteract] ×´Ì¬³Ö¾Ã»¯ÒÑ½ûÓÃ");
+            return false;
+        }
+
+        try
+        {
+            if (string.IsNullOrEmpty(jsonData))
+            {
+                Debug.LogError("[GridInteract] ¼ÓÔØÊı¾İÎª¿Õ");
+                return false;
+            }
+
+            var saveData = JsonUtility.FromJson<GridInteractSaveData>(jsonData);
+            if (saveData == null)
+            {
+                Debug.LogError("[GridInteract] ·´ĞòÁĞ»¯Íø¸ñ×´Ì¬Êı¾İÊ§°Ü");
+                return false;
+            }
+
+            // ÑéÖ¤Êı¾İ°æ±¾
+            if (saveData.saveVersion > saveVersion)
+            {
+                Debug.LogWarning($"[GridInteract] ±£´æÊı¾İ°æ±¾ ({saveData.saveVersion}) ¸ßÓÚµ±Ç°°æ±¾ ({saveVersion})£¬¿ÉÄÜ´æÔÚ¼æÈİĞÔÎÊÌâ");
+            }
+
+            // ÑéÖ¤Íø¸ñÀàĞÍÆ¥Åä
+            if (saveData.gridType != currentGridType)
+            {
+                Debug.LogWarning($"[GridInteract] ±£´æµÄÍø¸ñÀàĞÍ ({saveData.gridType}) Óëµ±Ç°Íø¸ñÀàĞÍ ({currentGridType}) ²»Æ¥Åä");
+            }
+
+            // »Ö¸´Íø¸ñ×´Ì¬
+            gridInteractID = saveData.gridID;
+            gridPriority = saveData.gridPriority;
+            wasInGrid = saveData.wasInGrid;
+            lastKnownPosition = saveData.gridPosition;
+            lastKnownSize = saveData.gridSize;
+            isGridSelected = saveData.isSelected;
+            lastInteractionTime = saveData.lastInteractionTime;
+            interactionCount = saveData.interactionCount;
+
+            // »Ö¸´»îÔ¾×´Ì¬
+            if (saveData.isActive)
+            {
+                currentActiveGridInteract = this;
+            }
+
+            // »Ö¸´Ñ¡Ôñ×´Ì¬
+            if (saveData.isSelected)
+            {
+                RestoreSelectionState();
+            }
+
+            OnGridStateLoaded?.Invoke(GetGridInteractID());
+            Debug.Log($"[GridInteract] Íø¸ñ×´Ì¬¼ÓÔØ³É¹¦£º{GetGridInteractID()}");
+            return true;
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[GridInteract] ¼ÓÔØÍø¸ñ×´Ì¬Ê±·¢Éú´íÎó£º{ex.Message}");
+            OnGridStateError?.Invoke(GetGridInteractID(), ex.Message);
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// ¸üĞÂµ±Ç°×´Ì¬ĞÅÏ¢
+    /// </summary>
+    private void UpdateCurrentStateInfo()
+    {
+        try
+        {
+            if (rectTransform != null)
+            {
+                lastKnownPosition = rectTransform.anchoredPosition;
+                lastKnownSize = rectTransform.sizeDelta;
+            }
+
+            isGridSelected = (currentActiveGridInteract == this);
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[GridInteract] ¸üĞÂµ±Ç°×´Ì¬ĞÅÏ¢Ê±·¢Éú´íÎó£º{ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// »Ö¸´Ñ¡Ôñ×´Ì¬
+    /// </summary>
+    private void RestoreSelectionState()
+    {
+        try
+        {
+            if (isGridSelected && inventoryController != null)
+            {
+                // Çå³ıÆäËûÍø¸ñÑ¡Ôñ
+                ClearAllGridSelections();
+
+                // ÉèÖÃµ±Ç°Íø¸ñÎª»îÔ¾
+                currentActiveGridInteract = this;
+
+                // »Ö¸´Íø¸ñÑ¡Ôñ
+                SetAsSelectedGrid();
+
+                Debug.Log($"[GridInteract] »Ö¸´Íø¸ñÑ¡Ôñ×´Ì¬£º{currentGridType}");
+            }
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[GridInteract] »Ö¸´Ñ¡Ôñ×´Ì¬Ê±·¢Éú´íÎó£º{ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// ¼ÇÂ¼½»»¥ÊÂ¼ş
+    /// </summary>
+    public void RecordInteraction()
+    {
+        try
+        {
+            interactionCount++;
+            lastInteractionTime = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+
+            Debug.Log($"[GridInteract] ¼ÇÂ¼½»»¥ÊÂ¼ş£º{currentGridType} ×Ü¼Æ£º{interactionCount}");
+
+            // ×Ô¶¯±£´æ×´Ì¬
+            if (enableStatePersistence)
+            {
+                SaveGridState();
+            }
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[GridInteract] ¼ÇÂ¼½»»¥ÊÂ¼şÊ±·¢Éú´íÎó£º{ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// »ñÈ¡½»»¥Í³¼ÆĞÅÏ¢
+    /// </summary>
+    public string GetInteractionStats()
+    {
+        return $"½»»¥´ÎÊı: {interactionCount}, ×îºó½»»¥: {lastInteractionTime}";
+    }
+
+    /// <summary>
+    /// ÖØÖÃ½»»¥Í³¼Æ
+    /// </summary>
+    public void ResetInteractionStats()
+    {
+        interactionCount = 0;
+        lastInteractionTime = "";
+        Debug.Log("[GridInteract] ÒÑÖØÖÃ½»»¥Í³¼Æ");
+    }
+
+    /// <summary>
+    /// ÉèÖÃÍø¸ñÓÅÏÈ¼¶
+    /// </summary>
+    public void SetGridPriority(int priority)
+    {
+        if (priority >= 0)
+        {
+            gridPriority = priority;
+            Debug.Log($"[GridInteract] ÉèÖÃÍø¸ñÓÅÏÈ¼¶£º{priority}");
+
+            // ×Ô¶¯±£´æ×´Ì¬
+            if (enableStatePersistence)
+            {
+                SaveGridState();
+            }
+        }
+    }
+
+    /// <summary>
+    /// »ñÈ¡Íø¸ñÓÅÏÈ¼¶
+    /// </summary>
+    public int GetGridPriority()
+    {
+        return gridPriority;
+    }
+
+    /// <summary>
+    /// ÆôÓÃ/½ûÓÃ×´Ì¬³Ö¾Ã»¯
+    /// </summary>
+    public void SetStatePersistence(bool enabled)
+    {
+        enableStatePersistence = enabled;
+        Debug.Log($"[GridInteract] ×´Ì¬³Ö¾Ã»¯ÉèÖÃÎª£º{enabled}");
+    }
+
+    /// <summary>
+    /// ÑéÖ¤Íø¸ñ×´Ì¬Êı¾İ
+    /// </summary>
+    public bool ValidateGridStateData()
+    {
+        try
+        {
+            // ÑéÖ¤»ù±¾×é¼ş
+            if (rectTransform == null)
+            {
+                Debug.LogError("[GridInteract] RectTransform×é¼şÈ±Ê§");
+                return false;
+            }
+
+            if (inventoryController == null)
+            {
+                Debug.LogError("[GridInteract] InventoryControllerÒıÓÃÈ±Ê§");
+                return false;
+            }
+
+            // ÑéÖ¤Íø¸ñ×é¼ş
+            bool hasValidGrid = (itemGrid != null) || (backpackGrid != null) || (tacticalRigGrid != null);
+            if (!hasValidGrid)
+            {
+                Debug.LogError("[GridInteract] È±ÉÙÓĞĞ§µÄÍø¸ñ×é¼ş");
+                return false;
+            }
+
+            // ÑéÖ¤ID
+            if (!IsGridInteractIDValid())
+            {
+                Debug.LogError("[GridInteract] Íø¸ñ½»»¥IDÎŞĞ§");
+                return false;
+            }
+
+            // ÑéÖ¤ÓÅÏÈ¼¶
+            if (gridPriority < 0)
+            {
+                Debug.LogError("[GridInteract] Íø¸ñÓÅÏÈ¼¶ÎŞĞ§");
+                return false;
+            }
+
+            return true;
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[GridInteract] ÑéÖ¤Íø¸ñ×´Ì¬Êı¾İÊ±·¢Éú´íÎó£º{ex.Message}");
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// »ñÈ¡Íø¸ñ×´Ì¬ÕªÒª
+    /// </summary>
+    public string GetGridStateSummary()
+    {
+        return $"ID: {GetGridInteractID()}, ÀàĞÍ: {currentGridType}, ÓÅÏÈ¼¶: {gridPriority}, »îÔ¾: {currentActiveGridInteract == this}, Ñ¡ÖĞ: {isGridSelected}";
+    }
+
+    /// <summary>
+    /// Ç¿ÖÆË¢ĞÂÍø¸ñ×´Ì¬
+    /// </summary>
+    public void RefreshGridState()
+    {
+        try
+        {
+            UpdateCurrentStateInfo();
+
+            // ÖØĞÂÑéÖ¤Íø¸ñÀàĞÍºÍ×é¼ş
+            bool hasValidGrid = false;
+
+            if (itemGrid != null)
+            {
+                currentGridType = GridType.MainGrid;
+                hasValidGrid = true;
+            }
+            else if (backpackGrid != null)
+            {
+                currentGridType = GridType.BackpackGrid;
+                hasValidGrid = true;
+            }
+            else if (tacticalRigGrid != null)
+            {
+                currentGridType = GridType.TacticalRigGrid;
+                hasValidGrid = true;
+            }
+
+            if (!hasValidGrid)
+            {
+                Debug.LogError($"[GridInteract] Ë¢ĞÂ×´Ì¬Ê±Î´ÕÒµ½ÓĞĞ§µÄÍø¸ñ×é¼ş£º{gameObject.name}");
+                return;
+            }
+
+            Debug.Log($"[GridInteract] Íø¸ñ×´Ì¬Ë¢ĞÂÍê³É£º{currentGridType}");
+
+            // ×Ô¶¯±£´æ×´Ì¬
+            if (enableStatePersistence)
+            {
+                SaveGridState();
+            }
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[GridInteract] Ë¢ĞÂÍø¸ñ×´Ì¬Ê±·¢Éú´íÎó£º{ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// ³õÊ¼»¯Íø¸ñ×´Ì¬±£´æÏµÍ³
+    /// </summary>
+    private void InitializeGridStateSaveSystem()
+    {
+        // È·±£ÓĞÓĞĞ§µÄID
+        if (string.IsNullOrEmpty(gridInteractID) && autoGenerateID)
+        {
+            GenerateNewGridInteractID();
+        }
+
+        // ³õÊ¼»¯×´Ì¬ĞÅÏ¢
+        UpdateCurrentStateInfo();
+
+        // ÖØÖÃ½»»¥Í³¼Æ
+        if (interactionCount == 0)
+        {
+            lastInteractionTime = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+        }
+
+        Debug.Log($"[GridInteract] Íø¸ñ×´Ì¬±£´æÏµÍ³³õÊ¼»¯Íê³É£¬ID£º{GetGridInteractID()}, ÀàĞÍ£º{currentGridType}");
     }
 }

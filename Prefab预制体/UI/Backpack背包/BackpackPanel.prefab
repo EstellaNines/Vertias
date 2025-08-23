@@ -597,9 +597,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1c6530c9498e6c845aadc87ebbc15fba, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  equipSlotID: 
+  isModified: 0
   acceptedType: 0
   padding: 4
   autoResize: 1
+  highlightPrefab: {fileID: 0}
+  canEquipColor: {r: 0, g: 1, b: 0, a: 0.5}
+  cannotEquipColor: {r: 1, g: 0, b: 0, a: 0.5}
   backpackContainer: {fileID: 0}
   tacticalRigContainer: {fileID: 0}
   backpackGridPrefab: {fileID: 0}
@@ -922,6 +927,112 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: -20, y: -20}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!1 &1231562809130388461
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6679563584190642379}
+  - component: {fileID: 3659292773304086188}
+  m_Layer: 0
+  m_Name: ItemRestorationSystem
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6679563584190642379
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1231562809130388461}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 203.84647, y: -92.64075, z: 5.9002476}
+  m_LocalScale: {x: 0.75, y: 0.75, z: 0.75}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 5310994341252794597}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3659292773304086188
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1231562809130388461}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017d0cf646121fd4d85f3487960483c8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  databasePath: "Assets/InventorySystem/Database/Scriptable Object\u6570\u636E\u5BF9\u8C61"
+  prefabPath: Assets/InventorySystem/Prefab
+  showDebugInfo: 1
+--- !u!1 &1448412817481618895
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3984939191342902612}
+  - component: {fileID: 5802060166953778667}
+  m_Layer: 0
+  m_Name: BackpackOccupancyMapManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3984939191342902612
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1448412817481618895}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 5310994341252794597}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &5802060166953778667
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1448412817481618895}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b1868fe1fcb8cbf429b0f07bd88f4642, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  enableDebugInfo: 1
+  maxCachedMaps: 10
+  mapCacheTimeout: 300
+  enableAutoCleanup: 1
+  cleanupInterval: 60
+  enableAsyncOperations: 1
+  maxAsyncOperationsPerFrame: 3
+  enableMapCompression: 1
+  statistics:
+    totalCachedMaps: 0
+    cacheHits: 0
+    cacheMisses: 0
+    mapsEvicted: 0
+    averageAccessTime: 0
+    totalMemoryUsage: 0
 --- !u!1 &1978396944027883854
 GameObject:
   m_ObjectHideFlags: 0
@@ -1987,9 +2098,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1c6530c9498e6c845aadc87ebbc15fba, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  equipSlotID: 
+  isModified: 0
   acceptedType: 3
   padding: 4
   autoResize: 1
+  highlightPrefab: {fileID: 0}
+  canEquipColor: {r: 0, g: 1, b: 0, a: 0.5}
+  cannotEquipColor: {r: 1, g: 0, b: 0, a: 0.5}
   backpackContainer: {fileID: 7969172968469194242}
   tacticalRigContainer: {fileID: 2975523809542673886}
   backpackGridPrefab: {fileID: 220438366853721780, guid: 8c1bce28b74ccc3439d15be348721549, type: 3}
@@ -2249,7 +2365,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 3495735822181208538}
   m_Direction: 2
   m_Value: 1
-  m_Size: 0.46135417
+  m_Size: 0.46135414
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -2435,6 +2551,9 @@ RectTransform:
   - {fileID: 3393220211538336081}
   - {fileID: 4959914722719600628}
   - {fileID: 743027764860065380}
+  - {fileID: 182073515420189337}
+  - {fileID: 3984939191342902612}
+  - {fileID: 6679563584190642379}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
@@ -2493,6 +2612,9 @@ MonoBehaviour:
   backpackGrid: {fileID: 7139651449220119166}
   inventoryController: {fileID: 6866813787875284372}
   gridInteract: {fileID: 4077296070635289410}
+  managerID: 
+  isModified: 0
+  lastModified: 
 --- !u!1 &4493064599722728626
 GameObject:
   m_ObjectHideFlags: 0
@@ -2582,9 +2704,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1c6530c9498e6c845aadc87ebbc15fba, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  equipSlotID: 
+  isModified: 0
   acceptedType: 4
   padding: 4
   autoResize: 1
+  highlightPrefab: {fileID: 0}
+  canEquipColor: {r: 0, g: 1, b: 0, a: 0.5}
+  cannotEquipColor: {r: 1, g: 0, b: 0, a: 0.5}
   backpackContainer: {fileID: 0}
   tacticalRigContainer: {fileID: 0}
   backpackGridPrefab: {fileID: 0}
@@ -2752,9 +2879,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1c6530c9498e6c845aadc87ebbc15fba, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  equipSlotID: 
+  isModified: 0
   acceptedType: 1
   padding: 4
   autoResize: 1
+  highlightPrefab: {fileID: 0}
+  canEquipColor: {r: 0, g: 1, b: 0, a: 0.5}
+  cannotEquipColor: {r: 1, g: 0, b: 0, a: 0.5}
   backpackContainer: {fileID: 0}
   tacticalRigContainer: {fileID: 0}
   backpackGridPrefab: {fileID: 0}
@@ -2891,7 +3023,14 @@ MonoBehaviour:
   showDebugInfo: 1
   enablePreview: 1
   previewItemSize: {x: 1, y: 1}
+  enableSaveCoordination: 1
+  validateSaveOrder: 1
+  logSaveProgress: 1
+  saveTimeout: 5
   currentActiveGrid: 0
+  controllerID: 1
+  autoGenerateID: 1
+  saveVersion: 1
 --- !u!114 &9120949825997450081
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3087,9 +3226,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1c6530c9498e6c845aadc87ebbc15fba, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  equipSlotID: 
+  isModified: 0
   acceptedType: 4
   padding: 4
   autoResize: 1
+  highlightPrefab: {fileID: 0}
+  canEquipColor: {r: 0, g: 1, b: 0, a: 0.5}
+  cannotEquipColor: {r: 1, g: 0, b: 0, a: 0.5}
   backpackContainer: {fileID: 0}
   tacticalRigContainer: {fileID: 0}
   backpackGridPrefab: {fileID: 0}
@@ -3258,9 +3402,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1c6530c9498e6c845aadc87ebbc15fba, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  equipSlotID: 
+  isModified: 0
   acceptedType: 2
   padding: 4
   autoResize: 1
+  highlightPrefab: {fileID: 0}
+  canEquipColor: {r: 0, g: 1, b: 0, a: 0.5}
+  cannotEquipColor: {r: 1, g: 0, b: 0, a: 0.5}
   backpackContainer: {fileID: 7969172968469194242}
   tacticalRigContainer: {fileID: 2975523809542673886}
   backpackGridPrefab: {fileID: 220438366853721780, guid: 8c1bce28b74ccc3439d15be348721549, type: 3}
@@ -3416,6 +3565,43 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!1 &6523363345303474135
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 182073515420189337}
+  m_Layer: 5
+  m_Name: ContainerSaveSystem
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &182073515420189337
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6523363345303474135}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 8113529930827318056}
+  - {fileID: 9027781184520604037}
+  m_Father: {fileID: 5310994341252794597}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &6615902680143603969
 GameObject:
   m_ObjectHideFlags: 0
@@ -3887,6 +4073,126 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!1 &7219748701080150377
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8113529930827318056}
+  - component: {fileID: 819786265363706120}
+  m_Layer: 5
+  m_Name: ContainerUIStateManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &8113529930827318056
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7219748701080150377}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 182073515420189337}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &819786265363706120
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7219748701080150377}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7e6eaeb0c858d294f960a41e818a4173, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  managerID: 
+  autoGenerateID: 1
+  saveVersion: 1
+  backpackContainer: {fileID: 7969172968469194242}
+  backpackContainerRect: {fileID: 7969172968469194242}
+  backpackCanvas: {fileID: 0}
+  tacticalRigContainer: {fileID: 2975523809542673886}
+  tacticalRigContainerRect: {fileID: 2975523809542673886}
+  tacticalRigCanvas: {fileID: 0}
+  isModified: 1
+  lastModified: 
+--- !u!1 &8127878093994912874
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 9027781184520604037}
+  - component: {fileID: 6957923490470022359}
+  m_Layer: 5
+  m_Name: SaveDependencyManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &9027781184520604037
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8127878093994912874}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 182073515420189337}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &6957923490470022359
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8127878093994912874}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ee6602cc278e6da49a5ff9544b2cc17f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  managerID: 
+  autoGenerateID: 1
+  saveVersion: 1
+  itemDataPriority: 100
+  gridConfigPriority: 80
+  equipSlotPriority: 70
+  gridContentPriority: 60
+  inventoryControllerPriority: 50
+  uiStatePriority: 30
+  containerUIPriority: 10
+  enableDependencyTracking: 1
+  enableSaveOrderValidation: 1
+  logDependencyInfo: 1
 --- !u!1 &8179318317973363830
 GameObject:
   m_ObjectHideFlags: 0

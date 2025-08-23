@@ -544,4 +544,374 @@ public class ItemSpawner : BaseItemSpawn
     }
 #endif
 
+    // ===== ISaveable接口扩展实现 =====
+
+    /// <summary>
+    /// 物品生成器保存数据类（继承基类）
+    /// </summary>
+    [System.Serializable]
+    public class ItemSpawnerSaveData : BaseItemSpawnSaveData
+    {
+        // 物品类型选择状态
+        public bool spawnHelmet;
+        public bool spawnArmor;
+        public bool spawnTacticalRig;
+        public bool spawnBackpack;
+        public bool spawnWeapon;
+        public bool spawnAmmunition;
+        public bool spawnFood;
+        public bool spawnDrink;
+        public bool spawnHealing;
+        public bool spawnHemostatic;
+        public bool spawnSedative;
+        public bool spawnIntelligence;
+        public bool spawnCurrency;
+        
+        // 生成历史记录
+        public List<SpawnHistoryRecord> spawnHistory;
+        public int totalSpawnAttempts; // 总尝试生成次数
+        public int successfulSpawns; // 成功生成次数
+        public float averageSpawnTime; // 平均生成时间
+        public string lastSpawnedCategory; // 最后生成的物品类别
+    }
+
+    /// <summary>
+    /// 生成历史记录
+    /// </summary>
+    [System.Serializable]
+    public class SpawnHistoryRecord
+    {
+        public float timestamp; // 时间戳
+        public string itemName; // 物品名称
+        public string itemCategory; // 物品类别
+        public Vector2Int gridPosition; // 网格位置
+        public bool wasSuccessful; // 是否成功
+        public string failureReason; // 失败原因（如果有）
+    }
+
+    // 生成历史跟踪
+    private List<SpawnHistoryRecord> spawnHistory = new List<SpawnHistoryRecord>();
+    private int totalSpawnAttempts = 0;
+    private int successfulSpawns = 0;
+    private float totalSpawnTime = 0f;
+    private string lastSpawnedCategory = "";
+
+    /// <summary>
+    /// 重写生成新的保存ID方法
+    /// 格式: ItemSpawner_[生成器名称]_[8位GUID]_[实例ID]
+    /// </summary>
+    public override void GenerateNewSaveID()
+    {
+        string spawnerName = gameObject.name.Replace(" ", "").Replace("(", "").Replace(")", "");
+        string guidPart = System.Guid.NewGuid().ToString("N").Substring(0, 8).ToUpper();
+        int instanceID = GetInstanceID();
+        string newSaveID = $"ItemSpawner_{spawnerName}_{guidPart}_{instanceID}";
+        SetSaveID(newSaveID);
+        
+        if (Application.isPlaying && showDebugInfo)
+        {
+            Debug.Log($"为物品生成器生成新的保存ID: {newSaveID}");
+        }
+    }
+
+    /// <summary>
+    /// 重写获取保存数据方法
+    /// </summary>
+    public override object GetSaveData()
+    {
+        ItemSpawnerSaveData saveData = new ItemSpawnerSaveData();
+        
+        // 继承基类数据
+        BaseItemSpawnSaveData baseData = (BaseItemSpawnSaveData)base.GetSaveData();
+        saveData.spawnerName = baseData.spawnerName;
+        saveData.totalSpawnedCount = baseData.totalSpawnedCount;
+        saveData.lastSpawnTime = baseData.lastSpawnTime;
+        saveData.spawnedItemsData = baseData.spawnedItemsData;
+        saveData.spawnerPosition = baseData.spawnerPosition;
+        saveData.spawnerRotation = baseData.spawnerRotation;
+        saveData.isActive = baseData.isActive;
+        saveData.targetGridID = baseData.targetGridID;
+        
+        // 保存物品类型选择状态
+        saveData.spawnHelmet = this.spawnHelmet;
+        saveData.spawnArmor = this.spawnArmor;
+        saveData.spawnTacticalRig = this.spawnTacticalRig;
+        saveData.spawnBackpack = this.spawnBackpack;
+        saveData.spawnWeapon = this.spawnWeapon;
+        saveData.spawnAmmunition = this.spawnAmmunition;
+        saveData.spawnFood = this.spawnFood;
+        saveData.spawnDrink = this.spawnDrink;
+        saveData.spawnHealing = this.spawnHealing;
+        saveData.spawnHemostatic = this.spawnHemostatic;
+        saveData.spawnSedative = this.spawnSedative;
+        saveData.spawnIntelligence = this.spawnIntelligence;
+        saveData.spawnCurrency = this.spawnCurrency;
+        
+        // 保存生成历史和统计数据
+        saveData.spawnHistory = new List<SpawnHistoryRecord>(spawnHistory);
+        saveData.totalSpawnAttempts = totalSpawnAttempts;
+        saveData.successfulSpawns = successfulSpawns;
+        saveData.averageSpawnTime = successfulSpawns > 0 ? totalSpawnTime / successfulSpawns : 0f;
+        saveData.lastSpawnedCategory = lastSpawnedCategory;
+        
+        return saveData;
+    }
+
+    /// <summary>
+    /// 重写加载保存数据方法
+    /// </summary>
+    public override void LoadSaveData(object data)
+    {
+        if (data is ItemSpawnerSaveData saveData)
+        {
+            try
+            {
+                // 先调用基类加载方法
+                base.LoadSaveData(saveData);
+                
+                // 恢复物品类型选择状态
+                this.spawnHelmet = saveData.spawnHelmet;
+                this.spawnArmor = saveData.spawnArmor;
+                this.spawnTacticalRig = saveData.spawnTacticalRig;
+                this.spawnBackpack = saveData.spawnBackpack;
+                this.spawnWeapon = saveData.spawnWeapon;
+                this.spawnAmmunition = saveData.spawnAmmunition;
+                this.spawnFood = saveData.spawnFood;
+                this.spawnDrink = saveData.spawnDrink;
+                this.spawnHealing = saveData.spawnHealing;
+                this.spawnHemostatic = saveData.spawnHemostatic;
+                this.spawnSedative = saveData.spawnSedative;
+                this.spawnIntelligence = saveData.spawnIntelligence;
+                this.spawnCurrency = saveData.spawnCurrency;
+                
+                // 恢复生成历史和统计数据
+                if (saveData.spawnHistory != null)
+                {
+                    spawnHistory = new List<SpawnHistoryRecord>(saveData.spawnHistory);
+                }
+                totalSpawnAttempts = saveData.totalSpawnAttempts;
+                successfulSpawns = saveData.successfulSpawns;
+                totalSpawnTime = saveData.averageSpawnTime * successfulSpawns;
+                lastSpawnedCategory = saveData.lastSpawnedCategory;
+                
+                if (showDebugInfo)
+                {
+                    Debug.Log($"成功加载物品生成器保存数据: {GetSaveID()}, 历史记录: {spawnHistory.Count} 条");
+                }
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError($"加载物品生成器保存数据失败: {e.Message}");
+            }
+        }
+        else
+        {
+            // 如果不是ItemSpawnerSaveData，尝试调用基类方法
+            base.LoadSaveData(data);
+        }
+    }
+
+    /// <summary>
+    /// 记录生成历史
+    /// </summary>
+    private void RecordSpawnHistory(InventorySystemItemDataSO itemData, Vector2Int gridPos, bool success, string failureReason = "")
+    {
+        totalSpawnAttempts++;
+        
+        SpawnHistoryRecord record = new SpawnHistoryRecord()
+        {
+            timestamp = Time.time,
+            itemName = itemData != null ? itemData.itemName : "Unknown",
+            itemCategory = itemData != null ? itemData.itemCategory.ToString() : "Unknown",
+            gridPosition = gridPos,
+            wasSuccessful = success,
+            failureReason = failureReason
+        };
+        
+        spawnHistory.Add(record);
+        
+        if (success)
+        {
+            successfulSpawns++;
+            totalSpawnTime += Time.deltaTime;
+            lastSpawnedCategory = record.itemCategory;
+        }
+        
+        // 限制历史记录数量，避免内存过度使用
+        if (spawnHistory.Count > 1000)
+        {
+            spawnHistory.RemoveAt(0);
+        }
+        
+        if (showDebugInfo && success)
+        {
+            Debug.Log($"记录生成历史: {record.itemName} 在位置 {gridPos}, 成功率: {GetSuccessRate():F1}%");
+        }
+    }
+
+    /// <summary>
+    /// 重写SpawnItemAtPosition方法，添加历史记录
+    /// </summary>
+    public override GameObject SpawnItemAtPosition(GameObject prefab, InventorySystemItemDataSO itemData, Vector2Int gridPos)
+    {
+        float startTime = Time.time;
+        GameObject result = base.SpawnItemAtPosition(prefab, itemData, gridPos);
+        
+        bool success = result != null;
+        string failureReason = success ? "" : "生成失败";
+        
+        RecordSpawnHistory(itemData, gridPos, success, failureReason);
+        
+        return result;
+    }
+
+    /// <summary>
+    /// 获取生成成功率
+    /// </summary>
+    public float GetSuccessRate()
+    {
+        return totalSpawnAttempts > 0 ? (float)successfulSpawns / totalSpawnAttempts * 100f : 0f;
+    }
+
+    /// <summary>
+    /// 获取平均生成时间
+    /// </summary>
+    public float GetAverageSpawnTime()
+    {
+        return successfulSpawns > 0 ? totalSpawnTime / successfulSpawns : 0f;
+    }
+
+    /// <summary>
+    /// 获取生成历史记录
+    /// </summary>
+    public List<SpawnHistoryRecord> GetSpawnHistory()
+    {
+        return new List<SpawnHistoryRecord>(spawnHistory);
+    }
+
+    /// <summary>
+    /// 获取按类别分组的生成统计
+    /// </summary>
+    public Dictionary<string, int> GetSpawnStatsByCategory()
+    {
+        Dictionary<string, int> stats = new Dictionary<string, int>();
+        
+        foreach (var record in spawnHistory)
+        {
+            if (record.wasSuccessful)
+            {
+                if (stats.ContainsKey(record.itemCategory))
+                {
+                    stats[record.itemCategory]++;
+                }
+                else
+                {
+                    stats[record.itemCategory] = 1;
+                }
+            }
+        }
+        
+        return stats;
+    }
+
+    /// <summary>
+    /// 清除生成历史
+    /// </summary>
+    public void ClearSpawnHistory()
+    {
+        spawnHistory.Clear();
+        totalSpawnAttempts = 0;
+        successfulSpawns = 0;
+        totalSpawnTime = 0f;
+        lastSpawnedCategory = "";
+        
+        if (showDebugInfo)
+        {
+            Debug.Log("已清除生成历史记录");
+        }
+    }
+
+    /// <summary>
+    /// 重写验证数据方法
+    /// </summary>
+    public override bool ValidateData()
+    {
+        bool isValid = base.ValidateData();
+        
+        // 验证生成历史列表
+        if (spawnHistory == null)
+        {
+            spawnHistory = new List<SpawnHistoryRecord>();
+            isValid = false;
+            Debug.LogWarning("生成历史列表为空，已重新初始化");
+        }
+        
+        // 验证统计数据的一致性
+        if (totalSpawnAttempts < 0 || successfulSpawns < 0 || successfulSpawns > totalSpawnAttempts)
+        {
+            totalSpawnAttempts = spawnHistory.Count;
+            successfulSpawns = spawnHistory.Count(r => r.wasSuccessful);
+            isValid = false;
+            Debug.LogWarning("统计数据不一致，已重新计算");
+        }
+        
+        return isValid;
+    }
+
+    /// <summary>
+    /// 重写初始化保存系统方法
+    /// </summary>
+    public override void InitializeSaveSystem()
+    {
+        base.InitializeSaveSystem();
+        
+        // 初始化生成历史
+        if (spawnHistory == null)
+        {
+            spawnHistory = new List<SpawnHistoryRecord>();
+        }
+        
+        if (showDebugInfo)
+        {
+            Debug.Log($"物品生成器保存系统初始化完成: {GetSaveID()}, 历史记录: {spawnHistory.Count} 条");
+        }
+    }
+
+    /// <summary>
+    /// 重写获取状态摘要方法
+    /// </summary>
+    public override string GetSpawnerStatusSummary()
+    {
+        string baseInfo = base.GetSpawnerStatusSummary();
+        string successRate = GetSuccessRate().ToString("F1");
+        string avgTime = GetAverageSpawnTime().ToString("F2");
+        string historyCount = spawnHistory.Count.ToString();
+        
+        return $"{baseInfo}, 成功率:{successRate}%, 平均时间:{avgTime}s, 历史记录:{historyCount}条";
+    }
+
+    /// <summary>
+    /// 获取当前选择的物品类型摘要
+    /// </summary>
+    public string GetSelectedCategoriesSummary()
+    {
+        List<string> selectedCategories = new List<string>();
+        
+        if (spawnHelmet) selectedCategories.Add("头盔");
+        if (spawnArmor) selectedCategories.Add("护甲");
+        if (spawnTacticalRig) selectedCategories.Add("战术挂具");
+        if (spawnBackpack) selectedCategories.Add("背包");
+        if (spawnWeapon) selectedCategories.Add("武器");
+        if (spawnAmmunition) selectedCategories.Add("弹药");
+        if (spawnFood) selectedCategories.Add("食物");
+        if (spawnDrink) selectedCategories.Add("饮料");
+        if (spawnHealing) selectedCategories.Add("治疗");
+        if (spawnHemostatic) selectedCategories.Add("止血");
+        if (spawnSedative) selectedCategories.Add("镇静");
+        if (spawnIntelligence) selectedCategories.Add("情报");
+        if (spawnCurrency) selectedCategories.Add("货币");
+        
+        return selectedCategories.Count > 0 ? string.Join(", ", selectedCategories) : "无选择";
+    }
+
 }

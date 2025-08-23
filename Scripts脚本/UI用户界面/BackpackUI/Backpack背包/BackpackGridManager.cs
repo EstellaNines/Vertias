@@ -1,52 +1,95 @@
 using UnityEngine;
 using System.Collections.Generic;
+using System;
+using InventorySystem.SaveSystem;
 
-public class BackpackGridManager : MonoBehaviour
+/// <summary>
+/// ±³°üÍø¸ñ¹ÜÀíÆ÷ - ¸ºÔğ¹ÜÀí±³°üÍø¸ñµÄ³õÊ¼»¯¡¢ÅäÖÃºÍ×´Ì¬±£´æ
+/// ÊµÏÖISaveable½Ó¿ÚÒÔÖ§³Ö±£´æÏµÍ³¼¯³É
+/// </summary>
+public class BackpackGridManager : MonoBehaviour, ISaveable
 {
-    [Header("èƒŒåŒ…ç½‘æ ¼é…ç½®")]
+    [Header("±³°üÍø¸ñÅäÖÃ")]
     [SerializeField] private GridConfig backpackGridConfig;
     [SerializeField] private ItemGrid backpackGrid;
     [SerializeField] private InventoryController inventoryController;
 
-    [Header("ç½‘æ ¼ç³»ç»Ÿç»„ä»¶")]
+    [Header("Íø¸ñÏµÍ³×é¼ş")]
     [SerializeField] private GridInteract gridInteract;
+
+    [Header("±£´æÏµÍ³ÉèÖÃ")]
+    [SerializeField] private string managerID = "";              // ¹ÜÀíÆ÷Î¨Ò»ID
+    [SerializeField] private bool isModified = false;           // ÊÇ·ñÒÑĞŞ¸Ä
+    [SerializeField] private string lastModified = "";          // ×îºóĞŞ¸ÄÊ±¼ä
+
+    // ±£´æÏµÍ³Ïà¹Ø
+    private SaveManager saveManager;
+    private bool isInitialized = false;
 
     private void Start()
     {
+        InitializeSaveSystem();
         InitializeBackpackGrid();
+    }
+
+    /// <summary>
+    /// ³õÊ¼»¯±£´æÏµÍ³
+    /// </summary>
+    private void InitializeSaveSystem()
+    {
+        // Éú³ÉÎ¨Ò»ID
+        if (string.IsNullOrEmpty(managerID))
+        {
+            GenerateNewSaveID();
+        }
+
+        // »ñÈ¡SaveManager²¢×¢²á
+        saveManager = SaveManager.Instance;
+        if (saveManager != null)
+        {
+            saveManager.RegisterSaveable(this);
+            Debug.Log($"BackpackGridManagerÒÑ×¢²áµ½±£´æÏµÍ³: {GetSaveID()}");
+        }
+        else
+        {
+            Debug.LogWarning("SaveManagerÎ´ÕÒµ½£¬BackpackGridManagerÎŞ·¨×¢²áµ½±£´æÏµÍ³");
+        }
+
+        isInitialized = true;
+        UpdateLastModified();
     }
 
     private void InitializeBackpackGrid()
     {
         if (backpackGrid != null && backpackGridConfig != null)
         {
-            // è®¾ç½®ç½‘æ ¼é…ç½®
+            // ÉèÖÃÍø¸ñÅäÖÃ
             backpackGrid.SetGridConfig(backpackGridConfig);
 
-            // åˆå§‹åŒ–ç½‘æ ¼
+            // ³õÊ¼»¯Íø¸ñ
             backpackGrid.LoadFromGridConfig();
 
-            // è®¾ç½®åº“å­˜æ§åˆ¶å™¨ - ä¿®å¤ï¼šä½¿ç”¨æ–°çš„API
+            // ÉèÖÃ¿â´æ¿ØÖÆÆ÷ - ĞŞ¸´£ºÊ¹ÓÃĞÂµÄAPI
             if (inventoryController != null)
             {
                 inventoryController.SetSelectedMainGrid(backpackGrid);
             }
 
-            Debug.Log("èƒŒåŒ…ç½‘æ ¼ç³»ç»Ÿåˆå§‹åŒ–å®Œæˆ");
+            Debug.Log("±³°üÍø¸ñÏµÍ³³õÊ¼»¯Íê³É");
         }
         else
         {
-            Debug.LogError("èƒŒåŒ…ç½‘æ ¼é…ç½®æˆ–ç½‘æ ¼ç»„ä»¶æœªè®¾ç½®ï¼");
+            Debug.LogError("±³°üÍø¸ñÅäÖÃ»òÍø¸ñ×é¼şÎ´ÉèÖÃ£¡");
         }
     }
 
-    // è·å–èƒŒåŒ…ç½‘æ ¼
+    // »ñÈ¡±³°üÍø¸ñ
     public ItemGrid GetBackpackGrid()
     {
         return backpackGrid;
     }
 
-    // è®¾ç½®ç½‘æ ¼é…ç½®
+    // ÉèÖÃÍø¸ñÅäÖÃ
     public void SetGridConfig(GridConfig config)
     {
         backpackGridConfig = config;
@@ -57,14 +100,14 @@ public class BackpackGridManager : MonoBehaviour
         }
     }
 
-    // æ¸…ç©ºèƒŒåŒ…ç½‘æ ¼
+    // Çå¿Õ±³°üÍø¸ñ
     public void ClearBackpackGrid()
     {
         if (backpackGrid != null)
         {
-            // è·å–æ‰€æœ‰å·²æ”¾ç½®çš„ç‰©å“
+            // »ñÈ¡ËùÓĞÒÑ·ÅÖÃµÄÎïÆ·
             var placedItems = new List<ItemGrid.PlacedItem>();
-            // æ³¨æ„ï¼šéœ€è¦æ ¹æ®ItemGridçš„å®é™…APIè°ƒæ•´è¿™é‡Œçš„ä»£ç 
+            // ×¢Òâ£ºĞèÒª¸ù¾İItemGridµÄÊµ¼ÊAPIµ÷ÕûÕâÀïµÄ´úÂë
 
             for (int i = placedItems.Count - 1; i >= 0; i--)
             {
@@ -77,7 +120,7 @@ public class BackpackGridManager : MonoBehaviour
         }
     }
 
-    // ä¿å­˜èƒŒåŒ…çŠ¶æ€
+    // ±£´æ±³°ü×´Ì¬
     public void SaveBackpackState()
     {
         if (backpackGrid != null)
@@ -86,7 +129,7 @@ public class BackpackGridManager : MonoBehaviour
         }
     }
 
-    // æ–°å¢ï¼šåˆ‡æ¢åˆ°èƒŒåŒ…ç½‘æ ¼æ¨¡å¼çš„æ–¹æ³•
+    // ĞÂÔö£ºÇĞ»»µ½±³°üÍø¸ñÄ£Ê½µÄ·½·¨
     public void SwitchToBackpackMode()
     {
         if (inventoryController != null && backpackGrid != null)
@@ -95,12 +138,293 @@ public class BackpackGridManager : MonoBehaviour
         }
     }
 
-    // æ–°å¢ï¼šè·å–å½“å‰æ˜¯å¦ä¸ºæ´»è·ƒç½‘æ ¼
+    // ĞÂÔö£º»ñÈ¡µ±Ç°ÊÇ·ñÎª»îÔ¾Íø¸ñ
     public bool IsActiveGrid()
     {
         if (inventoryController == null) return false;
-        
+
         return inventoryController.GetActiveGridType() == InventoryController.ActiveGridType.MainGrid &&
                inventoryController.selectedItemGrid == backpackGrid;
     }
+
+    // ==================== ISaveable½Ó¿ÚÊµÏÖ ====================
+
+    /// <summary>
+    /// »ñÈ¡¹ÜÀíÆ÷µÄÎ¨Ò»±êÊ¶ID
+    /// </summary>
+    /// <returns>¹ÜÀíÆ÷µÄÎ¨Ò»ID×Ö·û´®</returns>
+    public string GetSaveID()
+    {
+        if (string.IsNullOrEmpty(managerID))
+        {
+            GenerateNewSaveID();
+        }
+        return managerID;
+    }
+
+    /// <summary>
+    /// ÉèÖÃ¹ÜÀíÆ÷µÄÎ¨Ò»±êÊ¶ID
+    /// </summary>
+    /// <param name="id">ĞÂµÄID×Ö·û´®</param>
+    public void SetSaveID(string id)
+    {
+        if (!string.IsNullOrEmpty(id) && managerID != id)
+        {
+            managerID = id;
+            MarkAsModified();
+        }
+    }
+
+    /// <summary>
+    /// Éú³ÉĞÂµÄÎ¨Ò»±êÊ¶ID
+    /// </summary>
+    public void GenerateNewSaveID()
+    {
+        managerID = $"BackpackGridManager_{System.Guid.NewGuid().ToString("N")[..12]}_{GetInstanceID()}";
+        MarkAsModified();
+        Debug.Log($"Éú³ÉĞÂµÄBackpackGridManager ID: {managerID}");
+    }
+
+    /// <summary>
+    /// ÑéÖ¤±£´æIDÊÇ·ñÓĞĞ§
+    /// </summary>
+    /// <returns>IDÊÇ·ñÓĞĞ§</returns>
+    public bool IsSaveIDValid()
+    {
+        return !string.IsNullOrEmpty(managerID) && managerID.Length > 10;
+    }
+
+    /// <summary>
+    /// ĞòÁĞ»¯¹ÜÀíÆ÷Êı¾İÎªJSON×Ö·û´®
+    /// </summary>
+    /// <returns>ĞòÁĞ»¯ºóµÄJSON×Ö·û´®</returns>
+    public string SerializeToJson()
+    {
+        try
+        {
+            var saveData = CreateSaveData();
+            return JsonUtility.ToJson(saveData, true);
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"BackpackGridManagerĞòÁĞ»¯Ê§°Ü: {ex.Message}");
+            return "{}";
+        }
+    }
+
+    /// <summary>
+    /// ´ÓJSON×Ö·û´®·´ĞòÁĞ»¯¹ÜÀíÆ÷Êı¾İ
+    /// </summary>
+    /// <param name="jsonData">JSONÊı¾İ×Ö·û´®</param>
+    /// <returns>·´ĞòÁĞ»¯ÊÇ·ñ³É¹¦</returns>
+    public bool DeserializeFromJson(string jsonData)
+    {
+        try
+        {
+            if (string.IsNullOrEmpty(jsonData))
+            {
+                Debug.LogWarning("BackpackGridManager·´ĞòÁĞ»¯Êı¾İÎª¿Õ");
+                return false;
+            }
+
+            var saveData = JsonUtility.FromJson<BackpackGridManagerSaveData>(jsonData);
+            return LoadFromSaveData(saveData);
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"BackpackGridManager·´ĞòÁĞ»¯Ê§°Ü: {ex.Message}");
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// ±ê¼ÇÎªÒÑĞŞ¸Ä
+    /// </summary>
+    public void MarkAsModified()
+    {
+        isModified = true;
+        UpdateLastModified();
+    }
+
+    /// <summary>
+    /// ÖØÖÃĞŞ¸Ä±ê¼Ç
+    /// </summary>
+    public void ResetModifiedFlag()
+    {
+        isModified = false;
+    }
+
+    /// <summary>
+    /// ¼ì²éÊÇ·ñÒÑĞŞ¸Ä
+    /// </summary>
+    /// <returns>ÊÇ·ñÒÑĞŞ¸Ä</returns>
+    public bool IsModified()
+    {
+        return isModified;
+    }
+
+    /// <summary>
+    /// ÑéÖ¤¹ÜÀíÆ÷Êı¾İµÄÍêÕûĞÔ
+    /// </summary>
+    /// <returns>Êı¾İÊÇ·ñÓĞĞ§</returns>
+    public bool ValidateData()
+    {
+        // ÑéÖ¤¹ÜÀíÆ÷ID
+        if (!IsSaveIDValid())
+        {
+            Debug.LogError("BackpackGridManager IDÎŞĞ§");
+            return false;
+        }
+
+        // ÑéÖ¤¹Ø¼ü×é¼şÒıÓÃ
+        if (backpackGrid == null)
+        {
+            Debug.LogError("BackpackGridÒıÓÃÈ±Ê§");
+            return false;
+        }
+
+        if (inventoryController == null)
+        {
+            Debug.LogError("InventoryControllerÒıÓÃÈ±Ê§");
+            return false;
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// »ñÈ¡×îºóĞŞ¸ÄÊ±¼ä
+    /// </summary>
+    /// <returns>×îºóĞŞ¸ÄÊ±¼ä×Ö·û´®</returns>
+    public string GetLastModified()
+    {
+        return lastModified;
+    }
+
+    /// <summary>
+    /// ¸üĞÂ×îºóĞŞ¸ÄÊ±¼äÎªµ±Ç°Ê±¼ä
+    /// </summary>
+    public void UpdateLastModified()
+    {
+        lastModified = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+    }
+
+    // ==================== ±£´æÊı¾İ¹ÜÀí ====================
+
+    /// <summary>
+    /// ´´½¨¹ÜÀíÆ÷±£´æÊı¾İ
+    /// </summary>
+    /// <returns>¹ÜÀíÆ÷±£´æÊı¾İ</returns>
+    public BackpackGridManagerSaveData CreateSaveData()
+    {
+        var saveData = new BackpackGridManagerSaveData
+        {
+            managerID = GetSaveID(),
+            saveVersion = "1.0",
+            lastModified = GetLastModified(),
+            isModified = IsModified(),
+
+            // Íø¸ñÅäÖÃĞÅÏ¢
+            hasGridConfig = backpackGridConfig != null,
+            gridConfigName = backpackGridConfig != null ? backpackGridConfig.name : "",
+
+            // Íø¸ñ×´Ì¬ĞÅÏ¢
+            hasBackpackGrid = backpackGrid != null,
+            backpackGridID = backpackGrid != null && backpackGrid is ISaveable saveableGrid ? saveableGrid.GetSaveID() : "",
+
+            // ¿ØÖÆÆ÷¹ØÁªĞÅÏ¢
+            hasInventoryController = inventoryController != null,
+            inventoryControllerID = inventoryController != null && inventoryController is ISaveable saveableController ? saveableController.GetSaveID() : "",
+
+            // ×´Ì¬ĞÅÏ¢
+            isActiveGrid = IsActiveGrid(),
+            isInitialized = this.isInitialized
+        };
+
+        return saveData;
+    }
+
+    /// <summary>
+    /// ´Ó±£´æÊı¾İ¼ÓÔØ¹ÜÀíÆ÷×´Ì¬
+    /// </summary>
+    /// <param name="saveData">±£´æÊı¾İ</param>
+    /// <returns>¼ÓÔØÊÇ·ñ³É¹¦</returns>
+    public bool LoadFromSaveData(BackpackGridManagerSaveData saveData)
+    {
+        try
+        {
+            // »Ö¸´»ù±¾ĞÅÏ¢
+            managerID = saveData.managerID;
+            lastModified = saveData.lastModified;
+            isModified = saveData.isModified;
+
+            // »Ö¸´³õÊ¼»¯×´Ì¬
+            isInitialized = saveData.isInitialized;
+
+            // ×¢Òâ£ºÍø¸ñºÍ¿ØÖÆÆ÷µÄÒıÓÃ»Ö¸´ĞèÒªÔÚ³¡¾°¼ÓÔØÍê³Éºó½øĞĞ
+            // ÕâÀïÖ»¼ÇÂ¼ID£¬Êµ¼ÊµÄÒıÓÃ»Ö¸´ÔÚRestoreReferences·½·¨ÖĞ´¦Àí
+
+            Debug.Log($"BackpackGridManagerÊı¾İ¼ÓÔØ³É¹¦: {managerID}");
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"BackpackGridManagerÊı¾İ¼ÓÔØÊ§°Ü: {ex.Message}");
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// »Ö¸´¶ÔÏóÒıÓÃ£¨ÔÚ³¡¾°¼ÓÔØÍê³Éºóµ÷ÓÃ£©
+    /// </summary>
+    /// <param name="saveData">±£´æÊı¾İ</param>
+    public void RestoreReferences(BackpackGridManagerSaveData saveData)
+    {
+        // Õâ¸ö·½·¨½«ÔÚºóĞøµÄÍø¸ñ±£´æÊµÏÖÖĞÍêÉÆ
+        // Ä¿Ç°Ö÷ÒªÓÃÓÚ×¼±¸½Ó¿ÚÀ©Õ¹
+        Debug.Log($"BackpackGridManagerÒıÓÃ»Ö¸´×¼±¸: {saveData.managerID}");
+    }
+
+    /// <summary>
+    /// ÔÚ¶ÔÏóÏú»ÙÊ±ÇåÀí±£´æÏµÍ³×¢²á
+    /// </summary>
+    private void OnDestroy()
+    {
+        if (saveManager != null && !string.IsNullOrEmpty(managerID))
+        {
+            saveManager.UnregisterSaveable(managerID);
+            Debug.Log($"BackpackGridManagerÒÑ´Ó±£´æÏµÍ³×¢Ïú: {managerID}");
+        }
+    }
+}
+
+// ==================== ±£´æÊı¾İ½á¹¹ ====================
+
+/// <summary>
+/// ±³°üÍø¸ñ¹ÜÀíÆ÷±£´æÊı¾İ½á¹¹
+/// </summary>
+[System.Serializable]
+public class BackpackGridManagerSaveData
+{
+    [Header("»ù±¾ĞÅÏ¢")]
+    public string managerID;                    // ¹ÜÀíÆ÷Î¨Ò»ID
+    public string saveVersion;                  // ±£´æ°æ±¾
+    public string lastModified;                 // ×îºóĞŞ¸ÄÊ±¼ä
+    public bool isModified;                     // ÊÇ·ñÒÑĞŞ¸Ä
+
+    [Header("Íø¸ñÅäÖÃĞÅÏ¢")]
+    public bool hasGridConfig;                  // ÊÇ·ñÓĞÍø¸ñÅäÖÃ
+    public string gridConfigName;               // Íø¸ñÅäÖÃÃû³Æ
+
+    [Header("Íø¸ñ×´Ì¬ĞÅÏ¢")]
+    public bool hasBackpackGrid;                // ÊÇ·ñÓĞ±³°üÍø¸ñ
+    public string backpackGridID;               // ±³°üÍø¸ñID
+
+    [Header("¿ØÖÆÆ÷¹ØÁªĞÅÏ¢")]
+    public bool hasInventoryController;         // ÊÇ·ñÓĞ¿â´æ¿ØÖÆÆ÷
+    public string inventoryControllerID;        // ¿â´æ¿ØÖÆÆ÷ID
+
+    [Header("×´Ì¬ĞÅÏ¢")]
+    public bool isActiveGrid;                   // ÊÇ·ñÎª»îÔ¾Íø¸ñ
+    public bool isInitialized;                  // ÊÇ·ñÒÑ³õÊ¼»¯
 }

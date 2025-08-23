@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 5933210937718622535}
   - component: {fileID: 250417683743189735}
   - component: {fileID: 2032796211033957933}
+  - component: {fileID: 2419301392703826565}
   m_Layer: 5
   m_Name: BackpackItemGrid
   m_TagString: Untagged
@@ -90,6 +91,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   gridConfig: {fileID: 11400000, guid: 7142a0d87094f254189ec042d12bfe56, type: 2}
+  gridID: 
+  saveVersion: 1
+  isModified: 0
+  lastModified: 
   defaultWidth: 1
   defaultHeight: 1
 --- !u!114 &2032796211033957933
@@ -105,3 +110,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   gridPriority: 1
+  gridInteractID: 
+  autoGenerateID: 1
+  saveVersion: 1
+  enableStatePersistence: 1
+--- !u!114 &2419301392703826565
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 220438366853721780}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e08aac8cb53b25849a0657cf7f4e1849, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  enableDebugLogs: 1
