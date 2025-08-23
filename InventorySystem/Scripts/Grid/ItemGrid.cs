@@ -12,13 +12,13 @@ using UnityEditor;
 [ExecuteInEditMode]
 public class ItemGrid : BaseItemGrid
 {
-    [SerializeField][FieldLabel("ç½‘æ ¼ç³»ç»Ÿå®½åº¦æ ¼æ•°")] private int inventoryWidth = 10;
-    [SerializeField][FieldLabel("ç½‘æ ¼ç³»ç»Ÿé«˜åº¦æ ¼æ•°")] private int inventoryHeight = 30;
-    [SerializeField] protected bool showDebugInfo = true; // è°ƒè¯•ä¿¡æ¯æ˜¾ç¤ºå¼€å…³
+    [SerializeField][FieldLabel("Íø¸ñÏµÍ³¿í¶È¸ñÊı")] private int inventoryWidth = 10;
+    [SerializeField][FieldLabel("Íø¸ñÏµÍ³¸ß¶È¸ñÊı")] private int inventoryHeight = 30;
+    [SerializeField] protected bool showDebugInfo = true; // µ÷ÊÔĞÅÏ¢ÏÔÊ¾¿ª¹Ø
 
     protected override void Awake()
     {
-        // ç¡®ä¿åœ¨base.Awake()ä¹‹å‰åŠ è½½é…ç½®
+        // È·±£ÔÚbase.Awake()Ö®Ç°¼ÓÔØÅäÖÃ
         LoadFromGridConfig();
         base.Awake();
     }
@@ -33,13 +33,13 @@ public class ItemGrid : BaseItemGrid
             width = inventoryWidth;
             height = inventoryHeight;
 
-            // å¼ºåˆ¶æ›´æ–°ç½‘æ ¼æ•°ç»„
+            // Ç¿ÖÆ¸üĞÂÍø¸ñÊı×é
             InitializeGridArrays();
 
             isUpdatingFromConfig = false;
 
-            // ç§»é™¤showDebugInfoå¼•ç”¨ï¼Œç›´æ¥ä½¿ç”¨Debug.Log
-            Debug.Log($"ä»GridConfigåŠ è½½å°ºå¯¸: {inventoryWidth}x{inventoryHeight}");
+            // ÒÆ³ıshowDebugInfoÒıÓÃ£¬Ö±½ÓÊ¹ÓÃDebug.Log
+            Debug.Log($"´ÓGridConfig¼ÓÔØ³ß´ç: {inventoryWidth}x{inventoryHeight}");
         }
     }
 
@@ -92,7 +92,7 @@ public class ItemGrid : BaseItemGrid
         rectTransform.sizeDelta = size;
     }
 
-    // åˆ é™¤é‡å¤çš„LoadFromGridConfigæ–¹æ³•ï¼Œåªä¿ç•™ä¸Šé¢çš„ä¸€ä¸ª
+    // É¾³ıÖØ¸´µÄLoadFromGridConfig·½·¨£¬Ö»±£ÁôÉÏÃæµÄÒ»¸ö
 
     public void SaveToGridConfig()
     {
@@ -129,35 +129,35 @@ public class ItemGrid : BaseItemGrid
         SaveToGridConfig();
     }
 
-    // ===== ISaveableæ¥å£æ‰©å±•å®ç° =====
+    // ===== ISaveable½Ó¿ÚÀ©Õ¹ÊµÏÖ =====
 
     /// <summary>
-    /// ä»“åº“ç½‘æ ¼ä¿å­˜æ•°æ®ç±»ï¼ˆç»§æ‰¿åŸºç±»ï¼‰
+    /// ²Ö¿âÍø¸ñ±£´æÊı¾İÀà£¨¼Ì³Ğ»ùÀà£©
     /// </summary>
     [System.Serializable]
     public class ItemGridSaveData : BaseItemGridSaveData
     {
-        // é™æ€ç½‘æ ¼é…ç½®æ•°æ®
-        public int configInventoryWidth; // é…ç½®æ–‡ä»¶ä¸­çš„å®½åº¦
-        public int configInventoryHeight; // é…ç½®æ–‡ä»¶ä¸­çš„é«˜åº¦
-        public string gridConfigPath; // GridConfigèµ„æºè·¯å¾„
-        public bool isStaticGrid; // æ˜¯å¦ä¸ºé™æ€ç½‘æ ¼
+        // ¾²Ì¬Íø¸ñÅäÖÃÊı¾İ
+        public int configInventoryWidth; // ÅäÖÃÎÄ¼şÖĞµÄ¿í¶È
+        public int configInventoryHeight; // ÅäÖÃÎÄ¼şÖĞµÄ¸ß¶È
+        public string gridConfigPath; // GridConfig×ÊÔ´Â·¾¶
+        public bool isStaticGrid; // ÊÇ·ñÎª¾²Ì¬Íø¸ñ
 
-        // ç½‘æ ¼çŠ¶æ€æ•°æ®
-        public bool isConfigSynced; // é…ç½®æ˜¯å¦å·²åŒæ­¥
-        public float lastConfigUpdateTime; // æœ€åé…ç½®æ›´æ–°æ—¶é—´
-        public string gridDescription; // ç½‘æ ¼æè¿°ä¿¡æ¯
-        public Vector2 gridWorldPosition; // ç½‘æ ¼åœ¨ä¸–ç•Œä¸­çš„ä½ç½®
+        // Íø¸ñ×´Ì¬Êı¾İ
+        public bool isConfigSynced; // ÅäÖÃÊÇ·ñÒÑÍ¬²½
+        public float lastConfigUpdateTime; // ×îºóÅäÖÃ¸üĞÂÊ±¼ä
+        public string gridDescription; // Íø¸ñÃèÊöĞÅÏ¢
+        public Vector2 gridWorldPosition; // Íø¸ñÔÚÊÀ½çÖĞµÄÎ»ÖÃ
     }
 
-    // é™æ€ç½‘æ ¼é…ç½®ç¼“å­˜
+    // ¾²Ì¬Íø¸ñÅäÖÃ»º´æ
     private bool isStaticGrid = true;
     private float lastConfigUpdateTime = 0f;
     private string gridDescription = "";
 
     /// <summary>
-    /// é‡å†™ç”Ÿæˆæ–°çš„ä¿å­˜IDæ–¹æ³•
-    /// æ ¼å¼: StorageGrid_[ç½‘æ ¼åç§°]_[å®½åº¦xé«˜åº¦]_[8ä½GUID]_[å®ä¾‹ID]
+    /// ÖØĞ´Éú³ÉĞÂµÄ±£´æID·½·¨
+    /// ¸ñÊ½: StorageGrid_[Íø¸ñÃû³Æ]_[¿í¶Èx¸ß¶È]_[8Î»GUID]_[ÊµÀıID]
     /// </summary>
     public override void GenerateNewSaveID()
     {
@@ -170,22 +170,22 @@ public class ItemGrid : BaseItemGrid
 
         if (Application.isPlaying && showDebugInfo)
         {
-            Debug.Log($"ä¸ºä»“åº“ç½‘æ ¼ç”Ÿæˆæ–°çš„ä¿å­˜ID: {newSaveID}");
+            Debug.Log($"Îª²Ö¿âÍø¸ñÉú³ÉĞÂµÄ±£´æID: {newSaveID}");
         }
     }
 
     /// <summary>
-    /// é‡å†™è·å–ä¿å­˜æ•°æ®æ–¹æ³•
+    /// ÖØĞ´»ñÈ¡±£´æÊı¾İ·½·¨
     /// </summary>
     public override BaseItemGridSaveData GetSaveData()
     {
-        // å…ˆè·å–åŸºç±»æ•°æ®
+        // ÏÈ»ñÈ¡»ùÀàÊı¾İ
         BaseItemGridSaveData baseData = base.GetSaveData();
 
-        // åˆ›å»ºItemGridä¸“ç”¨çš„ä¿å­˜æ•°æ®
+        // ´´½¨ItemGrid×¨ÓÃµÄ±£´æÊı¾İ
         ItemGridSaveData saveData = new ItemGridSaveData();
 
-        // ç»§æ‰¿åŸºç±»æ•°æ®
+        // ¼Ì³Ğ»ùÀàÊı¾İ
         saveData.gridID = baseData.gridID;
         saveData.saveVersion = baseData.saveVersion;
         saveData.gridWidth = baseData.gridWidth;
@@ -194,13 +194,13 @@ public class ItemGrid : BaseItemGrid
         saveData.lastModified = baseData.lastModified;
         saveData.isModified = baseData.isModified;
 
-        // ä¿å­˜é™æ€ç½‘æ ¼é…ç½®æ•°æ®
+        // ±£´æ¾²Ì¬Íø¸ñÅäÖÃÊı¾İ
         saveData.configInventoryWidth = inventoryWidth;
         saveData.configInventoryHeight = inventoryHeight;
         saveData.gridConfigPath = gridConfig != null ? GetGridConfigAssetPath() : "";
         saveData.isStaticGrid = isStaticGrid;
 
-        // ä¿å­˜ç½‘æ ¼çŠ¶æ€æ•°æ®
+        // ±£´æÍø¸ñ×´Ì¬Êı¾İ
         saveData.isConfigSynced = IsConfigSynced();
         saveData.lastConfigUpdateTime = lastConfigUpdateTime;
         saveData.gridDescription = gridDescription;
@@ -210,7 +210,7 @@ public class ItemGrid : BaseItemGrid
     }
 
     /// <summary>
-    /// é‡å†™åŠ è½½ä¿å­˜æ•°æ®æ–¹æ³•
+    /// ÖØĞ´¼ÓÔØ±£´æÊı¾İ·½·¨
     /// </summary>
     public override bool LoadSaveData(BaseItemGridSaveData data)
     {
@@ -218,14 +218,14 @@ public class ItemGrid : BaseItemGrid
         {
             try
             {
-                // å…ˆè°ƒç”¨åŸºç±»åŠ è½½æ–¹æ³•
+                // ÏÈµ÷ÓÃ»ùÀà¼ÓÔØ·½·¨
                 bool baseResult = base.LoadSaveData(saveData);
                 if (!baseResult)
                 {
                     return false;
                 }
 
-                // æ¢å¤é™æ€ç½‘æ ¼é…ç½®
+                // »Ö¸´¾²Ì¬Íø¸ñÅäÖÃ
                 if (saveData.configInventoryWidth > 0 && saveData.configInventoryHeight > 0)
                 {
                     inventoryWidth = saveData.configInventoryWidth;
@@ -234,49 +234,49 @@ public class ItemGrid : BaseItemGrid
                     height = inventoryHeight;
                 }
 
-                // æ¢å¤GridConfigå¼•ç”¨
+                // »Ö¸´GridConfigÒıÓÃ
                 if (!string.IsNullOrEmpty(saveData.gridConfigPath))
                 {
                     RestoreGridConfigReference(saveData.gridConfigPath);
                 }
 
-                // æ¢å¤ç½‘æ ¼çŠ¶æ€æ•°æ®
+                // »Ö¸´Íø¸ñ×´Ì¬Êı¾İ
                 isStaticGrid = saveData.isStaticGrid;
                 lastConfigUpdateTime = saveData.lastConfigUpdateTime;
                 gridDescription = saveData.gridDescription ?? "";
 
-                // æ¢å¤ä¸–ç•Œä½ç½®ï¼ˆå¦‚æœéœ€è¦ï¼‰
+                // »Ö¸´ÊÀ½çÎ»ÖÃ£¨Èç¹ûĞèÒª£©
                 if (saveData.gridWorldPosition != Vector2.zero)
                 {
                     Vector3 worldPos = new Vector3(saveData.gridWorldPosition.x, transform.position.y, saveData.gridWorldPosition.y);
                     transform.position = worldPos;
                 }
 
-                // é‡æ–°åˆå§‹åŒ–ç½‘æ ¼æ•°ç»„
+                // ÖØĞÂ³õÊ¼»¯Íø¸ñÊı×é
                 InitializeGridArrays();
 
                 if (showDebugInfo)
                 {
-                    Debug.Log($"æˆåŠŸåŠ è½½ä»“åº“ç½‘æ ¼ä¿å­˜æ•°æ®: {GetSaveID()}, å°ºå¯¸: {inventoryWidth}x{inventoryHeight}");
+                    Debug.Log($"³É¹¦¼ÓÔØ²Ö¿âÍø¸ñ±£´æÊı¾İ: {GetSaveID()}, ³ß´ç: {inventoryWidth}x{inventoryHeight}");
                 }
 
                 return true;
             }
             catch (System.Exception e)
             {
-                Debug.LogError($"åŠ è½½ä»“åº“ç½‘æ ¼ä¿å­˜æ•°æ®å¤±è´¥: {e.Message}");
+                Debug.LogError($"¼ÓÔØ²Ö¿âÍø¸ñ±£´æÊı¾İÊ§°Ü: {e.Message}");
                 return false;
             }
         }
         else
         {
-            // å¦‚æœä¸æ˜¯ItemGridSaveDataï¼Œå°è¯•è°ƒç”¨åŸºç±»æ–¹æ³•
+            // Èç¹û²»ÊÇItemGridSaveData£¬³¢ÊÔµ÷ÓÃ»ùÀà·½·¨
             return base.LoadSaveData(data);
         }
     }
 
     /// <summary>
-    /// è·å–GridConfigèµ„æºè·¯å¾„
+    /// »ñÈ¡GridConfig×ÊÔ´Â·¾¶
     /// </summary>
     private string GetGridConfigAssetPath()
     {
@@ -285,12 +285,12 @@ public class ItemGrid : BaseItemGrid
 #if UNITY_EDITOR
         return AssetDatabase.GetAssetPath(gridConfig);
 #else
-        return gridConfig.name; // è¿è¡Œæ—¶è¿”å›èµ„æºåç§°
+        return gridConfig.name; // ÔËĞĞÊ±·µ»Ø×ÊÔ´Ãû³Æ
 #endif
     }
 
     /// <summary>
-    /// æ¢å¤GridConfigå¼•ç”¨
+    /// »Ö¸´GridConfigÒıÓÃ
     /// </summary>
     private void RestoreGridConfigReference(string configPath)
     {
@@ -303,15 +303,15 @@ public class ItemGrid : BaseItemGrid
             gridConfig = loadedConfig;
             if (showDebugInfo)
             {
-                Debug.Log($"æˆåŠŸæ¢å¤GridConfigå¼•ç”¨: {configPath}");
+                Debug.Log($"³É¹¦»Ö¸´GridConfigÒıÓÃ: {configPath}");
             }
         }
         else
         {
-            Debug.LogWarning($"æ— æ³•æ‰¾åˆ°GridConfigèµ„æº: {configPath}");
+            Debug.LogWarning($"ÎŞ·¨ÕÒµ½GridConfig×ÊÔ´: {configPath}");
         }
 #else
-        // è¿è¡Œæ—¶é€šè¿‡Resources.Loadæˆ–AddressablesåŠ è½½
+        // ÔËĞĞÊ±Í¨¹ıResources.Load»òAddressables¼ÓÔØ
         GridConfig loadedConfig = Resources.Load<GridConfig>(configPath);
         if (loadedConfig != null)
         {
@@ -321,7 +321,7 @@ public class ItemGrid : BaseItemGrid
     }
 
     /// <summary>
-    /// æ£€æŸ¥é…ç½®æ˜¯å¦å·²åŒæ­¥
+    /// ¼ì²éÅäÖÃÊÇ·ñÒÑÍ¬²½
     /// </summary>
     private bool IsConfigSynced()
     {
@@ -332,7 +332,7 @@ public class ItemGrid : BaseItemGrid
     }
 
     /// <summary>
-    /// ä¿å­˜é™æ€ç½‘æ ¼é…ç½®åˆ°GridConfig
+    /// ±£´æ¾²Ì¬Íø¸ñÅäÖÃµ½GridConfig
     /// </summary>
     public void SaveStaticGridConfig()
     {
@@ -363,14 +363,14 @@ public class ItemGrid : BaseItemGrid
 
                 if (showDebugInfo)
                 {
-                    Debug.Log($"å·²ä¿å­˜é™æ€ç½‘æ ¼é…ç½®: {inventoryWidth}x{inventoryHeight}");
+                    Debug.Log($"ÒÑ±£´æ¾²Ì¬Íø¸ñÅäÖÃ: {inventoryWidth}x{inventoryHeight}");
                 }
             }
         }
     }
 
     /// <summary>
-    /// ä»GridConfigåŠ è½½é™æ€é…ç½®
+    /// ´ÓGridConfig¼ÓÔØ¾²Ì¬ÅäÖÃ
     /// </summary>
     public void LoadStaticGridConfig()
     {
@@ -399,14 +399,14 @@ public class ItemGrid : BaseItemGrid
 
                 if (showDebugInfo)
                 {
-                    Debug.Log($"å·²ä»GridConfigåŠ è½½é™æ€é…ç½®: {inventoryWidth}x{inventoryHeight}");
+                    Debug.Log($"ÒÑ´ÓGridConfig¼ÓÔØ¾²Ì¬ÅäÖÃ: {inventoryWidth}x{inventoryHeight}");
                 }
             }
         }
     }
 
     /// <summary>
-    /// è®¾ç½®ç½‘æ ¼æè¿°
+    /// ÉèÖÃÍø¸ñÃèÊö
     /// </summary>
     public void SetGridDescription(string description)
     {
@@ -414,12 +414,12 @@ public class ItemGrid : BaseItemGrid
 
         if (showDebugInfo)
         {
-            Debug.Log($"è®¾ç½®ç½‘æ ¼æè¿°: {gridDescription}");
+            Debug.Log($"ÉèÖÃÍø¸ñÃèÊö: {gridDescription}");
         }
     }
 
     /// <summary>
-    /// è·å–ç½‘æ ¼æè¿°
+    /// »ñÈ¡Íø¸ñÃèÊö
     /// </summary>
     public string GetGridDescription()
     {
@@ -427,7 +427,7 @@ public class ItemGrid : BaseItemGrid
     }
 
     /// <summary>
-    /// è®¾ç½®æ˜¯å¦ä¸ºé™æ€ç½‘æ ¼
+    /// ÉèÖÃÊÇ·ñÎª¾²Ì¬Íø¸ñ
     /// </summary>
     public void SetStaticGrid(bool isStatic)
     {
@@ -435,12 +435,12 @@ public class ItemGrid : BaseItemGrid
 
         if (showDebugInfo)
         {
-            Debug.Log($"è®¾ç½®é™æ€ç½‘æ ¼çŠ¶æ€: {isStaticGrid}");
+            Debug.Log($"ÉèÖÃ¾²Ì¬Íø¸ñ×´Ì¬: {isStaticGrid}");
         }
     }
 
     /// <summary>
-    /// è·å–æ˜¯å¦ä¸ºé™æ€ç½‘æ ¼
+    /// »ñÈ¡ÊÇ·ñÎª¾²Ì¬Íø¸ñ
     /// </summary>
     public bool IsStaticGrid()
     {
@@ -448,13 +448,13 @@ public class ItemGrid : BaseItemGrid
     }
 
     /// <summary>
-    /// é‡å†™éªŒè¯æ•°æ®æ–¹æ³•
+    /// ÖØĞ´ÑéÖ¤Êı¾İ·½·¨
     /// </summary>
     public override bool ValidateData()
     {
         bool isValid = base.ValidateData();
 
-        // éªŒè¯ç½‘æ ¼å°ºå¯¸
+        // ÑéÖ¤Íø¸ñ³ß´ç
         if (inventoryWidth <= 0 || inventoryHeight <= 0)
         {
             inventoryWidth = Mathf.Max(1, inventoryWidth);
@@ -462,77 +462,77 @@ public class ItemGrid : BaseItemGrid
             width = inventoryWidth;
             height = inventoryHeight;
             isValid = false;
-            Debug.LogWarning("ç½‘æ ¼å°ºå¯¸æ— æ•ˆï¼Œå·²é‡ç½®ä¸ºæœ€å°å€¼");
+            Debug.LogWarning("Íø¸ñ³ß´çÎŞĞ§£¬ÒÑÖØÖÃÎª×îĞ¡Öµ");
         }
 
-        // éªŒè¯GridConfigå¼•ç”¨
+        // ÑéÖ¤GridConfigÒıÓÃ
         if (gridConfig == null)
         {
-            Debug.LogWarning("GridConfigå¼•ç”¨ä¸ºç©ºï¼ŒæŸäº›åŠŸèƒ½å¯èƒ½æ— æ³•æ­£å¸¸å·¥ä½œ");
+            Debug.LogWarning("GridConfigÒıÓÃÎª¿Õ£¬Ä³Ğ©¹¦ÄÜ¿ÉÄÜÎŞ·¨Õı³£¹¤×÷");
         }
 
-        // éªŒè¯é…ç½®åŒæ­¥çŠ¶æ€
+        // ÑéÖ¤ÅäÖÃÍ¬²½×´Ì¬
         if (gridConfig != null && !IsConfigSynced())
         {
-            Debug.LogWarning("ç½‘æ ¼é…ç½®ä¸GridConfigä¸åŒæ­¥");
+            Debug.LogWarning("Íø¸ñÅäÖÃÓëGridConfig²»Í¬²½");
         }
 
         return isValid;
     }
 
     /// <summary>
-    /// é‡å†™åˆå§‹åŒ–ä¿å­˜ç³»ç»Ÿæ–¹æ³•
+    /// ÖØĞ´³õÊ¼»¯±£´æÏµÍ³·½·¨
     /// </summary>
     protected override void InitializeSaveSystem()
     {
         base.InitializeSaveSystem();
 
-        // åˆå§‹åŒ–é™æ€ç½‘æ ¼ç‰¹æœ‰å±æ€§
+        // ³õÊ¼»¯¾²Ì¬Íø¸ñÌØÓĞÊôĞÔ
         if (string.IsNullOrEmpty(gridDescription))
         {
-            gridDescription = $"ä»“åº“ç½‘æ ¼ {inventoryWidth}x{inventoryHeight}";
+            gridDescription = $"²Ö¿âÍø¸ñ {inventoryWidth}x{inventoryHeight}";
         }
 
         lastConfigUpdateTime = Time.time;
 
         if (showDebugInfo)
         {
-            Debug.Log($"ä»“åº“ç½‘æ ¼ä¿å­˜ç³»ç»Ÿåˆå§‹åŒ–å®Œæˆ: {GetSaveID()}, é™æ€ç½‘æ ¼: {isStaticGrid}");
+            Debug.Log($"²Ö¿âÍø¸ñ±£´æÏµÍ³³õÊ¼»¯Íê³É: {GetSaveID()}, ¾²Ì¬Íø¸ñ: {isStaticGrid}");
         }
     }
 
     /// <summary>
-    /// è·å–ç½‘æ ¼çŠ¶æ€æ‘˜è¦æ–¹æ³•
+    /// »ñÈ¡Íø¸ñ×´Ì¬ÕªÒª·½·¨
     /// </summary>
     public string GetGridStatusSummary()
     {
-        string baseInfo = $"ç½‘æ ¼ID: {GetSaveID()}, å°ºå¯¸: {inventoryWidth}x{inventoryHeight}, ç‰©å“æ•°é‡: {placedItems.Count}";
-        string configSync = IsConfigSynced() ? "å·²åŒæ­¥" : "æœªåŒæ­¥";
-        string staticStatus = isStaticGrid ? "é™æ€" : "åŠ¨æ€";
-        string configPath = gridConfig != null ? GetGridConfigAssetPath() : "æ— ";
+        string baseInfo = $"Íø¸ñID: {GetSaveID()}, ³ß´ç: {inventoryWidth}x{inventoryHeight}, ÎïÆ·ÊıÁ¿: {placedItems.Count}";
+        string configSync = IsConfigSynced() ? "ÒÑÍ¬²½" : "Î´Í¬²½";
+        string staticStatus = isStaticGrid ? "¾²Ì¬" : "¶¯Ì¬";
+        string configPath = gridConfig != null ? GetGridConfigAssetPath() : "ÎŞ";
 
-        return $"{baseInfo}, é…ç½®:{configSync}, ç±»å‹:{staticStatus}, é…ç½®æ–‡ä»¶:{configPath}";
+        return $"{baseInfo}, ÅäÖÃ:{configSync}, ÀàĞÍ:{staticStatus}, ÅäÖÃÎÄ¼ş:{configPath}";
     }
 
     /// <summary>
-    /// è·å–ç½‘æ ¼é…ç½®ä¿¡æ¯æ‘˜è¦
+    /// »ñÈ¡Íø¸ñÅäÖÃĞÅÏ¢ÕªÒª
     /// </summary>
     public string GetGridConfigSummary()
     {
         if (gridConfig == null)
         {
-            return "æ— é…ç½®æ–‡ä»¶";
+            return "ÎŞÅäÖÃÎÄ¼ş";
         }
 
         string configSize = $"{gridConfig.inventoryWidth}x{gridConfig.inventoryHeight}";
         string currentSize = $"{inventoryWidth}x{inventoryHeight}";
-        string syncStatus = IsConfigSynced() ? "åŒæ­¥" : "ä¸åŒæ­¥";
+        string syncStatus = IsConfigSynced() ? "Í¬²½" : "²»Í¬²½";
 
-        return $"é…ç½®å°ºå¯¸:{configSize}, å½“å‰å°ºå¯¸:{currentSize}, çŠ¶æ€:{syncStatus}";
+        return $"ÅäÖÃ³ß´ç:{configSize}, µ±Ç°³ß´ç:{currentSize}, ×´Ì¬:{syncStatus}";
     }
 
     /// <summary>
-    /// å¼ºåˆ¶åŒæ­¥åˆ°GridConfig
+    /// Ç¿ÖÆÍ¬²½µ½GridConfig
     /// </summary>
     public void ForceSyncToGridConfig()
     {
@@ -542,13 +542,13 @@ public class ItemGrid : BaseItemGrid
 
             if (showDebugInfo)
             {
-                Debug.Log("å·²å¼ºåˆ¶åŒæ­¥åˆ°GridConfig");
+                Debug.Log("ÒÑÇ¿ÖÆÍ¬²½µ½GridConfig");
             }
         }
     }
 
     /// <summary>
-    /// å¼ºåˆ¶ä»GridConfigåŒæ­¥
+    /// Ç¿ÖÆ´ÓGridConfigÍ¬²½
     /// </summary>
     public void ForceSyncFromGridConfig()
     {
@@ -558,33 +558,33 @@ public class ItemGrid : BaseItemGrid
 
             if (showDebugInfo)
             {
-                Debug.Log("å·²å¼ºåˆ¶ä»GridConfigåŒæ­¥");
+                Debug.Log("ÒÑÇ¿ÖÆ´ÓGridConfigÍ¬²½");
             }
         }
     }
 
-    // ==================== ä»“åº“ç½‘æ ¼æ£€æµ‹å™¨æ‰©å±•åŠŸèƒ½ ====================
+    // ==================== ²Ö¿âÍø¸ñ¼ì²âÆ÷À©Õ¹¹¦ÄÜ ====================
 
     /// <summary>
-    /// è·å–ä»“åº“ç½‘æ ¼ç‰¹æœ‰çš„æ£€æµ‹å™¨ä¿¡æ¯
-    /// åŒ…å«ä»“åº“ç½‘æ ¼çš„ç‰¹æ®Šå±æ€§å’ŒçŠ¶æ€
+    /// »ñÈ¡²Ö¿âÍø¸ñÌØÓĞµÄ¼ì²âÆ÷ĞÅÏ¢
+    /// °üº¬²Ö¿âÍø¸ñµÄÌØÊâÊôĞÔºÍ×´Ì¬
     /// </summary>
-    /// <returns>ä»“åº“ç½‘æ ¼æ£€æµ‹å™¨ä¿¡æ¯</returns>
+    /// <returns>²Ö¿âÍø¸ñ¼ì²âÆ÷ĞÅÏ¢</returns>
     public override GridDetectorInfo GetGridDetectorInfo()
     {
         var baseInfo = base.GetGridDetectorInfo();
 
-        // æ·»åŠ ä»“åº“ç½‘æ ¼ç‰¹æœ‰ä¿¡æ¯
-        baseInfo.gridType = "ä»“åº“ç½‘æ ¼ (ItemGrid)";
+        // Ìí¼Ó²Ö¿âÍø¸ñÌØÓĞĞÅÏ¢
+        baseInfo.gridType = "²Ö¿âÍø¸ñ (ItemGrid)";
 
         return baseInfo;
     }
 
     /// <summary>
-    /// è·å–ä»“åº“ç½‘æ ¼çš„å­˜å‚¨æ•ˆç‡åˆ†æ
-    /// åˆ†æå½“å‰ç‰©å“å­˜å‚¨çš„ç©ºé—´åˆ©ç”¨ç‡å’Œä¼˜åŒ–å»ºè®®
+    /// »ñÈ¡²Ö¿âÍø¸ñµÄ´æ´¢Ğ§ÂÊ·ÖÎö
+    /// ·ÖÎöµ±Ç°ÎïÆ·´æ´¢µÄ¿Õ¼äÀûÓÃÂÊºÍÓÅ»¯½¨Òé
     /// </summary>
-    /// <returns>å­˜å‚¨æ•ˆç‡åˆ†æä¿¡æ¯</returns>
+    /// <returns>´æ´¢Ğ§ÂÊ·ÖÎöĞÅÏ¢</returns>
     public WarehouseEfficiencyInfo GetWarehouseEfficiencyInfo()
     {
         var efficiencyInfo = new WarehouseEfficiencyInfo
@@ -599,19 +599,19 @@ public class ItemGrid : BaseItemGrid
             optimizationSuggestions = new List<string>()
         };
 
-        // åˆ†æç‰©å“ç±»åˆ«åˆ†å¸ƒ
+        // ·ÖÎöÎïÆ·Àà±ğ·Ö²¼
         AnalyzeItemCategories(efficiencyInfo);
 
-        // ç”Ÿæˆä¼˜åŒ–å»ºè®®
+        // Éú³ÉÓÅ»¯½¨Òé
         GenerateOptimizationSuggestions(efficiencyInfo);
 
         return efficiencyInfo;
     }
 
     /// <summary>
-    /// åˆ†æç‰©å“ç±»åˆ«åˆ†å¸ƒ
+    /// ·ÖÎöÎïÆ·Àà±ğ·Ö²¼
     /// </summary>
-    /// <param name="efficiencyInfo">æ•ˆç‡ä¿¡æ¯å¯¹è±¡</param>
+    /// <param name="efficiencyInfo">Ğ§ÂÊĞÅÏ¢¶ÔÏó</param>
     private void AnalyzeItemCategories(WarehouseEfficiencyInfo efficiencyInfo)
     {
         foreach (var placedItem in placedItems)
@@ -636,75 +636,75 @@ public class ItemGrid : BaseItemGrid
     }
 
     /// <summary>
-    /// è®¡ç®—ç¢ç‰‡åŒ–ç¨‹åº¦
-    /// ç¢ç‰‡åŒ–ç¨‹åº¦è¶Šé«˜ï¼Œè¡¨ç¤ºç©ºé—´åˆ©ç”¨è¶Šä¸è¿ç»­
+    /// ¼ÆËãËéÆ¬»¯³Ì¶È
+    /// ËéÆ¬»¯³Ì¶ÈÔ½¸ß£¬±íÊ¾¿Õ¼äÀûÓÃÔ½²»Á¬Ğø
     /// </summary>
-    /// <returns>ç¢ç‰‡åŒ–ç¨‹åº¦ï¼ˆ0-1ï¼Œ1è¡¨ç¤ºå®Œå…¨ç¢ç‰‡åŒ–ï¼‰</returns>
+    /// <returns>ËéÆ¬»¯³Ì¶È£¨0-1£¬1±íÊ¾ÍêÈ«ËéÆ¬»¯£©</returns>
     private float CalculateFragmentationLevel()
     {
         if (occupiedCells.Count == 0) return 0f;
 
         var availableSpaces = GetAvailableSpaces();
 
-        // å¦‚æœåªæœ‰ä¸€ä¸ªå¤§çš„è¿ç»­ç©ºé—´ï¼Œç¢ç‰‡åŒ–ç¨‹åº¦ä½
+        // Èç¹ûÖ»ÓĞÒ»¸ö´óµÄÁ¬Ğø¿Õ¼ä£¬ËéÆ¬»¯³Ì¶ÈµÍ
         if (availableSpaces.Count <= 1) return 0f;
 
-        // è®¡ç®—å¹³å‡ç©ºé—´å¤§å°
+        // ¼ÆËãÆ½¾ù¿Õ¼ä´óĞ¡
         float totalFreeSpace = width * height - occupiedCells.Count;
         if (totalFreeSpace <= 0) return 0f;
 
         float averageSpaceSize = totalFreeSpace / availableSpaces.Count;
         float maxSpaceSize = availableSpaces.Count > 0 ? availableSpaces[0].totalCells : 0;
 
-        // ç¢ç‰‡åŒ–ç¨‹åº¦ = 1 - (å¹³å‡ç©ºé—´å¤§å° / æœ€å¤§ç©ºé—´å¤§å°)
+        // ËéÆ¬»¯³Ì¶È = 1 - (Æ½¾ù¿Õ¼ä´óĞ¡ / ×î´ó¿Õ¼ä´óĞ¡)
         return maxSpaceSize > 0 ? 1f - (averageSpaceSize / maxSpaceSize) : 1f;
     }
 
     /// <summary>
-    /// ç”Ÿæˆä»“åº“ä¼˜åŒ–å»ºè®®
+    /// Éú³É²Ö¿âÓÅ»¯½¨Òé
     /// </summary>
-    /// <param name="efficiencyInfo">æ•ˆç‡ä¿¡æ¯å¯¹è±¡</param>
+    /// <param name="efficiencyInfo">Ğ§ÂÊĞÅÏ¢¶ÔÏó</param>
     private void GenerateOptimizationSuggestions(WarehouseEfficiencyInfo efficiencyInfo)
     {
-        // åŸºäºå ç”¨ç‡çš„å»ºè®®
+        // »ùÓÚÕ¼ÓÃÂÊµÄ½¨Òé
         if (efficiencyInfo.storageEfficiency > 0.9f)
         {
-            efficiencyInfo.optimizationSuggestions.Add("ä»“åº“ç©ºé—´åˆ©ç”¨ç‡è¿‡é«˜ï¼Œå»ºè®®æ‰©å±•ä»“åº“å®¹é‡æˆ–æ¸…ç†ä¸å¿…è¦çš„ç‰©å“");
+            efficiencyInfo.optimizationSuggestions.Add("²Ö¿â¿Õ¼äÀûÓÃÂÊ¹ı¸ß£¬½¨ÒéÀ©Õ¹²Ö¿âÈİÁ¿»òÇåÀí²»±ØÒªµÄÎïÆ·");
         }
         else if (efficiencyInfo.storageEfficiency < 0.3f)
         {
-            efficiencyInfo.optimizationSuggestions.Add("ä»“åº“ç©ºé—´åˆ©ç”¨ç‡è¾ƒä½ï¼Œå¯ä»¥è€ƒè™‘æ•´ç†ç‰©å“å¸ƒå±€ä»¥æé«˜ç©ºé—´æ•ˆç‡");
+            efficiencyInfo.optimizationSuggestions.Add("²Ö¿â¿Õ¼äÀûÓÃÂÊ½ÏµÍ£¬¿ÉÒÔ¿¼ÂÇÕûÀíÎïÆ·²¼¾ÖÒÔÌá¸ß¿Õ¼äĞ§ÂÊ");
         }
 
-        // åŸºäºç¢ç‰‡åŒ–ç¨‹åº¦çš„å»ºè®®
+        // »ùÓÚËéÆ¬»¯³Ì¶ÈµÄ½¨Òé
         if (efficiencyInfo.fragmentationLevel > 0.7f)
         {
-            efficiencyInfo.optimizationSuggestions.Add("ä»“åº“ç©ºé—´ç¢ç‰‡åŒ–ä¸¥é‡ï¼Œå»ºè®®é‡æ–°æ•´ç†ç‰©å“å¸ƒå±€ä»¥è·å¾—æ›´å¤§çš„è¿ç»­ç©ºé—´");
+            efficiencyInfo.optimizationSuggestions.Add("²Ö¿â¿Õ¼äËéÆ¬»¯ÑÏÖØ£¬½¨ÒéÖØĞÂÕûÀíÎïÆ·²¼¾ÖÒÔ»ñµÃ¸ü´óµÄÁ¬Ğø¿Õ¼ä");
         }
 
-        // åŸºäºå¯ç”¨ç©ºé—´çš„å»ºè®®
+        // »ùÓÚ¿ÉÓÃ¿Õ¼äµÄ½¨Òé
         var availableSpaces = GetAvailableSpaces();
         if (availableSpaces.Count > 0)
         {
             var largestSpace = availableSpaces[0];
             efficiencyInfo.optimizationSuggestions.Add(
-                $"æœ€å¤§å¯ç”¨è¿ç»­ç©ºé—´ä¸º {largestSpace.maxItemSize.x}x{largestSpace.maxItemSize.y}ï¼Œ" +
-                $"ä½äºåæ ‡ ({largestSpace.startPosition.x},{largestSpace.startPosition.y})");
+                $"×î´ó¿ÉÓÃÁ¬Ğø¿Õ¼äÎª {largestSpace.maxItemSize.x}x{largestSpace.maxItemSize.y}£¬" +
+                $"Î»ÓÚ×ø±ê ({largestSpace.startPosition.x},{largestSpace.startPosition.y})");
         }
 
-        // åŸºäºç‰©å“ç±»åˆ«çš„å»ºè®®
+        // »ùÓÚÎïÆ·Àà±ğµÄ½¨Òé
         if (efficiencyInfo.itemCategories.Count > 5)
         {
-            efficiencyInfo.optimizationSuggestions.Add("ä»“åº“ä¸­ç‰©å“ç±»åˆ«è¾ƒå¤šï¼Œå»ºè®®æŒ‰ç±»åˆ«åˆ†åŒºå­˜æ”¾ä»¥ä¾¿ç®¡ç†");
+            efficiencyInfo.optimizationSuggestions.Add("²Ö¿âÖĞÎïÆ·Àà±ğ½Ï¶à£¬½¨Òé°´Àà±ğ·ÖÇø´æ·ÅÒÔ±ã¹ÜÀí");
         }
     }
 
     /// <summary>
-    /// è·å–ä»“åº“ç‰©å“æœç´¢ç»“æœ
-    /// æ ¹æ®ç‰©å“åç§°ã€ç±»å‹ç­‰æ¡ä»¶æœç´¢ä»“åº“ä¸­çš„ç‰©å“
+    /// »ñÈ¡²Ö¿âÎïÆ·ËÑË÷½á¹û
+    /// ¸ù¾İÎïÆ·Ãû³Æ¡¢ÀàĞÍµÈÌõ¼şËÑË÷²Ö¿âÖĞµÄÎïÆ·
     /// </summary>
-    /// <param name="searchCriteria">æœç´¢æ¡ä»¶</param>
-    /// <returns>æœç´¢ç»“æœåˆ—è¡¨</returns>
+    /// <param name="searchCriteria">ËÑË÷Ìõ¼ş</param>
+    /// <returns>ËÑË÷½á¹ûÁĞ±í</returns>
     public List<ItemSearchResult> SearchWarehouseItems(WarehouseSearchCriteria searchCriteria)
     {
         var searchResults = new List<ItemSearchResult>();
@@ -719,7 +719,7 @@ public class ItemGrid : BaseItemGrid
 
             bool matchesCriteria = true;
 
-            // æ£€æŸ¥åç§°åŒ¹é…
+            // ¼ì²éÃû³ÆÆ¥Åä
             if (!string.IsNullOrEmpty(searchCriteria.itemName))
             {
                 if (!inventoryItem.Data.itemName.ToLower().Contains(searchCriteria.itemName.ToLower()))
@@ -728,7 +728,7 @@ public class ItemGrid : BaseItemGrid
                 }
             }
 
-            // æ£€æŸ¥ç±»å‹åŒ¹é…
+            // ¼ì²éÀàĞÍÆ¥Åä
             if (searchCriteria.itemType != null)
             {
                 if (inventoryItem.Data.itemCategory != searchCriteria.itemType)
@@ -737,7 +737,7 @@ public class ItemGrid : BaseItemGrid
                 }
             }
 
-            // æ£€æŸ¥å°ºå¯¸èŒƒå›´
+            // ¼ì²é³ß´ç·¶Î§
             if (searchCriteria.minSize != Vector2Int.zero || searchCriteria.maxSize != Vector2Int.zero)
             {
                 var itemSize = placedItem.size;
@@ -779,10 +779,10 @@ public class ItemGrid : BaseItemGrid
     }
 
     /// <summary>
-    /// è·å–ä»“åº“å®¹é‡é¢„è­¦ä¿¡æ¯
-    /// å½“ä»“åº“å®¹é‡æ¥è¿‘æ»¡è½½æ—¶æä¾›é¢„è­¦
+    /// »ñÈ¡²Ö¿âÈİÁ¿Ô¤¾¯ĞÅÏ¢
+    /// µ±²Ö¿âÈİÁ¿½Ó½üÂúÔØÊ±Ìá¹©Ô¤¾¯
     /// </summary>
-    /// <returns>å®¹é‡é¢„è­¦ä¿¡æ¯</returns>
+    /// <returns>ÈİÁ¿Ô¤¾¯ĞÅÏ¢</returns>
     public WarehouseCapacityWarning GetCapacityWarning()
     {
         float occupancyRate = GetOccupancyRate();
@@ -796,31 +796,31 @@ public class ItemGrid : BaseItemGrid
             recommendedActions = new List<string>()
         };
 
-        // æ ¹æ®å ç”¨ç‡è®¾ç½®é¢„è­¦çº§åˆ«
+        // ¸ù¾İÕ¼ÓÃÂÊÉèÖÃÔ¤¾¯¼¶±ğ
         if (occupancyRate >= 0.95f)
         {
             warning.warningLevel = InventorySystem.Grid.WarningLevel.Critical;
-            warning.warningMessage = "ä»“åº“å®¹é‡ä¸¥é‡ä¸è¶³ï¼";
-            warning.recommendedActions.Add("ç«‹å³æ¸…ç†ä¸å¿…è¦çš„ç‰©å“");
-            warning.recommendedActions.Add("è€ƒè™‘æ‰©å±•ä»“åº“å®¹é‡");
+            warning.warningMessage = "²Ö¿âÈİÁ¿ÑÏÖØ²»×ã£¡";
+            warning.recommendedActions.Add("Á¢¼´ÇåÀí²»±ØÒªµÄÎïÆ·");
+            warning.recommendedActions.Add("¿¼ÂÇÀ©Õ¹²Ö¿âÈİÁ¿");
         }
         else if (occupancyRate >= 0.85f)
         {
             warning.warningLevel = InventorySystem.Grid.WarningLevel.High;
-            warning.warningMessage = "ä»“åº“å®¹é‡ä¸è¶³ï¼Œè¯·æ³¨æ„ç®¡ç†ç©ºé—´";
-            warning.recommendedActions.Add("æ•´ç†ç‰©å“å¸ƒå±€");
-            warning.recommendedActions.Add("æ¸…ç†è¿‡æœŸæˆ–ä¸éœ€è¦çš„ç‰©å“");
+            warning.warningMessage = "²Ö¿âÈİÁ¿²»×ã£¬Çë×¢Òâ¹ÜÀí¿Õ¼ä";
+            warning.recommendedActions.Add("ÕûÀíÎïÆ·²¼¾Ö");
+            warning.recommendedActions.Add("ÇåÀí¹ıÆÚ»ò²»ĞèÒªµÄÎïÆ·");
         }
         else if (occupancyRate >= 0.70f)
         {
             warning.warningLevel = InventorySystem.Grid.WarningLevel.Medium;
-            warning.warningMessage = "ä»“åº“å®¹é‡ä½¿ç”¨è¾ƒé«˜ï¼Œå»ºè®®å®šæœŸæ•´ç†";
-            warning.recommendedActions.Add("å®šæœŸæ£€æŸ¥ç‰©å“å­˜æ”¾æƒ…å†µ");
+            warning.warningMessage = "²Ö¿âÈİÁ¿Ê¹ÓÃ½Ï¸ß£¬½¨Òé¶¨ÆÚÕûÀí";
+            warning.recommendedActions.Add("¶¨ÆÚ¼ì²éÎïÆ·´æ·ÅÇé¿ö");
         }
         else if (occupancyRate >= 0.50f)
         {
             warning.warningLevel = InventorySystem.Grid.WarningLevel.Low;
-            warning.warningMessage = "ä»“åº“å®¹é‡ä½¿ç”¨æ­£å¸¸";
+            warning.warningMessage = "²Ö¿âÈİÁ¿Ê¹ÓÃÕı³£";
         }
 
         return warning;

@@ -8,60 +8,60 @@ using System.Threading.Tasks;
 namespace InventorySystem.SaveSystem
 {
     /// <summary>
-    /// ä¿å­˜æ–‡ä»¶ç®¡ç†å™¨ - è´Ÿè´£ä¿å­˜æ–‡ä»¶çš„åˆ›å»ºã€è¯»å–ã€å†™å…¥å’Œç®¡ç†
-    /// æä¾›ç»Ÿä¸€çš„æ–‡ä»¶æ“ä½œæ¥å£ï¼Œæ”¯æŒå¤šå­˜æ¡£ç®¡ç†å’Œæ–‡ä»¶å®‰å…¨æ€§ä¿éšœ
+    /// ±£´æÎÄ¼ş¹ÜÀíÆ÷ - ¸ºÔğ±£´æÎÄ¼şµÄ´´½¨¡¢¶ÁÈ¡¡¢Ğ´ÈëºÍ¹ÜÀí
+    /// Ìá¹©Í³Ò»µÄÎÄ¼ş²Ù×÷½Ó¿Ú£¬Ö§³Ö¶à´æµµ¹ÜÀíºÍÎÄ¼ş°²È«ĞÔ±£ÕÏ
     /// </summary>
     public class SaveFileManager : MonoBehaviour
     {
-        #region å­—æ®µå’Œå±æ€§
-        [Header("æ–‡ä»¶ç®¡ç†é…ç½®")]
-        [SerializeField] private string saveDirectory = "SaveData"; // ä¿å­˜ç›®å½•å
-        [SerializeField] private string fileExtension = ".json"; // æ–‡ä»¶æ‰©å±•å
-        [SerializeField] private bool enableBackup = true; // æ˜¯å¦å¯ç”¨å¤‡ä»½
-        [SerializeField] private int maxBackupCount = 5; // æœ€å¤§å¤‡ä»½æ•°é‡
-        [SerializeField] private bool enableCompression = false; // æ˜¯å¦å¯ç”¨å‹ç¼©
-        [SerializeField] private bool enableLogging = true; // æ˜¯å¦å¯ç”¨æ—¥å¿—è®°å½•
+        #region ×Ö¶ÎºÍÊôĞÔ
+        [Header("ÎÄ¼ş¹ÜÀíÅäÖÃ")]
+        [SerializeField] private string saveDirectory = "SaveData"; // ±£´æÄ¿Â¼Ãû
+        [SerializeField] private string fileExtension = ".json"; // ÎÄ¼şÀ©Õ¹Ãû
+        [SerializeField] private bool enableBackup = true; // ÊÇ·ñÆôÓÃ±¸·İ
+        [SerializeField] private int maxBackupCount = 5; // ×î´ó±¸·İÊıÁ¿
+        [SerializeField] private bool enableCompression = false; // ÊÇ·ñÆôÓÃÑ¹Ëõ
+        [SerializeField] private bool enableLogging = true; // ÊÇ·ñÆôÓÃÈÕÖ¾¼ÇÂ¼
 
-        // æ–‡ä»¶è·¯å¾„ç›¸å…³
+        // ÎÄ¼şÂ·¾¶Ïà¹Ø
         private string fullSaveDirectory;
         private string backupDirectory;
 
-        // æ–‡ä»¶æ“ä½œç»Ÿè®¡
+        // ÎÄ¼ş²Ù×÷Í³¼Æ
         private int readOperations = 0;
         private int writeOperations = 0;
         private long totalBytesRead = 0;
         private long totalBytesWritten = 0;
 
-        // æ–‡ä»¶é”å®šç®¡ç†
+        // ÎÄ¼şËø¶¨¹ÜÀí
         private HashSet<string> lockedFiles = new HashSet<string>();
 
-        // æ”¯æŒçš„æ–‡ä»¶æ ¼å¼
+        // Ö§³ÖµÄÎÄ¼ş¸ñÊ½
         private readonly string[] supportedExtensions = { ".json", ".dat", ".save" };
         #endregion
 
-        #region åˆå§‹åŒ–
+        #region ³õÊ¼»¯
         /// <summary>
-        /// åˆå§‹åŒ–æ–‡ä»¶ç®¡ç†å™¨
+        /// ³õÊ¼»¯ÎÄ¼ş¹ÜÀíÆ÷
         /// </summary>
         public void Initialize()
         {
             SetupDirectories();
             ValidateConfiguration();
-            LogMessage("SaveFileManagerå·²åˆå§‹åŒ–");
+            LogMessage("SaveFileManagerÒÑ³õÊ¼»¯");
         }
 
         /// <summary>
-        /// è®¾ç½®ç›®å½•ç»“æ„
+        /// ÉèÖÃÄ¿Â¼½á¹¹
         /// </summary>
         private void SetupDirectories()
         {
-            // è®¾ç½®ä¸»ä¿å­˜ç›®å½•
+            // ÉèÖÃÖ÷±£´æÄ¿Â¼
             fullSaveDirectory = Path.Combine(Application.persistentDataPath, saveDirectory);
 
-            // è®¾ç½®å¤‡ä»½ç›®å½•
+            // ÉèÖÃ±¸·İÄ¿Â¼
             backupDirectory = Path.Combine(fullSaveDirectory, "Backups");
 
-            // åˆ›å»ºç›®å½•ï¼ˆå¦‚æœä¸å­˜åœ¨ï¼‰
+            // ´´½¨Ä¿Â¼£¨Èç¹û²»´æÔÚ£©
             CreateDirectoryIfNotExists(fullSaveDirectory);
 
             if (enableBackup)
@@ -69,16 +69,16 @@ namespace InventorySystem.SaveSystem
                 CreateDirectoryIfNotExists(backupDirectory);
             }
 
-            LogMessage($"ä¿å­˜ç›®å½•: {fullSaveDirectory}");
-            LogMessage($"å¤‡ä»½ç›®å½•: {backupDirectory}");
+            LogMessage($"±£´æÄ¿Â¼: {fullSaveDirectory}");
+            LogMessage($"±¸·İÄ¿Â¼: {backupDirectory}");
         }
 
         /// <summary>
-        /// éªŒè¯é…ç½®
+        /// ÑéÖ¤ÅäÖÃ
         /// </summary>
         private void ValidateConfiguration()
         {
-            // éªŒè¯æ–‡ä»¶æ‰©å±•å
+            // ÑéÖ¤ÎÄ¼şÀ©Õ¹Ãû
             if (!fileExtension.StartsWith("."))
             {
                 fileExtension = "." + fileExtension;
@@ -86,26 +86,26 @@ namespace InventorySystem.SaveSystem
 
             if (!supportedExtensions.Contains(fileExtension))
             {
-                LogWarning($"ä¸æ”¯æŒçš„æ–‡ä»¶æ‰©å±•å: {fileExtension}ï¼Œå°†ä½¿ç”¨é»˜è®¤çš„.json");
+                LogWarning($"²»Ö§³ÖµÄÎÄ¼şÀ©Õ¹Ãû: {fileExtension}£¬½«Ê¹ÓÃÄ¬ÈÏµÄ.json");
                 fileExtension = ".json";
             }
 
-            // éªŒè¯å¤‡ä»½æ•°é‡
+            // ÑéÖ¤±¸·İÊıÁ¿
             if (maxBackupCount < 1)
             {
                 maxBackupCount = 1;
-                LogWarning("æœ€å¤§å¤‡ä»½æ•°é‡ä¸èƒ½å°äº1ï¼Œå·²è®¾ç½®ä¸º1");
+                LogWarning("×î´ó±¸·İÊıÁ¿²»ÄÜĞ¡ÓÚ1£¬ÒÑÉèÖÃÎª1");
             }
 
             if (maxBackupCount > 20)
             {
                 maxBackupCount = 20;
-                LogWarning("æœ€å¤§å¤‡ä»½æ•°é‡ä¸èƒ½å¤§äº20ï¼Œå·²è®¾ç½®ä¸º20");
+                LogWarning("×î´ó±¸·İÊıÁ¿²»ÄÜ´óÓÚ20£¬ÒÑÉèÖÃÎª20");
             }
         }
 
         /// <summary>
-        /// åˆ›å»ºç›®å½•ï¼ˆå¦‚æœä¸å­˜åœ¨ï¼‰
+        /// ´´½¨Ä¿Â¼£¨Èç¹û²»´æÔÚ£©
         /// </summary>
         private void CreateDirectoryIfNotExists(string path)
         {
@@ -114,52 +114,52 @@ namespace InventorySystem.SaveSystem
                 try
                 {
                     Directory.CreateDirectory(path);
-                    LogMessage($"åˆ›å»ºç›®å½•: {path}");
+                    LogMessage($"´´½¨Ä¿Â¼: {path}");
                 }
                 catch (Exception ex)
                 {
-                    LogError($"åˆ›å»ºç›®å½•å¤±è´¥: {path}, é”™è¯¯: {ex.Message}");
+                    LogError($"´´½¨Ä¿Â¼Ê§°Ü: {path}, ´íÎó: {ex.Message}");
                 }
             }
         }
         #endregion
 
-        #region æ–‡ä»¶å†™å…¥æ“ä½œ
+        #region ÎÄ¼şĞ´Èë²Ù×÷
         /// <summary>
-        /// å†™å…¥ä¿å­˜æ–‡ä»¶
+        /// Ğ´Èë±£´æÎÄ¼ş
         /// </summary>
-        /// <param name="fileName">æ–‡ä»¶åï¼ˆä¸å«æ‰©å±•åï¼‰</param>
-        /// <param name="content">æ–‡ä»¶å†…å®¹</param>
-        /// <returns>æ˜¯å¦å†™å…¥æˆåŠŸ</returns>
+        /// <param name="fileName">ÎÄ¼şÃû£¨²»º¬À©Õ¹Ãû£©</param>
+        /// <param name="content">ÎÄ¼şÄÚÈİ</param>
+        /// <returns>ÊÇ·ñĞ´Èë³É¹¦</returns>
         public bool WriteSaveFile(string fileName, string content)
         {
             if (string.IsNullOrEmpty(fileName) || string.IsNullOrEmpty(content))
             {
-                LogWarning("æ–‡ä»¶åæˆ–å†…å®¹ä¸ºç©ºï¼Œæ— æ³•å†™å…¥");
+                LogWarning("ÎÄ¼şÃû»òÄÚÈİÎª¿Õ£¬ÎŞ·¨Ğ´Èë");
                 return false;
             }
 
             string filePath = GetFullFilePath(fileName);
 
-            // æ£€æŸ¥æ–‡ä»¶æ˜¯å¦è¢«é”å®š
+            // ¼ì²éÎÄ¼şÊÇ·ñ±»Ëø¶¨
             if (IsFileLocked(filePath))
             {
-                LogWarning($"æ–‡ä»¶è¢«é”å®šï¼Œæ— æ³•å†™å…¥: {fileName}");
+                LogWarning($"ÎÄ¼ş±»Ëø¶¨£¬ÎŞ·¨Ğ´Èë: {fileName}");
                 return false;
             }
 
             try
             {
-                // é”å®šæ–‡ä»¶
+                // Ëø¶¨ÎÄ¼ş
                 LockFile(filePath);
 
-                // åˆ›å»ºå¤‡ä»½ï¼ˆå¦‚æœæ–‡ä»¶å·²å­˜åœ¨ï¼‰
+                // ´´½¨±¸·İ£¨Èç¹ûÎÄ¼şÒÑ´æÔÚ£©
                 if (enableBackup && File.Exists(filePath))
                 {
                     CreateBackup(filePath);
                 }
 
-                // å†™å…¥æ–‡ä»¶
+                // Ğ´ÈëÎÄ¼ş
                 if (enableCompression)
                 {
                     WriteCompressedFile(filePath, content);
@@ -169,38 +169,38 @@ namespace InventorySystem.SaveSystem
                     File.WriteAllText(filePath, content, System.Text.Encoding.UTF8);
                 }
 
-                // æ›´æ–°ç»Ÿè®¡ä¿¡æ¯
+                // ¸üĞÂÍ³¼ÆĞÅÏ¢
                 writeOperations++;
                 totalBytesWritten += System.Text.Encoding.UTF8.GetByteCount(content);
 
-                LogMessage($"æ–‡ä»¶å†™å…¥æˆåŠŸ: {fileName}, å¤§å°: {content.Length}å­—ç¬¦");
+                LogMessage($"ÎÄ¼şĞ´Èë³É¹¦: {fileName}, ´óĞ¡: {content.Length}×Ö·û");
                 return true;
             }
             catch (Exception ex)
             {
-                LogError($"æ–‡ä»¶å†™å…¥å¤±è´¥: {fileName}, é”™è¯¯: {ex.Message}");
+                LogError($"ÎÄ¼şĞ´ÈëÊ§°Ü: {fileName}, ´íÎó: {ex.Message}");
                 return false;
             }
             finally
             {
-                // è§£é”æ–‡ä»¶
+                // ½âËøÎÄ¼ş
                 UnlockFile(filePath);
             }
         }
 
         /// <summary>
-        /// å¼‚æ­¥å†™å…¥ä¿å­˜æ–‡ä»¶
+        /// Òì²½Ğ´Èë±£´æÎÄ¼ş
         /// </summary>
-        /// <param name="fileName">æ–‡ä»¶å</param>
-        /// <param name="content">æ–‡ä»¶å†…å®¹</param>
-        /// <returns>å†™å…¥ä»»åŠ¡</returns>
+        /// <param name="fileName">ÎÄ¼şÃû</param>
+        /// <param name="content">ÎÄ¼şÄÚÈİ</param>
+        /// <returns>Ğ´ÈëÈÎÎñ</returns>
         public async Task<bool> WriteSaveFileAsync(string fileName, string content)
         {
             return await Task.Run(() => WriteSaveFile(fileName, content));
         }
 
         /// <summary>
-        /// å†™å…¥å‹ç¼©æ–‡ä»¶
+        /// Ğ´ÈëÑ¹ËõÎÄ¼ş
         /// </summary>
         private void WriteCompressedFile(string filePath, string content)
         {
@@ -210,17 +210,17 @@ namespace InventorySystem.SaveSystem
         }
         #endregion
 
-        #region æ–‡ä»¶è¯»å–æ“ä½œ
+        #region ÎÄ¼ş¶ÁÈ¡²Ù×÷
         /// <summary>
-        /// è¯»å–ä¿å­˜æ–‡ä»¶
+        /// ¶ÁÈ¡±£´æÎÄ¼ş
         /// </summary>
-        /// <param name="fileName">æ–‡ä»¶åï¼ˆä¸å«æ‰©å±•åï¼‰</param>
-        /// <returns>æ–‡ä»¶å†…å®¹ï¼Œå¤±è´¥è¿”å›null</returns>
+        /// <param name="fileName">ÎÄ¼şÃû£¨²»º¬À©Õ¹Ãû£©</param>
+        /// <returns>ÎÄ¼şÄÚÈİ£¬Ê§°Ü·µ»Ønull</returns>
         public string ReadSaveFile(string fileName)
         {
             if (string.IsNullOrEmpty(fileName))
             {
-                LogWarning("æ–‡ä»¶åä¸ºç©ºï¼Œæ— æ³•è¯»å–");
+                LogWarning("ÎÄ¼şÃûÎª¿Õ£¬ÎŞ·¨¶ÁÈ¡");
                 return null;
             }
 
@@ -228,20 +228,20 @@ namespace InventorySystem.SaveSystem
 
             if (!File.Exists(filePath))
             {
-                LogWarning($"æ–‡ä»¶ä¸å­˜åœ¨: {fileName}");
+                LogWarning($"ÎÄ¼ş²»´æÔÚ: {fileName}");
                 return null;
             }
 
-            // æ£€æŸ¥æ–‡ä»¶æ˜¯å¦è¢«é”å®š
+            // ¼ì²éÎÄ¼şÊÇ·ñ±»Ëø¶¨
             if (IsFileLocked(filePath))
             {
-                LogWarning($"æ–‡ä»¶è¢«é”å®šï¼Œæ— æ³•è¯»å–: {fileName}");
+                LogWarning($"ÎÄ¼ş±»Ëø¶¨£¬ÎŞ·¨¶ÁÈ¡: {fileName}");
                 return null;
             }
 
             try
             {
-                // é”å®šæ–‡ä»¶
+                // Ëø¶¨ÎÄ¼ş
                 LockFile(filePath);
 
                 string content;
@@ -255,37 +255,37 @@ namespace InventorySystem.SaveSystem
                     content = File.ReadAllText(filePath, System.Text.Encoding.UTF8);
                 }
 
-                // æ›´æ–°ç»Ÿè®¡ä¿¡æ¯
+                // ¸üĞÂÍ³¼ÆĞÅÏ¢
                 readOperations++;
                 totalBytesRead += System.Text.Encoding.UTF8.GetByteCount(content);
 
-                LogMessage($"æ–‡ä»¶è¯»å–æˆåŠŸ: {fileName}, å¤§å°: {content.Length}å­—ç¬¦");
+                LogMessage($"ÎÄ¼ş¶ÁÈ¡³É¹¦: {fileName}, ´óĞ¡: {content.Length}×Ö·û");
                 return content;
             }
             catch (Exception ex)
             {
-                LogError($"æ–‡ä»¶è¯»å–å¤±è´¥: {fileName}, é”™è¯¯: {ex.Message}");
+                LogError($"ÎÄ¼ş¶ÁÈ¡Ê§°Ü: {fileName}, ´íÎó: {ex.Message}");
                 return null;
             }
             finally
             {
-                // è§£é”æ–‡ä»¶
+                // ½âËøÎÄ¼ş
                 UnlockFile(filePath);
             }
         }
 
         /// <summary>
-        /// å¼‚æ­¥è¯»å–ä¿å­˜æ–‡ä»¶
+        /// Òì²½¶ÁÈ¡±£´æÎÄ¼ş
         /// </summary>
-        /// <param name="fileName">æ–‡ä»¶å</param>
-        /// <returns>è¯»å–ä»»åŠ¡</returns>
+        /// <param name="fileName">ÎÄ¼şÃû</param>
+        /// <returns>¶ÁÈ¡ÈÎÎñ</returns>
         public async Task<string> ReadSaveFileAsync(string fileName)
         {
             return await Task.Run(() => ReadSaveFile(fileName));
         }
 
         /// <summary>
-        /// è¯»å–å‹ç¼©æ–‡ä»¶
+        /// ¶ÁÈ¡Ñ¹ËõÎÄ¼ş
         /// </summary>
         private string ReadCompressedFile(string filePath)
         {
@@ -295,22 +295,22 @@ namespace InventorySystem.SaveSystem
         }
 
         /// <summary>
-        /// åŠ è½½ä¿å­˜æ•°æ®
+        /// ¼ÓÔØ±£´æÊı¾İ
         /// </summary>
-        /// <param name="fileName">æ–‡ä»¶åï¼ˆä¸å«æ‰©å±•åï¼‰</param>
-        /// <returns>ä¿å­˜æ¸¸æˆæ•°æ®ï¼Œå¤±è´¥è¿”å›null</returns>
+        /// <param name="fileName">ÎÄ¼şÃû£¨²»º¬À©Õ¹Ãû£©</param>
+        /// <returns>±£´æÓÎÏ·Êı¾İ£¬Ê§°Ü·µ»Ønull</returns>
         public SaveGameData LoadSaveData(string fileName)
         {
             if (string.IsNullOrEmpty(fileName))
             {
-                LogWarning("æ–‡ä»¶åä¸ºç©ºï¼Œæ— æ³•åŠ è½½ä¿å­˜æ•°æ®");
+                LogWarning("ÎÄ¼şÃûÎª¿Õ£¬ÎŞ·¨¼ÓÔØ±£´æÊı¾İ");
                 return null;
             }
 
             string content = ReadSaveFile(fileName);
             if (string.IsNullOrEmpty(content))
             {
-                LogWarning($"æ— æ³•è¯»å–ä¿å­˜æ–‡ä»¶: {fileName}");
+                LogWarning($"ÎŞ·¨¶ÁÈ¡±£´æÎÄ¼ş: {fileName}");
                 return null;
             }
 
@@ -319,27 +319,27 @@ namespace InventorySystem.SaveSystem
                 SaveGameData saveData = JsonUtility.FromJson<SaveGameData>(content);
                 if (saveData == null)
                 {
-                    LogError($"ä¿å­˜æ•°æ®ååºåˆ—åŒ–å¤±è´¥: {fileName}");
+                    LogError($"±£´æÊı¾İ·´ĞòÁĞ»¯Ê§°Ü: {fileName}");
                     return null;
                 }
 
-                LogMessage($"ä¿å­˜æ•°æ®åŠ è½½æˆåŠŸ: {fileName}");
+                LogMessage($"±£´æÊı¾İ¼ÓÔØ³É¹¦: {fileName}");
                 return saveData;
             }
             catch (Exception ex)
             {
-                LogError($"ä¿å­˜æ•°æ®åŠ è½½å¤±è´¥: {fileName}, é”™è¯¯: {ex.Message}");
+                LogError($"±£´æÊı¾İ¼ÓÔØÊ§°Ü: {fileName}, ´íÎó: {ex.Message}");
                 return null;
             }
         }
         #endregion
 
-        #region æ–‡ä»¶ç®¡ç†æ“ä½œ
+        #region ÎÄ¼ş¹ÜÀí²Ù×÷
         /// <summary>
-        /// æ£€æŸ¥ä¿å­˜æ–‡ä»¶æ˜¯å¦å­˜åœ¨
+        /// ¼ì²é±£´æÎÄ¼şÊÇ·ñ´æÔÚ
         /// </summary>
-        /// <param name="fileName">æ–‡ä»¶å</param>
-        /// <returns>æ˜¯å¦å­˜åœ¨</returns>
+        /// <param name="fileName">ÎÄ¼şÃû</param>
+        /// <returns>ÊÇ·ñ´æÔÚ</returns>
         public bool SaveFileExists(string fileName)
         {
             if (string.IsNullOrEmpty(fileName))
@@ -352,15 +352,15 @@ namespace InventorySystem.SaveSystem
         }
 
         /// <summary>
-        /// åˆ é™¤ä¿å­˜æ–‡ä»¶
+        /// É¾³ı±£´æÎÄ¼ş
         /// </summary>
-        /// <param name="fileName">æ–‡ä»¶å</param>
-        /// <returns>æ˜¯å¦åˆ é™¤æˆåŠŸ</returns>
+        /// <param name="fileName">ÎÄ¼şÃû</param>
+        /// <returns>ÊÇ·ñÉ¾³ı³É¹¦</returns>
         public bool DeleteSaveFile(string fileName)
         {
             if (string.IsNullOrEmpty(fileName))
             {
-                LogWarning("æ–‡ä»¶åä¸ºç©ºï¼Œæ— æ³•åˆ é™¤");
+                LogWarning("ÎÄ¼şÃûÎª¿Õ£¬ÎŞ·¨É¾³ı");
                 return false;
             }
 
@@ -368,47 +368,47 @@ namespace InventorySystem.SaveSystem
 
             if (!File.Exists(filePath))
             {
-                LogWarning($"æ–‡ä»¶ä¸å­˜åœ¨ï¼Œæ— æ³•åˆ é™¤: {fileName}");
+                LogWarning($"ÎÄ¼ş²»´æÔÚ£¬ÎŞ·¨É¾³ı: {fileName}");
                 return false;
             }
 
-            // æ£€æŸ¥æ–‡ä»¶æ˜¯å¦è¢«é”å®š
+            // ¼ì²éÎÄ¼şÊÇ·ñ±»Ëø¶¨
             if (IsFileLocked(filePath))
             {
-                LogWarning($"æ–‡ä»¶è¢«é”å®šï¼Œæ— æ³•åˆ é™¤: {fileName}");
+                LogWarning($"ÎÄ¼ş±»Ëø¶¨£¬ÎŞ·¨É¾³ı: {fileName}");
                 return false;
             }
 
             try
             {
-                // åˆ›å»ºå¤‡ä»½ï¼ˆå¦‚æœå¯ç”¨ï¼‰
+                // ´´½¨±¸·İ£¨Èç¹ûÆôÓÃ£©
                 if (enableBackup)
                 {
                     CreateBackup(filePath);
                 }
 
                 File.Delete(filePath);
-                LogMessage($"æ–‡ä»¶åˆ é™¤æˆåŠŸ: {fileName}");
+                LogMessage($"ÎÄ¼şÉ¾³ı³É¹¦: {fileName}");
                 return true;
             }
             catch (Exception ex)
             {
-                LogError($"æ–‡ä»¶åˆ é™¤å¤±è´¥: {fileName}, é”™è¯¯: {ex.Message}");
+                LogError($"ÎÄ¼şÉ¾³ıÊ§°Ü: {fileName}, ´íÎó: {ex.Message}");
                 return false;
             }
         }
 
         /// <summary>
-        /// å¤åˆ¶ä¿å­˜æ–‡ä»¶
+        /// ¸´ÖÆ±£´æÎÄ¼ş
         /// </summary>
-        /// <param name="sourceFileName">æºæ–‡ä»¶å</param>
-        /// <param name="targetFileName">ç›®æ ‡æ–‡ä»¶å</param>
-        /// <returns>æ˜¯å¦å¤åˆ¶æˆåŠŸ</returns>
+        /// <param name="sourceFileName">Ô´ÎÄ¼şÃû</param>
+        /// <param name="targetFileName">Ä¿±êÎÄ¼şÃû</param>
+        /// <returns>ÊÇ·ñ¸´ÖÆ³É¹¦</returns>
         public bool CopySaveFile(string sourceFileName, string targetFileName)
         {
             if (string.IsNullOrEmpty(sourceFileName) || string.IsNullOrEmpty(targetFileName))
             {
-                LogWarning("æºæ–‡ä»¶åæˆ–ç›®æ ‡æ–‡ä»¶åä¸ºç©ºï¼Œæ— æ³•å¤åˆ¶");
+                LogWarning("Ô´ÎÄ¼şÃû»òÄ¿±êÎÄ¼şÃûÎª¿Õ£¬ÎŞ·¨¸´ÖÆ");
                 return false;
             }
 
@@ -417,34 +417,34 @@ namespace InventorySystem.SaveSystem
 
             if (!File.Exists(sourcePath))
             {
-                LogWarning($"æºæ–‡ä»¶ä¸å­˜åœ¨: {sourceFileName}");
+                LogWarning($"Ô´ÎÄ¼ş²»´æÔÚ: {sourceFileName}");
                 return false;
             }
 
             try
             {
                 File.Copy(sourcePath, targetPath, true);
-                LogMessage($"æ–‡ä»¶å¤åˆ¶æˆåŠŸ: {sourceFileName} -> {targetFileName}");
+                LogMessage($"ÎÄ¼ş¸´ÖÆ³É¹¦: {sourceFileName} -> {targetFileName}");
                 return true;
             }
             catch (Exception ex)
             {
-                LogError($"æ–‡ä»¶å¤åˆ¶å¤±è´¥: {sourceFileName} -> {targetFileName}, é”™è¯¯: {ex.Message}");
+                LogError($"ÎÄ¼ş¸´ÖÆÊ§°Ü: {sourceFileName} -> {targetFileName}, ´íÎó: {ex.Message}");
                 return false;
             }
         }
 
         /// <summary>
-        /// é‡å‘½åä¿å­˜æ–‡ä»¶
+        /// ÖØÃüÃû±£´æÎÄ¼ş
         /// </summary>
-        /// <param name="oldFileName">æ—§æ–‡ä»¶å</param>
-        /// <param name="newFileName">æ–°æ–‡ä»¶å</param>
-        /// <returns>æ˜¯å¦é‡å‘½åæˆåŠŸ</returns>
+        /// <param name="oldFileName">¾ÉÎÄ¼şÃû</param>
+        /// <param name="newFileName">ĞÂÎÄ¼şÃû</param>
+        /// <returns>ÊÇ·ñÖØÃüÃû³É¹¦</returns>
         public bool RenameSaveFile(string oldFileName, string newFileName)
         {
             if (string.IsNullOrEmpty(oldFileName) || string.IsNullOrEmpty(newFileName))
             {
-                LogWarning("æ—§æ–‡ä»¶åæˆ–æ–°æ–‡ä»¶åä¸ºç©ºï¼Œæ— æ³•é‡å‘½å");
+                LogWarning("¾ÉÎÄ¼şÃû»òĞÂÎÄ¼şÃûÎª¿Õ£¬ÎŞ·¨ÖØÃüÃû");
                 return false;
             }
 
@@ -453,33 +453,33 @@ namespace InventorySystem.SaveSystem
 
             if (!File.Exists(oldPath))
             {
-                LogWarning($"æºæ–‡ä»¶ä¸å­˜åœ¨: {oldFileName}");
+                LogWarning($"Ô´ÎÄ¼ş²»´æÔÚ: {oldFileName}");
                 return false;
             }
 
             if (File.Exists(newPath))
             {
-                LogWarning($"ç›®æ ‡æ–‡ä»¶å·²å­˜åœ¨: {newFileName}");
+                LogWarning($"Ä¿±êÎÄ¼şÒÑ´æÔÚ: {newFileName}");
                 return false;
             }
 
             try
             {
                 File.Move(oldPath, newPath);
-                LogMessage($"æ–‡ä»¶é‡å‘½åæˆåŠŸ: {oldFileName} -> {newFileName}");
+                LogMessage($"ÎÄ¼şÖØÃüÃû³É¹¦: {oldFileName} -> {newFileName}");
                 return true;
             }
             catch (Exception ex)
             {
-                LogError($"æ–‡ä»¶é‡å‘½åå¤±è´¥: {oldFileName} -> {newFileName}, é”™è¯¯: {ex.Message}");
+                LogError($"ÎÄ¼şÖØÃüÃûÊ§°Ü: {oldFileName} -> {newFileName}, ´íÎó: {ex.Message}");
                 return false;
             }
         }
 
         /// <summary>
-        /// è·å–æ‰€æœ‰ä¿å­˜æ–‡ä»¶åˆ—è¡¨
+        /// »ñÈ¡ËùÓĞ±£´æÎÄ¼şÁĞ±í
         /// </summary>
-        /// <returns>æ–‡ä»¶ä¿¡æ¯åˆ—è¡¨</returns>
+        /// <returns>ÎÄ¼şĞÅÏ¢ÁĞ±í</returns>
         public List<SaveFileInfo> GetAllSaveFiles()
         {
             var saveFiles = new List<SaveFileInfo>();
@@ -492,7 +492,7 @@ namespace InventorySystem.SaveSystem
             try
             {
                 var files = Directory.GetFiles(fullSaveDirectory, $"*{fileExtension}")
-                    .Where(f => !Path.GetFileName(f).StartsWith(".")) // æ’é™¤éšè—æ–‡ä»¶
+                    .Where(f => !Path.GetFileName(f).StartsWith(".")) // ÅÅ³ıÒş²ØÎÄ¼ş
                     .OrderByDescending(f => File.GetLastWriteTime(f));
 
                 foreach (string filePath in files)
@@ -511,22 +511,22 @@ namespace InventorySystem.SaveSystem
                     saveFiles.Add(saveFileInfo);
                 }
 
-                LogMessage($"æ‰¾åˆ°{saveFiles.Count}ä¸ªä¿å­˜æ–‡ä»¶");
+                LogMessage($"ÕÒµ½{saveFiles.Count}¸ö±£´æÎÄ¼ş");
             }
             catch (Exception ex)
             {
-                LogError($"è·å–ä¿å­˜æ–‡ä»¶åˆ—è¡¨å¤±è´¥: {ex.Message}");
+                LogError($"»ñÈ¡±£´æÎÄ¼şÁĞ±íÊ§°Ü: {ex.Message}");
             }
 
             return saveFiles;
         }
         #endregion
 
-        #region å¤‡ä»½ç®¡ç†
+        #region ±¸·İ¹ÜÀí
         /// <summary>
-        /// åˆ›å»ºæ–‡ä»¶å¤‡ä»½
+        /// ´´½¨ÎÄ¼ş±¸·İ
         /// </summary>
-        /// <param name="filePath">åŸæ–‡ä»¶è·¯å¾„</param>
+        /// <param name="filePath">Ô­ÎÄ¼şÂ·¾¶</param>
         private void CreateBackup(string filePath)
         {
             if (!enableBackup || !File.Exists(filePath))
@@ -543,21 +543,21 @@ namespace InventorySystem.SaveSystem
 
                 File.Copy(filePath, backupPath, true);
 
-                // æ¸…ç†æ—§å¤‡ä»½
+                // ÇåÀí¾É±¸·İ
                 CleanupOldBackups(fileName);
 
-                LogMessage($"åˆ›å»ºå¤‡ä»½: {backupFileName}");
+                LogMessage($"´´½¨±¸·İ: {backupFileName}");
             }
             catch (Exception ex)
             {
-                LogError($"åˆ›å»ºå¤‡ä»½å¤±è´¥: {ex.Message}");
+                LogError($"´´½¨±¸·İÊ§°Ü: {ex.Message}");
             }
         }
 
         /// <summary>
-        /// æ¸…ç†æ—§å¤‡ä»½æ–‡ä»¶
+        /// ÇåÀí¾É±¸·İÎÄ¼ş
         /// </summary>
-        /// <param name="fileName">åŸæ–‡ä»¶å</param>
+        /// <param name="fileName">Ô­ÎÄ¼şÃû</param>
         private void CleanupOldBackups(string fileName)
         {
             try
@@ -569,26 +569,26 @@ namespace InventorySystem.SaveSystem
                 foreach (string oldBackup in backupFiles)
                 {
                     File.Delete(oldBackup);
-                    LogMessage($"åˆ é™¤æ—§å¤‡ä»½: {Path.GetFileName(oldBackup)}");
+                    LogMessage($"É¾³ı¾É±¸·İ: {Path.GetFileName(oldBackup)}");
                 }
             }
             catch (Exception ex)
             {
-                LogError($"æ¸…ç†æ—§å¤‡ä»½å¤±è´¥: {ex.Message}");
+                LogError($"ÇåÀí¾É±¸·İÊ§°Ü: {ex.Message}");
             }
         }
 
         /// <summary>
-        /// æ¢å¤å¤‡ä»½æ–‡ä»¶
+        /// »Ö¸´±¸·İÎÄ¼ş
         /// </summary>
-        /// <param name="fileName">æ–‡ä»¶å</param>
-        /// <param name="backupIndex">å¤‡ä»½ç´¢å¼•ï¼ˆ0ä¸ºæœ€æ–°ï¼‰</param>
-        /// <returns>æ˜¯å¦æ¢å¤æˆåŠŸ</returns>
+        /// <param name="fileName">ÎÄ¼şÃû</param>
+        /// <param name="backupIndex">±¸·İË÷Òı£¨0Îª×îĞÂ£©</param>
+        /// <returns>ÊÇ·ñ»Ö¸´³É¹¦</returns>
         public bool RestoreFromBackup(string fileName, int backupIndex = 0)
         {
             if (string.IsNullOrEmpty(fileName))
             {
-                LogWarning("æ–‡ä»¶åä¸ºç©ºï¼Œæ— æ³•æ¢å¤å¤‡ä»½");
+                LogWarning("ÎÄ¼şÃûÎª¿Õ£¬ÎŞ·¨»Ö¸´±¸·İ");
                 return false;
             }
 
@@ -600,7 +600,7 @@ namespace InventorySystem.SaveSystem
 
                 if (backupIndex >= backupFiles.Length)
                 {
-                    LogWarning($"å¤‡ä»½ç´¢å¼•è¶…å‡ºèŒƒå›´: {backupIndex}, å¯ç”¨å¤‡ä»½æ•°: {backupFiles.Length}");
+                    LogWarning($"±¸·İË÷Òı³¬³ö·¶Î§: {backupIndex}, ¿ÉÓÃ±¸·İÊı: {backupFiles.Length}");
                     return false;
                 }
 
@@ -609,21 +609,21 @@ namespace InventorySystem.SaveSystem
 
                 File.Copy(backupPath, targetPath, true);
 
-                LogMessage($"ä»å¤‡ä»½æ¢å¤æˆåŠŸ: {fileName}, å¤‡ä»½ç´¢å¼•: {backupIndex}");
+                LogMessage($"´Ó±¸·İ»Ö¸´³É¹¦: {fileName}, ±¸·İË÷Òı: {backupIndex}");
                 return true;
             }
             catch (Exception ex)
             {
-                LogError($"ä»å¤‡ä»½æ¢å¤å¤±è´¥: {fileName}, é”™è¯¯: {ex.Message}");
+                LogError($"´Ó±¸·İ»Ö¸´Ê§°Ü: {fileName}, ´íÎó: {ex.Message}");
                 return false;
             }
         }
 
         /// <summary>
-        /// è·å–å¤‡ä»½æ–‡ä»¶åˆ—è¡¨
+        /// »ñÈ¡±¸·İÎÄ¼şÁĞ±í
         /// </summary>
-        /// <param name="fileName">åŸæ–‡ä»¶å</param>
-        /// <returns>å¤‡ä»½æ–‡ä»¶ä¿¡æ¯åˆ—è¡¨</returns>
+        /// <param name="fileName">Ô­ÎÄ¼şÃû</param>
+        /// <returns>±¸·İÎÄ¼şĞÅÏ¢ÁĞ±í</returns>
         public List<BackupFileInfo> GetBackupFiles(string fileName)
         {
             var backupFiles = new List<BackupFileInfo>();
@@ -656,95 +656,95 @@ namespace InventorySystem.SaveSystem
             }
             catch (Exception ex)
             {
-                LogError($"è·å–å¤‡ä»½æ–‡ä»¶åˆ—è¡¨å¤±è´¥: {ex.Message}");
+                LogError($"»ñÈ¡±¸·İÎÄ¼şÁĞ±íÊ§°Ü: {ex.Message}");
             }
 
             return backupFiles;
         }
         #endregion
 
-        #region æ–‡ä»¶é”å®šç®¡ç†
+        #region ÎÄ¼şËø¶¨¹ÜÀí
         /// <summary>
-        /// é”å®šæ–‡ä»¶
+        /// Ëø¶¨ÎÄ¼ş
         /// </summary>
-        /// <param name="filePath">æ–‡ä»¶è·¯å¾„</param>
+        /// <param name="filePath">ÎÄ¼şÂ·¾¶</param>
         private void LockFile(string filePath)
         {
             lockedFiles.Add(filePath);
         }
 
         /// <summary>
-        /// è§£é”æ–‡ä»¶
+        /// ½âËøÎÄ¼ş
         /// </summary>
-        /// <param name="filePath">æ–‡ä»¶è·¯å¾„</param>
+        /// <param name="filePath">ÎÄ¼şÂ·¾¶</param>
         private void UnlockFile(string filePath)
         {
             lockedFiles.Remove(filePath);
         }
 
         /// <summary>
-        /// æ£€æŸ¥æ–‡ä»¶æ˜¯å¦è¢«é”å®š
+        /// ¼ì²éÎÄ¼şÊÇ·ñ±»Ëø¶¨
         /// </summary>
-        /// <param name="filePath">æ–‡ä»¶è·¯å¾„</param>
-        /// <returns>æ˜¯å¦è¢«é”å®š</returns>
+        /// <param name="filePath">ÎÄ¼şÂ·¾¶</param>
+        /// <returns>ÊÇ·ñ±»Ëø¶¨</returns>
         private bool IsFileLocked(string filePath)
         {
             return lockedFiles.Contains(filePath);
         }
         #endregion
 
-        #region å‹ç¼©å’Œè§£å‹ç¼©
+        #region Ñ¹ËõºÍ½âÑ¹Ëõ
         /// <summary>
-        /// å‹ç¼©æ•°æ®
+        /// Ñ¹ËõÊı¾İ
         /// </summary>
-        /// <param name="data">åŸå§‹æ•°æ®</param>
-        /// <returns>å‹ç¼©åçš„æ•°æ®</returns>
+        /// <param name="data">Ô­Ê¼Êı¾İ</param>
+        /// <returns>Ñ¹ËõºóµÄÊı¾İ</returns>
         private byte[] CompressData(byte[] data)
         {
-            // è¿™é‡Œå¯ä»¥å®ç°å…·ä½“çš„å‹ç¼©ç®—æ³•ï¼Œå¦‚GZip
-            // ä¸ºäº†ç®€åŒ–ï¼Œæš‚æ—¶è¿”å›åŸå§‹æ•°æ®
+            // ÕâÀï¿ÉÒÔÊµÏÖ¾ßÌåµÄÑ¹ËõËã·¨£¬ÈçGZip
+            // ÎªÁË¼ò»¯£¬ÔİÊ±·µ»ØÔ­Ê¼Êı¾İ
             return data;
         }
 
         /// <summary>
-        /// è§£å‹ç¼©æ•°æ®
+        /// ½âÑ¹ËõÊı¾İ
         /// </summary>
-        /// <param name="compressedData">å‹ç¼©æ•°æ®</param>
-        /// <returns>è§£å‹ç¼©åçš„æ•°æ®</returns>
+        /// <param name="compressedData">Ñ¹ËõÊı¾İ</param>
+        /// <returns>½âÑ¹ËõºóµÄÊı¾İ</returns>
         private byte[] DecompressData(byte[] compressedData)
         {
-            // è¿™é‡Œå¯ä»¥å®ç°å…·ä½“çš„è§£å‹ç¼©ç®—æ³•ï¼Œå¦‚GZip
-            // ä¸ºäº†ç®€åŒ–ï¼Œæš‚æ—¶è¿”å›åŸå§‹æ•°æ®
+            // ÕâÀï¿ÉÒÔÊµÏÖ¾ßÌåµÄ½âÑ¹ËõËã·¨£¬ÈçGZip
+            // ÎªÁË¼ò»¯£¬ÔİÊ±·µ»ØÔ­Ê¼Êı¾İ
             return compressedData;
         }
         #endregion
 
-        #region å®ç”¨æ–¹æ³•
+        #region ÊµÓÃ·½·¨
         /// <summary>
-        /// è·å–å®Œæ•´æ–‡ä»¶è·¯å¾„
+        /// »ñÈ¡ÍêÕûÎÄ¼şÂ·¾¶
         /// </summary>
-        /// <param name="fileName">æ–‡ä»¶åï¼ˆä¸å«æ‰©å±•åï¼‰</param>
-        /// <returns>å®Œæ•´æ–‡ä»¶è·¯å¾„</returns>
+        /// <param name="fileName">ÎÄ¼şÃû£¨²»º¬À©Õ¹Ãû£©</param>
+        /// <returns>ÍêÕûÎÄ¼şÂ·¾¶</returns>
         private string GetFullFilePath(string fileName)
         {
             return Path.Combine(fullSaveDirectory, fileName + fileExtension);
         }
 
         /// <summary>
-        /// è·å–æ–‡ä»¶ç®¡ç†å™¨ç»Ÿè®¡ä¿¡æ¯
+        /// »ñÈ¡ÎÄ¼ş¹ÜÀíÆ÷Í³¼ÆĞÅÏ¢
         /// </summary>
-        /// <returns>ç»Ÿè®¡ä¿¡æ¯å­—ç¬¦ä¸²</returns>
+        /// <returns>Í³¼ÆĞÅÏ¢×Ö·û´®</returns>
         public string GetStatistics()
         {
-            return $"è¯»å–æ“ä½œ: {readOperations}, " +
-                   $"å†™å…¥æ“ä½œ: {writeOperations}, " +
-                   $"æ€»è¯»å–å­—èŠ‚æ•°: {totalBytesRead}, " +
-                   $"æ€»å†™å…¥å­—èŠ‚æ•°: {totalBytesWritten}, " +
-                   $"é”å®šæ–‡ä»¶æ•°: {lockedFiles.Count}";
+            return $"¶ÁÈ¡²Ù×÷: {readOperations}, " +
+                   $"Ğ´Èë²Ù×÷: {writeOperations}, " +
+                   $"×Ü¶ÁÈ¡×Ö½ÚÊı: {totalBytesRead}, " +
+                   $"×ÜĞ´Èë×Ö½ÚÊı: {totalBytesWritten}, " +
+                   $"Ëø¶¨ÎÄ¼şÊı: {lockedFiles.Count}";
         }
 
         /// <summary>
-        /// é‡ç½®ç»Ÿè®¡ä¿¡æ¯
+        /// ÖØÖÃÍ³¼ÆĞÅÏ¢
         /// </summary>
         public void ResetStatistics()
         {
@@ -752,31 +752,31 @@ namespace InventorySystem.SaveSystem
             writeOperations = 0;
             totalBytesRead = 0;
             totalBytesWritten = 0;
-            LogMessage("ç»Ÿè®¡ä¿¡æ¯å·²é‡ç½®");
+            LogMessage("Í³¼ÆĞÅÏ¢ÒÑÖØÖÃ");
         }
 
         /// <summary>
-        /// è·å–ä¿å­˜ç›®å½•è·¯å¾„
+        /// »ñÈ¡±£´æÄ¿Â¼Â·¾¶
         /// </summary>
-        /// <returns>ä¿å­˜ç›®å½•è·¯å¾„</returns>
+        /// <returns>±£´æÄ¿Â¼Â·¾¶</returns>
         public string GetSaveDirectoryPath()
         {
             return fullSaveDirectory;
         }
 
         /// <summary>
-        /// è·å–å¤‡ä»½ç›®å½•è·¯å¾„
+        /// »ñÈ¡±¸·İÄ¿Â¼Â·¾¶
         /// </summary>
-        /// <returns>å¤‡ä»½ç›®å½•è·¯å¾„</returns>
+        /// <returns>±¸·İÄ¿Â¼Â·¾¶</returns>
         public string GetBackupDirectoryPath()
         {
             return backupDirectory;
         }
         #endregion
 
-        #region æ—¥å¿—æ–¹æ³•
+        #region ÈÕÖ¾·½·¨
         /// <summary>
-        /// è®°å½•æ—¥å¿—æ¶ˆæ¯
+        /// ¼ÇÂ¼ÈÕÖ¾ÏûÏ¢
         /// </summary>
         private void LogMessage(string message)
         {
@@ -787,7 +787,7 @@ namespace InventorySystem.SaveSystem
         }
 
         /// <summary>
-        /// è®°å½•è­¦å‘Šæ¶ˆæ¯
+        /// ¼ÇÂ¼¾¯¸æÏûÏ¢
         /// </summary>
         private void LogWarning(string message)
         {
@@ -798,7 +798,7 @@ namespace InventorySystem.SaveSystem
         }
 
         /// <summary>
-        /// è®°å½•é”™è¯¯æ¶ˆæ¯
+        /// ¼ÇÂ¼´íÎóÏûÏ¢
         /// </summary>
         private void LogError(string message)
         {
@@ -810,32 +810,32 @@ namespace InventorySystem.SaveSystem
         #endregion
     }
 
-    #region æ•°æ®ç»“æ„
+    #region Êı¾İ½á¹¹
     /// <summary>
-    /// ä¿å­˜æ–‡ä»¶ä¿¡æ¯
+    /// ±£´æÎÄ¼şĞÅÏ¢
     /// </summary>
     [Serializable]
     public class SaveFileInfo
     {
-        public string fileName;         // æ–‡ä»¶åï¼ˆä¸å«æ‰©å±•åï¼‰
-        public string fullPath;         // å®Œæ•´è·¯å¾„
-        public long size;               // æ–‡ä»¶å¤§å°ï¼ˆå­—èŠ‚ï¼‰
-        public DateTime creationTime;   // åˆ›å»ºæ—¶é—´
-        public DateTime lastWriteTime;  // æœ€åä¿®æ”¹æ—¶é—´
-        public bool isReadOnly;         // æ˜¯å¦åªè¯»
+        public string fileName;         // ÎÄ¼şÃû£¨²»º¬À©Õ¹Ãû£©
+        public string fullPath;         // ÍêÕûÂ·¾¶
+        public long size;               // ÎÄ¼ş´óĞ¡£¨×Ö½Ú£©
+        public DateTime creationTime;   // ´´½¨Ê±¼ä
+        public DateTime lastWriteTime;  // ×îºóĞŞ¸ÄÊ±¼ä
+        public bool isReadOnly;         // ÊÇ·ñÖ»¶Á
     }
 
     /// <summary>
-    /// å¤‡ä»½æ–‡ä»¶ä¿¡æ¯
+    /// ±¸·İÎÄ¼şĞÅÏ¢
     /// </summary>
     [Serializable]
     public class BackupFileInfo
     {
-        public int index;               // å¤‡ä»½ç´¢å¼•
-        public string fileName;         // æ–‡ä»¶å
-        public string fullPath;         // å®Œæ•´è·¯å¾„
-        public long size;               // æ–‡ä»¶å¤§å°ï¼ˆå­—èŠ‚ï¼‰
-        public DateTime creationTime;   // åˆ›å»ºæ—¶é—´
+        public int index;               // ±¸·İË÷Òı
+        public string fileName;         // ÎÄ¼şÃû
+        public string fullPath;         // ÍêÕûÂ·¾¶
+        public long size;               // ÎÄ¼ş´óĞ¡£¨×Ö½Ú£©
+        public DateTime creationTime;   // ´´½¨Ê±¼ä
     }
     #endregion
 }

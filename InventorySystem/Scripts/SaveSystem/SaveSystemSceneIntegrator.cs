@@ -6,44 +6,44 @@ using UnityEngine.SceneManagement;
 using InventorySystem.SaveSystem;
 
 /// <summary>
-/// ä¿å­˜ç³»ç»Ÿåœºæ™¯é›†æˆå™¨ - è´Ÿè´£åœ¨åœºæ™¯ä¸­è‡ªåŠ¨è®¾ç½®å’Œé…ç½®ä¿å­˜ç³»ç»Ÿç»„ä»¶
-/// å¤„ç†åœºæ™¯åŠ è½½ã€å¸è½½æ—¶çš„ç³»ç»Ÿé›†æˆå’Œæ•°æ®åŒæ­¥
+/// ±£´æÏµÍ³³¡¾°¼¯³ÉÆ÷ - ¸ºÔğÔÚ³¡¾°ÖĞ×Ô¶¯ÉèÖÃºÍÅäÖÃ±£´æÏµÍ³×é¼ş
+/// ´¦Àí³¡¾°¼ÓÔØ¡¢Ğ¶ÔØÊ±µÄÏµÍ³¼¯³ÉºÍÊı¾İÍ¬²½
 /// </summary>
 public class SaveSystemSceneIntegrator : MonoBehaviour
 {
-    [Header("åœºæ™¯é›†æˆé…ç½®")]
-    [SerializeField] private bool enableAutoSceneIntegration = true; // å¯ç”¨è‡ªåŠ¨åœºæ™¯é›†æˆ
-    [SerializeField] private bool enableCrossSceneSync = true; // å¯ç”¨è·¨åœºæ™¯åŒæ­¥
-    [SerializeField] private bool enableSceneDataPersistence = true; // å¯ç”¨åœºæ™¯æ•°æ®æŒä¹…åŒ–
-    [SerializeField] private bool enableDebugLogging = true; // å¯ç”¨è°ƒè¯•æ—¥å¿—
-    [SerializeField] private float integrationDelay = 0.5f; // é›†æˆå»¶è¿Ÿæ—¶é—´
+    [Header("³¡¾°¼¯³ÉÅäÖÃ")]
+    [SerializeField] private bool enableAutoSceneIntegration = true; // ÆôÓÃ×Ô¶¯³¡¾°¼¯³É
+    [SerializeField] private bool enableCrossSceneSync = true; // ÆôÓÃ¿ç³¡¾°Í¬²½
+    [SerializeField] private bool enableSceneDataPersistence = true; // ÆôÓÃ³¡¾°Êı¾İ³Ö¾Ã»¯
+    [SerializeField] private bool enableDebugLogging = true; // ÆôÓÃµ÷ÊÔÈÕÖ¾
+    [SerializeField] private float integrationDelay = 0.5f; // ¼¯³ÉÑÓ³ÙÊ±¼ä
 
-    [Header("é›†æˆç›®æ ‡é…ç½®")]
-    [SerializeField] private bool integrateInventoryItems = true; // é›†æˆåº“å­˜ç‰©å“
-    [SerializeField] private bool integrateItemGrids = true; // é›†æˆç‰©å“ç½‘æ ¼
-    [SerializeField] private bool integrateSpawners = true; // é›†æˆç”Ÿæˆå™¨
-    [SerializeField] private bool integrateEquipSlots = true; // é›†æˆè£…å¤‡æ§½
-    [SerializeField] private bool integrateItemDataHolders = true; // é›†æˆç‰©å“æ•°æ®æŒæœ‰è€…
+    [Header("¼¯³ÉÄ¿±êÅäÖÃ")]
+    [SerializeField] private bool integrateInventoryItems = true; // ¼¯³É¿â´æÎïÆ·
+    [SerializeField] private bool integrateItemGrids = true; // ¼¯³ÉÎïÆ·Íø¸ñ
+    [SerializeField] private bool integrateSpawners = true; // ¼¯³ÉÉú³ÉÆ÷
+    [SerializeField] private bool integrateEquipSlots = true; // ¼¯³É×°±¸²Û
+    [SerializeField] private bool integrateItemDataHolders = true; // ¼¯³ÉÎïÆ·Êı¾İ³ÖÓĞÕß
 
-    [Header("åŒæ­¥é…ç½®")]
-    [SerializeField] private bool syncOnSceneLoad = true; // åœºæ™¯åŠ è½½æ—¶åŒæ­¥
-    [SerializeField] private bool syncOnSceneUnload = true; // åœºæ™¯å¸è½½æ—¶åŒæ­¥
-    [SerializeField] private bool validateAfterSync = true; // åŒæ­¥åéªŒè¯
-    [SerializeField] private bool resolveConflictsAutomatically = true; // è‡ªåŠ¨è§£å†³å†²çª
+    [Header("Í¬²½ÅäÖÃ")]
+    [SerializeField] private bool syncOnSceneLoad = true; // ³¡¾°¼ÓÔØÊ±Í¬²½
+    [SerializeField] private bool syncOnSceneUnload = true; // ³¡¾°Ğ¶ÔØÊ±Í¬²½
+    [SerializeField] private bool validateAfterSync = true; // Í¬²½ºóÑéÖ¤
+    [SerializeField] private bool resolveConflictsAutomatically = true; // ×Ô¶¯½â¾ö³åÍ»
 
-    // ç³»ç»Ÿç»„ä»¶å¼•ç”¨
+    // ÏµÍ³×é¼şÒıÓÃ
     private SaveManager saveManager;
     private ItemInstanceIDManager idManager;
     private ItemInstanceIDManagerDeepIntegrator deepIntegrator;
     private SaveSystemAutoInitializer autoInitializer;
 
-    // åœºæ™¯é›†æˆçŠ¶æ€
+    // ³¡¾°¼¯³É×´Ì¬
     private bool isIntegrated = false;
     private bool isIntegrating = false;
     private string currentSceneName;
     private Dictionary<string, SceneIntegrationData> sceneDataCache;
 
-    // é›†æˆç»Ÿè®¡
+    // ¼¯³ÉÍ³¼Æ
     [System.Serializable]
     public class SceneIntegrationStats
     {
@@ -61,7 +61,7 @@ public class SaveSystemSceneIntegrator : MonoBehaviour
 
     [SerializeField] private SceneIntegrationStats integrationStats = new SceneIntegrationStats();
 
-    // åœºæ™¯æ•°æ®ç¼“å­˜
+    // ³¡¾°Êı¾İ»º´æ
     [System.Serializable]
     public class SceneIntegrationData
     {
@@ -74,7 +74,7 @@ public class SaveSystemSceneIntegrator : MonoBehaviour
         public string lastSyncTime;
     }
 
-    // äº‹ä»¶ç³»ç»Ÿ
+    // ÊÂ¼şÏµÍ³
     public static event System.Action<string> OnSceneIntegrationStarted;
     public static event System.Action<string, SceneIntegrationStats> OnSceneIntegrationCompleted;
     public static event System.Action<string> OnSceneIntegrationError;
@@ -82,34 +82,34 @@ public class SaveSystemSceneIntegrator : MonoBehaviour
 
     private void Awake()
     {
-        // åˆå§‹åŒ–åœºæ™¯æ•°æ®ç¼“å­˜
+        // ³õÊ¼»¯³¡¾°Êı¾İ»º´æ
         sceneDataCache = new Dictionary<string, SceneIntegrationData>();
         currentSceneName = SceneManager.GetActiveScene().name;
 
-        LogMessage("ä¿å­˜ç³»ç»Ÿåœºæ™¯é›†æˆå™¨å·²å¯åŠ¨");
+        LogMessage("±£´æÏµÍ³³¡¾°¼¯³ÉÆ÷ÒÑÆô¶¯");
     }
 
     private void Start()
     {
-        // æ³¨å†Œåœºæ™¯äº‹ä»¶
+        // ×¢²á³¡¾°ÊÂ¼ş
         SceneManager.sceneLoaded += OnSceneLoaded;
         SceneManager.sceneUnloaded += OnSceneUnloaded;
 
-        // å»¶è¿Ÿåˆå§‹åŒ–
+        // ÑÓ³Ù³õÊ¼»¯
         StartCoroutine(DelayedInitialization());
     }
 
     private void OnDestroy()
     {
-        // å–æ¶ˆæ³¨å†Œåœºæ™¯äº‹ä»¶
+        // È¡Ïû×¢²á³¡¾°ÊÂ¼ş
         SceneManager.sceneLoaded -= OnSceneLoaded;
         SceneManager.sceneUnloaded -= OnSceneUnloaded;
 
-        LogMessage("ä¿å­˜ç³»ç»Ÿåœºæ™¯é›†æˆå™¨å·²é”€æ¯");
+        LogMessage("±£´æÏµÍ³³¡¾°¼¯³ÉÆ÷ÒÑÏú»Ù");
     }
 
     /// <summary>
-    /// å»¶è¿Ÿåˆå§‹åŒ–
+    /// ÑÓ³Ù³õÊ¼»¯
     /// </summary>
     private IEnumerator DelayedInitialization()
     {
@@ -126,31 +126,31 @@ public class SaveSystemSceneIntegrator : MonoBehaviour
         }
         catch (Exception ex)
         {
-            LogError($"å»¶è¿Ÿåˆå§‹åŒ–å¤±è´¥: {ex.Message}");
+            LogError($"ÑÓ³Ù³õÊ¼»¯Ê§°Ü: {ex.Message}");
         }
     }
 
     /// <summary>
-    /// åˆå§‹åŒ–ç³»ç»Ÿç»„ä»¶å¼•ç”¨
+    /// ³õÊ¼»¯ÏµÍ³×é¼şÒıÓÃ
     /// </summary>
     private void InitializeSystemReferences()
     {
-        LogMessage("åˆå§‹åŒ–ç³»ç»Ÿç»„ä»¶å¼•ç”¨...");
+        LogMessage("³õÊ¼»¯ÏµÍ³×é¼şÒıÓÃ...");
 
-        // æŸ¥æ‰¾ç³»ç»Ÿç»„ä»¶
+        // ²éÕÒÏµÍ³×é¼ş
         saveManager = FindObjectOfType<SaveManager>();
         idManager = FindObjectOfType<ItemInstanceIDManager>();
         deepIntegrator = FindObjectOfType<ItemInstanceIDManagerDeepIntegrator>();
         autoInitializer = FindObjectOfType<SaveSystemAutoInitializer>();
 
-        // éªŒè¯ç»„ä»¶å®Œæ•´æ€§
+        // ÑéÖ¤×é¼şÍêÕûĞÔ
         ValidateSystemComponents();
 
-        LogMessage("ç³»ç»Ÿç»„ä»¶å¼•ç”¨åˆå§‹åŒ–å®Œæˆ");
+        LogMessage("ÏµÍ³×é¼şÒıÓÃ³õÊ¼»¯Íê³É");
     }
 
     /// <summary>
-    /// éªŒè¯ç³»ç»Ÿç»„ä»¶
+    /// ÑéÖ¤ÏµÍ³×é¼ş
     /// </summary>
     private void ValidateSystemComponents()
     {
@@ -163,26 +163,26 @@ public class SaveSystemSceneIntegrator : MonoBehaviour
         if (missingComponents.Count > 0)
         {
             string missing = string.Join(", ", missingComponents);
-            LogWarning($"ç¼ºå¤±ç³»ç»Ÿç»„ä»¶: {missing}");
+            LogWarning($"È±Ê§ÏµÍ³×é¼ş: {missing}");
 
-            // å¦‚æœæœ‰è‡ªåŠ¨åˆå§‹åŒ–å™¨ï¼Œå°è¯•è§¦å‘åˆå§‹åŒ–
+            // Èç¹ûÓĞ×Ô¶¯³õÊ¼»¯Æ÷£¬³¢ÊÔ´¥·¢³õÊ¼»¯
             if (autoInitializer != null && !autoInitializer.IsSystemInitialized())
             {
-                LogMessage("å°è¯•é€šè¿‡è‡ªåŠ¨åˆå§‹åŒ–å™¨åˆ›å»ºç¼ºå¤±ç»„ä»¶...");
+                LogMessage("³¢ÊÔÍ¨¹ı×Ô¶¯³õÊ¼»¯Æ÷´´½¨È±Ê§×é¼ş...");
                 autoInitializer.ManualInitialization();
 
-                // é‡æ–°è·å–ç»„ä»¶å¼•ç”¨
+                // ÖØĞÂ»ñÈ¡×é¼şÒıÓÃ
                 StartCoroutine(RetrySystemReferences());
             }
         }
         else
         {
-            LogMessage("æ‰€æœ‰ç³»ç»Ÿç»„ä»¶éªŒè¯é€šè¿‡");
+            LogMessage("ËùÓĞÏµÍ³×é¼şÑéÖ¤Í¨¹ı");
         }
     }
 
     /// <summary>
-    /// é‡è¯•è·å–ç³»ç»Ÿç»„ä»¶å¼•ç”¨
+    /// ÖØÊÔ»ñÈ¡ÏµÍ³×é¼şÒıÓÃ
     /// </summary>
     private IEnumerator RetrySystemReferences()
     {
@@ -192,15 +192,15 @@ public class SaveSystemSceneIntegrator : MonoBehaviour
         idManager = FindObjectOfType<ItemInstanceIDManager>();
         deepIntegrator = FindObjectOfType<ItemInstanceIDManagerDeepIntegrator>();
 
-        LogMessage("ç³»ç»Ÿç»„ä»¶å¼•ç”¨å·²æ›´æ–°");
+        LogMessage("ÏµÍ³×é¼şÒıÓÃÒÑ¸üĞÂ");
     }
 
     /// <summary>
-    /// åœºæ™¯åŠ è½½äº‹ä»¶å¤„ç†
+    /// ³¡¾°¼ÓÔØÊÂ¼ş´¦Àí
     /// </summary>
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        LogMessage($"åœºæ™¯å·²åŠ è½½: {scene.name} (æ¨¡å¼: {mode})");
+        LogMessage($"³¡¾°ÒÑ¼ÓÔØ: {scene.name} (Ä£Ê½: {mode})");
 
         currentSceneName = scene.name;
 
@@ -211,11 +211,11 @@ public class SaveSystemSceneIntegrator : MonoBehaviour
     }
 
     /// <summary>
-    /// åœºæ™¯å¸è½½äº‹ä»¶å¤„ç†
+    /// ³¡¾°Ğ¶ÔØÊÂ¼ş´¦Àí
     /// </summary>
     private void OnSceneUnloaded(Scene scene)
     {
-        LogMessage($"åœºæ™¯å·²å¸è½½: {scene.name}");
+        LogMessage($"³¡¾°ÒÑĞ¶ÔØ: {scene.name}");
 
         if (syncOnSceneUnload)
         {
@@ -224,7 +224,7 @@ public class SaveSystemSceneIntegrator : MonoBehaviour
     }
 
     /// <summary>
-    /// å»¶è¿Ÿåœºæ™¯é›†æˆ
+    /// ÑÓ³Ù³¡¾°¼¯³É
     /// </summary>
     private IEnumerator DelayedSceneIntegration(string sceneName)
     {
@@ -236,13 +236,13 @@ public class SaveSystemSceneIntegrator : MonoBehaviour
         }
         catch (Exception ex)
         {
-            LogError($"åœºæ™¯é›†æˆå¤±è´¥: {ex.Message}");
+            LogError($"³¡¾°¼¯³ÉÊ§°Ü: {ex.Message}");
             OnSceneIntegrationError?.Invoke(ex.Message);
         }
     }
 
     /// <summary>
-    /// é›†æˆå½“å‰åœºæ™¯
+    /// ¼¯³Éµ±Ç°³¡¾°
     /// </summary>
     public void IntegrateCurrentScene()
     {
@@ -250,13 +250,13 @@ public class SaveSystemSceneIntegrator : MonoBehaviour
     }
 
     /// <summary>
-    /// é›†æˆæŒ‡å®šåœºæ™¯
+    /// ¼¯³ÉÖ¸¶¨³¡¾°
     /// </summary>
     public void IntegrateScene(string sceneName)
     {
         if (isIntegrating)
         {
-            LogWarning("åœºæ™¯é›†æˆæ­£åœ¨è¿›è¡Œä¸­ï¼Œè·³è¿‡é‡å¤é›†æˆ");
+            LogWarning("³¡¾°¼¯³ÉÕıÔÚ½øĞĞÖĞ£¬Ìø¹ıÖØ¸´¼¯³É");
             return;
         }
 
@@ -265,7 +265,7 @@ public class SaveSystemSceneIntegrator : MonoBehaviour
             sceneName = currentSceneName;
         }
 
-        LogMessage($"å¼€å§‹é›†æˆåœºæ™¯: {sceneName}");
+        LogMessage($"¿ªÊ¼¼¯³É³¡¾°: {sceneName}");
 
         isIntegrating = true;
         integrationStats = new SceneIntegrationStats { sceneName = sceneName };
@@ -274,51 +274,51 @@ public class SaveSystemSceneIntegrator : MonoBehaviour
 
         try
         {
-            // 1. åˆå§‹åŒ–ç³»ç»Ÿç»„ä»¶å¼•ç”¨ï¼ˆå¦‚æœéœ€è¦ï¼‰
+            // 1. ³õÊ¼»¯ÏµÍ³×é¼şÒıÓÃ£¨Èç¹ûĞèÒª£©
             if (saveManager == null || idManager == null || deepIntegrator == null)
             {
                 InitializeSystemReferences();
             }
 
-            // 2. åŠ è½½åœºæ™¯æ•°æ®ç¼“å­˜
+            // 2. ¼ÓÔØ³¡¾°Êı¾İ»º´æ
             LoadSceneData(sceneName);
 
-            // 3. æ‰§è¡Œå„ç±»ç»„ä»¶é›†æˆ
+            // 3. Ö´ĞĞ¸÷Àà×é¼ş¼¯³É
             if (integrateInventoryItems) IntegrateInventoryItems();
             if (integrateItemGrids) IntegrateItemGrids();
             if (integrateSpawners) IntegrateSpawners();
             if (integrateEquipSlots) IntegrateEquipSlots();
             if (integrateItemDataHolders) IntegrateItemDataHolders();
 
-            // 4. æ‰§è¡Œè·¨åœºæ™¯åŒæ­¥
+            // 4. Ö´ĞĞ¿ç³¡¾°Í¬²½
             if (enableCrossSceneSync)
             {
                 PerformCrossSceneSync(sceneName);
             }
 
-            // 5. è§£å†³å†²çª
+            // 5. ½â¾ö³åÍ»
             if (resolveConflictsAutomatically)
             {
                 ResolveConflicts();
             }
 
-            // 6. éªŒè¯é›†æˆç»“æœ
+            // 6. ÑéÖ¤¼¯³É½á¹û
             if (validateAfterSync)
             {
                 ValidateIntegration();
             }
 
-            // 7. ä¿å­˜åœºæ™¯æ•°æ®
+            // 7. ±£´æ³¡¾°Êı¾İ
             SaveSceneData(sceneName);
 
-            // 8. å®Œæˆé›†æˆ
+            // 8. Íê³É¼¯³É
             CompleteSceneIntegration(sceneName);
 
-            LogMessage($"åœºæ™¯é›†æˆå®Œæˆ: {sceneName}");
+            LogMessage($"³¡¾°¼¯³ÉÍê³É: {sceneName}");
         }
         catch (Exception ex)
         {
-            LogError($"åœºæ™¯é›†æˆå¤±è´¥: {ex.Message}");
+            LogError($"³¡¾°¼¯³ÉÊ§°Ü: {ex.Message}");
             integrationStats.lastError = ex.Message;
             OnSceneIntegrationError?.Invoke(ex.Message);
         }
@@ -329,24 +329,24 @@ public class SaveSystemSceneIntegrator : MonoBehaviour
     }
 
     /// <summary>
-    /// é›†æˆåº“å­˜ç‰©å“
+    /// ¼¯³É¿â´æÎïÆ·
     /// </summary>
     private void IntegrateInventoryItems()
     {
         var items = FindObjectsOfType<InventorySystemItem>();
-        LogMessage($"å‘ç° {items.Length} ä¸ªåº“å­˜ç‰©å“");
+        LogMessage($"·¢ÏÖ {items.Length} ¸ö¿â´æÎïÆ·");
 
         foreach (var item in items)
         {
             try
             {
-                // ç¡®ä¿ç‰©å“æœ‰æœ‰æ•ˆçš„å®ä¾‹ID
+                // È·±£ÎïÆ·ÓĞÓĞĞ§µÄÊµÀıID
                 if (string.IsNullOrEmpty(item.GetItemInstanceID()) || !item.IsItemInstanceIDValid())
                 {
                     item.GenerateNewItemInstanceID();
                 }
 
-                // æ³¨å†Œåˆ°IDç®¡ç†å™¨
+                // ×¢²áµ½ID¹ÜÀíÆ÷
                 if (idManager != null)
                 {
                     idManager.RegisterInstanceID(item.GetItemInstanceID(), item.gameObject.name, "InventorySystemItem", item.transform.position);
@@ -356,40 +356,40 @@ public class SaveSystemSceneIntegrator : MonoBehaviour
             }
             catch (Exception ex)
             {
-                LogError($"é›†æˆåº“å­˜ç‰©å“å¤±è´¥: {ex.Message}");
+                LogError($"¼¯³É¿â´æÎïÆ·Ê§°Ü: {ex.Message}");
                 integrationStats.validationErrors++;
             }
         }
 
-        LogMessage($"åº“å­˜ç‰©å“é›†æˆå®Œæˆï¼Œå…±é›†æˆ {integrationStats.integratedItems} ä¸ªç‰©å“");
+        LogMessage($"¿â´æÎïÆ·¼¯³ÉÍê³É£¬¹²¼¯³É {integrationStats.integratedItems} ¸öÎïÆ·");
     }
 
     /// <summary>
-    /// é›†æˆç‰©å“ç½‘æ ¼
+    /// ¼¯³ÉÎïÆ·Íø¸ñ
     /// </summary>
     private void IntegrateItemGrids()
     {
         var grids = FindObjectsOfType<BaseItemGrid>();
-        LogMessage($"å‘ç° {grids.Length} ä¸ªç‰©å“ç½‘æ ¼");
+        LogMessage($"·¢ÏÖ {grids.Length} ¸öÎïÆ·Íø¸ñ");
 
         foreach (var grid in grids)
         {
             try
             {
-                // ç¡®ä¿ç½‘æ ¼æœ‰æœ‰æ•ˆçš„ä¿å­˜ID
+                // È·±£Íø¸ñÓĞÓĞĞ§µÄ±£´æID
                 if (string.IsNullOrEmpty(grid.GetSaveID()))
                 {
                     grid.SetSaveID(System.Guid.NewGuid().ToString());
                 }
 
-                // ç¡®ä¿ä¿å­˜ç³»ç»Ÿæ­£ç¡®è®¾ç½®ï¼ˆé€šè¿‡å…¬å…±æ–¹æ³•ï¼‰
+                // È·±£±£´æÏµÍ³ÕıÈ·ÉèÖÃ£¨Í¨¹ı¹«¹²·½·¨£©
                 if (!grid.IsSaveIDValid())
                 {
                     grid.GenerateNewSaveID();
                 }
                 grid.MarkAsModified();
 
-                // æ³¨å†Œåˆ°IDç®¡ç†å™¨
+                // ×¢²áµ½ID¹ÜÀíÆ÷
                 if (idManager != null)
                 {
                     idManager.RegisterInstanceID(grid.GetSaveID(), grid.gameObject.name, "BaseItemGrid", grid.transform.position);
@@ -399,33 +399,33 @@ public class SaveSystemSceneIntegrator : MonoBehaviour
             }
             catch (Exception ex)
             {
-                LogError($"é›†æˆç‰©å“ç½‘æ ¼å¤±è´¥: {ex.Message}");
+                LogError($"¼¯³ÉÎïÆ·Íø¸ñÊ§°Ü: {ex.Message}");
                 integrationStats.validationErrors++;
             }
         }
 
-        LogMessage($"ç‰©å“ç½‘æ ¼é›†æˆå®Œæˆï¼Œå…±é›†æˆ {integrationStats.integratedGrids} ä¸ªç½‘æ ¼");
+        LogMessage($"ÎïÆ·Íø¸ñ¼¯³ÉÍê³É£¬¹²¼¯³É {integrationStats.integratedGrids} ¸öÍø¸ñ");
     }
 
     /// <summary>
-    /// é›†æˆç”Ÿæˆå™¨
+    /// ¼¯³ÉÉú³ÉÆ÷
     /// </summary>
     private void IntegrateSpawners()
     {
         var spawners = FindObjectsOfType<BaseItemSpawn>();
-        LogMessage($"å‘ç° {spawners.Length} ä¸ªç”Ÿæˆå™¨");
+        LogMessage($"·¢ÏÖ {spawners.Length} ¸öÉú³ÉÆ÷");
 
         foreach (var spawner in spawners)
         {
             try
             {
-                // ç¡®ä¿ç”Ÿæˆå™¨æœ‰æœ‰æ•ˆçš„ä¿å­˜ID
+                // È·±£Éú³ÉÆ÷ÓĞÓĞĞ§µÄ±£´æID
                 if (string.IsNullOrEmpty(spawner.GetSaveID()))
                 {
                     spawner.SetSaveID(System.Guid.NewGuid().ToString());
                 }
 
-                // æ³¨å†Œåˆ°IDç®¡ç†å™¨
+                // ×¢²áµ½ID¹ÜÀíÆ÷
                 if (idManager != null)
                 {
                     idManager.RegisterInstanceID(spawner.GetSaveID(), spawner.gameObject.name, "BaseItemSpawn", spawner.transform.position);
@@ -435,33 +435,33 @@ public class SaveSystemSceneIntegrator : MonoBehaviour
             }
             catch (Exception ex)
             {
-                LogError($"é›†æˆç”Ÿæˆå™¨å¤±è´¥: {ex.Message}");
+                LogError($"¼¯³ÉÉú³ÉÆ÷Ê§°Ü: {ex.Message}");
                 integrationStats.validationErrors++;
             }
         }
 
-        LogMessage($"ç”Ÿæˆå™¨é›†æˆå®Œæˆï¼Œå…±é›†æˆ {integrationStats.integratedSpawners} ä¸ªç”Ÿæˆå™¨");
+        LogMessage($"Éú³ÉÆ÷¼¯³ÉÍê³É£¬¹²¼¯³É {integrationStats.integratedSpawners} ¸öÉú³ÉÆ÷");
     }
 
     /// <summary>
-    /// é›†æˆè£…å¤‡æ§½
+    /// ¼¯³É×°±¸²Û
     /// </summary>
     private void IntegrateEquipSlots()
     {
         var equipSlots = FindObjectsOfType<EquipSlot>();
-        LogMessage($"å‘ç° {equipSlots.Length} ä¸ªè£…å¤‡æ§½");
+        LogMessage($"·¢ÏÖ {equipSlots.Length} ¸ö×°±¸²Û");
 
         foreach (var slot in equipSlots)
         {
             try
             {
-                // ç¡®ä¿è£…å¤‡æ§½æœ‰æœ‰æ•ˆçš„ä¿å­˜ID
+                // È·±£×°±¸²ÛÓĞÓĞĞ§µÄ±£´æID
                 if (string.IsNullOrEmpty(slot.GetSaveID()))
                 {
                     slot.SetSaveID(System.Guid.NewGuid().ToString());
                 }
 
-                // æ³¨å†Œåˆ°IDç®¡ç†å™¨
+                // ×¢²áµ½ID¹ÜÀíÆ÷
                 if (idManager != null)
                 {
                     idManager.RegisterInstanceID(slot.GetSaveID(), slot.gameObject.name, "EquipSlot", slot.transform.position);
@@ -471,33 +471,33 @@ public class SaveSystemSceneIntegrator : MonoBehaviour
             }
             catch (Exception ex)
             {
-                LogError($"é›†æˆè£…å¤‡æ§½å¤±è´¥: {ex.Message}");
+                LogError($"¼¯³É×°±¸²ÛÊ§°Ü: {ex.Message}");
                 integrationStats.validationErrors++;
             }
         }
 
-        LogMessage($"è£…å¤‡æ§½é›†æˆå®Œæˆï¼Œå…±é›†æˆ {integrationStats.integratedEquipSlots} ä¸ªè£…å¤‡æ§½");
+        LogMessage($"×°±¸²Û¼¯³ÉÍê³É£¬¹²¼¯³É {integrationStats.integratedEquipSlots} ¸ö×°±¸²Û");
     }
 
     /// <summary>
-    /// é›†æˆç‰©å“æ•°æ®æŒæœ‰è€…
+    /// ¼¯³ÉÎïÆ·Êı¾İ³ÖÓĞÕß
     /// </summary>
     private void IntegrateItemDataHolders()
     {
         var dataHolders = FindObjectsOfType<ItemDataHolder>();
-        LogMessage($"å‘ç° {dataHolders.Length} ä¸ªç‰©å“æ•°æ®æŒæœ‰è€…");
+        LogMessage($"·¢ÏÖ {dataHolders.Length} ¸öÎïÆ·Êı¾İ³ÖÓĞÕß");
 
         foreach (var holder in dataHolders)
         {
             try
             {
-                // ç¡®ä¿æ•°æ®æŒæœ‰è€…æœ‰æœ‰æ•ˆçš„ä¿å­˜ID
+                // È·±£Êı¾İ³ÖÓĞÕßÓĞÓĞĞ§µÄ±£´æID
                 if (string.IsNullOrEmpty(holder.GetSaveID()))
                 {
                     holder.SetSaveID(System.Guid.NewGuid().ToString());
                 }
 
-                // æ³¨å†Œåˆ°IDç®¡ç†å™¨
+                // ×¢²áµ½ID¹ÜÀíÆ÷
                 if (idManager != null)
                 {
                     idManager.RegisterInstanceID(holder.GetSaveID(), holder.gameObject.name, "ItemDataHolder", holder.transform.position);
@@ -507,98 +507,98 @@ public class SaveSystemSceneIntegrator : MonoBehaviour
             }
             catch (Exception ex)
             {
-                LogError($"é›†æˆç‰©å“æ•°æ®æŒæœ‰è€…å¤±è´¥: {ex.Message}");
+                LogError($"¼¯³ÉÎïÆ·Êı¾İ³ÖÓĞÕßÊ§°Ü: {ex.Message}");
                 integrationStats.validationErrors++;
             }
         }
 
-        LogMessage($"ç‰©å“æ•°æ®æŒæœ‰è€…é›†æˆå®Œæˆï¼Œå…±é›†æˆ {integrationStats.integratedDataHolders} ä¸ªæ•°æ®æŒæœ‰è€…");
+        LogMessage($"ÎïÆ·Êı¾İ³ÖÓĞÕß¼¯³ÉÍê³É£¬¹²¼¯³É {integrationStats.integratedDataHolders} ¸öÊı¾İ³ÖÓĞÕß");
     }
 
     /// <summary>
-    /// æ‰§è¡Œè·¨åœºæ™¯åŒæ­¥
+    /// Ö´ĞĞ¿ç³¡¾°Í¬²½
     /// </summary>
     private void PerformCrossSceneSync(string sceneName)
     {
         if (idManager == null)
         {
-            LogWarning("IDç®¡ç†å™¨ä¸å­˜åœ¨ï¼Œè·³è¿‡è·¨åœºæ™¯åŒæ­¥");
+            LogWarning("ID¹ÜÀíÆ÷²»´æÔÚ£¬Ìø¹ı¿ç³¡¾°Í¬²½");
             return;
         }
 
         try
         {
-            LogMessage($"å¼€å§‹è·¨åœºæ™¯åŒæ­¥: {sceneName}");
+            LogMessage($"¿ªÊ¼¿ç³¡¾°Í¬²½: {sceneName}");
 
-            // è¿™é‡Œå¯ä»¥æ·»åŠ å…·ä½“çš„è·¨åœºæ™¯åŒæ­¥é€»è¾‘
-            // ä¾‹å¦‚åŒæ­¥ç‰©å“çŠ¶æ€ã€ä½ç½®ã€å±æ€§ç­‰
+            // ÕâÀï¿ÉÒÔÌí¼Ó¾ßÌåµÄ¿ç³¡¾°Í¬²½Âß¼­
+            // ÀıÈçÍ¬²½ÎïÆ·×´Ì¬¡¢Î»ÖÃ¡¢ÊôĞÔµÈ
 
-            OnCrossSceneSyncCompleted?.Invoke(sceneName, "åŒæ­¥å®Œæˆ");
-            LogMessage($"è·¨åœºæ™¯åŒæ­¥å®Œæˆ: {sceneName}");
+            OnCrossSceneSyncCompleted?.Invoke(sceneName, "Í¬²½Íê³É");
+            LogMessage($"¿ç³¡¾°Í¬²½Íê³É: {sceneName}");
         }
         catch (Exception ex)
         {
-            LogError($"è·¨åœºæ™¯åŒæ­¥å¤±è´¥: {ex.Message}");
+            LogError($"¿ç³¡¾°Í¬²½Ê§°Ü: {ex.Message}");
         }
     }
 
     /// <summary>
-    /// è§£å†³å†²çª
+    /// ½â¾ö³åÍ»
     /// </summary>
     private void ResolveConflicts()
     {
         if (idManager == null)
         {
-            LogWarning("IDç®¡ç†å™¨ä¸å­˜åœ¨ï¼Œè·³è¿‡å†²çªè§£å†³");
+            LogWarning("ID¹ÜÀíÆ÷²»´æÔÚ£¬Ìø¹ı³åÍ»½â¾ö");
             return;
         }
 
         try
         {
-            LogMessage("å¼€å§‹è§£å†³IDå†²çª...");
+            LogMessage("¿ªÊ¼½â¾öID³åÍ»...");
 
-            // è¿™é‡Œå¯ä»¥è°ƒç”¨IDç®¡ç†å™¨çš„å†²çªè§£å†³æ–¹æ³•
-            // ä¾‹å¦‚: idManager.ResolveConflicts();
+            // ÕâÀï¿ÉÒÔµ÷ÓÃID¹ÜÀíÆ÷µÄ³åÍ»½â¾ö·½·¨
+            // ÀıÈç: idManager.ResolveConflicts();
 
-            LogMessage("IDå†²çªè§£å†³å®Œæˆ");
+            LogMessage("ID³åÍ»½â¾öÍê³É");
         }
         catch (Exception ex)
         {
-            LogError($"è§£å†³å†²çªå¤±è´¥: {ex.Message}");
+            LogError($"½â¾ö³åÍ»Ê§°Ü: {ex.Message}");
             integrationStats.validationErrors++;
         }
     }
 
     /// <summary>
-    /// éªŒè¯é›†æˆç»“æœ
+    /// ÑéÖ¤¼¯³É½á¹û
     /// </summary>
     private void ValidateIntegration()
     {
         try
         {
-            LogMessage("å¼€å§‹éªŒè¯é›†æˆç»“æœ...");
+            LogMessage("¿ªÊ¼ÑéÖ¤¼¯³É½á¹û...");
 
-            // éªŒè¯æ‰€æœ‰æ³¨å†Œçš„å¯¹è±¡æ˜¯å¦æœ‰æ•ˆ
+            // ÑéÖ¤ËùÓĞ×¢²áµÄ¶ÔÏóÊÇ·ñÓĞĞ§
             int validationErrors = 0;
 
-            // éªŒè¯åº“å­˜ç‰©å“
+            // ÑéÖ¤¿â´æÎïÆ·
             var items = FindObjectsOfType<InventorySystemItem>();
             foreach (var item in items)
             {
                 if (!item.IsItemInstanceIDValid())
                 {
-                    LogError($"åº“å­˜ç‰©å“IDæ— æ•ˆ: {item.name}");
+                    LogError($"¿â´æÎïÆ·IDÎŞĞ§: {item.name}");
                     validationErrors++;
                 }
             }
 
-            // éªŒè¯ç‰©å“ç½‘æ ¼
+            // ÑéÖ¤ÎïÆ·Íø¸ñ
             var grids = FindObjectsOfType<BaseItemGrid>();
             foreach (var grid in grids)
             {
                 if (string.IsNullOrEmpty(grid.GetSaveID()))
                 {
-                    LogError($"ç‰©å“ç½‘æ ¼ä¿å­˜IDæ— æ•ˆ: {grid.name}");
+                    LogError($"ÎïÆ·Íø¸ñ±£´æIDÎŞĞ§: {grid.name}");
                     validationErrors++;
                 }
             }
@@ -607,39 +607,39 @@ public class SaveSystemSceneIntegrator : MonoBehaviour
 
             if (validationErrors == 0)
             {
-                LogMessage("é›†æˆéªŒè¯é€šè¿‡");
+                LogMessage("¼¯³ÉÑéÖ¤Í¨¹ı");
             }
             else
             {
-                LogWarning($"é›†æˆéªŒè¯å‘ç° {validationErrors} ä¸ªé”™è¯¯");
+                LogWarning($"¼¯³ÉÑéÖ¤·¢ÏÖ {validationErrors} ¸ö´íÎó");
             }
         }
         catch (Exception ex)
         {
-            LogError($"éªŒè¯é›†æˆç»“æœå¤±è´¥: {ex.Message}");
+            LogError($"ÑéÖ¤¼¯³É½á¹ûÊ§°Ü: {ex.Message}");
             integrationStats.validationErrors++;
         }
     }
 
     /// <summary>
-    /// åŠ è½½åœºæ™¯æ•°æ®
+    /// ¼ÓÔØ³¡¾°Êı¾İ
     /// </summary>
     private void LoadSceneData(string sceneName)
     {
         if (sceneDataCache.ContainsKey(sceneName))
         {
-            LogMessage($"åŠ è½½åœºæ™¯æ•°æ®ç¼“å­˜: {sceneName}");
-            // è¿™é‡Œå¯ä»¥æ·»åŠ å…·ä½“çš„æ•°æ®åŠ è½½é€»è¾‘
+            LogMessage($"¼ÓÔØ³¡¾°Êı¾İ»º´æ: {sceneName}");
+            // ÕâÀï¿ÉÒÔÌí¼Ó¾ßÌåµÄÊı¾İ¼ÓÔØÂß¼­
         }
         else
         {
-            LogMessage($"åˆ›å»ºæ–°çš„åœºæ™¯æ•°æ®ç¼“å­˜: {sceneName}");
+            LogMessage($"´´½¨ĞÂµÄ³¡¾°Êı¾İ»º´æ: {sceneName}");
             sceneDataCache[sceneName] = new SceneIntegrationData { sceneName = sceneName };
         }
     }
 
     /// <summary>
-    /// ä¿å­˜åœºæ™¯æ•°æ®
+    /// ±£´æ³¡¾°Êı¾İ
     /// </summary>
     private void SaveSceneData(string sceneName)
     {
@@ -653,18 +653,18 @@ public class SaveSystemSceneIntegrator : MonoBehaviour
             var sceneData = sceneDataCache[sceneName];
             sceneData.lastSyncTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
 
-            // è¿™é‡Œå¯ä»¥æ·»åŠ å…·ä½“çš„æ•°æ®ä¿å­˜é€»è¾‘
+            // ÕâÀï¿ÉÒÔÌí¼Ó¾ßÌåµÄÊı¾İ±£´æÂß¼­
 
-            LogMessage($"åœºæ™¯æ•°æ®å·²ä¿å­˜: {sceneName}");
+            LogMessage($"³¡¾°Êı¾İÒÑ±£´æ: {sceneName}");
         }
         catch (Exception ex)
         {
-            LogError($"ä¿å­˜åœºæ™¯æ•°æ®å¤±è´¥: {ex.Message}");
+            LogError($"±£´æ³¡¾°Êı¾İÊ§°Ü: {ex.Message}");
         }
     }
 
     /// <summary>
-    /// å®Œæˆåœºæ™¯é›†æˆ
+    /// Íê³É³¡¾°¼¯³É
     /// </summary>
     private void CompleteSceneIntegration(string sceneName)
     {
@@ -673,31 +673,31 @@ public class SaveSystemSceneIntegrator : MonoBehaviour
 
         OnSceneIntegrationCompleted?.Invoke(sceneName, integrationStats);
 
-        LogMessage($"åœºæ™¯é›†æˆç»Ÿè®¡:\n" +
-                  $"- åœºæ™¯åç§°: {integrationStats.sceneName}\n" +
-                  $"- é›†æˆç‰©å“: {integrationStats.integratedItems}\n" +
-                  $"- é›†æˆç½‘æ ¼: {integrationStats.integratedGrids}\n" +
-                  $"- é›†æˆç”Ÿæˆå™¨: {integrationStats.integratedSpawners}\n" +
-                  $"- é›†æˆè£…å¤‡æ§½: {integrationStats.integratedEquipSlots}\n" +
-                  $"- é›†æˆæ•°æ®æŒæœ‰è€…: {integrationStats.integratedDataHolders}\n" +
-                  $"- è§£å†³å†²çª: {integrationStats.resolvedConflicts}\n" +
-                  $"- éªŒè¯é”™è¯¯: {integrationStats.validationErrors}\n" +
-                  $"- é›†æˆæ—¶é—´: {integrationStats.integrationTime}");
+        LogMessage($"³¡¾°¼¯³ÉÍ³¼Æ:\n" +
+                  $"- ³¡¾°Ãû³Æ: {integrationStats.sceneName}\n" +
+                  $"- ¼¯³ÉÎïÆ·: {integrationStats.integratedItems}\n" +
+                  $"- ¼¯³ÉÍø¸ñ: {integrationStats.integratedGrids}\n" +
+                  $"- ¼¯³ÉÉú³ÉÆ÷: {integrationStats.integratedSpawners}\n" +
+                  $"- ¼¯³É×°±¸²Û: {integrationStats.integratedEquipSlots}\n" +
+                  $"- ¼¯³ÉÊı¾İ³ÖÓĞÕß: {integrationStats.integratedDataHolders}\n" +
+                  $"- ½â¾ö³åÍ»: {integrationStats.resolvedConflicts}\n" +
+                  $"- ÑéÖ¤´íÎó: {integrationStats.validationErrors}\n" +
+                  $"- ¼¯³ÉÊ±¼ä: {integrationStats.integrationTime}");
     }
 
-    // === å…¬å…±APIæ–¹æ³• ===
+    // === ¹«¹²API·½·¨ ===
 
     /// <summary>
-    /// æ‰‹åŠ¨è§¦å‘åœºæ™¯é›†æˆ
+    /// ÊÖ¶¯´¥·¢³¡¾°¼¯³É
     /// </summary>
     public void ManualSceneIntegration()
     {
-        LogMessage("æ‰‹åŠ¨è§¦å‘åœºæ™¯é›†æˆ");
+        LogMessage("ÊÖ¶¯´¥·¢³¡¾°¼¯³É");
         IntegrateCurrentScene();
     }
 
     /// <summary>
-    /// è·å–é›†æˆç»Ÿè®¡ä¿¡æ¯
+    /// »ñÈ¡¼¯³ÉÍ³¼ÆĞÅÏ¢
     /// </summary>
     public SceneIntegrationStats GetIntegrationStats()
     {
@@ -705,7 +705,7 @@ public class SaveSystemSceneIntegrator : MonoBehaviour
     }
 
     /// <summary>
-    /// æ£€æŸ¥æ˜¯å¦å·²é›†æˆ
+    /// ¼ì²éÊÇ·ñÒÑ¼¯³É
     /// </summary>
     public bool IsSceneIntegrated()
     {
@@ -713,7 +713,7 @@ public class SaveSystemSceneIntegrator : MonoBehaviour
     }
 
     /// <summary>
-    /// è·å–åœºæ™¯æ•°æ®ç¼“å­˜
+    /// »ñÈ¡³¡¾°Êı¾İ»º´æ
     /// </summary>
     public Dictionary<string, SceneIntegrationData> GetSceneDataCache()
     {
@@ -721,16 +721,16 @@ public class SaveSystemSceneIntegrator : MonoBehaviour
     }
 
     /// <summary>
-    /// æ¸…é™¤åœºæ™¯æ•°æ®ç¼“å­˜
+    /// Çå³ı³¡¾°Êı¾İ»º´æ
     /// </summary>
     public void ClearSceneDataCache()
     {
         sceneDataCache.Clear();
-        LogMessage("åœºæ™¯æ•°æ®ç¼“å­˜å·²æ¸…é™¤");
+        LogMessage("³¡¾°Êı¾İ»º´æÒÑÇå³ı");
     }
 
     /// <summary>
-    /// é‡ç½®é›†æˆçŠ¶æ€
+    /// ÖØÖÃ¼¯³É×´Ì¬
     /// </summary>
     public void ResetIntegrationState()
     {
@@ -738,10 +738,10 @@ public class SaveSystemSceneIntegrator : MonoBehaviour
         isIntegrating = false;
         integrationStats = new SceneIntegrationStats();
 
-        LogMessage("é›†æˆçŠ¶æ€å·²é‡ç½®");
+        LogMessage("¼¯³É×´Ì¬ÒÑÖØÖÃ");
     }
 
-    // === æ—¥å¿—å·¥å…·æ–¹æ³• ===
+    // === ÈÕÖ¾¹¤¾ß·½·¨ ===
 
     private void LogMessage(string message)
     {

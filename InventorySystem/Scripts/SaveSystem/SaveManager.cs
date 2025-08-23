@@ -8,12 +8,12 @@ using Newtonsoft.Json;
 namespace InventorySystem.SaveSystem
 {
     /// <summary>
-    /// ä¿å­˜ç®¡ç†å™¨ - è´Ÿè´£åè°ƒæ‰€æœ‰ISaveableå¯¹è±¡çš„ä¿å­˜å’ŒåŠ è½½æ“ä½œ
-    /// æä¾›ç»Ÿä¸€çš„ä¿å­˜ç³»ç»Ÿå…¥å£ç‚¹ï¼Œç®¡ç†å¯¹è±¡æ³¨å†Œã€ä¾èµ–å…³ç³»å’Œä¿å­˜æµç¨‹
+    /// ±£´æ¹ÜÀíÆ÷ - ¸ºÔğĞ­µ÷ËùÓĞISaveable¶ÔÏóµÄ±£´æºÍ¼ÓÔØ²Ù×÷
+    /// Ìá¹©Í³Ò»µÄ±£´æÏµÍ³Èë¿Úµã£¬¹ÜÀí¶ÔÏó×¢²á¡¢ÒÀÀµ¹ØÏµºÍ±£´æÁ÷³Ì
     /// </summary>
     public class SaveManager : MonoBehaviour
     {
-        #region å•ä¾‹æ¨¡å¼
+        #region µ¥ÀıÄ£Ê½
         private static SaveManager _instance;
         public static SaveManager Instance
         {
@@ -27,7 +27,7 @@ namespace InventorySystem.SaveSystem
                         GameObject go = new GameObject("SaveManager");
                         _instance = go.AddComponent<SaveManager>();
 
-                        // å°†æ–°åˆ›å»ºçš„SaveManagerè®¾ç½®ä¸ºSaveSystemçš„å­å¯¹è±¡ï¼ˆå¦‚æœå­˜åœ¨SaveSystemï¼‰
+                        // ½«ĞÂ´´½¨µÄSaveManagerÉèÖÃÎªSaveSystemµÄ×Ó¶ÔÏó£¨Èç¹û´æÔÚSaveSystem£©
                         var saveSystemPersistence = FindObjectOfType<SaveSystemPersistence>();
                         if (saveSystemPersistence != null)
                         {
@@ -40,57 +40,57 @@ namespace InventorySystem.SaveSystem
         }
         #endregion
 
-        #region å­—æ®µå’Œå±æ€§
-        [Header("ä¿å­˜ç³»ç»Ÿé…ç½®")]
-        [SerializeField] private bool autoSaveEnabled = true; // æ˜¯å¦å¯ç”¨è‡ªåŠ¨ä¿å­˜
-        [SerializeField] private float autoSaveInterval = 60f; // è‡ªåŠ¨ä¿å­˜é—´éš”ï¼ˆç§’ï¼‰
-        [SerializeField] private int maxBackupCount = 5; // æœ€å¤§å¤‡ä»½æ–‡ä»¶æ•°é‡
-        [SerializeField] private bool enableLogging = true; // æ˜¯å¦å¯ç”¨æ—¥å¿—è®°å½•
+        #region ×Ö¶ÎºÍÊôĞÔ
+        [Header("±£´æÏµÍ³ÅäÖÃ")]
+        [SerializeField] private bool autoSaveEnabled = true; // ÊÇ·ñÆôÓÃ×Ô¶¯±£´æ
+        [SerializeField] private float autoSaveInterval = 60f; // ×Ô¶¯±£´æ¼ä¸ô£¨Ãë£©
+        [SerializeField] private int maxBackupCount = 5; // ×î´ó±¸·İÎÄ¼şÊıÁ¿
+        [SerializeField] private bool enableLogging = true; // ÊÇ·ñÆôÓÃÈÕÖ¾¼ÇÂ¼
 
-        // æ³¨å†Œçš„ISaveableå¯¹è±¡å­—å…¸ - ä½¿ç”¨SaveIDä½œä¸ºé”®
+        // ×¢²áµÄISaveable¶ÔÏó×Öµä - Ê¹ÓÃSaveID×÷Îª¼ü
         private Dictionary<string, ISaveable> registeredObjects = new Dictionary<string, ISaveable>();
 
-        // å¯¹è±¡ä¾èµ–å…³ç³»å›¾ - ç”¨äºç¡®å®šä¿å­˜/åŠ è½½é¡ºåº
+        // ¶ÔÏóÒÀÀµ¹ØÏµÍ¼ - ÓÃÓÚÈ·¶¨±£´æ/¼ÓÔØË³Ğò
         private Dictionary<string, List<string>> dependencyGraph = new Dictionary<string, List<string>>();
 
-        // å˜åŒ–è·Ÿè¸ª - è®°å½•å“ªäº›å¯¹è±¡å‘ç”Ÿäº†å˜åŒ–
+        // ±ä»¯¸ú×Ù - ¼ÇÂ¼ÄÄĞ©¶ÔÏó·¢ÉúÁË±ä»¯
         private HashSet<string> changedObjects = new HashSet<string>();
 
-        // ä¿å­˜æ“ä½œçŠ¶æ€
+        // ±£´æ²Ù×÷×´Ì¬
         private bool isSaving = false;
         private bool isLoading = false;
 
-        // ç»„ä»¶å¼•ç”¨
+        // ×é¼şÒıÓÃ
         private SaveDataSerializer serializer;
         private SaveFileManager fileManager;
 
-        // ç»„ä»¶åˆå§‹åŒ–çŠ¶æ€
+        // ×é¼ş³õÊ¼»¯×´Ì¬
         private bool isInitialized = false;
 
-        // è‡ªåŠ¨ä¿å­˜åç¨‹
+        // ×Ô¶¯±£´æĞ­³Ì
         private Coroutine autoSaveCoroutine;
         #endregion
 
-        #region äº‹ä»¶å®šä¹‰
-        // ä¿å­˜ç›¸å…³äº‹ä»¶
-        public event Action<string> OnBeforeSave; // ä¿å­˜å‰äº‹ä»¶
-        public event Action<float, string> OnSaveProgress; // ä¿å­˜è¿›åº¦äº‹ä»¶
-        public event Action<string, bool> OnSaveComplete; // ä¿å­˜å®Œæˆäº‹ä»¶
+        #region ÊÂ¼ş¶¨Òå
+        // ±£´æÏà¹ØÊÂ¼ş
+        public event Action<string> OnBeforeSave; // ±£´æÇ°ÊÂ¼ş
+        public event Action<float, string> OnSaveProgress; // ±£´æ½ø¶ÈÊÂ¼ş
+        public event Action<string, bool> OnSaveComplete; // ±£´æÍê³ÉÊÂ¼ş
 
-        // åŠ è½½ç›¸å…³äº‹ä»¶
-        public event Action<string> OnBeforeLoad; // åŠ è½½å‰äº‹ä»¶
-        public event Action<float, string> OnLoadProgress; // åŠ è½½è¿›åº¦äº‹ä»¶
-        public event Action<string, bool> OnLoadComplete; // åŠ è½½å®Œæˆäº‹ä»¶
+        // ¼ÓÔØÏà¹ØÊÂ¼ş
+        public event Action<string> OnBeforeLoad; // ¼ÓÔØÇ°ÊÂ¼ş
+        public event Action<float, string> OnLoadProgress; // ¼ÓÔØ½ø¶ÈÊÂ¼ş
+        public event Action<string, bool> OnLoadComplete; // ¼ÓÔØÍê³ÉÊÂ¼ş
 
-        // å¯¹è±¡æ³¨å†Œäº‹ä»¶
-        public event Action<ISaveable> OnObjectRegistered; // å¯¹è±¡æ³¨å†Œäº‹ä»¶
-        public event Action<string> OnObjectUnregistered; // å¯¹è±¡æ³¨é”€äº‹ä»¶
+        // ¶ÔÏó×¢²áÊÂ¼ş
+        public event Action<ISaveable> OnObjectRegistered; // ¶ÔÏó×¢²áÊÂ¼ş
+        public event Action<string> OnObjectUnregistered; // ¶ÔÏó×¢ÏúÊÂ¼ş
         #endregion
 
-        #region Unityç”Ÿå‘½å‘¨æœŸ
+        #region UnityÉúÃüÖÜÆÚ
         private void Awake()
         {
-            // ç¡®ä¿å•ä¾‹å”¯ä¸€æ€§
+            // È·±£µ¥ÀıÎ¨Ò»ĞÔ
             if (_instance != null && _instance != this)
             {
                 Destroy(gameObject);
@@ -99,27 +99,27 @@ namespace InventorySystem.SaveSystem
 
             _instance = this;
 
-            // æ³¨æ„ï¼šä¸åœ¨è¿™é‡Œè°ƒç”¨DontDestroyOnLoadï¼Œå› ä¸ºSaveSystemPersistenceå·²ç»å¤„ç†äº†æ•´ä¸ªç³»ç»Ÿçš„æŒä¹…åŒ–
-            // å¦‚æœè¿™ä¸ªç»„ä»¶æ˜¯SaveSystemçš„å­å¯¹è±¡ï¼Œå®ƒä¼šè‡ªåŠ¨è·Ÿéšçˆ¶å¯¹è±¡è¿›è¡Œè·¨åœºæ™¯æŒä¹…åŒ–
+            // ×¢Òâ£º²»ÔÚÕâÀïµ÷ÓÃDontDestroyOnLoad£¬ÒòÎªSaveSystemPersistenceÒÑ¾­´¦ÀíÁËÕû¸öÏµÍ³µÄ³Ö¾Ã»¯
+            // Èç¹ûÕâ¸ö×é¼şÊÇSaveSystemµÄ×Ó¶ÔÏó£¬Ëü»á×Ô¶¯¸úËæ¸¸¶ÔÏó½øĞĞ¿ç³¡¾°³Ö¾Ã»¯
 
-            // åˆå§‹åŒ–ç»„ä»¶
+            // ³õÊ¼»¯×é¼ş
             InitializeComponents();
         }
 
         private void Start()
         {
-            // å¯åŠ¨è‡ªåŠ¨ä¿å­˜
+            // Æô¶¯×Ô¶¯±£´æ
             if (autoSaveEnabled)
             {
                 StartAutoSave();
             }
 
-            LogMessage("SaveManagerå·²å¯åŠ¨");
+            LogMessage("SaveManagerÒÑÆô¶¯");
         }
 
         private void OnDestroy()
         {
-            // åœæ­¢è‡ªåŠ¨ä¿å­˜
+            // Í£Ö¹×Ô¶¯±£´æ
             if (autoSaveCoroutine != null)
             {
                 StopCoroutine(autoSaveCoroutine);
@@ -127,9 +127,9 @@ namespace InventorySystem.SaveSystem
         }
         #endregion
 
-        #region åˆå§‹åŒ–æ–¹æ³•
+        #region ³õÊ¼»¯·½·¨
         /// <summary>
-        /// å…¬å…±åˆå§‹åŒ–æ–¹æ³• - ä¾›å¤–éƒ¨è°ƒç”¨
+        /// ¹«¹²³õÊ¼»¯·½·¨ - ¹©Íâ²¿µ÷ÓÃ
         /// </summary>
         public void Initialize()
         {
@@ -137,29 +137,29 @@ namespace InventorySystem.SaveSystem
             {
                 InitializeComponents();
             }
-            LogMessage("SaveManageråˆå§‹åŒ–å®Œæˆ");
+            LogMessage("SaveManager³õÊ¼»¯Íê³É");
         }
 
         /// <summary>
-        /// åˆå§‹åŒ–ä¿å­˜ç³»ç»Ÿç»„ä»¶
+        /// ³õÊ¼»¯±£´æÏµÍ³×é¼ş
         /// </summary>
         private void InitializeComponents()
         {
-            // è·å–æˆ–åˆ›å»ºåºåˆ—åŒ–å™¨ç»„ä»¶
+            // »ñÈ¡»ò´´½¨ĞòÁĞ»¯Æ÷×é¼ş
             serializer = GetComponent<SaveDataSerializer>();
             if (serializer == null)
             {
                 serializer = gameObject.AddComponent<SaveDataSerializer>();
             }
 
-            // è·å–æˆ–åˆ›å»ºæ–‡ä»¶ç®¡ç†å™¨ç»„ä»¶
+            // »ñÈ¡»ò´´½¨ÎÄ¼ş¹ÜÀíÆ÷×é¼ş
             fileManager = GetComponent<SaveFileManager>();
             if (fileManager == null)
             {
                 fileManager = gameObject.AddComponent<SaveFileManager>();
             }
 
-            // åˆå§‹åŒ–ç»„ä»¶
+            // ³õÊ¼»¯×é¼ş
             serializer.Initialize();
             fileManager.Initialize();
 
@@ -167,53 +167,53 @@ namespace InventorySystem.SaveSystem
         }
         #endregion
 
-        #region å¯¹è±¡æ³¨å†Œç®¡ç†
+        #region ¶ÔÏó×¢²á¹ÜÀí
         /// <summary>
-        /// æ³¨å†ŒISaveableå¯¹è±¡åˆ°ä¿å­˜ç³»ç»Ÿ
+        /// ×¢²áISaveable¶ÔÏóµ½±£´æÏµÍ³
         /// </summary>
-        /// <param name="saveable">è¦æ³¨å†Œçš„ISaveableå¯¹è±¡</param>
-        /// <returns>æ³¨å†Œæ˜¯å¦æˆåŠŸ</returns>
+        /// <param name="saveable">Òª×¢²áµÄISaveable¶ÔÏó</param>
+        /// <returns>×¢²áÊÇ·ñ³É¹¦</returns>
         public bool RegisterSaveable(ISaveable saveable)
         {
             if (saveable == null)
             {
-                LogError("å°è¯•æ³¨å†Œç©ºçš„ISaveableå¯¹è±¡");
+                LogError("³¢ÊÔ×¢²á¿ÕµÄISaveable¶ÔÏó");
                 return false;
             }
 
             string saveId = saveable.GetSaveID();
             if (string.IsNullOrEmpty(saveId))
             {
-                LogError($"ISaveableå¯¹è±¡çš„SaveIDä¸ºç©º: {saveable.GetType().Name}");
+                LogError($"ISaveable¶ÔÏóµÄSaveIDÎª¿Õ: {saveable.GetType().Name}");
                 return false;
             }
 
-            // æ£€æŸ¥æ˜¯å¦å·²ç»æ³¨å†Œ
+            // ¼ì²éÊÇ·ñÒÑ¾­×¢²á
             if (registeredObjects.ContainsKey(saveId))
             {
-                LogWarning($"SaveIDå·²å­˜åœ¨ï¼Œå°†è¦†ç›–æ³¨å†Œ: {saveId}");
+                LogWarning($"SaveIDÒÑ´æÔÚ£¬½«¸²¸Ç×¢²á: {saveId}");
             }
 
-            // æ³¨å†Œå¯¹è±¡
+            // ×¢²á¶ÔÏó
             registeredObjects[saveId] = saveable;
 
-            // åˆå§‹åŒ–ä¾èµ–å…³ç³»
+            // ³õÊ¼»¯ÒÀÀµ¹ØÏµ
             if (!dependencyGraph.ContainsKey(saveId))
             {
                 dependencyGraph[saveId] = new List<string>();
             }
 
-            LogMessage($"å·²æ³¨å†ŒISaveableå¯¹è±¡: {saveId}");
+            LogMessage($"ÒÑ×¢²áISaveable¶ÔÏó: {saveId}");
             OnObjectRegistered?.Invoke(saveable);
 
             return true;
         }
 
         /// <summary>
-        /// æ³¨é”€ISaveableå¯¹è±¡
+        /// ×¢ÏúISaveable¶ÔÏó
         /// </summary>
-        /// <param name="saveId">è¦æ³¨é”€çš„å¯¹è±¡SaveID</param>
-        /// <returns>æ³¨é”€æ˜¯å¦æˆåŠŸ</returns>
+        /// <param name="saveId">Òª×¢ÏúµÄ¶ÔÏóSaveID</param>
+        /// <returns>×¢ÏúÊÇ·ñ³É¹¦</returns>
         public bool UnregisterSaveable(string saveId)
         {
             if (string.IsNullOrEmpty(saveId))
@@ -224,19 +224,19 @@ namespace InventorySystem.SaveSystem
             bool removed = registeredObjects.Remove(saveId);
             if (removed)
             {
-                // æ¸…ç†ä¾èµ–å…³ç³»
+                // ÇåÀíÒÀÀµ¹ØÏµ
                 dependencyGraph.Remove(saveId);
 
-                // ä»å…¶ä»–å¯¹è±¡çš„ä¾èµ–åˆ—è¡¨ä¸­ç§»é™¤
+                // ´ÓÆäËû¶ÔÏóµÄÒÀÀµÁĞ±íÖĞÒÆ³ı
                 foreach (var deps in dependencyGraph.Values)
                 {
                     deps.Remove(saveId);
                 }
 
-                // æ¸…ç†å˜åŒ–è·Ÿè¸ª
+                // ÇåÀí±ä»¯¸ú×Ù
                 changedObjects.Remove(saveId);
 
-                LogMessage($"å·²æ³¨é”€ISaveableå¯¹è±¡: {saveId}");
+                LogMessage($"ÒÑ×¢ÏúISaveable¶ÔÏó: {saveId}");
                 OnObjectUnregistered?.Invoke(saveId);
             }
 
@@ -244,10 +244,10 @@ namespace InventorySystem.SaveSystem
         }
 
         /// <summary>
-        /// æ³¨é”€ISaveableå¯¹è±¡ï¼ˆé‡è½½æ–¹æ³•ï¼‰
+        /// ×¢ÏúISaveable¶ÔÏó£¨ÖØÔØ·½·¨£©
         /// </summary>
-        /// <param name="saveable">è¦æ³¨é”€çš„ISaveableå¯¹è±¡</param>
-        /// <returns>æ³¨é”€æ˜¯å¦æˆåŠŸ</returns>
+        /// <param name="saveable">Òª×¢ÏúµÄISaveable¶ÔÏó</param>
+        /// <returns>×¢ÏúÊÇ·ñ³É¹¦</returns>
         public bool UnregisterSaveable(ISaveable saveable)
         {
             if (saveable == null)
@@ -259,10 +259,10 @@ namespace InventorySystem.SaveSystem
         }
 
         /// <summary>
-        /// è·å–å·²æ³¨å†Œçš„ISaveableå¯¹è±¡
+        /// »ñÈ¡ÒÑ×¢²áµÄISaveable¶ÔÏó
         /// </summary>
-        /// <param name="saveId">å¯¹è±¡SaveID</param>
-        /// <returns>ISaveableå¯¹è±¡ï¼Œå¦‚æœä¸å­˜åœ¨åˆ™è¿”å›null</returns>
+        /// <param name="saveId">¶ÔÏóSaveID</param>
+        /// <returns>ISaveable¶ÔÏó£¬Èç¹û²»´æÔÚÔò·µ»Ønull</returns>
         public ISaveable GetRegisteredObject(string saveId)
         {
             registeredObjects.TryGetValue(saveId, out ISaveable obj);
@@ -270,21 +270,21 @@ namespace InventorySystem.SaveSystem
         }
 
         /// <summary>
-        /// è·å–æ‰€æœ‰å·²æ³¨å†Œå¯¹è±¡çš„SaveIDåˆ—è¡¨
+        /// »ñÈ¡ËùÓĞÒÑ×¢²á¶ÔÏóµÄSaveIDÁĞ±í
         /// </summary>
-        /// <returns>SaveIDåˆ—è¡¨</returns>
+        /// <returns>SaveIDÁĞ±í</returns>
         public List<string> GetAllRegisteredIds()
         {
             return new List<string>(registeredObjects.Keys);
         }
         #endregion
 
-        #region ä¾èµ–å…³ç³»ç®¡ç†
+        #region ÒÀÀµ¹ØÏµ¹ÜÀí
         /// <summary>
-        /// æ·»åŠ å¯¹è±¡ä¾èµ–å…³ç³»
+        /// Ìí¼Ó¶ÔÏóÒÀÀµ¹ØÏµ
         /// </summary>
-        /// <param name="objectId">ä¾èµ–è€…ID</param>
-        /// <param name="dependencyId">è¢«ä¾èµ–è€…ID</param>
+        /// <param name="objectId">ÒÀÀµÕßID</param>
+        /// <param name="dependencyId">±»ÒÀÀµÕßID</param>
         public void AddDependency(string objectId, string dependencyId)
         {
             if (!dependencyGraph.ContainsKey(objectId))
@@ -295,14 +295,14 @@ namespace InventorySystem.SaveSystem
             if (!dependencyGraph[objectId].Contains(dependencyId))
             {
                 dependencyGraph[objectId].Add(dependencyId);
-                LogMessage($"æ·»åŠ ä¾èµ–å…³ç³»: {objectId} -> {dependencyId}");
+                LogMessage($"Ìí¼ÓÒÀÀµ¹ØÏµ: {objectId} -> {dependencyId}");
             }
         }
 
         /// <summary>
-        /// è·å–æ‹“æ‰‘æ’åºåçš„ä¿å­˜é¡ºåº
+        /// »ñÈ¡ÍØÆËÅÅĞòºóµÄ±£´æË³Ğò
         /// </summary>
-        /// <returns>æŒ‰ä¾èµ–å…³ç³»æ’åºçš„SaveIDåˆ—è¡¨</returns>
+        /// <returns>°´ÒÀÀµ¹ØÏµÅÅĞòµÄSaveIDÁĞ±í</returns>
         private List<string> GetSaveOrder()
         {
             var result = new List<string>();
@@ -315,24 +315,24 @@ namespace InventorySystem.SaveSystem
                 {
                     if (!TopologicalSort(objectId, visited, visiting, result))
                     {
-                        LogError("æ£€æµ‹åˆ°å¾ªç¯ä¾èµ–ï¼Œä½¿ç”¨é»˜è®¤é¡ºåº");
+                        LogError("¼ì²âµ½Ñ­»·ÒÀÀµ£¬Ê¹ÓÃÄ¬ÈÏË³Ğò");
                         return new List<string>(registeredObjects.Keys);
                     }
                 }
             }
 
-            result.Reverse(); // åè½¬ä»¥è·å¾—æ­£ç¡®çš„ä¿å­˜é¡ºåº
+            result.Reverse(); // ·´×ªÒÔ»ñµÃÕıÈ·µÄ±£´æË³Ğò
             return result;
         }
 
         /// <summary>
-        /// æ‹“æ‰‘æ’åºè¾…åŠ©æ–¹æ³•
+        /// ÍØÆËÅÅĞò¸¨Öú·½·¨
         /// </summary>
         private bool TopologicalSort(string objectId, HashSet<string> visited, HashSet<string> visiting, List<string> result)
         {
             if (visiting.Contains(objectId))
             {
-                return false; // æ£€æµ‹åˆ°å¾ªç¯ä¾èµ–
+                return false; // ¼ì²âµ½Ñ­»·ÒÀÀµ
             }
 
             if (visited.Contains(objectId))
@@ -361,105 +361,105 @@ namespace InventorySystem.SaveSystem
         }
         #endregion
 
-        #region å˜åŒ–è·Ÿè¸ª
+        #region ±ä»¯¸ú×Ù
         /// <summary>
-        /// æ ‡è®°å¯¹è±¡å·²å‘ç”Ÿå˜åŒ–
+        /// ±ê¼Ç¶ÔÏóÒÑ·¢Éú±ä»¯
         /// </summary>
-        /// <param name="saveId">å¯¹è±¡SaveID</param>
+        /// <param name="saveId">¶ÔÏóSaveID</param>
         public void MarkObjectChanged(string saveId)
         {
             if (registeredObjects.ContainsKey(saveId))
             {
                 changedObjects.Add(saveId);
-                LogMessage($"å¯¹è±¡å·²æ ‡è®°ä¸ºå˜åŒ–: {saveId}");
+                LogMessage($"¶ÔÏóÒÑ±ê¼ÇÎª±ä»¯: {saveId}");
             }
         }
 
         /// <summary>
-        /// æ¸…é™¤å¯¹è±¡çš„å˜åŒ–æ ‡è®°
+        /// Çå³ı¶ÔÏóµÄ±ä»¯±ê¼Ç
         /// </summary>
-        /// <param name="saveId">å¯¹è±¡SaveID</param>
+        /// <param name="saveId">¶ÔÏóSaveID</param>
         public void ClearObjectChanged(string saveId)
         {
             changedObjects.Remove(saveId);
         }
 
         /// <summary>
-        /// æ£€æŸ¥å¯¹è±¡æ˜¯å¦å‘ç”Ÿå˜åŒ–
+        /// ¼ì²é¶ÔÏóÊÇ·ñ·¢Éú±ä»¯
         /// </summary>
-        /// <param name="saveId">å¯¹è±¡SaveID</param>
-        /// <returns>æ˜¯å¦å‘ç”Ÿå˜åŒ–</returns>
+        /// <param name="saveId">¶ÔÏóSaveID</param>
+        /// <returns>ÊÇ·ñ·¢Éú±ä»¯</returns>
         public bool IsObjectChanged(string saveId)
         {
             return changedObjects.Contains(saveId);
         }
 
         /// <summary>
-        /// è·å–æ‰€æœ‰å‘ç”Ÿå˜åŒ–çš„å¯¹è±¡ID
+        /// »ñÈ¡ËùÓĞ·¢Éú±ä»¯µÄ¶ÔÏóID
         /// </summary>
-        /// <returns>å˜åŒ–å¯¹è±¡IDåˆ—è¡¨</returns>
+        /// <returns>±ä»¯¶ÔÏóIDÁĞ±í</returns>
         public List<string> GetChangedObjects()
         {
             return new List<string>(changedObjects);
         }
         #endregion
 
-        #region ä¿å­˜æ“ä½œ
+        #region ±£´æ²Ù×÷
         /// <summary>
-        /// æ‰§è¡Œå…¨é‡ä¿å­˜æ“ä½œ
+        /// Ö´ĞĞÈ«Á¿±£´æ²Ù×÷
         /// </summary>
-        /// <param name="saveSlot">å­˜æ¡£æ§½ä½åç§°</param>
-        /// <returns>ä¿å­˜æ“ä½œçš„åç¨‹</returns>
+        /// <param name="saveSlot">´æµµ²ÛÎ»Ãû³Æ</param>
+        /// <returns>±£´æ²Ù×÷µÄĞ­³Ì</returns>
         public Coroutine SaveAll(string saveSlot)
         {
             return StartCoroutine(SaveAllCoroutine(saveSlot, false));
         }
 
         /// <summary>
-        /// ä¿å­˜æ¸¸æˆ - SaveAllæ–¹æ³•çš„åˆ«åï¼Œç”¨äºå…¼å®¹æ€§
+        /// ±£´æÓÎÏ· - SaveAll·½·¨µÄ±ğÃû£¬ÓÃÓÚ¼æÈİĞÔ
         /// </summary>
-        /// <param name="saveSlot">å­˜æ¡£æ§½ä½åç§°</param>
-        /// <returns>ä¿å­˜æ“ä½œçš„åç¨‹</returns>
+        /// <param name="saveSlot">´æµµ²ÛÎ»Ãû³Æ</param>
+        /// <returns>±£´æ²Ù×÷µÄĞ­³Ì</returns>
         public Coroutine SaveGame(string saveSlot)
         {
             return SaveAll(saveSlot);
         }
 
         /// <summary>
-        /// æ‰§è¡Œå¢é‡ä¿å­˜æ“ä½œï¼ˆåªä¿å­˜å˜åŒ–çš„å¯¹è±¡ï¼‰
+        /// Ö´ĞĞÔöÁ¿±£´æ²Ù×÷£¨Ö»±£´æ±ä»¯µÄ¶ÔÏó£©
         /// </summary>
-        /// <param name="saveSlot">å­˜æ¡£æ§½ä½åç§°</param>
-        /// <returns>ä¿å­˜æ“ä½œçš„åç¨‹</returns>
+        /// <param name="saveSlot">´æµµ²ÛÎ»Ãû³Æ</param>
+        /// <returns>±£´æ²Ù×÷µÄĞ­³Ì</returns>
         public Coroutine SaveIncremental(string saveSlot)
         {
             return StartCoroutine(SaveAllCoroutine(saveSlot, true));
         }
 
         /// <summary>
-        /// ä¿å­˜æ“ä½œåç¨‹
+        /// ±£´æ²Ù×÷Ğ­³Ì
         /// </summary>
         private IEnumerator SaveAllCoroutine(string saveSlot, bool incrementalOnly)
         {
             if (isSaving)
             {
-                LogWarning("ä¿å­˜æ“ä½œæ­£åœ¨è¿›è¡Œä¸­ï¼Œè·³è¿‡æ­¤æ¬¡ä¿å­˜");
+                LogWarning("±£´æ²Ù×÷ÕıÔÚ½øĞĞÖĞ£¬Ìø¹ı´Ë´Î±£´æ");
                 yield break;
             }
 
             isSaving = true;
             bool success = true;
 
-            LogMessage($"å¼€å§‹{(incrementalOnly ? "å¢é‡" : "å…¨é‡")}ä¿å­˜: {saveSlot}");
+            LogMessage($"¿ªÊ¼{(incrementalOnly ? "ÔöÁ¿" : "È«Á¿")}±£´æ: {saveSlot}");
             OnBeforeSave?.Invoke(saveSlot);
 
-            // è·å–è¦ä¿å­˜çš„å¯¹è±¡åˆ—è¡¨
+            // »ñÈ¡Òª±£´æµÄ¶ÔÏóÁĞ±í
             List<string> objectsToSave;
             if (incrementalOnly)
             {
                 objectsToSave = GetChangedObjects();
                 if (objectsToSave.Count == 0)
                 {
-                    LogMessage("æ²¡æœ‰å¯¹è±¡å‘ç”Ÿå˜åŒ–ï¼Œè·³è¿‡å¢é‡ä¿å­˜");
+                    LogMessage("Ã»ÓĞ¶ÔÏó·¢Éú±ä»¯£¬Ìø¹ıÔöÁ¿±£´æ");
                     OnSaveComplete?.Invoke(saveSlot, true);
                     isSaving = false;
                     yield break;
@@ -470,7 +470,7 @@ namespace InventorySystem.SaveSystem
                 objectsToSave = GetSaveOrder();
             }
 
-            // åˆ›å»ºä¿å­˜æ•°æ®å®¹å™¨
+            // ´´½¨±£´æÊı¾İÈİÆ÷
             var saveData = new SaveGameData
             {
                 saveVersion = "1.0.0",
@@ -479,43 +479,43 @@ namespace InventorySystem.SaveSystem
                 saveableObjects = new Dictionary<string, object>()
             };
 
-            // é€ä¸ªä¿å­˜å¯¹è±¡
+            // Öğ¸ö±£´æ¶ÔÏó
             for (int i = 0; i < objectsToSave.Count; i++)
             {
                 string objectId = objectsToSave[i];
 
                 if (registeredObjects.TryGetValue(objectId, out ISaveable saveable))
                 {
-                    // è·å–å¯¹è±¡ä¿å­˜æ•°æ® - ä½¿ç”¨SerializeToJsonæ–¹æ³•
+                    // »ñÈ¡¶ÔÏó±£´æÊı¾İ - Ê¹ÓÃSerializeToJson·½·¨
                     var objectData = saveable.SerializeToJson();
                     if (!string.IsNullOrEmpty(objectData))
                     {
                         saveData.saveableObjects[objectId] = objectData;
 
-                        // æ¸…é™¤å˜åŒ–æ ‡è®°
+                        // Çå³ı±ä»¯±ê¼Ç
                         ClearObjectChanged(objectId);
 
-                        LogMessage($"å·²ä¿å­˜å¯¹è±¡: {objectId}");
+                        LogMessage($"ÒÑ±£´æ¶ÔÏó: {objectId}");
                     }
                     else
                     {
-                        LogError($"ä¿å­˜å¯¹è±¡å¤±è´¥: {objectId}, åºåˆ—åŒ–è¿”å›ç©ºæ•°æ®");
+                        LogError($"±£´æ¶ÔÏóÊ§°Ü: {objectId}, ĞòÁĞ»¯·µ»Ø¿ÕÊı¾İ");
                         success = false;
                     }
                 }
 
-                // æŠ¥å‘Šè¿›åº¦
+                // ±¨¸æ½ø¶È
                 float progress = (float)(i + 1) / objectsToSave.Count;
                 OnSaveProgress?.Invoke(progress, objectId);
 
-                // æ¯å¤„ç†å‡ ä¸ªå¯¹è±¡åè®©å‡ºä¸€å¸§
+                // Ã¿´¦Àí¼¸¸ö¶ÔÏóºóÈÃ³öÒ»Ö¡
                 if (i % 5 == 0)
                 {
                     yield return null;
                 }
             }
 
-            // åºåˆ—åŒ–å¹¶å†™å…¥æ–‡ä»¶
+            // ĞòÁĞ»¯²¢Ğ´ÈëÎÄ¼ş
             if (success)
             {
                 string serializedData = serializer.SerializeToJson(saveData);
@@ -525,12 +525,12 @@ namespace InventorySystem.SaveSystem
                 }
                 else
                 {
-                    LogError("åºåˆ—åŒ–ä¿å­˜æ•°æ®å¤±è´¥");
+                    LogError("ĞòÁĞ»¯±£´æÊı¾İÊ§°Ü");
                     success = false;
                 }
             }
 
-            LogMessage($"ä¿å­˜æ“ä½œå®Œæˆ: {saveSlot}, æˆåŠŸ: {success}");
+            LogMessage($"±£´æ²Ù×÷Íê³É: {saveSlot}, ³É¹¦: {success}");
             isSaving = false;
             OnSaveComplete?.Invoke(saveSlot, success);
 
@@ -538,76 +538,76 @@ namespace InventorySystem.SaveSystem
         }
         #endregion
 
-        #region åŠ è½½æ“ä½œ
+        #region ¼ÓÔØ²Ù×÷
         /// <summary>
-        /// åŠ è½½æŒ‡å®šå­˜æ¡£
+        /// ¼ÓÔØÖ¸¶¨´æµµ
         /// </summary>
-        /// <param name="saveSlot">å­˜æ¡£æ§½ä½åç§°</param>
-        /// <returns>åŠ è½½æ“ä½œçš„åç¨‹</returns>
+        /// <param name="saveSlot">´æµµ²ÛÎ»Ãû³Æ</param>
+        /// <returns>¼ÓÔØ²Ù×÷µÄĞ­³Ì</returns>
         public Coroutine LoadSave(string saveSlot)
         {
             return StartCoroutine(LoadSaveCoroutine(saveSlot));
         }
 
         /// <summary>
-        /// åŠ è½½æ“ä½œåç¨‹
+        /// ¼ÓÔØ²Ù×÷Ğ­³Ì
         /// </summary>
         private IEnumerator LoadSaveCoroutine(string saveSlot)
         {
             if (isLoading)
             {
-                LogWarning("åŠ è½½æ“ä½œæ­£åœ¨è¿›è¡Œä¸­ï¼Œè·³è¿‡æ­¤æ¬¡åŠ è½½");
+                LogWarning("¼ÓÔØ²Ù×÷ÕıÔÚ½øĞĞÖĞ£¬Ìø¹ı´Ë´Î¼ÓÔØ");
                 yield break;
             }
 
             isLoading = true;
             bool success = true;
 
-            LogMessage($"å¼€å§‹åŠ è½½å­˜æ¡£: {saveSlot}");
+            LogMessage($"¿ªÊ¼¼ÓÔØ´æµµ: {saveSlot}");
             OnBeforeLoad?.Invoke(saveSlot);
 
-            // è¯»å–å­˜æ¡£æ–‡ä»¶
+            // ¶ÁÈ¡´æµµÎÄ¼ş
             string saveFileContent = fileManager.ReadSaveFile(saveSlot);
             if (string.IsNullOrEmpty(saveFileContent))
             {
-                LogError($"æ— æ³•è¯»å–å­˜æ¡£æ–‡ä»¶: {saveSlot}");
+                LogError($"ÎŞ·¨¶ÁÈ¡´æµµÎÄ¼ş: {saveSlot}");
                 success = false;
                 isLoading = false;
                 OnLoadComplete?.Invoke(saveSlot, success);
                 yield break;
             }
 
-            // ååºåˆ—åŒ–å­˜æ¡£æ•°æ®
+            // ·´ĞòÁĞ»¯´æµµÊı¾İ
             SaveGameData saveData = serializer.DeserializeFromJson<SaveGameData>(saveFileContent);
             if (saveData == null)
             {
-                LogError($"å­˜æ¡£æ•°æ®ååºåˆ—åŒ–å¤±è´¥: {saveSlot}");
+                LogError($"´æµµÊı¾İ·´ĞòÁĞ»¯Ê§°Ü: {saveSlot}");
                 success = false;
                 isLoading = false;
                 OnLoadComplete?.Invoke(saveSlot, success);
                 yield break;
             }
 
-            LogMessage($"å­˜æ¡£ç‰ˆæœ¬: {saveData.saveVersion}, æ¸¸æˆç‰ˆæœ¬: {saveData.gameVersion}");
+            LogMessage($"´æµµ°æ±¾: {saveData.saveVersion}, ÓÎÏ·°æ±¾: {saveData.gameVersion}");
 
-            // è·å–åŠ è½½é¡ºåºï¼ˆä¸ä¿å­˜é¡ºåºç›¸åï¼‰
+            // »ñÈ¡¼ÓÔØË³Ğò£¨Óë±£´æË³ĞòÏà·´£©
             var loadOrder = GetSaveOrder();
             loadOrder.Reverse();
 
-            // é€ä¸ªåŠ è½½å¯¹è±¡
+            // Öğ¸ö¼ÓÔØ¶ÔÏó
             int processedCount = 0;
             foreach (string objectId in loadOrder)
             {
                 if (saveData.saveableObjects.ContainsKey(objectId) &&
                     registeredObjects.TryGetValue(objectId, out ISaveable saveable))
                 {
-                    // åŠ è½½å¯¹è±¡æ•°æ® - ä½¿ç”¨DeserializeFromJsonæ–¹æ³•
+                    // ¼ÓÔØ¶ÔÏóÊı¾İ - Ê¹ÓÃDeserializeFromJson·½·¨
                     var objectData = saveData.saveableObjects[objectId];
                     if (objectData is string jsonData)
                     {
                         if (!string.IsNullOrEmpty(jsonData))
                         {
-                            // å®‰å…¨åœ°ååºåˆ—åŒ–æ•°æ®
+                            // °²È«µØ·´ĞòÁĞ»¯Êı¾İ
                             if (!TryDeserializeObject(saveable, jsonData, objectId))
                             {
                                 success = false;
@@ -615,62 +615,62 @@ namespace InventorySystem.SaveSystem
                         }
                         else
                         {
-                            LogError($"å¯¹è±¡æ•°æ®ä¸ºç©º: {objectId}");
+                            LogError($"¶ÔÏóÊı¾İÎª¿Õ: {objectId}");
                             success = false;
                         }
                     }
                     else
                     {
-                        LogError($"å¯¹è±¡æ•°æ®æ ¼å¼é”™è¯¯: {objectId}");
+                        LogError($"¶ÔÏóÊı¾İ¸ñÊ½´íÎó: {objectId}");
                         success = false;
                     }
                 }
 
                 processedCount++;
 
-                // æŠ¥å‘Šè¿›åº¦
+                // ±¨¸æ½ø¶È
                 float progress = (float)processedCount / loadOrder.Count;
                 OnLoadProgress?.Invoke(progress, objectId);
 
-                // æ¯å¤„ç†å‡ ä¸ªå¯¹è±¡åè®©å‡ºä¸€å¸§
+                // Ã¿´¦Àí¼¸¸ö¶ÔÏóºóÈÃ³öÒ»Ö¡
                 if (processedCount % 5 == 0)
                 {
                     yield return null;
                 }
             }
 
-            // æ¸…é™¤æ‰€æœ‰å˜åŒ–æ ‡è®°
+            // Çå³ıËùÓĞ±ä»¯±ê¼Ç
             changedObjects.Clear();
 
-            LogMessage($"åŠ è½½æ“ä½œå®Œæˆ: {saveSlot}, æˆåŠŸ: {success}");
+            LogMessage($"¼ÓÔØ²Ù×÷Íê³É: {saveSlot}, ³É¹¦: {success}");
 
-            // å®ŒæˆåŠ è½½æ“ä½œ
+            // Íê³É¼ÓÔØ²Ù×÷
             isLoading = false;
             OnLoadComplete?.Invoke(saveSlot, success);
         }
 
         /// <summary>
-        /// å®‰å…¨åœ°ååºåˆ—åŒ–å¯¹è±¡æ•°æ®
+        /// °²È«µØ·´ĞòÁĞ»¯¶ÔÏóÊı¾İ
         /// </summary>
         private bool TryDeserializeObject(ISaveable saveable, string jsonData, string objectId)
         {
             try
             {
                 saveable.DeserializeFromJson(jsonData);
-                LogMessage($"å·²åŠ è½½å¯¹è±¡: {objectId}");
+                LogMessage($"ÒÑ¼ÓÔØ¶ÔÏó: {objectId}");
                 return true;
             }
             catch (Exception ex)
             {
-                LogError($"åŠ è½½å¯¹è±¡å¤±è´¥: {objectId}, é”™è¯¯: {ex.Message}");
+                LogError($"¼ÓÔØ¶ÔÏóÊ§°Ü: {objectId}, ´íÎó: {ex.Message}");
                 return false;
             }
         }
         #endregion
 
-        #region è‡ªåŠ¨ä¿å­˜
+        #region ×Ô¶¯±£´æ
         /// <summary>
-        /// å¯åŠ¨è‡ªåŠ¨ä¿å­˜
+        /// Æô¶¯×Ô¶¯±£´æ
         /// </summary>
         public void StartAutoSave()
         {
@@ -680,11 +680,11 @@ namespace InventorySystem.SaveSystem
             }
 
             autoSaveCoroutine = StartCoroutine(AutoSaveCoroutine());
-            LogMessage($"è‡ªåŠ¨ä¿å­˜å·²å¯åŠ¨ï¼Œé—´éš”: {autoSaveInterval}ç§’");
+            LogMessage($"×Ô¶¯±£´æÒÑÆô¶¯£¬¼ä¸ô: {autoSaveInterval}Ãë");
         }
 
         /// <summary>
-        /// åœæ­¢è‡ªåŠ¨ä¿å­˜
+        /// Í£Ö¹×Ô¶¯±£´æ
         /// </summary>
         public void StopAutoSave()
         {
@@ -692,12 +692,12 @@ namespace InventorySystem.SaveSystem
             {
                 StopCoroutine(autoSaveCoroutine);
                 autoSaveCoroutine = null;
-                LogMessage("è‡ªåŠ¨ä¿å­˜å·²åœæ­¢");
+                LogMessage("×Ô¶¯±£´æÒÑÍ£Ö¹");
             }
         }
 
         /// <summary>
-        /// è‡ªåŠ¨ä¿å­˜åç¨‹
+        /// ×Ô¶¯±£´æĞ­³Ì
         /// </summary>
         private IEnumerator AutoSaveCoroutine()
         {
@@ -705,21 +705,21 @@ namespace InventorySystem.SaveSystem
             {
                 yield return new WaitForSeconds(autoSaveInterval);
 
-                // åªæœ‰åœ¨æœ‰å˜åŒ–æ—¶æ‰æ‰§è¡Œè‡ªåŠ¨ä¿å­˜
+                // Ö»ÓĞÔÚÓĞ±ä»¯Ê±²ÅÖ´ĞĞ×Ô¶¯±£´æ
                 if (changedObjects.Count > 0 && !isSaving && !isLoading)
                 {
-                    LogMessage("æ‰§è¡Œè‡ªåŠ¨ä¿å­˜");
+                    LogMessage("Ö´ĞĞ×Ô¶¯±£´æ");
                     yield return SaveIncremental("AutoSave");
                 }
             }
         }
         #endregion
 
-        #region æ•°æ®æ”¶é›†å’Œåº”ç”¨
+        #region Êı¾İÊÕ¼¯ºÍÓ¦ÓÃ
         /// <summary>
-        /// æ”¶é›†æ‰€æœ‰ISaveableå¯¹è±¡çš„ä¿å­˜æ•°æ®
+        /// ÊÕ¼¯ËùÓĞISaveable¶ÔÏóµÄ±£´æÊı¾İ
         /// </summary>
-        /// <returns>ä¿å­˜æ¸¸æˆæ•°æ®</returns>
+        /// <returns>±£´æÓÎÏ·Êı¾İ</returns>
         private SaveGameData CollectSaveData()
         {
             var saveGameData = new SaveGameData
@@ -730,7 +730,7 @@ namespace InventorySystem.SaveSystem
                 saveableObjects = new Dictionary<string, object>()
             };
 
-            // æŒ‰ä¾èµ–é¡ºåºæ”¶é›†æ•°æ®
+            // °´ÒÀÀµË³ĞòÊÕ¼¯Êı¾İ
             var sortedObjects = GetSortedSaveableObjects();
 
             foreach (var saveable in sortedObjects)
@@ -741,40 +741,40 @@ namespace InventorySystem.SaveSystem
                     if (saveData != null)
                     {
                         saveGameData.saveableObjects[saveable.GetSaveID()] = saveData;
-                        LogMessage($"æ”¶é›†ä¿å­˜æ•°æ®: {saveable.GetSaveID()}");
+                        LogMessage($"ÊÕ¼¯±£´æÊı¾İ: {saveable.GetSaveID()}");
                     }
                     else
                     {
-                        LogWarning($"å¯¹è±¡è¿”å›ç©ºä¿å­˜æ•°æ®: {saveable.GetSaveID()}");
+                        LogWarning($"¶ÔÏó·µ»Ø¿Õ±£´æÊı¾İ: {saveable.GetSaveID()}");
                     }
                 }
                 catch (System.Exception ex)
                 {
-                    LogError($"æ”¶é›†ä¿å­˜æ•°æ®å¤±è´¥: {saveable.GetSaveID()}, é”™è¯¯: {ex.Message}");
+                    LogError($"ÊÕ¼¯±£´æÊı¾İÊ§°Ü: {saveable.GetSaveID()}, ´íÎó: {ex.Message}");
                 }
             }
 
-            LogMessage($"æ•°æ®æ”¶é›†å®Œæˆï¼Œå…±{saveGameData.saveableObjects.Count}ä¸ªå¯¹è±¡");
+            LogMessage($"Êı¾İÊÕ¼¯Íê³É£¬¹²{saveGameData.saveableObjects.Count}¸ö¶ÔÏó");
             return saveGameData;
         }
 
         /// <summary>
-        /// åº”ç”¨ä¿å­˜æ•°æ®åˆ°ISaveableå¯¹è±¡
+        /// Ó¦ÓÃ±£´æÊı¾İµ½ISaveable¶ÔÏó
         /// </summary>
-        /// <param name="saveGameData">ä¿å­˜æ¸¸æˆæ•°æ®</param>
-        /// <returns>æ˜¯å¦åº”ç”¨æˆåŠŸ</returns>
+        /// <param name="saveGameData">±£´æÓÎÏ·Êı¾İ</param>
+        /// <returns>ÊÇ·ñÓ¦ÓÃ³É¹¦</returns>
         private bool ApplySaveData(SaveGameData saveGameData)
         {
             if (saveGameData?.saveableObjects == null)
             {
-                LogError("ä¿å­˜æ•°æ®ä¸ºç©ºæˆ–æ— æ•ˆ");
+                LogError("±£´æÊı¾İÎª¿Õ»òÎŞĞ§");
                 return false;
             }
 
             int successCount = 0;
             int totalCount = 0;
 
-            // æŒ‰ä¾èµ–é¡ºåºåº”ç”¨æ•°æ®
+            // °´ÒÀÀµË³ĞòÓ¦ÓÃÊı¾İ
             var sortedObjects = GetSortedSaveableObjects();
 
             foreach (var saveable in sortedObjects)
@@ -792,35 +792,35 @@ namespace InventorySystem.SaveSystem
                         }
                         else
                         {
-                            LogError($"ä¿å­˜æ•°æ®æ ¼å¼é”™è¯¯: {saveId}");
+                            LogError($"±£´æÊı¾İ¸ñÊ½´íÎó: {saveId}");
                             continue;
                         }
                         successCount++;
 
-                        LogMessage($"åº”ç”¨ä¿å­˜æ•°æ®: {saveId}");
+                        LogMessage($"Ó¦ÓÃ±£´æÊı¾İ: {saveId}");
                     }
                     else
                     {
-                        LogWarning($"æœªæ‰¾åˆ°ä¿å­˜æ•°æ®: {saveId}");
+                        LogWarning($"Î´ÕÒµ½±£´æÊı¾İ: {saveId}");
                     }
                 }
                 catch (System.Exception ex)
                 {
-                    LogError($"åº”ç”¨ä¿å­˜æ•°æ®å¤±è´¥: {saveable.GetSaveID()}, é”™è¯¯: {ex.Message}");
+                    LogError($"Ó¦ÓÃ±£´æÊı¾İÊ§°Ü: {saveable.GetSaveID()}, ´íÎó: {ex.Message}");
                 }
             }
 
-            LogMessage($"æ•°æ®åº”ç”¨å®Œæˆ: {successCount}/{totalCount} æˆåŠŸ");
-            return successCount > 0; // åªè¦æœ‰ä¸€ä¸ªæˆåŠŸå°±è®¤ä¸ºåº”ç”¨æˆåŠŸ
+            LogMessage($"Êı¾İÓ¦ÓÃÍê³É: {successCount}/{totalCount} ³É¹¦");
+            return successCount > 0; // Ö»ÒªÓĞÒ»¸ö³É¹¦¾ÍÈÏÎªÓ¦ÓÃ³É¹¦
         }
 
         /// <summary>
-        /// è·å–æŒ‰ä¾èµ–å…³ç³»æ’åºçš„ISaveableå¯¹è±¡åˆ—è¡¨
+        /// »ñÈ¡°´ÒÀÀµ¹ØÏµÅÅĞòµÄISaveable¶ÔÏóÁĞ±í
         /// </summary>
-        /// <returns>æ’åºåçš„å¯¹è±¡åˆ—è¡¨</returns>
+        /// <returns>ÅÅĞòºóµÄ¶ÔÏóÁĞ±í</returns>
         private List<ISaveable> GetSortedSaveableObjects()
         {
-            // ä½¿ç”¨æ‹“æ‰‘æ’åºç¡®ä¿ä¾èµ–å…³ç³»æ­£ç¡®
+            // Ê¹ÓÃÍØÆËÅÅĞòÈ·±£ÒÀÀµ¹ØÏµÕıÈ·
             var sorted = new List<ISaveable>();
             var visited = new HashSet<ISaveable>();
             var visiting = new HashSet<ISaveable>();
@@ -833,18 +833,18 @@ namespace InventorySystem.SaveSystem
                 }
             }
 
-            LogMessage($"å¯¹è±¡æ’åºå®Œæˆï¼Œå…±{sorted.Count}ä¸ªå¯¹è±¡");
+            LogMessage($"¶ÔÏóÅÅĞòÍê³É£¬¹²{sorted.Count}¸ö¶ÔÏó");
             return sorted;
         }
 
         /// <summary>
-        /// æ‹“æ‰‘æ’åºè¾…åŠ©æ–¹æ³•
+        /// ÍØÆËÅÅĞò¸¨Öú·½·¨
         /// </summary>
         private void TopologicalSort(ISaveable obj, HashSet<ISaveable> visited, HashSet<ISaveable> visiting, List<ISaveable> sorted)
         {
             if (visiting.Contains(obj))
             {
-                LogWarning($"æ£€æµ‹åˆ°å¾ªç¯ä¾èµ–: {obj.GetSaveID()}");
+                LogWarning($"¼ì²âµ½Ñ­»·ÒÀÀµ: {obj.GetSaveID()}");
                 return;
             }
 
@@ -855,12 +855,12 @@ namespace InventorySystem.SaveSystem
 
             visiting.Add(obj);
 
-            // å¤„ç†ä¾èµ–å…³ç³»
-            // åŸºç¡€è§„åˆ™ï¼šå…ˆä¿å­˜/åŠ è½½åŸºç¡€ç»„ä»¶ï¼Œå†ä¿å­˜/åŠ è½½ä¾èµ–ç»„ä»¶
-            // 1. ItemDataHolder (åŸºç¡€æ•°æ®)
-            // 2. BaseItemGrid (ç½‘æ ¼ç³»ç»Ÿ)
-            // 3. BaseItemSpawn (ç”Ÿæˆå™¨)
-            // 4. å…¶ä»–ç»„ä»¶
+            // ´¦ÀíÒÀÀµ¹ØÏµ
+            // »ù´¡¹æÔò£ºÏÈ±£´æ/¼ÓÔØ»ù´¡×é¼ş£¬ÔÙ±£´æ/¼ÓÔØÒÀÀµ×é¼ş
+            // 1. ItemDataHolder (»ù´¡Êı¾İ)
+            // 2. BaseItemGrid (Íø¸ñÏµÍ³)
+            // 3. BaseItemSpawn (Éú³ÉÆ÷)
+            // 4. ÆäËû×é¼ş
 
             visiting.Remove(obj);
             visited.Add(obj);
@@ -868,7 +868,7 @@ namespace InventorySystem.SaveSystem
         }
 
         /// <summary>
-        /// è‡ªåŠ¨å‘ç°åœºæ™¯ä¸­çš„ISaveableå¯¹è±¡
+        /// ×Ô¶¯·¢ÏÖ³¡¾°ÖĞµÄISaveable¶ÔÏó
         /// </summary>
         public void AutoDiscoverSaveableObjects()
         {
@@ -883,29 +883,29 @@ namespace InventorySystem.SaveSystem
                 }
             }
 
-            LogMessage($"è‡ªåŠ¨å‘ç°å®Œæˆï¼Œæ–°æ³¨å†Œ{discoveredCount}ä¸ªå¯¹è±¡");
+            LogMessage($"×Ô¶¯·¢ÏÖÍê³É£¬ĞÂ×¢²á{discoveredCount}¸ö¶ÔÏó");
         }
         #endregion
 
-        #region å®ç”¨æ–¹æ³•
+        #region ÊµÓÃ·½·¨
         /// <summary>
-        /// è·å–ä¿å­˜ç³»ç»ŸçŠ¶æ€ä¿¡æ¯
+        /// »ñÈ¡±£´æÏµÍ³×´Ì¬ĞÅÏ¢
         /// </summary>
-        /// <returns>çŠ¶æ€ä¿¡æ¯å­—ç¬¦ä¸²</returns>
+        /// <returns>×´Ì¬ĞÅÏ¢×Ö·û´®</returns>
         public string GetSystemStatus()
         {
-            return $"æ³¨å†Œå¯¹è±¡æ•°: {registeredObjects.Count}, " +
-                   $"å˜åŒ–å¯¹è±¡æ•°: {changedObjects.Count}, " +
-                   $"æ­£åœ¨ä¿å­˜: {isSaving}, " +
-                   $"æ­£åœ¨åŠ è½½: {isLoading}, " +
-                   $"è‡ªåŠ¨ä¿å­˜: {autoSaveEnabled}";
+            return $"×¢²á¶ÔÏóÊı: {registeredObjects.Count}, " +
+                   $"±ä»¯¶ÔÏóÊı: {changedObjects.Count}, " +
+                   $"ÕıÔÚ±£´æ: {isSaving}, " +
+                   $"ÕıÔÚ¼ÓÔØ: {isLoading}, " +
+                   $"×Ô¶¯±£´æ: {autoSaveEnabled}";
         }
 
         /// <summary>
-        /// éªŒè¯å­˜æ¡£æ–‡ä»¶
+        /// ÑéÖ¤´æµµÎÄ¼ş
         /// </summary>
-        /// <param name="saveSlot">å­˜æ¡£æ§½ä½åç§°</param>
-        /// <returns>éªŒè¯æ˜¯å¦æˆåŠŸ</returns>
+        /// <param name="saveSlot">´æµµ²ÛÎ»Ãû³Æ</param>
+        /// <returns>ÑéÖ¤ÊÇ·ñ³É¹¦</returns>
         public bool ValidateSave(string saveSlot)
         {
             try
@@ -926,10 +926,10 @@ namespace InventorySystem.SaveSystem
         }
 
         /// <summary>
-        /// è·å–å­˜æ¡£ä¿¡æ¯
+        /// »ñÈ¡´æµµĞÅÏ¢
         /// </summary>
-        /// <param name="saveSlot">å­˜æ¡£æ§½ä½åç§°</param>
-        /// <returns>å­˜æ¡£ä¿¡æ¯ï¼Œå¤±è´¥è¿”å›null</returns>
+        /// <param name="saveSlot">´æµµ²ÛÎ»Ãû³Æ</param>
+        /// <returns>´æµµĞÅÏ¢£¬Ê§°Ü·µ»Ønull</returns>
         public SaveGameInfo GetSaveInfo(string saveSlot)
         {
             try
@@ -962,10 +962,10 @@ namespace InventorySystem.SaveSystem
         }
 
         /// <summary>
-        /// åˆ é™¤å­˜æ¡£
+        /// É¾³ı´æµµ
         /// </summary>
-        /// <param name="saveSlot">å­˜æ¡£æ§½ä½åç§°</param>
-        /// <returns>åˆ é™¤æ˜¯å¦æˆåŠŸ</returns>
+        /// <param name="saveSlot">´æµµ²ÛÎ»Ãû³Æ</param>
+        /// <returns>É¾³ıÊÇ·ñ³É¹¦</returns>
         public bool DeleteSave(string saveSlot)
         {
             try
@@ -974,13 +974,13 @@ namespace InventorySystem.SaveSystem
             }
             catch (Exception ex)
             {
-                LogError($"åˆ é™¤å­˜æ¡£å¤±è´¥: {saveSlot}, é”™è¯¯: {ex.Message}");
+                LogError($"É¾³ı´æµµÊ§°Ü: {saveSlot}, ´íÎó: {ex.Message}");
                 return false;
             }
         }
 
         /// <summary>
-        /// æ£€æŸ¥å¯¹è±¡æ˜¯å¦å·²æ³¨å†Œ
+        /// ¼ì²é¶ÔÏóÊÇ·ñÒÑ×¢²á
         /// </summary>
         public bool IsObjectRegistered(ISaveable saveableObject)
         {
@@ -989,10 +989,10 @@ namespace InventorySystem.SaveSystem
         }
 
         /// <summary>
-        /// æ£€æŸ¥æ˜¯å¦å­˜åœ¨æŒ‡å®šIDçš„ä¿å­˜æ•°æ®
+        /// ¼ì²éÊÇ·ñ´æÔÚÖ¸¶¨IDµÄ±£´æÊı¾İ
         /// </summary>
-        /// <param name="saveId">ä¿å­˜ID</param>
-        /// <returns>æ˜¯å¦å­˜åœ¨ä¿å­˜æ•°æ®</returns>
+        /// <param name="saveId">±£´æID</param>
+        /// <returns>ÊÇ·ñ´æÔÚ±£´æÊı¾İ</returns>
         public bool HasSaveData(string saveId)
         {
             if (string.IsNullOrEmpty(saveId))
@@ -1000,13 +1000,13 @@ namespace InventorySystem.SaveSystem
                 return false;
             }
 
-            // æ£€æŸ¥å½“å‰å†…å­˜ä¸­æ˜¯å¦æœ‰è¯¥å¯¹è±¡çš„æ•°æ®
+            // ¼ì²éµ±Ç°ÄÚ´æÖĞÊÇ·ñÓĞ¸Ã¶ÔÏóµÄÊı¾İ
             if (registeredObjects.ContainsKey(saveId))
             {
                 return true;
             }
 
-            // å°è¯•ä»æœ€è¿‘çš„ä¿å­˜æ–‡ä»¶ä¸­æŸ¥æ‰¾æ•°æ®
+            // ³¢ÊÔ´Ó×î½üµÄ±£´æÎÄ¼şÖĞ²éÕÒÊı¾İ
             try
             {
                 var saveFileManager = GetComponent<SaveFileManager>();
@@ -1021,17 +1021,17 @@ namespace InventorySystem.SaveSystem
             }
             catch (System.Exception ex)
             {
-                LogError($"æ£€æŸ¥ä¿å­˜æ•°æ®æ—¶å‘ç”Ÿé”™è¯¯: {ex.Message}");
+                LogError($"¼ì²é±£´æÊı¾İÊ±·¢Éú´íÎó: {ex.Message}");
             }
 
             return false;
         }
 
         /// <summary>
-        /// åŠ è½½æŒ‡å®šIDçš„ä¿å­˜æ•°æ®
+        /// ¼ÓÔØÖ¸¶¨IDµÄ±£´æÊı¾İ
         /// </summary>
-        /// <param name="saveId">ä¿å­˜ID</param>
-        /// <returns>ä¿å­˜æ•°æ®çš„JSONå­—ç¬¦ä¸²ï¼Œå¦‚æœä¸å­˜åœ¨åˆ™è¿”å›null</returns>
+        /// <param name="saveId">±£´æID</param>
+        /// <returns>±£´æÊı¾İµÄJSON×Ö·û´®£¬Èç¹û²»´æÔÚÔò·µ»Ønull</returns>
         public string LoadSaveData(string saveId)
         {
             if (string.IsNullOrEmpty(saveId))
@@ -1050,7 +1050,7 @@ namespace InventorySystem.SaveSystem
                         var data = saveGameData.saveableObjects[saveId];
                         if (data is string jsonData)
                         {
-                            LogMessage($"æˆåŠŸåŠ è½½ä¿å­˜æ•°æ®: {saveId}");
+                            LogMessage($"³É¹¦¼ÓÔØ±£´æÊı¾İ: {saveId}");
                             return jsonData;
                         }
                     }
@@ -1058,20 +1058,20 @@ namespace InventorySystem.SaveSystem
             }
             catch (System.Exception ex)
             {
-                LogError($"åŠ è½½ä¿å­˜æ•°æ®æ—¶å‘ç”Ÿé”™è¯¯: {saveId}, é”™è¯¯: {ex.Message}");
+                LogError($"¼ÓÔØ±£´æÊı¾İÊ±·¢Éú´íÎó: {saveId}, ´íÎó: {ex.Message}");
             }
 
-            LogWarning($"æœªæ‰¾åˆ°ä¿å­˜æ•°æ®: {saveId}");
+            LogWarning($"Î´ÕÒµ½±£´æÊı¾İ: {saveId}");
             return null;
         }
 
         /// <summary>
-        /// è·å–å·²æ³¨å†Œå¯¹è±¡æ•°é‡
+        /// »ñÈ¡ÒÑ×¢²á¶ÔÏóÊıÁ¿
         /// </summary>
         public int RegisteredObjectCount => registeredObjects.Count;
 
         /// <summary>
-        /// è®¾ç½®è‡ªåŠ¨ä¿å­˜å¯ç”¨çŠ¶æ€
+        /// ÉèÖÃ×Ô¶¯±£´æÆôÓÃ×´Ì¬
         /// </summary>
         public void SetAutoSaveEnabled(bool enabled)
         {
@@ -1084,61 +1084,61 @@ namespace InventorySystem.SaveSystem
             {
                 StopAutoSave();
             }
-            LogMessage($"è‡ªåŠ¨ä¿å­˜å·²{(enabled ? "å¯ç”¨" : "ç¦ç”¨")}");
+            LogMessage($"×Ô¶¯±£´æÒÑ{(enabled ? "ÆôÓÃ" : "½ûÓÃ")}");
         }
 
         /// <summary>
-        /// è®¾ç½®è‡ªåŠ¨ä¿å­˜é—´éš”
+        /// ÉèÖÃ×Ô¶¯±£´æ¼ä¸ô
         /// </summary>
         public void SetAutoSaveInterval(float interval)
         {
             if (interval < 30f)
             {
-                LogWarning("è‡ªåŠ¨ä¿å­˜é—´éš”ä¸èƒ½å°äº30ç§’ï¼Œå·²è®¾ç½®ä¸º30ç§’");
+                LogWarning("×Ô¶¯±£´æ¼ä¸ô²»ÄÜĞ¡ÓÚ30Ãë£¬ÒÑÉèÖÃÎª30Ãë");
                 interval = 30f;
             }
 
             autoSaveInterval = interval;
 
-            // å¦‚æœè‡ªåŠ¨ä¿å­˜æ­£åœ¨è¿è¡Œï¼Œé‡æ–°å¯åŠ¨ä»¥åº”ç”¨æ–°é—´éš”
+            // Èç¹û×Ô¶¯±£´æÕıÔÚÔËĞĞ£¬ÖØĞÂÆô¶¯ÒÔÓ¦ÓÃĞÂ¼ä¸ô
             if (autoSaveEnabled && autoSaveCoroutine != null)
             {
                 StartAutoSave();
             }
 
-            LogMessage($"è‡ªåŠ¨ä¿å­˜é—´éš”å·²è®¾ç½®ä¸º: {interval}ç§’");
+            LogMessage($"×Ô¶¯±£´æ¼ä¸ôÒÑÉèÖÃÎª: {interval}Ãë");
         }
 
         /// <summary>
-        /// è·å–è‡ªåŠ¨ä¿å­˜çŠ¶æ€
+        /// »ñÈ¡×Ô¶¯±£´æ×´Ì¬
         /// </summary>
         public bool IsAutoSaveEnabled => autoSaveEnabled;
 
         /// <summary>
-        /// è·å–è‡ªåŠ¨ä¿å­˜é—´éš”
+        /// »ñÈ¡×Ô¶¯±£´æ¼ä¸ô
         /// </summary>
         public float AutoSaveInterval => autoSaveInterval;
 
         /// <summary>
-        /// å¿«é€Ÿä¿å­˜ - ä½¿ç”¨é»˜è®¤å­˜æ¡£æ§½ä½
+        /// ¿ìËÙ±£´æ - Ê¹ÓÃÄ¬ÈÏ´æµµ²ÛÎ»
         /// </summary>
         public void QuickSave()
         {
             SaveAll("quicksave");
-            LogMessage("å¿«é€Ÿä¿å­˜å·²æ‰§è¡Œ");
+            LogMessage("¿ìËÙ±£´æÒÑÖ´ĞĞ");
         }
 
         /// <summary>
-        /// å¿«é€ŸåŠ è½½ - ä½¿ç”¨é»˜è®¤å­˜æ¡£æ§½ä½
+        /// ¿ìËÙ¼ÓÔØ - Ê¹ÓÃÄ¬ÈÏ´æµµ²ÛÎ»
         /// </summary>
         public void QuickLoad()
         {
             LoadSave("quicksave");
-            LogMessage("å¿«é€ŸåŠ è½½å·²æ‰§è¡Œ");
+            LogMessage("¿ìËÙ¼ÓÔØÒÑÖ´ĞĞ");
         }
 
         /// <summary>
-        /// è®°å½•æ—¥å¿—æ¶ˆæ¯
+        /// ¼ÇÂ¼ÈÕÖ¾ÏûÏ¢
         /// </summary>
         private void LogMessage(string message)
         {
@@ -1149,7 +1149,7 @@ namespace InventorySystem.SaveSystem
         }
 
         /// <summary>
-        /// è®°å½•è­¦å‘Šæ¶ˆæ¯
+        /// ¼ÇÂ¼¾¯¸æÏûÏ¢
         /// </summary>
         private void LogWarning(string message)
         {
@@ -1160,7 +1160,7 @@ namespace InventorySystem.SaveSystem
         }
 
         /// <summary>
-        /// è®°å½•é”™è¯¯æ¶ˆæ¯
+        /// ¼ÇÂ¼´íÎóÏûÏ¢
         /// </summary>
         private void LogError(string message)
         {
@@ -1173,27 +1173,27 @@ namespace InventorySystem.SaveSystem
     }
 
     /// <summary>
-    /// å­˜æ¡£æ¸¸æˆæ•°æ®ç»“æ„
+    /// ´æµµÓÎÏ·Êı¾İ½á¹¹
     /// </summary>
     [Serializable]
     public class SaveGameData
     {
-        public string saveVersion;           // å­˜æ¡£ç‰ˆæœ¬
-        public string gameVersion;           // æ¸¸æˆç‰ˆæœ¬
-        public string timestamp;             // æ—¶é—´æˆ³
-        public Dictionary<string, object> saveableObjects; // å¯ä¿å­˜å¯¹è±¡æ•°æ®
+        public string saveVersion;           // ´æµµ°æ±¾
+        public string gameVersion;           // ÓÎÏ·°æ±¾
+        public string timestamp;             // Ê±¼ä´Á
+        public Dictionary<string, object> saveableObjects; // ¿É±£´æ¶ÔÏóÊı¾İ
     }
 
     /// <summary>
-    /// å­˜æ¡£ä¿¡æ¯ç»“æ„
+    /// ´æµµĞÅÏ¢½á¹¹
     /// </summary>
     [Serializable]
     public class SaveGameInfo
     {
-        public string saveSlot;              // å­˜æ¡£æ§½ä½
-        public string saveVersion;          // å­˜æ¡£ç‰ˆæœ¬
-        public string gameVersion;          // æ¸¸æˆç‰ˆæœ¬
-        public string timestamp;            // æ—¶é—´æˆ³
-        public int objectCount;             // å¯¹è±¡æ•°é‡
+        public string saveSlot;              // ´æµµ²ÛÎ»
+        public string saveVersion;          // ´æµµ°æ±¾
+        public string gameVersion;          // ÓÎÏ·°æ±¾
+        public string timestamp;            // Ê±¼ä´Á
+        public int objectCount;             // ¶ÔÏóÊıÁ¿
     }
 }

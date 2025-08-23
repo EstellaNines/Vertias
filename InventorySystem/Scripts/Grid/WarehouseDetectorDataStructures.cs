@@ -6,45 +6,45 @@ using UnityEngine;
 namespace InventorySystem.Grid
 {
     /// <summary>
-    /// ä»“åº“æ•ˆç‡åˆ†æä¿¡æ¯æ•°æ®ç»“æ„
-    /// ç”¨äºåˆ†æä»“åº“ç½‘æ ¼çš„å­˜å‚¨æ•ˆç‡å’Œä¼˜åŒ–å»ºè®®
+    /// ²Ö¿âĞ§ÂÊ·ÖÎöĞÅÏ¢Êı¾İ½á¹¹
+    /// ÓÃÓÚ·ÖÎö²Ö¿âÍø¸ñµÄ´æ´¢Ğ§ÂÊºÍÓÅ»¯½¨Òé
     /// </summary>
     [System.Serializable]
     public class WarehouseEfficiencyInfo
     {
-        [Header("åŸºæœ¬å®¹é‡ä¿¡æ¯")]
-        public string gridID;                                    // ç½‘æ ¼ID
-        public int totalCapacity;                                // æ€»å®¹é‡ï¼ˆæ ¼å­æ•°ï¼‰
-        public int usedCapacity;                                 // å·²ä½¿ç”¨å®¹é‡
-        public int freeCapacity;                                 // å‰©ä½™å®¹é‡
-        public float storageEfficiency;                          // å­˜å‚¨æ•ˆç‡ï¼ˆ0-1ï¼‰
+        [Header("»ù±¾ÈİÁ¿ĞÅÏ¢")]
+        public string gridID;                                    // Íø¸ñID
+        public int totalCapacity;                                // ×ÜÈİÁ¿£¨¸ñ×ÓÊı£©
+        public int usedCapacity;                                 // ÒÑÊ¹ÓÃÈİÁ¿
+        public int freeCapacity;                                 // Ê£ÓàÈİÁ¿
+        public float storageEfficiency;                          // ´æ´¢Ğ§ÂÊ£¨0-1£©
 
-        [Header("ç‰©å“åˆ†ç±»ç»Ÿè®¡")]
-        public Dictionary<string, int> itemCategories;           // ç‰©å“ç±»åˆ«ç»Ÿè®¡
+        [Header("ÎïÆ··ÖÀàÍ³¼Æ")]
+        public Dictionary<string, int> itemCategories;           // ÎïÆ·Àà±ğÍ³¼Æ
 
-        [Header("ç©ºé—´åˆ†æ")]
-        public float fragmentationLevel;                         // ç¢ç‰‡åŒ–ç¨‹åº¦ï¼ˆ0-1ï¼‰
+        [Header("¿Õ¼ä·ÖÎö")]
+        public float fragmentationLevel;                         // ËéÆ¬»¯³Ì¶È£¨0-1£©
 
-        [Header("ä¼˜åŒ–å»ºè®®")]
-        public List<string> optimizationSuggestions;             // ä¼˜åŒ–å»ºè®®åˆ—è¡¨
+        [Header("ÓÅ»¯½¨Òé")]
+        public List<string> optimizationSuggestions;             // ÓÅ»¯½¨ÒéÁĞ±í
 
         /// <summary>
-        /// è·å–æ•ˆç‡åˆ†ææ‘˜è¦
+        /// »ñÈ¡Ğ§ÂÊ·ÖÎöÕªÒª
         /// </summary>
-        /// <returns>æ•ˆç‡æ‘˜è¦å­—ç¬¦ä¸²</returns>
+        /// <returns>Ğ§ÂÊÕªÒª×Ö·û´®</returns>
         public string GetEfficiencySummary()
         {
-            return $"ä»“åº“æ•ˆç‡åˆ†æ - å®¹é‡åˆ©ç”¨ç‡:{storageEfficiency:P1} ç¢ç‰‡åŒ–ç¨‹åº¦:{fragmentationLevel:P1} " +
-                   $"ç‰©å“ç±»åˆ«æ•°:{itemCategories.Count} ä¼˜åŒ–å»ºè®®æ•°:{optimizationSuggestions.Count}";
+            return $"²Ö¿âĞ§ÂÊ·ÖÎö - ÈİÁ¿ÀûÓÃÂÊ:{storageEfficiency:P1} ËéÆ¬»¯³Ì¶È:{fragmentationLevel:P1} " +
+                   $"ÎïÆ·Àà±ğÊı:{itemCategories.Count} ÓÅ»¯½¨ÒéÊı:{optimizationSuggestions.Count}";
         }
 
         /// <summary>
-        /// è·å–æœ€å¤šçš„ç‰©å“ç±»åˆ«
+        /// »ñÈ¡×î¶àµÄÎïÆ·Àà±ğ
         /// </summary>
-        /// <returns>æœ€å¤šçš„ç‰©å“ç±»åˆ«åç§°</returns>
+        /// <returns>×î¶àµÄÎïÆ·Àà±ğÃû³Æ</returns>
         public string GetMostCommonCategory()
         {
-            if (itemCategories.Count == 0) return "æ— ";
+            if (itemCategories.Count == 0) return "ÎŞ";
 
             string mostCommon = "";
             int maxCount = 0;
@@ -63,29 +63,29 @@ namespace InventorySystem.Grid
     }
 
     /// <summary>
-    /// ä»“åº“æœç´¢æ¡ä»¶æ•°æ®ç»“æ„
-    /// ç”¨äºå®šä¹‰ä»“åº“ç‰©å“æœç´¢çš„å„ç§æ¡ä»¶
+    /// ²Ö¿âËÑË÷Ìõ¼şÊı¾İ½á¹¹
+    /// ÓÃÓÚ¶¨Òå²Ö¿âÎïÆ·ËÑË÷µÄ¸÷ÖÖÌõ¼ş
     /// </summary>
     [System.Serializable]
     public class WarehouseSearchCriteria
     {
-        [Header("åŸºæœ¬æœç´¢æ¡ä»¶")]
-        public string itemName;                                  // ç‰©å“åç§°ï¼ˆæ”¯æŒæ¨¡ç³Šæœç´¢ï¼‰
-        public InventorySystemItemCategory? itemType;            // ç‰©å“ç±»å‹ï¼ˆnullè¡¨ç¤ºæœç´¢æ‰€æœ‰ç±»å‹ï¼‰
+        [Header("»ù±¾ËÑË÷Ìõ¼ş")]
+        public string itemName;                                  // ÎïÆ·Ãû³Æ£¨Ö§³ÖÄ£ºıËÑË÷£©
+        public InventorySystemItemCategory? itemType;            // ÎïÆ·ÀàĞÍ£¨null±íÊ¾ËÑË÷ËùÓĞÀàĞÍ£©
 
-        [Header("å°ºå¯¸èŒƒå›´æ¡ä»¶")]
-        public Vector2Int minSize;                               // æœ€å°å°ºå¯¸
-        public Vector2Int maxSize;                               // æœ€å¤§å°ºå¯¸
+        [Header("³ß´ç·¶Î§Ìõ¼ş")]
+        public Vector2Int minSize;                               // ×îĞ¡³ß´ç
+        public Vector2Int maxSize;                               // ×î´ó³ß´ç
 
-        [Header("ä½ç½®èŒƒå›´æ¡ä»¶")]
-        public Vector2Int searchAreaStart;                       // æœç´¢åŒºåŸŸèµ·å§‹ä½ç½®
-        public Vector2Int searchAreaSize;                        // æœç´¢åŒºåŸŸå°ºå¯¸
-        public bool useAreaFilter;                               // æ˜¯å¦ä½¿ç”¨åŒºåŸŸè¿‡æ»¤
+        [Header("Î»ÖÃ·¶Î§Ìõ¼ş")]
+        public Vector2Int searchAreaStart;                       // ËÑË÷ÇøÓòÆğÊ¼Î»ÖÃ
+        public Vector2Int searchAreaSize;                        // ËÑË÷ÇøÓò³ß´ç
+        public bool useAreaFilter;                               // ÊÇ·ñÊ¹ÓÃÇøÓò¹ıÂË
 
         /// <summary>
-        /// åˆ›å»ºé»˜è®¤æœç´¢æ¡ä»¶ï¼ˆæœç´¢æ‰€æœ‰ç‰©å“ï¼‰
+        /// ´´½¨Ä¬ÈÏËÑË÷Ìõ¼ş£¨ËÑË÷ËùÓĞÎïÆ·£©
         /// </summary>
-        /// <returns>é»˜è®¤æœç´¢æ¡ä»¶</returns>
+        /// <returns>Ä¬ÈÏËÑË÷Ìõ¼ş</returns>
         public static WarehouseSearchCriteria CreateDefault()
         {
             return new WarehouseSearchCriteria
@@ -101,10 +101,10 @@ namespace InventorySystem.Grid
         }
 
         /// <summary>
-        /// åˆ›å»ºæŒ‰åç§°æœç´¢çš„æ¡ä»¶
+        /// ´´½¨°´Ãû³ÆËÑË÷µÄÌõ¼ş
         /// </summary>
-        /// <param name="name">ç‰©å“åç§°</param>
-        /// <returns>æŒ‰åç§°æœç´¢çš„æ¡ä»¶</returns>
+        /// <param name="name">ÎïÆ·Ãû³Æ</param>
+        /// <returns>°´Ãû³ÆËÑË÷µÄÌõ¼ş</returns>
         public static WarehouseSearchCriteria CreateByName(string name)
         {
             var criteria = CreateDefault();
@@ -113,10 +113,10 @@ namespace InventorySystem.Grid
         }
 
         /// <summary>
-        /// åˆ›å»ºæŒ‰ç±»å‹æœç´¢çš„æ¡ä»¶
+        /// ´´½¨°´ÀàĞÍËÑË÷µÄÌõ¼ş
         /// </summary>
-        /// <param name="type">ç‰©å“ç±»å‹</param>
-        /// <returns>æŒ‰ç±»å‹æœç´¢çš„æ¡ä»¶</returns>
+        /// <param name="type">ÎïÆ·ÀàĞÍ</param>
+        /// <returns>°´ÀàĞÍËÑË÷µÄÌõ¼ş</returns>
         public static WarehouseSearchCriteria CreateByType(InventorySystemItemCategory? type)
         {
             var criteria = CreateDefault();
@@ -126,40 +126,40 @@ namespace InventorySystem.Grid
     }
 
     /// <summary>
-    /// ç‰©å“æœç´¢ç»“æœæ•°æ®ç»“æ„
-    /// åŒ…å«æœç´¢åˆ°çš„ç‰©å“çš„è¯¦ç»†ä¿¡æ¯
+    /// ÎïÆ·ËÑË÷½á¹ûÊı¾İ½á¹¹
+    /// °üº¬ËÑË÷µ½µÄÎïÆ·µÄÏêÏ¸ĞÅÏ¢
     /// </summary>
     [System.Serializable]
     public class ItemSearchResult
     {
-        [Header("ç‰©å“åŸºæœ¬ä¿¡æ¯")]
-        public string itemName;                                  // ç‰©å“åç§°
-        public string itemType;                                  // ç‰©å“ç±»å‹
-        public string itemInstanceID;                            // ç‰©å“å®ä¾‹ID
+        [Header("ÎïÆ·»ù±¾ĞÅÏ¢")]
+        public string itemName;                                  // ÎïÆ·Ãû³Æ
+        public string itemType;                                  // ÎïÆ·ÀàĞÍ
+        public string itemInstanceID;                            // ÎïÆ·ÊµÀıID
 
-        [Header("ä½ç½®ä¿¡æ¯")]
-        public Vector2Int gridPosition;                          // ç½‘æ ¼ä½ç½®
-        public Vector2Int itemSize;                              // ç‰©å“å°ºå¯¸
-        public int placementIndex;                               // åœ¨placedItemsä¸­çš„ç´¢å¼•
+        [Header("Î»ÖÃĞÅÏ¢")]
+        public Vector2Int gridPosition;                          // Íø¸ñÎ»ÖÃ
+        public Vector2Int itemSize;                              // ÎïÆ·³ß´ç
+        public int placementIndex;                               // ÔÚplacedItemsÖĞµÄË÷Òı
 
-        [Header("å¼•ç”¨ä¿¡æ¯")]
-        public GameObject itemGameObject;                        // ç‰©å“GameObjectå¼•ç”¨
+        [Header("ÒıÓÃĞÅÏ¢")]
+        public GameObject itemGameObject;                        // ÎïÆ·GameObjectÒıÓÃ
 
         /// <summary>
-        /// è·å–æœç´¢ç»“æœæ‘˜è¦
+        /// »ñÈ¡ËÑË÷½á¹ûÕªÒª
         /// </summary>
-        /// <returns>ç»“æœæ‘˜è¦å­—ç¬¦ä¸²</returns>
+        /// <returns>½á¹ûÕªÒª×Ö·û´®</returns>
         public string GetResultSummary()
         {
-            return $"ç‰©å“[{itemName}] ç±»å‹:{itemType} ä½ç½®:({gridPosition.x},{gridPosition.y}) å°ºå¯¸:{itemSize.x}x{itemSize.y}";
+            return $"ÎïÆ·[{itemName}] ÀàĞÍ:{itemType} Î»ÖÃ:({gridPosition.x},{gridPosition.y}) ³ß´ç:{itemSize.x}x{itemSize.y}";
         }
 
         /// <summary>
-        /// æ£€æŸ¥ç‰©å“æ˜¯å¦åœ¨æŒ‡å®šåŒºåŸŸå†…
+        /// ¼ì²éÎïÆ·ÊÇ·ñÔÚÖ¸¶¨ÇøÓòÄÚ
         /// </summary>
-        /// <param name="areaStart">åŒºåŸŸèµ·å§‹ä½ç½®</param>
-        /// <param name="areaSize">åŒºåŸŸå°ºå¯¸</param>
-        /// <returns>æ˜¯å¦åœ¨åŒºåŸŸå†…</returns>
+        /// <param name="areaStart">ÇøÓòÆğÊ¼Î»ÖÃ</param>
+        /// <param name="areaSize">ÇøÓò³ß´ç</param>
+        /// <returns>ÊÇ·ñÔÚÇøÓòÄÚ</returns>
         public bool IsInArea(Vector2Int areaStart, Vector2Int areaSize)
         {
             return gridPosition.x >= areaStart.x &&
@@ -170,38 +170,38 @@ namespace InventorySystem.Grid
     }
 
     /// <summary>
-    /// é¢„è­¦çº§åˆ«æšä¸¾
-    /// å®šä¹‰ä¸åŒç¨‹åº¦çš„é¢„è­¦çº§åˆ«
+    /// Ô¤¾¯¼¶±ğÃ¶¾Ù
+    /// ¶¨Òå²»Í¬³Ì¶ÈµÄÔ¤¾¯¼¶±ğ
     /// </summary>
     public enum WarningLevel
     {
-        None = 0,        // æ— é¢„è­¦
-        Low = 1,         // ä½çº§é¢„è­¦
-        Medium = 2,      // ä¸­çº§é¢„è­¦
-        High = 3,        // é«˜çº§é¢„è­¦
-        Critical = 4     // ä¸¥é‡é¢„è­¦
+        None = 0,        // ÎŞÔ¤¾¯
+        Low = 1,         // µÍ¼¶Ô¤¾¯
+        Medium = 2,      // ÖĞ¼¶Ô¤¾¯
+        High = 3,        // ¸ß¼¶Ô¤¾¯
+        Critical = 4     // ÑÏÖØÔ¤¾¯
     }
 
     /// <summary>
-    /// ä»“åº“å®¹é‡é¢„è­¦ä¿¡æ¯æ•°æ®ç»“æ„
-    /// ç”¨äºç›‘æ§ä»“åº“å®¹é‡çŠ¶æ€å¹¶æä¾›é¢„è­¦
+    /// ²Ö¿âÈİÁ¿Ô¤¾¯ĞÅÏ¢Êı¾İ½á¹¹
+    /// ÓÃÓÚ¼à¿Ø²Ö¿âÈİÁ¿×´Ì¬²¢Ìá¹©Ô¤¾¯
     /// </summary>
     [System.Serializable]
     public class WarehouseCapacityWarning
     {
-        [Header("åŸºæœ¬é¢„è­¦ä¿¡æ¯")]
-        public string gridID;                                    // ç½‘æ ¼ID
-        public float currentOccupancyRate;                       // å½“å‰å ç”¨ç‡
-        public WarningLevel warningLevel;                        // é¢„è­¦çº§åˆ«
-        public string warningMessage;                            // é¢„è­¦æ¶ˆæ¯
+        [Header("»ù±¾Ô¤¾¯ĞÅÏ¢")]
+        public string gridID;                                    // Íø¸ñID
+        public float currentOccupancyRate;                       // µ±Ç°Õ¼ÓÃÂÊ
+        public WarningLevel warningLevel;                        // Ô¤¾¯¼¶±ğ
+        public string warningMessage;                            // Ô¤¾¯ÏûÏ¢
 
-        [Header("å»ºè®®æ“ä½œ")]
-        public List<string> recommendedActions;                   // æ¨èæ“ä½œåˆ—è¡¨
+        [Header("½¨Òé²Ù×÷")]
+        public List<string> recommendedActions;                   // ÍÆ¼ö²Ù×÷ÁĞ±í
 
         /// <summary>
-        /// è·å–é¢„è­¦çº§åˆ«çš„é¢œè‰²
+        /// »ñÈ¡Ô¤¾¯¼¶±ğµÄÑÕÉ«
         /// </summary>
-        /// <returns>é¢„è­¦çº§åˆ«å¯¹åº”çš„é¢œè‰²</returns>
+        /// <returns>Ô¤¾¯¼¶±ğ¶ÔÓ¦µÄÑÕÉ«</returns>
         public Color GetWarningColor()
         {
             switch (warningLevel)
@@ -211,7 +211,7 @@ namespace InventorySystem.Grid
                 case WarningLevel.Low:
                     return Color.yellow;
                 case WarningLevel.Medium:
-                    return new Color(1f, 0.5f, 0f); // æ©™è‰²
+                    return new Color(1f, 0.5f, 0f); // ³ÈÉ«
                 case WarningLevel.High:
                     return Color.red;
                 case WarningLevel.Critical:
@@ -222,45 +222,45 @@ namespace InventorySystem.Grid
         }
 
         /// <summary>
-        /// è·å–é¢„è­¦çº§åˆ«çš„ä¸­æ–‡æè¿°
+        /// »ñÈ¡Ô¤¾¯¼¶±ğµÄÖĞÎÄÃèÊö
         /// </summary>
-        /// <returns>é¢„è­¦çº§åˆ«ä¸­æ–‡æè¿°</returns>
+        /// <returns>Ô¤¾¯¼¶±ğÖĞÎÄÃèÊö</returns>
         public string GetWarningLevelText()
         {
             switch (warningLevel)
             {
                 case WarningLevel.None:
-                    return "æ­£å¸¸";
+                    return "Õı³£";
                 case WarningLevel.Low:
-                    return "ä½çº§é¢„è­¦";
+                    return "µÍ¼¶Ô¤¾¯";
                 case WarningLevel.Medium:
-                    return "ä¸­çº§é¢„è­¦";
+                    return "ÖĞ¼¶Ô¤¾¯";
                 case WarningLevel.High:
-                    return "é«˜çº§é¢„è­¦";
+                    return "¸ß¼¶Ô¤¾¯";
                 case WarningLevel.Critical:
-                    return "ä¸¥é‡é¢„è­¦";
+                    return "ÑÏÖØÔ¤¾¯";
                 default:
-                    return "æœªçŸ¥";
+                    return "Î´Öª";
             }
         }
 
         /// <summary>
-        /// æ£€æŸ¥æ˜¯å¦éœ€è¦ç«‹å³å¤„ç†
+        /// ¼ì²éÊÇ·ñĞèÒªÁ¢¼´´¦Àí
         /// </summary>
-        /// <returns>æ˜¯å¦éœ€è¦ç«‹å³å¤„ç†</returns>
+        /// <returns>ÊÇ·ñĞèÒªÁ¢¼´´¦Àí</returns>
         public bool RequiresImmediateAction()
         {
             return warningLevel >= WarningLevel.High;
         }
 
         /// <summary>
-        /// è·å–é¢„è­¦æ‘˜è¦ä¿¡æ¯
+        /// »ñÈ¡Ô¤¾¯ÕªÒªĞÅÏ¢
         /// </summary>
-        /// <returns>é¢„è­¦æ‘˜è¦å­—ç¬¦ä¸²</returns>
+        /// <returns>Ô¤¾¯ÕªÒª×Ö·û´®</returns>
         public string GetWarningSummary()
         {
-            return $"ä»“åº“å®¹é‡é¢„è­¦ - å ç”¨ç‡:{currentOccupancyRate:P1} çº§åˆ«:{GetWarningLevelText()} " +
-                   $"æ¶ˆæ¯:{warningMessage} å»ºè®®æ“ä½œæ•°:{recommendedActions.Count}";
+            return $"²Ö¿âÈİÁ¿Ô¤¾¯ - Õ¼ÓÃÂÊ:{currentOccupancyRate:P1} ¼¶±ğ:{GetWarningLevelText()} " +
+                   $"ÏûÏ¢:{warningMessage} ½¨Òé²Ù×÷Êı:{recommendedActions.Count}";
         }
     }
 }

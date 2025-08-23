@@ -2,16 +2,16 @@ using UnityEngine;
 using InventorySystem.SaveSystem;
 
 /// <summary>
-/// ç½‘æ ¼ISaveableæ¥å£åˆå§‹åŒ–å™¨
-/// ç¡®ä¿åŠ¨æ€ç”Ÿæˆçš„ç½‘æ ¼å¯¹è±¡æ­£ç¡®å®ç°ISaveableæ¥å£
+/// Íø¸ñISaveable½Ó¿Ú³õÊ¼»¯Æ÷
+/// È·±£¶¯Ì¬Éú³ÉµÄÍø¸ñ¶ÔÏóÕıÈ·ÊµÏÖISaveable½Ó¿Ú
 /// </summary>
 public class GridISaveableInitializer : MonoBehaviour
 {
-    [Header("è°ƒè¯•ä¿¡æ¯")]
+    [Header("µ÷ÊÔĞÅÏ¢")]
     [SerializeField] private bool enableDebugLogs = true;
 
     /// <summary>
-    /// åœ¨Awakeä¸­å¼ºåˆ¶åˆå§‹åŒ–ISaveableæ¥å£
+    /// ÔÚAwakeÖĞÇ¿ÖÆ³õÊ¼»¯ISaveable½Ó¿Ú
     /// </summary>
     private void Awake()
     {
@@ -19,7 +19,7 @@ public class GridISaveableInitializer : MonoBehaviour
     }
 
     /// <summary>
-    /// åœ¨Startä¸­å†æ¬¡ç¡®è®¤ISaveableæ¥å£çŠ¶æ€
+    /// ÔÚStartÖĞÔÙ´ÎÈ·ÈÏISaveable½Ó¿Ú×´Ì¬
     /// </summary>
     private void Start()
     {
@@ -27,78 +27,78 @@ public class GridISaveableInitializer : MonoBehaviour
     }
 
     /// <summary>
-    /// åˆå§‹åŒ–ISaveableæ¥å£å®ç°
+    /// ³õÊ¼»¯ISaveable½Ó¿ÚÊµÏÖ
     /// </summary>
     private void InitializeISaveableInterface()
     {
-        // è·å–ç½‘æ ¼ç»„ä»¶
+        // »ñÈ¡Íø¸ñ×é¼ş
         BaseItemGrid gridComponent = GetComponent<BaseItemGrid>();
         if (gridComponent == null)
         {
             if (enableDebugLogs)
-                Debug.LogWarning($"[GridISaveableInitializer] {gameObject.name}: æœªæ‰¾åˆ°BaseItemGridç»„ä»¶");
+                Debug.LogWarning($"[GridISaveableInitializer] {gameObject.name}: Î´ÕÒµ½BaseItemGrid×é¼ş");
             return;
         }
 
-        // æ£€æŸ¥æ˜¯å¦å®ç°ISaveableæ¥å£
+        // ¼ì²éÊÇ·ñÊµÏÖISaveable½Ó¿Ú
         ISaveable saveableGrid = gridComponent as ISaveable;
         if (saveableGrid == null)
         {
-            Debug.LogError($"[GridISaveableInitializer] {gameObject.name}: BaseItemGridç»„ä»¶æœªå®ç°ISaveableæ¥å£ï¼");
+            Debug.LogError($"[GridISaveableInitializer] {gameObject.name}: BaseItemGrid×é¼şÎ´ÊµÏÖISaveable½Ó¿Ú£¡");
             return;
         }
 
-        // å¼ºåˆ¶åˆå§‹åŒ–ä¿å­˜ç³»ç»Ÿ
+        // Ç¿ÖÆ³õÊ¼»¯±£´æÏµÍ³
         try
         {
-            // ç¡®ä¿æœ‰æœ‰æ•ˆçš„ä¿å­˜ID
+            // È·±£ÓĞÓĞĞ§µÄ±£´æID
             if (!saveableGrid.IsSaveIDValid())
             {
                 saveableGrid.GenerateNewSaveID();
                 if (enableDebugLogs)
-                    Debug.Log($"[GridISaveableInitializer] {gameObject.name}: ç”Ÿæˆæ–°çš„ä¿å­˜ID: {saveableGrid.GetSaveID()}");
+                    Debug.Log($"[GridISaveableInitializer] {gameObject.name}: Éú³ÉĞÂµÄ±£´æID: {saveableGrid.GetSaveID()}");
             }
 
-            // è°ƒç”¨ç½‘æ ¼çš„ä¿å­˜ç³»ç»Ÿåˆå§‹åŒ–æ–¹æ³•
+            // µ÷ÓÃÍø¸ñµÄ±£´æÏµÍ³³õÊ¼»¯·½·¨
             if (gridComponent is BackpackItemGrid backpackGrid)
             {
-                // å¼ºåˆ¶è°ƒç”¨èƒŒåŒ…ç½‘æ ¼çš„åˆå§‹åŒ–æ–¹æ³•
+                // Ç¿ÖÆµ÷ÓÃ±³°üÍø¸ñµÄ³õÊ¼»¯·½·¨
                 var initMethod = typeof(BackpackItemGrid).GetMethod("InitializeSaveSystem",
                     System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
                 initMethod?.Invoke(backpackGrid, null);
 
                 if (enableDebugLogs)
-                    Debug.Log($"[GridISaveableInitializer] {gameObject.name}: BackpackItemGridä¿å­˜ç³»ç»Ÿåˆå§‹åŒ–å®Œæˆ");
+                    Debug.Log($"[GridISaveableInitializer] {gameObject.name}: BackpackItemGrid±£´æÏµÍ³³õÊ¼»¯Íê³É");
             }
             else if (gridComponent is TactiaclRigItemGrid tacticalGrid)
             {
-                // å¼ºåˆ¶è°ƒç”¨æˆ˜æœ¯æŒ‚å…·ç½‘æ ¼çš„åˆå§‹åŒ–æ–¹æ³•
+                // Ç¿ÖÆµ÷ÓÃÕ½Êõ¹Ò¾ßÍø¸ñµÄ³õÊ¼»¯·½·¨
                 var initMethod = typeof(TactiaclRigItemGrid).GetMethod("InitializeSaveSystem",
                     System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
                 initMethod?.Invoke(tacticalGrid, null);
 
                 if (enableDebugLogs)
-                    Debug.Log($"[GridISaveableInitializer] {gameObject.name}: TacticalRigItemGridä¿å­˜ç³»ç»Ÿåˆå§‹åŒ–å®Œæˆ");
+                    Debug.Log($"[GridISaveableInitializer] {gameObject.name}: TacticalRigItemGrid±£´æÏµÍ³³õÊ¼»¯Íê³É");
             }
             else
             {
-                // è°ƒç”¨åŸºç±»çš„åˆå§‹åŒ–æ–¹æ³•
+                // µ÷ÓÃ»ùÀàµÄ³õÊ¼»¯·½·¨
                 var initMethod = typeof(BaseItemGrid).GetMethod("InitializeSaveSystem",
                     System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
                 initMethod?.Invoke(gridComponent, null);
 
                 if (enableDebugLogs)
-                    Debug.Log($"[GridISaveableInitializer] {gameObject.name}: BaseItemGridä¿å­˜ç³»ç»Ÿåˆå§‹åŒ–å®Œæˆ");
+                    Debug.Log($"[GridISaveableInitializer] {gameObject.name}: BaseItemGrid±£´æÏµÍ³³õÊ¼»¯Íê³É");
             }
         }
         catch (System.Exception ex)
         {
-            Debug.LogError($"[GridISaveableInitializer] {gameObject.name}: åˆå§‹åŒ–ISaveableæ¥å£æ—¶å‘ç”Ÿé”™è¯¯: {ex.Message}");
+            Debug.LogError($"[GridISaveableInitializer] {gameObject.name}: ³õÊ¼»¯ISaveable½Ó¿ÚÊ±·¢Éú´íÎó: {ex.Message}");
         }
     }
 
     /// <summary>
-    /// éªŒè¯ISaveableæ¥å£å®ç°çŠ¶æ€
+    /// ÑéÖ¤ISaveable½Ó¿ÚÊµÏÖ×´Ì¬
     /// </summary>
     private void ValidateISaveableInterface()
     {
@@ -108,11 +108,11 @@ public class GridISaveableInitializer : MonoBehaviour
         ISaveable saveableGrid = gridComponent as ISaveable;
         if (saveableGrid == null)
         {
-            Debug.LogError($"[GridISaveableInitializer] {gameObject.name}: ISaveableæ¥å£éªŒè¯å¤±è´¥ï¼");
+            Debug.LogError($"[GridISaveableInitializer] {gameObject.name}: ISaveable½Ó¿ÚÑéÖ¤Ê§°Ü£¡");
             return;
         }
 
-        // æµ‹è¯•ISaveableæ¥å£çš„å„ä¸ªæ–¹æ³•
+        // ²âÊÔISaveable½Ó¿ÚµÄ¸÷¸ö·½·¨
         try
         {
             string saveID = saveableGrid.GetSaveID();
@@ -122,64 +122,64 @@ public class GridISaveableInitializer : MonoBehaviour
 
             if (enableDebugLogs)
             {
-                Debug.Log($"[GridISaveableInitializer] {gameObject.name}: ISaveableæ¥å£éªŒè¯æˆåŠŸ\n" +
-                         $"ä¿å­˜ID: {saveID}\n" +
-                         $"IDæœ‰æ•ˆæ€§: {isValidID}\n" +
-                         $"å·²ä¿®æ”¹: {isModified}\n" +
-                         $"æœ€åä¿®æ”¹: {lastModified}");
+                Debug.Log($"[GridISaveableInitializer] {gameObject.name}: ISaveable½Ó¿ÚÑéÖ¤³É¹¦\n" +
+                         $"±£´æID: {saveID}\n" +
+                         $"IDÓĞĞ§ĞÔ: {isValidID}\n" +
+                         $"ÒÑĞŞ¸Ä: {isModified}\n" +
+                         $"×îºóĞŞ¸Ä: {lastModified}");
             }
 
-            // æµ‹è¯•åºåˆ—åŒ–
+            // ²âÊÔĞòÁĞ»¯
             string jsonData = saveableGrid.SerializeToJson();
             if (string.IsNullOrEmpty(jsonData))
             {
-                Debug.LogWarning($"[GridISaveableInitializer] {gameObject.name}: åºåˆ—åŒ–è¿”å›ç©ºæ•°æ®");
+                Debug.LogWarning($"[GridISaveableInitializer] {gameObject.name}: ĞòÁĞ»¯·µ»Ø¿ÕÊı¾İ");
             }
             else if (enableDebugLogs)
             {
-                Debug.Log($"[GridISaveableInitializer] {gameObject.name}: åºåˆ—åŒ–æµ‹è¯•æˆåŠŸï¼Œæ•°æ®é•¿åº¦: {jsonData.Length}");
+                Debug.Log($"[GridISaveableInitializer] {gameObject.name}: ĞòÁĞ»¯²âÊÔ³É¹¦£¬Êı¾İ³¤¶È: {jsonData.Length}");
             }
         }
         catch (System.Exception ex)
         {
-            Debug.LogError($"[GridISaveableInitializer] {gameObject.name}: ISaveableæ¥å£éªŒè¯æ—¶å‘ç”Ÿé”™è¯¯: {ex.Message}");
+            Debug.LogError($"[GridISaveableInitializer] {gameObject.name}: ISaveable½Ó¿ÚÑéÖ¤Ê±·¢Éú´íÎó: {ex.Message}");
         }
     }
 
     /// <summary>
-    /// æ‰‹åŠ¨è§¦å‘ISaveableæ¥å£é‡æ–°åˆå§‹åŒ–
-    /// å¯åœ¨è¿è¡Œæ—¶è°ƒç”¨ä»¥ä¿®å¤æ¥å£é—®é¢˜
+    /// ÊÖ¶¯´¥·¢ISaveable½Ó¿ÚÖØĞÂ³õÊ¼»¯
+    /// ¿ÉÔÚÔËĞĞÊ±µ÷ÓÃÒÔĞŞ¸´½Ó¿ÚÎÊÌâ
     /// </summary>
-    [ContextMenu("é‡æ–°åˆå§‹åŒ–ISaveableæ¥å£")]
+    [ContextMenu("ÖØĞÂ³õÊ¼»¯ISaveable½Ó¿Ú")]
     public void ReinitializeISaveableInterface()
     {
-        Debug.Log($"[GridISaveableInitializer] {gameObject.name}: æ‰‹åŠ¨é‡æ–°åˆå§‹åŒ–ISaveableæ¥å£");
+        Debug.Log($"[GridISaveableInitializer] {gameObject.name}: ÊÖ¶¯ÖØĞÂ³õÊ¼»¯ISaveable½Ó¿Ú");
         InitializeISaveableInterface();
         ValidateISaveableInterface();
     }
 
     /// <summary>
-    /// è·å–ç½‘æ ¼çš„è¯¦ç»†çŠ¶æ€ä¿¡æ¯
+    /// »ñÈ¡Íø¸ñµÄÏêÏ¸×´Ì¬ĞÅÏ¢
     /// </summary>
-    /// <returns>çŠ¶æ€ä¿¡æ¯å­—ç¬¦ä¸²</returns>
+    /// <returns>×´Ì¬ĞÅÏ¢×Ö·û´®</returns>
     public string GetGridStatusInfo()
     {
         BaseItemGrid gridComponent = GetComponent<BaseItemGrid>();
         if (gridComponent == null)
-            return "æœªæ‰¾åˆ°BaseItemGridç»„ä»¶";
+            return "Î´ÕÒµ½BaseItemGrid×é¼ş";
 
         ISaveable saveableGrid = gridComponent as ISaveable;
         if (saveableGrid == null)
-            return "BaseItemGridç»„ä»¶æœªå®ç°ISaveableæ¥å£";
+            return "BaseItemGrid×é¼şÎ´ÊµÏÖISaveable½Ó¿Ú";
 
         var info = new System.Text.StringBuilder();
-        info.AppendLine($"æ¸¸æˆå¯¹è±¡: {gameObject.name}");
-        info.AppendLine($"ç»„ä»¶ç±»å‹: {gridComponent.GetType().Name}");
-        info.AppendLine($"ä¿å­˜ID: {saveableGrid.GetSaveID()}");
-        info.AppendLine($"IDæœ‰æ•ˆæ€§: {saveableGrid.IsSaveIDValid()}");
-        info.AppendLine($"å·²ä¿®æ”¹: {saveableGrid.IsModified()}");
-        info.AppendLine($"æœ€åä¿®æ”¹: {saveableGrid.GetLastModified()}");
-        info.AppendLine($"æ•°æ®æœ‰æ•ˆæ€§: {saveableGrid.ValidateData()}");
+        info.AppendLine($"ÓÎÏ·¶ÔÏó: {gameObject.name}");
+        info.AppendLine($"×é¼şÀàĞÍ: {gridComponent.GetType().Name}");
+        info.AppendLine($"±£´æID: {saveableGrid.GetSaveID()}");
+        info.AppendLine($"IDÓĞĞ§ĞÔ: {saveableGrid.IsSaveIDValid()}");
+        info.AppendLine($"ÒÑĞŞ¸Ä: {saveableGrid.IsModified()}");
+        info.AppendLine($"×îºóĞŞ¸Ä: {saveableGrid.GetLastModified()}");
+        info.AppendLine($"Êı¾İÓĞĞ§ĞÔ: {saveableGrid.ValidateData()}");
 
         return info.ToString();
     }

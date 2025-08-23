@@ -1,5 +1,5 @@
 // BackpackItemGrid.cs
-// èƒŒåŒ…ä¸“ç”¨ç½‘æ ¼ï¼Œç›´æ¥ç»§æ‰¿ BaseItemGrid å¹¶æ”¯æŒè¿è¡Œæ—¶åˆ‡æ¢èƒŒåŒ…æ•°æ®
+// ±³°ü×¨ÓÃÍø¸ñ£¬Ö±½Ó¼Ì³Ğ BaseItemGrid ²¢Ö§³ÖÔËĞĞÊ±ÇĞ»»±³°üÊı¾İ
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -12,14 +12,14 @@ using UnityEditor;
 [ExecuteInEditMode]
 public class BackpackItemGrid : BaseItemGrid
 {
-    [Header("èƒŒåŒ…ç½‘æ ¼å‚æ•°")]
-    [SerializeField, Tooltip("é»˜è®¤å®½åº¦")] private int defaultWidth = 6;
-    [SerializeField, Tooltip("é»˜è®¤é«˜åº¦")] private int defaultHeight = 8;
+    [Header("±³°üÍø¸ñ²ÎÊı")]
+    [SerializeField, Tooltip("Ä¬ÈÏ¿í¶È")] private int defaultWidth = 6;
+    [SerializeField, Tooltip("Ä¬ÈÏ¸ß¶È")] private int defaultHeight = 8;
 
-    // å½“å‰èƒŒåŒ…æ•°æ®ï¼ˆè¿è¡Œæ—¶åŠ¨æ€è®¾ç½®ï¼‰
+    // µ±Ç°±³°üÊı¾İ£¨ÔËĞĞÊ±¶¯Ì¬ÉèÖÃ£©
     private InventorySystemItemDataSO currentBackpackData;
 
-    /* ---------------- ç”Ÿå‘½å‘¨æœŸ ---------------- */
+    /* ---------------- ÉúÃüÖÜÆÚ ---------------- */
     protected override void Awake()
     {
         LoadFromBackpackData();
@@ -49,7 +49,7 @@ public class BackpackItemGrid : BaseItemGrid
         if (Application.isPlaying) InitializeGridArrays();
     }
 
-    /* ---------------- åŠ¨æ€èƒŒåŒ… ---------------- */
+    /* ---------------- ¶¯Ì¬±³°ü ---------------- */
     private void LoadFromBackpackData()
     {
         if (currentBackpackData != null && !isUpdatingFromConfig)
@@ -68,7 +68,7 @@ public class BackpackItemGrid : BaseItemGrid
         }
     }
 
-    /// <summary>è¿è¡Œæ—¶æ›´æ¢èƒŒåŒ…ï¼ˆæ¢è£…æ›´å¤§çš„èƒŒåŒ…ï¼‰</summary>
+    /// <summary>ÔËĞĞÊ±¸ü»»±³°ü£¨»»×°¸ü´óµÄ±³°ü£©</summary>
     public void SetBackpackData(InventorySystemItemDataSO data)
     {
         currentBackpackData = data;
@@ -77,9 +77,9 @@ public class BackpackItemGrid : BaseItemGrid
         {
             InitializeGridArrays();
             placedItems.Clear();
-            // ç”Ÿæˆç¨³å®šçš„ä¿å­˜IDï¼ˆåŸºäºèƒŒåŒ…æ•°æ®ï¼Œç¡®ä¿åŒä¸€èƒŒåŒ…ä½¿ç”¨ç›¸åŒIDï¼‰
+            // Éú³ÉÎÈ¶¨µÄ±£´æID£¨»ùÓÚ±³°üÊı¾İ£¬È·±£Í¬Ò»±³°üÊ¹ÓÃÏàÍ¬ID£©
             GenerateStableSaveID();
-            // é‡æ–°åˆå§‹åŒ–ä¿å­˜ç³»ç»Ÿ
+            // ÖØĞÂ³õÊ¼»¯±£´æÏµÍ³
             InitializeSaveSystem();
         }
         Init(width, height);
@@ -87,10 +87,10 @@ public class BackpackItemGrid : BaseItemGrid
 
     public InventorySystemItemDataSO GetCurrentBackpackData() => currentBackpackData;
 
-    /// <summary>èƒŒåŒ…å ç”¨ç‡</summary>
+    /// <summary>±³°üÕ¼ÓÃÂÊ</summary>
     public float GetBackpackOccupancyRate() => GetOccupancyRate();
 
-    /// <summary>èƒŒåŒ…å‰©ä½™æ ¼å­æ•°</summary>
+    /// <summary>±³°üÊ£Óà¸ñ×ÓÊı</summary>
     public int GetRemainingSpace() => width * height - occupiedCells.Count;
 
     public override string GetSaveID()
@@ -98,28 +98,28 @@ public class BackpackItemGrid : BaseItemGrid
         return "BackpackItemGrid";
     }
 
-    // ==================== èƒŒåŒ…ç½‘æ ¼æ£€æµ‹å™¨æ‰©å±•åŠŸèƒ½ ====================
+    // ==================== ±³°üÍø¸ñ¼ì²âÆ÷À©Õ¹¹¦ÄÜ ====================
 
     /// <summary>
-    /// è·å–èƒŒåŒ…ç½‘æ ¼ç‰¹æœ‰çš„æ£€æµ‹å™¨ä¿¡æ¯
-    /// åŒ…å«èƒŒåŒ…ç½‘æ ¼çš„ç‰¹æ®Šå±æ€§å’ŒçŠ¶æ€
+    /// »ñÈ¡±³°üÍø¸ñÌØÓĞµÄ¼ì²âÆ÷ĞÅÏ¢
+    /// °üº¬±³°üÍø¸ñµÄÌØÊâÊôĞÔºÍ×´Ì¬
     /// </summary>
-    /// <returns>èƒŒåŒ…ç½‘æ ¼æ£€æµ‹å™¨ä¿¡æ¯</returns>
+    /// <returns>±³°üÍø¸ñ¼ì²âÆ÷ĞÅÏ¢</returns>
     public override GridDetectorInfo GetGridDetectorInfo()
     {
         var baseInfo = base.GetGridDetectorInfo();
 
-        // æ·»åŠ èƒŒåŒ…ç½‘æ ¼ç‰¹æœ‰ä¿¡æ¯
-        baseInfo.gridType = "èƒŒåŒ…ç½‘æ ¼ (BackpackItemGrid)";
+        // Ìí¼Ó±³°üÍø¸ñÌØÓĞĞÅÏ¢
+        baseInfo.gridType = "±³°üÍø¸ñ (BackpackItemGrid)";
 
         return baseInfo;
     }
 
     /// <summary>
-    /// è·å–èƒŒåŒ…è´Ÿé‡åˆ†æä¿¡æ¯
-    /// åˆ†æèƒŒåŒ…ä¸­ç‰©å“çš„é‡é‡åˆ†å¸ƒå’Œè´Ÿé‡çŠ¶æ€
+    /// »ñÈ¡±³°ü¸ºÖØ·ÖÎöĞÅÏ¢
+    /// ·ÖÎö±³°üÖĞÎïÆ·µÄÖØÁ¿·Ö²¼ºÍ¸ºÖØ×´Ì¬
     /// </summary>
-    /// <returns>èƒŒåŒ…è´Ÿé‡åˆ†æä¿¡æ¯</returns>
+    /// <returns>±³°ü¸ºÖØ·ÖÎöĞÅÏ¢</returns>
     public BackpackWeightInfo GetBackpackWeightInfo()
     {
         var weightInfo = new BackpackWeightInfo
@@ -144,7 +144,7 @@ public class BackpackItemGrid : BaseItemGrid
         string heaviestItemName = "";
         string lightestItemName = "";
 
-        // åˆ†ææ¯ä¸ªç‰©å“çš„é‡é‡
+        // ·ÖÎöÃ¿¸öÎïÆ·µÄÖØÁ¿
         foreach (var placedItem in placedItems)
         {
             if (placedItem.itemObject == null) continue;
@@ -158,7 +158,7 @@ public class BackpackItemGrid : BaseItemGrid
 
             weightInfo.totalWeight += itemWeight;
 
-            // æ›´æ–°æœ€é‡å’Œæœ€è½»ç‰©å“
+            // ¸üĞÂ×îÖØºÍ×îÇáÎïÆ·
             if (itemWeight > maxWeight)
             {
                 maxWeight = itemWeight;
@@ -170,7 +170,7 @@ public class BackpackItemGrid : BaseItemGrid
                 lightestItemName = itemName;
             }
 
-            // ç»Ÿè®¡ç±»åˆ«é‡é‡åˆ†å¸ƒ
+            // Í³¼ÆÀà±ğÖØÁ¿·Ö²¼
             if (weightInfo.weightDistribution.ContainsKey(category))
             {
                 weightInfo.weightDistribution[category] += itemWeight;
@@ -180,7 +180,7 @@ public class BackpackItemGrid : BaseItemGrid
                 weightInfo.weightDistribution[category] = itemWeight;
             }
 
-            // æ£€æŸ¥æ˜¯å¦ä¸ºè¶…é‡ç‰©å“ï¼ˆå‡è®¾å•ä¸ªç‰©å“é‡é‡è¶…è¿‡5.0ä¸ºè¶…é‡ï¼‰
+            // ¼ì²éÊÇ·ñÎª³¬ÖØÎïÆ·£¨¼ÙÉèµ¥¸öÎïÆ·ÖØÁ¿³¬¹ı5.0Îª³¬ÖØ£©
             if (itemWeight > 5.0f)
             {
                 weightInfo.overweightItems.Add($"{itemName} ({itemWeight:F1}kg)");
@@ -195,54 +195,54 @@ public class BackpackItemGrid : BaseItemGrid
     }
 
     /// <summary>
-    /// è·å–ç‰©å“é‡é‡ï¼ˆä»ç‰©å“æ•°æ®ä¸­æå–æˆ–ä½¿ç”¨é»˜è®¤å€¼ï¼‰
+    /// »ñÈ¡ÎïÆ·ÖØÁ¿£¨´ÓÎïÆ·Êı¾İÖĞÌáÈ¡»òÊ¹ÓÃÄ¬ÈÏÖµ£©
     /// </summary>
-    /// <param name="itemData">ç‰©å“æ•°æ®</param>
-    /// <returns>ç‰©å“é‡é‡</returns>
+    /// <param name="itemData">ÎïÆ·Êı¾İ</param>
+    /// <returns>ÎïÆ·ÖØÁ¿</returns>
     private float GetItemWeight(InventorySystemItemDataSO itemData)
     {
-        // è¿™é‡Œå¯ä»¥æ ¹æ®å®é™…çš„ç‰©å“æ•°æ®ç»“æ„æ¥è·å–é‡é‡
-        // ç›®å‰ä½¿ç”¨åŸºäºç‰©å“å°ºå¯¸çš„ä¼°ç®—é‡é‡
+        // ÕâÀï¿ÉÒÔ¸ù¾İÊµ¼ÊµÄÎïÆ·Êı¾İ½á¹¹À´»ñÈ¡ÖØÁ¿
+        // Ä¿Ç°Ê¹ÓÃ»ùÓÚÎïÆ·³ß´çµÄ¹ÀËãÖØÁ¿
         if (itemData == null) return 0f;
 
-        // åŸºäºç‰©å“å°ºå¯¸ä¼°ç®—é‡é‡ï¼ˆ1x1 = 0.5kgåŸºç¡€é‡é‡ï¼‰
+        // »ùÓÚÎïÆ·³ß´ç¹ÀËãÖØÁ¿£¨1x1 = 0.5kg»ù´¡ÖØÁ¿£©
         float baseWeight = itemData.width * itemData.height * 0.5f;
 
-        // æ ¹æ®ç‰©å“ç±»å‹è°ƒæ•´é‡é‡ç³»æ•°
+        // ¸ù¾İÎïÆ·ÀàĞÍµ÷ÕûÖØÁ¿ÏµÊı
         float weightMultiplier = GetWeightMultiplierByType(itemData.itemCategory);
 
         return baseWeight * weightMultiplier;
     }
 
     /// <summary>
-    /// æ ¹æ®ç‰©å“ç±»å‹è·å–é‡é‡ç³»æ•°
+    /// ¸ù¾İÎïÆ·ÀàĞÍ»ñÈ¡ÖØÁ¿ÏµÊı
     /// </summary>
-    /// <param name="itemType">ç‰©å“ç±»å‹</param>
-    /// <returns>é‡é‡ç³»æ•°</returns>
+    /// <param name="itemType">ÎïÆ·ÀàĞÍ</param>
+    /// <returns>ÖØÁ¿ÏµÊı</returns>
     private float GetWeightMultiplierByType(InventorySystemItemCategory? itemType)
     {
         if (itemType == null) return 1.0f;
 
-        // æ ¹æ®ç‰©å“ç±»å‹åç§°è®¾ç½®ä¸åŒçš„é‡é‡ç³»æ•°
+        // ¸ù¾İÎïÆ·ÀàĞÍÃû³ÆÉèÖÃ²»Í¬µÄÖØÁ¿ÏµÊı
         string typeName = itemType.ToString().ToLower();
 
-        if (typeName.Contains("weapon") || typeName.Contains("æ­¦å™¨"))
-            return 2.0f;  // æ­¦å™¨è¾ƒé‡
-        else if (typeName.Contains("armor") || typeName.Contains("é˜²å…·"))
-            return 1.5f;  // é˜²å…·ä¸­ç­‰é‡é‡
-        else if (typeName.Contains("ammo") || typeName.Contains("å¼¹è¯"))
-            return 0.8f;  // å¼¹è¯è¾ƒè½»
-        else if (typeName.Contains("consumable") || typeName.Contains("æ¶ˆè€—å“"))
-            return 0.3f;  // æ¶ˆè€—å“å¾ˆè½»
+        if (typeName.Contains("weapon") || typeName.Contains("ÎäÆ÷"))
+            return 2.0f;  // ÎäÆ÷½ÏÖØ
+        else if (typeName.Contains("armor") || typeName.Contains("·À¾ß"))
+            return 1.5f;  // ·À¾ßÖĞµÈÖØÁ¿
+        else if (typeName.Contains("ammo") || typeName.Contains("µ¯Ò©"))
+            return 0.8f;  // µ¯Ò©½ÏÇá
+        else if (typeName.Contains("consumable") || typeName.Contains("ÏûºÄÆ·"))
+            return 0.3f;  // ÏûºÄÆ·ºÜÇá
         else
-            return 1.0f;  // é»˜è®¤é‡é‡
+            return 1.0f;  // Ä¬ÈÏÖØÁ¿
     }
 
     /// <summary>
-    /// è·å–èƒŒåŒ…æ•´ç†å»ºè®®
-    /// åŸºäºç‰©å“åˆ†å¸ƒå’Œä½¿ç”¨é¢‘ç‡æä¾›æ•´ç†å»ºè®®
+    /// »ñÈ¡±³°üÕûÀí½¨Òé
+    /// »ùÓÚÎïÆ··Ö²¼ºÍÊ¹ÓÃÆµÂÊÌá¹©ÕûÀí½¨Òé
     /// </summary>
-    /// <returns>èƒŒåŒ…æ•´ç†å»ºè®®ä¿¡æ¯</returns>
+    /// <returns>±³°üÕûÀí½¨ÒéĞÅÏ¢</returns>
     public BackpackOrganizationSuggestion GetOrganizationSuggestion()
     {
         var suggestion = new BackpackOrganizationSuggestion
@@ -255,7 +255,7 @@ public class BackpackItemGrid : BaseItemGrid
             misplacedItems = new List<string>()
         };
 
-        // åˆ†æç‰©å“ç±»å‹åˆ†å¸ƒ
+        // ·ÖÎöÎïÆ·ÀàĞÍ·Ö²¼
         var itemTypeCount = new Dictionary<string, int>();
         var itemTypePositions = new Dictionary<string, List<Vector2Int>>();
 
@@ -269,7 +269,7 @@ public class BackpackItemGrid : BaseItemGrid
             string itemType = inventoryItem.Data.itemCategory.ToString();
             string itemName = inventoryItem.Data.itemName;
 
-            // ç»Ÿè®¡ç‰©å“ç±»å‹æ•°é‡
+            // Í³¼ÆÎïÆ·ÀàĞÍÊıÁ¿
             if (itemTypeCount.ContainsKey(itemType))
             {
                 itemTypeCount[itemType]++;
@@ -283,58 +283,58 @@ public class BackpackItemGrid : BaseItemGrid
             itemTypePositions[itemType].Add(placedItem.position);
         }
 
-        // ç”Ÿæˆæ•´ç†å»ºè®®
+        // Éú³ÉÕûÀí½¨Òé
         GenerateOrganizationSuggestions(suggestion, itemTypeCount, itemTypePositions);
 
         return suggestion;
     }
 
     /// <summary>
-    /// ç”ŸæˆèƒŒåŒ…æ•´ç†å»ºè®®
+    /// Éú³É±³°üÕûÀí½¨Òé
     /// </summary>
-    /// <param name="suggestion">å»ºè®®å¯¹è±¡</param>
-    /// <param name="itemTypeCount">ç‰©å“ç±»å‹ç»Ÿè®¡</param>
-    /// <param name="itemTypePositions">ç‰©å“ç±»å‹ä½ç½®åˆ†å¸ƒ</param>
+    /// <param name="suggestion">½¨Òé¶ÔÏó</param>
+    /// <param name="itemTypeCount">ÎïÆ·ÀàĞÍÍ³¼Æ</param>
+    /// <param name="itemTypePositions">ÎïÆ·ÀàĞÍÎ»ÖÃ·Ö²¼</param>
     private void GenerateOrganizationSuggestions(BackpackOrganizationSuggestion suggestion,
         Dictionary<string, int> itemTypeCount, Dictionary<string, List<Vector2Int>> itemTypePositions)
     {
-        // æ£€æŸ¥ç‰©å“åˆ†æ•£åº¦
+        // ¼ì²éÎïÆ··ÖÉ¢¶È
         foreach (var typePos in itemTypePositions)
         {
             if (typePos.Value.Count > 1)
             {
-                // è®¡ç®—åŒç±»å‹ç‰©å“çš„åˆ†æ•£ç¨‹åº¦
+                // ¼ÆËãÍ¬ÀàĞÍÎïÆ·µÄ·ÖÉ¢³Ì¶È
                 float averageDistance = CalculateAverageDistance(typePos.Value);
-                if (averageDistance > 3.0f) // å¦‚æœå¹³å‡è·ç¦»å¤§äº3æ ¼
+                if (averageDistance > 3.0f) // Èç¹ûÆ½¾ù¾àÀë´óÓÚ3¸ñ
                 {
-                    suggestion.suggestions.Add($"å»ºè®®å°†åˆ†æ•£çš„{typePos.Key}ç±»ç‰©å“é›†ä¸­æ”¾ç½®ï¼Œå½“å‰å¹³å‡è·ç¦»ä¸º{averageDistance:F1}æ ¼");
-                    suggestion.misplacedItems.Add($"{typePos.Key}ç±»ç‰©å“ (åˆ†æ•£åº¦:{averageDistance:F1})");
+                    suggestion.suggestions.Add($"½¨Òé½«·ÖÉ¢µÄ{typePos.Key}ÀàÎïÆ·¼¯ÖĞ·ÅÖÃ£¬µ±Ç°Æ½¾ù¾àÀëÎª{averageDistance:F1}¸ñ");
+                    suggestion.misplacedItems.Add($"{typePos.Key}ÀàÎïÆ· (·ÖÉ¢¶È:{averageDistance:F1})");
                 }
             }
         }
 
-        // æ£€æŸ¥é«˜é¢‘ä½¿ç”¨ç‰©å“ä½ç½®
+        // ¼ì²é¸ßÆµÊ¹ÓÃÎïÆ·Î»ÖÃ
         CheckHighFrequencyItemPlacement(suggestion, itemTypeCount);
 
-        // æ£€æŸ¥å†—ä½™ç‰©å“
+        // ¼ì²éÈßÓàÎïÆ·
         CheckRedundantItems(suggestion, itemTypeCount);
 
-        // æ£€æŸ¥ç©ºé—´åˆ©ç”¨æ•ˆç‡
+        // ¼ì²é¿Õ¼äÀûÓÃĞ§ÂÊ
         if (suggestion.currentEfficiency < 0.6f)
         {
-            suggestion.suggestions.Add("èƒŒåŒ…ç©ºé—´åˆ©ç”¨ç‡è¾ƒä½ï¼Œå»ºè®®é‡æ–°æ•´ç†ç‰©å“å¸ƒå±€ä»¥èŠ‚çœç©ºé—´");
+            suggestion.suggestions.Add("±³°ü¿Õ¼äÀûÓÃÂÊ½ÏµÍ£¬½¨ÒéÖØĞÂÕûÀíÎïÆ·²¼¾ÖÒÔ½ÚÊ¡¿Õ¼ä");
         }
         else if (suggestion.currentEfficiency > 0.9f)
         {
-            suggestion.suggestions.Add("èƒŒåŒ…ç©ºé—´å‡ ä¹æ»¡è½½ï¼Œå»ºè®®æ¸…ç†ä¸å¿…è¦çš„ç‰©å“æˆ–æ‰©å±•èƒŒåŒ…å®¹é‡");
+            suggestion.suggestions.Add("±³°ü¿Õ¼ä¼¸ºõÂúÔØ£¬½¨ÒéÇåÀí²»±ØÒªµÄÎïÆ·»òÀ©Õ¹±³°üÈİÁ¿");
         }
     }
 
     /// <summary>
-    /// è®¡ç®—ä½ç½®åˆ—è¡¨çš„å¹³å‡è·ç¦»
+    /// ¼ÆËãÎ»ÖÃÁĞ±íµÄÆ½¾ù¾àÀë
     /// </summary>
-    /// <param name="positions">ä½ç½®åˆ—è¡¨</param>
-    /// <returns>å¹³å‡è·ç¦»</returns>
+    /// <param name="positions">Î»ÖÃÁĞ±í</param>
+    /// <returns>Æ½¾ù¾àÀë</returns>
     private float CalculateAverageDistance(List<Vector2Int> positions)
     {
         if (positions.Count <= 1) return 0f;
@@ -356,50 +356,50 @@ public class BackpackItemGrid : BaseItemGrid
     }
 
     /// <summary>
-    /// æ£€æŸ¥é«˜é¢‘ä½¿ç”¨ç‰©å“çš„æ”¾ç½®ä½ç½®
+    /// ¼ì²é¸ßÆµÊ¹ÓÃÎïÆ·µÄ·ÅÖÃÎ»ÖÃ
     /// </summary>
-    /// <param name="suggestion">å»ºè®®å¯¹è±¡</param>
-    /// <param name="itemTypeCount">ç‰©å“ç±»å‹ç»Ÿè®¡</param>
+    /// <param name="suggestion">½¨Òé¶ÔÏó</param>
+    /// <param name="itemTypeCount">ÎïÆ·ÀàĞÍÍ³¼Æ</param>
     private void CheckHighFrequencyItemPlacement(BackpackOrganizationSuggestion suggestion,
         Dictionary<string, int> itemTypeCount)
     {
-        // è¯†åˆ«é«˜é¢‘ç‰©å“ç±»å‹ï¼ˆå‡è®¾æ¶ˆè€—å“å’Œå¼¹è¯ä¸ºé«˜é¢‘ä½¿ç”¨ï¼‰
+        // Ê¶±ğ¸ßÆµÎïÆ·ÀàĞÍ£¨¼ÙÉèÏûºÄÆ·ºÍµ¯Ò©Îª¸ßÆµÊ¹ÓÃ£©
         foreach (var typeCount in itemTypeCount)
         {
             string typeName = typeCount.Key.ToLower();
             if (typeName.Contains("consumable") || typeName.Contains("ammo") ||
-                typeName.Contains("æ¶ˆè€—å“") || typeName.Contains("å¼¹è¯"))
+                typeName.Contains("ÏûºÄÆ·") || typeName.Contains("µ¯Ò©"))
             {
-                suggestion.priorityItems.Add($"{typeCount.Key} (æ•°é‡:{typeCount.Value})");
-                suggestion.suggestions.Add($"å»ºè®®å°†{typeCount.Key}ç±»ç‰©å“æ”¾ç½®åœ¨èƒŒåŒ…æ˜“å–ä½ç½®ï¼ˆå·¦ä¸Šè§’åŒºåŸŸï¼‰");
+                suggestion.priorityItems.Add($"{typeCount.Key} (ÊıÁ¿:{typeCount.Value})");
+                suggestion.suggestions.Add($"½¨Òé½«{typeCount.Key}ÀàÎïÆ··ÅÖÃÔÚ±³°üÒ×È¡Î»ÖÃ£¨×óÉÏ½ÇÇøÓò£©");
             }
         }
     }
 
     /// <summary>
-    /// æ£€æŸ¥å†—ä½™ç‰©å“
+    /// ¼ì²éÈßÓàÎïÆ·
     /// </summary>
-    /// <param name="suggestion">å»ºè®®å¯¹è±¡</param>
-    /// <param name="itemTypeCount">ç‰©å“ç±»å‹ç»Ÿè®¡</param>
+    /// <param name="suggestion">½¨Òé¶ÔÏó</param>
+    /// <param name="itemTypeCount">ÎïÆ·ÀàĞÍÍ³¼Æ</param>
     private void CheckRedundantItems(BackpackOrganizationSuggestion suggestion,
         Dictionary<string, int> itemTypeCount)
     {
         foreach (var typeCount in itemTypeCount)
         {
-            // å¦‚æœæŸç±»å‹ç‰©å“æ•°é‡è¿‡å¤šï¼ˆè¶…è¿‡5ä¸ªï¼‰ï¼Œæ ‡è®°ä¸ºå¯èƒ½å†—ä½™
+            // Èç¹ûÄ³ÀàĞÍÎïÆ·ÊıÁ¿¹ı¶à£¨³¬¹ı5¸ö£©£¬±ê¼ÇÎª¿ÉÄÜÈßÓà
             if (typeCount.Value > 5)
             {
-                suggestion.redundantItems.Add($"{typeCount.Key} (æ•°é‡:{typeCount.Value})");
-                suggestion.suggestions.Add($"{typeCount.Key}ç±»ç‰©å“æ•°é‡è¾ƒå¤š({typeCount.Value}ä¸ª)ï¼Œå»ºè®®æ£€æŸ¥æ˜¯å¦æœ‰å†—ä½™");
+                suggestion.redundantItems.Add($"{typeCount.Key} (ÊıÁ¿:{typeCount.Value})");
+                suggestion.suggestions.Add($"{typeCount.Key}ÀàÎïÆ·ÊıÁ¿½Ï¶à({typeCount.Value}¸ö)£¬½¨Òé¼ì²éÊÇ·ñÓĞÈßÓà");
             }
         }
     }
 
     /// <summary>
-    /// è·å–èƒŒåŒ…å¿«é€Ÿè®¿é—®åŒºåŸŸåˆ†æ
-    /// åˆ†æèƒŒåŒ…ä¸­å“ªäº›åŒºåŸŸé€‚åˆæ”¾ç½®å¸¸ç”¨ç‰©å“
+    /// »ñÈ¡±³°ü¿ìËÙ·ÃÎÊÇøÓò·ÖÎö
+    /// ·ÖÎö±³°üÖĞÄÄĞ©ÇøÓòÊÊºÏ·ÅÖÃ³£ÓÃÎïÆ·
     /// </summary>
-    /// <returns>å¿«é€Ÿè®¿é—®åŒºåŸŸåˆ†æä¿¡æ¯</returns>
+    /// <returns>¿ìËÙ·ÃÎÊÇøÓò·ÖÎöĞÅÏ¢</returns>
     public BackpackQuickAccessInfo GetQuickAccessInfo()
     {
         var accessInfo = new BackpackQuickAccessInfo
@@ -409,62 +409,62 @@ public class BackpackItemGrid : BaseItemGrid
             recommendedPlacements = new Dictionary<string, Vector2Int>()
         };
 
-        // å®šä¹‰å¿«é€Ÿè®¿é—®åŒºåŸŸï¼ˆé€šå¸¸æ˜¯èƒŒåŒ…çš„å·¦ä¸Šè§’åŒºåŸŸï¼‰
+        // ¶¨Òå¿ìËÙ·ÃÎÊÇøÓò£¨Í¨³£ÊÇ±³°üµÄ×óÉÏ½ÇÇøÓò£©
         DefineQuickAccessZones(accessInfo);
 
-        // åˆ†æå½“å‰å¿«é€Ÿè®¿é—®åŒºåŸŸçš„ä½¿ç”¨æƒ…å†µ
+        // ·ÖÎöµ±Ç°¿ìËÙ·ÃÎÊÇøÓòµÄÊ¹ÓÃÇé¿ö
         AnalyzeQuickAccessUsage(accessInfo);
 
-        // ç”Ÿæˆæ¨èæ”¾ç½®å»ºè®®
+        // Éú³ÉÍÆ¼ö·ÅÖÃ½¨Òé
         GenerateQuickAccessRecommendations(accessInfo);
 
         return accessInfo;
     }
 
     /// <summary>
-    /// å®šä¹‰å¿«é€Ÿè®¿é—®åŒºåŸŸ
+    /// ¶¨Òå¿ìËÙ·ÃÎÊÇøÓò
     /// </summary>
-    /// <param name="accessInfo">è®¿é—®ä¿¡æ¯å¯¹è±¡</param>
+    /// <param name="accessInfo">·ÃÎÊĞÅÏ¢¶ÔÏó</param>
     private void DefineQuickAccessZones(BackpackQuickAccessInfo accessInfo)
     {
-        // ä¸»è¦å¿«é€Ÿè®¿é—®åŒºåŸŸï¼ˆå·¦ä¸Šè§’2x2ï¼‰
+        // Ö÷Òª¿ìËÙ·ÃÎÊÇøÓò£¨×óÉÏ½Ç2x2£©
         accessInfo.quickAccessZones.Add(new QuickAccessZone
         {
-            zoneName = "ä¸»è¦å¿«é€ŸåŒº",
+            zoneName = "Ö÷Òª¿ìËÙÇø",
             zoneArea = new RectInt(0, 0, 2, 2),
             priority = 1,
-            recommendedItemTypes = new List<string> { "æ¶ˆè€—å“", "æ²»ç–—ç‰©å“", "å¼¹è¯" }
+            recommendedItemTypes = new List<string> { "ÏûºÄÆ·", "ÖÎÁÆÎïÆ·", "µ¯Ò©" }
         });
 
-        // æ¬¡è¦å¿«é€Ÿè®¿é—®åŒºåŸŸï¼ˆå·¦ä¾§è¾¹ç¼˜ï¼‰
+        // ´ÎÒª¿ìËÙ·ÃÎÊÇøÓò£¨×ó²à±ßÔµ£©
         if (width > 2)
         {
             accessInfo.quickAccessZones.Add(new QuickAccessZone
             {
-                zoneName = "æ¬¡è¦å¿«é€ŸåŒº",
+                zoneName = "´ÎÒª¿ìËÙÇø",
                 zoneArea = new RectInt(0, 2, 1, Mathf.Min(3, height - 2)),
                 priority = 2,
-                recommendedItemTypes = new List<string> { "å·¥å…·", "é’¥åŒ™ç‰©å“" }
+                recommendedItemTypes = new List<string> { "¹¤¾ß", "Ô¿³×ÎïÆ·" }
             });
         }
 
-        // æ­¦å™¨å¿«é€ŸåŒºåŸŸï¼ˆé¡¶éƒ¨è¾¹ç¼˜ï¼‰
+        // ÎäÆ÷¿ìËÙÇøÓò£¨¶¥²¿±ßÔµ£©
         if (height > 2)
         {
             accessInfo.quickAccessZones.Add(new QuickAccessZone
             {
-                zoneName = "æ­¦å™¨å¿«é€ŸåŒº",
+                zoneName = "ÎäÆ÷¿ìËÙÇø",
                 zoneArea = new RectInt(2, 0, Mathf.Min(3, width - 2), 1),
                 priority = 2,
-                recommendedItemTypes = new List<string> { "æ­¦å™¨", "å¼¹è¯" }
+                recommendedItemTypes = new List<string> { "ÎäÆ÷", "µ¯Ò©" }
             });
         }
     }
 
     /// <summary>
-    /// åˆ†æå¿«é€Ÿè®¿é—®åŒºåŸŸçš„ä½¿ç”¨æƒ…å†µ
+    /// ·ÖÎö¿ìËÙ·ÃÎÊÇøÓòµÄÊ¹ÓÃÇé¿ö
     /// </summary>
-    /// <param name="accessInfo">è®¿é—®ä¿¡æ¯å¯¹è±¡</param>
+    /// <param name="accessInfo">·ÃÎÊĞÅÏ¢¶ÔÏó</param>
     private void AnalyzeQuickAccessUsage(BackpackQuickAccessInfo accessInfo)
     {
         foreach (var zone in accessInfo.quickAccessZones)
@@ -475,7 +475,7 @@ public class BackpackItemGrid : BaseItemGrid
             int occupiedCells = 0;
             int totalCells = zone.zoneArea.width * zone.zoneArea.height;
 
-            // æ£€æŸ¥åŒºåŸŸå†…çš„ç‰©å“
+            // ¼ì²éÇøÓòÄÚµÄÎïÆ·
             foreach (var placedItem in placedItems)
             {
                 if (IsItemInZone(placedItem, zone.zoneArea))
@@ -494,11 +494,11 @@ public class BackpackItemGrid : BaseItemGrid
     }
 
     /// <summary>
-    /// æ£€æŸ¥ç‰©å“æ˜¯å¦åœ¨æŒ‡å®šåŒºåŸŸå†…
+    /// ¼ì²éÎïÆ·ÊÇ·ñÔÚÖ¸¶¨ÇøÓòÄÚ
     /// </summary>
-    /// <param name="placedItem">æ”¾ç½®çš„ç‰©å“</param>
-    /// <param name="zoneArea">åŒºåŸŸèŒƒå›´</param>
-    /// <returns>æ˜¯å¦åœ¨åŒºåŸŸå†…</returns>
+    /// <param name="placedItem">·ÅÖÃµÄÎïÆ·</param>
+    /// <param name="zoneArea">ÇøÓò·¶Î§</param>
+    /// <returns>ÊÇ·ñÔÚÇøÓòÄÚ</returns>
     private bool IsItemInZone(PlacedItem placedItem, RectInt zoneArea)
     {
         return placedItem.position.x >= zoneArea.x &&
@@ -508,19 +508,19 @@ public class BackpackItemGrid : BaseItemGrid
     }
 
     /// <summary>
-    /// ç”Ÿæˆå¿«é€Ÿè®¿é—®æ¨èæ”¾ç½®å»ºè®®
+    /// Éú³É¿ìËÙ·ÃÎÊÍÆ¼ö·ÅÖÃ½¨Òé
     /// </summary>
-    /// <param name="accessInfo">è®¿é—®ä¿¡æ¯å¯¹è±¡</param>
+    /// <param name="accessInfo">·ÃÎÊĞÅÏ¢¶ÔÏó</param>
     private void GenerateQuickAccessRecommendations(BackpackQuickAccessInfo accessInfo)
     {
-        // ä¸ºæ¯ä¸ªå¿«é€Ÿè®¿é—®åŒºåŸŸç”Ÿæˆæ¨è
+        // ÎªÃ¿¸ö¿ìËÙ·ÃÎÊÇøÓòÉú³ÉÍÆ¼ö
         foreach (var zone in accessInfo.quickAccessZones)
         {
-            if (zone.utilizationRate < 0.5f) // å¦‚æœåŒºåŸŸåˆ©ç”¨ç‡ä½äº50%
+            if (zone.utilizationRate < 0.5f) // Èç¹ûÇøÓòÀûÓÃÂÊµÍÓÚ50%
             {
                 foreach (var recommendedType in zone.recommendedItemTypes)
                 {
-                    // å¯»æ‰¾åˆé€‚çš„ç©ºä½
+                    // Ñ°ÕÒºÏÊÊµÄ¿ÕÎ»
                     var availablePos = FindAvailablePositionInZone(zone.zoneArea);
                     if (availablePos != new Vector2Int(-1, -1))
                     {
@@ -532,10 +532,10 @@ public class BackpackItemGrid : BaseItemGrid
     }
 
     /// <summary>
-    /// åœ¨æŒ‡å®šåŒºåŸŸå†…å¯»æ‰¾å¯ç”¨ä½ç½®
+    /// ÔÚÖ¸¶¨ÇøÓòÄÚÑ°ÕÒ¿ÉÓÃÎ»ÖÃ
     /// </summary>
-    /// <param name="zoneArea">åŒºåŸŸèŒƒå›´</param>
-    /// <returns>å¯ç”¨ä½ç½®ï¼Œå¦‚æœæ²¡æœ‰åˆ™è¿”å›(-1,-1)</returns>
+    /// <param name="zoneArea">ÇøÓò·¶Î§</param>
+    /// <returns>¿ÉÓÃÎ»ÖÃ£¬Èç¹ûÃ»ÓĞÔò·µ»Ø(-1,-1)</returns>
     private Vector2Int FindAvailablePositionInZone(RectInt zoneArea)
     {
         for (int x = zoneArea.x; x < zoneArea.x + zoneArea.width; x++)
@@ -555,40 +555,40 @@ public class BackpackItemGrid : BaseItemGrid
 
 
 
-    // ==================== ISaveableæ¥å£æ‰©å±•å®ç° ====================
+    // ==================== ISaveable½Ó¿ÚÀ©Õ¹ÊµÏÖ ====================
 
     /// <summary>
-    /// ç”ŸæˆèƒŒåŒ…ç½‘æ ¼ä¸“ç”¨çš„ç¨³å®šä¿å­˜ID
-    /// æ ¼å¼ï¼šBackpack_[èƒŒåŒ…æ•°æ®ID]_Grid
-    /// ä½¿ç”¨èƒŒåŒ…æ•°æ®çš„å”¯ä¸€IDç¡®ä¿åŒä¸€ä¸ªèƒŒåŒ…é‡æ–°è£…å¤‡æ—¶ä½¿ç”¨ç›¸åŒçš„ä¿å­˜ID
+    /// Éú³É±³°üÍø¸ñ×¨ÓÃµÄÎÈ¶¨±£´æID
+    /// ¸ñÊ½£ºBackpack_[±³°üÊı¾İID]_Grid
+    /// Ê¹ÓÃ±³°üÊı¾İµÄÎ¨Ò»IDÈ·±£Í¬Ò»¸ö±³°üÖØĞÂ×°±¸Ê±Ê¹ÓÃÏàÍ¬µÄ±£´æID
     /// </summary>
     public void GenerateStableSaveID()
     {
         string backpackDataID = "Unknown";
         if (currentBackpackData != null)
         {
-            // ä½¿ç”¨èƒŒåŒ…æ•°æ®çš„nameä½œä¸ºå”¯ä¸€æ ‡è¯†ï¼Œç¡®ä¿åŒä¸€ä¸ªèƒŒåŒ…æ•°æ®æ€»æ˜¯ç”Ÿæˆç›¸åŒçš„ID
+            // Ê¹ÓÃ±³°üÊı¾İµÄname×÷ÎªÎ¨Ò»±êÊ¶£¬È·±£Í¬Ò»¸ö±³°üÊı¾İ×ÜÊÇÉú³ÉÏàÍ¬µÄID
             backpackDataID = currentBackpackData.name.Replace(" ", "").Replace("/", "").Replace("\\", "");
         }
 
         string newGridID = $"Backpack_{backpackDataID}_Grid";
 
-        // åªæœ‰å½“IDçœŸæ­£æ”¹å˜æ—¶æ‰æ›´æ–°å¹¶æ ‡è®°ä¸ºä¿®æ”¹
+        // Ö»ÓĞµ±IDÕæÕı¸Ä±äÊ±²Å¸üĞÂ²¢±ê¼ÇÎªĞŞ¸Ä
         if (gridID != newGridID)
         {
             gridID = newGridID;
             MarkAsModified();
-            Debug.Log($"èƒŒåŒ…ç½‘æ ¼æ›´æ–°ç¨³å®šID: {gridID}");
+            Debug.Log($"±³°üÍø¸ñ¸üĞÂÎÈ¶¨ID: {gridID}");
         }
         else
         {
-            Debug.Log($"èƒŒåŒ…ç½‘æ ¼ä¿æŒç°æœ‰ID: {gridID}");
+            Debug.Log($"±³°üÍø¸ñ±£³ÖÏÖÓĞID: {gridID}");
         }
     }
 
     /// <summary>
-    /// ç”ŸæˆèƒŒåŒ…ç½‘æ ¼ä¸“ç”¨çš„å”¯ä¸€æ ‡è¯†IDï¼ˆé‡å†™åŸºç±»æ–¹æ³•ï¼‰
-    /// è°ƒç”¨ç¨³å®šIDç”Ÿæˆæ–¹æ³•ç¡®ä¿ä¸€è‡´æ€§
+    /// Éú³É±³°üÍø¸ñ×¨ÓÃµÄÎ¨Ò»±êÊ¶ID£¨ÖØĞ´»ùÀà·½·¨£©
+    /// µ÷ÓÃÎÈ¶¨IDÉú³É·½·¨È·±£Ò»ÖÂĞÔ
     /// </summary>
     public override void GenerateNewSaveID()
     {
@@ -596,14 +596,14 @@ public class BackpackItemGrid : BaseItemGrid
     }
 
     /// <summary>
-    /// è·å–èƒŒåŒ…ç½‘æ ¼çš„ä¿å­˜æ•°æ®
-    /// åŒ…å«èƒŒåŒ…æ•°æ®è·¯å¾„å’ŒåŠ¨æ€å°ºå¯¸ä¿¡æ¯
+    /// »ñÈ¡±³°üÍø¸ñµÄ±£´æÊı¾İ
+    /// °üº¬±³°üÊı¾İÂ·¾¶ºÍ¶¯Ì¬³ß´çĞÅÏ¢
     /// </summary>
     public override BaseItemGridSaveData GetSaveData()
     {
         var saveData = base.GetSaveData();
 
-        // åˆ›å»ºèƒŒåŒ…ä¸“ç”¨çš„ä¿å­˜æ•°æ®
+        // ´´½¨±³°ü×¨ÓÃµÄ±£´æÊı¾İ
         var backpackSaveData = new BackpackGridSaveData
         {
             gridID = saveData.gridID,
@@ -614,7 +614,7 @@ public class BackpackItemGrid : BaseItemGrid
             lastModified = saveData.lastModified,
             isModified = saveData.isModified,
 
-            // èƒŒåŒ…ç‰¹å®šæ•°æ®
+            // ±³°üÌØ¶¨Êı¾İ
             backpackDataPath = GetBackpackDataPath(),
             defaultWidth = defaultWidth,
             defaultHeight = defaultHeight,
@@ -626,29 +626,29 @@ public class BackpackItemGrid : BaseItemGrid
     }
 
     /// <summary>
-    /// ä»ä¿å­˜æ•°æ®åŠ è½½èƒŒåŒ…ç½‘æ ¼çŠ¶æ€
-    /// æ¢å¤èƒŒåŒ…æ•°æ®å…³è”å’Œç½‘æ ¼é…ç½®
+    /// ´Ó±£´æÊı¾İ¼ÓÔØ±³°üÍø¸ñ×´Ì¬
+    /// »Ö¸´±³°üÊı¾İ¹ØÁªºÍÍø¸ñÅäÖÃ
     /// </summary>
     public override bool LoadSaveData(BaseItemGridSaveData saveData)
     {
         try
         {
-            // å°è¯•è½¬æ¢ä¸ºèƒŒåŒ…ä¸“ç”¨ä¿å­˜æ•°æ®
+            // ³¢ÊÔ×ª»»Îª±³°ü×¨ÓÃ±£´æÊı¾İ
             if (saveData is BackpackGridSaveData backpackData)
             {
-                // æ¢å¤èƒŒåŒ…æ•°æ®å…³è”
+                // »Ö¸´±³°üÊı¾İ¹ØÁª
                 if (!string.IsNullOrEmpty(backpackData.backpackDataPath))
                 {
                     var backpackItemData = Resources.Load<InventorySystemItemDataSO>(backpackData.backpackDataPath);
                     if (backpackItemData != null)
                     {
                         SetBackpackData(backpackItemData);
-                        Debug.Log($"æˆåŠŸæ¢å¤èƒŒåŒ…æ•°æ®: {backpackData.backpackDataPath}");
+                        Debug.Log($"³É¹¦»Ö¸´±³°üÊı¾İ: {backpackData.backpackDataPath}");
                     }
                     else
                     {
-                        Debug.LogWarning($"æ— æ³•åŠ è½½èƒŒåŒ…æ•°æ®: {backpackData.backpackDataPath}");
-                        // ä½¿ç”¨é»˜è®¤å°ºå¯¸
+                        Debug.LogWarning($"ÎŞ·¨¼ÓÔØ±³°üÊı¾İ: {backpackData.backpackDataPath}");
+                        // Ê¹ÓÃÄ¬ÈÏ³ß´ç
                         defaultWidth = backpackData.defaultWidth;
                         defaultHeight = backpackData.defaultHeight;
                         LoadFromBackpackData();
@@ -656,7 +656,7 @@ public class BackpackItemGrid : BaseItemGrid
                 }
                 else if (!backpackData.hasActiveBackpack)
                 {
-                    // æ²¡æœ‰æ´»åŠ¨èƒŒåŒ…ï¼Œä½¿ç”¨é»˜è®¤é…ç½®
+                    // Ã»ÓĞ»î¶¯±³°ü£¬Ê¹ÓÃÄ¬ÈÏÅäÖÃ
                     defaultWidth = backpackData.defaultWidth;
                     defaultHeight = backpackData.defaultHeight;
                     currentBackpackData = null;
@@ -664,61 +664,61 @@ public class BackpackItemGrid : BaseItemGrid
                 }
             }
 
-            // è°ƒç”¨åŸºç±»åŠ è½½æ–¹æ³•
+            // µ÷ÓÃ»ùÀà¼ÓÔØ·½·¨
             bool baseResult = base.LoadSaveData(saveData);
 
             if (baseResult)
             {
-                Debug.Log($"èƒŒåŒ…ç½‘æ ¼æ•°æ®åŠ è½½æˆåŠŸ: {saveData.gridID}");
+                Debug.Log($"±³°üÍø¸ñÊı¾İ¼ÓÔØ³É¹¦: {saveData.gridID}");
             }
 
             return baseResult;
         }
         catch (System.Exception ex)
         {
-            Debug.LogError($"èƒŒåŒ…ç½‘æ ¼æ•°æ®åŠ è½½å¤±è´¥: {ex.Message}");
+            Debug.LogError($"±³°üÍø¸ñÊı¾İ¼ÓÔØÊ§°Ü: {ex.Message}");
             return false;
         }
     }
 
     /// <summary>
-    /// å¤„ç†èƒŒåŒ…å¸è½½æ—¶çš„æ•°æ®æ¸…ç†
-    /// æ¸…ç©ºç½‘æ ¼å†…å®¹å¹¶é‡ç½®ä¸ºé»˜è®¤çŠ¶æ€
+    /// ´¦Àí±³°üĞ¶ÔØÊ±µÄÊı¾İÇåÀí
+    /// Çå¿ÕÍø¸ñÄÚÈİ²¢ÖØÖÃÎªÄ¬ÈÏ×´Ì¬
     /// </summary>
     public void OnBackpackUnequipped()
     {
         try
         {
-            // æ¸…ç©ºç½‘æ ¼ä¸­çš„æ‰€æœ‰ç‰©å“
+            // Çå¿ÕÍø¸ñÖĞµÄËùÓĞÎïÆ·
             ClearGrid();
 
-            // æ¸…ç†ç‰©å“å®ä¾‹IDæ˜ å°„
+            // ÇåÀíÎïÆ·ÊµÀıIDÓ³Éä
             itemInstanceMap.Clear();
             objectToInstanceID.Clear();
 
-            // é‡ç½®ä¸ºé»˜è®¤çŠ¶æ€
+            // ÖØÖÃÎªÄ¬ÈÏ×´Ì¬
             currentBackpackData = null;
             LoadFromBackpackData();
 
-            // é‡æ–°åˆå§‹åŒ–ç½‘æ ¼æ•°ç»„
+            // ÖØĞÂ³õÊ¼»¯Íø¸ñÊı×é
             InitializeGridArrays();
             Init(width, height);
 
-            // æ ‡è®°ä¸ºå·²ä¿®æ”¹å¹¶æ›´æ–°æ—¶é—´æˆ³
+            // ±ê¼ÇÎªÒÑĞŞ¸Ä²¢¸üĞÂÊ±¼ä´Á
             MarkAsModified();
 
-            Debug.Log("èƒŒåŒ…å¸è½½ï¼Œç½‘æ ¼æ•°æ®å·²æ¸…ç†");
+            Debug.Log("±³°üĞ¶ÔØ£¬Íø¸ñÊı¾İÒÑÇåÀí");
         }
         catch (System.Exception ex)
         {
-            Debug.LogError($"èƒŒåŒ…å¸è½½æ•°æ®æ¸…ç†å¤±è´¥: {ex.Message}");
+            Debug.LogError($"±³°üĞ¶ÔØÊı¾İÇåÀíÊ§°Ü: {ex.Message}");
         }
     }
 
     /// <summary>
-    /// è·å–å½“å‰èƒŒåŒ…æ•°æ®çš„èµ„æºè·¯å¾„
+    /// »ñÈ¡µ±Ç°±³°üÊı¾İµÄ×ÊÔ´Â·¾¶
     /// </summary>
-    /// <returns>èƒŒåŒ…æ•°æ®èµ„æºè·¯å¾„ï¼Œå¦‚æœæ²¡æœ‰åˆ™è¿”å›ç©ºå­—ç¬¦ä¸²</returns>
+    /// <returns>±³°üÊı¾İ×ÊÔ´Â·¾¶£¬Èç¹ûÃ»ÓĞÔò·µ»Ø¿Õ×Ö·û´®</returns>
     private string GetBackpackDataPath()
     {
         if (currentBackpackData == null) return "";
@@ -727,7 +727,7 @@ public class BackpackItemGrid : BaseItemGrid
         string assetPath = UnityEditor.AssetDatabase.GetAssetPath(currentBackpackData);
         if (!string.IsNullOrEmpty(assetPath) && assetPath.StartsWith("Assets/Resources/"))
         {
-            // è½¬æ¢ä¸ºResources.Loadå¯ç”¨çš„è·¯å¾„
+            // ×ª»»ÎªResources.Load¿ÉÓÃµÄÂ·¾¶
             string resourcePath = assetPath.Substring("Assets/Resources/".Length);
             if (resourcePath.EndsWith(".asset"))
             {
@@ -740,40 +740,40 @@ public class BackpackItemGrid : BaseItemGrid
     }
 
     /// <summary>
-    /// éªŒè¯èƒŒåŒ…ç½‘æ ¼æ•°æ®çš„å®Œæ•´æ€§
+    /// ÑéÖ¤±³°üÍø¸ñÊı¾İµÄÍêÕûĞÔ
     /// </summary>
-    /// <returns>æ•°æ®æ˜¯å¦æœ‰æ•ˆ</returns>
+    /// <returns>Êı¾İÊÇ·ñÓĞĞ§</returns>
     public override bool ValidateData()
     {
-        // è°ƒç”¨åŸºç±»éªŒè¯
+        // µ÷ÓÃ»ùÀàÑéÖ¤
         if (!base.ValidateData())
         {
             return false;
         }
 
-        // éªŒè¯èƒŒåŒ…ç‰¹å®šæ•°æ®
+        // ÑéÖ¤±³°üÌØ¶¨Êı¾İ
         if (currentBackpackData != null)
         {
-            // éªŒè¯èƒŒåŒ…æ•°æ®çš„æœ‰æ•ˆæ€§
+            // ÑéÖ¤±³°üÊı¾İµÄÓĞĞ§ĞÔ
             if (currentBackpackData.CellH <= 0 || currentBackpackData.CellV <= 0)
             {
-                Debug.LogError("èƒŒåŒ…æ•°æ®ä¸­çš„ç½‘æ ¼å°ºå¯¸æ— æ•ˆ");
+                Debug.LogError("±³°üÊı¾İÖĞµÄÍø¸ñ³ß´çÎŞĞ§");
                 return false;
             }
 
-            // éªŒè¯å½“å‰ç½‘æ ¼å°ºå¯¸ä¸èƒŒåŒ…æ•°æ®æ˜¯å¦åŒ¹é…
+            // ÑéÖ¤µ±Ç°Íø¸ñ³ß´çÓë±³°üÊı¾İÊÇ·ñÆ¥Åä
             if (width != currentBackpackData.CellH || height != currentBackpackData.CellV)
             {
-                Debug.LogWarning("å½“å‰ç½‘æ ¼å°ºå¯¸ä¸èƒŒåŒ…æ•°æ®ä¸åŒ¹é…ï¼Œå°†è‡ªåŠ¨åŒæ­¥");
+                Debug.LogWarning("µ±Ç°Íø¸ñ³ß´çÓë±³°üÊı¾İ²»Æ¥Åä£¬½«×Ô¶¯Í¬²½");
                 LoadFromBackpackData();
             }
         }
 
-        // éªŒè¯å ç”¨ç‡æ˜¯å¦åˆç†ï¼ˆä¸åº”è¶…è¿‡100%ï¼‰
+        // ÑéÖ¤Õ¼ÓÃÂÊÊÇ·ñºÏÀí£¨²»Ó¦³¬¹ı100%£©
         float occupancyRate = GetBackpackOccupancyRate();
         if (occupancyRate > 1.0f)
         {
-            Debug.LogError($"èƒŒåŒ…å ç”¨ç‡å¼‚å¸¸: {occupancyRate * 100:F1}%");
+            Debug.LogError($"±³°üÕ¼ÓÃÂÊÒì³£: {occupancyRate * 100:F1}%");
             return false;
         }
 
@@ -781,55 +781,55 @@ public class BackpackItemGrid : BaseItemGrid
     }
 
     /// <summary>
-    /// åˆå§‹åŒ–èƒŒåŒ…ç½‘æ ¼çš„ä¿å­˜ç³»ç»Ÿ
-    /// åœ¨Awakeä¸­è°ƒç”¨ä»¥ç¡®ä¿ä¿å­˜ç³»ç»Ÿæ­£ç¡®åˆå§‹åŒ–
+    /// ³õÊ¼»¯±³°üÍø¸ñµÄ±£´æÏµÍ³
+    /// ÔÚAwakeÖĞµ÷ÓÃÒÔÈ·±£±£´æÏµÍ³ÕıÈ·³õÊ¼»¯
     /// </summary>
     protected override void InitializeSaveSystem()
     {
         base.InitializeSaveSystem();
 
-        // å¦‚æœæ²¡æœ‰æœ‰æ•ˆIDï¼Œç”ŸæˆèƒŒåŒ…ä¸“ç”¨ID
+        // Èç¹ûÃ»ÓĞÓĞĞ§ID£¬Éú³É±³°ü×¨ÓÃID
         if (!IsSaveIDValid())
         {
             GenerateNewSaveID();
         }
 
-        Debug.Log($"èƒŒåŒ…ç½‘æ ¼ä¿å­˜ç³»ç»Ÿåˆå§‹åŒ–å®Œæˆ: {GetSaveID()}");
+        Debug.Log($"±³°üÍø¸ñ±£´æÏµÍ³³õÊ¼»¯Íê³É: {GetSaveID()}");
     }
 
     /// <summary>
-    /// è·å–èƒŒåŒ…çŠ¶æ€æ‘˜è¦ä¿¡æ¯
-    /// ç”¨äºè°ƒè¯•å’ŒçŠ¶æ€ç›‘æ§
+    /// »ñÈ¡±³°ü×´Ì¬ÕªÒªĞÅÏ¢
+    /// ÓÃÓÚµ÷ÊÔºÍ×´Ì¬¼à¿Ø
     /// </summary>
     public string GetBackpackStatusSummary()
     {
         var summary = new System.Text.StringBuilder();
-        summary.AppendLine($"èƒŒåŒ…ç½‘æ ¼ID: {GetSaveID()}");
-        summary.AppendLine($"èƒŒåŒ…æ•°æ®: {(currentBackpackData != null ? currentBackpackData.itemName : "æ— ")}");
-        summary.AppendLine($"ç½‘æ ¼å°ºå¯¸: {width}x{height}");
-        summary.AppendLine($"å ç”¨ç‡: {GetBackpackOccupancyRate() * 100:F1}%");
-        summary.AppendLine($"å‰©ä½™ç©ºé—´: {GetRemainingSpace()} æ ¼");
-        summary.AppendLine($"å·²æ”¾ç½®ç‰©å“æ•°: {placedItems.Count}");
-        summary.AppendLine($"æœ€åä¿®æ”¹: {GetLastModified()}");
+        summary.AppendLine($"±³°üÍø¸ñID: {GetSaveID()}");
+        summary.AppendLine($"±³°üÊı¾İ: {(currentBackpackData != null ? currentBackpackData.itemName : "ÎŞ")}");
+        summary.AppendLine($"Íø¸ñ³ß´ç: {width}x{height}");
+        summary.AppendLine($"Õ¼ÓÃÂÊ: {GetBackpackOccupancyRate() * 100:F1}%");
+        summary.AppendLine($"Ê£Óà¿Õ¼ä: {GetRemainingSpace()} ¸ñ");
+        summary.AppendLine($"ÒÑ·ÅÖÃÎïÆ·Êı: {placedItems.Count}");
+        summary.AppendLine($"×îºóĞŞ¸Ä: {GetLastModified()}");
         return summary.ToString();
     }
 
-    // ==================== èƒŒåŒ…ä¸“ç”¨ä¿å­˜æ•°æ®ç±» ====================
+    // ==================== ±³°ü×¨ÓÃ±£´æÊı¾İÀà ====================
 
     [System.Serializable]
     public class BackpackGridSaveData : BaseItemGridSaveData
     {
-        public string backpackDataPath;       // èƒŒåŒ…æ•°æ®èµ„æºè·¯å¾„
-        public int defaultWidth;              // é»˜è®¤å®½åº¦
-        public int defaultHeight;             // é»˜è®¤é«˜åº¦
-        public bool hasActiveBackpack;        // æ˜¯å¦æœ‰æ´»åŠ¨çš„èƒŒåŒ…
-        public float occupancyRate;           // å ç”¨ç‡å¿«ç…§
+        public string backpackDataPath;       // ±³°üÊı¾İ×ÊÔ´Â·¾¶
+        public int defaultWidth;              // Ä¬ÈÏ¿í¶È
+        public int defaultHeight;             // Ä¬ÈÏ¸ß¶È
+        public bool hasActiveBackpack;        // ÊÇ·ñÓĞ»î¶¯µÄ±³°ü
+        public float occupancyRate;           // Õ¼ÓÃÂÊ¿ìÕÕ
     }
 
-    // ==================== èƒŒåŒ…æ£€æµ‹å™¨æ•°æ®ç»“æ„ ====================
+    // ==================== ±³°ü¼ì²âÆ÷Êı¾İ½á¹¹ ====================
 
     /// <summary>
-    /// èƒŒåŒ…è´Ÿé‡åˆ†æä¿¡æ¯
+    /// ±³°ü¸ºÖØ·ÖÎöĞÅÏ¢
     /// </summary>
     [System.Serializable]
     public class BackpackWeightInfo
@@ -845,7 +845,7 @@ public class BackpackItemGrid : BaseItemGrid
     }
 
     /// <summary>
-    /// èƒŒåŒ…æ•´ç†å»ºè®®ä¿¡æ¯
+    /// ±³°üÕûÀí½¨ÒéĞÅÏ¢
     /// </summary>
     [System.Serializable]
     public class BackpackOrganizationSuggestion
@@ -859,7 +859,7 @@ public class BackpackItemGrid : BaseItemGrid
     }
 
     /// <summary>
-    /// èƒŒåŒ…å¿«é€Ÿè®¿é—®åŒºåŸŸä¿¡æ¯
+    /// ±³°ü¿ìËÙ·ÃÎÊÇøÓòĞÅÏ¢
     /// </summary>
     [System.Serializable]
     public class BackpackQuickAccessInfo
@@ -870,7 +870,7 @@ public class BackpackItemGrid : BaseItemGrid
     }
 
     /// <summary>
-    /// å¿«é€Ÿè®¿é—®åŒºåŸŸå®šä¹‰
+    /// ¿ìËÙ·ÃÎÊÇøÓò¶¨Òå
     /// </summary>
     [System.Serializable]
     public class QuickAccessZone

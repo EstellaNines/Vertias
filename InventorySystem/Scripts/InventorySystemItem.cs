@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-// ç‰©å“ç³»ç»Ÿé¡¹ç›® - æ”¯æŒå®ä¾‹IDå’Œåºåˆ—åŒ–çš„æ•°æ®å®¹å™¨
+// ÎïÆ·ÏµÍ³ÏîÄ¿ - Ö§³ÖÊµÀıIDºÍĞòÁĞ»¯µÄÊı¾İÈİÆ÷
 [System.Serializable]
 public class ItemSaveData
 {
@@ -10,7 +10,7 @@ public class ItemSaveData
     public string instanceDataJson;
     public Vector2Int gridPosition;
     public bool isDraggable;
-    public string itemDataPath; // ç‰©å“æ•°æ®èµ„æºè·¯å¾„
+    public string itemDataPath; // ÎïÆ·Êı¾İ×ÊÔ´Â·¾¶
 
     public ItemSaveData()
     {
@@ -25,24 +25,24 @@ public class ItemSaveData
 
 public class InventorySystemItem : MonoBehaviour
 {
-    [Header("å®ä¾‹æ ‡è¯†")]
+    [Header("ÊµÀı±êÊ¶")]
     [SerializeField] private string instanceID;
 
-    [Header("ç»„ä»¶å¼•ç”¨")]
+    [Header("×é¼şÒıÓÃ")]
     ItemDataHolder holder;
 
-    [Header("å±æ€§è®¾ç½®")]
+    [Header("ÊôĞÔÉèÖÃ")]
     private bool isDraggable = true;
 
-    [Header("ç½‘æ ¼ä½ç½®")]
+    [Header("Íø¸ñÎ»ÖÃ")]
     [SerializeField] private Vector2Int gridPosition = Vector2Int.zero;
 
-    // åŸºç¡€å±æ€§
+    // »ù´¡ÊôĞÔ
     public Vector2Int Size => holder != null ? new Vector2Int(holder.ItemWidth, holder.ItemHeight) : Vector2Int.one;
     public InventorySystemItemDataSO Data => holder?.GetItemData();
     public bool IsDraggable { get => isDraggable; set => isDraggable = value; }
 
-    // å®ä¾‹IDå±æ€§
+    // ÊµÀıIDÊôĞÔ
     public string InstanceID
     {
         get
@@ -56,7 +56,7 @@ public class InventorySystemItem : MonoBehaviour
         private set => instanceID = value;
     }
 
-    // ç½‘æ ¼ä½ç½®å±æ€§
+    // Íø¸ñÎ»ÖÃÊôĞÔ
     public Vector2Int GridPosition
     {
         get => gridPosition;
@@ -65,29 +65,29 @@ public class InventorySystemItem : MonoBehaviour
 
     void Awake()
     {
-        // æŸ¥æ‰¾å­å¯¹è±¡ä¸­çš„ ItemDataHolder
+        // ²éÕÒ×Ó¶ÔÏóÖĞµÄ ItemDataHolder
         holder = GetComponentInChildren<ItemDataHolder>();
         if (holder == null)
         {
-            Debug.LogError($"åœ¨ {gameObject.name} å­å¯¹è±¡ä¸­æœªæ‰¾åˆ° ItemDataHolder ç»„ä»¶ï¼");
+            Debug.LogError($"ÔÚ {gameObject.name} ×Ó¶ÔÏóÖĞÎ´ÕÒµ½ ItemDataHolder ×é¼ş£¡");
         }
 
-        // ç¡®ä¿æœ‰å”¯ä¸€çš„å®ä¾‹ID
+        // È·±£ÓĞÎ¨Ò»µÄÊµÀıID
         if (string.IsNullOrEmpty(instanceID))
         {
             instanceID = System.Guid.NewGuid().ToString();
         }
     }
 
-    // === å®ä¾‹IDç®¡ç†æ–¹æ³• ===
+    // === ÊµÀıID¹ÜÀí·½·¨ ===
 
-    // è·å–å®ä¾‹ID
+    // »ñÈ¡ÊµÀıID
     public string GetItemInstanceID()
     {
         return InstanceID;
     }
 
-    // è®¾ç½®å®ä¾‹IDï¼ˆé€šå¸¸ç”¨äºåŠ è½½ä¿å­˜æ•°æ®æ—¶ï¼‰
+    // ÉèÖÃÊµÀıID£¨Í¨³£ÓÃÓÚ¼ÓÔØ±£´æÊı¾İÊ±£©
     public void SetItemInstanceID(string id)
     {
         if (!string.IsNullOrEmpty(id))
@@ -96,53 +96,53 @@ public class InventorySystemItem : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning($"å°è¯•è®¾ç½®ç©ºçš„å®ä¾‹IDåˆ°ç‰©å“ {gameObject.name}ï¼Œå°†ç”Ÿæˆæ–°çš„ID");
+            Debug.LogWarning($"³¢ÊÔÉèÖÃ¿ÕµÄÊµÀıIDµ½ÎïÆ· {gameObject.name}£¬½«Éú³ÉĞÂµÄID");
             instanceID = System.Guid.NewGuid().ToString();
         }
     }
 
-    // ç”Ÿæˆæ–°çš„å®ä¾‹ID
+    // Éú³ÉĞÂµÄÊµÀıID
     public string GenerateNewItemInstanceID()
     {
         instanceID = System.Guid.NewGuid().ToString();
         return instanceID;
     }
 
-    // æ£€æŸ¥å®ä¾‹IDæ˜¯å¦æœ‰æ•ˆ
+    // ¼ì²éÊµÀıIDÊÇ·ñÓĞĞ§
     public bool IsItemInstanceIDValid()
     {
         return !string.IsNullOrEmpty(instanceID) && instanceID.Length > 0;
     }
 
-    // === æ•°æ®è®¿é—®æ–¹æ³• ===
+    // === Êı¾İ·ÃÎÊ·½·¨ ===
 
-    // è·å–ItemDataHolderç»„ä»¶
+    // »ñÈ¡ItemDataHolder×é¼ş
     public ItemDataHolder GetItemDataHolder()
     {
         return holder;
     }
 
-    // è·å–ç‰©å“æ•°æ®ID
+    // »ñÈ¡ÎïÆ·Êı¾İID
     public int GetItemDataID()
     {
         return Data?.id ?? 0;
     }
 
-    // è·å–ç‰©å“åç§°
+    // »ñÈ¡ÎïÆ·Ãû³Æ
     public string GetItemName()
     {
-        return Data?.itemName ?? "æœªçŸ¥ç‰©å“";
+        return Data?.itemName ?? "Î´ÖªÎïÆ·";
     }
 
-    // æ£€æŸ¥æ˜¯å¦æœ‰æœ‰æ•ˆçš„ç‰©å“æ•°æ®
+    // ¼ì²éÊÇ·ñÓĞÓĞĞ§µÄÎïÆ·Êı¾İ
     public bool HasValidItemData()
     {
         return holder != null && Data != null;
     }
 
-    // === åºåˆ—åŒ–æ”¯æŒæ–¹æ³• ===
+    // === ĞòÁĞ»¯Ö§³Ö·½·¨ ===
 
-    // åˆ›å»ºä¿å­˜æ•°æ®
+    // ´´½¨±£´æÊı¾İ
     public ItemSaveData CreateSaveData()
     {
         ItemSaveData saveData = new ItemSaveData();
@@ -152,7 +152,7 @@ public class InventorySystemItem : MonoBehaviour
         saveData.gridPosition = gridPosition;
         saveData.isDraggable = isDraggable;
 
-        // è®¾ç½®ç‰©å“æ•°æ®è·¯å¾„
+        // ÉèÖÃÎïÆ·Êı¾İÂ·¾¶
         if (Data != null)
         {
 #if UNITY_EDITOR
@@ -160,7 +160,7 @@ public class InventorySystemItem : MonoBehaviour
 #endif
         }
 
-        // åºåˆ—åŒ–å®ä¾‹æ•°æ®
+        // ĞòÁĞ»¯ÊµÀıÊı¾İ
         if (holder != null)
         {
             saveData.instanceDataJson = holder.SerializeInstanceData();
@@ -169,36 +169,36 @@ public class InventorySystemItem : MonoBehaviour
         return saveData;
     }
 
-    // ä»ä¿å­˜æ•°æ®åŠ è½½
+    // ´Ó±£´æÊı¾İ¼ÓÔØ
     public bool LoadFromSaveData(ItemSaveData saveData)
     {
         if (saveData == null)
         {
-            Debug.LogError("ä¿å­˜æ•°æ®ä¸ºç©ºï¼Œæ— æ³•åŠ è½½");
+            Debug.LogError("±£´æÊı¾İÎª¿Õ£¬ÎŞ·¨¼ÓÔØ");
             return false;
         }
 
-        // è®¾ç½®å®ä¾‹ID
+        // ÉèÖÃÊµÀıID
         SetItemInstanceID(saveData.instanceID);
 
-        // è®¾ç½®åŸºç¡€å±æ€§
+        // ÉèÖÃ»ù´¡ÊôĞÔ
         gridPosition = saveData.gridPosition;
         isDraggable = saveData.isDraggable;
 
-        // åŠ è½½å®ä¾‹æ•°æ®
+        // ¼ÓÔØÊµÀıÊı¾İ
         if (holder != null && !string.IsNullOrEmpty(saveData.instanceDataJson))
         {
             bool success = holder.DeserializeInstanceData(saveData.instanceDataJson);
             if (!success)
             {
-                Debug.LogWarning($"ç‰©å“ {GetItemName()} çš„å®ä¾‹æ•°æ®åŠ è½½å¤±è´¥ï¼Œä½¿ç”¨é»˜è®¤å€¼");
+                Debug.LogWarning($"ÎïÆ· {GetItemName()} µÄÊµÀıÊı¾İ¼ÓÔØÊ§°Ü£¬Ê¹ÓÃÄ¬ÈÏÖµ");
             }
         }
 
         return true;
     }
 
-    // åºåˆ—åŒ–ä¸ºJSONå­—ç¬¦ä¸²
+    // ĞòÁĞ»¯ÎªJSON×Ö·û´®
     public string SerializeToJson()
     {
         try
@@ -208,17 +208,17 @@ public class InventorySystemItem : MonoBehaviour
         }
         catch (System.Exception e)
         {
-            Debug.LogError($"åºåˆ—åŒ–ç‰©å“ {GetItemName()} å¤±è´¥: {e.Message}");
+            Debug.LogError($"ĞòÁĞ»¯ÎïÆ· {GetItemName()} Ê§°Ü: {e.Message}");
             return "";
         }
     }
 
-    // ä»JSONå­—ç¬¦ä¸²ååºåˆ—åŒ–
+    // ´ÓJSON×Ö·û´®·´ĞòÁĞ»¯
     public bool DeserializeFromJson(string jsonData)
     {
         if (string.IsNullOrEmpty(jsonData))
         {
-            Debug.LogError("JSONæ•°æ®ä¸ºç©ºï¼Œæ— æ³•ååºåˆ—åŒ–");
+            Debug.LogError("JSONÊı¾İÎª¿Õ£¬ÎŞ·¨·´ĞòÁĞ»¯");
             return false;
         }
 
@@ -229,26 +229,26 @@ public class InventorySystemItem : MonoBehaviour
         }
         catch (System.Exception e)
         {
-            Debug.LogError($"ååºåˆ—åŒ–ç‰©å“æ•°æ®å¤±è´¥: {e.Message}");
+            Debug.LogError($"·´ĞòÁĞ»¯ÎïÆ·Êı¾İÊ§°Ü: {e.Message}");
             return false;
         }
     }
 
-    // === å®ç”¨æ–¹æ³• ===
+    // === ÊµÓÃ·½·¨ ===
 
-    // å¤åˆ¶ç‰©å“ï¼ˆåˆ›å»ºæ–°çš„å®ä¾‹IDï¼‰
+    // ¸´ÖÆÎïÆ·£¨´´½¨ĞÂµÄÊµÀıID£©
     public InventorySystemItem CreateCopy()
     {
-        // åˆ›å»ºæ–°çš„GameObject
+        // ´´½¨ĞÂµÄGameObject
         GameObject newObj = Instantiate(gameObject);
         InventorySystemItem newItem = newObj.GetComponent<InventorySystemItem>();
 
         if (newItem != null)
         {
-            // ç”Ÿæˆæ–°çš„å®ä¾‹ID
+            // Éú³ÉĞÂµÄÊµÀıID
             newItem.GenerateNewItemInstanceID();
 
-            // å¤åˆ¶å®ä¾‹æ•°æ®
+            // ¸´ÖÆÊµÀıÊı¾İ
             if (holder != null && newItem.holder != null)
             {
                 string instanceDataJson = holder.SerializeInstanceData();
@@ -259,31 +259,31 @@ public class InventorySystemItem : MonoBehaviour
         return newItem;
     }
 
-    // éªŒè¯ç‰©å“å®Œæ•´æ€§
+    // ÑéÖ¤ÎïÆ·ÍêÕûĞÔ
     public bool ValidateItem()
     {
         bool isValid = true;
 
-        // æ£€æŸ¥å®ä¾‹ID
+        // ¼ì²éÊµÀıID
         if (!IsItemInstanceIDValid())
         {
-            Debug.LogWarning($"ç‰©å“ {gameObject.name} çš„å®ä¾‹IDæ— æ•ˆï¼Œæ­£åœ¨ç”Ÿæˆæ–°ID");
+            Debug.LogWarning($"ÎïÆ· {gameObject.name} µÄÊµÀıIDÎŞĞ§£¬ÕıÔÚÉú³ÉĞÂID");
             GenerateNewItemInstanceID();
             isValid = false;
         }
 
-        // æ£€æŸ¥ItemDataHolder
+        // ¼ì²éItemDataHolder
         if (holder == null)
         {
-            Debug.LogError($"ç‰©å“ {gameObject.name} ç¼ºå°‘ItemDataHolderç»„ä»¶");
+            Debug.LogError($"ÎïÆ· {gameObject.name} È±ÉÙItemDataHolder×é¼ş");
             isValid = false;
         }
         else
         {
-            // éªŒè¯å®ä¾‹æ•°æ®
+            // ÑéÖ¤ÊµÀıÊı¾İ
             if (!holder.ValidateAndRepairInstanceData())
             {
-                Debug.LogWarning($"ç‰©å“ {GetItemName()} çš„å®ä¾‹æ•°æ®å·²ä¿®å¤");
+                Debug.LogWarning($"ÎïÆ· {GetItemName()} µÄÊµÀıÊı¾İÒÑĞŞ¸´");
                 isValid = false;
             }
         }
@@ -291,46 +291,46 @@ public class InventorySystemItem : MonoBehaviour
         return isValid;
     }
 
-    // === è°ƒè¯•å’Œæµ‹è¯•æ–¹æ³• ===
+    // === µ÷ÊÔºÍ²âÊÔ·½·¨ ===
 
-    // æ‰“å°ç‰©å“è¯¦ç»†ä¿¡æ¯
-    [ContextMenu("æ‰“å°ç‰©å“è¯¦ç»†ä¿¡æ¯")]
+    // ´òÓ¡ÎïÆ·ÏêÏ¸ĞÅÏ¢
+    [ContextMenu("´òÓ¡ÎïÆ·ÏêÏ¸ĞÅÏ¢")]
     public void LogItemDetails()
     {
-        Debug.Log($"=== ç‰©å“è¯¦ç»†ä¿¡æ¯ ===\n" +
-                  $"å®ä¾‹ID: {InstanceID}\n" +
-                  $"ç‰©å“åç§°: {GetItemName()}\n" +
-                  $"ç‰©å“æ•°æ®ID: {GetItemDataID()}\n" +
-                  $"ç½‘æ ¼ä½ç½®: {gridPosition}\n" +
-                  $"å¯æ‹–æ‹½: {isDraggable}\n" +
-                  $"å°ºå¯¸: {Size}\n" +
-                  $"æ•°æ®æœ‰æ•ˆæ€§: {HasValidItemData()}");
+        Debug.Log($"=== ÎïÆ·ÏêÏ¸ĞÅÏ¢ ===\n" +
+                  $"ÊµÀıID: {InstanceID}\n" +
+                  $"ÎïÆ·Ãû³Æ: {GetItemName()}\n" +
+                  $"ÎïÆ·Êı¾İID: {GetItemDataID()}\n" +
+                  $"Íø¸ñÎ»ÖÃ: {gridPosition}\n" +
+                  $"¿ÉÍÏ×§: {isDraggable}\n" +
+                  $"³ß´ç: {Size}\n" +
+                  $"Êı¾İÓĞĞ§ĞÔ: {HasValidItemData()}");
 
-        // å¦‚æœæœ‰ItemDataHolderï¼Œä¹Ÿæ‰“å°å…¶ä¿¡æ¯
+        // Èç¹ûÓĞItemDataHolder£¬Ò²´òÓ¡ÆäĞÅÏ¢
         if (holder != null)
         {
             holder.LogItemInfo();
         }
     }
 
-    // æµ‹è¯•åºåˆ—åŒ–
-    [ContextMenu("æµ‹è¯•åºåˆ—åŒ–")]
+    // ²âÊÔĞòÁĞ»¯
+    [ContextMenu("²âÊÔĞòÁĞ»¯")]
     public void TestSerialization()
     {
         string json = SerializeToJson();
-        Debug.Log($"åºåˆ—åŒ–ç»“æœ: {json}");
+        Debug.Log($"ĞòÁĞ»¯½á¹û: {json}");
 
-        // æµ‹è¯•ååºåˆ—åŒ–
+        // ²âÊÔ·´ĞòÁĞ»¯
         bool success = DeserializeFromJson(json);
-        Debug.Log($"ååºåˆ—åŒ–ç»“æœ: {(success ? "æˆåŠŸ" : "å¤±è´¥")}");
+        Debug.Log($"·´ĞòÁĞ»¯½á¹û: {(success ? "³É¹¦" : "Ê§°Ü")}");
     }
 
-    // éªŒè¯ç‰©å“æµ‹è¯•
-    [ContextMenu("éªŒè¯ç‰©å“å®Œæ•´æ€§")]
+    // ÑéÖ¤ÎïÆ·²âÊÔ
+    [ContextMenu("ÑéÖ¤ÎïÆ·ÍêÕûĞÔ")]
     public void TestValidateItem()
     {
         bool isValid = ValidateItem();
-        Debug.Log($"ç‰©å“éªŒè¯ç»“æœ: {(isValid ? "å®Œæ•´" : "å·²ä¿®å¤")}");
+        Debug.Log($"ÎïÆ·ÑéÖ¤½á¹û: {(isValid ? "ÍêÕû" : "ÒÑĞŞ¸´")}");
         LogItemDetails();
     }
 }

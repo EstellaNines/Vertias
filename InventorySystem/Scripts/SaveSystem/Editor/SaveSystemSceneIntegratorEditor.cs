@@ -5,8 +5,8 @@ using System.Collections.Generic;
 using InventorySystem.SaveSystem;
 
 /// <summary>
-/// SaveSystemSceneIntegratorçš„è‡ªå®šä¹‰ç¼–è¾‘å™¨
-/// æä¾›å¯è§†åŒ–çš„åœºæ™¯é›†æˆç®¡ç†ç•Œé¢
+/// SaveSystemSceneIntegratorµÄ×Ô¶¨Òå±à¼­Æ÷
+/// Ìá¹©¿ÉÊÓ»¯µÄ³¡¾°¼¯³É¹ÜÀí½çÃæ
 /// </summary>
 [CustomEditor(typeof(SaveSystemSceneIntegrator))]
 public class SaveSystemSceneIntegratorEditor : Editor
@@ -19,7 +19,7 @@ public class SaveSystemSceneIntegratorEditor : Editor
     private bool showSceneDataCache = false;
     private bool showAdvancedOptions = false;
 
-    // æ ·å¼ç¼“å­˜
+    // ÑùÊ½»º´æ
     private GUIStyle headerStyle;
     private GUIStyle boxStyle;
     private GUIStyle buttonStyle;
@@ -34,57 +34,57 @@ public class SaveSystemSceneIntegratorEditor : Editor
 
     public override void OnInspectorGUI()
     {
-        // åˆå§‹åŒ–æ ·å¼
+        // ³õÊ¼»¯ÑùÊ½
         InitializeStyles();
 
         serializedObject.Update();
 
-        // æ ‡é¢˜
+        // ±êÌâ
         EditorGUILayout.Space();
-        EditorGUILayout.LabelField("ä¿å­˜ç³»ç»Ÿåœºæ™¯é›†æˆå™¨", headerStyle);
+        EditorGUILayout.LabelField("±£´æÏµÍ³³¡¾°¼¯³ÉÆ÷", headerStyle);
         EditorGUILayout.Space();
 
-        // é›†æˆçŠ¶æ€æ˜¾ç¤º
+        // ¼¯³É×´Ì¬ÏÔÊ¾
         DrawIntegrationStatus();
 
         EditorGUILayout.Space();
 
-        // åœºæ™¯é›†æˆé…ç½®
+        // ³¡¾°¼¯³ÉÅäÖÃ
         DrawSceneConfig();
 
         EditorGUILayout.Space();
 
-        // é›†æˆç›®æ ‡é…ç½®
+        // ¼¯³ÉÄ¿±êÅäÖÃ
         DrawIntegrationTargets();
 
         EditorGUILayout.Space();
 
-        // åŒæ­¥é…ç½®
+        // Í¬²½ÅäÖÃ
         DrawSyncConfig();
 
         EditorGUILayout.Space();
 
-        // é›†æˆç»Ÿè®¡
+        // ¼¯³ÉÍ³¼Æ
         DrawIntegrationStats();
 
         EditorGUILayout.Space();
 
-        // åœºæ™¯æ•°æ®ç¼“å­˜
+        // ³¡¾°Êı¾İ»º´æ
         DrawSceneDataCache();
 
         EditorGUILayout.Space();
 
-        // é«˜çº§é€‰é¡¹
+        // ¸ß¼¶Ñ¡Ïî
         DrawAdvancedOptions();
 
         EditorGUILayout.Space();
 
-        // æ“ä½œæŒ‰é’®
+        // ²Ù×÷°´Å¥
         DrawActionButtons();
 
         serializedObject.ApplyModifiedProperties();
 
-        // è‡ªåŠ¨åˆ·æ–°
+        // ×Ô¶¯Ë¢ĞÂ
         if (Application.isPlaying)
         {
             Repaint();
@@ -92,7 +92,7 @@ public class SaveSystemSceneIntegratorEditor : Editor
     }
 
     /// <summary>
-    /// åˆå§‹åŒ–æ ·å¼
+    /// ³õÊ¼»¯ÑùÊ½
     /// </summary>
     private void InitializeStyles()
     {
@@ -147,44 +147,44 @@ public class SaveSystemSceneIntegratorEditor : Editor
     }
 
     /// <summary>
-    /// ç»˜åˆ¶é›†æˆçŠ¶æ€
+    /// »æÖÆ¼¯³É×´Ì¬
     /// </summary>
     private void DrawIntegrationStatus()
     {
         EditorGUILayout.BeginVertical(boxStyle);
 
-        EditorGUILayout.LabelField("é›†æˆçŠ¶æ€", EditorStyles.boldLabel);
+        EditorGUILayout.LabelField("¼¯³É×´Ì¬", EditorStyles.boldLabel);
 
         if (Application.isPlaying)
         {
             bool isIntegrated = sceneIntegrator.IsSceneIntegrated();
-            string statusText = isIntegrated ? "å·²é›†æˆ" : "æœªé›†æˆ";
+            string statusText = isIntegrated ? "ÒÑ¼¯³É" : "Î´¼¯³É";
             var statusColor = isIntegrated ? Color.green : Color.yellow;
 
             var originalColor = GUI.color;
             GUI.color = statusColor;
-            EditorGUILayout.LabelField("å½“å‰çŠ¶æ€:", statusText, statusStyle);
+            EditorGUILayout.LabelField("µ±Ç°×´Ì¬:", statusText, statusStyle);
             GUI.color = originalColor;
 
-            // æ˜¾ç¤ºå½“å‰åœºæ™¯ä¿¡æ¯
-            EditorGUILayout.LabelField("å½“å‰åœºæ™¯:", UnityEngine.SceneManagement.SceneManager.GetActiveScene().name);
+            // ÏÔÊ¾µ±Ç°³¡¾°ĞÅÏ¢
+            EditorGUILayout.LabelField("µ±Ç°³¡¾°:", UnityEngine.SceneManagement.SceneManager.GetActiveScene().name);
 
-            // æ˜¾ç¤ºç³»ç»Ÿç»„ä»¶çŠ¶æ€
+            // ÏÔÊ¾ÏµÍ³×é¼ş×´Ì¬
             EditorGUILayout.Space(5);
-            EditorGUILayout.LabelField("ç³»ç»Ÿç»„ä»¶çŠ¶æ€:", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("ÏµÍ³×é¼ş×´Ì¬:", EditorStyles.boldLabel);
 
             DrawSystemComponentStatus();
         }
         else
         {
-            EditorGUILayout.HelpBox("è¿è¡Œæ—¶æ‰èƒ½æ˜¾ç¤ºè¯¦ç»†çŠ¶æ€ä¿¡æ¯", MessageType.Info);
+            EditorGUILayout.HelpBox("ÔËĞĞÊ±²ÅÄÜÏÔÊ¾ÏêÏ¸×´Ì¬ĞÅÏ¢", MessageType.Info);
         }
 
         EditorGUILayout.EndVertical();
     }
 
     /// <summary>
-    /// ç»˜åˆ¶ç³»ç»Ÿç»„ä»¶çŠ¶æ€
+    /// »æÖÆÏµÍ³×é¼ş×´Ì¬
     /// </summary>
     private void DrawSystemComponentStatus()
     {
@@ -200,7 +200,7 @@ public class SaveSystemSceneIntegratorEditor : Editor
     }
 
     /// <summary>
-    /// ç»˜åˆ¶ç»„ä»¶çŠ¶æ€
+    /// »æÖÆ×é¼ş×´Ì¬
     /// </summary>
     private void DrawComponentStatus(string componentName, bool exists)
     {
@@ -208,56 +208,56 @@ public class SaveSystemSceneIntegratorEditor : Editor
         GUI.color = exists ? Color.green : Color.red;
 
         string status = exists ? "?" : "?";
-        EditorGUILayout.LabelField($"  {status} {componentName}", exists ? "å­˜åœ¨" : "ç¼ºå¤±");
+        EditorGUILayout.LabelField($"  {status} {componentName}", exists ? "´æÔÚ" : "È±Ê§");
 
         GUI.color = originalColor;
     }
 
     /// <summary>
-    /// ç»˜åˆ¶åœºæ™¯é…ç½®
+    /// »æÖÆ³¡¾°ÅäÖÃ
     /// </summary>
     private void DrawSceneConfig()
     {
-        showSceneConfig = EditorGUILayout.Foldout(showSceneConfig, "åœºæ™¯é›†æˆé…ç½®", true);
+        showSceneConfig = EditorGUILayout.Foldout(showSceneConfig, "³¡¾°¼¯³ÉÅäÖÃ", true);
 
         if (showSceneConfig)
         {
             EditorGUILayout.BeginVertical(boxStyle);
 
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("enableAutoSceneIntegration"), new GUIContent("å¯ç”¨è‡ªåŠ¨åœºæ™¯é›†æˆ", "åœ¨åœºæ™¯åŠ è½½æ—¶è‡ªåŠ¨æ‰§è¡Œé›†æˆ"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("enableCrossSceneSync"), new GUIContent("å¯ç”¨è·¨åœºæ™¯åŒæ­¥", "åœ¨åœºæ™¯åˆ‡æ¢æ—¶åŒæ­¥æ•°æ®"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("enableSceneDataPersistence"), new GUIContent("å¯ç”¨åœºæ™¯æ•°æ®æŒä¹…åŒ–", "ä¿æŒåœºæ™¯æ•°æ®åœ¨åœºæ™¯åˆ‡æ¢æ—¶ä¸ä¸¢å¤±"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("enableDebugLogging"), new GUIContent("å¯ç”¨è°ƒè¯•æ—¥å¿—", "åœ¨æ§åˆ¶å°è¾“å‡ºè¯¦ç»†çš„è°ƒè¯•ä¿¡æ¯"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("integrationDelay"), new GUIContent("é›†æˆå»¶è¿Ÿ(ç§’)", "å»¶è¿Ÿé›†æˆçš„æ—¶é—´ï¼Œç¡®ä¿å…¶ä»–ç»„ä»¶å…ˆåŠ è½½"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("enableAutoSceneIntegration"), new GUIContent("ÆôÓÃ×Ô¶¯³¡¾°¼¯³É", "ÔÚ³¡¾°¼ÓÔØÊ±×Ô¶¯Ö´ĞĞ¼¯³É"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("enableCrossSceneSync"), new GUIContent("ÆôÓÃ¿ç³¡¾°Í¬²½", "ÔÚ³¡¾°ÇĞ»»Ê±Í¬²½Êı¾İ"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("enableSceneDataPersistence"), new GUIContent("ÆôÓÃ³¡¾°Êı¾İ³Ö¾Ã»¯", "±£³Ö³¡¾°Êı¾İÔÚ³¡¾°ÇĞ»»Ê±²»¶ªÊ§"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("enableDebugLogging"), new GUIContent("ÆôÓÃµ÷ÊÔÈÕÖ¾", "ÔÚ¿ØÖÆÌ¨Êä³öÏêÏ¸µÄµ÷ÊÔĞÅÏ¢"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("integrationDelay"), new GUIContent("¼¯³ÉÑÓ³Ù(Ãë)", "ÑÓ³Ù¼¯³ÉµÄÊ±¼ä£¬È·±£ÆäËû×é¼şÏÈ¼ÓÔØ"));
 
             EditorGUILayout.EndVertical();
         }
     }
 
     /// <summary>
-    /// ç»˜åˆ¶é›†æˆç›®æ ‡é…ç½®
+    /// »æÖÆ¼¯³ÉÄ¿±êÅäÖÃ
     /// </summary>
     private void DrawIntegrationTargets()
     {
-        showIntegrationTargets = EditorGUILayout.Foldout(showIntegrationTargets, "é›†æˆç›®æ ‡é…ç½®", true);
+        showIntegrationTargets = EditorGUILayout.Foldout(showIntegrationTargets, "¼¯³ÉÄ¿±êÅäÖÃ", true);
 
         if (showIntegrationTargets)
         {
             EditorGUILayout.BeginVertical(boxStyle);
 
-            EditorGUILayout.LabelField("é€‰æ‹©è¦é›†æˆçš„ç»„ä»¶ç±»å‹:", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("Ñ¡ÔñÒª¼¯³ÉµÄ×é¼şÀàĞÍ:", EditorStyles.boldLabel);
 
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("integrateInventoryItems"), new GUIContent("é›†æˆåº“å­˜ç‰©å“", "è‡ªåŠ¨é›†æˆåœºæ™¯ä¸­çš„InventorySystemItemç»„ä»¶"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("integrateItemGrids"), new GUIContent("é›†æˆç‰©å“ç½‘æ ¼", "è‡ªåŠ¨é›†æˆåœºæ™¯ä¸­çš„BaseItemGridç»„ä»¶"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("integrateSpawners"), new GUIContent("é›†æˆç”Ÿæˆå™¨", "è‡ªåŠ¨é›†æˆåœºæ™¯ä¸­çš„BaseItemSpawnç»„ä»¶"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("integrateEquipSlots"), new GUIContent("é›†æˆè£…å¤‡æ§½", "è‡ªåŠ¨é›†æˆåœºæ™¯ä¸­çš„EquipSlotç»„ä»¶"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("integrateItemDataHolders"), new GUIContent("é›†æˆç‰©å“æ•°æ®æŒæœ‰è€…", "è‡ªåŠ¨é›†æˆåœºæ™¯ä¸­çš„ItemDataHolderç»„ä»¶"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("integrateInventoryItems"), new GUIContent("¼¯³É¿â´æÎïÆ·", "×Ô¶¯¼¯³É³¡¾°ÖĞµÄInventorySystemItem×é¼ş"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("integrateItemGrids"), new GUIContent("¼¯³ÉÎïÆ·Íø¸ñ", "×Ô¶¯¼¯³É³¡¾°ÖĞµÄBaseItemGrid×é¼ş"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("integrateSpawners"), new GUIContent("¼¯³ÉÉú³ÉÆ÷", "×Ô¶¯¼¯³É³¡¾°ÖĞµÄBaseItemSpawn×é¼ş"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("integrateEquipSlots"), new GUIContent("¼¯³É×°±¸²Û", "×Ô¶¯¼¯³É³¡¾°ÖĞµÄEquipSlot×é¼ş"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("integrateItemDataHolders"), new GUIContent("¼¯³ÉÎïÆ·Êı¾İ³ÖÓĞÕß", "×Ô¶¯¼¯³É³¡¾°ÖĞµÄItemDataHolder×é¼ş"));
 
-            // æ˜¾ç¤ºå½“å‰åœºæ™¯ä¸­çš„ç»„ä»¶æ•°é‡
+            // ÏÔÊ¾µ±Ç°³¡¾°ÖĞµÄ×é¼şÊıÁ¿
             if (Application.isPlaying)
             {
                 EditorGUILayout.Space(5);
-                EditorGUILayout.LabelField("å½“å‰åœºæ™¯ç»„ä»¶æ•°é‡:", EditorStyles.boldLabel);
+                EditorGUILayout.LabelField("µ±Ç°³¡¾°×é¼şÊıÁ¿:", EditorStyles.boldLabel);
 
                 var items = FindObjectsOfType<InventorySystemItem>();
                 var grids = FindObjectsOfType<BaseItemGrid>();
@@ -265,11 +265,11 @@ public class SaveSystemSceneIntegratorEditor : Editor
                 var equipSlots = FindObjectsOfType<EquipSlot>();
                 var dataHolders = FindObjectsOfType<ItemDataHolder>();
 
-                EditorGUILayout.LabelField($"  åº“å­˜ç‰©å“: {items.Length}");
-                EditorGUILayout.LabelField($"  ç‰©å“ç½‘æ ¼: {grids.Length}");
-                EditorGUILayout.LabelField($"  ç”Ÿæˆå™¨: {spawners.Length}");
-                EditorGUILayout.LabelField($"  è£…å¤‡æ§½: {equipSlots.Length}");
-                EditorGUILayout.LabelField($"  æ•°æ®æŒæœ‰è€…: {dataHolders.Length}");
+                EditorGUILayout.LabelField($"  ¿â´æÎïÆ·: {items.Length}");
+                EditorGUILayout.LabelField($"  ÎïÆ·Íø¸ñ: {grids.Length}");
+                EditorGUILayout.LabelField($"  Éú³ÉÆ÷: {spawners.Length}");
+                EditorGUILayout.LabelField($"  ×°±¸²Û: {equipSlots.Length}");
+                EditorGUILayout.LabelField($"  Êı¾İ³ÖÓĞÕß: {dataHolders.Length}");
             }
 
             EditorGUILayout.EndVertical();
@@ -277,31 +277,31 @@ public class SaveSystemSceneIntegratorEditor : Editor
     }
 
     /// <summary>
-    /// ç»˜åˆ¶åŒæ­¥é…ç½®
+    /// »æÖÆÍ¬²½ÅäÖÃ
     /// </summary>
     private void DrawSyncConfig()
     {
-        showSyncConfig = EditorGUILayout.Foldout(showSyncConfig, "åŒæ­¥é…ç½®", true);
+        showSyncConfig = EditorGUILayout.Foldout(showSyncConfig, "Í¬²½ÅäÖÃ", true);
 
         if (showSyncConfig)
         {
             EditorGUILayout.BeginVertical(boxStyle);
 
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("syncOnSceneLoad"), new GUIContent("åœºæ™¯åŠ è½½æ—¶åŒæ­¥", "åœ¨åœºæ™¯åŠ è½½å®Œæˆåè‡ªåŠ¨æ‰§è¡ŒåŒæ­¥"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("syncOnSceneUnload"), new GUIContent("åœºæ™¯å¸è½½æ—¶åŒæ­¥", "åœ¨åœºæ™¯å¸è½½å‰ä¿å­˜æ•°æ®"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("validateAfterSync"), new GUIContent("åŒæ­¥åéªŒè¯", "åœ¨åŒæ­¥å®ŒæˆåéªŒè¯æ•°æ®å®Œæ•´æ€§"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("resolveConflictsAutomatically"), new GUIContent("è‡ªåŠ¨è§£å†³å†²çª", "è‡ªåŠ¨è§£å†³IDå†²çªå’Œæ•°æ®å†²çª"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("syncOnSceneLoad"), new GUIContent("³¡¾°¼ÓÔØÊ±Í¬²½", "ÔÚ³¡¾°¼ÓÔØÍê³Éºó×Ô¶¯Ö´ĞĞÍ¬²½"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("syncOnSceneUnload"), new GUIContent("³¡¾°Ğ¶ÔØÊ±Í¬²½", "ÔÚ³¡¾°Ğ¶ÔØÇ°±£´æÊı¾İ"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("validateAfterSync"), new GUIContent("Í¬²½ºóÑéÖ¤", "ÔÚÍ¬²½Íê³ÉºóÑéÖ¤Êı¾İÍêÕûĞÔ"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("resolveConflictsAutomatically"), new GUIContent("×Ô¶¯½â¾ö³åÍ»", "×Ô¶¯½â¾öID³åÍ»ºÍÊı¾İ³åÍ»"));
 
             EditorGUILayout.EndVertical();
         }
     }
 
     /// <summary>
-    /// ç»˜åˆ¶é›†æˆç»Ÿè®¡
+    /// »æÖÆ¼¯³ÉÍ³¼Æ
     /// </summary>
     private void DrawIntegrationStats()
     {
-        showIntegrationStats = EditorGUILayout.Foldout(showIntegrationStats, "é›†æˆç»Ÿè®¡", true);
+        showIntegrationStats = EditorGUILayout.Foldout(showIntegrationStats, "¼¯³ÉÍ³¼Æ", true);
 
         if (showIntegrationStats)
         {
@@ -311,50 +311,50 @@ public class SaveSystemSceneIntegratorEditor : Editor
             {
                 var stats = sceneIntegrator.GetIntegrationStats();
 
-                EditorGUILayout.LabelField("å½“å‰é›†æˆç»Ÿè®¡:", EditorStyles.boldLabel);
+                EditorGUILayout.LabelField("µ±Ç°¼¯³ÉÍ³¼Æ:", EditorStyles.boldLabel);
 
                 if (!string.IsNullOrEmpty(stats.sceneName))
                 {
-                    EditorGUILayout.LabelField($"åœºæ™¯åç§°: {stats.sceneName}");
+                    EditorGUILayout.LabelField($"³¡¾°Ãû³Æ: {stats.sceneName}");
                 }
 
-                EditorGUILayout.LabelField($"é›†æˆç‰©å“: {stats.integratedItems}");
-                EditorGUILayout.LabelField($"é›†æˆç½‘æ ¼: {stats.integratedGrids}");
-                EditorGUILayout.LabelField($"é›†æˆç”Ÿæˆå™¨: {stats.integratedSpawners}");
-                EditorGUILayout.LabelField($"é›†æˆè£…å¤‡æ§½: {stats.integratedEquipSlots}");
-                EditorGUILayout.LabelField($"é›†æˆæ•°æ®æŒæœ‰è€…: {stats.integratedDataHolders}");
-                EditorGUILayout.LabelField($"è§£å†³å†²çª: {stats.resolvedConflicts}");
+                EditorGUILayout.LabelField($"¼¯³ÉÎïÆ·: {stats.integratedItems}");
+                EditorGUILayout.LabelField($"¼¯³ÉÍø¸ñ: {stats.integratedGrids}");
+                EditorGUILayout.LabelField($"¼¯³ÉÉú³ÉÆ÷: {stats.integratedSpawners}");
+                EditorGUILayout.LabelField($"¼¯³É×°±¸²Û: {stats.integratedEquipSlots}");
+                EditorGUILayout.LabelField($"¼¯³ÉÊı¾İ³ÖÓĞÕß: {stats.integratedDataHolders}");
+                EditorGUILayout.LabelField($"½â¾ö³åÍ»: {stats.resolvedConflicts}");
 
                 if (stats.validationErrors > 0)
                 {
                     var originalColor = GUI.color;
                     GUI.color = Color.red;
-                    EditorGUILayout.LabelField($"éªŒè¯é”™è¯¯: {stats.validationErrors}");
+                    EditorGUILayout.LabelField($"ÑéÖ¤´íÎó: {stats.validationErrors}");
                     GUI.color = originalColor;
                 }
                 else
                 {
                     var originalColor = GUI.color;
                     GUI.color = Color.green;
-                    EditorGUILayout.LabelField($"éªŒè¯é”™è¯¯: {stats.validationErrors}");
+                    EditorGUILayout.LabelField($"ÑéÖ¤´íÎó: {stats.validationErrors}");
                     GUI.color = originalColor;
                 }
 
                 if (!string.IsNullOrEmpty(stats.integrationTime))
                 {
-                    EditorGUILayout.LabelField($"é›†æˆæ—¶é—´: {stats.integrationTime}");
+                    EditorGUILayout.LabelField($"¼¯³ÉÊ±¼ä: {stats.integrationTime}");
                 }
 
                 if (!string.IsNullOrEmpty(stats.lastError))
                 {
                     EditorGUILayout.Space(5);
-                    EditorGUILayout.LabelField("æœ€åé”™è¯¯:", EditorStyles.boldLabel);
+                    EditorGUILayout.LabelField("×îºó´íÎó:", EditorStyles.boldLabel);
                     EditorGUILayout.HelpBox(stats.lastError, MessageType.Error);
                 }
             }
             else
             {
-                EditorGUILayout.HelpBox("è¿è¡Œæ—¶æ‰èƒ½æ˜¾ç¤ºç»Ÿè®¡ä¿¡æ¯", MessageType.Info);
+                EditorGUILayout.HelpBox("ÔËĞĞÊ±²ÅÄÜÏÔÊ¾Í³¼ÆĞÅÏ¢", MessageType.Info);
             }
 
             EditorGUILayout.EndVertical();
@@ -362,11 +362,11 @@ public class SaveSystemSceneIntegratorEditor : Editor
     }
 
     /// <summary>
-    /// ç»˜åˆ¶åœºæ™¯æ•°æ®ç¼“å­˜
+    /// »æÖÆ³¡¾°Êı¾İ»º´æ
     /// </summary>
     private void DrawSceneDataCache()
     {
-        showSceneDataCache = EditorGUILayout.Foldout(showSceneDataCache, "åœºæ™¯æ•°æ®ç¼“å­˜", true);
+        showSceneDataCache = EditorGUILayout.Foldout(showSceneDataCache, "³¡¾°Êı¾İ»º´æ", true);
 
         if (showSceneDataCache)
         {
@@ -378,34 +378,34 @@ public class SaveSystemSceneIntegratorEditor : Editor
 
                 if (sceneDataCache != null && sceneDataCache.Count > 0)
                 {
-                    EditorGUILayout.LabelField($"ç¼“å­˜åœºæ™¯æ•°é‡: {sceneDataCache.Count}", EditorStyles.boldLabel);
+                    EditorGUILayout.LabelField($"»º´æ³¡¾°ÊıÁ¿: {sceneDataCache.Count}", EditorStyles.boldLabel);
 
                     foreach (var kvp in sceneDataCache)
                     {
                         EditorGUILayout.Space(3);
-                        EditorGUILayout.LabelField($"åœºæ™¯: {kvp.Key}", EditorStyles.boldLabel);
+                        EditorGUILayout.LabelField($"³¡¾°: {kvp.Key}", EditorStyles.boldLabel);
 
                         var sceneData = kvp.Value;
-                        EditorGUILayout.LabelField($"  æ³¨å†Œç‰©å“ID: {sceneData.registeredItemIDs.Count}");
-                        EditorGUILayout.LabelField($"  æ³¨å†Œç½‘æ ¼ID: {sceneData.registeredGridIDs.Count}");
-                        EditorGUILayout.LabelField($"  æ³¨å†Œç”Ÿæˆå™¨ID: {sceneData.registeredSpawnerIDs.Count}");
-                        EditorGUILayout.LabelField($"  æ³¨å†Œè£…å¤‡æ§½ID: {sceneData.registeredEquipSlotIDs.Count}");
-                        EditorGUILayout.LabelField($"  IDæ˜ å°„: {sceneData.idMappings.Count}");
+                        EditorGUILayout.LabelField($"  ×¢²áÎïÆ·ID: {sceneData.registeredItemIDs.Count}");
+                        EditorGUILayout.LabelField($"  ×¢²áÍø¸ñID: {sceneData.registeredGridIDs.Count}");
+                        EditorGUILayout.LabelField($"  ×¢²áÉú³ÉÆ÷ID: {sceneData.registeredSpawnerIDs.Count}");
+                        EditorGUILayout.LabelField($"  ×¢²á×°±¸²ÛID: {sceneData.registeredEquipSlotIDs.Count}");
+                        EditorGUILayout.LabelField($"  IDÓ³Éä: {sceneData.idMappings.Count}");
 
                         if (!string.IsNullOrEmpty(sceneData.lastSyncTime))
                         {
-                            EditorGUILayout.LabelField($"  æœ€ååŒæ­¥: {sceneData.lastSyncTime}");
+                            EditorGUILayout.LabelField($"  ×îºóÍ¬²½: {sceneData.lastSyncTime}");
                         }
                     }
                 }
                 else
                 {
-                    EditorGUILayout.LabelField("æš‚æ— ç¼“å­˜æ•°æ®");
+                    EditorGUILayout.LabelField("ÔİÎŞ»º´æÊı¾İ");
                 }
             }
             else
             {
-                EditorGUILayout.HelpBox("è¿è¡Œæ—¶æ‰èƒ½æ˜¾ç¤ºç¼“å­˜æ•°æ®", MessageType.Info);
+                EditorGUILayout.HelpBox("ÔËĞĞÊ±²ÅÄÜÏÔÊ¾»º´æÊı¾İ", MessageType.Info);
             }
 
             EditorGUILayout.EndVertical();
@@ -413,51 +413,51 @@ public class SaveSystemSceneIntegratorEditor : Editor
     }
 
     /// <summary>
-    /// ç»˜åˆ¶é«˜çº§é€‰é¡¹
+    /// »æÖÆ¸ß¼¶Ñ¡Ïî
     /// </summary>
     private void DrawAdvancedOptions()
     {
-        showAdvancedOptions = EditorGUILayout.Foldout(showAdvancedOptions, "é«˜çº§é€‰é¡¹", true);
+        showAdvancedOptions = EditorGUILayout.Foldout(showAdvancedOptions, "¸ß¼¶Ñ¡Ïî", true);
 
         if (showAdvancedOptions)
         {
             EditorGUILayout.BeginVertical(boxStyle);
 
-            EditorGUILayout.HelpBox("é«˜çº§é€‰é¡¹å¯èƒ½å½±å“ç³»ç»Ÿç¨³å®šæ€§ï¼Œè¯·è°¨æ…ä½¿ç”¨", MessageType.Warning);
+            EditorGUILayout.HelpBox("¸ß¼¶Ñ¡Ïî¿ÉÄÜÓ°ÏìÏµÍ³ÎÈ¶¨ĞÔ£¬Çë½÷É÷Ê¹ÓÃ", MessageType.Warning);
 
             EditorGUILayout.Space(5);
 
-            // é‡ç½®é›†æˆçŠ¶æ€
+            // ÖØÖÃ¼¯³É×´Ì¬
             if (Application.isPlaying)
             {
-                if (GUILayout.Button("é‡ç½®é›†æˆçŠ¶æ€", buttonStyle))
+                if (GUILayout.Button("ÖØÖÃ¼¯³É×´Ì¬", buttonStyle))
                 {
-                    if (EditorUtility.DisplayDialog("ç¡®è®¤é‡ç½®", "ç¡®å®šè¦é‡ç½®é›†æˆçŠ¶æ€å—ï¼Ÿè¿™å°†æ¸…é™¤å½“å‰çš„é›†æˆè®°å½•ã€‚", "ç¡®å®š", "å–æ¶ˆ"))
+                    if (EditorUtility.DisplayDialog("È·ÈÏÖØÖÃ", "È·¶¨ÒªÖØÖÃ¼¯³É×´Ì¬Âğ£¿Õâ½«Çå³ıµ±Ç°µÄ¼¯³É¼ÇÂ¼¡£", "È·¶¨", "È¡Ïû"))
                     {
                         sceneIntegrator.ResetIntegrationState();
-                        Debug.Log("[SaveSystemSceneIntegratorEditor] é›†æˆçŠ¶æ€å·²é‡ç½®");
+                        Debug.Log("[SaveSystemSceneIntegratorEditor] ¼¯³É×´Ì¬ÒÑÖØÖÃ");
                     }
                 }
 
-                // æ¸…é™¤åœºæ™¯æ•°æ®ç¼“å­˜
-                if (GUILayout.Button("æ¸…é™¤åœºæ™¯æ•°æ®ç¼“å­˜", buttonStyle))
+                // Çå³ı³¡¾°Êı¾İ»º´æ
+                if (GUILayout.Button("Çå³ı³¡¾°Êı¾İ»º´æ", buttonStyle))
                 {
-                    if (EditorUtility.DisplayDialog("ç¡®è®¤æ¸…é™¤", "ç¡®å®šè¦æ¸…é™¤æ‰€æœ‰åœºæ™¯æ•°æ®ç¼“å­˜å—ï¼Ÿ", "ç¡®å®š", "å–æ¶ˆ"))
+                    if (EditorUtility.DisplayDialog("È·ÈÏÇå³ı", "È·¶¨ÒªÇå³ıËùÓĞ³¡¾°Êı¾İ»º´æÂğ£¿", "È·¶¨", "È¡Ïû"))
                     {
                         sceneIntegrator.ClearSceneDataCache();
-                        Debug.Log("[SaveSystemSceneIntegratorEditor] åœºæ™¯æ•°æ®ç¼“å­˜å·²æ¸…é™¤");
+                        Debug.Log("[SaveSystemSceneIntegratorEditor] ³¡¾°Êı¾İ»º´æÒÑÇå³ı");
                     }
                 }
             }
 
-            // æŸ¥æ‰¾åœºæ™¯ç»„ä»¶
-            if (GUILayout.Button("æŸ¥æ‰¾åœºæ™¯ç»„ä»¶", buttonStyle))
+            // ²éÕÒ³¡¾°×é¼ş
+            if (GUILayout.Button("²éÕÒ³¡¾°×é¼ş", buttonStyle))
             {
                 FindSceneComponents();
             }
 
-            // éªŒè¯åœºæ™¯å®Œæ•´æ€§
-            if (GUILayout.Button("éªŒè¯åœºæ™¯å®Œæ•´æ€§", buttonStyle))
+            // ÑéÖ¤³¡¾°ÍêÕûĞÔ
+            if (GUILayout.Button("ÑéÖ¤³¡¾°ÍêÕûĞÔ", buttonStyle))
             {
                 ValidateSceneIntegrity();
             }
@@ -467,39 +467,39 @@ public class SaveSystemSceneIntegratorEditor : Editor
     }
 
     /// <summary>
-    /// ç»˜åˆ¶æ“ä½œæŒ‰é’®
+    /// »æÖÆ²Ù×÷°´Å¥
     /// </summary>
     private void DrawActionButtons()
     {
         EditorGUILayout.BeginVertical(boxStyle);
 
-        EditorGUILayout.LabelField("æ“ä½œ", EditorStyles.boldLabel);
+        EditorGUILayout.LabelField("²Ù×÷", EditorStyles.boldLabel);
 
         EditorGUILayout.Space(5);
 
-        // æ‰‹åŠ¨åœºæ™¯é›†æˆæŒ‰é’®
+        // ÊÖ¶¯³¡¾°¼¯³É°´Å¥
         if (Application.isPlaying)
         {
-            if (GUILayout.Button("æ‰‹åŠ¨åœºæ™¯é›†æˆ", buttonStyle))
+            if (GUILayout.Button("ÊÖ¶¯³¡¾°¼¯³É", buttonStyle))
             {
                 try
                 {
                     sceneIntegrator.ManualSceneIntegration();
-                    Debug.Log("[SaveSystemSceneIntegratorEditor] æ‰‹åŠ¨åœºæ™¯é›†æˆå®Œæˆ");
+                    Debug.Log("[SaveSystemSceneIntegratorEditor] ÊÖ¶¯³¡¾°¼¯³ÉÍê³É");
                 }
                 catch (System.Exception ex)
                 {
-                    Debug.LogError($"[SaveSystemSceneIntegratorEditor] æ‰‹åŠ¨åœºæ™¯é›†æˆå¤±è´¥: {ex.Message}");
+                    Debug.LogError($"[SaveSystemSceneIntegratorEditor] ÊÖ¶¯³¡¾°¼¯³ÉÊ§°Ü: {ex.Message}");
                 }
             }
         }
         else
         {
-            EditorGUILayout.HelpBox("éœ€è¦åœ¨è¿è¡Œæ—¶æ‰èƒ½æ‰§è¡Œé›†æˆæ“ä½œ", MessageType.Info);
+            EditorGUILayout.HelpBox("ĞèÒªÔÚÔËĞĞÊ±²ÅÄÜÖ´ĞĞ¼¯³É²Ù×÷", MessageType.Info);
         }
 
-        // åˆ·æ–°ç•Œé¢æŒ‰é’®
-        if (GUILayout.Button("åˆ·æ–°ç•Œé¢", buttonStyle))
+        // Ë¢ĞÂ½çÃæ°´Å¥
+        if (GUILayout.Button("Ë¢ĞÂ½çÃæ", buttonStyle))
         {
             Repaint();
         }
@@ -508,11 +508,11 @@ public class SaveSystemSceneIntegratorEditor : Editor
     }
 
     /// <summary>
-    /// æŸ¥æ‰¾åœºæ™¯ç»„ä»¶
+    /// ²éÕÒ³¡¾°×é¼ş
     /// </summary>
     private void FindSceneComponents()
     {
-        Debug.Log("[SaveSystemSceneIntegratorEditor] æŸ¥æ‰¾åœºæ™¯ç»„ä»¶...");
+        Debug.Log("[SaveSystemSceneIntegratorEditor] ²éÕÒ³¡¾°×é¼ş...");
 
         var items = FindObjectsOfType<InventorySystemItem>();
         var grids = FindObjectsOfType<BaseItemGrid>();
@@ -520,112 +520,112 @@ public class SaveSystemSceneIntegratorEditor : Editor
         var equipSlots = FindObjectsOfType<EquipSlot>();
         var dataHolders = FindObjectsOfType<ItemDataHolder>();
 
-        Debug.Log($"[SaveSystemSceneIntegratorEditor] æ‰¾åˆ°ç»„ä»¶æ•°é‡:");
+        Debug.Log($"[SaveSystemSceneIntegratorEditor] ÕÒµ½×é¼şÊıÁ¿:");
         Debug.Log($"  InventorySystemItem: {items.Length}");
         Debug.Log($"  BaseItemGrid: {grids.Length}");
         Debug.Log($"  BaseItemSpawn: {spawners.Length}");
         Debug.Log($"  EquipSlot: {equipSlots.Length}");
         Debug.Log($"  ItemDataHolder: {dataHolders.Length}");
 
-        string summary = $"åœºæ™¯ç»„ä»¶æŸ¥æ‰¾å®Œæˆ:\n" +
-                        $"åº“å­˜ç‰©å“: {items.Length}\n" +
-                        $"ç‰©å“ç½‘æ ¼: {grids.Length}\n" +
-                        $"ç”Ÿæˆå™¨: {spawners.Length}\n" +
-                        $"è£…å¤‡æ§½: {equipSlots.Length}\n" +
-                        $"æ•°æ®æŒæœ‰è€…: {dataHolders.Length}";
+        string summary = $"³¡¾°×é¼ş²éÕÒÍê³É:\n" +
+                        $"¿â´æÎïÆ·: {items.Length}\n" +
+                        $"ÎïÆ·Íø¸ñ: {grids.Length}\n" +
+                        $"Éú³ÉÆ÷: {spawners.Length}\n" +
+                        $"×°±¸²Û: {equipSlots.Length}\n" +
+                        $"Êı¾İ³ÖÓĞÕß: {dataHolders.Length}";
 
-        EditorUtility.DisplayDialog("åœºæ™¯ç»„ä»¶æŸ¥æ‰¾ç»“æœ", summary, "ç¡®å®š");
+        EditorUtility.DisplayDialog("³¡¾°×é¼ş²éÕÒ½á¹û", summary, "È·¶¨");
     }
 
     /// <summary>
-    /// éªŒè¯åœºæ™¯å®Œæ•´æ€§
+    /// ÑéÖ¤³¡¾°ÍêÕûĞÔ
     /// </summary>
     private void ValidateSceneIntegrity()
     {
-        Debug.Log("[SaveSystemSceneIntegratorEditor] å¼€å§‹éªŒè¯åœºæ™¯å®Œæ•´æ€§...");
+        Debug.Log("[SaveSystemSceneIntegratorEditor] ¿ªÊ¼ÑéÖ¤³¡¾°ÍêÕûĞÔ...");
 
         int validationErrors = 0;
         List<string> errorMessages = new List<string>();
 
-        // éªŒè¯åº“å­˜ç‰©å“
+        // ÑéÖ¤¿â´æÎïÆ·
         var items = FindObjectsOfType<InventorySystemItem>();
         foreach (var item in items)
         {
             if (string.IsNullOrEmpty(item.GetItemInstanceID()))
             {
-                errorMessages.Add($"åº“å­˜ç‰©å“ '{item.name}' ç¼ºå°‘å®ä¾‹ID");
+                errorMessages.Add($"¿â´æÎïÆ· '{item.name}' È±ÉÙÊµÀıID");
                 validationErrors++;
             }
         }
 
-        // éªŒè¯ç‰©å“ç½‘æ ¼
+        // ÑéÖ¤ÎïÆ·Íø¸ñ
         var grids = FindObjectsOfType<BaseItemGrid>();
         foreach (var grid in grids)
         {
             if (string.IsNullOrEmpty(grid.GetSaveID()))
             {
-                errorMessages.Add($"ç‰©å“ç½‘æ ¼ '{grid.name}' ç¼ºå°‘ä¿å­˜ID");
+                errorMessages.Add($"ÎïÆ·Íø¸ñ '{grid.name}' È±ÉÙ±£´æID");
                 validationErrors++;
             }
         }
 
-        // éªŒè¯ç”Ÿæˆå™¨
+        // ÑéÖ¤Éú³ÉÆ÷
         var spawners = FindObjectsOfType<BaseItemSpawn>();
         foreach (var spawner in spawners)
         {
             if (string.IsNullOrEmpty(spawner.GetSaveID()))
             {
-                errorMessages.Add($"ç”Ÿæˆå™¨ '{spawner.name}' ç¼ºå°‘ä¿å­˜ID");
+                errorMessages.Add($"Éú³ÉÆ÷ '{spawner.name}' È±ÉÙ±£´æID");
                 validationErrors++;
             }
         }
 
-        // éªŒè¯è£…å¤‡æ§½
+        // ÑéÖ¤×°±¸²Û
         var equipSlots = FindObjectsOfType<EquipSlot>();
         foreach (var slot in equipSlots)
         {
             if (string.IsNullOrEmpty(slot.GetSaveID()))
             {
-                errorMessages.Add($"è£…å¤‡æ§½ '{slot.name}' ç¼ºå°‘ä¿å­˜ID");
+                errorMessages.Add($"×°±¸²Û '{slot.name}' È±ÉÙ±£´æID");
                 validationErrors++;
             }
         }
 
-        // éªŒè¯æ•°æ®æŒæœ‰è€…
+        // ÑéÖ¤Êı¾İ³ÖÓĞÕß
         var dataHolders = FindObjectsOfType<ItemDataHolder>();
         foreach (var holder in dataHolders)
         {
             if (string.IsNullOrEmpty(holder.GetSaveID()))
             {
-                errorMessages.Add($"æ•°æ®æŒæœ‰è€… '{holder.name}' ç¼ºå°‘ä¿å­˜ID");
+                errorMessages.Add($"Êı¾İ³ÖÓĞÕß '{holder.name}' È±ÉÙ±£´æID");
                 validationErrors++;
             }
         }
 
-        // è¾“å‡ºéªŒè¯ç»“æœ
+        // Êä³öÑéÖ¤½á¹û
         if (validationErrors == 0)
         {
-            Debug.Log("[SaveSystemSceneIntegratorEditor] åœºæ™¯å®Œæ•´æ€§éªŒè¯é€šè¿‡");
-            EditorUtility.DisplayDialog("éªŒè¯ç»“æœ", "åœºæ™¯å®Œæ•´æ€§éªŒè¯é€šè¿‡ï¼", "ç¡®å®š");
+            Debug.Log("[SaveSystemSceneIntegratorEditor] ³¡¾°ÍêÕûĞÔÑéÖ¤Í¨¹ı");
+            EditorUtility.DisplayDialog("ÑéÖ¤½á¹û", "³¡¾°ÍêÕûĞÔÑéÖ¤Í¨¹ı£¡", "È·¶¨");
         }
         else
         {
-            Debug.LogWarning($"[SaveSystemSceneIntegratorEditor] åœºæ™¯å®Œæ•´æ€§éªŒè¯å¤±è´¥ï¼Œå‘ç° {validationErrors} ä¸ªé”™è¯¯");
+            Debug.LogWarning($"[SaveSystemSceneIntegratorEditor] ³¡¾°ÍêÕûĞÔÑéÖ¤Ê§°Ü£¬·¢ÏÖ {validationErrors} ¸ö´íÎó");
 
             foreach (string error in errorMessages)
             {
                 Debug.LogError($"[SaveSystemSceneIntegratorEditor] {error}");
             }
 
-            string errorSummary = $"å‘ç° {validationErrors} ä¸ªéªŒè¯é”™è¯¯ï¼š\n\n";
-            errorSummary += string.Join("\n", errorMessages.Take(10)); // åªæ˜¾ç¤ºå‰10ä¸ªé”™è¯¯
+            string errorSummary = $"·¢ÏÖ {validationErrors} ¸öÑéÖ¤´íÎó£º\n\n";
+            errorSummary += string.Join("\n", errorMessages.Take(10)); // Ö»ÏÔÊ¾Ç°10¸ö´íÎó
 
             if (errorMessages.Count > 10)
             {
-                errorSummary += $"\n\n... è¿˜æœ‰ {errorMessages.Count - 10} ä¸ªé”™è¯¯ï¼Œè¯·æŸ¥çœ‹æ§åˆ¶å°æ—¥å¿—ã€‚";
+                errorSummary += $"\n\n... »¹ÓĞ {errorMessages.Count - 10} ¸ö´íÎó£¬Çë²é¿´¿ØÖÆÌ¨ÈÕÖ¾¡£";
             }
 
-            EditorUtility.DisplayDialog("éªŒè¯ç»“æœ", errorSummary, "ç¡®å®š");
+            EditorUtility.DisplayDialog("ÑéÖ¤½á¹û", errorSummary, "È·¶¨");
         }
     }
 }

@@ -1,6 +1,6 @@
 // BackpackDetectorDataStructures.cs
-// èƒŒåŒ…ç½‘æ ¼æ£€æµ‹å™¨ä¸“ç”¨æ•°æ®ç»“æ„å®šä¹‰
-// åŒ…å«èƒŒåŒ…è´Ÿé‡åˆ†æã€æ•´ç†å»ºè®®ã€å¿«é€Ÿè®¿é—®åŒºåŸŸç­‰åŠŸèƒ½çš„æ•°æ®ç»“æ„
+// ±³°üÍø¸ñ¼ì²âÆ÷×¨ÓÃÊı¾İ½á¹¹¶¨Òå
+// °üº¬±³°ü¸ºÖØ·ÖÎö¡¢ÕûÀí½¨Òé¡¢¿ìËÙ·ÃÎÊÇøÓòµÈ¹¦ÄÜµÄÊı¾İ½á¹¹
 
 using System.Collections.Generic;
 using UnityEngine;
@@ -9,31 +9,31 @@ using InventorySystem.Grid;
 namespace InventorySystem.Grid
 {
     /// <summary>
-    /// èƒŒåŒ…è´Ÿé‡åˆ†æä¿¡æ¯
-    /// ç”¨äºåˆ†æèƒŒåŒ…ä¸­ç‰©å“çš„é‡é‡åˆ†å¸ƒå’Œè´Ÿé‡çŠ¶æ€
+    /// ±³°ü¸ºÖØ·ÖÎöĞÅÏ¢
+    /// ÓÃÓÚ·ÖÎö±³°üÖĞÎïÆ·µÄÖØÁ¿·Ö²¼ºÍ¸ºÖØ×´Ì¬
     /// </summary>
     [System.Serializable]
     public class BackpackWeightInfo
     {
-        [Header("åŸºç¡€ä¿¡æ¯")]
-        public string gridID;                                    // ç½‘æ ¼æ ‡è¯†ç¬¦
-        public int totalItems;                                   // ç‰©å“æ€»æ•°
-        public float totalWeight;                                // æ€»é‡é‡
-        public float averageWeight;                              // å¹³å‡é‡é‡
+        [Header("»ù´¡ĞÅÏ¢")]
+        public string gridID;                                    // Íø¸ñ±êÊ¶·û
+        public int totalItems;                                   // ÎïÆ·×ÜÊı
+        public float totalWeight;                                // ×ÜÖØÁ¿
+        public float averageWeight;                              // Æ½¾ùÖØÁ¿
 
-        [Header("é‡é‡ç»Ÿè®¡")]
-        public string heaviestItem;                              // æœ€é‡ç‰©å“åç§°
-        public string lightestItem;                              // æœ€è½»ç‰©å“åç§°
-        public Dictionary<string, float> weightDistribution;     // æŒ‰ç±»åˆ«çš„é‡é‡åˆ†å¸ƒ
-        public List<string> overweightItems;                     // è¶…é‡ç‰©å“åˆ—è¡¨
+        [Header("ÖØÁ¿Í³¼Æ")]
+        public string heaviestItem;                              // ×îÖØÎïÆ·Ãû³Æ
+        public string lightestItem;                              // ×îÇáÎïÆ·Ãû³Æ
+        public Dictionary<string, float> weightDistribution;     // °´Àà±ğµÄÖØÁ¿·Ö²¼
+        public List<string> overweightItems;                     // ³¬ÖØÎïÆ·ÁĞ±í
 
-        [Header("è´Ÿé‡å»ºè®®")]
-        public float recommendedMaxWeight;                       // æ¨èæœ€å¤§è´Ÿé‡
-        public bool isOverloaded;                               // æ˜¯å¦è¶…è½½
-        public List<string> weightOptimizationSuggestions;      // è´Ÿé‡ä¼˜åŒ–å»ºè®®
+        [Header("¸ºÖØ½¨Òé")]
+        public float recommendedMaxWeight;                       // ÍÆ¼ö×î´ó¸ºÖØ
+        public bool isOverloaded;                               // ÊÇ·ñ³¬ÔØ
+        public List<string> weightOptimizationSuggestions;      // ¸ºÖØÓÅ»¯½¨Òé
 
         /// <summary>
-        /// æ„é€ å‡½æ•°ï¼Œåˆå§‹åŒ–é›†åˆ
+        /// ¹¹Ôìº¯Êı£¬³õÊ¼»¯¼¯ºÏ
         /// </summary>
         public BackpackWeightInfo()
         {
@@ -43,51 +43,51 @@ namespace InventorySystem.Grid
         }
 
         /// <summary>
-        /// è·å–è´Ÿé‡çŠ¶æ€æè¿°
+        /// »ñÈ¡¸ºÖØ×´Ì¬ÃèÊö
         /// </summary>
-        /// <returns>è´Ÿé‡çŠ¶æ€æ–‡æœ¬</returns>
+        /// <returns>¸ºÖØ×´Ì¬ÎÄ±¾</returns>
         public string GetWeightStatusDescription()
         {
-            if (totalWeight == 0f) return "èƒŒåŒ…ä¸ºç©º";
+            if (totalWeight == 0f) return "±³°üÎª¿Õ";
 
             float loadPercentage = recommendedMaxWeight > 0 ? (totalWeight / recommendedMaxWeight) * 100f : 0f;
 
             if (loadPercentage < 50f)
-                return $"è´Ÿé‡è½»æ¾ ({loadPercentage:F1}%)";
+                return $"¸ºÖØÇáËÉ ({loadPercentage:F1}%)";
             else if (loadPercentage < 80f)
-                return $"è´Ÿé‡é€‚ä¸­ ({loadPercentage:F1}%)";
+                return $"¸ºÖØÊÊÖĞ ({loadPercentage:F1}%)";
             else if (loadPercentage < 100f)
-                return $"è´Ÿé‡è¾ƒé‡ ({loadPercentage:F1}%)";
+                return $"¸ºÖØ½ÏÖØ ({loadPercentage:F1}%)";
             else
-                return $"è´Ÿé‡è¶…è½½ ({loadPercentage:F1}%)";
+                return $"¸ºÖØ³¬ÔØ ({loadPercentage:F1}%)";
         }
     }
 
     /// <summary>
-    /// èƒŒåŒ…æ•´ç†å»ºè®®ä¿¡æ¯
-    /// åŸºäºç‰©å“åˆ†å¸ƒå’Œä½¿ç”¨é¢‘ç‡æä¾›æ•´ç†å»ºè®®
+    /// ±³°üÕûÀí½¨ÒéĞÅÏ¢
+    /// »ùÓÚÎïÆ··Ö²¼ºÍÊ¹ÓÃÆµÂÊÌá¹©ÕûÀí½¨Òé
     /// </summary>
     [System.Serializable]
     public class BackpackOrganizationSuggestion
     {
-        [Header("åŸºç¡€ä¿¡æ¯")]
-        public string gridID;                                    // ç½‘æ ¼æ ‡è¯†ç¬¦
-        public float currentEfficiency;                          // å½“å‰ç©ºé—´åˆ©ç”¨æ•ˆç‡
-        public int totalSuggestions;                             // å»ºè®®æ€»æ•°
+        [Header("»ù´¡ĞÅÏ¢")]
+        public string gridID;                                    // Íø¸ñ±êÊ¶·û
+        public float currentEfficiency;                          // µ±Ç°¿Õ¼äÀûÓÃĞ§ÂÊ
+        public int totalSuggestions;                             // ½¨Òé×ÜÊı
 
-        [Header("æ•´ç†å»ºè®®")]
-        public List<string> suggestions;                         // æ•´ç†å»ºè®®åˆ—è¡¨
-        public List<string> priorityItems;                       // ä¼˜å…ˆçº§ç‰©å“åˆ—è¡¨
-        public List<string> redundantItems;                      // å†—ä½™ç‰©å“åˆ—è¡¨
-        public List<string> misplacedItems;                      // é”™ä½ç‰©å“åˆ—è¡¨
+        [Header("ÕûÀí½¨Òé")]
+        public List<string> suggestions;                         // ÕûÀí½¨ÒéÁĞ±í
+        public List<string> priorityItems;                       // ÓÅÏÈ¼¶ÎïÆ·ÁĞ±í
+        public List<string> redundantItems;                      // ÈßÓàÎïÆ·ÁĞ±í
+        public List<string> misplacedItems;                      // ´íÎ»ÎïÆ·ÁĞ±í
 
-        [Header("ä¼˜åŒ–åˆ†æ")]
-        public float potentialEfficiencyGain;                    // æ½œåœ¨æ•ˆç‡æå‡
-        public int estimatedTimeToOrganize;                      // é¢„ä¼°æ•´ç†æ—¶é—´ï¼ˆç§’ï¼‰
-        public OrganizationPriority overallPriority;             // æ•´ä½“æ•´ç†ä¼˜å…ˆçº§
+        [Header("ÓÅ»¯·ÖÎö")]
+        public float potentialEfficiencyGain;                    // Ç±ÔÚĞ§ÂÊÌáÉı
+        public int estimatedTimeToOrganize;                      // Ô¤¹ÀÕûÀíÊ±¼ä£¨Ãë£©
+        public OrganizationPriority overallPriority;             // ÕûÌåÕûÀíÓÅÏÈ¼¶
 
         /// <summary>
-        /// æ„é€ å‡½æ•°ï¼Œåˆå§‹åŒ–é›†åˆ
+        /// ¹¹Ôìº¯Êı£¬³õÊ¼»¯¼¯ºÏ
         /// </summary>
         public BackpackOrganizationSuggestion()
         {
@@ -99,61 +99,61 @@ namespace InventorySystem.Grid
         }
 
         /// <summary>
-        /// è·å–æ•´ç†ä¼˜å…ˆçº§æè¿°
+        /// »ñÈ¡ÕûÀíÓÅÏÈ¼¶ÃèÊö
         /// </summary>
-        /// <returns>ä¼˜å…ˆçº§æè¿°æ–‡æœ¬</returns>
+        /// <returns>ÓÅÏÈ¼¶ÃèÊöÎÄ±¾</returns>
         public string GetPriorityDescription()
         {
             switch (overallPriority)
             {
                 case OrganizationPriority.Critical:
-                    return "ç´§æ€¥æ•´ç† - èƒŒåŒ…æ··ä¹±ä¸¥é‡å½±å“ä½¿ç”¨æ•ˆç‡";
+                    return "½ô¼±ÕûÀí - ±³°ü»ìÂÒÑÏÖØÓ°ÏìÊ¹ÓÃĞ§ÂÊ";
                 case OrganizationPriority.High:
-                    return "é«˜ä¼˜å…ˆçº§ - å»ºè®®å°½å¿«æ•´ç†ä»¥æå‡æ•ˆç‡";
+                    return "¸ßÓÅÏÈ¼¶ - ½¨Òé¾¡¿ìÕûÀíÒÔÌáÉıĞ§ÂÊ";
                 case OrganizationPriority.Medium:
-                    return "ä¸­ç­‰ä¼˜å…ˆçº§ - æœ‰æ—¶é—´æ—¶å¯ä»¥æ•´ç†";
+                    return "ÖĞµÈÓÅÏÈ¼¶ - ÓĞÊ±¼äÊ±¿ÉÒÔÕûÀí";
                 case OrganizationPriority.Low:
-                    return "ä½ä¼˜å…ˆçº§ - èƒŒåŒ…ç»„ç»‡è‰¯å¥½";
+                    return "µÍÓÅÏÈ¼¶ - ±³°ü×éÖ¯Á¼ºÃ";
                 default:
-                    return "æœªçŸ¥ä¼˜å…ˆçº§";
+                    return "Î´ÖªÓÅÏÈ¼¶";
             }
         }
     }
 
     /// <summary>
-    /// æ•´ç†ä¼˜å…ˆçº§æšä¸¾
+    /// ÕûÀíÓÅÏÈ¼¶Ã¶¾Ù
     /// </summary>
     public enum OrganizationPriority
     {
-        Low = 0,        // ä½ä¼˜å…ˆçº§
-        Medium = 1,     // ä¸­ç­‰ä¼˜å…ˆçº§
-        High = 2,       // é«˜ä¼˜å…ˆçº§
-        Critical = 3    // ç´§æ€¥ä¼˜å…ˆçº§
+        Low = 0,        // µÍÓÅÏÈ¼¶
+        Medium = 1,     // ÖĞµÈÓÅÏÈ¼¶
+        High = 2,       // ¸ßÓÅÏÈ¼¶
+        Critical = 3    // ½ô¼±ÓÅÏÈ¼¶
     }
 
     /// <summary>
-    /// èƒŒåŒ…å¿«é€Ÿè®¿é—®åŒºåŸŸä¿¡æ¯
-    /// åˆ†æèƒŒåŒ…ä¸­å“ªäº›åŒºåŸŸé€‚åˆæ”¾ç½®å¸¸ç”¨ç‰©å“
+    /// ±³°ü¿ìËÙ·ÃÎÊÇøÓòĞÅÏ¢
+    /// ·ÖÎö±³°üÖĞÄÄĞ©ÇøÓòÊÊºÏ·ÅÖÃ³£ÓÃÎïÆ·
     /// </summary>
     [System.Serializable]
     public class BackpackQuickAccessInfo
     {
-        [Header("åŸºç¡€ä¿¡æ¯")]
-        public string gridID;                                    // ç½‘æ ¼æ ‡è¯†ç¬¦
-        public int totalZones;                                   // å¿«é€Ÿè®¿é—®åŒºåŸŸæ€»æ•°
-        public float overallAccessEfficiency;                    // æ•´ä½“è®¿é—®æ•ˆç‡
+        [Header("»ù´¡ĞÅÏ¢")]
+        public string gridID;                                    // Íø¸ñ±êÊ¶·û
+        public int totalZones;                                   // ¿ìËÙ·ÃÎÊÇøÓò×ÜÊı
+        public float overallAccessEfficiency;                    // ÕûÌå·ÃÎÊĞ§ÂÊ
 
-        [Header("è®¿é—®åŒºåŸŸ")]
-        public List<QuickAccessZone> quickAccessZones;           // å¿«é€Ÿè®¿é—®åŒºåŸŸåˆ—è¡¨
-        public Dictionary<string, Vector2Int> recommendedPlacements; // æ¨èæ”¾ç½®ä½ç½®
+        [Header("·ÃÎÊÇøÓò")]
+        public List<QuickAccessZone> quickAccessZones;           // ¿ìËÙ·ÃÎÊÇøÓòÁĞ±í
+        public Dictionary<string, Vector2Int> recommendedPlacements; // ÍÆ¼ö·ÅÖÃÎ»ÖÃ
 
-        [Header("ä½¿ç”¨ç»Ÿè®¡")]
-        public Dictionary<string, int> itemTypeAccessFrequency;   // ç‰©å“ç±»å‹è®¿é—®é¢‘ç‡
-        public List<string> mostAccessedItems;                   // æœ€å¸¸è®¿é—®çš„ç‰©å“
-        public List<string> leastAccessedItems;                  // æœ€å°‘è®¿é—®çš„ç‰©å“
+        [Header("Ê¹ÓÃÍ³¼Æ")]
+        public Dictionary<string, int> itemTypeAccessFrequency;   // ÎïÆ·ÀàĞÍ·ÃÎÊÆµÂÊ
+        public List<string> mostAccessedItems;                   // ×î³£·ÃÎÊµÄÎïÆ·
+        public List<string> leastAccessedItems;                  // ×îÉÙ·ÃÎÊµÄÎïÆ·
 
         /// <summary>
-        /// æ„é€ å‡½æ•°ï¼Œåˆå§‹åŒ–é›†åˆ
+        /// ¹¹Ôìº¯Êı£¬³õÊ¼»¯¼¯ºÏ
         /// </summary>
         public BackpackQuickAccessInfo()
         {
@@ -165,47 +165,47 @@ namespace InventorySystem.Grid
         }
 
         /// <summary>
-        /// è·å–è®¿é—®æ•ˆç‡è¯„çº§
+        /// »ñÈ¡·ÃÎÊĞ§ÂÊÆÀ¼¶
         /// </summary>
-        /// <returns>æ•ˆç‡è¯„çº§æ–‡æœ¬</returns>
+        /// <returns>Ğ§ÂÊÆÀ¼¶ÎÄ±¾</returns>
         public string GetAccessEfficiencyRating()
         {
             if (overallAccessEfficiency >= 0.9f)
-                return "ä¼˜ç§€ - å¿«é€Ÿè®¿é—®åŒºåŸŸé…ç½®å®Œç¾";
+                return "ÓÅĞã - ¿ìËÙ·ÃÎÊÇøÓòÅäÖÃÍêÃÀ";
             else if (overallAccessEfficiency >= 0.7f)
-                return "è‰¯å¥½ - å¿«é€Ÿè®¿é—®åŒºåŸŸé…ç½®åˆç†";
+                return "Á¼ºÃ - ¿ìËÙ·ÃÎÊÇøÓòÅäÖÃºÏÀí";
             else if (overallAccessEfficiency >= 0.5f)
-                return "ä¸€èˆ¬ - å¿«é€Ÿè®¿é—®åŒºåŸŸæœ‰æ”¹è¿›ç©ºé—´";
+                return "Ò»°ã - ¿ìËÙ·ÃÎÊÇøÓòÓĞ¸Ä½ø¿Õ¼ä";
             else
-                return "è¾ƒå·® - å»ºè®®é‡æ–°é…ç½®å¿«é€Ÿè®¿é—®åŒºåŸŸ";
+                return "½Ï²î - ½¨ÒéÖØĞÂÅäÖÃ¿ìËÙ·ÃÎÊÇøÓò";
         }
     }
 
     /// <summary>
-    /// å¿«é€Ÿè®¿é—®åŒºåŸŸå®šä¹‰
-    /// å®šä¹‰èƒŒåŒ…ä¸­çš„ç‰¹å®šåŒºåŸŸåŠå…¶æ¨èç”¨é€”
+    /// ¿ìËÙ·ÃÎÊÇøÓò¶¨Òå
+    /// ¶¨Òå±³°üÖĞµÄÌØ¶¨ÇøÓò¼°ÆäÍÆ¼öÓÃÍ¾
     /// </summary>
     [System.Serializable]
     public class QuickAccessZone
     {
-        [Header("åŒºåŸŸå®šä¹‰")]
-        public string zoneName;                                  // åŒºåŸŸåç§°
-        public RectInt zoneArea;                                 // åŒºåŸŸèŒƒå›´
-        public int priority;                                     // ä¼˜å…ˆçº§ï¼ˆ1æœ€é«˜ï¼‰
-        public ZoneType zoneType;                               // åŒºåŸŸç±»å‹
+        [Header("ÇøÓò¶¨Òå")]
+        public string zoneName;                                  // ÇøÓòÃû³Æ
+        public RectInt zoneArea;                                 // ÇøÓò·¶Î§
+        public int priority;                                     // ÓÅÏÈ¼¶£¨1×î¸ß£©
+        public ZoneType zoneType;                               // ÇøÓòÀàĞÍ
 
-        [Header("æ¨èé…ç½®")]
-        public List<string> recommendedItemTypes;                // æ¨èç‰©å“ç±»å‹
-        public List<string> currentItems;                       // å½“å‰ç‰©å“åˆ—è¡¨
-        public float utilizationRate;                           // åˆ©ç”¨ç‡
+        [Header("ÍÆ¼öÅäÖÃ")]
+        public List<string> recommendedItemTypes;                // ÍÆ¼öÎïÆ·ÀàĞÍ
+        public List<string> currentItems;                       // µ±Ç°ÎïÆ·ÁĞ±í
+        public float utilizationRate;                           // ÀûÓÃÂÊ
 
-        [Header("è®¿é—®åˆ†æ")]
-        public int accessCount;                                  // è®¿é—®æ¬¡æ•°
-        public float averageAccessTime;                         // å¹³å‡è®¿é—®æ—¶é—´
-        public bool isOptimallyUsed;                           // æ˜¯å¦æœ€ä¼˜ä½¿ç”¨
+        [Header("·ÃÎÊ·ÖÎö")]
+        public int accessCount;                                  // ·ÃÎÊ´ÎÊı
+        public float averageAccessTime;                         // Æ½¾ù·ÃÎÊÊ±¼ä
+        public bool isOptimallyUsed;                           // ÊÇ·ñ×îÓÅÊ¹ÓÃ
 
         /// <summary>
-        /// æ„é€ å‡½æ•°ï¼Œåˆå§‹åŒ–é›†åˆ
+        /// ¹¹Ôìº¯Êı£¬³õÊ¼»¯¼¯ºÏ
         /// </summary>
         public QuickAccessZone()
         {
@@ -215,65 +215,65 @@ namespace InventorySystem.Grid
         }
 
         /// <summary>
-        /// è·å–åŒºåŸŸçŠ¶æ€æè¿°
+        /// »ñÈ¡ÇøÓò×´Ì¬ÃèÊö
         /// </summary>
-        /// <returns>åŒºåŸŸçŠ¶æ€æ–‡æœ¬</returns>
+        /// <returns>ÇøÓò×´Ì¬ÎÄ±¾</returns>
         public string GetZoneStatusDescription()
         {
             if (utilizationRate == 0f)
-                return "ç©ºé—² - åŒºåŸŸæœªä½¿ç”¨";
+                return "¿ÕÏĞ - ÇøÓòÎ´Ê¹ÓÃ";
             else if (utilizationRate < 0.3f)
-                return "ä½åˆ©ç”¨ - åŒºåŸŸä½¿ç”¨ä¸å……åˆ†";
+                return "µÍÀûÓÃ - ÇøÓòÊ¹ÓÃ²»³ä·Ö";
             else if (utilizationRate < 0.7f)
-                return "é€‚ä¸­ - åŒºåŸŸä½¿ç”¨åˆç†";
+                return "ÊÊÖĞ - ÇøÓòÊ¹ÓÃºÏÀí";
             else if (utilizationRate < 1.0f)
-                return "é«˜åˆ©ç”¨ - åŒºåŸŸä½¿ç”¨å……åˆ†";
+                return "¸ßÀûÓÃ - ÇøÓòÊ¹ÓÃ³ä·Ö";
             else
-                return "æ»¡è½½ - åŒºåŸŸå·²æ»¡";
+                return "ÂúÔØ - ÇøÓòÒÑÂú";
         }
     }
 
     /// <summary>
-    /// å¿«é€Ÿè®¿é—®åŒºåŸŸç±»å‹æšä¸¾
+    /// ¿ìËÙ·ÃÎÊÇøÓòÀàĞÍÃ¶¾Ù
     /// </summary>
     public enum ZoneType
     {
-        General = 0,        // é€šç”¨åŒºåŸŸ
-        Combat = 1,         // æˆ˜æ–—åŒºåŸŸ
-        Consumable = 2,     // æ¶ˆè€—å“åŒºåŸŸ
-        Tool = 3,           // å·¥å…·åŒºåŸŸ
-        Weapon = 4,         // æ­¦å™¨åŒºåŸŸ
-        Armor = 5,          // é˜²å…·åŒºåŸŸ
-        Ammo = 6,           // å¼¹è¯åŒºåŸŸ
-        Quest = 7,          // ä»»åŠ¡ç‰©å“åŒºåŸŸ
-        Valuable = 8        // è´µé‡ç‰©å“åŒºåŸŸ
+        General = 0,        // Í¨ÓÃÇøÓò
+        Combat = 1,         // Õ½¶·ÇøÓò
+        Consumable = 2,     // ÏûºÄÆ·ÇøÓò
+        Tool = 3,           // ¹¤¾ßÇøÓò
+        Weapon = 4,         // ÎäÆ÷ÇøÓò
+        Armor = 5,          // ·À¾ßÇøÓò
+        Ammo = 6,           // µ¯Ò©ÇøÓò
+        Quest = 7,          // ÈÎÎñÎïÆ·ÇøÓò
+        Valuable = 8        // ¹óÖØÎïÆ·ÇøÓò
     }
 
     /// <summary>
-    /// èƒŒåŒ…å®¹é‡é¢„è­¦ä¿¡æ¯
-    /// æä¾›èƒŒåŒ…å®¹é‡ç›¸å…³çš„é¢„è­¦å’Œå»ºè®®
+    /// ±³°üÈİÁ¿Ô¤¾¯ĞÅÏ¢
+    /// Ìá¹©±³°üÈİÁ¿Ïà¹ØµÄÔ¤¾¯ºÍ½¨Òé
     /// </summary>
     [System.Serializable]
     public class BackpackCapacityWarning
     {
-        [Header("å®¹é‡çŠ¶æ€")]
-        public string gridID;                                    // ç½‘æ ¼æ ‡è¯†ç¬¦
-        public float currentCapacityUsage;                       // å½“å‰å®¹é‡ä½¿ç”¨ç‡
-        public int remainingSlots;                              // å‰©ä½™æ§½ä½æ•°
-        public CapacityWarningLevel warningLevel;               // é¢„è­¦çº§åˆ«
+        [Header("ÈİÁ¿×´Ì¬")]
+        public string gridID;                                    // Íø¸ñ±êÊ¶·û
+        public float currentCapacityUsage;                       // µ±Ç°ÈİÁ¿Ê¹ÓÃÂÊ
+        public int remainingSlots;                              // Ê£Óà²ÛÎ»Êı
+        public CapacityWarningLevel warningLevel;               // Ô¤¾¯¼¶±ğ
 
-        [Header("é¢„è­¦ä¿¡æ¯")]
-        public List<string> warnings;                           // é¢„è­¦æ¶ˆæ¯åˆ—è¡¨
-        public List<string> recommendations;                     // æ¨èæ“ä½œåˆ—è¡¨
-        public bool requiresImmediateAction;                    // æ˜¯å¦éœ€è¦ç«‹å³è¡ŒåŠ¨
+        [Header("Ô¤¾¯ĞÅÏ¢")]
+        public List<string> warnings;                           // Ô¤¾¯ÏûÏ¢ÁĞ±í
+        public List<string> recommendations;                     // ÍÆ¼ö²Ù×÷ÁĞ±í
+        public bool requiresImmediateAction;                    // ÊÇ·ñĞèÒªÁ¢¼´ĞĞ¶¯
 
-        [Header("å®¹é‡åˆ†æ")]
-        public Dictionary<string, int> itemTypeSlotUsage;        // å„ç±»å‹ç‰©å“æ§½ä½ä½¿ç”¨æƒ…å†µ
-        public List<string> largestItems;                       // æœ€å¤§çš„ç‰©å“åˆ—è¡¨
-        public float projectedFullTime;                         // é¢„è®¡æ»¡è½½æ—¶é—´ï¼ˆå°æ—¶ï¼‰
+        [Header("ÈİÁ¿·ÖÎö")]
+        public Dictionary<string, int> itemTypeSlotUsage;        // ¸÷ÀàĞÍÎïÆ·²ÛÎ»Ê¹ÓÃÇé¿ö
+        public List<string> largestItems;                       // ×î´óµÄÎïÆ·ÁĞ±í
+        public float projectedFullTime;                         // Ô¤¼ÆÂúÔØÊ±¼ä£¨Ğ¡Ê±£©
 
         /// <summary>
-        /// æ„é€ å‡½æ•°ï¼Œåˆå§‹åŒ–é›†åˆ
+        /// ¹¹Ôìº¯Êı£¬³õÊ¼»¯¼¯ºÏ
         /// </summary>
         public BackpackCapacityWarning()
         {
@@ -285,38 +285,38 @@ namespace InventorySystem.Grid
         }
 
         /// <summary>
-        /// è·å–é¢„è­¦çº§åˆ«æè¿°
+        /// »ñÈ¡Ô¤¾¯¼¶±ğÃèÊö
         /// </summary>
-        /// <returns>é¢„è­¦çº§åˆ«æè¿°æ–‡æœ¬</returns>
+        /// <returns>Ô¤¾¯¼¶±ğÃèÊöÎÄ±¾</returns>
         public string GetWarningLevelDescription()
         {
             switch (warningLevel)
             {
                 case CapacityWarningLevel.Normal:
-                    return "æ­£å¸¸ - èƒŒåŒ…å®¹é‡å……è¶³";
+                    return "Õı³£ - ±³°üÈİÁ¿³ä×ã";
                 case CapacityWarningLevel.Low:
-                    return "æ³¨æ„ - èƒŒåŒ…å®¹é‡åä½";
+                    return "×¢Òâ - ±³°üÈİÁ¿Æ«µÍ";
                 case CapacityWarningLevel.Medium:
-                    return "è­¦å‘Š - èƒŒåŒ…å®¹é‡ä¸è¶³";
+                    return "¾¯¸æ - ±³°üÈİÁ¿²»×ã";
                 case CapacityWarningLevel.High:
-                    return "ä¸¥é‡ - èƒŒåŒ…å®¹é‡ä¸¥é‡ä¸è¶³";
+                    return "ÑÏÖØ - ±³°üÈİÁ¿ÑÏÖØ²»×ã";
                 case CapacityWarningLevel.Critical:
-                    return "ç´§æ€¥ - èƒŒåŒ…å³å°†æ»¡è½½";
+                    return "½ô¼± - ±³°ü¼´½«ÂúÔØ";
                 default:
-                    return "æœªçŸ¥é¢„è­¦çº§åˆ«";
+                    return "Î´ÖªÔ¤¾¯¼¶±ğ";
             }
         }
     }
 
     /// <summary>
-    /// å®¹é‡é¢„è­¦çº§åˆ«æšä¸¾
+    /// ÈİÁ¿Ô¤¾¯¼¶±ğÃ¶¾Ù
     /// </summary>
     public enum CapacityWarningLevel
     {
-        Normal = 0,     // æ­£å¸¸
-        Low = 1,        // ä½é¢„è­¦
-        Medium = 2,     // ä¸­ç­‰é¢„è­¦
-        High = 3,       // é«˜é¢„è­¦
-        Critical = 4    // ç´§æ€¥é¢„è­¦
+        Normal = 0,     // Õı³£
+        Low = 1,        // µÍÔ¤¾¯
+        Medium = 2,     // ÖĞµÈÔ¤¾¯
+        High = 3,       // ¸ßÔ¤¾¯
+        Critical = 4    // ½ô¼±Ô¤¾¯
     }
 }

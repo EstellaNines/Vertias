@@ -8,109 +8,109 @@ using Newtonsoft.Json.Linq;
 namespace InventorySystem.SaveSystem
 {
     /// <summary>
-    /// ä¿å­˜æ•°æ®åºåˆ—åŒ–å™¨ - è´Ÿè´£ISaveableå¯¹è±¡æ•°æ®çš„JSONåºåˆ—åŒ–å’Œååºåˆ—åŒ–
-    /// æä¾›ç»Ÿä¸€çš„æ•°æ®è½¬æ¢æ¥å£ï¼Œæ”¯æŒå¤æ‚å¯¹è±¡ç»“æ„å’Œç±»å‹å®‰å…¨çš„åºåˆ—åŒ–
+    /// ±£´æÊı¾İĞòÁĞ»¯Æ÷ - ¸ºÔğISaveable¶ÔÏóÊı¾İµÄJSONĞòÁĞ»¯ºÍ·´ĞòÁĞ»¯
+    /// Ìá¹©Í³Ò»µÄÊı¾İ×ª»»½Ó¿Ú£¬Ö§³Ö¸´ÔÓ¶ÔÏó½á¹¹ºÍÀàĞÍ°²È«µÄĞòÁĞ»¯
     /// </summary>
     public class SaveDataSerializer : MonoBehaviour
     {
-        #region å­—æ®µå’Œå±æ€§
-        [Header("åºåˆ—åŒ–é…ç½®")]
-        [SerializeField] private bool prettyPrint = true; // æ˜¯å¦æ ¼å¼åŒ–JSONè¾“å‡º
-        [SerializeField] private bool enableTypeHandling = true; // æ˜¯å¦å¯ç”¨ç±»å‹å¤„ç†
-        [SerializeField] private bool enableLogging = true; // æ˜¯å¦å¯ç”¨æ—¥å¿—è®°å½•
+        #region ×Ö¶ÎºÍÊôĞÔ
+        [Header("ĞòÁĞ»¯ÅäÖÃ")]
+        [SerializeField] private bool prettyPrint = true; // ÊÇ·ñ¸ñÊ½»¯JSONÊä³ö
+        [SerializeField] private bool enableTypeHandling = true; // ÊÇ·ñÆôÓÃÀàĞÍ´¦Àí
+        [SerializeField] private bool enableLogging = true; // ÊÇ·ñÆôÓÃÈÕÖ¾¼ÇÂ¼
 
-        // JSONåºåˆ—åŒ–è®¾ç½®
+        // JSONĞòÁĞ»¯ÉèÖÃ
         private JsonSerializerSettings jsonSettings;
 
-        // è‡ªå®šä¹‰ç±»å‹è½¬æ¢å™¨å­—å…¸
+        // ×Ô¶¨ÒåÀàĞÍ×ª»»Æ÷×Öµä
         private Dictionary<Type, JsonConverter> customConverters = new Dictionary<Type, JsonConverter>();
 
-        // åºåˆ—åŒ–ç»Ÿè®¡ä¿¡æ¯
+        // ĞòÁĞ»¯Í³¼ÆĞÅÏ¢
         private int serializationCount = 0;
         private int deserializationCount = 0;
         private long totalSerializedBytes = 0;
         #endregion
 
-        #region åˆå§‹åŒ–
+        #region ³õÊ¼»¯
         /// <summary>
-        /// åˆå§‹åŒ–åºåˆ—åŒ–å™¨
+        /// ³õÊ¼»¯ĞòÁĞ»¯Æ÷
         /// </summary>
         public void Initialize()
         {
             SetupJsonSettings();
             RegisterCustomConverters();
-            LogMessage("SaveDataSerializerå·²åˆå§‹åŒ–");
+            LogMessage("SaveDataSerializerÒÑ³õÊ¼»¯");
         }
 
         /// <summary>
-        /// è®¾ç½®JSONåºåˆ—åŒ–é…ç½®
+        /// ÉèÖÃJSONĞòÁĞ»¯ÅäÖÃ
         /// </summary>
         private void SetupJsonSettings()
         {
             jsonSettings = new JsonSerializerSettings
             {
-                // åŸºç¡€è®¾ç½®
+                // »ù´¡ÉèÖÃ
                 Formatting = prettyPrint ? Formatting.Indented : Formatting.None,
                 NullValueHandling = NullValueHandling.Include,
                 DefaultValueHandling = DefaultValueHandling.Include,
 
-                // ç±»å‹å¤„ç†
+                // ÀàĞÍ´¦Àí
                 TypeNameHandling = enableTypeHandling ? TypeNameHandling.Auto : TypeNameHandling.None,
                 TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Simple,
 
-                // é”™è¯¯å¤„ç†
+                // ´íÎó´¦Àí
                 Error = HandleSerializationError,
 
-                // æ—¥æœŸæ ¼å¼
+                // ÈÕÆÚ¸ñÊ½
                 DateFormatHandling = DateFormatHandling.IsoDateFormat,
                 DateTimeZoneHandling = DateTimeZoneHandling.Utc,
 
-                // å¼•ç”¨å¤„ç†
+                // ÒıÓÃ´¦Àí
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
                 PreserveReferencesHandling = PreserveReferencesHandling.Objects
             };
         }
 
         /// <summary>
-        /// æ³¨å†Œè‡ªå®šä¹‰ç±»å‹è½¬æ¢å™¨
+        /// ×¢²á×Ô¶¨ÒåÀàĞÍ×ª»»Æ÷
         /// </summary>
         private void RegisterCustomConverters()
         {
-            // Vector3è½¬æ¢å™¨
+            // Vector3×ª»»Æ÷
             var vector3Converter = new Vector3Converter();
             customConverters[typeof(Vector3)] = vector3Converter;
             jsonSettings.Converters.Add(vector3Converter);
 
-            // Quaternionè½¬æ¢å™¨
+            // Quaternion×ª»»Æ÷
             var quaternionConverter = new QuaternionConverter();
             customConverters[typeof(Quaternion)] = quaternionConverter;
             jsonSettings.Converters.Add(quaternionConverter);
 
-            // Colorè½¬æ¢å™¨
+            // Color×ª»»Æ÷
             var colorConverter = new ColorConverter();
             customConverters[typeof(Color)] = colorConverter;
             jsonSettings.Converters.Add(colorConverter);
 
-            // GameObjectå¼•ç”¨è½¬æ¢å™¨
+            // GameObjectÒıÓÃ×ª»»Æ÷
             var gameObjectConverter = new GameObjectReferenceConverter();
             customConverters[typeof(GameObject)] = gameObjectConverter;
             jsonSettings.Converters.Add(gameObjectConverter);
 
-            LogMessage($"å·²æ³¨å†Œ{customConverters.Count}ä¸ªè‡ªå®šä¹‰è½¬æ¢å™¨");
+            LogMessage($"ÒÑ×¢²á{customConverters.Count}¸ö×Ô¶¨Òå×ª»»Æ÷");
         }
         #endregion
 
-        #region åºåˆ—åŒ–æ–¹æ³•
+        #region ĞòÁĞ»¯·½·¨
         /// <summary>
-        /// å°†å¯¹è±¡åºåˆ—åŒ–ä¸ºJSONå­—ç¬¦ä¸²
+        /// ½«¶ÔÏóĞòÁĞ»¯ÎªJSON×Ö·û´®
         /// </summary>
-        /// <param name="obj">è¦åºåˆ—åŒ–çš„å¯¹è±¡</param>
-        /// <returns>JSONå­—ç¬¦ä¸²</returns>
+        /// <param name="obj">ÒªĞòÁĞ»¯µÄ¶ÔÏó</param>
+        /// <returns>JSON×Ö·û´®</returns>
         public string SerializeToJson(object obj)
         {
             if (obj == null)
             {
-                LogWarning("å°è¯•åºåˆ—åŒ–ç©ºå¯¹è±¡");
+                LogWarning("³¢ÊÔĞòÁĞ»¯¿Õ¶ÔÏó");
                 return "null";
             }
 
@@ -118,39 +118,39 @@ namespace InventorySystem.SaveSystem
             {
                 string json = JsonConvert.SerializeObject(obj, jsonSettings);
 
-                // æ›´æ–°ç»Ÿè®¡ä¿¡æ¯
+                // ¸üĞÂÍ³¼ÆĞÅÏ¢
                 serializationCount++;
                 totalSerializedBytes += System.Text.Encoding.UTF8.GetByteCount(json);
 
-                LogMessage($"åºåˆ—åŒ–æˆåŠŸ: {obj.GetType().Name}, å¤§å°: {json.Length}å­—ç¬¦");
+                LogMessage($"ĞòÁĞ»¯³É¹¦: {obj.GetType().Name}, ´óĞ¡: {json.Length}×Ö·û");
                 return json;
             }
             catch (Exception ex)
             {
-                LogError($"åºåˆ—åŒ–å¤±è´¥: {obj.GetType().Name}, é”™è¯¯: {ex.Message}");
+                LogError($"ĞòÁĞ»¯Ê§°Ü: {obj.GetType().Name}, ´íÎó: {ex.Message}");
                 return null;
             }
         }
 
         /// <summary>
-        /// å°†ISaveableå¯¹è±¡çš„ä¿å­˜æ•°æ®åºåˆ—åŒ–ä¸ºJSON
+        /// ½«ISaveable¶ÔÏóµÄ±£´æÊı¾İĞòÁĞ»¯ÎªJSON
         /// </summary>
-        /// <param name="saveable">ISaveableå¯¹è±¡</param>
-        /// <returns>JSONå­—ç¬¦ä¸²</returns>
+        /// <param name="saveable">ISaveable¶ÔÏó</param>
+        /// <returns>JSON×Ö·û´®</returns>
         public string SerializeSaveableData(ISaveable saveable)
         {
             if (saveable == null)
             {
-                LogWarning("å°è¯•åºåˆ—åŒ–ç©ºçš„ISaveableå¯¹è±¡");
+                LogWarning("³¢ÊÔĞòÁĞ»¯¿ÕµÄISaveable¶ÔÏó");
                 return null;
             }
 
             try
             {
-                // è·å–ä¿å­˜æ•°æ® - ä½¿ç”¨SerializeToJsonæ–¹æ³•
+                // »ñÈ¡±£´æÊı¾İ - Ê¹ÓÃSerializeToJson·½·¨
                 var saveDataJson = saveable.SerializeToJson();
 
-                // åˆ›å»ºåŒ…è£…å¯¹è±¡ï¼ŒåŒ…å«ç±»å‹ä¿¡æ¯
+                // ´´½¨°ü×°¶ÔÏó£¬°üº¬ÀàĞÍĞÅÏ¢
                 var wrappedData = new SaveableDataWrapper
                 {
                     saveId = saveable.GetSaveID(),
@@ -163,24 +163,24 @@ namespace InventorySystem.SaveSystem
             }
             catch (Exception ex)
             {
-                LogError($"åºåˆ—åŒ–ISaveableå¯¹è±¡å¤±è´¥: {saveable.GetSaveID()}, é”™è¯¯: {ex.Message}");
+                LogError($"ĞòÁĞ»¯ISaveable¶ÔÏóÊ§°Ü: {saveable.GetSaveID()}, ´íÎó: {ex.Message}");
                 return null;
             }
         }
         #endregion
 
-        #region ååºåˆ—åŒ–æ–¹æ³•
+        #region ·´ĞòÁĞ»¯·½·¨
         /// <summary>
-        /// ä»JSONå­—ç¬¦ä¸²ååºåˆ—åŒ–å¯¹è±¡
+        /// ´ÓJSON×Ö·û´®·´ĞòÁĞ»¯¶ÔÏó
         /// </summary>
-        /// <typeparam name="T">ç›®æ ‡ç±»å‹</typeparam>
-        /// <param name="json">JSONå­—ç¬¦ä¸²</param>
-        /// <returns>ååºåˆ—åŒ–çš„å¯¹è±¡</returns>
+        /// <typeparam name="T">Ä¿±êÀàĞÍ</typeparam>
+        /// <param name="json">JSON×Ö·û´®</param>
+        /// <returns>·´ĞòÁĞ»¯µÄ¶ÔÏó</returns>
         public T DeserializeFromJson<T>(string json)
         {
             if (string.IsNullOrEmpty(json))
             {
-                LogWarning("å°è¯•ååºåˆ—åŒ–ç©ºçš„JSONå­—ç¬¦ä¸²");
+                LogWarning("³¢ÊÔ·´ĞòÁĞ»¯¿ÕµÄJSON×Ö·û´®");
                 return default(T);
             }
 
@@ -188,30 +188,30 @@ namespace InventorySystem.SaveSystem
             {
                 T result = JsonConvert.DeserializeObject<T>(json, jsonSettings);
 
-                // æ›´æ–°ç»Ÿè®¡ä¿¡æ¯
+                // ¸üĞÂÍ³¼ÆĞÅÏ¢
                 deserializationCount++;
 
-                LogMessage($"ååºåˆ—åŒ–æˆåŠŸ: {typeof(T).Name}");
+                LogMessage($"·´ĞòÁĞ»¯³É¹¦: {typeof(T).Name}");
                 return result;
             }
             catch (Exception ex)
             {
-                LogError($"ååºåˆ—åŒ–å¤±è´¥: {typeof(T).Name}, é”™è¯¯: {ex.Message}");
+                LogError($"·´ĞòÁĞ»¯Ê§°Ü: {typeof(T).Name}, ´íÎó: {ex.Message}");
                 return default(T);
             }
         }
 
         /// <summary>
-        /// ä»JSONå­—ç¬¦ä¸²ååºåˆ—åŒ–ä¸ºæŒ‡å®šç±»å‹
+        /// ´ÓJSON×Ö·û´®·´ĞòÁĞ»¯ÎªÖ¸¶¨ÀàĞÍ
         /// </summary>
-        /// <param name="json">JSONå­—ç¬¦ä¸²</param>
-        /// <param name="targetType">ç›®æ ‡ç±»å‹</param>
-        /// <returns>ååºåˆ—åŒ–çš„å¯¹è±¡</returns>
+        /// <param name="json">JSON×Ö·û´®</param>
+        /// <param name="targetType">Ä¿±êÀàĞÍ</param>
+        /// <returns>·´ĞòÁĞ»¯µÄ¶ÔÏó</returns>
         public object DeserializeFromJson(string json, Type targetType)
         {
             if (string.IsNullOrEmpty(json) || targetType == null)
             {
-                LogWarning("ååºåˆ—åŒ–å‚æ•°æ— æ•ˆ");
+                LogWarning("·´ĞòÁĞ»¯²ÎÊıÎŞĞ§");
                 return null;
             }
 
@@ -219,29 +219,29 @@ namespace InventorySystem.SaveSystem
             {
                 object result = JsonConvert.DeserializeObject(json, targetType, jsonSettings);
 
-                // æ›´æ–°ç»Ÿè®¡ä¿¡æ¯
+                // ¸üĞÂÍ³¼ÆĞÅÏ¢
                 deserializationCount++;
 
-                LogMessage($"ååºåˆ—åŒ–æˆåŠŸ: {targetType.Name}");
+                LogMessage($"·´ĞòÁĞ»¯³É¹¦: {targetType.Name}");
                 return result;
             }
             catch (Exception ex)
             {
-                LogError($"ååºåˆ—åŒ–å¤±è´¥: {targetType.Name}, é”™è¯¯: {ex.Message}");
+                LogError($"·´ĞòÁĞ»¯Ê§°Ü: {targetType.Name}, ´íÎó: {ex.Message}");
                 return null;
             }
         }
 
         /// <summary>
-        /// ååºåˆ—åŒ–ISaveableå¯¹è±¡çš„ä¿å­˜æ•°æ®
+        /// ·´ĞòÁĞ»¯ISaveable¶ÔÏóµÄ±£´æÊı¾İ
         /// </summary>
-        /// <param name="json">JSONå­—ç¬¦ä¸²</param>
-        /// <returns>SaveableDataWrapperå¯¹è±¡</returns>
+        /// <param name="json">JSON×Ö·û´®</param>
+        /// <returns>SaveableDataWrapper¶ÔÏó</returns>
         public SaveableDataWrapper DeserializeSaveableData(string json)
         {
             if (string.IsNullOrEmpty(json))
             {
-                LogWarning("å°è¯•ååºåˆ—åŒ–ç©ºçš„ISaveableæ•°æ®");
+                LogWarning("³¢ÊÔ·´ĞòÁĞ»¯¿ÕµÄISaveableÊı¾İ");
                 return null;
             }
 
@@ -250,24 +250,24 @@ namespace InventorySystem.SaveSystem
                 var wrapper = DeserializeFromJson<SaveableDataWrapper>(json);
                 if (wrapper != null)
                 {
-                    LogMessage($"ååºåˆ—åŒ–ISaveableæ•°æ®æˆåŠŸ: {wrapper.saveId}");
+                    LogMessage($"·´ĞòÁĞ»¯ISaveableÊı¾İ³É¹¦: {wrapper.saveId}");
                 }
                 return wrapper;
             }
             catch (Exception ex)
             {
-                LogError($"ååºåˆ—åŒ–ISaveableæ•°æ®å¤±è´¥: {ex.Message}");
+                LogError($"·´ĞòÁĞ»¯ISaveableÊı¾İÊ§°Ü: {ex.Message}");
                 return null;
             }
         }
         #endregion
 
-        #region éªŒè¯å’Œå®ç”¨æ–¹æ³•
+        #region ÑéÖ¤ºÍÊµÓÃ·½·¨
         /// <summary>
-        /// éªŒè¯JSONå­—ç¬¦ä¸²æ ¼å¼
+        /// ÑéÖ¤JSON×Ö·û´®¸ñÊ½
         /// </summary>
-        /// <param name="json">JSONå­—ç¬¦ä¸²</param>
-        /// <returns>æ˜¯å¦ä¸ºæœ‰æ•ˆçš„JSONæ ¼å¼</returns>
+        /// <param name="json">JSON×Ö·û´®</param>
+        /// <returns>ÊÇ·ñÎªÓĞĞ§µÄJSON¸ñÊ½</returns>
         public bool ValidateJson(string json)
         {
             if (string.IsNullOrEmpty(json))
@@ -287,10 +287,10 @@ namespace InventorySystem.SaveSystem
         }
 
         /// <summary>
-        /// è·å–JSONå­—ç¬¦ä¸²çš„å¤§å°ï¼ˆå­—èŠ‚ï¼‰
+        /// »ñÈ¡JSON×Ö·û´®µÄ´óĞ¡£¨×Ö½Ú£©
         /// </summary>
-        /// <param name="json">JSONå­—ç¬¦ä¸²</param>
-        /// <returns>å­—èŠ‚å¤§å°</returns>
+        /// <param name="json">JSON×Ö·û´®</param>
+        /// <returns>×Ö½Ú´óĞ¡</returns>
         public long GetJsonSize(string json)
         {
             if (string.IsNullOrEmpty(json))
@@ -302,10 +302,10 @@ namespace InventorySystem.SaveSystem
         }
 
         /// <summary>
-        /// å‹ç¼©JSONå­—ç¬¦ä¸²ï¼ˆç§»é™¤æ ¼å¼åŒ–ï¼‰
+        /// Ñ¹ËõJSON×Ö·û´®£¨ÒÆ³ı¸ñÊ½»¯£©
         /// </summary>
-        /// <param name="json">JSONå­—ç¬¦ä¸²</param>
-        /// <returns>å‹ç¼©åçš„JSONå­—ç¬¦ä¸²</returns>
+        /// <param name="json">JSON×Ö·û´®</param>
+        /// <returns>Ñ¹ËõºóµÄJSON×Ö·û´®</returns>
         public string CompressJson(string json)
         {
             if (string.IsNullOrEmpty(json))
@@ -325,51 +325,51 @@ namespace InventorySystem.SaveSystem
             }
             catch (Exception ex)
             {
-                LogError($"JSONå‹ç¼©å¤±è´¥: {ex.Message}");
+                LogError($"JSONÑ¹ËõÊ§°Ü: {ex.Message}");
                 return json;
             }
         }
 
         /// <summary>
-        /// è·å–åºåˆ—åŒ–å™¨ç»Ÿè®¡ä¿¡æ¯
+        /// »ñÈ¡ĞòÁĞ»¯Æ÷Í³¼ÆĞÅÏ¢
         /// </summary>
-        /// <returns>ç»Ÿè®¡ä¿¡æ¯å­—ç¬¦ä¸²</returns>
+        /// <returns>Í³¼ÆĞÅÏ¢×Ö·û´®</returns>
         public string GetStatistics()
         {
-            return $"åºåˆ—åŒ–æ¬¡æ•°: {serializationCount}, " +
-                   $"ååºåˆ—åŒ–æ¬¡æ•°: {deserializationCount}, " +
-                   $"æ€»åºåˆ—åŒ–å­—èŠ‚æ•°: {totalSerializedBytes}, " +
-                   $"è‡ªå®šä¹‰è½¬æ¢å™¨æ•°: {customConverters.Count}";
+            return $"ĞòÁĞ»¯´ÎÊı: {serializationCount}, " +
+                   $"·´ĞòÁĞ»¯´ÎÊı: {deserializationCount}, " +
+                   $"×ÜĞòÁĞ»¯×Ö½ÚÊı: {totalSerializedBytes}, " +
+                   $"×Ô¶¨Òå×ª»»Æ÷Êı: {customConverters.Count}";
         }
 
         /// <summary>
-        /// é‡ç½®ç»Ÿè®¡ä¿¡æ¯
+        /// ÖØÖÃÍ³¼ÆĞÅÏ¢
         /// </summary>
         public void ResetStatistics()
         {
             serializationCount = 0;
             deserializationCount = 0;
             totalSerializedBytes = 0;
-            LogMessage("ç»Ÿè®¡ä¿¡æ¯å·²é‡ç½®");
+            LogMessage("Í³¼ÆĞÅÏ¢ÒÑÖØÖÃ");
         }
         #endregion
 
-        #region é”™è¯¯å¤„ç†
+        #region ´íÎó´¦Àí
         /// <summary>
-        /// å¤„ç†åºåˆ—åŒ–é”™è¯¯
+        /// ´¦ÀíĞòÁĞ»¯´íÎó
         /// </summary>
         private void HandleSerializationError(object sender, Newtonsoft.Json.Serialization.ErrorEventArgs e)
         {
-            LogError($"åºåˆ—åŒ–é”™è¯¯: {e.ErrorContext.Error.Message}, è·¯å¾„: {e.ErrorContext.Path}");
+            LogError($"ĞòÁĞ»¯´íÎó: {e.ErrorContext.Error.Message}, Â·¾¶: {e.ErrorContext.Path}");
 
-            // æ ‡è®°é”™è¯¯å·²å¤„ç†ï¼Œç»§ç»­åºåˆ—åŒ–å…¶ä»–éƒ¨åˆ†
+            // ±ê¼Ç´íÎóÒÑ´¦Àí£¬¼ÌĞøĞòÁĞ»¯ÆäËû²¿·Ö
             e.ErrorContext.Handled = true;
         }
         #endregion
 
-        #region æ—¥å¿—æ–¹æ³•
+        #region ÈÕÖ¾·½·¨
         /// <summary>
-        /// è®°å½•æ—¥å¿—æ¶ˆæ¯
+        /// ¼ÇÂ¼ÈÕÖ¾ÏûÏ¢
         /// </summary>
         private void LogMessage(string message)
         {
@@ -380,7 +380,7 @@ namespace InventorySystem.SaveSystem
         }
 
         /// <summary>
-        /// è®°å½•è­¦å‘Šæ¶ˆæ¯
+        /// ¼ÇÂ¼¾¯¸æÏûÏ¢
         /// </summary>
         private void LogWarning(string message)
         {
@@ -391,7 +391,7 @@ namespace InventorySystem.SaveSystem
         }
 
         /// <summary>
-        /// è®°å½•é”™è¯¯æ¶ˆæ¯
+        /// ¼ÇÂ¼´íÎóÏûÏ¢
         /// </summary>
         private void LogError(string message)
         {
@@ -403,23 +403,23 @@ namespace InventorySystem.SaveSystem
         #endregion
     }
 
-    #region æ•°æ®åŒ…è£…ç±»
+    #region Êı¾İ°ü×°Àà
     /// <summary>
-    /// ISaveableå¯¹è±¡æ•°æ®åŒ…è£…å™¨
+    /// ISaveable¶ÔÏóÊı¾İ°ü×°Æ÷
     /// </summary>
     [Serializable]
     public class SaveableDataWrapper
     {
-        public string saveId;           // ä¿å­˜ID
-        public string objectType;       // å¯¹è±¡ç±»å‹
-        public object saveData;         // ä¿å­˜æ•°æ®
-        public string timestamp;        // æ—¶é—´æˆ³
+        public string saveId;           // ±£´æID
+        public string objectType;       // ¶ÔÏóÀàĞÍ
+        public object saveData;         // ±£´æÊı¾İ
+        public string timestamp;        // Ê±¼ä´Á
     }
     #endregion
 
-    #region è‡ªå®šä¹‰JSONè½¬æ¢å™¨
+    #region ×Ô¶¨ÒåJSON×ª»»Æ÷
     /// <summary>
-    /// Vector3 JSONè½¬æ¢å™¨
+    /// Vector3 JSON×ª»»Æ÷
     /// </summary>
     public class Vector3Converter : JsonConverter<Vector3>
     {
@@ -447,7 +447,7 @@ namespace InventorySystem.SaveSystem
     }
 
     /// <summary>
-    /// Quaternion JSONè½¬æ¢å™¨
+    /// Quaternion JSON×ª»»Æ÷
     /// </summary>
     public class QuaternionConverter : JsonConverter<Quaternion>
     {
@@ -478,7 +478,7 @@ namespace InventorySystem.SaveSystem
     }
 
     /// <summary>
-    /// Color JSONè½¬æ¢å™¨
+    /// Color JSON×ª»»Æ÷
     /// </summary>
     public class ColorConverter : JsonConverter<Color>
     {
@@ -509,7 +509,7 @@ namespace InventorySystem.SaveSystem
     }
 
     /// <summary>
-    /// GameObjectå¼•ç”¨JSONè½¬æ¢å™¨
+    /// GameObjectÒıÓÃJSON×ª»»Æ÷
     /// </summary>
     public class GameObjectReferenceConverter : JsonConverter<GameObject>
     {
@@ -543,7 +543,7 @@ namespace InventorySystem.SaveSystem
             int instanceId = obj["instanceId"]?.Value<int>() ?? 0;
             string tag = obj["tag"]?.Value<string>();
 
-            // å°è¯•é€šè¿‡å®ä¾‹IDæŸ¥æ‰¾å¯¹è±¡
+            // ³¢ÊÔÍ¨¹ıÊµÀıID²éÕÒ¶ÔÏó
             var allObjects = Resources.FindObjectsOfTypeAll<GameObject>();
             GameObject foundObject = null;
             foreach (var go in allObjects)
@@ -560,7 +560,7 @@ namespace InventorySystem.SaveSystem
                 return foundObject;
             }
 
-            // å¦‚æœé€šè¿‡å®ä¾‹IDæ‰¾ä¸åˆ°ï¼Œå°è¯•é€šè¿‡åç§°å’Œæ ‡ç­¾æŸ¥æ‰¾
+            // Èç¹ûÍ¨¹ıÊµÀıIDÕÒ²»µ½£¬³¢ÊÔÍ¨¹ıÃû³ÆºÍ±êÇ©²éÕÒ
             if (!string.IsNullOrEmpty(name))
             {
                 var allGameObjects = GameObject.FindObjectsOfType<GameObject>();

@@ -9,13 +9,13 @@ using Newtonsoft.Json;
 namespace InventorySystem.SaveSystem
 {
     /// <summary>
-    /// ç‰©å“å®ä¾‹IDä¸€è‡´æ€§ç®¡ç†å™¨
-    /// è´Ÿè´£å…¨å±€IDå†²çªæ£€æµ‹ã€è§£å†³æœºåˆ¶å’Œè·¨åœºæ™¯IDåŒæ­¥åŠŸèƒ½
-    /// ç¡®ä¿æ‰€æœ‰ç‰©å“å®ä¾‹åœ¨æ•´ä¸ªæ¸¸æˆç”Ÿå‘½å‘¨æœŸä¸­ä¿æŒå”¯ä¸€ä¸”ä¸€è‡´çš„ID
+    /// ÎïÆ·ÊµÀıIDÒ»ÖÂĞÔ¹ÜÀíÆ÷
+    /// ¸ºÔğÈ«¾ÖID³åÍ»¼ì²â¡¢½â¾ö»úÖÆºÍ¿ç³¡¾°IDÍ¬²½¹¦ÄÜ
+    /// È·±£ËùÓĞÎïÆ·ÊµÀıÔÚÕû¸öÓÎÏ·ÉúÃüÖÜÆÚÖĞ±£³ÖÎ¨Ò»ÇÒÒ»ÖÂµÄID
     /// </summary>
     public class ItemInstanceIDManager : MonoBehaviour
     {
-        #region å•ä¾‹æ¨¡å¼
+        #region µ¥ÀıÄ£Ê½
         private static ItemInstanceIDManager _instance;
         public static ItemInstanceIDManager Instance
         {
@@ -29,13 +29,13 @@ namespace InventorySystem.SaveSystem
                         GameObject go = new GameObject("ItemInstanceIDManager");
                         _instance = go.AddComponent<ItemInstanceIDManager>();
 
-                        // å°†æ–°åˆ›å»ºçš„ItemInstanceIDManagerè®¾ç½®ä¸ºSaveSystemçš„å­å¯¹è±¡ï¼ˆå¦‚æœå­˜åœ¨SaveSystemï¼‰
+                        // ½«ĞÂ´´½¨µÄItemInstanceIDManagerÉèÖÃÎªSaveSystemµÄ×Ó¶ÔÏó£¨Èç¹û´æÔÚSaveSystem£©
                         var saveSystemPersistence = FindObjectOfType<SaveSystemPersistence>();
                         if (saveSystemPersistence != null)
                         {
                             go.transform.SetParent(saveSystemPersistence.transform);
                         }
-                        // æ³¨æ„ï¼šä¸è°ƒç”¨DontDestroyOnLoadï¼Œå› ä¸ºSaveSystemPersistenceä¼šå¤„ç†æ•´ä¸ªç³»ç»Ÿçš„æŒä¹…åŒ–
+                        // ×¢Òâ£º²»µ÷ÓÃDontDestroyOnLoad£¬ÒòÎªSaveSystemPersistence»á´¦ÀíÕû¸öÏµÍ³µÄ³Ö¾Ã»¯
                     }
                 }
                 return _instance;
@@ -43,9 +43,9 @@ namespace InventorySystem.SaveSystem
         }
         #endregion
 
-        #region å†²çªæ£€æµ‹å’Œè§£å†³
+        #region ³åÍ»¼ì²âºÍ½â¾ö
         /// <summary>
-        /// å¯åŠ¨è‡ªåŠ¨æ£€æµ‹
+        /// Æô¶¯×Ô¶¯¼ì²â
         /// </summary>
         private void StartAutoDetection()
         {
@@ -57,7 +57,7 @@ namespace InventorySystem.SaveSystem
         }
 
         /// <summary>
-        /// è‡ªåŠ¨æ£€æµ‹åç¨‹
+        /// ×Ô¶¯¼ì²âĞ­³Ì
         /// </summary>
         private IEnumerator AutoDetectionCoroutine()
         {
@@ -69,40 +69,40 @@ namespace InventorySystem.SaveSystem
         }
 
         /// <summary>
-        /// æ‰§è¡Œå†²çªæ£€æµ‹
+        /// Ö´ĞĞ³åÍ»¼ì²â
         /// </summary>
         public void PerformConflictDetection()
         {
-            LogMessage("å¼€å§‹æ‰§è¡ŒIDå†²çªæ£€æµ‹...");
+            LogMessage("¿ªÊ¼Ö´ĞĞID³åÍ»¼ì²â...");
 
-            // æ£€æµ‹é‡å¤ID
+            // ¼ì²âÖØ¸´ID
             DetectDuplicateIDs();
 
-            // æ£€æµ‹æ— æ•ˆID
+            // ¼ì²âÎŞĞ§ID
             DetectInvalidIDs();
 
-            // æ£€æµ‹å­¤ç«‹å¼•ç”¨
+            // ¼ì²â¹ÂÁ¢ÒıÓÃ
             DetectOrphanedReferences();
 
-            // å¦‚æœå¯ç”¨è‡ªåŠ¨è§£å†³ï¼Œå°è¯•è§£å†³å†²çª
+            // Èç¹ûÆôÓÃ×Ô¶¯½â¾ö£¬³¢ÊÔ½â¾ö³åÍ»
             if (enableAutoResolve)
             {
                 ResolveActiveConflicts();
             }
 
-            LogMessage($"å†²çªæ£€æµ‹å®Œæˆï¼Œå‘ç° {activeConflicts.Count} ä¸ªæ´»è·ƒå†²çª");
+            LogMessage($"³åÍ»¼ì²âÍê³É£¬·¢ÏÖ {activeConflicts.Count} ¸ö»îÔ¾³åÍ»");
         }
 
         /// <summary>
-        /// æ£€æµ‹é‡å¤ID
+        /// ¼ì²âÖØ¸´ID
         /// </summary>
         private void DetectDuplicateIDs()
         {
-            // æŸ¥æ‰¾æ‰€æœ‰InventorySystemItemç»„ä»¶
+            // ²éÕÒËùÓĞInventorySystemItem×é¼ş
             InventorySystemItem[] allItems = FindObjectsOfType<InventorySystemItem>(true);
             Dictionary<string, List<InventorySystemItem>> idGroups = new Dictionary<string, List<InventorySystemItem>>();
 
-            // æŒ‰IDåˆ†ç»„
+            // °´ID·Ö×é
             foreach (var item in allItems)
             {
                 string id = item.GetItemInstanceID();
@@ -116,7 +116,7 @@ namespace InventorySystem.SaveSystem
                 }
             }
 
-            // æ£€æµ‹é‡å¤
+            // ¼ì²âÖØ¸´
             foreach (var group in idGroups)
             {
                 if (group.Value.Count > 1)
@@ -128,7 +128,7 @@ namespace InventorySystem.SaveSystem
         }
 
         /// <summary>
-        /// æ£€æµ‹æ— æ•ˆID
+        /// ¼ì²âÎŞĞ§ID
         /// </summary>
         private void DetectInvalidIDs()
         {
@@ -144,11 +144,11 @@ namespace InventorySystem.SaveSystem
         }
 
         /// <summary>
-        /// æ£€æµ‹å­¤ç«‹å¼•ç”¨
+        /// ¼ì²â¹ÂÁ¢ÒıÓÃ
         /// </summary>
         private void DetectOrphanedReferences()
         {
-            // æ£€æŸ¥æ³¨å†Œè¡¨ä¸­çš„IDæ˜¯å¦è¿˜æœ‰å¯¹åº”çš„æ¸¸æˆå¯¹è±¡
+            // ¼ì²é×¢²á±íÖĞµÄIDÊÇ·ñ»¹ÓĞ¶ÔÓ¦µÄÓÎÏ·¶ÔÏó
             List<string> orphanedIDs = new List<string>();
 
             foreach (var kvp in globalIDRegistry)
@@ -156,7 +156,7 @@ namespace InventorySystem.SaveSystem
                 string id = kvp.Key;
                 IDMappingInfo info = kvp.Value;
 
-                // å°è¯•æ‰¾åˆ°å¯¹åº”çš„æ¸¸æˆå¯¹è±¡
+                // ³¢ÊÔÕÒµ½¶ÔÓ¦µÄÓÎÏ·¶ÔÏó
                 InventorySystemItem[] allItems = FindObjectsOfType<InventorySystemItem>(true);
                 bool found = allItems.Any(item => item.GetItemInstanceID() == id);
 
@@ -166,25 +166,25 @@ namespace InventorySystem.SaveSystem
                 }
             }
 
-            // è®°å½•å­¤ç«‹å¼•ç”¨
+            // ¼ÇÂ¼¹ÂÁ¢ÒıÓÃ
             foreach (string orphanedID in orphanedIDs)
             {
-                DetectAndRecordConflict(orphanedID, "æœªæ‰¾åˆ°å¯¹åº”å¯¹è±¡", ConflictType.Orphaned);
+                DetectAndRecordConflict(orphanedID, "Î´ÕÒµ½¶ÔÓ¦¶ÔÏó", ConflictType.Orphaned);
             }
         }
 
         /// <summary>
-        /// æ£€æµ‹å¹¶è®°å½•å†²çª
+        /// ¼ì²â²¢¼ÇÂ¼³åÍ»
         /// </summary>
-        /// <param name="conflictID">å†²çªID</param>
-        /// <param name="objectInfo">å¯¹è±¡ä¿¡æ¯</param>
-        /// <param name="type">å†²çªç±»å‹</param>
+        /// <param name="conflictID">³åÍ»ID</param>
+        /// <param name="objectInfo">¶ÔÏóĞÅÏ¢</param>
+        /// <param name="type">³åÍ»ÀàĞÍ</param>
         private void DetectAndRecordConflict(string conflictID, string objectInfo, ConflictType type)
         {
-            // æ£€æŸ¥æ˜¯å¦å·²å­˜åœ¨è¯¥å†²çª
+            // ¼ì²éÊÇ·ñÒÑ´æÔÚ¸Ã³åÍ»
             if (activeConflicts.ContainsKey(conflictID))
             {
-                // æ›´æ–°ç°æœ‰å†²çªä¿¡æ¯
+                // ¸üĞÂÏÖÓĞ³åÍ»ĞÅÏ¢
                 var existingConflict = activeConflicts[conflictID];
                 if (!existingConflict.conflictObjects.Contains(objectInfo))
                 {
@@ -193,7 +193,7 @@ namespace InventorySystem.SaveSystem
                 return;
             }
 
-            // åˆ›å»ºæ–°çš„å†²çªè®°å½•
+            // ´´½¨ĞÂµÄ³åÍ»¼ÇÂ¼
             IDConflictInfo conflict = new IDConflictInfo
             {
                 conflictID = conflictID,
@@ -203,30 +203,30 @@ namespace InventorySystem.SaveSystem
             };
             conflict.conflictObjects.Add(objectInfo);
 
-            // æ·»åŠ åˆ°æ´»è·ƒå†²çªåˆ—è¡¨
+            // Ìí¼Óµ½»îÔ¾³åÍ»ÁĞ±í
             activeConflicts[conflictID] = conflict;
 
-            // æ·»åŠ åˆ°å†å²è®°å½•
+            // Ìí¼Óµ½ÀúÊ·¼ÇÂ¼
             conflictHistory.Add(conflict);
 
-            // é™åˆ¶å†å²è®°å½•æ•°é‡
+            // ÏŞÖÆÀúÊ·¼ÇÂ¼ÊıÁ¿
             if (conflictHistory.Count > maxConflictHistory)
             {
                 conflictHistory.RemoveAt(0);
             }
 
-            LogWarning($"æ£€æµ‹åˆ°IDå†²çª: {conflictID}, ç±»å‹: {type}, å¯¹è±¡: {objectInfo}");
+            LogWarning($"¼ì²âµ½ID³åÍ»: {conflictID}, ÀàĞÍ: {type}, ¶ÔÏó: {objectInfo}");
             OnConflictDetected?.Invoke(conflict);
         }
 
         /// <summary>
-        /// è§£å†³æ´»è·ƒå†²çª
+        /// ½â¾ö»îÔ¾³åÍ»
         /// </summary>
         private void ResolveActiveConflicts()
         {
             List<string> resolvedConflicts = new List<string>();
 
-            // åˆ›å»ºactiveConflictsçš„å‰¯æœ¬æ¥é¿å…åœ¨éå†æ—¶ä¿®æ”¹é›†åˆ
+            // ´´½¨activeConflictsµÄ¸±±¾À´±ÜÃâÔÚ±éÀúÊ±ĞŞ¸Ä¼¯ºÏ
             var conflictsCopy = activeConflicts.ToList();
 
             foreach (var kvp in conflictsCopy)
@@ -234,7 +234,7 @@ namespace InventorySystem.SaveSystem
                 string conflictID = kvp.Key;
                 IDConflictInfo conflict = kvp.Value;
 
-                // æ£€æŸ¥å†²çªæ˜¯å¦ä»ç„¶å­˜åœ¨ï¼ˆå¯èƒ½å·²è¢«å…¶ä»–æ“ä½œè§£å†³ï¼‰
+                // ¼ì²é³åÍ»ÊÇ·ñÈÔÈ»´æÔÚ£¨¿ÉÄÜÒÑ±»ÆäËû²Ù×÷½â¾ö£©
                 if (!activeConflicts.ContainsKey(conflictID))
                 {
                     continue;
@@ -260,7 +260,7 @@ namespace InventorySystem.SaveSystem
 
                 if (resolved)
                 {
-                    // æ£€æŸ¥å†²çªæ˜¯å¦ä»åœ¨activeConflictsä¸­ï¼ˆå¯èƒ½å·²è¢«UnregisterInstanceIDç§»é™¤ï¼‰
+                    // ¼ì²é³åÍ»ÊÇ·ñÈÔÔÚactiveConflictsÖĞ£¨¿ÉÄÜÒÑ±»UnregisterInstanceIDÒÆ³ı£©
                     if (activeConflicts.ContainsKey(conflictID))
                     {
                         activeConflicts[conflictID].isResolved = true;
@@ -269,7 +269,7 @@ namespace InventorySystem.SaveSystem
                 }
             }
 
-            // ç§»é™¤å·²è§£å†³çš„å†²çª
+            // ÒÆ³ıÒÑ½â¾öµÄ³åÍ»
             foreach (string resolvedID in resolvedConflicts)
             {
                 activeConflicts.Remove(resolvedID);
@@ -277,10 +277,10 @@ namespace InventorySystem.SaveSystem
         }
 
         /// <summary>
-        /// è§£å†³é‡å¤IDå†²çª
+        /// ½â¾öÖØ¸´ID³åÍ»
         /// </summary>
-        /// <param name="conflictID">å†²çªID</param>
-        /// <returns>æ˜¯å¦è§£å†³æˆåŠŸ</returns>
+        /// <param name="conflictID">³åÍ»ID</param>
+        /// <returns>ÊÇ·ñ½â¾ö³É¹¦</returns>
         private bool ResolveDuplicateIDConflict(string conflictID)
         {
             InventorySystemItem[] conflictItems = FindObjectsOfType<InventorySystemItem>(true)
@@ -289,10 +289,10 @@ namespace InventorySystem.SaveSystem
 
             if (conflictItems.Length <= 1)
             {
-                return true; // å†²çªå·²è‡ªç„¶è§£å†³
+                return true; // ³åÍ»ÒÑ×ÔÈ»½â¾ö
             }
 
-            // ä¿ç•™ç¬¬ä¸€ä¸ªå¯¹è±¡çš„IDï¼Œä¸ºå…¶ä»–å¯¹è±¡ç”Ÿæˆæ–°ID
+            // ±£ÁôµÚÒ»¸ö¶ÔÏóµÄID£¬ÎªÆäËû¶ÔÏóÉú³ÉĞÂID
             for (int i = 1; i < conflictItems.Length; i++)
             {
                 string newID = GenerateUniqueInstanceID("ResolvedItem");
@@ -300,10 +300,10 @@ namespace InventorySystem.SaveSystem
 
                 conflictItems[i].SetItemInstanceID(newID);
 
-                // æ³¨å†Œæ–°ID
+                // ×¢²áĞÂID
                 RegisterInstanceID(newID, conflictItems[i].gameObject.name, "InventorySystemItem", conflictItems[i].transform.position);
 
-                LogMessage($"è§£å†³é‡å¤IDå†²çª: {oldID} -> {newID}, å¯¹è±¡: {conflictItems[i].gameObject.name}");
+                LogMessage($"½â¾öÖØ¸´ID³åÍ»: {oldID} -> {newID}, ¶ÔÏó: {conflictItems[i].gameObject.name}");
                 OnConflictResolved?.Invoke(oldID, newID);
             }
 
@@ -311,10 +311,10 @@ namespace InventorySystem.SaveSystem
         }
 
         /// <summary>
-        /// è§£å†³æ— æ•ˆIDå†²çª
+        /// ½â¾öÎŞĞ§ID³åÍ»
         /// </summary>
-        /// <param name="conflictID">å†²çªID</param>
-        /// <returns>æ˜¯å¦è§£å†³æˆåŠŸ</returns>
+        /// <param name="conflictID">³åÍ»ID</param>
+        /// <returns>ÊÇ·ñ½â¾ö³É¹¦</returns>
         private bool ResolveInvalidIDConflict(string conflictID)
         {
             InventorySystemItem[] invalidItems = FindObjectsOfType<InventorySystemItem>(true)
@@ -328,10 +328,10 @@ namespace InventorySystem.SaveSystem
 
                 item.SetItemInstanceID(newID);
 
-                // æ³¨å†Œæ–°ID
+                // ×¢²áĞÂID
                 RegisterInstanceID(newID, item.gameObject.name, "InventorySystemItem", item.transform.position);
 
-                LogMessage($"è§£å†³æ— æ•ˆIDå†²çª: {oldID} -> {newID}, å¯¹è±¡: {item.gameObject.name}");
+                LogMessage($"½â¾öÎŞĞ§ID³åÍ»: {oldID} -> {newID}, ¶ÔÏó: {item.gameObject.name}");
                 OnConflictResolved?.Invoke(oldID, newID);
             }
 
@@ -339,18 +339,18 @@ namespace InventorySystem.SaveSystem
         }
 
         /// <summary>
-        /// è§£å†³å­¤ç«‹å¼•ç”¨å†²çª
+        /// ½â¾ö¹ÂÁ¢ÒıÓÃ³åÍ»
         /// </summary>
-        /// <param name="conflictID">å†²çªID</param>
-        /// <returns>æ˜¯å¦è§£å†³æˆåŠŸ</returns>
+        /// <param name="conflictID">³åÍ»ID</param>
+        /// <returns>ÊÇ·ñ½â¾ö³É¹¦</returns>
         private bool ResolveOrphanedReferenceConflict(string conflictID)
         {
-            // ç®€å•åœ°ä»æ³¨å†Œè¡¨ä¸­ç§»é™¤å­¤ç«‹çš„å¼•ç”¨
+            // ¼òµ¥µØ´Ó×¢²á±íÖĞÒÆ³ı¹ÂÁ¢µÄÒıÓÃ
             bool removed = UnregisterInstanceID(conflictID);
 
             if (removed)
             {
-                LogMessage($"è§£å†³å­¤ç«‹å¼•ç”¨å†²çª: ç§»é™¤ID {conflictID}");
+                LogMessage($"½â¾ö¹ÂÁ¢ÒıÓÃ³åÍ»: ÒÆ³ıID {conflictID}");
                 OnConflictResolved?.Invoke(conflictID, "");
             }
 
@@ -358,84 +358,84 @@ namespace InventorySystem.SaveSystem
         }
 
         /// <summary>
-        /// è§£å†³è·¨åœºæ™¯å†²çª
+        /// ½â¾ö¿ç³¡¾°³åÍ»
         /// </summary>
-        /// <param name="conflictID">å†²çªID</param>
-        /// <returns>æ˜¯å¦è§£å†³æˆåŠŸ</returns>
+        /// <param name="conflictID">³åÍ»ID</param>
+        /// <returns>ÊÇ·ñ½â¾ö³É¹¦</returns>
         private bool ResolveCrossSceneConflict(string conflictID)
         {
-            // æ£€æŸ¥ç¼“å­˜ä¸­æ˜¯å¦æœ‰æ­£ç¡®çš„æ˜ å°„
+            // ¼ì²é»º´æÖĞÊÇ·ñÓĞÕıÈ·µÄÓ³Éä
             if (sceneTransitionCache.TryGetValue(conflictID, out string cachedMapping))
             {
-                // ä½¿ç”¨ç¼“å­˜çš„æ˜ å°„ä¿¡æ¯æ¢å¤
-                LogMessage($"ä½¿ç”¨ç¼“å­˜è§£å†³è·¨åœºæ™¯å†²çª: {conflictID}");
+                // Ê¹ÓÃ»º´æµÄÓ³ÉäĞÅÏ¢»Ö¸´
+                LogMessage($"Ê¹ÓÃ»º´æ½â¾ö¿ç³¡¾°³åÍ»: {conflictID}");
                 return true;
             }
 
-            // å¦‚æœæ²¡æœ‰ç¼“å­˜ï¼Œå°è¯•é‡æ–°åŒæ­¥
+            // Èç¹ûÃ»ÓĞ»º´æ£¬³¢ÊÔÖØĞÂÍ¬²½
             return SynchronizeSceneIDs();
         }
         #endregion
 
-        #region è·¨åœºæ™¯åŒæ­¥
+        #region ¿ç³¡¾°Í¬²½
         /// <summary>
-        /// åœºæ™¯åŠ è½½äº‹ä»¶å¤„ç†
+        /// ³¡¾°¼ÓÔØÊÂ¼ş´¦Àí
         /// </summary>
-        /// <param name="scene">åŠ è½½çš„åœºæ™¯</param>
-        /// <param name="mode">åŠ è½½æ¨¡å¼</param>
+        /// <param name="scene">¼ÓÔØµÄ³¡¾°</param>
+        /// <param name="mode">¼ÓÔØÄ£Ê½</param>
         private void OnSceneLoaded(UnityEngine.SceneManagement.Scene scene, UnityEngine.SceneManagement.LoadSceneMode mode)
         {
-            LogMessage($"åœºæ™¯å·²åŠ è½½: {scene.name}");
+            LogMessage($"³¡¾°ÒÑ¼ÓÔØ: {scene.name}");
             OnSceneTransitionStart?.Invoke(scene.name);
 
-            // å»¶è¿Ÿæ‰§è¡ŒåŒæ­¥ï¼Œç¡®ä¿æ‰€æœ‰å¯¹è±¡éƒ½å·²åˆå§‹åŒ–
+            // ÑÓ³ÙÖ´ĞĞÍ¬²½£¬È·±£ËùÓĞ¶ÔÏó¶¼ÒÑ³õÊ¼»¯
             StartCoroutine(DelayedSceneSync(scene.name));
         }
 
         /// <summary>
-        /// åœºæ™¯å¸è½½äº‹ä»¶å¤„ç†
+        /// ³¡¾°Ğ¶ÔØÊÂ¼ş´¦Àí
         /// </summary>
-        /// <param name="scene">å¸è½½çš„åœºæ™¯</param>
+        /// <param name="scene">Ğ¶ÔØµÄ³¡¾°</param>
         private void OnSceneUnloaded(UnityEngine.SceneManagement.Scene scene)
         {
-            LogMessage($"åœºæ™¯å·²å¸è½½: {scene.name}");
+            LogMessage($"³¡¾°ÒÑĞ¶ÔØ: {scene.name}");
 
-            // ç¼“å­˜å½“å‰åœºæ™¯çš„IDæ˜ å°„
+            // »º´æµ±Ç°³¡¾°µÄIDÓ³Éä
             CacheSceneIDs(scene.name);
 
-            // æ¸…ç†è¯¥åœºæ™¯çš„æ³¨å†Œä¿¡æ¯
+            // ÇåÀí¸Ã³¡¾°µÄ×¢²áĞÅÏ¢
             CleanupSceneRegistrations(scene.name);
         }
 
         /// <summary>
-        /// å»¶è¿Ÿåœºæ™¯åŒæ­¥
+        /// ÑÓ³Ù³¡¾°Í¬²½
         /// </summary>
-        /// <param name="sceneName">åœºæ™¯åç§°</param>
+        /// <param name="sceneName">³¡¾°Ãû³Æ</param>
         private IEnumerator DelayedSceneSync(string sceneName)
         {
-            // ç­‰å¾…ä¸€å¸§ï¼Œç¡®ä¿æ‰€æœ‰å¯¹è±¡éƒ½å·²åˆå§‹åŒ–
+            // µÈ´ıÒ»Ö¡£¬È·±£ËùÓĞ¶ÔÏó¶¼ÒÑ³õÊ¼»¯
             yield return null;
 
-            // æ‰§è¡Œåœºæ™¯åŒæ­¥
+            // Ö´ĞĞ³¡¾°Í¬²½
             SynchronizeSceneIDs();
 
-            // æ¢å¤ç¼“å­˜çš„IDæ˜ å°„
+            // »Ö¸´»º´æµÄIDÓ³Éä
             RestoreCachedIDs(sceneName);
 
             OnSceneTransitionComplete?.Invoke(sceneName);
         }
 
         /// <summary>
-        /// åŒæ­¥åœºæ™¯ID
+        /// Í¬²½³¡¾°ID
         /// </summary>
-        /// <returns>åŒæ­¥æ˜¯å¦æˆåŠŸ</returns>
+        /// <returns>Í¬²½ÊÇ·ñ³É¹¦</returns>
         public bool SynchronizeSceneIDs()
         {
             try
             {
-                LogMessage("å¼€å§‹åŒæ­¥åœºæ™¯ID...");
+                LogMessage("¿ªÊ¼Í¬²½³¡¾°ID...");
 
-                // è·å–å½“å‰åœºæ™¯ä¸­çš„æ‰€æœ‰ç‰©å“
+                // »ñÈ¡µ±Ç°³¡¾°ÖĞµÄËùÓĞÎïÆ·
                 InventorySystemItem[] sceneItems = FindObjectsOfType<InventorySystemItem>(true);
                 int syncCount = 0;
 
@@ -445,22 +445,22 @@ namespace InventorySystem.SaveSystem
 
                     if (!string.IsNullOrEmpty(itemID))
                     {
-                        // æ£€æŸ¥IDæ˜¯å¦å·²æ³¨å†Œ
+                        // ¼ì²éIDÊÇ·ñÒÑ×¢²á
                         if (!IsIDRegistered(itemID))
                         {
-                            // æ³¨å†Œæ–°ID
+                            // ×¢²áĞÂID
                             RegisterInstanceID(itemID, item.gameObject.name, "InventorySystemItem", item.transform.position);
                             syncCount++;
                         }
                         else
                         {
-                            // æ›´æ–°ç°æœ‰IDçš„ä¿¡æ¯
+                            // ¸üĞÂÏÖÓĞIDµÄĞÅÏ¢
                             UpdateIDMappingInfo(itemID, item.transform.position, item.gameObject.activeInHierarchy);
                         }
                     }
                     else
                     {
-                        // ä¸ºæ²¡æœ‰IDçš„ç‰©å“ç”Ÿæˆæ–°ID
+                        // ÎªÃ»ÓĞIDµÄÎïÆ·Éú³ÉĞÂID
                         string newID = GenerateUniqueInstanceID("SyncedItem");
                         item.SetItemInstanceID(newID);
                         RegisterInstanceID(newID, item.gameObject.name, "InventorySystemItem", item.transform.position);
@@ -468,23 +468,23 @@ namespace InventorySystem.SaveSystem
                     }
                 }
 
-                LogMessage($"åœºæ™¯IDåŒæ­¥å®Œæˆï¼Œå¤„ç†äº† {syncCount} ä¸ªç‰©å“");
+                LogMessage($"³¡¾°IDÍ¬²½Íê³É£¬´¦ÀíÁË {syncCount} ¸öÎïÆ·");
                 return true;
             }
             catch (System.Exception ex)
             {
-                LogError($"åœºæ™¯IDåŒæ­¥å¤±è´¥: {ex.Message}");
+                LogError($"³¡¾°IDÍ¬²½Ê§°Ü: {ex.Message}");
                 return false;
             }
         }
 
         /// <summary>
-        /// ç¼“å­˜åœºæ™¯ID
+        /// »º´æ³¡¾°ID
         /// </summary>
-        /// <param name="sceneName">åœºæ™¯åç§°</param>
+        /// <param name="sceneName">³¡¾°Ãû³Æ</param>
         private void CacheSceneIDs(string sceneName)
         {
-            // æ¸…ç†æ—§ç¼“å­˜
+            // ÇåÀí¾É»º´æ
             List<string> keysToRemove = sceneTransitionCache.Keys
                 .Where(key => key.StartsWith($"{sceneName}_"))
                 .ToList();
@@ -494,7 +494,7 @@ namespace InventorySystem.SaveSystem
                 sceneTransitionCache.Remove(key);
             }
 
-            // ç¼“å­˜å½“å‰åœºæ™¯çš„IDæ˜ å°„
+            // »º´æµ±Ç°³¡¾°µÄIDÓ³Éä
             foreach (var kvp in globalIDRegistry)
             {
                 if (kvp.Value.sceneName == sceneName)
@@ -504,13 +504,13 @@ namespace InventorySystem.SaveSystem
                 }
             }
 
-            LogMessage($"å·²ç¼“å­˜åœºæ™¯ {sceneName} çš„IDæ˜ å°„ï¼Œå…± {sceneTransitionCache.Count} é¡¹");
+            LogMessage($"ÒÑ»º´æ³¡¾° {sceneName} µÄIDÓ³Éä£¬¹² {sceneTransitionCache.Count} Ïî");
         }
 
         /// <summary>
-        /// æ¢å¤ç¼“å­˜çš„ID
+        /// »Ö¸´»º´æµÄID
         /// </summary>
-        /// <param name="sceneName">åœºæ™¯åç§°</param>
+        /// <param name="sceneName">³¡¾°Ãû³Æ</param>
         private void RestoreCachedIDs(string sceneName)
         {
             List<string> cacheKeys = sceneTransitionCache.Keys
@@ -534,17 +534,17 @@ namespace InventorySystem.SaveSystem
                 }
                 catch (System.Exception ex)
                 {
-                    LogError($"æ¢å¤ç¼“å­˜IDå¤±è´¥: {cacheKey}, é”™è¯¯: {ex.Message}");
+                    LogError($"»Ö¸´»º´æIDÊ§°Ü: {cacheKey}, ´íÎó: {ex.Message}");
                 }
             }
 
-            LogMessage($"å·²æ¢å¤åœºæ™¯ {sceneName} çš„IDæ˜ å°„ï¼Œå…± {restoredCount} é¡¹");
+            LogMessage($"ÒÑ»Ö¸´³¡¾° {sceneName} µÄIDÓ³Éä£¬¹² {restoredCount} Ïî");
         }
 
         /// <summary>
-        /// æ¸…ç†åœºæ™¯æ³¨å†Œä¿¡æ¯
+        /// ÇåÀí³¡¾°×¢²áĞÅÏ¢
         /// </summary>
-        /// <param name="sceneName">åœºæ™¯åç§°</param>
+        /// <param name="sceneName">³¡¾°Ãû³Æ</param>
         private void CleanupSceneRegistrations(string sceneName)
         {
             List<string> idsToRemove = globalIDRegistry
@@ -554,7 +554,7 @@ namespace InventorySystem.SaveSystem
 
             foreach (string id in idsToRemove)
             {
-                // æ ‡è®°ä¸ºéæ¿€æ´»çŠ¶æ€ï¼Œè€Œä¸æ˜¯ç›´æ¥åˆ é™¤
+                // ±ê¼ÇÎª·Ç¼¤»î×´Ì¬£¬¶ø²»ÊÇÖ±½ÓÉ¾³ı
                 if (globalIDRegistry.TryGetValue(id, out IDMappingInfo info))
                 {
                     info.isActive = false;
@@ -562,43 +562,43 @@ namespace InventorySystem.SaveSystem
                 }
             }
 
-            LogMessage($"å·²æ¸…ç†åœºæ™¯ {sceneName} çš„æ³¨å†Œä¿¡æ¯ï¼Œå…± {idsToRemove.Count} é¡¹");
+            LogMessage($"ÒÑÇåÀí³¡¾° {sceneName} µÄ×¢²áĞÅÏ¢£¬¹² {idsToRemove.Count} Ïî");
         }
         #endregion
 
-        #region å…¬å…±APIæ–¹æ³•
+        #region ¹«¹²API·½·¨
         /// <summary>
-        /// è·å–æ‰€æœ‰æ´»è·ƒå†²çª
+        /// »ñÈ¡ËùÓĞ»îÔ¾³åÍ»
         /// </summary>
-        /// <returns>å†²çªä¿¡æ¯åˆ—è¡¨</returns>
+        /// <returns>³åÍ»ĞÅÏ¢ÁĞ±í</returns>
         public List<IDConflictInfo> GetActiveConflicts()
         {
             return new List<IDConflictInfo>(activeConflicts.Values);
         }
 
         /// <summary>
-        /// è·å–å†²çªå†å²
+        /// »ñÈ¡³åÍ»ÀúÊ·
         /// </summary>
-        /// <returns>å†å²å†²çªåˆ—è¡¨</returns>
+        /// <returns>ÀúÊ·³åÍ»ÁĞ±í</returns>
         public List<IDConflictInfo> GetConflictHistory()
         {
             return new List<IDConflictInfo>(conflictHistory);
         }
 
         /// <summary>
-        /// è·å–æ‰€æœ‰æ³¨å†Œçš„ID
+        /// »ñÈ¡ËùÓĞ×¢²áµÄID
         /// </summary>
-        /// <returns>IDåˆ—è¡¨</returns>
+        /// <returns>IDÁĞ±í</returns>
         public List<string> GetAllRegisteredIDs()
         {
             return new List<string>(globalIDRegistry.Keys);
         }
 
         /// <summary>
-        /// è·å–æŒ‡å®šåœºæ™¯çš„ID
+        /// »ñÈ¡Ö¸¶¨³¡¾°µÄID
         /// </summary>
-        /// <param name="sceneName">åœºæ™¯åç§°</param>
-        /// <returns>è¯¥åœºæ™¯çš„IDåˆ—è¡¨</returns>
+        /// <param name="sceneName">³¡¾°Ãû³Æ</param>
+        /// <returns>¸Ã³¡¾°µÄIDÁĞ±í</returns>
         public List<string> GetSceneIDs(string sceneName)
         {
             return globalIDRegistry
@@ -608,59 +608,59 @@ namespace InventorySystem.SaveSystem
         }
 
         /// <summary>
-        /// å¼ºåˆ¶æ‰§è¡Œå®Œæ•´çš„ç³»ç»ŸéªŒè¯
+        /// Ç¿ÖÆÖ´ĞĞÍêÕûµÄÏµÍ³ÑéÖ¤
         /// </summary>
-        /// <returns>éªŒè¯æŠ¥å‘Š</returns>
+        /// <returns>ÑéÖ¤±¨¸æ</returns>
         public string PerformSystemValidation()
         {
-            LogMessage("å¼€å§‹æ‰§è¡Œç³»ç»ŸéªŒè¯...");
+            LogMessage("¿ªÊ¼Ö´ĞĞÏµÍ³ÑéÖ¤...");
 
             var report = new System.Text.StringBuilder();
-            report.AppendLine("=== ç‰©å“å®ä¾‹IDç³»ç»ŸéªŒè¯æŠ¥å‘Š ===");
-            report.AppendLine($"éªŒè¯æ—¶é—´: {DateTime.Now}");
+            report.AppendLine("=== ÎïÆ·ÊµÀıIDÏµÍ³ÑéÖ¤±¨¸æ ===");
+            report.AppendLine($"ÑéÖ¤Ê±¼ä: {DateTime.Now}");
             report.AppendLine();
 
-            // ç»Ÿè®¡ä¿¡æ¯
+            // Í³¼ÆĞÅÏ¢
             int totalRegistered = globalIDRegistry.Count;
             int activeRegistered = globalIDRegistry.Values.Count(info => info.isActive);
             int totalConflicts = activeConflicts.Count;
             int totalItems = FindObjectsOfType<InventorySystemItem>(true).Length;
 
-            report.AppendLine("=== ç»Ÿè®¡ä¿¡æ¯ ===");
-            report.AppendLine($"å·²æ³¨å†ŒIDæ€»æ•°: {totalRegistered}");
-            report.AppendLine($"æ´»è·ƒIDæ•°é‡: {activeRegistered}");
-            report.AppendLine($"å½“å‰å†²çªæ•°: {totalConflicts}");
-            report.AppendLine($"åœºæ™¯ä¸­ç‰©å“æ•°: {totalItems}");
+            report.AppendLine("=== Í³¼ÆĞÅÏ¢ ===");
+            report.AppendLine($"ÒÑ×¢²áID×ÜÊı: {totalRegistered}");
+            report.AppendLine($"»îÔ¾IDÊıÁ¿: {activeRegistered}");
+            report.AppendLine($"µ±Ç°³åÍ»Êı: {totalConflicts}");
+            report.AppendLine($"³¡¾°ÖĞÎïÆ·Êı: {totalItems}");
             report.AppendLine();
 
-            // æ‰§è¡Œæ£€æµ‹
+            // Ö´ĞĞ¼ì²â
             PerformConflictDetection();
 
-            // å†²çªè¯¦æƒ…
+            // ³åÍ»ÏêÇé
             if (activeConflicts.Count > 0)
             {
-                report.AppendLine("=== æ£€æµ‹åˆ°çš„å†²çª ===");
+                report.AppendLine("=== ¼ì²âµ½µÄ³åÍ» ===");
                 foreach (var conflict in activeConflicts.Values)
                 {
                     report.AppendLine($"ID: {conflict.conflictID}");
-                    report.AppendLine($"ç±»å‹: {conflict.type}");
-                    report.AppendLine($"å¯¹è±¡: {string.Join(", ", conflict.conflictObjects)}");
-                    report.AppendLine($"æ£€æµ‹æ—¶é—´: {conflict.detectedTime}");
+                    report.AppendLine($"ÀàĞÍ: {conflict.type}");
+                    report.AppendLine($"¶ÔÏó: {string.Join(", ", conflict.conflictObjects)}");
+                    report.AppendLine($"¼ì²âÊ±¼ä: {conflict.detectedTime}");
                     report.AppendLine();
                 }
             }
             else
             {
-                report.AppendLine("=== æœªæ£€æµ‹åˆ°å†²çª ===");
+                report.AppendLine("=== Î´¼ì²âµ½³åÍ» ===");
             }
 
             string reportText = report.ToString();
-            LogMessage("ç³»ç»ŸéªŒè¯å®Œæˆ");
+            LogMessage("ÏµÍ³ÑéÖ¤Íê³É");
             return reportText;
         }
 
         /// <summary>
-        /// æ¸…ç†æ‰€æœ‰æ•°æ®ï¼ˆè°¨æ…ä½¿ç”¨ï¼‰
+        /// ÇåÀíËùÓĞÊı¾İ£¨½÷É÷Ê¹ÓÃ£©
         /// </summary>
         public void ClearAllData()
         {
@@ -670,13 +670,13 @@ namespace InventorySystem.SaveSystem
             sceneTransitionCache.Clear();
             idGenerationCounter = 0;
 
-            LogMessage("å·²æ¸…ç†æ‰€æœ‰IDç®¡ç†æ•°æ®");
+            LogMessage("ÒÑÇåÀíËùÓĞID¹ÜÀíÊı¾İ");
         }
 
         /// <summary>
-        /// å¯¼å‡ºIDæ˜ å°„æ•°æ®
+        /// µ¼³öIDÓ³ÉäÊı¾İ
         /// </summary>
-        /// <returns>JSONæ ¼å¼çš„æ˜ å°„æ•°æ®</returns>
+        /// <returns>JSON¸ñÊ½µÄÓ³ÉäÊı¾İ</returns>
         public string ExportIDMappingData()
         {
             try
@@ -692,16 +692,16 @@ namespace InventorySystem.SaveSystem
             }
             catch (System.Exception ex)
             {
-                LogError($"å¯¼å‡ºIDæ˜ å°„æ•°æ®å¤±è´¥: {ex.Message}");
+                LogError($"µ¼³öIDÓ³ÉäÊı¾İÊ§°Ü: {ex.Message}");
                 return null;
             }
         }
 
         /// <summary>
-        /// å¯¼å…¥IDæ˜ å°„æ•°æ®
+        /// µ¼ÈëIDÓ³ÉäÊı¾İ
         /// </summary>
-        /// <param name="jsonData">JSONæ ¼å¼çš„æ˜ å°„æ•°æ®</param>
-        /// <returns>å¯¼å…¥æ˜¯å¦æˆåŠŸ</returns>
+        /// <param name="jsonData">JSON¸ñÊ½µÄÓ³ÉäÊı¾İ</param>
+        /// <returns>µ¼ÈëÊÇ·ñ³É¹¦</returns>
         public bool ImportIDMappingData(string jsonData)
         {
             try
@@ -714,22 +714,22 @@ namespace InventorySystem.SaveSystem
                     globalIDRegistry[kvp.Key] = kvp.Value;
                 }
 
-                LogMessage($"æˆåŠŸå¯¼å…¥ {mappings.Count} ä¸ªIDæ˜ å°„");
+                LogMessage($"³É¹¦µ¼Èë {mappings.Count} ¸öIDÓ³Éä");
                 return true;
             }
             catch (System.Exception ex)
             {
-                LogError($"å¯¼å…¥IDæ˜ å°„æ•°æ®å¤±è´¥: {ex.Message}");
+                LogError($"µ¼ÈëIDÓ³ÉäÊı¾İÊ§°Ü: {ex.Message}");
                 return false;
             }
         }
         #endregion
 
-        #region æ—¥å¿—è®°å½•
+        #region ÈÕÖ¾¼ÇÂ¼
         /// <summary>
-        /// è®°å½•æ™®é€šæ¶ˆæ¯
+        /// ¼ÇÂ¼ÆÕÍ¨ÏûÏ¢
         /// </summary>
-        /// <param name="message">æ¶ˆæ¯å†…å®¹</param>
+        /// <param name="message">ÏûÏ¢ÄÚÈİ</param>
         private void LogMessage(string message)
         {
             if (enableLogging)
@@ -739,9 +739,9 @@ namespace InventorySystem.SaveSystem
         }
 
         /// <summary>
-        /// è®°å½•è­¦å‘Šæ¶ˆæ¯
+        /// ¼ÇÂ¼¾¯¸æÏûÏ¢
         /// </summary>
-        /// <param name="message">è­¦å‘Šå†…å®¹</param>
+        /// <param name="message">¾¯¸æÄÚÈİ</param>
         private void LogWarning(string message)
         {
             if (enableLogging)
@@ -751,9 +751,9 @@ namespace InventorySystem.SaveSystem
         }
 
         /// <summary>
-        /// è®°å½•é”™è¯¯æ¶ˆæ¯
+        /// ¼ÇÂ¼´íÎóÏûÏ¢
         /// </summary>
-        /// <param name="message">é”™è¯¯å†…å®¹</param>
+        /// <param name="message">´íÎóÄÚÈİ</param>
         private void LogError(string message)
         {
             if (enableLogging)
@@ -763,18 +763,18 @@ namespace InventorySystem.SaveSystem
         }
         #endregion
 
-        #region æ•°æ®ç»“æ„å®šä¹‰
+        #region Êı¾İ½á¹¹¶¨Òå
         /// <summary>
-        /// IDå†²çªä¿¡æ¯
+        /// ID³åÍ»ĞÅÏ¢
         /// </summary>
         [System.Serializable]
         public class IDConflictInfo
         {
-            public string conflictID;           // å†²çªçš„ID
-            public List<string> conflictObjects; // ä½¿ç”¨è¯¥IDçš„å¯¹è±¡åˆ—è¡¨
-            public ConflictType type;           // å†²çªç±»å‹
-            public DateTime detectedTime;       // æ£€æµ‹æ—¶é—´
-            public bool isResolved;            // æ˜¯å¦å·²è§£å†³
+            public string conflictID;           // ³åÍ»µÄID
+            public List<string> conflictObjects; // Ê¹ÓÃ¸ÃIDµÄ¶ÔÏóÁĞ±í
+            public ConflictType type;           // ³åÍ»ÀàĞÍ
+            public DateTime detectedTime;       // ¼ì²âÊ±¼ä
+            public bool isResolved;            // ÊÇ·ñÒÑ½â¾ö
 
             public IDConflictInfo()
             {
@@ -785,29 +785,29 @@ namespace InventorySystem.SaveSystem
         }
 
         /// <summary>
-        /// å†²çªç±»å‹æšä¸¾
+        /// ³åÍ»ÀàĞÍÃ¶¾Ù
         /// </summary>
         public enum ConflictType
         {
-            Duplicate,      // é‡å¤ID
-            Invalid,        // æ— æ•ˆID
-            Orphaned,       // å­¤ç«‹å¼•ç”¨
-            CrossScene      // è·¨åœºæ™¯å†²çª
+            Duplicate,      // ÖØ¸´ID
+            Invalid,        // ÎŞĞ§ID
+            Orphaned,       // ¹ÂÁ¢ÒıÓÃ
+            CrossScene      // ¿ç³¡¾°³åÍ»
         }
 
         /// <summary>
-        /// IDæ˜ å°„ä¿¡æ¯
+        /// IDÓ³ÉäĞÅÏ¢
         /// </summary>
         [System.Serializable]
         public class IDMappingInfo
         {
-            public string instanceID;          // å®ä¾‹ID
-            public string objectName;          // å¯¹è±¡åç§°
-            public string sceneName;           // åœºæ™¯åç§°
-            public string objectType;          // å¯¹è±¡ç±»å‹
-            public Vector3 worldPosition;      // ä¸–ç•Œåæ ‡
-            public DateTime lastUpdated;       // æœ€åæ›´æ–°æ—¶é—´
-            public bool isActive;              // æ˜¯å¦æ¿€æ´»
+            public string instanceID;          // ÊµÀıID
+            public string objectName;          // ¶ÔÏóÃû³Æ
+            public string sceneName;           // ³¡¾°Ãû³Æ
+            public string objectType;          // ¶ÔÏóÀàĞÍ
+            public Vector3 worldPosition;      // ÊÀ½ç×ø±ê
+            public DateTime lastUpdated;       // ×îºó¸üĞÂÊ±¼ä
+            public bool isActive;              // ÊÇ·ñ¼¤»î
 
             public IDMappingInfo()
             {
@@ -817,54 +817,54 @@ namespace InventorySystem.SaveSystem
         }
         #endregion
 
-        #region å­—æ®µå’Œå±æ€§
-        [Header("IDç®¡ç†é…ç½®")]
-        [SerializeField] private bool enableAutoDetection = true;     // æ˜¯å¦å¯ç”¨è‡ªåŠ¨æ£€æµ‹
-        [SerializeField] private float detectionInterval = 30f;      // æ£€æµ‹é—´éš”ï¼ˆç§’ï¼‰
-        [SerializeField] private bool enableAutoResolve = true;      // æ˜¯å¦å¯ç”¨è‡ªåŠ¨è§£å†³
-        [SerializeField] private bool enableLogging = true;          // æ˜¯å¦å¯ç”¨æ—¥å¿—è®°å½•
-        [SerializeField] private int maxConflictHistory = 100;       // æœ€å¤§å†²çªå†å²è®°å½•æ•°
+        #region ×Ö¶ÎºÍÊôĞÔ
+        [Header("ID¹ÜÀíÅäÖÃ")]
+        [SerializeField] private bool enableAutoDetection = true;     // ÊÇ·ñÆôÓÃ×Ô¶¯¼ì²â
+        [SerializeField] private float detectionInterval = 30f;      // ¼ì²â¼ä¸ô£¨Ãë£©
+        [SerializeField] private bool enableAutoResolve = true;      // ÊÇ·ñÆôÓÃ×Ô¶¯½â¾ö
+        [SerializeField] private bool enableLogging = true;          // ÊÇ·ñÆôÓÃÈÕÖ¾¼ÇÂ¼
+        [SerializeField] private int maxConflictHistory = 100;       // ×î´ó³åÍ»ÀúÊ·¼ÇÂ¼Êı
 
-        // å…¨å±€IDæ³¨å†Œè¡¨ - è®°å½•æ‰€æœ‰å·²åˆ†é…çš„ID
+        // È«¾ÖID×¢²á±í - ¼ÇÂ¼ËùÓĞÒÑ·ÖÅäµÄID
         private Dictionary<string, IDMappingInfo> globalIDRegistry = new Dictionary<string, IDMappingInfo>();
 
-        // IDå†²çªè®°å½•
+        // ID³åÍ»¼ÇÂ¼
         private List<IDConflictInfo> conflictHistory = new List<IDConflictInfo>();
 
-        // å½“å‰æ£€æµ‹åˆ°çš„å†²çª
+        // µ±Ç°¼ì²âµ½µÄ³åÍ»
         private Dictionary<string, IDConflictInfo> activeConflicts = new Dictionary<string, IDConflictInfo>();
 
-        // IDç”Ÿæˆè®¡æ•°å™¨
+        // IDÉú³É¼ÆÊıÆ÷
         private int idGenerationCounter = 0;
 
-        // åœºæ™¯åˆ‡æ¢æ—¶çš„IDç¼“å­˜
+        // ³¡¾°ÇĞ»»Ê±µÄID»º´æ
         private Dictionary<string, string> sceneTransitionCache = new Dictionary<string, string>();
 
-        // æ£€æµ‹åç¨‹
+        // ¼ì²âĞ­³Ì
         private Coroutine detectionCoroutine;
 
-        // åˆå§‹åŒ–çŠ¶æ€
+        // ³õÊ¼»¯×´Ì¬
         private bool isInitialized = false;
         #endregion
 
-        #region äº‹ä»¶å®šä¹‰
-        // IDå†²çªäº‹ä»¶
+        #region ÊÂ¼ş¶¨Òå
+        // ID³åÍ»ÊÂ¼ş
         public event Action<IDConflictInfo> OnConflictDetected;
-        public event Action<string, string> OnConflictResolved; // æ—§ID, æ–°ID
+        public event Action<string, string> OnConflictResolved; // ¾ÉID, ĞÂID
 
-        // IDæ³¨å†Œäº‹ä»¶
+        // ID×¢²áÊÂ¼ş
         public event Action<string, IDMappingInfo> OnIDRegistered;
         public event Action<string> OnIDUnregistered;
 
-        // åœºæ™¯åˆ‡æ¢äº‹ä»¶
+        // ³¡¾°ÇĞ»»ÊÂ¼ş
         public event Action<string> OnSceneTransitionStart;
         public event Action<string> OnSceneTransitionComplete;
         #endregion
 
-        #region Unityç”Ÿå‘½å‘¨æœŸ
+        #region UnityÉúÃüÖÜÆÚ
         private void Awake()
         {
-            // ç¡®ä¿å•ä¾‹å”¯ä¸€æ€§
+            // È·±£µ¥ÀıÎ¨Ò»ĞÔ
             if (_instance != null && _instance != this)
             {
                 Destroy(gameObject);
@@ -873,13 +873,13 @@ namespace InventorySystem.SaveSystem
 
             _instance = this;
 
-            // åˆå§‹åŒ–ç®¡ç†å™¨
+            // ³õÊ¼»¯¹ÜÀíÆ÷
             InitializeManager();
         }
 
         private void Start()
         {
-            // å¯åŠ¨è‡ªåŠ¨æ£€æµ‹
+            // Æô¶¯×Ô¶¯¼ì²â
             if (enableAutoDetection)
             {
                 StartAutoDetection();
@@ -888,7 +888,7 @@ namespace InventorySystem.SaveSystem
 
         private void OnDestroy()
         {
-            // åœæ­¢æ£€æµ‹åç¨‹
+            // Í£Ö¹¼ì²âĞ­³Ì
             if (detectionCoroutine != null)
             {
                 StopCoroutine(detectionCoroutine);
@@ -896,59 +896,59 @@ namespace InventorySystem.SaveSystem
         }
         #endregion
 
-        #region åˆå§‹åŒ–æ–¹æ³•
+        #region ³õÊ¼»¯·½·¨
         /// <summary>
-        /// åˆå§‹åŒ–ç®¡ç†å™¨
+        /// ³õÊ¼»¯¹ÜÀíÆ÷
         /// </summary>
         private void InitializeManager()
         {
             if (isInitialized) return;
 
-            // åˆå§‹åŒ–æ•°æ®ç»“æ„
+            // ³õÊ¼»¯Êı¾İ½á¹¹
             globalIDRegistry = new Dictionary<string, IDMappingInfo>();
             conflictHistory = new List<IDConflictInfo>();
             activeConflicts = new Dictionary<string, IDConflictInfo>();
             sceneTransitionCache = new Dictionary<string, string>();
 
-            // é‡ç½®è®¡æ•°å™¨
+            // ÖØÖÃ¼ÆÊıÆ÷
             idGenerationCounter = 0;
 
-            // æ³¨å†Œåœºæ™¯åˆ‡æ¢äº‹ä»¶
+            // ×¢²á³¡¾°ÇĞ»»ÊÂ¼ş
             UnityEngine.SceneManagement.SceneManager.sceneLoaded += OnSceneLoaded;
             UnityEngine.SceneManagement.SceneManager.sceneUnloaded += OnSceneUnloaded;
 
             isInitialized = true;
 
-            LogMessage("ç‰©å“å®ä¾‹IDç®¡ç†å™¨åˆå§‹åŒ–å®Œæˆ");
+            LogMessage("ÎïÆ·ÊµÀıID¹ÜÀíÆ÷³õÊ¼»¯Íê³É");
         }
         #endregion
 
-        #region IDæ³¨å†Œå’Œç®¡ç†
+        #region ID×¢²áºÍ¹ÜÀí
         /// <summary>
-        /// æ³¨å†Œæ–°çš„å®ä¾‹ID
+        /// ×¢²áĞÂµÄÊµÀıID
         /// </summary>
-        /// <param name="instanceID">å®ä¾‹ID</param>
-        /// <param name="objectName">å¯¹è±¡åç§°</param>
-        /// <param name="objectType">å¯¹è±¡ç±»å‹</param>
-        /// <param name="worldPosition">ä¸–ç•Œåæ ‡</param>
-        /// <returns>æ³¨å†Œæ˜¯å¦æˆåŠŸ</returns>
+        /// <param name="instanceID">ÊµÀıID</param>
+        /// <param name="objectName">¶ÔÏóÃû³Æ</param>
+        /// <param name="objectType">¶ÔÏóÀàĞÍ</param>
+        /// <param name="worldPosition">ÊÀ½ç×ø±ê</param>
+        /// <returns>×¢²áÊÇ·ñ³É¹¦</returns>
         public bool RegisterInstanceID(string instanceID, string objectName, string objectType, Vector3 worldPosition)
         {
             if (string.IsNullOrEmpty(instanceID))
             {
-                LogError($"å°è¯•æ³¨å†Œç©ºçš„å®ä¾‹IDï¼Œå¯¹è±¡: {objectName}");
+                LogError($"³¢ÊÔ×¢²á¿ÕµÄÊµÀıID£¬¶ÔÏó: {objectName}");
                 return false;
             }
 
-            // æ£€æŸ¥IDæ˜¯å¦å·²å­˜åœ¨
+            // ¼ì²éIDÊÇ·ñÒÑ´æÔÚ
             if (globalIDRegistry.ContainsKey(instanceID))
             {
-                // æ£€æµ‹åˆ°å†²çª
+                // ¼ì²âµ½³åÍ»
                 DetectAndRecordConflict(instanceID, objectName, ConflictType.Duplicate);
                 return false;
             }
 
-            // åˆ›å»ºæ˜ å°„ä¿¡æ¯
+            // ´´½¨Ó³ÉäĞÅÏ¢
             IDMappingInfo mappingInfo = new IDMappingInfo
             {
                 instanceID = instanceID,
@@ -960,20 +960,20 @@ namespace InventorySystem.SaveSystem
                 isActive = true
             };
 
-            // æ³¨å†ŒID
+            // ×¢²áID
             globalIDRegistry[instanceID] = mappingInfo;
 
-            LogMessage($"æˆåŠŸæ³¨å†Œå®ä¾‹ID: {instanceID}, å¯¹è±¡: {objectName}");
+            LogMessage($"³É¹¦×¢²áÊµÀıID: {instanceID}, ¶ÔÏó: {objectName}");
             OnIDRegistered?.Invoke(instanceID, mappingInfo);
 
             return true;
         }
 
         /// <summary>
-        /// æ³¨é”€å®ä¾‹ID
+        /// ×¢ÏúÊµÀıID
         /// </summary>
-        /// <param name="instanceID">è¦æ³¨é”€çš„å®ä¾‹ID</param>
-        /// <returns>æ³¨é”€æ˜¯å¦æˆåŠŸ</returns>
+        /// <param name="instanceID">Òª×¢ÏúµÄÊµÀıID</param>
+        /// <returns>×¢ÏúÊÇ·ñ³É¹¦</returns>
         public bool UnregisterInstanceID(string instanceID)
         {
             if (string.IsNullOrEmpty(instanceID))
@@ -984,10 +984,10 @@ namespace InventorySystem.SaveSystem
             bool removed = globalIDRegistry.Remove(instanceID);
             if (removed)
             {
-                // æ¸…ç†ç›¸å…³å†²çªè®°å½•
+                // ÇåÀíÏà¹Ø³åÍ»¼ÇÂ¼
                 activeConflicts.Remove(instanceID);
 
-                LogMessage($"æˆåŠŸæ³¨é”€å®ä¾‹ID: {instanceID}");
+                LogMessage($"³É¹¦×¢ÏúÊµÀıID: {instanceID}");
                 OnIDUnregistered?.Invoke(instanceID);
             }
 
@@ -995,10 +995,10 @@ namespace InventorySystem.SaveSystem
         }
 
         /// <summary>
-        /// ç”Ÿæˆæ–°çš„å”¯ä¸€å®ä¾‹ID
+        /// Éú³ÉĞÂµÄÎ¨Ò»ÊµÀıID
         /// </summary>
-        /// <param name="prefix">IDå‰ç¼€</param>
-        /// <returns>æ–°çš„å”¯ä¸€ID</returns>
+        /// <param name="prefix">IDÇ°×º</param>
+        /// <returns>ĞÂµÄÎ¨Ò»ID</returns>
         public string GenerateUniqueInstanceID(string prefix = "Item")
         {
             string newID;
@@ -1015,32 +1015,32 @@ namespace InventorySystem.SaveSystem
 
                 if (attempts >= maxAttempts)
                 {
-                    // å¦‚æœå°è¯•æ¬¡æ•°è¿‡å¤šï¼Œä½¿ç”¨GUIDç¡®ä¿å”¯ä¸€æ€§
+                    // Èç¹û³¢ÊÔ´ÎÊı¹ı¶à£¬Ê¹ÓÃGUIDÈ·±£Î¨Ò»ĞÔ
                     newID = $"{prefix}_{System.Guid.NewGuid().ToString("N")[..12]}";
                     break;
                 }
             }
             while (globalIDRegistry.ContainsKey(newID));
 
-            LogMessage($"ç”Ÿæˆæ–°çš„å”¯ä¸€å®ä¾‹ID: {newID}");
+            LogMessage($"Éú³ÉĞÂµÄÎ¨Ò»ÊµÀıID: {newID}");
             return newID;
         }
 
         /// <summary>
-        /// æ£€æŸ¥IDæ˜¯å¦å·²æ³¨å†Œ
+        /// ¼ì²éIDÊÇ·ñÒÑ×¢²á
         /// </summary>
-        /// <param name="instanceID">è¦æ£€æŸ¥çš„ID</param>
-        /// <returns>æ˜¯å¦å·²æ³¨å†Œ</returns>
+        /// <param name="instanceID">Òª¼ì²éµÄID</param>
+        /// <returns>ÊÇ·ñÒÑ×¢²á</returns>
         public bool IsIDRegistered(string instanceID)
         {
             return !string.IsNullOrEmpty(instanceID) && globalIDRegistry.ContainsKey(instanceID);
         }
 
         /// <summary>
-        /// è·å–IDæ˜ å°„ä¿¡æ¯
+        /// »ñÈ¡IDÓ³ÉäĞÅÏ¢
         /// </summary>
-        /// <param name="instanceID">å®ä¾‹ID</param>
-        /// <returns>æ˜ å°„ä¿¡æ¯ï¼Œå¦‚æœä¸å­˜åœ¨åˆ™è¿”å›null</returns>
+        /// <param name="instanceID">ÊµÀıID</param>
+        /// <returns>Ó³ÉäĞÅÏ¢£¬Èç¹û²»´æÔÚÔò·µ»Ønull</returns>
         public IDMappingInfo GetIDMappingInfo(string instanceID)
         {
             globalIDRegistry.TryGetValue(instanceID, out IDMappingInfo info);
@@ -1048,11 +1048,11 @@ namespace InventorySystem.SaveSystem
         }
 
         /// <summary>
-        /// æ›´æ–°IDæ˜ å°„ä¿¡æ¯
+        /// ¸üĞÂIDÓ³ÉäĞÅÏ¢
         /// </summary>
-        /// <param name="instanceID">å®ä¾‹ID</param>
-        /// <param name="worldPosition">æ–°çš„ä¸–ç•Œåæ ‡</param>
-        /// <param name="isActive">æ˜¯å¦æ¿€æ´»</param>
+        /// <param name="instanceID">ÊµÀıID</param>
+        /// <param name="worldPosition">ĞÂµÄÊÀ½ç×ø±ê</param>
+        /// <param name="isActive">ÊÇ·ñ¼¤»î</param>
         public void UpdateIDMappingInfo(string instanceID, Vector3 worldPosition, bool isActive = true)
         {
             if (globalIDRegistry.TryGetValue(instanceID, out IDMappingInfo info))
@@ -1065,30 +1065,30 @@ namespace InventorySystem.SaveSystem
         }
         #endregion
 
-        #region Unityç”Ÿå‘½å‘¨æœŸæ‰©å±•
+        #region UnityÉúÃüÖÜÆÚÀ©Õ¹
 
         /// <summary>
-        /// åº”ç”¨ç¨‹åºæš‚åœæ—¶ä¿å­˜æ•°æ®
+        /// Ó¦ÓÃ³ÌĞòÔİÍ£Ê±±£´æÊı¾İ
         /// </summary>
-        /// <param name="pauseStatus">æš‚åœçŠ¶æ€</param>
+        /// <param name="pauseStatus">ÔİÍ£×´Ì¬</param>
         private void OnApplicationPause(bool pauseStatus)
         {
             if (pauseStatus)
             {
-                // åº”ç”¨æš‚åœæ—¶æ‰§è¡Œä¸€æ¬¡å†²çªæ£€æµ‹
+                // Ó¦ÓÃÔİÍ£Ê±Ö´ĞĞÒ»´Î³åÍ»¼ì²â
                 PerformConflictDetection();
             }
         }
 
         /// <summary>
-        /// åº”ç”¨ç¨‹åºç„¦ç‚¹å˜åŒ–æ—¶å¤„ç†
+        /// Ó¦ÓÃ³ÌĞò½¹µã±ä»¯Ê±´¦Àí
         /// </summary>
-        /// <param name="hasFocus">æ˜¯å¦æœ‰ç„¦ç‚¹</param>
+        /// <param name="hasFocus">ÊÇ·ñÓĞ½¹µã</param>
         private void OnApplicationFocus(bool hasFocus)
         {
             if (!hasFocus)
             {
-                // å¤±å»ç„¦ç‚¹æ—¶æ‰§è¡Œä¸€æ¬¡å†²çªæ£€æµ‹
+                // Ê§È¥½¹µãÊ±Ö´ĞĞÒ»´Î³åÍ»¼ì²â
                 PerformConflictDetection();
             }
         }

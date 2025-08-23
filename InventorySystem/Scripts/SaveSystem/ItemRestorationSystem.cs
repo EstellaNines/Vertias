@@ -7,22 +7,22 @@ using UnityEditor;
 #endif
 
 /// <summary>
-/// ç‰©å“æ¢å¤ç³»ç»Ÿ - è´Ÿè´£æ ¹æ®ä¿å­˜æ•°æ®é‡æ–°åˆ›å»ºInventorySystemItemå¯¹è±¡
-/// éä¾µå…¥å¼è®¾è®¡ï¼Œä¸ä¿®æ”¹ç°æœ‰ä»£ç ç»“æ„
+/// ÎïÆ·»Ö¸´ÏµÍ³ - ¸ºÔğ¸ù¾İ±£´æÊı¾İÖØĞÂ´´½¨InventorySystemItem¶ÔÏó
+/// ·ÇÇÖÈëÊ½Éè¼Æ£¬²»ĞŞ¸ÄÏÖÓĞ´úÂë½á¹¹
 /// </summary>
 public class ItemRestorationSystem : MonoBehaviour
 {
-    [Header("ç‰©å“æ¢å¤é…ç½®")]
-    [SerializeField] private string databasePath = "Assets/InventorySystem/Database/Scriptable Objectæ•°æ®å¯¹è±¡";
+    [Header("ÎïÆ·»Ö¸´ÅäÖÃ")]
+    [SerializeField] private string databasePath = "Assets/InventorySystem/Database/Scriptable ObjectÊı¾İ¶ÔÏó";
     [SerializeField] private string prefabPath = "Assets/InventorySystem/Prefab";
     [SerializeField] private bool showDebugInfo = true;
 
-    // ç¼“å­˜çš„ç‰©å“æ•°æ®å’Œé¢„åˆ¶ä½“å­—å…¸
+    // »º´æµÄÎïÆ·Êı¾İºÍÔ¤ÖÆÌå×Öµä
     private Dictionary<string, InventorySystemItemDataSO> itemDataDict = new Dictionary<string, InventorySystemItemDataSO>();
     private Dictionary<string, GameObject> itemPrefabDict = new Dictionary<string, GameObject>();
     private List<InventorySystemItemDataSO> allItemData = new List<InventorySystemItemDataSO>();
 
-    // å•ä¾‹æ¨¡å¼
+    // µ¥ÀıÄ£Ê½
     private static ItemRestorationSystem _instance;
     public static ItemRestorationSystem Instance
     {
@@ -56,7 +56,7 @@ public class ItemRestorationSystem : MonoBehaviour
     }
 
     /// <summary>
-    /// åˆå§‹åŒ–ç‰©å“æ¢å¤ç³»ç»Ÿ
+    /// ³õÊ¼»¯ÎïÆ·»Ö¸´ÏµÍ³
     /// </summary>
     public void InitializeSystem()
     {
@@ -65,12 +65,12 @@ public class ItemRestorationSystem : MonoBehaviour
 
         if (showDebugInfo)
         {
-            Debug.Log($"ç‰©å“æ¢å¤ç³»ç»Ÿåˆå§‹åŒ–å®Œæˆ: {allItemData.Count} ä¸ªç‰©å“æ•°æ®, {itemPrefabDict.Count} ä¸ªé¢„åˆ¶ä½“");
+            Debug.Log($"ÎïÆ·»Ö¸´ÏµÍ³³õÊ¼»¯Íê³É: {allItemData.Count} ¸öÎïÆ·Êı¾İ, {itemPrefabDict.Count} ¸öÔ¤ÖÆÌå");
         }
     }
 
     /// <summary>
-    /// ä»æ•°æ®åº“åŠ è½½æ‰€æœ‰ç‰©å“æ•°æ®
+    /// ´ÓÊı¾İ¿â¼ÓÔØËùÓĞÎïÆ·Êı¾İ
     /// </summary>
     private void LoadItemDataFromDatabase()
     {
@@ -94,7 +94,7 @@ public class ItemRestorationSystem : MonoBehaviour
                     allItemData.Add(itemData);
                 }
 
-                // åŒæ—¶ä½¿ç”¨IDä½œä¸ºé”®
+                // Í¬Ê±Ê¹ÓÃID×÷Îª¼ü
                 string idKey = itemData.id.ToString();
                 if (!itemDataDict.ContainsKey(idKey))
                 {
@@ -103,7 +103,7 @@ public class ItemRestorationSystem : MonoBehaviour
             }
         }
 #else
-        // è¿è¡Œæ—¶ä½¿ç”¨Resources.LoadAll
+        // ÔËĞĞÊ±Ê¹ÓÃResources.LoadAll
         InventorySystemItemDataSO[] loadedData = Resources.LoadAll<InventorySystemItemDataSO>("");
         
         foreach (var itemData in loadedData)
@@ -128,7 +128,7 @@ public class ItemRestorationSystem : MonoBehaviour
     }
 
     /// <summary>
-    /// ä»æ–‡ä»¶å¤¹åŠ è½½æ‰€æœ‰é¢„åˆ¶ä½“
+    /// ´ÓÎÄ¼ş¼Ğ¼ÓÔØËùÓĞÔ¤ÖÆÌå
     /// </summary>
     private void LoadPrefabsFromFolder()
     {
@@ -152,7 +152,7 @@ public class ItemRestorationSystem : MonoBehaviour
             }
         }
 #else
-        // è¿è¡Œæ—¶ä½¿ç”¨Resources.LoadAll
+        // ÔËĞĞÊ±Ê¹ÓÃResources.LoadAll
         GameObject[] loadedPrefabs = Resources.LoadAll<GameObject>("");
         
         foreach (var prefab in loadedPrefabs)
@@ -170,67 +170,67 @@ public class ItemRestorationSystem : MonoBehaviour
     }
 
     /// <summary>
-    /// æ ¹æ®ç‰©å“ä¿å­˜æ•°æ®æ¢å¤ç‰©å“åˆ°æŒ‡å®šç½‘æ ¼
+    /// ¸ù¾İÎïÆ·±£´æÊı¾İ»Ö¸´ÎïÆ·µ½Ö¸¶¨Íø¸ñ
     /// </summary>
-    /// <param name="itemSaveData">ç‰©å“ä¿å­˜æ•°æ®</param>
-    /// <param name="targetGrid">ç›®æ ‡ç½‘æ ¼</param>
-    /// <param name="gridPosition">ç½‘æ ¼ä½ç½®</param>
-    /// <returns>æ¢å¤çš„ç‰©å“GameObject</returns>
+    /// <param name="itemSaveData">ÎïÆ·±£´æÊı¾İ</param>
+    /// <param name="targetGrid">Ä¿±êÍø¸ñ</param>
+    /// <param name="gridPosition">Íø¸ñÎ»ÖÃ</param>
+    /// <returns>»Ö¸´µÄÎïÆ·GameObject</returns>
     public GameObject RestoreItem(ItemSaveData itemSaveData, BaseItemGrid targetGrid, Vector2Int gridPosition)
     {
         if (itemSaveData == null || targetGrid == null)
         {
             if (showDebugInfo)
             {
-                Debug.LogWarning("ç‰©å“æ¢å¤å¤±è´¥ï¼šä¿å­˜æ•°æ®æˆ–ç›®æ ‡ç½‘æ ¼ä¸ºç©º");
+                Debug.LogWarning("ÎïÆ·»Ö¸´Ê§°Ü£º±£´æÊı¾İ»òÄ¿±êÍø¸ñÎª¿Õ");
             }
             return null;
         }
 
-        // æ ¹æ®æ•°æ®è·¯å¾„å’ŒIDæŸ¥æ‰¾ç‰©å“æ•°æ®
+        // ¸ù¾İÊı¾İÂ·¾¶ºÍID²éÕÒÎïÆ·Êı¾İ
         InventorySystemItemDataSO itemData = FindItemDataByPath(itemSaveData.itemDataPath, itemSaveData.itemDataID.ToString());
         if (itemData == null)
         {
             if (showDebugInfo)
             {
-                Debug.LogWarning($"æ— æ³•æ‰¾åˆ°ç‰©å“æ•°æ®: {itemSaveData.itemDataPath}, ID: {itemSaveData.itemDataID}");
+                Debug.LogWarning($"ÎŞ·¨ÕÒµ½ÎïÆ·Êı¾İ: {itemSaveData.itemDataPath}, ID: {itemSaveData.itemDataID}");
             }
             return null;
         }
 
-        // è·å–ç‰©å“é¢„åˆ¶ä½“
+        // »ñÈ¡ÎïÆ·Ô¤ÖÆÌå
         GameObject prefab = GetItemPrefab(itemData);
         if (prefab == null)
         {
             if (showDebugInfo)
             {
-                Debug.LogWarning($"æ— æ³•æ‰¾åˆ°ç‰©å“é¢„åˆ¶ä½“: {itemData.itemName}");
+                Debug.LogWarning($"ÎŞ·¨ÕÒµ½ÎïÆ·Ô¤ÖÆÌå: {itemData.itemName}");
             }
             return null;
         }
 
-        // æ£€æŸ¥ä½ç½®æ˜¯å¦å¯ç”¨
+        // ¼ì²éÎ»ÖÃÊÇ·ñ¿ÉÓÃ
         Vector2Int itemSize = new Vector2Int(itemData.width, itemData.height);
         if (!targetGrid.CanPlaceItem(gridPosition, itemSize))
         {
             if (showDebugInfo)
             {
-                Debug.LogWarning($"ç½‘æ ¼ä½ç½® {gridPosition} ä¸å¯ç”¨ï¼Œæ— æ³•æ¢å¤ç‰©å“ {itemData.itemName}");
+                Debug.LogWarning($"Íø¸ñÎ»ÖÃ {gridPosition} ²»¿ÉÓÃ£¬ÎŞ·¨»Ö¸´ÎïÆ· {itemData.itemName}");
             }
             return null;
         }
 
-        // åˆ›å»ºç‰©å“
+        // ´´½¨ÎïÆ·
         GameObject restoredItem = CreateItem(prefab, itemData, targetGrid, gridPosition);
 
         if (restoredItem != null)
         {
-            // æ¢å¤ç‰©å“çš„å®ä¾‹IDå’Œå®ä¾‹æ•°æ®
+            // »Ö¸´ÎïÆ·µÄÊµÀıIDºÍÊµÀıÊı¾İ
             RestoreItemInstanceData(restoredItem, itemSaveData);
 
             if (showDebugInfo)
             {
-                Debug.Log($"æˆåŠŸæ¢å¤ç‰©å“: {itemData.itemName} åˆ°ä½ç½® {gridPosition}");
+                Debug.Log($"³É¹¦»Ö¸´ÎïÆ·: {itemData.itemName} µ½Î»ÖÃ {gridPosition}");
             }
         }
 
@@ -238,16 +238,16 @@ public class ItemRestorationSystem : MonoBehaviour
     }
 
     /// <summary>
-    /// åˆ›å»ºç‰©å“å¯¹è±¡
+    /// ´´½¨ÎïÆ·¶ÔÏó
     /// </summary>
     private GameObject CreateItem(GameObject prefab, InventorySystemItemDataSO data, BaseItemGrid targetGrid, Vector2Int gridPos)
     {
         if (prefab == null || data == null || targetGrid == null) return null;
 
-        // å®ä¾‹åŒ–ç‰©å“é¢„åˆ¶ä½“
+        // ÊµÀı»¯ÎïÆ·Ô¤ÖÆÌå
         GameObject item = Instantiate(prefab, targetGrid.transform);
 
-        // è®¾ç½®ç‰©å“æ•°æ®
+        // ÉèÖÃÎïÆ·Êı¾İ
         ItemDataHolder dataHolder = item.GetComponentInChildren<ItemDataHolder>();
         if (dataHolder != null)
         {
@@ -255,22 +255,22 @@ public class ItemRestorationSystem : MonoBehaviour
         }
         else
         {
-            Debug.LogError($"é¢„åˆ¶ä½“ {prefab.name} ä¸­æ²¡æœ‰æ‰¾åˆ° ItemDataHolder ç»„ä»¶ï¼");
+            Debug.LogError($"Ô¤ÖÆÌå {prefab.name} ÖĞÃ»ÓĞÕÒµ½ ItemDataHolder ×é¼ş£¡");
         }
 
-        // ç¡®ä¿ç‰©å“å…·æœ‰å¿…è¦çš„ç»„ä»¶
+        // È·±£ÎïÆ·¾ßÓĞ±ØÒªµÄ×é¼ş
         EnsureRequiredComponents(item);
 
-        // è®¾ç½®ç‰©å“çš„é”šç‚¹å’Œè½´å¿ƒç‚¹
+        // ÉèÖÃÎïÆ·µÄÃªµãºÍÖáĞÄµã
         RectTransform itemRect = item.GetComponent<RectTransform>();
         if (itemRect != null)
         {
-            itemRect.anchorMin = new Vector2(0, 1); // å·¦ä¸Šè§’
-            itemRect.anchorMax = new Vector2(0, 1); // å·¦ä¸Šè§’
-            itemRect.pivot = new Vector2(0, 1);     // è½´å¿ƒç‚¹ä¹Ÿè®¾ç½®ä¸ºå·¦ä¸Šè§’
+            itemRect.anchorMin = new Vector2(0, 1); // ×óÉÏ½Ç
+            itemRect.anchorMax = new Vector2(0, 1); // ×óÉÏ½Ç
+            itemRect.pivot = new Vector2(0, 1);     // ÖáĞÄµãÒ²ÉèÖÃÎª×óÉÏ½Ç
         }
 
-        // è®¾ç½®ç‰©å“åœ¨ç½‘æ ¼ä¸­çš„ä½ç½®
+        // ÉèÖÃÎïÆ·ÔÚÍø¸ñÖĞµÄÎ»ÖÃ
         Vector2Int itemSize = new Vector2Int(data.width, data.height);
         targetGrid.PlaceItem(item, gridPos, itemSize);
 
@@ -278,23 +278,23 @@ public class ItemRestorationSystem : MonoBehaviour
     }
 
     /// <summary>
-    /// ç¡®ä¿ç‰©å“å…·æœ‰å¿…è¦çš„ç»„ä»¶
+    /// È·±£ÎïÆ·¾ßÓĞ±ØÒªµÄ×é¼ş
     /// </summary>
     private void EnsureRequiredComponents(GameObject item)
     {
-        // ç¡®ä¿æœ‰ DraggableItem ç»„ä»¶
+        // È·±£ÓĞ DraggableItem ×é¼ş
         if (item.GetComponent<DraggableItem>() == null)
         {
             item.AddComponent<DraggableItem>();
         }
 
-        // ç¡®ä¿æœ‰ InventorySystemItem ç»„ä»¶
+        // È·±£ÓĞ InventorySystemItem ×é¼ş
         if (item.GetComponent<InventorySystemItem>() == null)
         {
             item.AddComponent<InventorySystemItem>();
         }
 
-        // ç¡®ä¿æœ‰ CanvasGroup ç»„ä»¶ï¼ˆDraggableItem éœ€è¦ï¼‰
+        // È·±£ÓĞ CanvasGroup ×é¼ş£¨DraggableItem ĞèÒª£©
         if (item.GetComponent<CanvasGroup>() == null)
         {
             item.AddComponent<CanvasGroup>();
@@ -302,18 +302,18 @@ public class ItemRestorationSystem : MonoBehaviour
     }
 
     /// <summary>
-    /// æ¢å¤ç‰©å“çš„å®ä¾‹æ•°æ®
+    /// »Ö¸´ÎïÆ·µÄÊµÀıÊı¾İ
     /// </summary>
     private void RestoreItemInstanceData(GameObject item, ItemSaveData itemSaveData)
     {
-        // æ¢å¤å®ä¾‹ID
+        // »Ö¸´ÊµÀıID
         InventorySystemItem inventoryItem = item.GetComponent<InventorySystemItem>();
         if (inventoryItem != null && !string.IsNullOrEmpty(itemSaveData.instanceID))
         {
             inventoryItem.SetItemInstanceID(itemSaveData.instanceID);
         }
 
-        // æ¢å¤å®ä¾‹æ•°æ®
+        // »Ö¸´ÊµÀıÊı¾İ
         ItemDataHolder dataHolder = item.GetComponentInChildren<ItemDataHolder>();
         if (dataHolder != null && !string.IsNullOrEmpty(itemSaveData.instanceDataJson))
         {
@@ -322,11 +322,11 @@ public class ItemRestorationSystem : MonoBehaviour
     }
 
     /// <summary>
-    /// æ ¹æ®è·¯å¾„å’ŒIDæŸ¥æ‰¾ç‰©å“æ•°æ®
+    /// ¸ù¾İÂ·¾¶ºÍID²éÕÒÎïÆ·Êı¾İ
     /// </summary>
     private InventorySystemItemDataSO FindItemDataByPath(string assetPath, string itemID)
     {
-        // é¦–å…ˆå°è¯•ä»ç¼“å­˜ä¸­æŸ¥æ‰¾
+        // Ê×ÏÈ³¢ÊÔ´Ó»º´æÖĞ²éÕÒ
         foreach (var kvp in itemDataDict)
         {
             if (kvp.Value.id.ToString() == itemID)
@@ -335,7 +335,7 @@ public class ItemRestorationSystem : MonoBehaviour
             }
         }
 
-        // ç„¶åé€šè¿‡è·¯å¾„åŠ è½½
+        // È»ºóÍ¨¹ıÂ·¾¶¼ÓÔØ
 #if UNITY_EDITOR
         InventorySystemItemDataSO loadedData = AssetDatabase.LoadAssetAtPath<InventorySystemItemDataSO>(assetPath);
         if (loadedData != null)
@@ -344,7 +344,7 @@ public class ItemRestorationSystem : MonoBehaviour
         }
 #endif
 
-        // æœ€ååœ¨æ‰€æœ‰ç‰©å“æ•°æ®ä¸­æŸ¥æ‰¾
+        // ×îºóÔÚËùÓĞÎïÆ·Êı¾İÖĞ²éÕÒ
         foreach (var itemData in allItemData)
         {
             if (itemData.id.ToString() == itemID)
@@ -357,51 +357,51 @@ public class ItemRestorationSystem : MonoBehaviour
     }
 
     /// <summary>
-    /// æ ¹æ®ç‰©å“æ•°æ®è·å–å¯¹åº”çš„é¢„åˆ¶ä½“
+    /// ¸ù¾İÎïÆ·Êı¾İ»ñÈ¡¶ÔÓ¦µÄÔ¤ÖÆÌå
     /// </summary>
     private GameObject GetItemPrefab(InventorySystemItemDataSO itemData)
     {
         if (itemData == null) return null;
 
-        // é¦–å…ˆå°è¯•ä»é¢„åˆ¶ä½“å­—å…¸ä¸­è·å–
+        // Ê×ÏÈ³¢ÊÔ´ÓÔ¤ÖÆÌå×ÖµäÖĞ»ñÈ¡
         string itemKey = itemData.itemName;
         if (itemPrefabDict.ContainsKey(itemKey))
         {
             return itemPrefabDict[itemKey];
         }
 
-        // å¦‚æœå­—å…¸ä¸­æ²¡æœ‰ï¼Œå°è¯•é€šè¿‡IDæŸ¥æ‰¾
+        // Èç¹û×ÖµäÖĞÃ»ÓĞ£¬³¢ÊÔÍ¨¹ıID²éÕÒ
         itemKey = itemData.id.ToString();
         if (itemPrefabDict.ContainsKey(itemKey))
         {
             return itemPrefabDict[itemKey];
         }
 
-        // å°è¯•æ¨¡ç³ŠåŒ¹é…
+        // ³¢ÊÔÄ£ºıÆ¥Åä
         return FindPrefabForItemData(itemData);
     }
 
     /// <summary>
-    /// æ ¹æ®ç‰©å“æ•°æ®æŸ¥æ‰¾å¯¹åº”çš„é¢„åˆ¶ä½“ï¼ˆæ¨¡ç³ŠåŒ¹é…ï¼‰
+    /// ¸ù¾İÎïÆ·Êı¾İ²éÕÒ¶ÔÓ¦µÄÔ¤ÖÆÌå£¨Ä£ºıÆ¥Åä£©
     /// </summary>
     private GameObject FindPrefabForItemData(InventorySystemItemDataSO itemData)
     {
         string dataKey = GetItemKey(itemData.itemName);
 
-        // ç›´æ¥åŒ¹é…
+        // Ö±½ÓÆ¥Åä
         if (itemPrefabDict.ContainsKey(dataKey))
         {
             return itemPrefabDict[dataKey];
         }
 
-        // æ¨¡ç³ŠåŒ¹é…
+        // Ä£ºıÆ¥Åä
         foreach (var kvp in itemPrefabDict)
         {
             if (kvp.Key.Contains(dataKey) || dataKey.Contains(kvp.Key))
             {
                 if (showDebugInfo)
                 {
-                    Debug.Log($"æ¨¡ç³ŠåŒ¹é…æˆåŠŸ: '{itemData.itemName}' -> '{kvp.Value.name}'");
+                    Debug.Log($"Ä£ºıÆ¥Åä³É¹¦: '{itemData.itemName}' -> '{kvp.Value.name}'");
                 }
                 return kvp.Value;
             }
@@ -411,20 +411,20 @@ public class ItemRestorationSystem : MonoBehaviour
     }
 
     /// <summary>
-    /// è·å–ç‰©å“é”®å€¼ï¼ˆç”¨äºå­—å…¸æŸ¥æ‰¾ï¼‰
+    /// »ñÈ¡ÎïÆ·¼üÖµ£¨ÓÃÓÚ×Öµä²éÕÒ£©
     /// </summary>
     private string GetItemKey(string itemName)
     {
         if (string.IsNullOrEmpty(itemName)) return "";
 
-        // ç§»é™¤ç‰¹æ®Šå­—ç¬¦å’Œç©ºæ ¼ï¼Œè½¬æ¢ä¸ºå°å†™
+        // ÒÆ³ıÌØÊâ×Ö·ûºÍ¿Õ¸ñ£¬×ª»»ÎªĞ¡Ğ´
         return itemName.Replace(" ", "").Replace("-", "").Replace("_", "").ToLower();
     }
 
     /// <summary>
-    /// é‡æ–°åŠ è½½ç‰©å“æ•°æ®å’Œé¢„åˆ¶ä½“ï¼ˆç”¨äºè¿è¡Œæ—¶æ›´æ–°ï¼‰
+    /// ÖØĞÂ¼ÓÔØÎïÆ·Êı¾İºÍÔ¤ÖÆÌå£¨ÓÃÓÚÔËĞĞÊ±¸üĞÂ£©
     /// </summary>
-    [ContextMenu("é‡æ–°åŠ è½½ç‰©å“æ•°æ®")]
+    [ContextMenu("ÖØĞÂ¼ÓÔØÎïÆ·Êı¾İ")]
     public void ReloadItemData()
     {
         InitializeSystem();

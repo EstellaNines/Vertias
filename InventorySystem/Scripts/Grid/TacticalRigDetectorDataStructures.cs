@@ -1,6 +1,6 @@
 // TacticalRigDetectorDataStructures.cs
-// æˆ˜æœ¯æŒ‚å…·ç½‘æ ¼æ£€æµ‹å™¨ç›¸å…³æ•°æ®ç»“æ„å®šä¹‰
-// åŒ…å«æˆ˜æœ¯æŒ‚å…·é…ç½®åˆ†æã€æ’æ§½åˆ†æã€è´Ÿè½½å¹³è¡¡ç­‰åŠŸèƒ½çš„æ•°æ®ç»“æ„
+// Õ½Êõ¹Ò¾ßÍø¸ñ¼ì²âÆ÷Ïà¹ØÊı¾İ½á¹¹¶¨Òå
+// °üº¬Õ½Êõ¹Ò¾ßÅäÖÃ·ÖÎö¡¢²å²Û·ÖÎö¡¢¸ºÔØÆ½ºâµÈ¹¦ÄÜµÄÊı¾İ½á¹¹
 
 using System.Collections.Generic;
 using UnityEngine;
@@ -8,54 +8,54 @@ using InventorySystem.Grid;
 
 namespace InventorySystem.Grid
 {
-    // ==================== æˆ˜æœ¯æŒ‚å…·åˆ†ææ•°æ®ç»“æ„ ====================
+    // ==================== Õ½Êõ¹Ò¾ß·ÖÎöÊı¾İ½á¹¹ ====================
 
     /// <summary>
-    /// è£…å¤‡é…ç½®ç±»å‹æšä¸¾
-    /// å®šä¹‰ä¸åŒçš„æˆ˜æœ¯è£…å¤‡é…ç½®ç±»å‹
+    /// ×°±¸ÅäÖÃÀàĞÍÃ¶¾Ù
+    /// ¶¨Òå²»Í¬µÄÕ½Êõ×°±¸ÅäÖÃÀàĞÍ
     /// </summary>
     public enum LoadoutType
     {
-        Assault,    // çªå‡»é…ç½® - é‡æ­¦å™¨å’Œå¼¹è¯ä¸ºä¸»
-        Support,    // æ”¯æ´é…ç½® - åŒ»ç–—ç”¨å“å’Œæ”¯æ´è£…å¤‡ä¸ºä¸»
-        Marksman,   // å°„æ‰‹é…ç½® - ç²¾ç¡®å°„å‡»è£…å¤‡ä¸ºä¸»
-        Utility,    // å·¥å…·é…ç½® - å„ç§å·¥å…·å’Œè¾…åŠ©è£…å¤‡ä¸ºä¸»
-        Balanced    // å¹³è¡¡é…ç½® - å„ç±»è£…å¤‡å‡è¡¡åˆ†å¸ƒ
+        Assault,    // Í»»÷ÅäÖÃ - ÖØÎäÆ÷ºÍµ¯Ò©ÎªÖ÷
+        Support,    // Ö§Ô®ÅäÖÃ - Ò½ÁÆÓÃÆ·ºÍÖ§Ô®×°±¸ÎªÖ÷
+        Marksman,   // ÉäÊÖÅäÖÃ - ¾«È·Éä»÷×°±¸ÎªÖ÷
+        Utility,    // ¹¤¾ßÅäÖÃ - ¸÷ÖÖ¹¤¾ßºÍ¸¨Öú×°±¸ÎªÖ÷
+        Balanced    // Æ½ºâÅäÖÃ - ¸÷Àà×°±¸¾ùºâ·Ö²¼
     }
 
     /// <summary>
-    /// æˆ˜æœ¯æŒ‚å…·é…ç½®åˆ†æä¿¡æ¯
-    /// ç”¨äºåˆ†ææˆ˜æœ¯æŒ‚å…·ä¸­è£…å¤‡çš„é…ç½®åˆç†æ€§å’Œæˆ˜æœ¯æ•ˆèƒ½
+    /// Õ½Êõ¹Ò¾ßÅäÖÃ·ÖÎöĞÅÏ¢
+    /// ÓÃÓÚ·ÖÎöÕ½Êõ¹Ò¾ßÖĞ×°±¸µÄÅäÖÃºÏÀíĞÔºÍÕ½ÊõĞ§ÄÜ
     /// </summary>
     [System.Serializable]
     public class TacticalRigConfigInfo
     {
-        [Header("åŸºç¡€ä¿¡æ¯")]
-        public string gridID;                           // ç½‘æ ¼å”¯ä¸€æ ‡è¯†ç¬¦
-        public int totalSlots;                          // ç½‘æ ¼æ€»æ’æ§½æ•°é‡
-        public int usedSlots;                           // å½“å‰å·²ä½¿ç”¨çš„æ’æ§½æ•°é‡
+        [Header("»ù´¡ĞÅÏ¢")]
+        public string gridID;                           // Íø¸ñÎ¨Ò»±êÊ¶·û
+        public int totalSlots;                          // Íø¸ñ×Ü²å²ÛÊıÁ¿
+        public int usedSlots;                           // µ±Ç°ÒÑÊ¹ÓÃµÄ²å²ÛÊıÁ¿
 
-        [Header("é…ç½®è¯„åˆ†")]
+        [Header("ÅäÖÃÆÀ·Ö")]
         [Range(0f, 1f)]
-        public float configurationScore;                // æ•´ä½“é…ç½®è¯„åˆ† (0-1ï¼Œ1ä¸ºæœ€ä½³)
+        public float configurationScore;                // ÕûÌåÅäÖÃÆÀ·Ö (0-1£¬1Îª×î¼Ñ)
         [Range(0f, 1f)]
-        public float tacticalEfficiency;                // æˆ˜æœ¯æ•ˆç‡è¯„åˆ† (0-1ï¼Œè€ƒè™‘å®æˆ˜åº”ç”¨)
+        public float tacticalEfficiency;                // Õ½ÊõĞ§ÂÊÆÀ·Ö (0-1£¬¿¼ÂÇÊµÕ½Ó¦ÓÃ)
 
-        [Header("é…ç½®åˆ†æ")]
-        public LoadoutType loadoutType;                 // å½“å‰è£…å¤‡é…ç½®ç±»å‹
+        [Header("ÅäÖÃ·ÖÎö")]
+        public LoadoutType loadoutType;                 // µ±Ç°×°±¸ÅäÖÃÀàĞÍ
         [Range(0f, 1f)]
-        public float equipmentBalance;                  // è£…å¤‡ç±»å‹å¹³è¡¡æ€§ (0-1ï¼Œ1ä¸ºå®Œå…¨å¹³è¡¡)
+        public float equipmentBalance;                  // ×°±¸ÀàĞÍÆ½ºâĞÔ (0-1£¬1ÎªÍêÈ«Æ½ºâ)
         [Range(0f, 1f)]
-        public float accessibilityRating;               // è£…å¤‡å¯è®¿é—®æ€§è¯„çº§ (0-1ï¼Œ1ä¸ºæœ€æ˜“è®¿é—®)
+        public float accessibilityRating;               // ×°±¸¿É·ÃÎÊĞÔÆÀ¼¶ (0-1£¬1Îª×îÒ×·ÃÎÊ)
         [Range(0f, 1f)]
-        public float combatReadiness;                   // æˆ˜æ–—å‡†å¤‡åº¦è¯„åˆ† (0-1ï¼Œ1ä¸ºå®Œå…¨å‡†å¤‡)
+        public float combatReadiness;                   // Õ½¶·×¼±¸¶ÈÆÀ·Ö (0-1£¬1ÎªÍêÈ«×¼±¸)
 
-        [Header("å»ºè®®å’Œæç¤º")]
-        public List<string> suggestions;                // é…ç½®æ”¹è¿›å»ºè®®åˆ—è¡¨
-        public List<string> optimizationTips;           // ä¼˜åŒ–æç¤ºåˆ—è¡¨
+        [Header("½¨ÒéºÍÌáÊ¾")]
+        public List<string> suggestions;                // ÅäÖÃ¸Ä½ø½¨ÒéÁĞ±í
+        public List<string> optimizationTips;           // ÓÅ»¯ÌáÊ¾ÁĞ±í
 
         /// <summary>
-        /// æ„é€ å‡½æ•°ï¼Œåˆå§‹åŒ–åˆ—è¡¨
+        /// ¹¹Ôìº¯Êı£¬³õÊ¼»¯ÁĞ±í
         /// </summary>
         public TacticalRigConfigInfo()
         {
@@ -64,69 +64,69 @@ namespace InventorySystem.Grid
         }
 
         /// <summary>
-        /// è·å–é…ç½®ç±»å‹çš„ä¸­æ–‡æè¿°
+        /// »ñÈ¡ÅäÖÃÀàĞÍµÄÖĞÎÄÃèÊö
         /// </summary>
-        /// <returns>é…ç½®ç±»å‹çš„ä¸­æ–‡åç§°</returns>
+        /// <returns>ÅäÖÃÀàĞÍµÄÖĞÎÄÃû³Æ</returns>
         public string GetLoadoutTypeDescription()
         {
             switch (loadoutType)
             {
                 case LoadoutType.Assault:
-                    return "çªå‡»é…ç½®";
+                    return "Í»»÷ÅäÖÃ";
                 case LoadoutType.Support:
-                    return "æ”¯æ´é…ç½®";
+                    return "Ö§Ô®ÅäÖÃ";
                 case LoadoutType.Marksman:
-                    return "å°„æ‰‹é…ç½®";
+                    return "ÉäÊÖÅäÖÃ";
                 case LoadoutType.Utility:
-                    return "å·¥å…·é…ç½®";
+                    return "¹¤¾ßÅäÖÃ";
                 case LoadoutType.Balanced:
-                    return "å¹³è¡¡é…ç½®";
+                    return "Æ½ºâÅäÖÃ";
                 default:
-                    return "æœªçŸ¥é…ç½®";
+                    return "Î´ÖªÅäÖÃ";
             }
         }
 
         /// <summary>
-        /// è·å–æ•´ä½“é…ç½®ç­‰çº§æè¿°
+        /// »ñÈ¡ÕûÌåÅäÖÃµÈ¼¶ÃèÊö
         /// </summary>
-        /// <returns>é…ç½®ç­‰çº§çš„æ–‡å­—æè¿°</returns>
+        /// <returns>ÅäÖÃµÈ¼¶µÄÎÄ×ÖÃèÊö</returns>
         public string GetConfigurationGrade()
         {
             if (configurationScore >= 0.9f)
-                return "ä¼˜ç§€";
+                return "ÓÅĞã";
             else if (configurationScore >= 0.7f)
-                return "è‰¯å¥½";
+                return "Á¼ºÃ";
             else if (configurationScore >= 0.5f)
-                return "ä¸€èˆ¬";
+                return "Ò»°ã";
             else if (configurationScore >= 0.3f)
-                return "è¾ƒå·®";
+                return "½Ï²î";
             else
-                return "å¾ˆå·®";
+                return "ºÜ²î";
         }
     }
 
     /// <summary>
-    /// æˆ˜æœ¯æŒ‚å…·æ’æ§½åˆ†æä¿¡æ¯
-    /// ç”¨äºåˆ†æå„ä¸ªæ’æ§½çš„ä½¿ç”¨æ•ˆç‡å’Œä¼˜åŒ–å»ºè®®
+    /// Õ½Êõ¹Ò¾ß²å²Û·ÖÎöĞÅÏ¢
+    /// ÓÃÓÚ·ÖÎö¸÷¸ö²å²ÛµÄÊ¹ÓÃĞ§ÂÊºÍÓÅ»¯½¨Òé
     /// </summary>
     [System.Serializable]
     public class TacticalRigSlotAnalysis
     {
-        [Header("åŸºç¡€ä¿¡æ¯")]
-        public string gridID;                                       // ç½‘æ ¼å”¯ä¸€æ ‡è¯†ç¬¦
-        public int totalSlots;                                      // ç½‘æ ¼æ€»æ’æ§½æ•°é‡
-        public int usedSlots;                                       // å½“å‰å·²ä½¿ç”¨æ’æ§½æ•°é‡
+        [Header("»ù´¡ĞÅÏ¢")]
+        public string gridID;                                       // Íø¸ñÎ¨Ò»±êÊ¶·û
+        public int totalSlots;                                      // Íø¸ñ×Ü²å²ÛÊıÁ¿
+        public int usedSlots;                                       // µ±Ç°ÒÑÊ¹ÓÃ²å²ÛÊıÁ¿
 
-        [Header("æ’æ§½æ•ˆç‡åˆ†æ")]
-        public Dictionary<Vector2Int, float> slotEfficiency;        // æ¯ä¸ªæ’æ§½çš„æ•ˆç‡è¯„åˆ†æ˜ å°„
-        public List<Vector2Int> hotSpots;                           // é«˜æ•ˆç‡æ’æ§½ä½ç½®åˆ—è¡¨ï¼ˆçƒ­ç‚¹åŒºåŸŸï¼‰
-        public List<Vector2Int> coldSpots;                          // ä½æ•ˆç‡æ’æ§½ä½ç½®åˆ—è¡¨ï¼ˆå†·ç‚¹åŒºåŸŸï¼‰
+        [Header("²å²ÛĞ§ÂÊ·ÖÎö")]
+        public Dictionary<Vector2Int, float> slotEfficiency;        // Ã¿¸ö²å²ÛµÄĞ§ÂÊÆÀ·ÖÓ³Éä
+        public List<Vector2Int> hotSpots;                           // ¸ßĞ§ÂÊ²å²ÛÎ»ÖÃÁĞ±í£¨ÈÈµãÇøÓò£©
+        public List<Vector2Int> coldSpots;                          // µÍĞ§ÂÊ²å²ÛÎ»ÖÃÁĞ±í£¨ÀäµãÇøÓò£©
 
-        [Header("ä½¿ç”¨å»ºè®®")]
-        public Dictionary<Vector2Int, string> recommendedSlotUsage; // æ¯ä¸ªæ’æ§½çš„æ¨èç”¨é€”æ˜ å°„
+        [Header("Ê¹ÓÃ½¨Òé")]
+        public Dictionary<Vector2Int, string> recommendedSlotUsage; // Ã¿¸ö²å²ÛµÄÍÆ¼öÓÃÍ¾Ó³Éä
 
         /// <summary>
-        /// æ„é€ å‡½æ•°ï¼Œåˆå§‹åŒ–é›†åˆ
+        /// ¹¹Ôìº¯Êı£¬³õÊ¼»¯¼¯ºÏ
         /// </summary>
         public TacticalRigSlotAnalysis()
         {
@@ -137,9 +137,9 @@ namespace InventorySystem.Grid
         }
 
         /// <summary>
-        /// è·å–å¹³å‡æ’æ§½æ•ˆç‡
+        /// »ñÈ¡Æ½¾ù²å²ÛĞ§ÂÊ
         /// </summary>
-        /// <returns>æ‰€æœ‰æ’æ§½çš„å¹³å‡æ•ˆç‡å€¼</returns>
+        /// <returns>ËùÓĞ²å²ÛµÄÆ½¾ùĞ§ÂÊÖµ</returns>
         public float GetAverageSlotEfficiency()
         {
             if (slotEfficiency.Count == 0) return 0f;
@@ -153,18 +153,18 @@ namespace InventorySystem.Grid
         }
 
         /// <summary>
-        /// è·å–çƒ­ç‚¹åŒºåŸŸæ•°é‡
+        /// »ñÈ¡ÈÈµãÇøÓòÊıÁ¿
         /// </summary>
-        /// <returns>çƒ­ç‚¹æ’æ§½çš„æ•°é‡</returns>
+        /// <returns>ÈÈµã²å²ÛµÄÊıÁ¿</returns>
         public int GetHotSpotCount()
         {
             return hotSpots?.Count ?? 0;
         }
 
         /// <summary>
-        /// è·å–å†·ç‚¹åŒºåŸŸæ•°é‡
+        /// »ñÈ¡ÀäµãÇøÓòÊıÁ¿
         /// </summary>
-        /// <returns>å†·ç‚¹æ’æ§½çš„æ•°é‡</returns>
+        /// <returns>Àäµã²å²ÛµÄÊıÁ¿</returns>
         public int GetColdSpotCount()
         {
             return coldSpots?.Count ?? 0;
@@ -172,27 +172,27 @@ namespace InventorySystem.Grid
     }
 
     /// <summary>
-    /// æˆ˜æœ¯æŒ‚å…·è´Ÿè½½å¹³è¡¡ä¿¡æ¯
-    /// ç”¨äºåˆ†ææŒ‚å…·çš„é‡é‡åˆ†å¸ƒå’Œå¹³è¡¡æ€§
+    /// Õ½Êõ¹Ò¾ß¸ºÔØÆ½ºâĞÅÏ¢
+    /// ÓÃÓÚ·ÖÎö¹Ò¾ßµÄÖØÁ¿·Ö²¼ºÍÆ½ºâĞÔ
     /// </summary>
     [System.Serializable]
     public class TacticalRigLoadBalance
     {
-        [Header("é‡é‡ä¿¡æ¯")]
-        public string gridID;                               // ç½‘æ ¼å”¯ä¸€æ ‡è¯†ç¬¦
-        public float totalWeight;                           // æŒ‚å…·æ€»é‡é‡ï¼ˆä¼°ç®—å€¼ï¼‰
-        public Dictionary<string, float> weightDistribution; // æŒ‰è£…å¤‡ç±»åˆ«çš„é‡é‡åˆ†å¸ƒ
+        [Header("ÖØÁ¿ĞÅÏ¢")]
+        public string gridID;                               // Íø¸ñÎ¨Ò»±êÊ¶·û
+        public float totalWeight;                           // ¹Ò¾ß×ÜÖØÁ¿£¨¹ÀËãÖµ£©
+        public Dictionary<string, float> weightDistribution; // °´×°±¸Àà±ğµÄÖØÁ¿·Ö²¼
 
-        [Header("å¹³è¡¡åˆ†æ")]
+        [Header("Æ½ºâ·ÖÎö")]
         [Range(0f, 1f)]
-        public float balanceScore;                          // è´Ÿè½½å¹³è¡¡è¯„åˆ† (0-1ï¼Œ1ä¸ºå®Œç¾å¹³è¡¡)
-        public Vector2 centerOfMass;                        // é‡å¿ƒä½ç½®åæ ‡
+        public float balanceScore;                          // ¸ºÔØÆ½ºâÆÀ·Ö (0-1£¬1ÎªÍêÃÀÆ½ºâ)
+        public Vector2 centerOfMass;                        // ÖØĞÄÎ»ÖÃ×ø±ê
 
-        [Header("å¹³è¡¡å»ºè®®")]
-        public List<string> balanceRecommendations;         // è´Ÿè½½å¹³è¡¡æ”¹è¿›å»ºè®®åˆ—è¡¨
+        [Header("Æ½ºâ½¨Òé")]
+        public List<string> balanceRecommendations;         // ¸ºÔØÆ½ºâ¸Ä½ø½¨ÒéÁĞ±í
 
         /// <summary>
-        /// æ„é€ å‡½æ•°ï¼Œåˆå§‹åŒ–é›†åˆ
+        /// ¹¹Ôìº¯Êı£¬³õÊ¼»¯¼¯ºÏ
         /// </summary>
         public TacticalRigLoadBalance()
         {
@@ -201,12 +201,12 @@ namespace InventorySystem.Grid
         }
 
         /// <summary>
-        /// è·å–æœ€é‡çš„è£…å¤‡ç±»åˆ«
+        /// »ñÈ¡×îÖØµÄ×°±¸Àà±ğ
         /// </summary>
-        /// <returns>é‡é‡æœ€å¤§çš„è£…å¤‡ç±»åˆ«åç§°</returns>
+        /// <returns>ÖØÁ¿×î´óµÄ×°±¸Àà±ğÃû³Æ</returns>
         public string GetHeaviestCategory()
         {
-            if (weightDistribution.Count == 0) return "æ— ";
+            if (weightDistribution.Count == 0) return "ÎŞ";
 
             string heaviestCategory = "";
             float maxWeight = 0f;
@@ -224,29 +224,29 @@ namespace InventorySystem.Grid
         }
 
         /// <summary>
-        /// è·å–å¹³è¡¡çŠ¶æ€æè¿°
+        /// »ñÈ¡Æ½ºâ×´Ì¬ÃèÊö
         /// </summary>
-        /// <returns>å¹³è¡¡çŠ¶æ€çš„æ–‡å­—æè¿°</returns>
+        /// <returns>Æ½ºâ×´Ì¬µÄÎÄ×ÖÃèÊö</returns>
         public string GetBalanceStatusDescription()
         {
             if (balanceScore >= 0.9f)
-                return "å®Œç¾å¹³è¡¡";
+                return "ÍêÃÀÆ½ºâ";
             else if (balanceScore >= 0.7f)
-                return "è‰¯å¥½å¹³è¡¡";
+                return "Á¼ºÃÆ½ºâ";
             else if (balanceScore >= 0.5f)
-                return "åŸºæœ¬å¹³è¡¡";
+                return "»ù±¾Æ½ºâ";
             else if (balanceScore >= 0.3f)
-                return "è½»å¾®å¤±è¡¡";
+                return "ÇáÎ¢Ê§ºâ";
             else
-                return "ä¸¥é‡å¤±è¡¡";
+                return "ÑÏÖØÊ§ºâ";
         }
 
         /// <summary>
-        /// è®¡ç®—é‡å¿ƒåç§»è·ç¦»
+        /// ¼ÆËãÖØĞÄÆ«ÒÆ¾àÀë
         /// </summary>
-        /// <param name="gridWidth">ç½‘æ ¼å®½åº¦</param>
-        /// <param name="gridHeight">ç½‘æ ¼é«˜åº¦</param>
-        /// <returns>é‡å¿ƒè·ç¦»ç½‘æ ¼ä¸­å¿ƒçš„åç§»è·ç¦»</returns>
+        /// <param name="gridWidth">Íø¸ñ¿í¶È</param>
+        /// <param name="gridHeight">Íø¸ñ¸ß¶È</param>
+        /// <returns>ÖØĞÄ¾àÀëÍø¸ñÖĞĞÄµÄÆ«ÒÆ¾àÀë</returns>
         public float CalculateCenterOffset(int gridWidth, int gridHeight)
         {
             Vector2 gridCenter = new Vector2(gridWidth / 2f, gridHeight / 2f);
@@ -255,22 +255,22 @@ namespace InventorySystem.Grid
     }
 
     /// <summary>
-    /// æˆ˜æœ¯æŒ‚å…·æ£€æµ‹å™¨äº‹ä»¶å‚æ•°
-    /// ç”¨äºæˆ˜æœ¯æŒ‚å…·ç›¸å…³äº‹ä»¶çš„æ•°æ®ä¼ é€’
+    /// Õ½Êõ¹Ò¾ß¼ì²âÆ÷ÊÂ¼ş²ÎÊı
+    /// ÓÃÓÚÕ½Êõ¹Ò¾ßÏà¹ØÊÂ¼şµÄÊı¾İ´«µİ
     /// </summary>
     [System.Serializable]
     public class TacticalRigDetectorEventArgs
     {
-        public string gridID;                           // è§¦å‘äº‹ä»¶çš„ç½‘æ ¼ID
-        public TacticalRigConfigInfo configInfo;        // é…ç½®åˆ†æä¿¡æ¯
-        public TacticalRigSlotAnalysis slotAnalysis;    // æ’æ§½åˆ†æä¿¡æ¯
-        public TacticalRigLoadBalance loadBalance;      // è´Ÿè½½å¹³è¡¡ä¿¡æ¯
-        public System.DateTime timestamp;               // äº‹ä»¶æ—¶é—´æˆ³
+        public string gridID;                           // ´¥·¢ÊÂ¼şµÄÍø¸ñID
+        public TacticalRigConfigInfo configInfo;        // ÅäÖÃ·ÖÎöĞÅÏ¢
+        public TacticalRigSlotAnalysis slotAnalysis;    // ²å²Û·ÖÎöĞÅÏ¢
+        public TacticalRigLoadBalance loadBalance;      // ¸ºÔØÆ½ºâĞÅÏ¢
+        public System.DateTime timestamp;               // ÊÂ¼şÊ±¼ä´Á
 
         /// <summary>
-        /// æ„é€ å‡½æ•°
+        /// ¹¹Ôìº¯Êı
         /// </summary>
-        /// <param name="gridID">ç½‘æ ¼ID</param>
+        /// <param name="gridID">Íø¸ñID</param>
         public TacticalRigDetectorEventArgs(string gridID)
         {
             this.gridID = gridID;

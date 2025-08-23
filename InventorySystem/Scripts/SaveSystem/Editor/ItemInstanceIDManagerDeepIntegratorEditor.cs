@@ -6,8 +6,8 @@ using System;
 using InventorySystem.SaveSystem;
 
 /// <summary>
-/// ItemInstanceIDManagerDeepIntegratorçš„è‡ªå®šä¹‰ç¼–è¾‘å™¨
-/// æä¾›æ·±åº¦é›†æˆç®¡ç†çš„å¯è§†åŒ–ç•Œé¢
+/// ItemInstanceIDManagerDeepIntegratorµÄ×Ô¶¨Òå±à¼­Æ÷
+/// Ìá¹©Éî¶È¼¯³É¹ÜÀíµÄ¿ÉÊÓ»¯½çÃæ
 /// </summary>
 [CustomEditor(typeof(ItemInstanceIDManagerDeepIntegrator))]
 public class ItemInstanceIDManagerDeepIntegratorEditor : Editor
@@ -39,55 +39,55 @@ public class ItemInstanceIDManagerDeepIntegratorEditor : Editor
 
         EditorGUILayout.Space(10);
 
-        // æ ‡é¢˜
-        EditorGUILayout.LabelField("ItemInstanceIDManager æ·±åº¦é›†æˆå™¨", headerStyle);
+        // ±êÌâ
+        EditorGUILayout.LabelField("ItemInstanceIDManager Éî¶È¼¯³ÉÆ÷", headerStyle);
         EditorGUILayout.Space(5);
 
         scrollPosition = EditorGUILayout.BeginScrollView(scrollPosition);
 
-        // é›†æˆç»Ÿè®¡ä¿¡æ¯
+        // ¼¯³ÉÍ³¼ÆĞÅÏ¢
         DrawIntegrationStats();
 
         EditorGUILayout.Space(10);
 
-        // é›†æˆé…ç½®
+        // ¼¯³ÉÅäÖÃ
         DrawIntegrationConfig();
 
         EditorGUILayout.Space(10);
 
-        // é›†æˆç›®æ ‡é…ç½®
+        // ¼¯³ÉÄ¿±êÅäÖÃ
         DrawTargetConfig();
 
         EditorGUILayout.Space(10);
 
-        // å…¼å®¹æ€§é…ç½®
+        // ¼æÈİĞÔÅäÖÃ
         DrawCompatibilityConfig();
 
         EditorGUILayout.Space(10);
 
-        // IDè¿ç§»æ˜ å°„
+        // IDÇ¨ÒÆÓ³Éä
         DrawIDMigrationMap();
 
         EditorGUILayout.Space(10);
 
-        // å·²é›†æˆå¯¹è±¡åˆ—è¡¨
+        // ÒÑ¼¯³É¶ÔÏóÁĞ±í
         DrawIntegratedObjects();
 
         EditorGUILayout.Space(10);
 
-        // é«˜çº§é€‰é¡¹
+        // ¸ß¼¶Ñ¡Ïî
         DrawAdvancedOptions();
 
         EditorGUILayout.Space(10);
 
-        // æ“ä½œæŒ‰é’®
+        // ²Ù×÷°´Å¥
         DrawActionButtons();
 
         EditorGUILayout.EndScrollView();
 
         serializedObject.ApplyModifiedProperties();
 
-        // è‡ªåŠ¨åˆ·æ–°
+        // ×Ô¶¯Ë¢ĞÂ
         if (Application.isPlaying)
         {
             Repaint();
@@ -95,7 +95,7 @@ public class ItemInstanceIDManagerDeepIntegratorEditor : Editor
     }
 
     /// <summary>
-    /// åˆå§‹åŒ–æ ·å¼
+    /// ³õÊ¼»¯ÑùÊ½
     /// </summary>
     private void InitializeStyles()
     {
@@ -127,11 +127,11 @@ public class ItemInstanceIDManagerDeepIntegratorEditor : Editor
     }
 
     /// <summary>
-    /// ç»˜åˆ¶é›†æˆç»Ÿè®¡ä¿¡æ¯
+    /// »æÖÆ¼¯³ÉÍ³¼ÆĞÅÏ¢
     /// </summary>
     private void DrawIntegrationStats()
     {
-        showIntegrationStats = EditorGUILayout.Foldout(showIntegrationStats, "é›†æˆç»Ÿè®¡ä¿¡æ¯", true);
+        showIntegrationStats = EditorGUILayout.Foldout(showIntegrationStats, "¼¯³ÉÍ³¼ÆĞÅÏ¢", true);
 
         if (showIntegrationStats)
         {
@@ -139,27 +139,27 @@ public class ItemInstanceIDManagerDeepIntegratorEditor : Editor
 
             var stats = integrator.GetIntegrationStats();
 
-            EditorGUILayout.LabelField("åŸºæœ¬ç»Ÿè®¡", EditorStyles.boldLabel);
-            EditorGUILayout.LabelField($"é›†æˆå¯¹è±¡æ€»æ•°: {stats.totalIntegratedObjects}");
-            EditorGUILayout.LabelField($"è¿ç§»IDæ•°é‡: {stats.migratedIDs}");
-            EditorGUILayout.LabelField($"è§£å†³å†²çªæ•°é‡: {stats.resolvedConflicts}");
-            EditorGUILayout.LabelField($"éªŒè¯é”™è¯¯æ•°é‡: {stats.validationErrors}");
-            EditorGUILayout.LabelField($"åˆ›å»ºå¤‡ä»½æ•°é‡: {stats.backupCreated}");
+            EditorGUILayout.LabelField("»ù±¾Í³¼Æ", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField($"¼¯³É¶ÔÏó×ÜÊı: {stats.totalIntegratedObjects}");
+            EditorGUILayout.LabelField($"Ç¨ÒÆIDÊıÁ¿: {stats.migratedIDs}");
+            EditorGUILayout.LabelField($"½â¾ö³åÍ»ÊıÁ¿: {stats.resolvedConflicts}");
+            EditorGUILayout.LabelField($"ÑéÖ¤´íÎóÊıÁ¿: {stats.validationErrors}");
+            EditorGUILayout.LabelField($"´´½¨±¸·İÊıÁ¿: {stats.backupCreated}");
 
             EditorGUILayout.Space(5);
 
-            EditorGUILayout.LabelField("æ—¶é—´ä¿¡æ¯", EditorStyles.boldLabel);
-            EditorGUILayout.LabelField($"æœ€åé›†æˆæ—¶é—´: {stats.lastIntegrationTime}");
-            EditorGUILayout.LabelField($"é›†æˆç‰ˆæœ¬: {stats.integrationVersion}");
+            EditorGUILayout.LabelField("Ê±¼äĞÅÏ¢", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField($"×îºó¼¯³ÉÊ±¼ä: {stats.lastIntegrationTime}");
+            EditorGUILayout.LabelField($"¼¯³É°æ±¾: {stats.integrationVersion}");
 
-            // çŠ¶æ€æŒ‡ç¤ºå™¨
+            // ×´Ì¬Ö¸Ê¾Æ÷
             EditorGUILayout.Space(5);
-            EditorGUILayout.LabelField("ç³»ç»ŸçŠ¶æ€", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("ÏµÍ³×´Ì¬", EditorStyles.boldLabel);
 
             bool systemValid = integrator.ValidateSystemIntegration();
             Color originalColor = GUI.color;
             GUI.color = systemValid ? Color.green : Color.red;
-            EditorGUILayout.LabelField($"ç³»ç»ŸçŠ¶æ€: {(systemValid ? "æ­£å¸¸" : "å¼‚å¸¸")}");
+            EditorGUILayout.LabelField($"ÏµÍ³×´Ì¬: {(systemValid ? "Õı³£" : "Òì³£")}");
             GUI.color = originalColor;
 
             EditorGUILayout.EndVertical();
@@ -167,73 +167,73 @@ public class ItemInstanceIDManagerDeepIntegratorEditor : Editor
     }
 
     /// <summary>
-    /// ç»˜åˆ¶é›†æˆé…ç½®
+    /// »æÖÆ¼¯³ÉÅäÖÃ
     /// </summary>
     private void DrawIntegrationConfig()
     {
-        showIntegrationConfig = EditorGUILayout.Foldout(showIntegrationConfig, "é›†æˆé…ç½®", true);
+        showIntegrationConfig = EditorGUILayout.Foldout(showIntegrationConfig, "¼¯³ÉÅäÖÃ", true);
 
         if (showIntegrationConfig)
         {
             EditorGUILayout.BeginVertical(boxStyle);
 
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("enableAutoIntegration"), new GUIContent("å¯ç”¨è‡ªåŠ¨é›†æˆ"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("enableScenePersistence"), new GUIContent("å¯ç”¨åœºæ™¯æŒä¹…åŒ–"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("enableBackwardCompatibility"), new GUIContent("å¯ç”¨å‘åå…¼å®¹æ€§"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("enableSaveLogicUpdate"), new GUIContent("å¯ç”¨ä¿å­˜é€»è¾‘æ›´æ–°"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("integrationDelay"), new GUIContent("é›†æˆå»¶è¿Ÿæ—¶é—´"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("enableDebugLogging"), new GUIContent("å¯ç”¨è°ƒè¯•æ—¥å¿—"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("enableAutoIntegration"), new GUIContent("ÆôÓÃ×Ô¶¯¼¯³É"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("enableScenePersistence"), new GUIContent("ÆôÓÃ³¡¾°³Ö¾Ã»¯"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("enableBackwardCompatibility"), new GUIContent("ÆôÓÃÏòºó¼æÈİĞÔ"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("enableSaveLogicUpdate"), new GUIContent("ÆôÓÃ±£´æÂß¼­¸üĞÂ"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("integrationDelay"), new GUIContent("¼¯³ÉÑÓ³ÙÊ±¼ä"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("enableDebugLogging"), new GUIContent("ÆôÓÃµ÷ÊÔÈÕÖ¾"));
 
             EditorGUILayout.EndVertical();
         }
     }
 
     /// <summary>
-    /// ç»˜åˆ¶é›†æˆç›®æ ‡é…ç½®
+    /// »æÖÆ¼¯³ÉÄ¿±êÅäÖÃ
     /// </summary>
     private void DrawTargetConfig()
     {
-        showTargetConfig = EditorGUILayout.Foldout(showTargetConfig, "é›†æˆç›®æ ‡é…ç½®", true);
+        showTargetConfig = EditorGUILayout.Foldout(showTargetConfig, "¼¯³ÉÄ¿±êÅäÖÃ", true);
 
         if (showTargetConfig)
         {
             EditorGUILayout.BeginVertical(boxStyle);
 
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("integrateInventoryItems"), new GUIContent("é›†æˆåº“å­˜ç‰©å“"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("integrateItemGrids"), new GUIContent("é›†æˆç‰©å“ç½‘æ ¼"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("integrateItemSpawners"), new GUIContent("é›†æˆç‰©å“ç”Ÿæˆå™¨"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("integrateEquipSlots"), new GUIContent("é›†æˆè£…å¤‡æ§½"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("integrateItemDataHolders"), new GUIContent("é›†æˆç‰©å“æ•°æ®æŒæœ‰è€…"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("integrateInventoryItems"), new GUIContent("¼¯³É¿â´æÎïÆ·"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("integrateItemGrids"), new GUIContent("¼¯³ÉÎïÆ·Íø¸ñ"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("integrateItemSpawners"), new GUIContent("¼¯³ÉÎïÆ·Éú³ÉÆ÷"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("integrateEquipSlots"), new GUIContent("¼¯³É×°±¸²Û"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("integrateItemDataHolders"), new GUIContent("¼¯³ÉÎïÆ·Êı¾İ³ÖÓĞÕß"));
 
             EditorGUILayout.EndVertical();
         }
     }
 
     /// <summary>
-    /// ç»˜åˆ¶å…¼å®¹æ€§é…ç½®
+    /// »æÖÆ¼æÈİĞÔÅäÖÃ
     /// </summary>
     private void DrawCompatibilityConfig()
     {
-        showCompatibilityConfig = EditorGUILayout.Foldout(showCompatibilityConfig, "å…¼å®¹æ€§é…ç½®", true);
+        showCompatibilityConfig = EditorGUILayout.Foldout(showCompatibilityConfig, "¼æÈİĞÔÅäÖÃ", true);
 
         if (showCompatibilityConfig)
         {
             EditorGUILayout.BeginVertical(boxStyle);
 
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("preserveExistingIDs"), new GUIContent("ä¿ç•™ç°æœ‰ID"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("migrateOldSaveData"), new GUIContent("è¿ç§»æ—§ä¿å­˜æ•°æ®"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("validateDataIntegrity"), new GUIContent("éªŒè¯æ•°æ®å®Œæ•´æ€§"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("preserveExistingIDs"), new GUIContent("±£ÁôÏÖÓĞID"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("migrateOldSaveData"), new GUIContent("Ç¨ÒÆ¾É±£´æÊı¾İ"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("validateDataIntegrity"), new GUIContent("ÑéÖ¤Êı¾İÍêÕûĞÔ"));
 
             EditorGUILayout.EndVertical();
         }
     }
 
     /// <summary>
-    /// ç»˜åˆ¶IDè¿ç§»æ˜ å°„
+    /// »æÖÆIDÇ¨ÒÆÓ³Éä
     /// </summary>
     private void DrawIDMigrationMap()
     {
-        showIDMigrationMap = EditorGUILayout.Foldout(showIDMigrationMap, "IDè¿ç§»æ˜ å°„", true);
+        showIDMigrationMap = EditorGUILayout.Foldout(showIDMigrationMap, "IDÇ¨ÒÆÓ³Éä", true);
 
         if (showIDMigrationMap)
         {
@@ -243,27 +243,27 @@ public class ItemInstanceIDManagerDeepIntegratorEditor : Editor
 
             if (migrationMap.Count == 0)
             {
-                EditorGUILayout.LabelField("æš‚æ— IDè¿ç§»è®°å½•", EditorStyles.centeredGreyMiniLabel);
+                EditorGUILayout.LabelField("ÔİÎŞIDÇ¨ÒÆ¼ÇÂ¼", EditorStyles.centeredGreyMiniLabel);
             }
             else
             {
-                EditorGUILayout.LabelField($"è¿ç§»è®°å½•æ•°é‡: {migrationMap.Count}", EditorStyles.boldLabel);
+                EditorGUILayout.LabelField($"Ç¨ÒÆ¼ÇÂ¼ÊıÁ¿: {migrationMap.Count}", EditorStyles.boldLabel);
                 EditorGUILayout.Space(5);
 
-                foreach (var migration in migrationMap.Take(10)) // åªæ˜¾ç¤ºå‰10æ¡
+                foreach (var migration in migrationMap.Take(10)) // Ö»ÏÔÊ¾Ç°10Ìõ
                 {
                     EditorGUILayout.BeginHorizontal();
-                    EditorGUILayout.LabelField("æ—§ID:", GUILayout.Width(40));
+                    EditorGUILayout.LabelField("¾ÉID:", GUILayout.Width(40));
                     EditorGUILayout.SelectableLabel(migration.Key, GUILayout.Height(16));
-                    EditorGUILayout.LabelField("â†’", GUILayout.Width(20));
-                    EditorGUILayout.LabelField("æ–°ID:", GUILayout.Width(40));
+                    EditorGUILayout.LabelField("¡ú", GUILayout.Width(20));
+                    EditorGUILayout.LabelField("ĞÂID:", GUILayout.Width(40));
                     EditorGUILayout.SelectableLabel(migration.Value, GUILayout.Height(16));
                     EditorGUILayout.EndHorizontal();
                 }
 
                 if (migrationMap.Count > 10)
                 {
-                    EditorGUILayout.LabelField($"... è¿˜æœ‰ {migrationMap.Count - 10} æ¡è®°å½•", EditorStyles.centeredGreyMiniLabel);
+                    EditorGUILayout.LabelField($"... »¹ÓĞ {migrationMap.Count - 10} Ìõ¼ÇÂ¼", EditorStyles.centeredGreyMiniLabel);
                 }
             }
 
@@ -272,11 +272,11 @@ public class ItemInstanceIDManagerDeepIntegratorEditor : Editor
     }
 
     /// <summary>
-    /// ç»˜åˆ¶å·²é›†æˆå¯¹è±¡åˆ—è¡¨
+    /// »æÖÆÒÑ¼¯³É¶ÔÏóÁĞ±í
     /// </summary>
     private void DrawIntegratedObjects()
     {
-        showIntegratedObjects = EditorGUILayout.Foldout(showIntegratedObjects, "å·²é›†æˆå¯¹è±¡", true);
+        showIntegratedObjects = EditorGUILayout.Foldout(showIntegratedObjects, "ÒÑ¼¯³É¶ÔÏó", true);
 
         if (showIntegratedObjects)
         {
@@ -288,31 +288,31 @@ public class ItemInstanceIDManagerDeepIntegratorEditor : Editor
 
                 if (registeredIDs.Count == 0)
                 {
-                    EditorGUILayout.LabelField("æš‚æ— å·²é›†æˆå¯¹è±¡", EditorStyles.centeredGreyMiniLabel);
+                    EditorGUILayout.LabelField("ÔİÎŞÒÑ¼¯³É¶ÔÏó", EditorStyles.centeredGreyMiniLabel);
                 }
                 else
                 {
-                    EditorGUILayout.LabelField($"å·²æ³¨å†Œå¯¹è±¡æ•°é‡: {registeredIDs.Count}", EditorStyles.boldLabel);
+                    EditorGUILayout.LabelField($"ÒÑ×¢²á¶ÔÏóÊıÁ¿: {registeredIDs.Count}", EditorStyles.boldLabel);
                     EditorGUILayout.Space(5);
 
-                    // æŒ‰ç±»å‹åˆ†ç»„æ˜¾ç¤º
+                    // °´ÀàĞÍ·Ö×éÏÔÊ¾
                     var groupedIDs = registeredIDs.GroupBy(id => GetIDType(id)).ToList();
 
                     foreach (var group in groupedIDs)
                     {
-                        EditorGUILayout.LabelField($"{group.Key}: {group.Count()}ä¸ª", EditorStyles.boldLabel);
+                        EditorGUILayout.LabelField($"{group.Key}: {group.Count()}¸ö", EditorStyles.boldLabel);
 
-                        foreach (var id in group.Take(5)) // æ¯ä¸ªç±»å‹åªæ˜¾ç¤ºå‰5ä¸ª
+                        foreach (var id in group.Take(5)) // Ã¿¸öÀàĞÍÖ»ÏÔÊ¾Ç°5¸ö
                         {
                             EditorGUILayout.BeginHorizontal();
                             EditorGUILayout.LabelField("  ? ", GUILayout.Width(20));
                             EditorGUILayout.SelectableLabel(id, GUILayout.Height(16));
 
-                            // æ£€æŸ¥çŠ¶æ€
+                            // ¼ì²é×´Ì¬
                             bool isIntegrated = integrator.IsObjectIntegrated(id);
                             Color originalColor = GUI.color;
                             GUI.color = isIntegrated ? Color.green : Color.yellow;
-                            EditorGUILayout.LabelField(isIntegrated ? "å·²é›†æˆ" : "æœªé›†æˆ", GUILayout.Width(50));
+                            EditorGUILayout.LabelField(isIntegrated ? "ÒÑ¼¯³É" : "Î´¼¯³É", GUILayout.Width(50));
                             GUI.color = originalColor;
 
                             EditorGUILayout.EndHorizontal();
@@ -320,7 +320,7 @@ public class ItemInstanceIDManagerDeepIntegratorEditor : Editor
 
                         if (group.Count() > 5)
                         {
-                            EditorGUILayout.LabelField($"    ... è¿˜æœ‰ {group.Count() - 5} ä¸ªå¯¹è±¡", EditorStyles.centeredGreyMiniLabel);
+                            EditorGUILayout.LabelField($"    ... »¹ÓĞ {group.Count() - 5} ¸ö¶ÔÏó", EditorStyles.centeredGreyMiniLabel);
                         }
 
                         EditorGUILayout.Space(3);
@@ -329,7 +329,7 @@ public class ItemInstanceIDManagerDeepIntegratorEditor : Editor
             }
             else
             {
-                EditorGUILayout.LabelField("è¯·åœ¨è¿è¡Œæ—¶æŸ¥çœ‹å·²é›†æˆå¯¹è±¡", EditorStyles.centeredGreyMiniLabel);
+                EditorGUILayout.LabelField("ÇëÔÚÔËĞĞÊ±²é¿´ÒÑ¼¯³É¶ÔÏó", EditorStyles.centeredGreyMiniLabel);
             }
 
             EditorGUILayout.EndVertical();
@@ -337,36 +337,36 @@ public class ItemInstanceIDManagerDeepIntegratorEditor : Editor
     }
 
     /// <summary>
-    /// ç»˜åˆ¶é«˜çº§é€‰é¡¹
+    /// »æÖÆ¸ß¼¶Ñ¡Ïî
     /// </summary>
     private void DrawAdvancedOptions()
     {
-        showAdvancedOptions = EditorGUILayout.Foldout(showAdvancedOptions, "é«˜çº§é€‰é¡¹", true);
+        showAdvancedOptions = EditorGUILayout.Foldout(showAdvancedOptions, "¸ß¼¶Ñ¡Ïî", true);
 
         if (showAdvancedOptions)
         {
             EditorGUILayout.BeginVertical(boxStyle);
 
-            EditorGUILayout.LabelField("è°ƒè¯•å·¥å…·", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("µ÷ÊÔ¹¤¾ß", EditorStyles.boldLabel);
 
             EditorGUILayout.BeginHorizontal();
 
-            if (GUILayout.Button("éªŒè¯ç³»ç»Ÿé›†æˆ", buttonStyle))
+            if (GUILayout.Button("ÑéÖ¤ÏµÍ³¼¯³É", buttonStyle))
             {
                 bool isValid = integrator.ValidateSystemIntegration();
-                EditorUtility.DisplayDialog("ç³»ç»ŸéªŒè¯",
-                    isValid ? "ç³»ç»Ÿé›†æˆéªŒè¯é€šè¿‡ï¼" : "ç³»ç»Ÿé›†æˆéªŒè¯å¤±è´¥ï¼Œè¯·æ£€æŸ¥æ§åˆ¶å°æ—¥å¿—ã€‚",
-                    "ç¡®å®š");
+                EditorUtility.DisplayDialog("ÏµÍ³ÑéÖ¤",
+                    isValid ? "ÏµÍ³¼¯³ÉÑéÖ¤Í¨¹ı£¡" : "ÏµÍ³¼¯³ÉÑéÖ¤Ê§°Ü£¬Çë¼ì²é¿ØÖÆÌ¨ÈÕÖ¾¡£",
+                    "È·¶¨");
             }
 
-            if (GUILayout.Button("æ¸…é™¤é›†æˆçŠ¶æ€", buttonStyle))
+            if (GUILayout.Button("Çå³ı¼¯³É×´Ì¬", buttonStyle))
             {
-                if (EditorUtility.DisplayDialog("ç¡®è®¤æ¸…é™¤",
-                    "ç¡®å®šè¦æ¸…é™¤æ‰€æœ‰é›†æˆçŠ¶æ€å—ï¼Ÿæ­¤æ“ä½œä¸å¯æ’¤é”€ã€‚",
-                    "ç¡®å®š", "å–æ¶ˆ"))
+                if (EditorUtility.DisplayDialog("È·ÈÏÇå³ı",
+                    "È·¶¨ÒªÇå³ıËùÓĞ¼¯³É×´Ì¬Âğ£¿´Ë²Ù×÷²»¿É³·Ïú¡£",
+                    "È·¶¨", "È¡Ïû"))
                 {
                     integrator.ClearIntegrationState();
-                    EditorUtility.DisplayDialog("æ“ä½œå®Œæˆ", "é›†æˆçŠ¶æ€å·²æ¸…é™¤ã€‚", "ç¡®å®š");
+                    EditorUtility.DisplayDialog("²Ù×÷Íê³É", "¼¯³É×´Ì¬ÒÑÇå³ı¡£", "È·¶¨");
                 }
             }
 
@@ -374,16 +374,16 @@ public class ItemInstanceIDManagerDeepIntegratorEditor : Editor
 
             EditorGUILayout.Space(5);
 
-            EditorGUILayout.LabelField("æ•°æ®ç®¡ç†", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("Êı¾İ¹ÜÀí", EditorStyles.boldLabel);
 
             EditorGUILayout.BeginHorizontal();
 
-            if (GUILayout.Button("å¯¼å‡ºé›†æˆæ•°æ®", buttonStyle))
+            if (GUILayout.Button("µ¼³ö¼¯³ÉÊı¾İ", buttonStyle))
             {
                 ExportIntegrationData();
             }
 
-            if (GUILayout.Button("å¯¼å…¥é›†æˆæ•°æ®", buttonStyle))
+            if (GUILayout.Button("µ¼Èë¼¯³ÉÊı¾İ", buttonStyle))
             {
                 ImportIntegrationData();
             }
@@ -395,27 +395,27 @@ public class ItemInstanceIDManagerDeepIntegratorEditor : Editor
     }
 
     /// <summary>
-    /// ç»˜åˆ¶æ“ä½œæŒ‰é’®
+    /// »æÖÆ²Ù×÷°´Å¥
     /// </summary>
     private void DrawActionButtons()
     {
         EditorGUILayout.BeginVertical(boxStyle);
 
-        EditorGUILayout.LabelField("é›†æˆæ“ä½œ", EditorStyles.boldLabel);
+        EditorGUILayout.LabelField("¼¯³É²Ù×÷", EditorStyles.boldLabel);
 
         EditorGUILayout.BeginHorizontal();
 
-        // æ‰‹åŠ¨é›†æˆæŒ‰é’®
+        // ÊÖ¶¯¼¯³É°´Å¥
         GUI.enabled = Application.isPlaying;
-        if (GUILayout.Button("æ‰§è¡Œæ·±åº¦é›†æˆ", buttonStyle, GUILayout.Height(30)))
+        if (GUILayout.Button("Ö´ĞĞÉî¶È¼¯³É", buttonStyle, GUILayout.Height(30)))
         {
             integrator.ManualDeepIntegration();
-            EditorUtility.DisplayDialog("é›†æˆå®Œæˆ", "æ·±åº¦é›†æˆå·²æ‰§è¡Œå®Œæˆï¼Œè¯·æŸ¥çœ‹æ§åˆ¶å°æ—¥å¿—äº†è§£è¯¦æƒ…ã€‚", "ç¡®å®š");
+            EditorUtility.DisplayDialog("¼¯³ÉÍê³É", "Éî¶È¼¯³ÉÒÑÖ´ĞĞÍê³É£¬Çë²é¿´¿ØÖÆÌ¨ÈÕÖ¾ÁË½âÏêÇé¡£", "È·¶¨");
         }
         GUI.enabled = true;
 
-        // åˆ·æ–°æŒ‰é’®
-        if (GUILayout.Button("åˆ·æ–°ç•Œé¢", buttonStyle, GUILayout.Height(30)))
+        // Ë¢ĞÂ°´Å¥
+        if (GUILayout.Button("Ë¢ĞÂ½çÃæ", buttonStyle, GUILayout.Height(30)))
         {
             Repaint();
         }
@@ -424,37 +424,37 @@ public class ItemInstanceIDManagerDeepIntegratorEditor : Editor
 
         if (!Application.isPlaying)
         {
-            EditorGUILayout.HelpBox("æ·±åº¦é›†æˆåŠŸèƒ½éœ€è¦åœ¨è¿è¡Œæ—¶æ‰§è¡Œã€‚", MessageType.Info);
+            EditorGUILayout.HelpBox("Éî¶È¼¯³É¹¦ÄÜĞèÒªÔÚÔËĞĞÊ±Ö´ĞĞ¡£", MessageType.Info);
         }
 
         EditorGUILayout.EndVertical();
     }
 
     /// <summary>
-    /// è·å–IDç±»å‹
+    /// »ñÈ¡IDÀàĞÍ
     /// </summary>
     private string GetIDType(string id)
     {
-        if (id.StartsWith("Item_")) return "ç‰©å“";
-        if (id.StartsWith("Grid_")) return "ç½‘æ ¼";
-        if (id.StartsWith("Spawner_")) return "ç”Ÿæˆå™¨";
-        if (id.StartsWith("EquipSlot_")) return "è£…å¤‡æ§½";
-        if (id.StartsWith("DataHolder_")) return "æ•°æ®æŒæœ‰è€…";
-        return "æœªçŸ¥";
+        if (id.StartsWith("Item_")) return "ÎïÆ·";
+        if (id.StartsWith("Grid_")) return "Íø¸ñ";
+        if (id.StartsWith("Spawner_")) return "Éú³ÉÆ÷";
+        if (id.StartsWith("EquipSlot_")) return "×°±¸²Û";
+        if (id.StartsWith("DataHolder_")) return "Êı¾İ³ÖÓĞÕß";
+        return "Î´Öª";
     }
 
     /// <summary>
-    /// å¯¼å‡ºé›†æˆæ•°æ®
+    /// µ¼³ö¼¯³ÉÊı¾İ
     /// </summary>
     private void ExportIntegrationData()
     {
         if (!Application.isPlaying || ItemInstanceIDManager.Instance == null)
         {
-            EditorUtility.DisplayDialog("å¯¼å‡ºå¤±è´¥", "è¯·åœ¨è¿è¡Œæ—¶å¯¼å‡ºé›†æˆæ•°æ®ã€‚", "ç¡®å®š");
+            EditorUtility.DisplayDialog("µ¼³öÊ§°Ü", "ÇëÔÚÔËĞĞÊ±µ¼³ö¼¯³ÉÊı¾İ¡£", "È·¶¨");
             return;
         }
 
-        string path = EditorUtility.SaveFilePanel("å¯¼å‡ºé›†æˆæ•°æ®",
+        string path = EditorUtility.SaveFilePanel("µ¼³ö¼¯³ÉÊı¾İ",
             "Assets/InventorySystem/Exports",
             $"integration_data_{System.DateTime.Now:yyyyMMdd_HHmmss}",
             "json");
@@ -466,27 +466,27 @@ public class ItemInstanceIDManagerDeepIntegratorEditor : Editor
                 var exportData = ItemInstanceIDManager.Instance.ExportIDMappingData();
                 System.IO.File.WriteAllText(path, exportData);
 
-                EditorUtility.DisplayDialog("å¯¼å‡ºæˆåŠŸ", $"é›†æˆæ•°æ®å·²å¯¼å‡ºåˆ°ï¼š\n{path}", "ç¡®å®š");
+                EditorUtility.DisplayDialog("µ¼³ö³É¹¦", $"¼¯³ÉÊı¾İÒÑµ¼³öµ½£º\n{path}", "È·¶¨");
             }
             catch (System.Exception ex)
             {
-                EditorUtility.DisplayDialog("å¯¼å‡ºå¤±è´¥", $"å¯¼å‡ºè¿‡ç¨‹ä¸­å‘ç”Ÿé”™è¯¯ï¼š\n{ex.Message}", "ç¡®å®š");
+                EditorUtility.DisplayDialog("µ¼³öÊ§°Ü", $"µ¼³ö¹ı³ÌÖĞ·¢Éú´íÎó£º\n{ex.Message}", "È·¶¨");
             }
         }
     }
 
     /// <summary>
-    /// å¯¼å…¥é›†æˆæ•°æ®
+    /// µ¼Èë¼¯³ÉÊı¾İ
     /// </summary>
     private void ImportIntegrationData()
     {
         if (!Application.isPlaying || ItemInstanceIDManager.Instance == null)
         {
-            EditorUtility.DisplayDialog("å¯¼å…¥å¤±è´¥", "è¯·åœ¨è¿è¡Œæ—¶å¯¼å…¥é›†æˆæ•°æ®ã€‚", "ç¡®å®š");
+            EditorUtility.DisplayDialog("µ¼ÈëÊ§°Ü", "ÇëÔÚÔËĞĞÊ±µ¼Èë¼¯³ÉÊı¾İ¡£", "È·¶¨");
             return;
         }
 
-        string path = EditorUtility.OpenFilePanel("å¯¼å…¥é›†æˆæ•°æ®",
+        string path = EditorUtility.OpenFilePanel("µ¼Èë¼¯³ÉÊı¾İ",
             "Assets/InventorySystem/Exports",
             "json");
 
@@ -499,16 +499,16 @@ public class ItemInstanceIDManagerDeepIntegratorEditor : Editor
 
                 if (success)
                 {
-                    EditorUtility.DisplayDialog("å¯¼å…¥æˆåŠŸ", "é›†æˆæ•°æ®å·²æˆåŠŸå¯¼å…¥ã€‚", "ç¡®å®š");
+                    EditorUtility.DisplayDialog("µ¼Èë³É¹¦", "¼¯³ÉÊı¾İÒÑ³É¹¦µ¼Èë¡£", "È·¶¨");
                 }
                 else
                 {
-                    EditorUtility.DisplayDialog("å¯¼å…¥å¤±è´¥", "å¯¼å…¥æ•°æ®æ ¼å¼æ— æ•ˆæˆ–å¯¼å…¥è¿‡ç¨‹ä¸­å‘ç”Ÿé”™è¯¯ã€‚", "ç¡®å®š");
+                    EditorUtility.DisplayDialog("µ¼ÈëÊ§°Ü", "µ¼ÈëÊı¾İ¸ñÊ½ÎŞĞ§»òµ¼Èë¹ı³ÌÖĞ·¢Éú´íÎó¡£", "È·¶¨");
                 }
             }
             catch (System.Exception ex)
             {
-                EditorUtility.DisplayDialog("å¯¼å…¥å¤±è´¥", $"å¯¼å…¥è¿‡ç¨‹ä¸­å‘ç”Ÿé”™è¯¯ï¼š\n{ex.Message}", "ç¡®å®š");
+                EditorUtility.DisplayDialog("µ¼ÈëÊ§°Ü", $"µ¼Èë¹ı³ÌÖĞ·¢Éú´íÎó£º\n{ex.Message}", "È·¶¨");
             }
         }
     }

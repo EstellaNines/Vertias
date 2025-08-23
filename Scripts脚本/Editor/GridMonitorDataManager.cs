@@ -4,13 +4,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System;
 using GridSystem.Editor;
+using InventorySystem.Grid;
 
 /// <summary>
-/// ç½‘æ ¼ç›‘æ§æ•°æ®ç®¡ç†å™¨ - å¤„ç†Unity Editorçª—å£ä¸­ç½‘æ ¼æ•°æ®çš„å®æ—¶åŒæ­¥å’Œæ›´æ–°
+/// Íø¸ñ¼à¿ØÊı¾İ¹ÜÀíÆ÷ - ´¦ÀíUnity Editor´°¿ÚÖĞÍø¸ñÊı¾İµÄÊµÊ±Í¬²½ºÍ¸üĞÂ
 /// </summary>
 public class GridMonitorDataManager
 {
-    // å•ä¾‹å®ä¾‹
+    // µ¥ÀıÊµÀı
     private static GridMonitorDataManager instance;
     public static GridMonitorDataManager Instance
     {
@@ -22,66 +23,153 @@ public class GridMonitorDataManager
         }
     }
 
-    // æ•°æ®ç¼“å­˜
+    // Êı¾İ»º´æ
     private Dictionary<BaseItemGrid, InventorySystem.Grid.GridDetectorInfo> gridDataCache = new Dictionary<BaseItemGrid, InventorySystem.Grid.GridDetectorInfo>();
     private Dictionary<BaseItemGrid, InventorySystem.Grid.GridDetectorInfo> gridInfoCache = new Dictionary<BaseItemGrid, InventorySystem.Grid.GridDetectorInfo>();
     private Dictionary<BaseItemGrid, double> lastUpdateTimes = new Dictionary<BaseItemGrid, double>();
     private Dictionary<BaseItemGrid, float> customUpdateIntervals = new Dictionary<BaseItemGrid, float>();
 
-    // æ›´æ–°è®¾ç½®
-    private float cacheValidityDuration = 5f; // ç¼“å­˜æœ‰æ•ˆæœŸï¼ˆç§’ï¼‰
+    // ¸üĞÂÉèÖÃ
+    private float cacheValidityDuration = 5f; // »º´æÓĞĞ§ÆÚ£¨Ãë£©
     private bool enableAutoUpdate = true;
     private float autoUpdateInterval = 2f;
 
-    // äº‹ä»¶ç³»ç»Ÿ
+    // ÊÂ¼şÏµÍ³
     public event Action<BaseItemGrid, InventorySystem.Grid.GridDetectorInfo> OnGridDataUpdated;
     public event Action<BaseItemGrid> OnGridAdded;
     public event Action<BaseItemGrid> OnGridRemoved;
     public event Action OnAllGridsRefreshed;
 
-    // ç›‘æ§çŠ¶æ€
+    // ¼à¿Ø×´Ì¬
     private bool isMonitoring = false;
     private List<BaseItemGrid> registeredGrids = new List<BaseItemGrid>();
     private List<BaseItemGrid> monitoredGrids = new List<BaseItemGrid>();
     private double lastFullRefresh;
 
-    // æ€§èƒ½ç»Ÿè®¡
+    // ĞÔÄÜÍ³¼Æ
     private int totalRefreshCount = 0;
     private float totalRefreshTime = 0f;
     private Dictionary<string, int> gridTypeUpdateCounts = new Dictionary<string, int>();
 
     /// <summary>
-    /// ç§æœ‰æ„é€ å‡½æ•°
+    /// Ë½ÓĞ¹¹Ôìº¯Êı
     /// </summary>
     private GridMonitorDataManager()
     {
-        // æ³¨å†ŒEditoræ›´æ–°å›è°ƒ
+        // ×¢²áEditor¸üĞÂ»Øµ÷
         EditorApplication.update += OnEditorUpdate;
 
-        // æ³¨å†Œåœºæ™¯å˜åŒ–å›è°ƒ
+        // ×¢²á³¡¾°±ä»¯»Øµ÷
         EditorApplication.hierarchyChanged += OnHierarchyChanged;
         EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
 
-        // åˆå§‹åŒ–ç›‘æ§
+        // ³õÊ¼»¯¶¯Ì¬Íø¸ñ¼ì²âÏµÍ³
+        InitializeDynamicDetection();
+
+        // ³õÊ¼»¯¼à¿Ø
         StartMonitoring();
         lastFullRefresh = EditorApplication.timeSinceStartup;
     }
 
     /// <summary>
-    /// ææ„å‡½æ•° - æ¸…ç†èµ„æº
+    /// Îö¹¹º¯Êı - ÇåÀí×ÊÔ´
     /// </summary>
     ~GridMonitorDataManager()
     {
         StopMonitoring();
 
-        // å–æ¶ˆæ³¨å†ŒUnityç¼–è¾‘å™¨äº‹ä»¶
+        // Í£Ö¹¶¯Ì¬¼ì²âÏµÍ³
+        GridSystem.Editor.GridDynamicDetectionSystem.Instance.StopMonitoring();
+
+        // È¡Ïû×¢²áUnity±à¼­Æ÷ÊÂ¼ş
         EditorApplication.update -= OnEditorUpdate;
         EditorApplication.hierarchyChanged -= OnHierarchyChanged;
         EditorApplication.playModeStateChanged -= OnPlayModeStateChanged;
     }
 
     /// <summary>
-    /// å¼€å§‹ç›‘æ§ç½‘æ ¼ç³»ç»Ÿ
+    /// ³õÊ¼»¯¶¯Ì¬Íø¸ñ¼ì²âÏµÍ³
+    /// </summary>
+    private void InitializeDynamicDetection()
+    {
+        // Æô¶¯¶¯Ì¬¼ì²âÏµÍ³
+        GridSystem.Editor.GridDynamicDetectionSystem.Instance.StartMonitoring();
+
+        // ×¢²á¶¯Ì¬Íø¸ñÊÂ¼ş
+        GridSystem.Editor.GridDynamicDetectionSystem.Instance.OnDynamicGridDetected += OnDynamicGridDetected;
+        GridSystem.Editor.GridDynamicDetectionSystem.Instance.OnDynamicGridRemoved += OnDynamicGridRemoved;
+
+        Debug.Log("[GridMonitorDataManager] ¶¯Ì¬Íø¸ñ¼ì²âÏµÍ³ÒÑ³õÊ¼»¯");
+    }
+
+    /// <summary>
+    /// ´¦Àí¶¯Ì¬Íø¸ñ±»¼ì²âµ½µÄÊÂ¼ş
+    /// </summary>
+    private void OnDynamicGridDetected(BaseItemGrid grid)
+    {
+        if (grid == null) return;
+
+        Debug.Log($"[GridMonitorDataManager] ¼ì²âµ½¶¯Ì¬Íø¸ñ: {grid.name} (ÀàĞÍ: {grid.GetType().Name})");
+
+        // Á¢¼´½«ĞÂÍø¸ñÌí¼Óµ½¼à¿ØÁĞ±í
+        if (!registeredGrids.Contains(grid))
+        {
+            registeredGrids.Add(grid);
+            OnGridAdded?.Invoke(grid);
+        }
+
+        if (!monitoredGrids.Contains(grid))
+        {
+            monitoredGrids.Add(grid);
+        }
+
+        // Á¢¼´¸üĞÂÍø¸ñĞÅÏ¢
+        UpdateGridInfo(grid, true);
+    }
+
+    /// <summary>
+    /// ´¦Àí¶¯Ì¬Íø¸ñ±»ÒÆ³ıµÄÊÂ¼ş
+    /// </summary>
+    private void OnDynamicGridRemoved(BaseItemGrid grid)
+    {
+        Debug.Log($"[GridMonitorDataManager] ¶¯Ì¬Íø¸ñ±»ÒÆ³ı: {(grid != null ? grid.name : "null")}");
+
+        // ´Ó¼à¿ØÁĞ±íÖĞÒÆ³ı
+        if (registeredGrids.Contains(grid))
+        {
+            registeredGrids.Remove(grid);
+            OnGridRemoved?.Invoke(grid);
+        }
+
+        if (monitoredGrids.Contains(grid))
+        {
+            monitoredGrids.Remove(grid);
+        }
+
+        // ÇåÀí»º´æÊı¾İ
+        if (gridDataCache.ContainsKey(grid))
+        {
+            gridDataCache.Remove(grid);
+        }
+
+        if (gridInfoCache.ContainsKey(grid))
+        {
+            gridInfoCache.Remove(grid);
+        }
+
+        if (lastUpdateTimes.ContainsKey(grid))
+        {
+            lastUpdateTimes.Remove(grid);
+        }
+
+        if (customUpdateIntervals.ContainsKey(grid))
+        {
+            customUpdateIntervals.Remove(grid);
+        }
+    }
+
+    /// <summary>
+    /// ¿ªÊ¼¼à¿ØÍø¸ñÏµÍ³
     /// </summary>
     public void StartMonitoring()
     {
@@ -90,26 +178,36 @@ public class GridMonitorDataManager
         isMonitoring = true;
         RefreshAllGrids();
 
-        Debug.Log("ç½‘æ ¼ç›‘æ§ç³»ç»Ÿå·²å¯åŠ¨");
+        Debug.Log("Íø¸ñ¼à¿ØÏµÍ³ÒÑÆô¶¯");
     }
 
     /// <summary>
-    /// åœæ­¢ç›‘æ§ç½‘æ ¼ç³»ç»Ÿ
+    /// Í£Ö¹¼à¿ØÍø¸ñÏµÍ³
     /// </summary>
     public void StopMonitoring()
     {
         if (!isMonitoring) return;
 
         isMonitoring = false;
+
+        // Í£Ö¹¶¯Ì¬¼ì²âÏµÍ³²¢È¡ÏûÊÂ¼ş×¢²á
+        GridSystem.Editor.GridDynamicDetectionSystem.Instance.OnDynamicGridDetected -= OnDynamicGridDetected;
+        GridSystem.Editor.GridDynamicDetectionSystem.Instance.OnDynamicGridRemoved -= OnDynamicGridRemoved;
+        GridSystem.Editor.GridDynamicDetectionSystem.Instance.StopMonitoring();
+
+        // ÇåÀí»º´æÊı¾İ
         gridDataCache.Clear();
         lastUpdateTimes.Clear();
         registeredGrids.Clear();
+        monitoredGrids.Clear();
+        gridInfoCache.Clear();
+        customUpdateIntervals.Clear();
 
-        Debug.Log("ç½‘æ ¼ç›‘æ§ç³»ç»Ÿå·²åœæ­¢");
+        Debug.Log("Íø¸ñ¼à¿ØÏµÍ³ÒÑÍ£Ö¹");
     }
 
     /// <summary>
-    /// è®¾ç½®ç¼“å­˜æœ‰æ•ˆæœŸ
+    /// ÉèÖÃ»º´æÓĞĞ§ÆÚ
     /// </summary>
     public void SetCacheValidityDuration(float duration)
     {
@@ -117,7 +215,7 @@ public class GridMonitorDataManager
     }
 
     /// <summary>
-    /// è®¾ç½®è‡ªåŠ¨æ›´æ–°é—´éš”
+    /// ÉèÖÃ×Ô¶¯¸üĞÂ¼ä¸ô
     /// </summary>
     public void SetAutoUpdateInterval(float interval)
     {
@@ -125,7 +223,7 @@ public class GridMonitorDataManager
     }
 
     /// <summary>
-    /// å¯ç”¨æˆ–ç¦ç”¨è‡ªåŠ¨æ›´æ–°
+    /// ÆôÓÃ»ò½ûÓÃ×Ô¶¯¸üĞÂ
     /// </summary>
     public void SetAutoUpdateEnabled(bool enabled)
     {
@@ -133,7 +231,7 @@ public class GridMonitorDataManager
     }
 
     /// <summary>
-    /// è·å–æ‰€æœ‰ç½‘æ ¼æ•°æ®
+    /// »ñÈ¡ËùÓĞÍø¸ñÊı¾İ
     /// </summary>
     public Dictionary<BaseItemGrid, InventorySystem.Grid.GridDetectorInfo> GetAllGridData()
     {
@@ -142,7 +240,7 @@ public class GridMonitorDataManager
     }
 
     /// <summary>
-    /// è·å–æŒ‡å®šç½‘æ ¼çš„æ•°æ®
+    /// »ñÈ¡Ö¸¶¨Íø¸ñµÄÊı¾İ
     /// </summary>
     public InventorySystem.Grid.GridDetectorInfo GetGridData(BaseItemGrid grid)
     {
@@ -157,7 +255,7 @@ public class GridMonitorDataManager
     }
 
     /// <summary>
-    /// è·å–æ‰€æœ‰ç›‘æ§çš„ç½‘æ ¼
+    /// »ñÈ¡ËùÓĞ¼à¿ØµÄÍø¸ñ
     /// </summary>
     public List<BaseItemGrid> GetMonitoredGrids()
     {
@@ -165,7 +263,7 @@ public class GridMonitorDataManager
     }
 
     /// <summary>
-    /// æ£€æŸ¥æ•°æ®æ˜¯å¦è¿‡æœŸ
+    /// ¼ì²éÊı¾İÊÇ·ñ¹ıÆÚ
     /// </summary>
     private bool IsDataExpired(BaseItemGrid grid)
     {
@@ -176,7 +274,7 @@ public class GridMonitorDataManager
     }
 
     /// <summary>
-    /// åˆ·æ–°è¿‡æœŸæ•°æ®
+    /// Ë¢ĞÂ¹ıÆÚÊı¾İ
     /// </summary>
     private void RefreshExpiredData()
     {
@@ -197,7 +295,7 @@ public class GridMonitorDataManager
     }
 
     /// <summary>
-    /// æ›´æ–°ç½‘æ ¼æ•°æ®
+    /// ¸üĞÂÍø¸ñÊı¾İ
     /// </summary>
     private void UpdateGridData(BaseItemGrid grid)
     {
@@ -209,7 +307,7 @@ public class GridMonitorDataManager
             gridDataCache[grid] = gridInfo;
             lastUpdateTimes[grid] = EditorApplication.timeSinceStartup;
 
-            // æ›´æ–°ç»Ÿè®¡ä¿¡æ¯
+            // ¸üĞÂÍ³¼ÆĞÅÏ¢
             string gridType = grid.GetType().Name;
             if (!gridTypeUpdateCounts.ContainsKey(gridType))
             {
@@ -221,12 +319,12 @@ public class GridMonitorDataManager
         }
         catch (Exception e)
         {
-            Debug.LogError($"æ›´æ–°ç½‘æ ¼ {grid.name} æ•°æ®æ—¶å‡ºé”™: {e.Message}");
+            Debug.LogError($"¸üĞÂÍø¸ñ {grid.name} Êı¾İÊ±³ö´í: {e.Message}");
         }
     }
 
     /// <summary>
-    /// å¼ºåˆ¶åˆ·æ–°ç‰¹å®šç½‘æ ¼
+    /// Ç¿ÖÆË¢ĞÂÌØ¶¨Íø¸ñ
     /// </summary>
     public void ForceRefreshGrid(BaseItemGrid grid)
     {
@@ -237,17 +335,17 @@ public class GridMonitorDataManager
     }
 
     /// <summary>
-    /// åˆ·æ–°æ‰€æœ‰ç½‘æ ¼
+    /// Ë¢ĞÂËùÓĞÍø¸ñ
     /// </summary>
     public void RefreshAllGrids()
     {
-        // æŸ¥æ‰¾åœºæ™¯ä¸­æ‰€æœ‰çš„ç½‘æ ¼
+        // ²éÕÒ³¡¾°ÖĞËùÓĞµÄÍø¸ñ
         BaseItemGrid[] allGrids = UnityEngine.Object.FindObjectsOfType<BaseItemGrid>();
 
-        // æ›´æ–°ç›‘æ§åˆ—è¡¨
+        // ¸üĞÂ¼à¿ØÁĞ±í
         UpdateMonitoredGridsList(allGrids);
 
-        // åˆ·æ–°æ‰€æœ‰ç½‘æ ¼ä¿¡æ¯
+        // Ë¢ĞÂËùÓĞÍø¸ñĞÅÏ¢
         foreach (BaseItemGrid grid in monitoredGrids)
         {
             UpdateGridInfo(grid, true);
@@ -257,11 +355,11 @@ public class GridMonitorDataManager
     }
 
     /// <summary>
-    /// æ›´æ–°ç›‘æ§ç½‘æ ¼åˆ—è¡¨
+    /// ¸üĞÂ¼à¿ØÍø¸ñÁĞ±í
     /// </summary>
     private void UpdateMonitoredGridsList(BaseItemGrid[] currentGrids)
     {
-        // æ£€æŸ¥æ–°å¢çš„ç½‘æ ¼
+        // ¼ì²éĞÂÔöµÄÍø¸ñ
         foreach (BaseItemGrid grid in currentGrids)
         {
             if (!monitoredGrids.Contains(grid))
@@ -271,7 +369,7 @@ public class GridMonitorDataManager
             }
         }
 
-        // æ£€æŸ¥ç§»é™¤çš„ç½‘æ ¼
+        // ¼ì²éÒÆ³ıµÄÍø¸ñ
         List<BaseItemGrid> gridsToRemove = new List<BaseItemGrid>();
         foreach (BaseItemGrid grid in monitoredGrids)
         {
@@ -301,7 +399,7 @@ public class GridMonitorDataManager
     }
 
     /// <summary>
-    /// æ›´æ–°ç½‘æ ¼ä¿¡æ¯
+    /// ¸üĞÂÍø¸ñĞÅÏ¢
     /// </summary>
     private void UpdateGridInfo(BaseItemGrid grid, bool forceUpdate = false)
     {
@@ -310,7 +408,7 @@ public class GridMonitorDataManager
         double currentTime = EditorApplication.timeSinceStartup;
         float updateInterval = GetGridUpdateInterval(grid);
 
-        // æ£€æŸ¥æ˜¯å¦éœ€è¦æ›´æ–°
+        // ¼ì²éÊÇ·ñĞèÒª¸üĞÂ
         if (!forceUpdate && lastUpdateTimes.ContainsKey(grid))
         {
             double timeSinceLastUpdate = currentTime - lastUpdateTimes[grid];
@@ -322,10 +420,10 @@ public class GridMonitorDataManager
 
         try
         {
-            // è·å–æœ€æ–°çš„ç½‘æ ¼ä¿¡æ¯
+            // »ñÈ¡×îĞÂµÄÍø¸ñĞÅÏ¢
             InventorySystem.Grid.GridDetectorInfo newInfo = grid.GetGridDetectorInfo();
 
-            // æ£€æŸ¥ä¿¡æ¯æ˜¯å¦æœ‰å˜åŒ–
+            // ¼ì²éĞÅÏ¢ÊÇ·ñÓĞ±ä»¯
             bool hasChanged = !gridInfoCache.ContainsKey(grid) || HasGridInfoChanged(gridInfoCache[grid], newInfo);
 
             if (hasChanged || forceUpdate)
@@ -337,18 +435,18 @@ public class GridMonitorDataManager
         }
         catch (Exception e)
         {
-            Debug.LogError($"æ›´æ–°ç½‘æ ¼ {grid.name} çš„ä¿¡æ¯æ—¶å‡ºé”™: {e.Message}");
+            Debug.LogError($"¸üĞÂÍø¸ñ {grid.name} µÄĞÅÏ¢Ê±³ö´í: {e.Message}");
         }
     }
 
     /// <summary>
-    /// æ£€æŸ¥ç½‘æ ¼ä¿¡æ¯æ˜¯å¦æœ‰å˜åŒ–
+    /// ¼ì²éÍø¸ñĞÅÏ¢ÊÇ·ñÓĞ±ä»¯
     /// </summary>
     private bool HasGridInfoChanged(InventorySystem.Grid.GridDetectorInfo oldInfo, InventorySystem.Grid.GridDetectorInfo newInfo)
     {
         if (oldInfo == null || newInfo == null) return true;
 
-        // æ£€æŸ¥åŸºæœ¬ä¿¡æ¯
+        // ¼ì²é»ù±¾ĞÅÏ¢
         if (oldInfo.placedItemsCount != newInfo.placedItemsCount ||
             oldInfo.occupiedCellsCount != newInfo.occupiedCellsCount ||
             Math.Abs(oldInfo.occupancyRate - newInfo.occupancyRate) > 0.001f)
@@ -356,7 +454,7 @@ public class GridMonitorDataManager
             return true;
         }
 
-        // æ£€æŸ¥ç‰©å“åˆ†å¸ƒ
+        // ¼ì²éÎïÆ··Ö²¼
         if (oldInfo.itemDistribution.Count != newInfo.itemDistribution.Count)
         {
             return true;
@@ -375,7 +473,7 @@ public class GridMonitorDataManager
     }
 
     /// <summary>
-    /// Editoræ›´æ–°å›è°ƒ
+    /// Editor¸üĞÂ»Øµ÷
     /// </summary>
     private void OnEditorUpdate()
     {
@@ -390,13 +488,13 @@ public class GridMonitorDataManager
     }
 
     /// <summary>
-    /// å±‚çº§å˜åŒ–å›è°ƒ
+    /// ²ã¼¶±ä»¯»Øµ÷
     /// </summary>
     private void OnHierarchyChanged()
     {
         if (isMonitoring)
         {
-            // å»¶è¿Ÿåˆ·æ–°ï¼Œé¿å…é¢‘ç¹æ›´æ–°
+            // ÑÓ³ÙË¢ĞÂ£¬±ÜÃâÆµ·±¸üĞÂ
             EditorApplication.delayCall += () =>
             {
                 if (isMonitoring)
@@ -408,18 +506,18 @@ public class GridMonitorDataManager
     }
 
     /// <summary>
-    /// æ’­æ”¾æ¨¡å¼çŠ¶æ€å˜åŒ–å›è°ƒ
+    /// ²¥·ÅÄ£Ê½×´Ì¬±ä»¯»Øµ÷
     /// </summary>
     private void OnPlayModeStateChanged(PlayModeStateChange state)
     {
         switch (state)
         {
             case PlayModeStateChange.EnteredPlayMode:
-                // è¿›å…¥æ’­æ”¾æ¨¡å¼æ—¶åˆ·æ–°æ‰€æœ‰æ•°æ®
+                // ½øÈë²¥·ÅÄ£Ê½Ê±Ë¢ĞÂËùÓĞÊı¾İ
                 RefreshAllGrids();
                 break;
             case PlayModeStateChange.ExitingPlayMode:
-                // é€€å‡ºæ’­æ”¾æ¨¡å¼æ—¶æ¸…ç†ç¼“å­˜
+                // ÍË³ö²¥·ÅÄ£Ê½Ê±ÇåÀí»º´æ
                 gridDataCache.Clear();
                 lastUpdateTimes.Clear();
                 break;
@@ -427,11 +525,11 @@ public class GridMonitorDataManager
     }
 
     /// <summary>
-    /// è·å–ç½‘æ ¼ç»Ÿè®¡ä¿¡æ¯
+    /// »ñÈ¡Íø¸ñÍ³¼ÆĞÅÏ¢
     /// </summary>
-    public GridSystem.Editor.GridSystemStatistics GetSystemStatistics()
+    public GridSystemStatistics GetSystemStatistics()
     {
-        return new GridSystem.Editor.GridSystemStatistics
+        return new GridSystemStatistics
         {
             TotalGrids = registeredGrids.Count,
             ActiveGrids = gridDataCache.Count(kvp => kvp.Value.placedItemsCount > 0),
@@ -446,20 +544,20 @@ public class GridMonitorDataManager
     }
 
     /// <summary>
-    /// è·å–æ€§èƒ½ç»Ÿè®¡ä¿¡æ¯
+    /// »ñÈ¡ĞÔÄÜÍ³¼ÆĞÅÏ¢
     /// </summary>
     public string GetPerformanceReport()
     {
         var stats = GetSystemStatistics();
-        return $"æ€§èƒ½æŠ¥å‘Š:\n" +
-               $"- æ€»åˆ·æ–°æ¬¡æ•°: {stats.TotalRefreshCount}\n" +
-               $"- å¹³å‡åˆ·æ–°æ—¶é—´: {stats.AverageRefreshTime:F3}ç§’\n" +
-               $"- ç¼“å­˜å‘½ä¸­ç‡: {CalculateCacheHitRate():F1}%\n" +
-               $"- å†…å­˜ä½¿ç”¨: {GetMemoryUsage():F2}MB";
+        return $"ĞÔÄÜ±¨¸æ:\n" +
+               $"- ×ÜË¢ĞÂ´ÎÊı: {stats.TotalRefreshCount}\n" +
+               $"- Æ½¾ùË¢ĞÂÊ±¼ä: {stats.AverageRefreshTime:F3}Ãë\n" +
+               $"- »º´æÃüÖĞÂÊ: {CalculateCacheHitRate():F1}%\n" +
+               $"- ÄÚ´æÊ¹ÓÃ: {GetMemoryUsage():F2}MB";
     }
 
     /// <summary>
-    /// è®¡ç®—ç¼“å­˜å‘½ä¸­ç‡
+    /// ¼ÆËã»º´æÃüÖĞÂÊ
     /// </summary>
     private float CalculateCacheHitRate()
     {
@@ -471,38 +569,38 @@ public class GridMonitorDataManager
     }
 
     /// <summary>
-    /// è·å–å†…å­˜ä½¿ç”¨é‡ï¼ˆä¼°ç®—ï¼‰
+    /// »ñÈ¡ÄÚ´æÊ¹ÓÃÁ¿£¨¹ÀËã£©
     /// </summary>
     private float GetMemoryUsage()
     {
-        // ç®€å•ä¼°ç®—å†…å­˜ä½¿ç”¨é‡
-        int estimatedSize = gridDataCache.Count * 1024; // æ¯ä¸ªç½‘æ ¼æ•°æ®çº¦1KB
-        return estimatedSize / (1024f * 1024f); // è½¬æ¢ä¸ºMB
+        // ¼òµ¥¹ÀËãÄÚ´æÊ¹ÓÃÁ¿
+        int estimatedSize = gridDataCache.Count * 1024; // Ã¿¸öÍø¸ñÊı¾İÔ¼1KB
+        return estimatedSize / (1024f * 1024f); // ×ª»»ÎªMB
     }
 
     /// <summary>
-    /// æ¸…ç†ç¼“å­˜
+    /// ÇåÀí»º´æ
     /// </summary>
     public void ClearCache()
     {
         gridDataCache.Clear();
         lastUpdateTimes.Clear();
-        Debug.Log("ç½‘æ ¼ç›‘æ§ç¼“å­˜å·²æ¸…ç†");
+        Debug.Log("Íø¸ñ¼à¿Ø»º´æÒÑÇåÀí");
     }
 
     /// <summary>
-    /// é‡ç½®ç»Ÿè®¡ä¿¡æ¯
+    /// ÖØÖÃÍ³¼ÆĞÅÏ¢
     /// </summary>
     public void ResetStatistics()
     {
         totalRefreshCount = 0;
         totalRefreshTime = 0f;
         gridTypeUpdateCounts.Clear();
-        Debug.Log("ç½‘æ ¼ç›‘æ§ç»Ÿè®¡ä¿¡æ¯å·²é‡ç½®");
+        Debug.Log("Íø¸ñ¼à¿ØÍ³¼ÆĞÅÏ¢ÒÑÖØÖÃ");
     }
 
     /// <summary>
-    /// æ£€æŸ¥ç½‘æ ¼æ˜¯å¦éœ€è¦æ›´æ–°
+    /// ¼ì²éÍø¸ñÊÇ·ñĞèÒª¸üĞÂ
     /// </summary>
     private bool ShouldUpdateGrid(BaseItemGrid grid)
     {
@@ -513,7 +611,7 @@ public class GridMonitorDataManager
     }
 
     /// <summary>
-    /// æ›´æ–°ç½‘æ ¼ä¿¡æ¯
+    /// ¸üĞÂÍø¸ñĞÅÏ¢
     /// </summary>
     private void UpdateGridInfo(BaseItemGrid grid)
     {
@@ -525,7 +623,7 @@ public class GridMonitorDataManager
             InventorySystem.Grid.GridDetectorInfo info = grid.GetGridDetectorInfo();
             var endTime = EditorApplication.timeSinceStartup;
 
-            // éªŒè¯æ•°æ®å®Œæ•´æ€§
+            // ÑéÖ¤Êı¾İÍêÕûĞÔ
             if (!ValidateGridData(grid, info))
             {
                 return;
@@ -534,7 +632,7 @@ public class GridMonitorDataManager
             gridDataCache[grid] = info;
             lastUpdateTimes[grid] = endTime;
 
-            // æ›´æ–°ç»Ÿè®¡ä¿¡æ¯
+            // ¸üĞÂÍ³¼ÆĞÅÏ¢
             string gridType = grid.GetType().Name;
             if (!gridTypeUpdateCounts.ContainsKey(gridType))
             {
@@ -542,49 +640,49 @@ public class GridMonitorDataManager
             }
             gridTypeUpdateCounts[gridType]++;
 
-            // æ›´æ–°æ€§èƒ½ç»Ÿè®¡
+            // ¸üĞÂĞÔÄÜÍ³¼Æ
             totalRefreshTime += (float)(endTime - startTime);
 
             OnGridDataUpdated?.Invoke(grid, info);
         }
         catch (Exception e)
         {
-            Debug.LogError($"æ›´æ–°ç½‘æ ¼ {grid.name} ä¿¡æ¯æ—¶å‡ºé”™: {e.Message}");
+            Debug.LogError($"¸üĞÂÍø¸ñ {grid.name} ĞÅÏ¢Ê±³ö´í: {e.Message}");
         }
     }
 
 
 
     /// <summary>
-    /// è·å–ç½‘æ ¼æ›´æ–°é—´éš”
+    /// »ñÈ¡Íø¸ñ¸üĞÂ¼ä¸ô
     /// </summary>
     private float GetGridUpdateInterval(BaseItemGrid grid)
     {
-        // æ ¹æ®ç½‘æ ¼ç±»å‹è¿”å›ä¸åŒçš„æ›´æ–°é—´éš”
+        // ¸ù¾İÍø¸ñÀàĞÍ·µ»Ø²»Í¬µÄ¸üĞÂ¼ä¸ô
         switch (grid)
         {
             case BackpackItemGrid _:
-                return 0.5f; // èƒŒåŒ…æ›´æ–°é¢‘ç‡è¾ƒé«˜
+                return 0.5f; // ±³°ü¸üĞÂÆµÂÊ½Ï¸ß
             case TactiaclRigItemGrid _:
-                return 1.0f; // æˆ˜æœ¯æŒ‚å…·ä¸­ç­‰é¢‘ç‡
+                return 1.0f; // Õ½Êõ¹Ò¾ßÖĞµÈÆµÂÊ
             case ItemGrid _:
-                return 2.0f; // ä»“åº“æ›´æ–°é¢‘ç‡è¾ƒä½
+                return 2.0f; // ²Ö¿â¸üĞÂÆµÂÊ½ÏµÍ
             default:
-                return 1.0f; // é»˜è®¤é—´éš”
+                return 1.0f; // Ä¬ÈÏ¼ä¸ô
         }
     }
 
     /// <summary>
-    /// éªŒè¯ç½‘æ ¼æ•°æ®å®Œæ•´æ€§
+    /// ÑéÖ¤Íø¸ñÊı¾İÍêÕûĞÔ
     /// </summary>
     private bool ValidateGridData(BaseItemGrid grid, InventorySystem.Grid.GridDetectorInfo info)
     {
         if (grid == null || info == null) return false;
 
-        // æ£€æŸ¥åŸºæœ¬æ•°æ®å®Œæ•´æ€§
+        // ¼ì²é»ù±¾Êı¾İÍêÕûĞÔ
         if (info.totalCells < 0 || info.occupiedCellsCount < 0 || info.placedItemsCount < 0)
         {
-            Debug.LogWarning($"ç½‘æ ¼ {grid.name} æ•°æ®å¼‚å¸¸: å®¹é‡={info.totalCells}, å ç”¨={info.occupiedCellsCount}, ç‰©å“æ•°={info.placedItemsCount}");
+            Debug.LogWarning($"Íø¸ñ {grid.name} Êı¾İÒì³£: ÈİÁ¿={info.totalCells}, Õ¼ÓÃ={info.occupiedCellsCount}, ÎïÆ·Êı={info.placedItemsCount}");
             return false;
         }
 
@@ -592,7 +690,7 @@ public class GridMonitorDataManager
     }
 
     /// <summary>
-    /// æ¸…ç†èµ„æº
+    /// ÇåÀí×ÊÔ´
     /// </summary>
     public void Cleanup()
     {
@@ -607,7 +705,7 @@ public class GridMonitorDataManager
 }
 
 /// <summary>
-/// ç½‘æ ¼ç³»ç»Ÿç»Ÿè®¡ä¿¡æ¯
+/// Íø¸ñÏµÍ³Í³¼ÆĞÅÏ¢
 /// </summary>
 [Serializable]
 public class GridSystemStatistics
@@ -622,4 +720,4 @@ public class GridSystemStatistics
     public Dictionary<string, int> GridTypeUpdateCounts;
 }
 
-// GridMonitorSettingsç±»å®šä¹‰å·²ç§»è‡³ç‹¬ç«‹çš„GridMonitorSettings.csæ–‡ä»¶ä¸­
+// ×¢Òâ£ºGridMonitorSettingsÀàÒÑËæ¾²Ì¬¼à¿ØÏµÍ³Ò»ÆğÒÆ³ı

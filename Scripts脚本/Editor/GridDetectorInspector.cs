@@ -6,27 +6,27 @@ using InventorySystem.Grid;
 using GridSystem.Editor;
 
 /// <summary>
-/// ç½‘æ ¼æ£€æµ‹å™¨è‡ªå®šä¹‰Inspector - åœ¨Inspectoré¢æ¿ä¸­æ˜¾ç¤ºç½‘æ ¼çš„è¯¦ç»†æ£€æµ‹ä¿¡æ¯
+/// Íø¸ñ¼ì²âÆ÷×Ô¶¨ÒåInspector - ÔÚInspectorÃæ°åÖĞÏÔÊ¾Íø¸ñµÄÏêÏ¸¼ì²âĞÅÏ¢
 /// </summary>
 [CustomEditor(typeof(BaseItemGrid), true)]
 public class GridDetectorInspector : Editor
 {
-    // æŠ˜å é¢æ¿çŠ¶æ€
+    // ÕÛµşÃæ°å×´Ì¬
     private bool showBasicInfo = true;
     private bool showItemDistribution = true;
     private bool showOccupancyInfo = true;
     private bool showSpecificAnalysis = true;
     private bool showVisualization = false;
 
-    // è‡ªåŠ¨åˆ·æ–°è®¾ç½®
+    // ×Ô¶¯Ë¢ĞÂÉèÖÃ
     private bool autoRefresh = false;
     private double lastRefreshTime;
     private float refreshInterval = 2.0f;
 
-    // ç¼“å­˜çš„æ£€æµ‹å™¨ä¿¡æ¯
+    // »º´æµÄ¼ì²âÆ÷ĞÅÏ¢
     private InventorySystem.Grid.GridDetectorInfo cachedDetectorInfo;
 
-    // GUIæ ·å¼
+    // GUIÑùÊ½
     private GUIStyle headerStyle;
     private GUIStyle subHeaderStyle;
     private GUIStyle infoStyle;
@@ -34,7 +34,7 @@ public class GridDetectorInspector : Editor
     private GUIStyle errorStyle;
 
     /// <summary>
-    /// å¯ç”¨æ—¶åˆå§‹åŒ–
+    /// ÆôÓÃÊ±³õÊ¼»¯
     /// </summary>
     private void OnEnable()
     {
@@ -43,7 +43,7 @@ public class GridDetectorInspector : Editor
     }
 
     /// <summary>
-    /// åˆå§‹åŒ–GUIæ ·å¼
+    /// ³õÊ¼»¯GUIÑùÊ½
     /// </summary>
     private void InitializeStyles()
     {
@@ -80,7 +80,7 @@ public class GridDetectorInspector : Editor
     }
 
     /// <summary>
-    /// åˆ·æ–°æ£€æµ‹å™¨ä¿¡æ¯
+    /// Ë¢ĞÂ¼ì²âÆ÷ĞÅÏ¢
     /// </summary>
     private void RefreshDetectorInfo()
     {
@@ -94,24 +94,24 @@ public class GridDetectorInspector : Editor
             }
             catch (System.Exception e)
             {
-                Debug.LogError($"åˆ·æ–°ç½‘æ ¼æ£€æµ‹å™¨ä¿¡æ¯æ—¶å‡ºé”™: {e.Message}");
+                Debug.LogError($"Ë¢ĞÂÍø¸ñ¼ì²âÆ÷ĞÅÏ¢Ê±³ö´í: {e.Message}");
                 cachedDetectorInfo = null;
             }
         }
     }
 
     /// <summary>
-    /// ç»˜åˆ¶Inspector GUI
+    /// »æÖÆInspector GUI
     /// </summary>
     public override void OnInspectorGUI()
     {
-        // ç»˜åˆ¶é»˜è®¤Inspector
+        // »æÖÆÄ¬ÈÏInspector
         DrawDefaultInspector();
 
         EditorGUILayout.Space();
-        EditorGUILayout.LabelField("ç½‘æ ¼æ£€æµ‹å™¨ä¿¡æ¯", EditorStyles.boldLabel);
+        EditorGUILayout.LabelField("Íø¸ñ¼ì²âÆ÷ĞÅÏ¢", EditorStyles.boldLabel);
 
-        // æ£€æŸ¥è‡ªåŠ¨åˆ·æ–°
+        // ¼ì²é×Ô¶¯Ë¢ĞÂ
         if (autoRefresh && EditorApplication.timeSinceStartup - lastRefreshTime > refreshInterval)
         {
             RefreshDetectorInfo();
@@ -125,12 +125,12 @@ public class GridDetectorInspector : Editor
         }
         else
         {
-            EditorGUILayout.HelpBox("æ— æ³•è·å–ç½‘æ ¼æ£€æµ‹å™¨ä¿¡æ¯", MessageType.Warning);
+            EditorGUILayout.HelpBox("ÎŞ·¨»ñÈ¡Íø¸ñ¼ì²âÆ÷ĞÅÏ¢", MessageType.Warning);
         }
     }
 
     /// <summary>
-    /// ç»˜åˆ¶æ£€æµ‹å™¨æ§åˆ¶é¢æ¿
+    /// »æÖÆ¼ì²âÆ÷¿ØÖÆÃæ°å
     /// </summary>
     private void DrawDetectorControls()
     {
@@ -138,80 +138,75 @@ public class GridDetectorInspector : Editor
 
         EditorGUILayout.BeginHorizontal();
 
-        if (GUILayout.Button("åˆ·æ–°æ£€æµ‹å™¨ä¿¡æ¯", GUILayout.Height(25)))
+        if (GUILayout.Button("Ë¢ĞÂ¼ì²âÆ÷ĞÅÏ¢", GUILayout.Height(25)))
         {
             RefreshDetectorInfo();
         }
 
-        if (GUILayout.Button("æ‰“å¼€ç›‘æ§çª—å£", GUILayout.Height(25)))
+        // ¾²Ì¬¼à¿Ø´°¿ÚÒÑÒÆ³ı£¬Ö»±£Áô¶¯Ì¬¼à¿Ø¹¦ÄÜ
+        if (GUILayout.Button("´ò¿ª¶¯Ì¬¼à¿Ø´°¿Ú", GUILayout.Height(25)))
         {
-            GridSystemMonitorWindow.ShowWindow();
-        }
-
-        if (GUILayout.Button("å¯è§†åŒ–ç½‘æ ¼", GUILayout.Height(25)))
-        {
-            GridVisualizationWindow window = EditorWindow.GetWindow<GridVisualizationWindow>();
-            window.SetSelectedGrid(target as BaseItemGrid);
+            GridDynamicMonitorWindow.ShowWindow();
         }
 
         EditorGUILayout.EndHorizontal();
 
         EditorGUILayout.BeginHorizontal();
-        autoRefresh = EditorGUILayout.ToggleLeft("è‡ªåŠ¨åˆ·æ–°", autoRefresh, GUILayout.Width(80));
+        autoRefresh = EditorGUILayout.ToggleLeft("×Ô¶¯Ë¢ĞÂ", autoRefresh, GUILayout.Width(80));
 
         if (autoRefresh)
         {
-            EditorGUILayout.LabelField("é—´éš”:", GUILayout.Width(30));
+            EditorGUILayout.LabelField("¼ä¸ô:", GUILayout.Width(30));
             refreshInterval = EditorGUILayout.Slider(refreshInterval, 1.0f, 10.0f, GUILayout.Width(100));
-            EditorGUILayout.LabelField("ç§’", GUILayout.Width(20));
+            EditorGUILayout.LabelField("Ãë", GUILayout.Width(20));
         }
 
         EditorGUILayout.EndHorizontal();
 
-        EditorGUILayout.LabelField($"æœ€åæ›´æ–°: {System.DateTime.FromBinary((long)lastRefreshTime):HH:mm:ss}",
+        EditorGUILayout.LabelField($"×îºó¸üĞÂ: {System.DateTime.FromBinary((long)lastRefreshTime):HH:mm:ss}",
             EditorStyles.miniLabel);
 
         EditorGUILayout.EndVertical();
     }
 
     /// <summary>
-    /// ç»˜åˆ¶æ£€æµ‹å™¨ä¿¡æ¯
+    /// »æÖÆ¼ì²âÆ÷ĞÅÏ¢
     /// </summary>
     private void DrawDetectorInfo()
     {
-        // åŸºç¡€ä¿¡æ¯
-        showBasicInfo = EditorGUILayout.Foldout(showBasicInfo, "åŸºç¡€ä¿¡æ¯", headerStyle);
+        // »ù´¡ĞÅÏ¢
+        showBasicInfo = EditorGUILayout.Foldout(showBasicInfo, "»ù´¡ĞÅÏ¢", headerStyle);
         if (showBasicInfo)
         {
             DrawBasicInfo();
         }
 
-        // ç‰©å“åˆ†å¸ƒ
+        // ÎïÆ··Ö²¼
         if (cachedDetectorInfo.itemDistribution.Count > 0)
         {
-            showItemDistribution = EditorGUILayout.Foldout(showItemDistribution, "ç‰©å“åˆ†å¸ƒ", headerStyle);
+            showItemDistribution = EditorGUILayout.Foldout(showItemDistribution, "ÎïÆ··Ö²¼", headerStyle);
             if (showItemDistribution)
             {
                 DrawItemDistribution();
             }
         }
 
-        // å ç”¨ä¿¡æ¯
-        showOccupancyInfo = EditorGUILayout.Foldout(showOccupancyInfo, "å ç”¨åˆ†æ", headerStyle);
+        // Õ¼ÓÃĞÅÏ¢
+        showOccupancyInfo = EditorGUILayout.Foldout(showOccupancyInfo, "Õ¼ÓÃ·ÖÎö", headerStyle);
         if (showOccupancyInfo)
         {
             DrawOccupancyInfo();
         }
 
-        // ç‰¹å®šç±»å‹åˆ†æ
-        showSpecificAnalysis = EditorGUILayout.Foldout(showSpecificAnalysis, "ä¸“é¡¹åˆ†æ", headerStyle);
+        // ÌØ¶¨ÀàĞÍ·ÖÎö
+        showSpecificAnalysis = EditorGUILayout.Foldout(showSpecificAnalysis, "×¨Ïî·ÖÎö", headerStyle);
         if (showSpecificAnalysis)
         {
             DrawSpecificAnalysis();
         }
 
-        // å¯è§†åŒ–é¢„è§ˆ
-        showVisualization = EditorGUILayout.Foldout(showVisualization, "å¯è§†åŒ–é¢„è§ˆ", headerStyle);
+        // ¿ÉÊÓ»¯Ô¤ÀÀ
+        showVisualization = EditorGUILayout.Foldout(showVisualization, "¿ÉÊÓ»¯Ô¤ÀÀ", headerStyle);
         if (showVisualization)
         {
             DrawVisualizationPreview();
@@ -219,34 +214,34 @@ public class GridDetectorInspector : Editor
     }
 
     /// <summary>
-    /// ç»˜åˆ¶åŸºç¡€ä¿¡æ¯
+    /// »æÖÆ»ù´¡ĞÅÏ¢
     /// </summary>
     private void DrawBasicInfo()
     {
         EditorGUILayout.BeginVertical("box");
 
-        EditorGUILayout.LabelField($"ç½‘æ ¼å°ºå¯¸: {cachedDetectorInfo.gridSize.x} x {cachedDetectorInfo.gridSize.y}", infoStyle);
-        EditorGUILayout.LabelField($"æ€»å®¹é‡: {cachedDetectorInfo.totalCells} æ ¼", infoStyle);
-        EditorGUILayout.LabelField($"å·²å ç”¨: {cachedDetectorInfo.occupiedCellsCount} æ ¼", infoStyle);
-        EditorGUILayout.LabelField($"å¯ç”¨ç©ºé—´: {cachedDetectorInfo.availableCells} æ ¼", infoStyle);
+        EditorGUILayout.LabelField($"Íø¸ñ³ß´ç: {cachedDetectorInfo.gridSize.x} x {cachedDetectorInfo.gridSize.y}", infoStyle);
+        EditorGUILayout.LabelField($"×ÜÈİÁ¿: {cachedDetectorInfo.totalCells} ¸ñ", infoStyle);
+        EditorGUILayout.LabelField($"ÒÑÕ¼ÓÃ: {cachedDetectorInfo.occupiedCellsCount} ¸ñ", infoStyle);
+        EditorGUILayout.LabelField($"¿ÉÓÃ¿Õ¼ä: {cachedDetectorInfo.availableCells} ¸ñ", infoStyle);
 
-        // å ç”¨ç‡è¿›åº¦æ¡
+        // Õ¼ÓÃÂÊ½ø¶ÈÌõ
         float occupancyRatio = cachedDetectorInfo.occupancyRate;
         Color barColor = occupancyRatio > 0.8f ? Color.red : (occupancyRatio > 0.6f ? Color.yellow : Color.green);
 
-        EditorGUILayout.LabelField($"å ç”¨ç‡: {cachedDetectorInfo.occupancyRate * 100:F1}%",
+        EditorGUILayout.LabelField($"Õ¼ÓÃÂÊ: {cachedDetectorInfo.occupancyRate * 100:F1}%",
             occupancyRatio > 0.8f ? warningStyle : infoStyle);
 
         Rect progressRect = GUILayoutUtility.GetRect(0, 20, GUILayout.ExpandWidth(true));
         EditorGUI.ProgressBar(progressRect, occupancyRatio, $"{cachedDetectorInfo.occupancyRate * 100:F1}%");
 
-        EditorGUILayout.LabelField($"ç‰©å“æ•°é‡: {cachedDetectorInfo.placedItemsCount}", infoStyle);
+        EditorGUILayout.LabelField($"ÎïÆ·ÊıÁ¿: {cachedDetectorInfo.placedItemsCount}", infoStyle);
 
         EditorGUILayout.EndVertical();
     }
 
     /// <summary>
-    /// ç»˜åˆ¶ç‰©å“åˆ†å¸ƒ
+    /// »æÖÆÎïÆ··Ö²¼
     /// </summary>
     private void DrawItemDistribution()
     {
@@ -254,13 +249,13 @@ public class GridDetectorInspector : Editor
 
         if (cachedDetectorInfo.itemDistribution.Count == 0)
         {
-            EditorGUILayout.LabelField("æš‚æ— ç‰©å“", infoStyle);
+            EditorGUILayout.LabelField("ÔİÎŞÎïÆ·", infoStyle);
         }
         else
         {
-            EditorGUILayout.LabelField($"ç‰©å“ç§ç±»: {cachedDetectorInfo.itemDistribution.Count}", subHeaderStyle);
+            EditorGUILayout.LabelField($"ÎïÆ·ÖÖÀà: {cachedDetectorInfo.itemDistribution.Count}", subHeaderStyle);
 
-            // æ˜¾ç¤ºå‰10ç§ç‰©å“
+            // ÏÔÊ¾Ç°10ÖÖÎïÆ·
             var sortedItems = cachedDetectorInfo.itemDistribution
                 .OrderByDescending(kvp => kvp.Value)
                 .Take(10);
@@ -269,13 +264,13 @@ public class GridDetectorInspector : Editor
             {
                 EditorGUILayout.BeginHorizontal();
                 EditorGUILayout.LabelField(kvp.Key, infoStyle, GUILayout.ExpandWidth(true));
-                EditorGUILayout.LabelField($"{kvp.Value} ä¸ª", infoStyle, GUILayout.Width(60));
+                EditorGUILayout.LabelField($"{kvp.Value} ¸ö", infoStyle, GUILayout.Width(60));
                 EditorGUILayout.EndHorizontal();
             }
 
             if (cachedDetectorInfo.itemDistribution.Count > 10)
             {
-                EditorGUILayout.LabelField($"... è¿˜æœ‰ {cachedDetectorInfo.itemDistribution.Count - 10} ç§ç‰©å“",
+                EditorGUILayout.LabelField($"... »¹ÓĞ {cachedDetectorInfo.itemDistribution.Count - 10} ÖÖÎïÆ·",
                     EditorStyles.miniLabel);
             }
         }
@@ -284,23 +279,23 @@ public class GridDetectorInspector : Editor
     }
 
     /// <summary>
-    /// ç»˜åˆ¶å ç”¨ä¿¡æ¯
+    /// »æÖÆÕ¼ÓÃĞÅÏ¢
     /// </summary>
     private void DrawOccupancyInfo()
     {
         EditorGUILayout.BeginVertical("box");
 
-        // åŒºåŸŸå ç”¨ä¿¡æ¯ - åŠŸèƒ½å¼€å‘ä¸­
-        EditorGUILayout.LabelField("åŒºåŸŸå ç”¨åˆ†æåŠŸèƒ½å¼€å‘ä¸­...", EditorStyles.centeredGreyMiniLabel);
-        
-        // å¯ç”¨ç©ºé—´ä¿¡æ¯ - åŠŸèƒ½å¼€å‘ä¸­  
-        EditorGUILayout.LabelField("å¯ç”¨ç©ºé—´åˆ†æåŠŸèƒ½å¼€å‘ä¸­...", EditorStyles.centeredGreyMiniLabel);
+        // ÇøÓòÕ¼ÓÃĞÅÏ¢ - ¹¦ÄÜ¿ª·¢ÖĞ
+        EditorGUILayout.LabelField("ÇøÓòÕ¼ÓÃ·ÖÎö¹¦ÄÜ¿ª·¢ÖĞ...", EditorStyles.centeredGreyMiniLabel);
+
+        // ¿ÉÓÃ¿Õ¼äĞÅÏ¢ - ¹¦ÄÜ¿ª·¢ÖĞ  
+        EditorGUILayout.LabelField("¿ÉÓÃ¿Õ¼ä·ÖÎö¹¦ÄÜ¿ª·¢ÖĞ...", EditorStyles.centeredGreyMiniLabel);
 
         EditorGUILayout.EndVertical();
     }
 
     /// <summary>
-    /// ç»˜åˆ¶ç‰¹å®šç±»å‹åˆ†æ
+    /// »æÖÆÌØ¶¨ÀàĞÍ·ÖÎö
     /// </summary>
     private void DrawSpecificAnalysis()
     {
@@ -308,85 +303,85 @@ public class GridDetectorInspector : Editor
 
         EditorGUILayout.BeginVertical("box");
 
-        // ä»“åº“åˆ†æ
+        // ²Ö¿â·ÖÎö
         if (grid is ItemGrid warehouseGrid)
         {
             DrawWarehouseAnalysis(warehouseGrid);
         }
-        // èƒŒåŒ…åˆ†æ
+        // ±³°ü·ÖÎö
         else if (grid is BackpackItemGrid backpackGrid)
         {
             DrawBackpackAnalysis(backpackGrid);
         }
-        // æˆ˜æœ¯æŒ‚å…·åˆ†æ
+        // Õ½Êõ¹Ò¾ß·ÖÎö
         else if (grid is TactiaclRigItemGrid tacticalGrid)
         {
             DrawTacticalRigAnalysis(tacticalGrid);
         }
         else
         {
-            EditorGUILayout.LabelField("æ­¤ç½‘æ ¼ç±»å‹æš‚æ— ä¸“é¡¹åˆ†æ", infoStyle);
+            EditorGUILayout.LabelField("´ËÍø¸ñÀàĞÍÔİÎŞ×¨Ïî·ÖÎö", infoStyle);
         }
 
         EditorGUILayout.EndVertical();
     }
 
     /// <summary>
-    /// ç»˜åˆ¶ä»“åº“åˆ†æ
+    /// »æÖÆ²Ö¿â·ÖÎö
     /// </summary>
     private void DrawWarehouseAnalysis(ItemGrid warehouseGrid)
     {
         try
         {
-            // ä»“åº“æ•ˆç‡åˆ†æåŠŸèƒ½å¼€å‘ä¸­
-            EditorGUILayout.LabelField("ä»“åº“æ•ˆç‡åˆ†æåŠŸèƒ½å¼€å‘ä¸­...", EditorStyles.centeredGreyMiniLabel);
+            // ²Ö¿âĞ§ÂÊ·ÖÎö¹¦ÄÜ¿ª·¢ÖĞ
+            EditorGUILayout.LabelField("²Ö¿âĞ§ÂÊ·ÖÎö¹¦ÄÜ¿ª·¢ÖĞ...", EditorStyles.centeredGreyMiniLabel);
         }
         catch (System.Exception e)
         {
-            EditorGUILayout.LabelField($"ä»“åº“åˆ†æé”™è¯¯: {e.Message}", errorStyle);
+            EditorGUILayout.LabelField($"²Ö¿â·ÖÎö´íÎó: {e.Message}", errorStyle);
         }
     }
 
     /// <summary>
-    /// ç»˜åˆ¶èƒŒåŒ…åˆ†æ
+    /// »æÖÆ±³°ü·ÖÎö
     /// </summary>
     private void DrawBackpackAnalysis(BackpackItemGrid backpackGrid)
     {
         try
         {
-            // èƒŒåŒ…è´Ÿé‡åˆ†æåŠŸèƒ½å¼€å‘ä¸­
-            EditorGUILayout.LabelField("èƒŒåŒ…è´Ÿé‡åˆ†æåŠŸèƒ½å¼€å‘ä¸­...", EditorStyles.centeredGreyMiniLabel);
+            // ±³°ü¸ºÖØ·ÖÎö¹¦ÄÜ¿ª·¢ÖĞ
+            EditorGUILayout.LabelField("±³°ü¸ºÖØ·ÖÎö¹¦ÄÜ¿ª·¢ÖĞ...", EditorStyles.centeredGreyMiniLabel);
         }
         catch (System.Exception e)
         {
-            EditorGUILayout.LabelField($"èƒŒåŒ…åˆ†æé”™è¯¯: {e.Message}", errorStyle);
+            EditorGUILayout.LabelField($"±³°ü·ÖÎö´íÎó: {e.Message}", errorStyle);
         }
     }
 
     /// <summary>
-    /// ç»˜åˆ¶æˆ˜æœ¯æŒ‚å…·åˆ†æ
+    /// »æÖÆÕ½Êõ¹Ò¾ß·ÖÎö
     /// </summary>
     private void DrawTacticalRigAnalysis(TactiaclRigItemGrid tacticalGrid)
     {
         try
         {
-            // æˆ˜æœ¯æŒ‚å…·åˆ†æåŠŸèƒ½å¼€å‘ä¸­
-            EditorGUILayout.LabelField("æˆ˜æœ¯æŒ‚å…·åˆ†æåŠŸèƒ½å¼€å‘ä¸­...", EditorStyles.centeredGreyMiniLabel);
+            // Õ½Êõ¹Ò¾ß·ÖÎö¹¦ÄÜ¿ª·¢ÖĞ
+            EditorGUILayout.LabelField("Õ½Êõ¹Ò¾ß·ÖÎö¹¦ÄÜ¿ª·¢ÖĞ...", EditorStyles.centeredGreyMiniLabel);
         }
         catch (System.Exception e)
         {
-            EditorGUILayout.LabelField($"æŒ‚å…·åˆ†æé”™è¯¯: {e.Message}", errorStyle);
+            EditorGUILayout.LabelField($"¹Ò¾ß·ÖÎö´íÎó: {e.Message}", errorStyle);
         }
     }
 
     /// <summary>
-    /// ç»˜åˆ¶å¯è§†åŒ–é¢„è§ˆ
+    /// »æÖÆ¿ÉÊÓ»¯Ô¤ÀÀ
     /// </summary>
     private void DrawVisualizationPreview()
     {
         EditorGUILayout.BeginVertical("box");
 
-        // ç®€å•çš„ç½‘æ ¼é¢„è§ˆ
+        // ¼òµ¥µÄÍø¸ñÔ¤ÀÀ
         if (cachedDetectorInfo != null)
         {
             Rect previewRect = GUILayoutUtility.GetRect(200, 150);
@@ -395,11 +390,7 @@ public class GridDetectorInspector : Editor
 
         EditorGUILayout.BeginHorizontal();
 
-        if (GUILayout.Button("æ‰“å¼€è¯¦ç»†å¯è§†åŒ–"))
-        {
-            GridVisualizationWindow window = EditorWindow.GetWindow<GridVisualizationWindow>();
-            window.SetSelectedGrid(target as BaseItemGrid);
-        }
+        // ¿ÉÊÓ»¯´°¿ÚÒÑÒÆ³ı£¬¹¦ÄÜÒÑ¼¯³Éµ½¶¯Ì¬¼à¿Ø´°¿ÚÖĞ
 
         EditorGUILayout.EndHorizontal();
 
@@ -407,11 +398,11 @@ public class GridDetectorInspector : Editor
     }
 
     /// <summary>
-    /// ç»˜åˆ¶ç®€å•ç½‘æ ¼é¢„è§ˆ
+    /// »æÖÆ¼òµ¥Íø¸ñÔ¤ÀÀ
     /// </summary>
     private void DrawSimpleGridPreview(Rect rect)
     {
-        // ç»˜åˆ¶èƒŒæ™¯
+        // »æÖÆ±³¾°
         EditorGUI.DrawRect(rect, new Color(0.2f, 0.2f, 0.2f));
 
         Vector2 gridSize = cachedDetectorInfo.gridSize;
@@ -422,7 +413,7 @@ public class GridDetectorInspector : Editor
             rect.y + (rect.height - gridSize.y * cellSize) * 0.5f
         );
 
-        // ç»˜åˆ¶ç½‘æ ¼
+        // »æÖÆÍø¸ñ
         for (int x = 0; x < gridSize.x; x++)
         {
             for (int y = 0; y < gridSize.y; y++)
@@ -434,10 +425,10 @@ public class GridDetectorInspector : Editor
                     cellSize - 1
                 );
 
-                // ä½¿ç”¨å ç”¨çŸ©é˜µæ¥åˆ¤æ–­æ ¼å­æ˜¯å¦è¢«å ç”¨
+                // Ê¹ÓÃÕ¼ÓÃ¾ØÕóÀ´ÅĞ¶Ï¸ñ×ÓÊÇ·ñ±»Õ¼ÓÃ
                 bool isOccupied = false;
-                if (cachedDetectorInfo.occupancyMatrix != null && 
-                    x < cachedDetectorInfo.occupancyMatrix.GetLength(0) && 
+                if (cachedDetectorInfo.occupancyMatrix != null &&
+                    x < cachedDetectorInfo.occupancyMatrix.GetLength(0) &&
                     y < cachedDetectorInfo.occupancyMatrix.GetLength(1))
                 {
                     isOccupied = cachedDetectorInfo.occupancyMatrix[x, y] > 0;
@@ -450,17 +441,17 @@ public class GridDetectorInspector : Editor
     }
 
     /// <summary>
-    /// è·å–é…ç½®ç±»å‹çš„æ˜¾ç¤ºåç§°
+    /// »ñÈ¡ÅäÖÃÀàĞÍµÄÏÔÊ¾Ãû³Æ
     /// </summary>
     private string GetLoadoutTypeDisplayName(InventorySystem.Grid.LoadoutType loadoutType)
     {
         switch (loadoutType)
         {
-            case InventorySystem.Grid.LoadoutType.Assault: return "çªå‡»é…ç½®";
-            case InventorySystem.Grid.LoadoutType.Support: return "æ”¯æ´é…ç½®";
-            case InventorySystem.Grid.LoadoutType.Marksman: return "å°„æ‰‹é…ç½®";
-            case InventorySystem.Grid.LoadoutType.Utility: return "å·¥å…·é…ç½®";
-            case InventorySystem.Grid.LoadoutType.Balanced: return "å¹³è¡¡é…ç½®";
+            case InventorySystem.Grid.LoadoutType.Assault: return "Í»»÷ÅäÖÃ";
+            case InventorySystem.Grid.LoadoutType.Support: return "Ö§Ô®ÅäÖÃ";
+            case InventorySystem.Grid.LoadoutType.Marksman: return "ÉäÊÖÅäÖÃ";
+            case InventorySystem.Grid.LoadoutType.Utility: return "¹¤¾ßÅäÖÃ";
+            case InventorySystem.Grid.LoadoutType.Balanced: return "Æ½ºâÅäÖÃ";
             default: return loadoutType.ToString();
         }
     }

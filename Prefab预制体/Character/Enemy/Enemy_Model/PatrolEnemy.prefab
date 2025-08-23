@@ -234,8 +234,8 @@ MonoBehaviour:
   currentWaypoint: 0
   reachedEndOfPath: 0
   shouldPatrol: 1
-  weapon: {fileID: 0}
-  firePoint: {fileID: 0}
+  weapon: {fileID: 8271964574586338997}
+  firePoint: {fileID: 2564352485790659728}
   weaponController: {fileID: 0}
   fireRate: 0.2
   nextFireTime: 0
@@ -293,9 +293,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8166fac0f9f2087498b10d5e1965003f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  weaponTransform: {fileID: 0}
-  weaponSprite: {fileID: 0}
-  flipAngleThreshold: 90
+  weaponTransform: {fileID: 8271964574586338997}
+  weaponSprite: {fileID: 8188633822475907417}
   targetLayer:
     serializedVersion: 2
     m_Bits: 768
@@ -611,13 +610,16 @@ MonoBehaviour:
   bulletSpeed: 50
   range: 50
   damage: 18
+  magazineCapacity: 30
+  reloadTime: 2
+  currentAmmo: 0
+  isReloading: 0
+  reloadStartTime: 0
   playerBulletPrefab: {fileID: 2965606263880691008, guid: 7d628be2d48fbc04997864f324daed06, type: 3}
   enemyBulletPrefab: {fileID: 2965606263880691008, guid: eb65c448a7caf5f48a035eb88a0adbd6, type: 3}
   bulletPrefab: {fileID: 0}
   muzzle: {fileID: 2564352485790659728}
   weaponTrigger: {fileID: 7192917798057192745}
-  playerBulletPool: {fileID: 0}
-  enemyBulletPool: {fileID: 0}
 --- !u!114 &7192917798057192745
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -631,8 +633,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Muzzle: {fileID: 2564352485790659728}
-  playerBulletPool: {fileID: 0}
-  enemyBulletPool: {fileID: 0}
   ShootInterval: 50
   spreadAngle: 12
 --- !u!114 &6449826293912487619
@@ -647,3 +647,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f5f9561747f829f4e8bed5bc11553a0a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  itemDisplayName: 
+  defaultMaterial: {fileID: 0}
+  highlightMaterial: {fileID: 0}
