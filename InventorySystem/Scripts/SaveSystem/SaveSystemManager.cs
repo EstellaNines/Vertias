@@ -4,20 +4,20 @@ using UnityEngine.SceneManagement;
 namespace InventorySystem.SaveSystem
 {
     /// <summary>
-    /// ±£´æÏµÍ³¹ÜÀíÆ÷
-    /// Í³Ò»¹ÜÀíSaveManager¡¢ItemInstanceIDManagerºÍItemInstanceIDManagerIntegrator
-    /// È·±£ËüÃÇÄÜ¹»ÕıÈ·µØ¿ç³¡¾°±£´æ
+    /// ä¿å­˜ç³»ç»Ÿç®¡ç†å™¨
+    /// ç»Ÿä¸€ç®¡ç†SaveManagerã€ItemInstanceIDManagerå’ŒItemInstanceIDManagerIntegrator
+    /// ç¡®ä¿å®ƒä»¬èƒ½å¤Ÿæ­£ç¡®åœ°è·¨åœºæ™¯ä¿å­˜
     /// </summary>
     public class SaveSystemManager : MonoBehaviour
     {
-        #region µ¥ÀıÄ£Ê½
+        #region å•ä¾‹æ¨¡å¼
         /// <summary>
-        /// µ¥ÀıÊµÀı
+        /// å•ä¾‹å®ä¾‹
         /// </summary>
         private static SaveSystemManager _instance;
 
         /// <summary>
-        /// »ñÈ¡µ¥ÀıÊµÀı
+        /// è·å–å•ä¾‹å®ä¾‹
         /// </summary>
         public static SaveSystemManager Instance
         {
@@ -31,13 +31,13 @@ namespace InventorySystem.SaveSystem
                         GameObject go = new GameObject("SaveSystemManager");
                         _instance = go.AddComponent<SaveSystemManager>();
 
-                        // ½«ĞÂ´´½¨µÄSaveSystemManagerÉèÖÃÎªSaveSystemµÄ×Ó¶ÔÏó£¨Èç¹û´æÔÚSaveSystem£©
+                        // å°†æ–°åˆ›å»ºçš„SaveSystemManagerè®¾ç½®ä¸ºSaveSystemçš„å­å¯¹è±¡ï¼ˆå¦‚æœå­˜åœ¨SaveSystemï¼‰
                         var saveSystemPersistence = FindObjectOfType<SaveSystemPersistence>();
                         if (saveSystemPersistence != null)
                         {
                             go.transform.SetParent(saveSystemPersistence.transform);
                         }
-                        // ×¢Òâ£º²»µ÷ÓÃDontDestroyOnLoad£¬ÒòÎªSaveSystemPersistence»á´¦ÀíÕû¸öÏµÍ³µÄ³Ö¾Ã»¯
+                        // æ³¨æ„ï¼šä¸è°ƒç”¨DontDestroyOnLoadï¼Œå› ä¸ºSaveSystemPersistenceä¼šå¤„ç†æ•´ä¸ªç³»ç»Ÿçš„æŒä¹…åŒ–
                     }
                 }
                 return _instance;
@@ -45,45 +45,45 @@ namespace InventorySystem.SaveSystem
         }
         #endregion
 
-        #region ÅäÖÃ×Ö¶Î
-        [Header("±£´æÏµÍ³ÅäÖÃ")]
+        #region é…ç½®å­—æ®µ
+        [Header("ä¿å­˜ç³»ç»Ÿé…ç½®")]
         [SerializeField]
-        [Tooltip("ÊÇ·ñÔÚÆô¶¯Ê±×Ô¶¯³õÊ¼»¯ËùÓĞ×é¼ş")]
+        [Tooltip("æ˜¯å¦åœ¨å¯åŠ¨æ—¶è‡ªåŠ¨åˆå§‹åŒ–æ‰€æœ‰ç»„ä»¶")]
         private bool autoInitializeOnStart = true;
 
         [SerializeField]
-        [Tooltip("ÊÇ·ñÆôÓÃµ÷ÊÔÈÕÖ¾")]
+        [Tooltip("æ˜¯å¦å¯ç”¨è°ƒè¯•æ—¥å¿—")]
         private bool enableDebugLog = true;
 
         [SerializeField]
-        [Tooltip("³õÊ¼»¯ÑÓ³ÙÊ±¼ä£¨Ãë£©")]
+        [Tooltip("åˆå§‹åŒ–å»¶è¿Ÿæ—¶é—´ï¼ˆç§’ï¼‰")]
         private float initializationDelay = 0.5f;
         #endregion
 
-        #region ×é¼şÒıÓÃ
+        #region ç»„ä»¶å¼•ç”¨
         /// <summary>
-        /// ±£´æ¹ÜÀíÆ÷ÊµÀı
+        /// ä¿å­˜ç®¡ç†å™¨å®ä¾‹
         /// </summary>
         public SaveManager SaveManager { get; private set; }
 
         /// <summary>
-        /// ÎïÆ·ÊµÀıID¹ÜÀíÆ÷ÊµÀı
+        /// ç‰©å“å®ä¾‹IDç®¡ç†å™¨å®ä¾‹
         /// </summary>
         public ItemInstanceIDManager ItemIDManager { get; private set; }
 
         /// <summary>
-        /// ÎïÆ·ÊµÀıID¹ÜÀíÆ÷¼¯³ÉÆ÷ÊµÀı
+        /// ç‰©å“å®ä¾‹IDç®¡ç†å™¨é›†æˆå™¨å®ä¾‹
         /// </summary>
         public ItemInstanceIDManagerIntegrator ItemIDIntegrator { get; private set; }
         #endregion
 
-        #region UnityÉúÃüÖÜÆÚ
+        #region Unityç”Ÿå‘½å‘¨æœŸ
         /// <summary>
-        /// ×é¼ş³õÊ¼»¯
+        /// ç»„ä»¶åˆå§‹åŒ–
         /// </summary>
         private void Awake()
         {
-            // È·±£µ¥ÀıÎ¨Ò»ĞÔ
+            // ç¡®ä¿å•ä¾‹å”¯ä¸€æ€§
             if (_instance != null && _instance != this)
             {
                 Destroy(gameObject);
@@ -92,23 +92,23 @@ namespace InventorySystem.SaveSystem
 
             _instance = this;
 
-            LogDebug("SaveSystemManagerÒÑ³õÊ¼»¯");
+            LogDebug("SaveSystemManagerå·²åˆå§‹åŒ–");
         }
 
         /// <summary>
-        /// ×é¼şÆô¶¯
+        /// ç»„ä»¶å¯åŠ¨
         /// </summary>
         private void Start()
         {
             if (autoInitializeOnStart)
             {
-                // ÑÓ³Ù³õÊ¼»¯£¬È·±£ËùÓĞÏµÍ³¶¼ÒÑ×¼±¸¾ÍĞ÷
+                // å»¶è¿Ÿåˆå§‹åŒ–ï¼Œç¡®ä¿æ‰€æœ‰ç³»ç»Ÿéƒ½å·²å‡†å¤‡å°±ç»ª
                 Invoke(nameof(InitializeAllComponents), initializationDelay);
             }
         }
 
         /// <summary>
-        /// ×é¼şÏú»Ù
+        /// ç»„ä»¶é”€æ¯
         /// </summary>
         private void OnDestroy()
         {
@@ -119,147 +119,147 @@ namespace InventorySystem.SaveSystem
         }
         #endregion
 
-        #region ³õÊ¼»¯·½·¨
+        #region åˆå§‹åŒ–æ–¹æ³•
         /// <summary>
-        /// ³õÊ¼»¯ËùÓĞ±£´æÏµÍ³×é¼ş
+        /// åˆå§‹åŒ–æ‰€æœ‰ä¿å­˜ç³»ç»Ÿç»„ä»¶
         /// </summary>
         public void InitializeAllComponents()
         {
-            LogDebug("¿ªÊ¼³õÊ¼»¯±£´æÏµÍ³×é¼ş...");
+            LogDebug("å¼€å§‹åˆå§‹åŒ–ä¿å­˜ç³»ç»Ÿç»„ä»¶...");
 
-            // ³õÊ¼»¯SaveManager
+            // åˆå§‹åŒ–SaveManager
             InitializeSaveManager();
 
-            // ³õÊ¼»¯ItemInstanceIDManager
+            // åˆå§‹åŒ–ItemInstanceIDManager
             InitializeItemIDManager();
 
-            // ³õÊ¼»¯ItemInstanceIDManagerIntegrator
+            // åˆå§‹åŒ–ItemInstanceIDManagerIntegrator
             InitializeItemIDIntegrator();
 
-            LogDebug("±£´æÏµÍ³×é¼ş³õÊ¼»¯Íê³É");
+            LogDebug("ä¿å­˜ç³»ç»Ÿç»„ä»¶åˆå§‹åŒ–å®Œæˆ");
         }
 
         /// <summary>
-        /// ³õÊ¼»¯±£´æ¹ÜÀíÆ÷
+        /// åˆå§‹åŒ–ä¿å­˜ç®¡ç†å™¨
         /// </summary>
         private void InitializeSaveManager()
         {
             SaveManager = SaveManager.Instance;
             if (SaveManager != null)
             {
-                LogDebug("SaveManager³õÊ¼»¯³É¹¦");
+                LogDebug("SaveManageråˆå§‹åŒ–æˆåŠŸ");
             }
             else
             {
-                Debug.LogError("SaveManager³õÊ¼»¯Ê§°Ü");
+                Debug.LogError("SaveManageråˆå§‹åŒ–å¤±è´¥");
             }
         }
 
         /// <summary>
-        /// ³õÊ¼»¯ÎïÆ·ÊµÀıID¹ÜÀíÆ÷
+        /// åˆå§‹åŒ–ç‰©å“å®ä¾‹IDç®¡ç†å™¨
         /// </summary>
         private void InitializeItemIDManager()
         {
             ItemIDManager = ItemInstanceIDManager.Instance;
             if (ItemIDManager != null)
             {
-                LogDebug("ItemInstanceIDManager³õÊ¼»¯³É¹¦");
+                LogDebug("ItemInstanceIDManageråˆå§‹åŒ–æˆåŠŸ");
             }
             else
             {
-                Debug.LogError("ItemInstanceIDManager³õÊ¼»¯Ê§°Ü");
+                Debug.LogError("ItemInstanceIDManageråˆå§‹åŒ–å¤±è´¥");
             }
         }
 
         /// <summary>
-        /// ³õÊ¼»¯ÎïÆ·ÊµÀıID¹ÜÀíÆ÷¼¯³ÉÆ÷
+        /// åˆå§‹åŒ–ç‰©å“å®ä¾‹IDç®¡ç†å™¨é›†æˆå™¨
         /// </summary>
         private void InitializeItemIDIntegrator()
         {
             ItemIDIntegrator = ItemInstanceIDManagerIntegrator.Instance;
             if (ItemIDIntegrator != null)
             {
-                LogDebug("ItemInstanceIDManagerIntegrator³õÊ¼»¯³É¹¦");
+                LogDebug("ItemInstanceIDManagerIntegratoråˆå§‹åŒ–æˆåŠŸ");
             }
             else
             {
-                Debug.LogError("ItemInstanceIDManagerIntegrator³õÊ¼»¯Ê§°Ü");
+                Debug.LogError("ItemInstanceIDManagerIntegratoråˆå§‹åŒ–å¤±è´¥");
             }
         }
         #endregion
 
-        #region ¹«¹²·½·¨
+        #region å…¬å…±æ–¹æ³•
         /// <summary>
-        /// ÊÖ¶¯´¥·¢±£´æ
+        /// æ‰‹åŠ¨è§¦å‘ä¿å­˜
         /// </summary>
-        /// <param name="saveSlot">±£´æ²ÛÎ»Ãû³Æ£¬Ä¬ÈÏÎª"default"</param>
+        /// <param name="saveSlot">ä¿å­˜æ§½ä½åç§°ï¼Œé»˜è®¤ä¸º"default"</param>
         public void TriggerSave(string saveSlot = "default")
         {
             if (SaveManager != null)
             {
                 SaveManager.SaveAll(saveSlot);
-                LogDebug($"ÊÖ¶¯´¥·¢±£´æÍê³É£¬±£´æ²ÛÎ»£º{saveSlot}");
+                LogDebug($"æ‰‹åŠ¨è§¦å‘ä¿å­˜å®Œæˆï¼Œä¿å­˜æ§½ä½ï¼š{saveSlot}");
             }
             else
             {
-                Debug.LogError("SaveManagerÎ´³õÊ¼»¯£¬ÎŞ·¨Ö´ĞĞ±£´æ");
+                Debug.LogError("SaveManageræœªåˆå§‹åŒ–ï¼Œæ— æ³•æ‰§è¡Œä¿å­˜");
             }
         }
 
         /// <summary>
-        /// ÊÖ¶¯´¥·¢¼ÓÔØ
+        /// æ‰‹åŠ¨è§¦å‘åŠ è½½
         /// </summary>
-        /// <param name="saveSlot">±£´æ²ÛÎ»Ãû³Æ£¬Ä¬ÈÏÎª"default"</param>
+        /// <param name="saveSlot">ä¿å­˜æ§½ä½åç§°ï¼Œé»˜è®¤ä¸º"default"</param>
         public void TriggerLoad(string saveSlot = "default")
         {
             if (SaveManager != null)
             {
                 SaveManager.LoadSave(saveSlot);
-                LogDebug($"ÊÖ¶¯´¥·¢¼ÓÔØÍê³É£¬±£´æ²ÛÎ»£º{saveSlot}");
+                LogDebug($"æ‰‹åŠ¨è§¦å‘åŠ è½½å®Œæˆï¼Œä¿å­˜æ§½ä½ï¼š{saveSlot}");
             }
             else
             {
-                Debug.LogError("SaveManagerÎ´³õÊ¼»¯£¬ÎŞ·¨Ö´ĞĞ¼ÓÔØ");
+                Debug.LogError("SaveManageræœªåˆå§‹åŒ–ï¼Œæ— æ³•æ‰§è¡ŒåŠ è½½");
             }
         }
 
         /// <summary>
-        /// ÊÖ¶¯´¥·¢ID¼¯³É
+        /// æ‰‹åŠ¨è§¦å‘IDé›†æˆ
         /// </summary>
         public void TriggerIDIntegration()
         {
             if (ItemIDIntegrator != null)
             {
                 ItemIDIntegrator.PerformAutoIntegration();
-                LogDebug("ÊÖ¶¯´¥·¢ID¼¯³ÉÍê³É");
+                LogDebug("æ‰‹åŠ¨è§¦å‘IDé›†æˆå®Œæˆ");
             }
             else
             {
-                Debug.LogError("ItemInstanceIDManagerIntegratorÎ´³õÊ¼»¯£¬ÎŞ·¨Ö´ĞĞ¼¯³É");
+                Debug.LogError("ItemInstanceIDManagerIntegratoræœªåˆå§‹åŒ–ï¼Œæ— æ³•æ‰§è¡Œé›†æˆ");
             }
         }
 
         /// <summary>
-        /// »ñÈ¡±£´æÏµÍ³×´Ì¬
+        /// è·å–ä¿å­˜ç³»ç»ŸçŠ¶æ€
         /// </summary>
-        /// <returns>±£´æÏµÍ³×´Ì¬ĞÅÏ¢</returns>
+        /// <returns>ä¿å­˜ç³»ç»ŸçŠ¶æ€ä¿¡æ¯</returns>
         public string GetSystemStatus()
         {
             var status = new System.Text.StringBuilder();
-            status.AppendLine("=== ±£´æÏµÍ³×´Ì¬ ===");
-            status.AppendLine($"SaveManager: {(SaveManager != null ? "ÒÑ³õÊ¼»¯" : "Î´³õÊ¼»¯")}");
-            status.AppendLine($"ItemInstanceIDManager: {(ItemIDManager != null ? "ÒÑ³õÊ¼»¯" : "Î´³õÊ¼»¯")}");
-            status.AppendLine($"ItemInstanceIDManagerIntegrator: {(ItemIDIntegrator != null ? "ÒÑ³õÊ¼»¯" : "Î´³õÊ¼»¯")}");
-            status.AppendLine($"µ±Ç°³¡¾°: {SceneManager.GetActiveScene().name}");
+            status.AppendLine("=== ä¿å­˜ç³»ç»ŸçŠ¶æ€ ===");
+            status.AppendLine($"SaveManager: {(SaveManager != null ? "å·²åˆå§‹åŒ–" : "æœªåˆå§‹åŒ–")}");
+            status.AppendLine($"ItemInstanceIDManager: {(ItemIDManager != null ? "å·²åˆå§‹åŒ–" : "æœªåˆå§‹åŒ–")}");
+            status.AppendLine($"ItemInstanceIDManagerIntegrator: {(ItemIDIntegrator != null ? "å·²åˆå§‹åŒ–" : "æœªåˆå§‹åŒ–")}");
+            status.AppendLine($"å½“å‰åœºæ™¯: {SceneManager.GetActiveScene().name}");
             return status.ToString();
         }
         #endregion
 
-        #region µ÷ÊÔ·½·¨
+        #region è°ƒè¯•æ–¹æ³•
         /// <summary>
-        /// Êä³öµ÷ÊÔÈÕÖ¾
+        /// è¾“å‡ºè°ƒè¯•æ—¥å¿—
         /// </summary>
-        /// <param name="message">ÈÕÖ¾ÏûÏ¢</param>
+        /// <param name="message">æ—¥å¿—æ¶ˆæ¯</param>
         private void LogDebug(string message)
         {
             if (enableDebugLog)

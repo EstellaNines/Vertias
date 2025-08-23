@@ -7,13 +7,13 @@ using System.Collections.Generic;
 namespace InventorySystem.SaveSystem.Editor
 {
     /// <summary>
-    /// ItemInstanceIDManagerµÄ×Ô¶¨Òå±à¼­Æ÷
-    /// Ìá¹©¿ÉÊÓ»¯µÄ¹ÜÀí½çÃæºÍµ÷ÊÔ¹¤¾ß
+    /// ItemInstanceIDManagerçš„è‡ªå®šä¹‰ç¼–è¾‘å™¨
+    /// æä¾›å¯è§†åŒ–çš„ç®¡ç†ç•Œé¢å’Œè°ƒè¯•å·¥å…·
     /// </summary>
     [CustomEditor(typeof(ItemInstanceIDManager))]
     public class ItemInstanceIDManagerEditor : UnityEditor.Editor
     {
-        #region Ë½ÓĞ×Ö¶Î
+        #region ç§æœ‰å­—æ®µ
         private ItemInstanceIDManager manager;
         private bool showRegisteredIDs = false;
         private bool showActiveConflicts = false;
@@ -23,9 +23,9 @@ namespace InventorySystem.SaveSystem.Editor
         private string validationReport = "";
         #endregion
 
-        #region Unity±à¼­Æ÷ÉúÃüÖÜÆÚ
+        #region Unityç¼–è¾‘å™¨ç”Ÿå‘½å‘¨æœŸ
         /// <summary>
-        /// ÆôÓÃÊ±³õÊ¼»¯
+        /// å¯ç”¨æ—¶åˆå§‹åŒ–
         /// </summary>
         private void OnEnable()
         {
@@ -33,26 +33,26 @@ namespace InventorySystem.SaveSystem.Editor
         }
 
         /// <summary>
-        /// »æÖÆInspector½çÃæ
+        /// ç»˜åˆ¶Inspectorç•Œé¢
         /// </summary>
         public override void OnInspectorGUI()
         {
-            // »æÖÆÄ¬ÈÏÊôĞÔ
+            // ç»˜åˆ¶é»˜è®¤å±æ€§
             DrawDefaultInspector();
 
             EditorGUILayout.Space(10);
-            EditorGUILayout.LabelField("ID¹ÜÀíÆ÷¿ØÖÆÃæ°å", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("IDç®¡ç†å™¨æ§åˆ¶é¢æ¿", EditorStyles.boldLabel);
             EditorGUILayout.Space(5);
 
-            // »æÖÆ¿ØÖÆ°´Å¥
+            // ç»˜åˆ¶æ§åˆ¶æŒ‰é’®
             DrawControlButtons();
 
             EditorGUILayout.Space(10);
 
-            // »æÖÆĞÅÏ¢Ãæ°å
+            // ç»˜åˆ¶ä¿¡æ¯é¢æ¿
             DrawInformationPanels();
 
-            // Èç¹ûÓĞ±ä»¯£¬±ê¼ÇÎªÔàÊı¾İ
+            // å¦‚æœæœ‰å˜åŒ–ï¼Œæ ‡è®°ä¸ºè„æ•°æ®
             if (GUI.changed)
             {
                 EditorUtility.SetDirty(manager);
@@ -60,40 +60,40 @@ namespace InventorySystem.SaveSystem.Editor
         }
         #endregion
 
-        #region ½çÃæ»æÖÆ·½·¨
+        #region ç•Œé¢ç»˜åˆ¶æ–¹æ³•
         /// <summary>
-        /// »æÖÆ¿ØÖÆ°´Å¥
+        /// ç»˜åˆ¶æ§åˆ¶æŒ‰é’®
         /// </summary>
         private void DrawControlButtons()
         {
             EditorGUILayout.BeginHorizontal();
 
-            // Ö´ĞĞÏµÍ³ÑéÖ¤°´Å¥
-            if (GUILayout.Button("Ö´ĞĞÏµÍ³ÑéÖ¤", GUILayout.Height(30)))
+            // æ‰§è¡Œç³»ç»ŸéªŒè¯æŒ‰é’®
+            if (GUILayout.Button("æ‰§è¡Œç³»ç»ŸéªŒè¯", GUILayout.Height(30)))
             {
                 if (Application.isPlaying && manager != null)
                 {
                     validationReport = manager.PerformSystemValidation();
-                    Debug.Log("ÏµÍ³ÑéÖ¤Íê³É£¬²é¿´±¨¸æÏêÇé");
+                    Debug.Log("ç³»ç»ŸéªŒè¯å®Œæˆï¼ŒæŸ¥çœ‹æŠ¥å‘Šè¯¦æƒ…");
                 }
                 else
                 {
-                    EditorUtility.DisplayDialog("ÌáÊ¾", "ÇëÔÚÔËĞĞÊ±Ö´ĞĞÏµÍ³ÑéÖ¤", "È·¶¨");
+                    EditorUtility.DisplayDialog("æç¤º", "è¯·åœ¨è¿è¡Œæ—¶æ‰§è¡Œç³»ç»ŸéªŒè¯", "ç¡®å®š");
                 }
             }
 
-            // Í¬²½³¡¾°ID°´Å¥
-            if (GUILayout.Button("Í¬²½³¡¾°ID", GUILayout.Height(30)))
+            // åŒæ­¥åœºæ™¯IDæŒ‰é’®
+            if (GUILayout.Button("åŒæ­¥åœºæ™¯ID", GUILayout.Height(30)))
             {
                 if (Application.isPlaying && manager != null)
                 {
                     bool success = manager.SynchronizeSceneIDs();
-                    string message = success ? "³¡¾°IDÍ¬²½³É¹¦" : "³¡¾°IDÍ¬²½Ê§°Ü";
-                    EditorUtility.DisplayDialog("Í¬²½½á¹û", message, "È·¶¨");
+                    string message = success ? "åœºæ™¯IDåŒæ­¥æˆåŠŸ" : "åœºæ™¯IDåŒæ­¥å¤±è´¥";
+                    EditorUtility.DisplayDialog("åŒæ­¥ç»“æœ", message, "ç¡®å®š");
                 }
                 else
                 {
-                    EditorUtility.DisplayDialog("ÌáÊ¾", "ÇëÔÚÔËĞĞÊ±Ö´ĞĞ³¡¾°IDÍ¬²½", "È·¶¨");
+                    EditorUtility.DisplayDialog("æç¤º", "è¯·åœ¨è¿è¡Œæ—¶æ‰§è¡Œåœºæ™¯IDåŒæ­¥", "ç¡®å®š");
                 }
             }
 
@@ -101,67 +101,67 @@ namespace InventorySystem.SaveSystem.Editor
 
             EditorGUILayout.BeginHorizontal();
 
-            // µ¼³öIDÓ³Éä°´Å¥
-            if (GUILayout.Button("µ¼³öIDÓ³Éä", GUILayout.Height(25)))
+            // å¯¼å‡ºIDæ˜ å°„æŒ‰é’®
+            if (GUILayout.Button("å¯¼å‡ºIDæ˜ å°„", GUILayout.Height(25)))
             {
                 if (Application.isPlaying && manager != null)
                 {
                     string exportData = manager.ExportIDMappingData();
                     if (!string.IsNullOrEmpty(exportData))
                     {
-                        string path = EditorUtility.SaveFilePanel("µ¼³öIDÓ³ÉäÊı¾İ", "", "id_mapping", "json");
+                        string path = EditorUtility.SaveFilePanel("å¯¼å‡ºIDæ˜ å°„æ•°æ®", "", "id_mapping", "json");
                         if (!string.IsNullOrEmpty(path))
                         {
                             System.IO.File.WriteAllText(path, exportData);
-                            EditorUtility.DisplayDialog("µ¼³ö³É¹¦", $"IDÓ³ÉäÊı¾İÒÑµ¼³öµ½: {path}", "È·¶¨");
+                            EditorUtility.DisplayDialog("å¯¼å‡ºæˆåŠŸ", $"IDæ˜ å°„æ•°æ®å·²å¯¼å‡ºåˆ°: {path}", "ç¡®å®š");
                         }
                     }
                 }
                 else
                 {
-                    EditorUtility.DisplayDialog("ÌáÊ¾", "ÇëÔÚÔËĞĞÊ±Ö´ĞĞµ¼³ö²Ù×÷", "È·¶¨");
+                    EditorUtility.DisplayDialog("æç¤º", "è¯·åœ¨è¿è¡Œæ—¶æ‰§è¡Œå¯¼å‡ºæ“ä½œ", "ç¡®å®š");
                 }
             }
 
-            // µ¼ÈëIDÓ³Éä°´Å¥
-            if (GUILayout.Button("µ¼ÈëIDÓ³Éä", GUILayout.Height(25)))
+            // å¯¼å…¥IDæ˜ å°„æŒ‰é’®
+            if (GUILayout.Button("å¯¼å…¥IDæ˜ å°„", GUILayout.Height(25)))
             {
                 if (Application.isPlaying && manager != null)
                 {
-                    string path = EditorUtility.OpenFilePanel("µ¼ÈëIDÓ³ÉäÊı¾İ", "", "json");
+                    string path = EditorUtility.OpenFilePanel("å¯¼å…¥IDæ˜ å°„æ•°æ®", "", "json");
                     if (!string.IsNullOrEmpty(path))
                     {
                         string importData = System.IO.File.ReadAllText(path);
                         bool success = manager.ImportIDMappingData(importData);
-                        string message = success ? "IDÓ³ÉäÊı¾İµ¼Èë³É¹¦" : "IDÓ³ÉäÊı¾İµ¼ÈëÊ§°Ü";
-                        EditorUtility.DisplayDialog("µ¼Èë½á¹û", message, "È·¶¨");
+                        string message = success ? "IDæ˜ å°„æ•°æ®å¯¼å…¥æˆåŠŸ" : "IDæ˜ å°„æ•°æ®å¯¼å…¥å¤±è´¥";
+                        EditorUtility.DisplayDialog("å¯¼å…¥ç»“æœ", message, "ç¡®å®š");
                     }
                 }
                 else
                 {
-                    EditorUtility.DisplayDialog("ÌáÊ¾", "ÇëÔÚÔËĞĞÊ±Ö´ĞĞµ¼Èë²Ù×÷", "È·¶¨");
+                    EditorUtility.DisplayDialog("æç¤º", "è¯·åœ¨è¿è¡Œæ—¶æ‰§è¡Œå¯¼å…¥æ“ä½œ", "ç¡®å®š");
                 }
             }
 
             EditorGUILayout.EndHorizontal();
 
-            // Î£ÏÕ²Ù×÷ÇøÓò
+            // å±é™©æ“ä½œåŒºåŸŸ
             EditorGUILayout.Space(5);
-            EditorGUILayout.LabelField("Î£ÏÕ²Ù×÷", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("å±é™©æ“ä½œ", EditorStyles.boldLabel);
 
             GUI.backgroundColor = Color.red;
-            if (GUILayout.Button("ÇåÀíËùÓĞÊı¾İ", GUILayout.Height(25)))
+            if (GUILayout.Button("æ¸…ç†æ‰€æœ‰æ•°æ®", GUILayout.Height(25)))
             {
-                if (EditorUtility.DisplayDialog("¾¯¸æ", "´Ë²Ù×÷½«ÇåÀíËùÓĞID¹ÜÀíÊı¾İ£¬ÎŞ·¨³·Ïú£¡\nÈ·¶¨Òª¼ÌĞøÂğ£¿", "È·¶¨", "È¡Ïû"))
+                if (EditorUtility.DisplayDialog("è­¦å‘Š", "æ­¤æ“ä½œå°†æ¸…ç†æ‰€æœ‰IDç®¡ç†æ•°æ®ï¼Œæ— æ³•æ’¤é”€ï¼\nç¡®å®šè¦ç»§ç»­å—ï¼Ÿ", "ç¡®å®š", "å–æ¶ˆ"))
                 {
                     if (Application.isPlaying && manager != null)
                     {
                         manager.ClearAllData();
-                        EditorUtility.DisplayDialog("Íê³É", "ËùÓĞÊı¾İÒÑÇåÀí", "È·¶¨");
+                        EditorUtility.DisplayDialog("å®Œæˆ", "æ‰€æœ‰æ•°æ®å·²æ¸…ç†", "ç¡®å®š");
                     }
                     else
                     {
-                        EditorUtility.DisplayDialog("ÌáÊ¾", "ÇëÔÚÔËĞĞÊ±Ö´ĞĞÇåÀí²Ù×÷", "È·¶¨");
+                        EditorUtility.DisplayDialog("æç¤º", "è¯·åœ¨è¿è¡Œæ—¶æ‰§è¡Œæ¸…ç†æ“ä½œ", "ç¡®å®š");
                     }
                 }
             }
@@ -169,56 +169,56 @@ namespace InventorySystem.SaveSystem.Editor
         }
 
         /// <summary>
-        /// »æÖÆĞÅÏ¢Ãæ°å
+        /// ç»˜åˆ¶ä¿¡æ¯é¢æ¿
         /// </summary>
         private void DrawInformationPanels()
         {
             if (!Application.isPlaying)
             {
-                EditorGUILayout.HelpBox("ÇëÔÚÔËĞĞÊ±²é¿´ÏêÏ¸ĞÅÏ¢", MessageType.Info);
+                EditorGUILayout.HelpBox("è¯·åœ¨è¿è¡Œæ—¶æŸ¥çœ‹è¯¦ç»†ä¿¡æ¯", MessageType.Info);
                 return;
             }
 
             if (manager == null)
             {
-                EditorGUILayout.HelpBox("¹ÜÀíÆ÷ÊµÀı²»¿ÉÓÃ", MessageType.Warning);
+                EditorGUILayout.HelpBox("ç®¡ç†å™¨å®ä¾‹ä¸å¯ç”¨", MessageType.Warning);
                 return;
             }
 
             scrollPosition = EditorGUILayout.BeginScrollView(scrollPosition, GUILayout.Height(400));
 
-            // ÏµÍ³Í³¼ÆĞÅÏ¢
+            // ç³»ç»Ÿç»Ÿè®¡ä¿¡æ¯
             DrawSystemStats();
 
             EditorGUILayout.Space(10);
 
-            // ÒÑ×¢²áIDÁĞ±í
+            // å·²æ³¨å†ŒIDåˆ—è¡¨
             DrawRegisteredIDs();
 
             EditorGUILayout.Space(10);
 
-            // »îÔ¾³åÍ»ÁĞ±í
+            // æ´»è·ƒå†²çªåˆ—è¡¨
             DrawActiveConflicts();
 
             EditorGUILayout.Space(10);
 
-            // ³åÍ»ÀúÊ·
+            // å†²çªå†å²
             DrawConflictHistory();
 
             EditorGUILayout.Space(10);
 
-            // ÑéÖ¤±¨¸æ
+            // éªŒè¯æŠ¥å‘Š
             DrawValidationReport();
 
             EditorGUILayout.EndScrollView();
         }
 
         /// <summary>
-        /// »æÖÆÏµÍ³Í³¼ÆĞÅÏ¢
+        /// ç»˜åˆ¶ç³»ç»Ÿç»Ÿè®¡ä¿¡æ¯
         /// </summary>
         private void DrawSystemStats()
         {
-            showSystemStats = EditorGUILayout.Foldout(showSystemStats, "ÏµÍ³Í³¼ÆĞÅÏ¢", true);
+            showSystemStats = EditorGUILayout.Foldout(showSystemStats, "ç³»ç»Ÿç»Ÿè®¡ä¿¡æ¯", true);
 
             if (showSystemStats)
             {
@@ -228,11 +228,11 @@ namespace InventorySystem.SaveSystem.Editor
                 var activeConflicts = manager.GetActiveConflicts();
                 var conflictHistory = manager.GetConflictHistory();
 
-                EditorGUILayout.LabelField($"ÒÑ×¢²áID×ÜÊı: {allIDs.Count}");
-                EditorGUILayout.LabelField($"µ±Ç°»îÔ¾³åÍ»: {activeConflicts.Count}");
-                EditorGUILayout.LabelField($"ÀúÊ·³åÍ»×ÜÊı: {conflictHistory.Count}");
+                EditorGUILayout.LabelField($"å·²æ³¨å†ŒIDæ€»æ•°: {allIDs.Count}");
+                EditorGUILayout.LabelField($"å½“å‰æ´»è·ƒå†²çª: {activeConflicts.Count}");
+                EditorGUILayout.LabelField($"å†å²å†²çªæ€»æ•°: {conflictHistory.Count}");
 
-                // °´³¡¾°Í³¼Æ
+                // æŒ‰åœºæ™¯ç»Ÿè®¡
                 var sceneStats = new System.Collections.Generic.Dictionary<string, int>();
                 foreach (string id in allIDs)
                 {
@@ -252,10 +252,10 @@ namespace InventorySystem.SaveSystem.Editor
                 }
 
                 EditorGUILayout.Space(5);
-                EditorGUILayout.LabelField("°´³¡¾°Í³¼Æ:", EditorStyles.boldLabel);
+                EditorGUILayout.LabelField("æŒ‰åœºæ™¯ç»Ÿè®¡:", EditorStyles.boldLabel);
                 foreach (var kvp in sceneStats)
                 {
-                    EditorGUILayout.LabelField($"  {kvp.Key}: {kvp.Value} ¸öID");
+                    EditorGUILayout.LabelField($"  {kvp.Key}: {kvp.Value} ä¸ªID");
                 }
 
                 EditorGUILayout.EndVertical();
@@ -263,11 +263,11 @@ namespace InventorySystem.SaveSystem.Editor
         }
 
         /// <summary>
-        /// »æÖÆÒÑ×¢²áIDÁĞ±í
+        /// ç»˜åˆ¶å·²æ³¨å†ŒIDåˆ—è¡¨
         /// </summary>
         private void DrawRegisteredIDs()
         {
-            showRegisteredIDs = EditorGUILayout.Foldout(showRegisteredIDs, "ÒÑ×¢²áIDÁĞ±í", true);
+            showRegisteredIDs = EditorGUILayout.Foldout(showRegisteredIDs, "å·²æ³¨å†ŒIDåˆ—è¡¨", true);
 
             if (showRegisteredIDs)
             {
@@ -277,13 +277,13 @@ namespace InventorySystem.SaveSystem.Editor
 
                 if (allIDs.Count == 0)
                 {
-                    EditorGUILayout.LabelField("ÔİÎŞÒÑ×¢²áµÄID");
+                    EditorGUILayout.LabelField("æš‚æ— å·²æ³¨å†Œçš„ID");
                 }
                 else
                 {
-                    EditorGUILayout.LabelField($"¹² {allIDs.Count} ¸öÒÑ×¢²áID:");
+                    EditorGUILayout.LabelField($"å…± {allIDs.Count} ä¸ªå·²æ³¨å†ŒID:");
 
-                    for (int i = 0; i < Mathf.Min(allIDs.Count, 20); i++) // ÏŞÖÆÏÔÊ¾ÊıÁ¿
+                    for (int i = 0; i < Mathf.Min(allIDs.Count, 20); i++) // é™åˆ¶æ˜¾ç¤ºæ•°é‡
                     {
                         EditorGUILayout.BeginHorizontal();
                         EditorGUILayout.LabelField($"{i + 1}.", GUILayout.Width(30));
@@ -293,7 +293,7 @@ namespace InventorySystem.SaveSystem.Editor
 
                     if (allIDs.Count > 20)
                     {
-                        EditorGUILayout.LabelField($"... »¹ÓĞ {allIDs.Count - 20} ¸öID");
+                        EditorGUILayout.LabelField($"... è¿˜æœ‰ {allIDs.Count - 20} ä¸ªID");
                     }
                 }
 
@@ -302,11 +302,11 @@ namespace InventorySystem.SaveSystem.Editor
         }
 
         /// <summary>
-        /// »æÖÆ»îÔ¾³åÍ»ÁĞ±í
+        /// ç»˜åˆ¶æ´»è·ƒå†²çªåˆ—è¡¨
         /// </summary>
         private void DrawActiveConflicts()
         {
-            showActiveConflicts = EditorGUILayout.Foldout(showActiveConflicts, "»îÔ¾³åÍ»ÁĞ±í", true);
+            showActiveConflicts = EditorGUILayout.Foldout(showActiveConflicts, "æ´»è·ƒå†²çªåˆ—è¡¨", true);
 
             if (showActiveConflicts)
             {
@@ -316,23 +316,23 @@ namespace InventorySystem.SaveSystem.Editor
 
                 if (activeConflicts.Count == 0)
                 {
-                    EditorGUILayout.LabelField("ÔİÎŞ»îÔ¾³åÍ»");
+                    EditorGUILayout.LabelField("æš‚æ— æ´»è·ƒå†²çª");
                 }
                 else
                 {
-                    EditorGUILayout.LabelField($"¹² {activeConflicts.Count} ¸ö»îÔ¾³åÍ»:");
+                    EditorGUILayout.LabelField($"å…± {activeConflicts.Count} ä¸ªæ´»è·ƒå†²çª:");
 
                     foreach (var conflict in activeConflicts)
                     {
                         EditorGUILayout.BeginVertical("helpbox");
                         EditorGUILayout.LabelField($"ID: {conflict.conflictID}", EditorStyles.boldLabel);
-                        EditorGUILayout.LabelField($"ÀàĞÍ: {conflict.type}");
-                        EditorGUILayout.LabelField($"¼ì²âÊ±¼ä: {conflict.detectedTime}");
-                        EditorGUILayout.LabelField($"½â¾ö×´Ì¬: {(conflict.isResolved ? "ÒÑ½â¾ö" : "Î´½â¾ö")}");
+                        EditorGUILayout.LabelField($"ç±»å‹: {conflict.type}");
+                        EditorGUILayout.LabelField($"æ£€æµ‹æ—¶é—´: {conflict.detectedTime}");
+                        EditorGUILayout.LabelField($"è§£å†³çŠ¶æ€: {(conflict.isResolved ? "å·²è§£å†³" : "æœªè§£å†³")}");
 
                         if (conflict.conflictObjects != null && conflict.conflictObjects.Count > 0)
                         {
-                            EditorGUILayout.LabelField($"Éæ¼°¶ÔÏó: {string.Join(", ", conflict.conflictObjects)}");
+                            EditorGUILayout.LabelField($"æ¶‰åŠå¯¹è±¡: {string.Join(", ", conflict.conflictObjects)}");
                         }
 
                         EditorGUILayout.EndVertical();
@@ -345,11 +345,11 @@ namespace InventorySystem.SaveSystem.Editor
         }
 
         /// <summary>
-        /// »æÖÆ³åÍ»ÀúÊ·
+        /// ç»˜åˆ¶å†²çªå†å²
         /// </summary>
         private void DrawConflictHistory()
         {
-            showConflictHistory = EditorGUILayout.Foldout(showConflictHistory, "³åÍ»ÀúÊ·", true);
+            showConflictHistory = EditorGUILayout.Foldout(showConflictHistory, "å†²çªå†å²", true);
 
             if (showConflictHistory)
             {
@@ -359,13 +359,13 @@ namespace InventorySystem.SaveSystem.Editor
 
                 if (conflictHistory.Count == 0)
                 {
-                    EditorGUILayout.LabelField("ÔİÎŞ³åÍ»ÀúÊ·");
+                    EditorGUILayout.LabelField("æš‚æ— å†²çªå†å²");
                 }
                 else
                 {
-                    EditorGUILayout.LabelField($"¹² {conflictHistory.Count} ¸öÀúÊ·³åÍ»:");
+                    EditorGUILayout.LabelField($"å…± {conflictHistory.Count} ä¸ªå†å²å†²çª:");
 
-                    // Ö»ÏÔÊ¾×î½üµÄ10¸ö³åÍ»
+                    // åªæ˜¾ç¤ºæœ€è¿‘çš„10ä¸ªå†²çª
                     var recentConflicts = conflictHistory.OrderByDescending(c => c.detectedTime).Take(10);
 
                     foreach (var conflict in recentConflicts)
@@ -379,7 +379,7 @@ namespace InventorySystem.SaveSystem.Editor
 
                     if (conflictHistory.Count > 10)
                     {
-                        EditorGUILayout.LabelField($"... »¹ÓĞ {conflictHistory.Count - 10} ¸öÀúÊ·³åÍ»");
+                        EditorGUILayout.LabelField($"... è¿˜æœ‰ {conflictHistory.Count - 10} ä¸ªå†å²å†²çª");
                     }
                 }
 
@@ -388,18 +388,18 @@ namespace InventorySystem.SaveSystem.Editor
         }
 
         /// <summary>
-        /// »æÖÆÑéÖ¤±¨¸æ
+        /// ç»˜åˆ¶éªŒè¯æŠ¥å‘Š
         /// </summary>
         private void DrawValidationReport()
         {
             if (!string.IsNullOrEmpty(validationReport))
             {
-                EditorGUILayout.LabelField("×îĞÂÑéÖ¤±¨¸æ", EditorStyles.boldLabel);
+                EditorGUILayout.LabelField("æœ€æ–°éªŒè¯æŠ¥å‘Š", EditorStyles.boldLabel);
                 EditorGUILayout.BeginVertical("box");
 
                 EditorGUILayout.TextArea(validationReport, GUILayout.Height(150));
 
-                if (GUILayout.Button("Çå³ı±¨¸æ"))
+                if (GUILayout.Button("æ¸…é™¤æŠ¥å‘Š"))
                 {
                     validationReport = "";
                 }
@@ -411,7 +411,7 @@ namespace InventorySystem.SaveSystem.Editor
     }
 
     /// <summary>
-    /// ItemInstanceIDManagerIntegratorµÄ×Ô¶¨Òå±à¼­Æ÷
+    /// ItemInstanceIDManagerIntegratorçš„è‡ªå®šä¹‰ç¼–è¾‘å™¨
     /// </summary>
     [CustomEditor(typeof(ItemInstanceIDManagerIntegrator))]
     public class ItemInstanceIDManagerIntegratorEditor : UnityEditor.Editor
@@ -426,62 +426,62 @@ namespace InventorySystem.SaveSystem.Editor
 
         public override void OnInspectorGUI()
         {
-            // »æÖÆÄ¬ÈÏÊôĞÔ
+            // ç»˜åˆ¶é»˜è®¤å±æ€§
             DrawDefaultInspector();
 
             EditorGUILayout.Space(10);
-            EditorGUILayout.LabelField("¼¯³ÉÆ÷¿ØÖÆÃæ°å", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("é›†æˆå™¨æ§åˆ¶é¢æ¿", EditorStyles.boldLabel);
             EditorGUILayout.Space(5);
 
-            // ÊÖ¶¯¼¯³É°´Å¥
-            if (GUILayout.Button("ÊÖ¶¯Ö´ĞĞ¼¯³É", GUILayout.Height(30)))
+            // æ‰‹åŠ¨é›†æˆæŒ‰é’®
+            if (GUILayout.Button("æ‰‹åŠ¨æ‰§è¡Œé›†æˆ", GUILayout.Height(30)))
             {
                 if (Application.isPlaying)
                 {
                     integrator.ManualIntegration();
-                    EditorUtility.DisplayDialog("Íê³É", "ÊÖ¶¯¼¯³ÉÒÑÖ´ĞĞ", "È·¶¨");
+                    EditorUtility.DisplayDialog("å®Œæˆ", "æ‰‹åŠ¨é›†æˆå·²æ‰§è¡Œ", "ç¡®å®š");
                 }
                 else
                 {
-                    EditorUtility.DisplayDialog("ÌáÊ¾", "ÇëÔÚÔËĞĞÊ±Ö´ĞĞ¼¯³É²Ù×÷", "È·¶¨");
+                    EditorUtility.DisplayDialog("æç¤º", "è¯·åœ¨è¿è¡Œæ—¶æ‰§è¡Œé›†æˆæ“ä½œ", "ç¡®å®š");
                 }
             }
 
             EditorGUILayout.BeginHorizontal();
 
-            // ÇåÀí¼¯³É×´Ì¬°´Å¥
-            if (GUILayout.Button("ÇåÀí¼¯³É×´Ì¬", GUILayout.Height(25)))
+            // æ¸…ç†é›†æˆçŠ¶æ€æŒ‰é’®
+            if (GUILayout.Button("æ¸…ç†é›†æˆçŠ¶æ€", GUILayout.Height(25)))
             {
                 integrator.ClearIntegrationState();
-                EditorUtility.DisplayDialog("Íê³É", "¼¯³É×´Ì¬ÒÑÇåÀí", "È·¶¨");
+                EditorUtility.DisplayDialog("å®Œæˆ", "é›†æˆçŠ¶æ€å·²æ¸…ç†", "ç¡®å®š");
             }
 
             EditorGUILayout.EndHorizontal();
 
-            // ÏÔÊ¾Í³¼ÆĞÅÏ¢
+            // æ˜¾ç¤ºç»Ÿè®¡ä¿¡æ¯
             if (Application.isPlaying)
             {
                 EditorGUILayout.Space(10);
-                showStats = EditorGUILayout.Foldout(showStats, "¼¯³ÉÍ³¼ÆĞÅÏ¢", true);
+                showStats = EditorGUILayout.Foldout(showStats, "é›†æˆç»Ÿè®¡ä¿¡æ¯", true);
 
                 if (showStats)
                 {
                     EditorGUILayout.BeginVertical("box");
 
                     var stats = integrator.GetIntegrationStats();
-                    EditorGUILayout.LabelField($"ÒÑ¼¯³ÉÎïÆ·: {stats.totalItemsIntegrated}");
-                    EditorGUILayout.LabelField($"ÒÑ¼¯³ÉÍø¸ñ: {stats.totalGridsIntegrated}");
-                    EditorGUILayout.LabelField($"ÒÑ¼¯³ÉÉú³ÉÆ÷: {stats.totalSpawnersIntegrated}");
-                    EditorGUILayout.LabelField($"ÒÑ¼¯³É×°±¸²Û: {stats.totalEquipSlotsIntegrated}");
-                    EditorGUILayout.LabelField($"ÒÑ½â¾ö³åÍ»: {stats.totalConflictsResolved}");
-                    EditorGUILayout.LabelField($"×îºó¼¯³ÉÊ±¼ä: {stats.lastIntegrationTime}");
+                    EditorGUILayout.LabelField($"å·²é›†æˆç‰©å“: {stats.totalItemsIntegrated}");
+                    EditorGUILayout.LabelField($"å·²é›†æˆç½‘æ ¼: {stats.totalGridsIntegrated}");
+                    EditorGUILayout.LabelField($"å·²é›†æˆç”Ÿæˆå™¨: {stats.totalSpawnersIntegrated}");
+                    EditorGUILayout.LabelField($"å·²é›†æˆè£…å¤‡æ§½: {stats.totalEquipSlotsIntegrated}");
+                    EditorGUILayout.LabelField($"å·²è§£å†³å†²çª: {stats.totalConflictsResolved}");
+                    EditorGUILayout.LabelField($"æœ€åé›†æˆæ—¶é—´: {stats.lastIntegrationTime}");
 
                     EditorGUILayout.EndVertical();
                 }
             }
             else
             {
-                EditorGUILayout.HelpBox("ÇëÔÚÔËĞĞÊ±²é¿´¼¯³ÉÍ³¼ÆĞÅÏ¢", MessageType.Info);
+                EditorGUILayout.HelpBox("è¯·åœ¨è¿è¡Œæ—¶æŸ¥çœ‹é›†æˆç»Ÿè®¡ä¿¡æ¯", MessageType.Info);
             }
 
             if (GUI.changed)

@@ -2,55 +2,55 @@ using InventorySystem.SaveSystem;
 using UnityEngine;
 
 /// <summary>
-/// ±£´æÏµÍ³³Ö¾Ã»¯¹ÜÀíÆ÷
-/// È·±£Õû¸öSaveSystem GameObject¼°ÆäËùÓĞ×Ó¶ÔÏóÔÚ³¡¾°ÇĞ»»Ê±²»±»Ïú»Ù
-/// Õâ¸ö½Å±¾Ó¦¸Ã¸½¼Óµ½SaveSystem¸ùGameObjectÉÏ
+/// ä¿å­˜ç³»ç»ŸæŒä¹…åŒ–ç®¡ç†å™¨
+/// ç¡®ä¿æ•´ä¸ªSaveSystem GameObjectåŠå…¶æ‰€æœ‰å­å¯¹è±¡åœ¨åœºæ™¯åˆ‡æ¢æ—¶ä¸è¢«é”€æ¯
+/// è¿™ä¸ªè„šæœ¬åº”è¯¥é™„åŠ åˆ°SaveSystemæ ¹GameObjectä¸Š
 /// </summary>
 public class SaveSystemPersistence : MonoBehaviour
 {
-    [Header("³Ö¾Ã»¯ÉèÖÃ")]
+    [Header("æŒä¹…åŒ–è®¾ç½®")]
     [SerializeField] private bool enableDebugLogging = true;
     [SerializeField] private bool validateChildComponents = true;
 
-    // µ¥ÀıÊµÀı
+    // å•ä¾‹å®ä¾‹
     private static SaveSystemPersistence instance;
     public static SaveSystemPersistence Instance => instance;
 
-    // ×Ó×é¼ş×´Ì¬¸ú×Ù
+    // å­ç»„ä»¶çŠ¶æ€è·Ÿè¸ª
     private bool isInitialized = false;
     private int childComponentCount = 0;
 
     void Awake()
     {
-        // ÊµÏÖµ¥ÀıÄ£Ê½£¬È·±£Ö»ÓĞÒ»¸öSaveSystemÊµÀı´æÔÚ
+        // å®ç°å•ä¾‹æ¨¡å¼ï¼Œç¡®ä¿åªæœ‰ä¸€ä¸ªSaveSystemå®ä¾‹å­˜åœ¨
         if (instance == null)
         {
             instance = this;
 
-            // È·±£GameObjectÊÇ¸ù¶ÔÏó
+            // ç¡®ä¿GameObjectæ˜¯æ ¹å¯¹è±¡
             if (transform.parent != null)
             {
-                LogWarning("SaveSystemÓ¦¸ÃÊÇ¸ù¶ÔÏó£¬ÕıÔÚÒÆ¶¯µ½¸ù¼¶±ğ¡£");
+                LogWarning("SaveSystemåº”è¯¥æ˜¯æ ¹å¯¹è±¡ï¼Œæ­£åœ¨ç§»åŠ¨åˆ°æ ¹çº§åˆ«ã€‚");
                 transform.SetParent(null);
             }
 
-            // ÉèÖÃÎª¿ç³¡¾°²»Ïú»Ù
+            // è®¾ç½®ä¸ºè·¨åœºæ™¯ä¸é”€æ¯
             DontDestroyOnLoad(gameObject);
 
-            // ³õÊ¼»¯ÏµÍ³
+            // åˆå§‹åŒ–ç³»ç»Ÿ
             InitializePersistenceSystem();
 
-            LogMessage("SaveSystemÒÑÉèÖÃÎª¿ç³¡¾°²»Ïú»Ù¡£");
+            LogMessage("SaveSystemå·²è®¾ç½®ä¸ºè·¨åœºæ™¯ä¸é”€æ¯ã€‚");
         }
         else if (instance != this)
         {
-            LogWarning($"¼ì²âµ½ÖØ¸´µÄSaveSystemÊµÀı£¬Ïú»ÙÖØ¸´ÊµÀı: {gameObject.name}");
+            LogWarning($"æ£€æµ‹åˆ°é‡å¤çš„SaveSystemå®ä¾‹ï¼Œé”€æ¯é‡å¤å®ä¾‹: {gameObject.name}");
             Destroy(gameObject);
         }
     }
 
     /// <summary>
-    /// ³õÊ¼»¯³Ö¾Ã»¯ÏµÍ³
+    /// åˆå§‹åŒ–æŒä¹…åŒ–ç³»ç»Ÿ
     /// </summary>
     private void InitializePersistenceSystem()
     {
@@ -61,29 +61,29 @@ public class SaveSystemPersistence : MonoBehaviour
 
         try
         {
-            // Í³¼Æ×Ó×é¼şÊıÁ¿
+            // ç»Ÿè®¡å­ç»„ä»¶æ•°é‡
             childComponentCount = CountChildComponents();
 
-            // ÑéÖ¤×Ó×é¼ş
+            // éªŒè¯å­ç»„ä»¶
             if (validateChildComponents)
             {
                 ValidateChildComponents();
             }
 
-            // È·±£ËùÓĞ×Ó¶ÔÏóÒ²²»»á±»ÒâÍâÏú»Ù
+            // ç¡®ä¿æ‰€æœ‰å­å¯¹è±¡ä¹Ÿä¸ä¼šè¢«æ„å¤–é”€æ¯
             EnsureChildPersistence();
 
             isInitialized = true;
-            LogMessage($"SaveSystem³Ö¾Ã»¯ÏµÍ³³õÊ¼»¯Íê³É£¬°üº¬ {childComponentCount} ¸ö×Ó×é¼ş¡£");
+            LogMessage($"SaveSystemæŒä¹…åŒ–ç³»ç»Ÿåˆå§‹åŒ–å®Œæˆï¼ŒåŒ…å« {childComponentCount} ä¸ªå­ç»„ä»¶ã€‚");
         }
         catch (System.Exception ex)
         {
-            LogError($"SaveSystem³Ö¾Ã»¯ÏµÍ³³õÊ¼»¯Ê§°Ü: {ex.Message}");
+            LogError($"SaveSystemæŒä¹…åŒ–ç³»ç»Ÿåˆå§‹åŒ–å¤±è´¥: {ex.Message}");
         }
     }
 
     /// <summary>
-    /// Í³¼Æ×Ó×é¼şÊıÁ¿
+    /// ç»Ÿè®¡å­ç»„ä»¶æ•°é‡
     /// </summary>
     private int CountChildComponents()
     {
@@ -91,7 +91,7 @@ public class SaveSystemPersistence : MonoBehaviour
     }
 
     /// <summary>
-    /// ÑéÖ¤¹Ø¼ü×Ó×é¼şÊÇ·ñ´æÔÚ
+    /// éªŒè¯å…³é”®å­ç»„ä»¶æ˜¯å¦å­˜åœ¨
     /// </summary>
     private void ValidateChildComponents()
     {
@@ -108,57 +108,57 @@ public class SaveSystemPersistence : MonoBehaviour
             typeof(ItemInstanceIDManagerDeepIntegrator)
         };
 
-        // ¼ì²é±ØĞè×é¼ş
+        // æ£€æŸ¥å¿…éœ€ç»„ä»¶
         foreach (var componentType in requiredComponents)
         {
             var component = GetComponentInChildren(componentType);
             if (component == null)
             {
-                LogError($"È±ÉÙ±ØĞè×é¼ş: {componentType.Name}");
+                LogError($"ç¼ºå°‘å¿…éœ€ç»„ä»¶: {componentType.Name}");
             }
             else
             {
-                LogMessage($"ÕÒµ½±ØĞè×é¼ş: {componentType.Name}");
+                LogMessage($"æ‰¾åˆ°å¿…éœ€ç»„ä»¶: {componentType.Name}");
             }
         }
 
-        // ¼ì²é¿ÉÑ¡×é¼ş
+        // æ£€æŸ¥å¯é€‰ç»„ä»¶
         foreach (var componentType in optionalComponents)
         {
             var component = GetComponentInChildren(componentType);
             if (component != null)
             {
-                LogMessage($"ÕÒµ½¿ÉÑ¡×é¼ş: {componentType.Name}");
+                LogMessage($"æ‰¾åˆ°å¯é€‰ç»„ä»¶: {componentType.Name}");
             }
         }
     }
 
     /// <summary>
-    /// È·±£×Ó¶ÔÏóµÄ³Ö¾Ã»¯
+    /// ç¡®ä¿å­å¯¹è±¡çš„æŒä¹…åŒ–
     /// </summary>
     private void EnsureChildPersistence()
     {
-        // ±éÀúËùÓĞ×Ó¶ÔÏó£¬È·±£ËüÃÇ²»»á±»ÒâÍâÏú»Ù
+        // éå†æ‰€æœ‰å­å¯¹è±¡ï¼Œç¡®ä¿å®ƒä»¬ä¸ä¼šè¢«æ„å¤–é”€æ¯
         var allChildren = GetComponentsInChildren<Transform>(true);
 
         foreach (var child in allChildren)
         {
-            if (child != transform) // ÅÅ³ı×ÔÉí
+            if (child != transform) // æ’é™¤è‡ªèº«
             {
-                // È·±£×Ó¶ÔÏóÃ»ÓĞ±»±ê¼ÇÎªÏú»Ù
+                // ç¡®ä¿å­å¯¹è±¡æ²¡æœ‰è¢«æ ‡è®°ä¸ºé”€æ¯
                 if (child.gameObject.scene.name == "DontDestroyOnLoad")
                 {
-                    continue; // ÒÑ¾­ÔÚDontDestroyOnLoad³¡¾°ÖĞ
+                    continue; // å·²ç»åœ¨DontDestroyOnLoadåœºæ™¯ä¸­
                 }
 
-                // ¼ÇÂ¼×Ó¶ÔÏóĞÅÏ¢£¨ÓÃÓÚµ÷ÊÔ£©
-                LogMessage($"×Ó¶ÔÏóÒÑÄÉÈë³Ö¾Ã»¯¹ÜÀí: {GetGameObjectPath(child.gameObject)}");
+                // è®°å½•å­å¯¹è±¡ä¿¡æ¯ï¼ˆç”¨äºè°ƒè¯•ï¼‰
+                LogMessage($"å­å¯¹è±¡å·²çº³å…¥æŒä¹…åŒ–ç®¡ç†: {GetGameObjectPath(child.gameObject)}");
             }
         }
     }
 
     /// <summary>
-    /// »ñÈ¡GameObjectµÄÍêÕûÂ·¾¶
+    /// è·å–GameObjectçš„å®Œæ•´è·¯å¾„
     /// </summary>
     private string GetGameObjectPath(GameObject obj)
     {
@@ -175,20 +175,20 @@ public class SaveSystemPersistence : MonoBehaviour
     }
 
     /// <summary>
-    /// »ñÈ¡ÏµÍ³×´Ì¬ĞÅÏ¢
+    /// è·å–ç³»ç»ŸçŠ¶æ€ä¿¡æ¯
     /// </summary>
     public string GetSystemStatus()
     {
         var status = new System.Text.StringBuilder();
-        status.AppendLine("=== SaveSystem³Ö¾Ã»¯×´Ì¬ ===");
-        status.AppendLine($"ÒÑ³õÊ¼»¯: {isInitialized}");
-        status.AppendLine($"×Ó×é¼şÊıÁ¿: {childComponentCount}");
-        status.AppendLine($"µ±Ç°³¡¾°: {UnityEngine.SceneManagement.SceneManager.GetActiveScene().name}");
-        status.AppendLine($"DontDestroyOnLoad×´Ì¬: {(gameObject.scene.name == "DontDestroyOnLoad" ? "ÊÇ" : "·ñ")}");
+        status.AppendLine("=== SaveSystemæŒä¹…åŒ–çŠ¶æ€ ===");
+        status.AppendLine($"å·²åˆå§‹åŒ–: {isInitialized}");
+        status.AppendLine($"å­ç»„ä»¶æ•°é‡: {childComponentCount}");
+        status.AppendLine($"å½“å‰åœºæ™¯: {UnityEngine.SceneManagement.SceneManager.GetActiveScene().name}");
+        status.AppendLine($"DontDestroyOnLoadçŠ¶æ€: {(gameObject.scene.name == "DontDestroyOnLoad" ? "æ˜¯" : "å¦")}");
 
-        // ÁĞ³öËùÓĞ×Ó×é¼ş
+        // åˆ—å‡ºæ‰€æœ‰å­ç»„ä»¶
         var components = GetComponentsInChildren<MonoBehaviour>(true);
-        status.AppendLine($"\n×Ó×é¼şÁĞ±í ({components.Length}¸ö):");
+        status.AppendLine($"\nå­ç»„ä»¶åˆ—è¡¨ ({components.Length}ä¸ª):");
         foreach (var component in components)
         {
             if (component != this)
@@ -201,9 +201,9 @@ public class SaveSystemPersistence : MonoBehaviour
     }
 
     /// <summary>
-    /// ÊÖ¶¯ÖØĞÂ³õÊ¼»¯ÏµÍ³£¨ÓÃÓÚµ÷ÊÔ£©
+    /// æ‰‹åŠ¨é‡æ–°åˆå§‹åŒ–ç³»ç»Ÿï¼ˆç”¨äºè°ƒè¯•ï¼‰
     /// </summary>
-    [ContextMenu("ÖØĞÂ³õÊ¼»¯³Ö¾Ã»¯ÏµÍ³")]
+    [ContextMenu("é‡æ–°åˆå§‹åŒ–æŒä¹…åŒ–ç³»ç»Ÿ")]
     public void ReinitializeSystem()
     {
         isInitialized = false;
@@ -211,15 +211,15 @@ public class SaveSystemPersistence : MonoBehaviour
     }
 
     /// <summary>
-    /// ¼ì²éÏµÍ³ÍêÕûĞÔ
+    /// æ£€æŸ¥ç³»ç»Ÿå®Œæ•´æ€§
     /// </summary>
-    [ContextMenu("¼ì²éÏµÍ³ÍêÕûĞÔ")]
+    [ContextMenu("æ£€æŸ¥ç³»ç»Ÿå®Œæ•´æ€§")]
     public void CheckSystemIntegrity()
     {
         LogMessage(GetSystemStatus());
     }
 
-    // ÈÕÖ¾¹¤¾ß·½·¨
+    // æ—¥å¿—å·¥å…·æ–¹æ³•
     private void LogMessage(string message)
     {
         if (enableDebugLogging)
@@ -245,12 +245,12 @@ public class SaveSystemPersistence : MonoBehaviour
     {
         if (instance == this)
         {
-            LogMessage("SaveSystemPersistenceÕıÔÚÏú»Ù¡£");
+            LogMessage("SaveSystemPersistenceæ­£åœ¨é”€æ¯ã€‚");
             instance = null;
         }
     }
 
-    // ³¡¾°ÇĞ»»ÊÂ¼ş´¦Àí
+    // åœºæ™¯åˆ‡æ¢äº‹ä»¶å¤„ç†
     void OnEnable()
     {
         UnityEngine.SceneManagement.SceneManager.sceneLoaded += OnSceneLoaded;
@@ -262,16 +262,16 @@ public class SaveSystemPersistence : MonoBehaviour
     }
 
     /// <summary>
-    /// ³¡¾°¼ÓÔØÍê³ÉºóµÄ´¦Àí
+    /// åœºæ™¯åŠ è½½å®Œæˆåçš„å¤„ç†
     /// </summary>
     private void OnSceneLoaded(UnityEngine.SceneManagement.Scene scene, UnityEngine.SceneManagement.LoadSceneMode mode)
     {
-        LogMessage($"³¡¾°ÇĞ»»Íê³É: {scene.name}£¬SaveSystem³Ö¾Ã»¯×´Ì¬Õı³£¡£");
+        LogMessage($"åœºæ™¯åˆ‡æ¢å®Œæˆ: {scene.name}ï¼ŒSaveSystemæŒä¹…åŒ–çŠ¶æ€æ­£å¸¸ã€‚");
 
-        // ¿ÉÒÔÔÚÕâÀïÌí¼Ó³¡¾°ÇĞ»»ºóµÄÌØÊâ´¦ÀíÂß¼­
+        // å¯ä»¥åœ¨è¿™é‡Œæ·»åŠ åœºæ™¯åˆ‡æ¢åçš„ç‰¹æ®Šå¤„ç†é€»è¾‘
         if (validateChildComponents)
         {
-            // ÖØĞÂÑéÖ¤×é¼ş×´Ì¬
+            // é‡æ–°éªŒè¯ç»„ä»¶çŠ¶æ€
             ValidateChildComponents();
         }
     }

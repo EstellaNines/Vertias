@@ -1,12 +1,9 @@
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using InventorySystem.SaveSystem;
 using InventorySystem.Grid;
 #if UNITY_EDITOR
-using UnityEditor;
 #endif
 
 [ExecuteInEditMode]
@@ -445,6 +442,39 @@ public abstract class BaseItemGrid : MonoBehaviour, IDropHandler, ISaveable
     public virtual List<PlacedItem> GetPlacedItems()
     {
         return new List<PlacedItem>(placedItems);
+    }
+
+    // 检查网格是否包含指定物品
+    public virtual bool ContainsItem(GameObject itemObject)
+    {
+        if (itemObject == null) return false;
+
+        foreach (PlacedItem placedItem in placedItems)
+        {
+            if (placedItem.itemObject == itemObject)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    // 检查网格是否包含指定的InventorySystemItem
+    public virtual bool ContainsItem(InventorySystemItem item)
+    {
+        if (item == null) return false;
+
+        foreach (PlacedItem placedItem in placedItems)
+        {
+            var inventoryItem = placedItem.itemObject?.GetComponent<InventorySystemItem>();
+            if (inventoryItem == item)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     // 清空网格中的所有物品 - 优化版本

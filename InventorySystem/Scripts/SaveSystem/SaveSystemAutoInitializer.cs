@@ -5,44 +5,44 @@ using UnityEngine.SceneManagement;
 using InventorySystem.SaveSystem;
 
 /// <summary>
-/// ±£´æÏµÍ³×Ô¶¯³õÊ¼»¯Æ÷ - ¸ºÔğ×Ô¶¯ÅäÖÃºÍ³õÊ¼»¯Õû¸ö±£´æÏµÍ³
-/// °üÀ¨SaveManager¡¢ItemInstanceIDManagerºÍÉî¶È¼¯³ÉÆ÷µÄ×Ô¶¯ÉèÖÃ
+/// ä¿å­˜ç³»ç»Ÿè‡ªåŠ¨åˆå§‹åŒ–å™¨ - è´Ÿè´£è‡ªåŠ¨é…ç½®å’Œåˆå§‹åŒ–æ•´ä¸ªä¿å­˜ç³»ç»Ÿ
+/// åŒ…æ‹¬SaveManagerã€ItemInstanceIDManagerå’Œæ·±åº¦é›†æˆå™¨çš„è‡ªåŠ¨è®¾ç½®
 /// </summary>
 public class SaveSystemAutoInitializer : MonoBehaviour
 {
-    [Header("×Ô¶¯³õÊ¼»¯ÅäÖÃ")]
-    [SerializeField] private bool enableAutoInitialization = true; // ÆôÓÃ×Ô¶¯³õÊ¼»¯
-    [SerializeField] private bool createSaveManagerIfMissing = true; // Èç¹ûÈ±Ê§Ôò´´½¨SaveManager
-    [SerializeField] private bool createIDManagerIfMissing = true; // Èç¹ûÈ±Ê§Ôò´´½¨ItemInstanceIDManager
-    [SerializeField] private bool createDeepIntegratorIfMissing = true; // Èç¹ûÈ±Ê§Ôò´´½¨Éî¶È¼¯³ÉÆ÷
-    [SerializeField] private bool enableScenePersistence = true; // ÆôÓÃ³¡¾°³Ö¾Ã»¯
-    [SerializeField] private float initializationDelay = 0.1f; // ³õÊ¼»¯ÑÓ³ÙÊ±¼ä
-    [SerializeField] private bool enableDebugLogging = true; // ÆôÓÃµ÷ÊÔÈÕÖ¾
+    [Header("è‡ªåŠ¨åˆå§‹åŒ–é…ç½®")]
+    [SerializeField] private bool enableAutoInitialization = true; // å¯ç”¨è‡ªåŠ¨åˆå§‹åŒ–
+    [SerializeField] private bool createSaveManagerIfMissing = true; // å¦‚æœç¼ºå¤±åˆ™åˆ›å»ºSaveManager
+    [SerializeField] private bool createIDManagerIfMissing = true; // å¦‚æœç¼ºå¤±åˆ™åˆ›å»ºItemInstanceIDManager
+    [SerializeField] private bool createDeepIntegratorIfMissing = true; // å¦‚æœç¼ºå¤±åˆ™åˆ›å»ºæ·±åº¦é›†æˆå™¨
+    [SerializeField] private bool enableScenePersistence = true; // å¯ç”¨åœºæ™¯æŒä¹…åŒ–
+    [SerializeField] private float initializationDelay = 0.1f; // åˆå§‹åŒ–å»¶è¿Ÿæ—¶é—´
+    [SerializeField] private bool enableDebugLogging = true; // å¯ç”¨è°ƒè¯•æ—¥å¿—
 
-    [Header("×é¼şÅäÖÃ")]
-    [SerializeField] private bool configureSaveManager = true; // ÅäÖÃSaveManager
-    [SerializeField] private bool configureIDManager = true; // ÅäÖÃItemInstanceIDManager
-    [SerializeField] private bool configureDeepIntegrator = true; // ÅäÖÃÉî¶È¼¯³ÉÆ÷
-    [SerializeField] private bool enableAutoSave = true; // ÆôÓÃ×Ô¶¯±£´æ
-    [SerializeField] private float autoSaveInterval = 60f; // ×Ô¶¯±£´æ¼ä¸ô£¨Ãë£©
+    [Header("ç»„ä»¶é…ç½®")]
+    [SerializeField] private bool configureSaveManager = true; // é…ç½®SaveManager
+    [SerializeField] private bool configureIDManager = true; // é…ç½®ItemInstanceIDManager
+    [SerializeField] private bool configureDeepIntegrator = true; // é…ç½®æ·±åº¦é›†æˆå™¨
+    [SerializeField] private bool enableAutoSave = true; // å¯ç”¨è‡ªåŠ¨ä¿å­˜
+    [SerializeField] private float autoSaveInterval = 60f; // è‡ªåŠ¨ä¿å­˜é—´éš”ï¼ˆç§’ï¼‰
 
-    [Header("¼¯³ÉÅäÖÃ")]
-    [SerializeField] private bool enableDeepIntegration = true; // ÆôÓÃÉî¶È¼¯³É
-    [SerializeField] private bool enableBackwardCompatibility = true; // ÆôÓÃÏòºó¼æÈİĞÔ
-    [SerializeField] private bool enableConflictDetection = true; // ÆôÓÃ³åÍ»¼ì²â
-    [SerializeField] private bool enableDataValidation = true; // ÆôÓÃÊı¾İÑéÖ¤
+    [Header("é›†æˆé…ç½®")]
+    [SerializeField] private bool enableDeepIntegration = true; // å¯ç”¨æ·±åº¦é›†æˆ
+    [SerializeField] private bool enableBackwardCompatibility = true; // å¯ç”¨å‘åå…¼å®¹æ€§
+    [SerializeField] private bool enableConflictDetection = true; // å¯ç”¨å†²çªæ£€æµ‹
+    [SerializeField] private bool enableDataValidation = true; // å¯ç”¨æ•°æ®éªŒè¯
 
-    // ×é¼şÒıÓÃ
+    // ç»„ä»¶å¼•ç”¨
     private SaveManager saveManager;
     private ItemInstanceIDManager idManager;
     private ItemInstanceIDManagerDeepIntegrator deepIntegrator;
     private SaveSystemInitializer systemInitializer;
 
-    // ³õÊ¼»¯×´Ì¬
+    // åˆå§‹åŒ–çŠ¶æ€
     private bool isInitialized = false;
     private bool isInitializing = false;
 
-    // ³õÊ¼»¯Í³¼Æ
+    // åˆå§‹åŒ–ç»Ÿè®¡
     [System.Serializable]
     public class InitializationStats
     {
@@ -58,22 +58,22 @@ public class SaveSystemAutoInitializer : MonoBehaviour
 
     [SerializeField] private InitializationStats initStats = new InitializationStats();
 
-    // ÊÂ¼şÏµÍ³
+    // äº‹ä»¶ç³»ç»Ÿ
     public static event System.Action OnSystemInitialized;
     public static event System.Action<string> OnInitializationError;
     public static event System.Action<InitializationStats> OnInitializationCompleted;
 
     private void Awake()
     {
-        // È·±£Ö»ÓĞÒ»¸ö×Ô¶¯³õÊ¼»¯Æ÷ÊµÀı
+        // ç¡®ä¿åªæœ‰ä¸€ä¸ªè‡ªåŠ¨åˆå§‹åŒ–å™¨å®ä¾‹
         var existingInitializers = FindObjectsOfType<SaveSystemAutoInitializer>();
         if (existingInitializers.Length > 1)
         {
-            LogWarning("·¢ÏÖ¶à¸öSaveSystemAutoInitializerÊµÀı£¬Ïú»ÙÖØ¸´ÊµÀı");
+            LogWarning("å‘ç°å¤šä¸ªSaveSystemAutoInitializerå®ä¾‹ï¼Œé”€æ¯é‡å¤å®ä¾‹");
             Destroy(gameObject);
             return;
         }
-        LogMessage("±£´æÏµÍ³×Ô¶¯³õÊ¼»¯Æ÷ÒÑÆô¶¯");
+        LogMessage("ä¿å­˜ç³»ç»Ÿè‡ªåŠ¨åˆå§‹åŒ–å™¨å·²å¯åŠ¨");
     }
 
     private void Start()
@@ -85,7 +85,7 @@ public class SaveSystemAutoInitializer : MonoBehaviour
     }
 
     /// <summary>
-    /// ÑÓ³Ù³õÊ¼»¯
+    /// å»¶è¿Ÿåˆå§‹åŒ–
     /// </summary>
     private IEnumerator DelayedInitialization()
     {
@@ -93,7 +93,7 @@ public class SaveSystemAutoInitializer : MonoBehaviour
 
         yield return new WaitForSeconds(initializationDelay);
 
-        LogMessage("¿ªÊ¼×Ô¶¯³õÊ¼»¯±£´æÏµÍ³...");
+        LogMessage("å¼€å§‹è‡ªåŠ¨åˆå§‹åŒ–ä¿å­˜ç³»ç»Ÿ...");
 
         try
         {
@@ -101,7 +101,7 @@ public class SaveSystemAutoInitializer : MonoBehaviour
         }
         catch (Exception ex)
         {
-            LogError($"×Ô¶¯³õÊ¼»¯Ê§°Ü: {ex.Message}");
+            LogError($"è‡ªåŠ¨åˆå§‹åŒ–å¤±è´¥: {ex.Message}");
             initStats.lastError = ex.Message;
             OnInitializationError?.Invoke(ex.Message);
         }
@@ -112,56 +112,56 @@ public class SaveSystemAutoInitializer : MonoBehaviour
     }
 
     /// <summary>
-    /// ³õÊ¼»¯±£´æÏµÍ³
+    /// åˆå§‹åŒ–ä¿å­˜ç³»ç»Ÿ
     /// </summary>
     public void InitializeSaveSystem()
     {
         if (isInitialized)
         {
-            LogWarning("±£´æÏµÍ³ÒÑ¾­³õÊ¼»¯£¬Ìø¹ıÖØ¸´³õÊ¼»¯");
+            LogWarning("ä¿å­˜ç³»ç»Ÿå·²ç»åˆå§‹åŒ–ï¼Œè·³è¿‡é‡å¤åˆå§‹åŒ–");
             return;
         }
 
-        // ÖØÖÃÍ³¼ÆĞÅÏ¢
+        // é‡ç½®ç»Ÿè®¡ä¿¡æ¯
         initStats = new InitializationStats();
 
         try
         {
-            // 1. ´´½¨»ò²éÕÒSaveManager
+            // 1. åˆ›å»ºæˆ–æŸ¥æ‰¾SaveManager
             InitializeSaveManager();
 
-            // 2. ´´½¨»ò²éÕÒItemInstanceIDManager
+            // 2. åˆ›å»ºæˆ–æŸ¥æ‰¾ItemInstanceIDManager
             InitializeIDManager();
 
-            // 3. ´´½¨»ò²éÕÒÉî¶È¼¯³ÉÆ÷
+            // 3. åˆ›å»ºæˆ–æŸ¥æ‰¾æ·±åº¦é›†æˆå™¨
             InitializeDeepIntegrator();
 
-            // 4. ´´½¨»ò²éÕÒÏµÍ³³õÊ¼»¯Æ÷
+            // 4. åˆ›å»ºæˆ–æŸ¥æ‰¾ç³»ç»Ÿåˆå§‹åŒ–å™¨
             InitializeSystemInitializer();
 
-            // 5. ÅäÖÃ×é¼ş
+            // 5. é…ç½®ç»„ä»¶
             ConfigureComponents();
 
-            // 6. Ö´ĞĞÉî¶È¼¯³É
+            // 6. æ‰§è¡Œæ·±åº¦é›†æˆ
             if (enableDeepIntegration)
             {
                 PerformDeepIntegration();
             }
 
-            // 7. ÆôÓÃ×Ô¶¯±£´æ
+            // 7. å¯ç”¨è‡ªåŠ¨ä¿å­˜
             if (enableAutoSave)
             {
                 EnableAutoSave();
             }
 
-            // 8. Íê³É³õÊ¼»¯
+            // 8. å®Œæˆåˆå§‹åŒ–
             CompleteInitialization();
 
-            LogMessage("±£´æÏµÍ³×Ô¶¯³õÊ¼»¯Íê³É£¡");
+            LogMessage("ä¿å­˜ç³»ç»Ÿè‡ªåŠ¨åˆå§‹åŒ–å®Œæˆï¼");
         }
         catch (Exception ex)
         {
-            LogError($"³õÊ¼»¯¹ı³ÌÖĞ·¢Éú´íÎó: {ex.Message}");
+            LogError($"åˆå§‹åŒ–è¿‡ç¨‹ä¸­å‘ç”Ÿé”™è¯¯: {ex.Message}");
             initStats.lastError = ex.Message;
             initStats.integrationErrors++;
             throw;
@@ -169,7 +169,7 @@ public class SaveSystemAutoInitializer : MonoBehaviour
     }
 
     /// <summary>
-    /// ³õÊ¼»¯SaveManager
+    /// åˆå§‹åŒ–SaveManager
     /// </summary>
     private void InitializeSaveManager()
     {
@@ -177,35 +177,35 @@ public class SaveSystemAutoInitializer : MonoBehaviour
 
         if (saveManager == null && createSaveManagerIfMissing)
         {
-            LogMessage("´´½¨SaveManagerÊµÀı...");
+            LogMessage("åˆ›å»ºSaveManagerå®ä¾‹...");
 
             var saveManagerGO = new GameObject("SaveManager");
             saveManager = saveManagerGO.AddComponent<SaveManager>();
 
-            // ½«ĞÂ´´½¨µÄSaveManagerÉèÖÃÎªSaveSystemµÄ×Ó¶ÔÏó£¨Èç¹û´æÔÚSaveSystem£©
+            // å°†æ–°åˆ›å»ºçš„SaveManagerè®¾ç½®ä¸ºSaveSystemçš„å­å¯¹è±¡ï¼ˆå¦‚æœå­˜åœ¨SaveSystemï¼‰
             var saveSystemPersistence = FindObjectOfType<SaveSystemPersistence>();
             if (saveSystemPersistence != null)
             {
                 saveManagerGO.transform.SetParent(saveSystemPersistence.transform);
-                LogMessage("SaveManagerÒÑÉèÖÃÎªSaveSystemµÄ×Ó¶ÔÏó");
+                LogMessage("SaveManagerå·²è®¾ç½®ä¸ºSaveSystemçš„å­å¯¹è±¡");
             }
-            // ×¢Òâ£º²»µ÷ÓÃDontDestroyOnLoad£¬ÒòÎªSaveSystemPersistence»á´¦ÀíÕû¸öÏµÍ³µÄ³Ö¾Ã»¯
+            // æ³¨æ„ï¼šä¸è°ƒç”¨DontDestroyOnLoadï¼Œå› ä¸ºSaveSystemPersistenceä¼šå¤„ç†æ•´ä¸ªç³»ç»Ÿçš„æŒä¹…åŒ–
 
             initStats.saveManagerCreated = true;
-            LogMessage("SaveManagerÒÑ´´½¨");
+            LogMessage("SaveManagerå·²åˆ›å»º");
         }
         else if (saveManager != null)
         {
-            LogMessage("·¢ÏÖÏÖÓĞSaveManagerÊµÀı");
+            LogMessage("å‘ç°ç°æœ‰SaveManagerå®ä¾‹");
         }
         else
         {
-            LogWarning("SaveManagerÎ´ÕÒµ½ÇÒÎ´ÆôÓÃ×Ô¶¯´´½¨");
+            LogWarning("SaveManageræœªæ‰¾åˆ°ä¸”æœªå¯ç”¨è‡ªåŠ¨åˆ›å»º");
         }
     }
 
     /// <summary>
-    /// ³õÊ¼»¯ItemInstanceIDManager
+    /// åˆå§‹åŒ–ItemInstanceIDManager
     /// </summary>
     private void InitializeIDManager()
     {
@@ -213,7 +213,7 @@ public class SaveSystemAutoInitializer : MonoBehaviour
 
         if (idManager == null && createIDManagerIfMissing)
         {
-            LogMessage("´´½¨ItemInstanceIDManagerÊµÀı...");
+            LogMessage("åˆ›å»ºItemInstanceIDManagerå®ä¾‹...");
 
             var idManagerGO = new GameObject("ItemInstanceIDManager");
             idManager = idManagerGO.AddComponent<ItemInstanceIDManager>();
@@ -222,24 +222,24 @@ public class SaveSystemAutoInitializer : MonoBehaviour
             if (saveSystemPersistence != null)
             {
                 idManagerGO.transform.SetParent(saveSystemPersistence.transform);
-                LogMessage("ItemInstanceIDManagerÒÑÉèÖÃÎªSaveSystemµÄ×Ó¶ÔÏó");
+                LogMessage("ItemInstanceIDManagerå·²è®¾ç½®ä¸ºSaveSystemçš„å­å¯¹è±¡");
             }
 
             initStats.idManagerCreated = true;
-            LogMessage("ItemInstanceIDManagerÒÑ´´½¨");
+            LogMessage("ItemInstanceIDManagerå·²åˆ›å»º");
         }
         else if (idManager != null)
         {
-            LogMessage("·¢ÏÖÏÖÓĞItemInstanceIDManagerÊµÀı");
+            LogMessage("å‘ç°ç°æœ‰ItemInstanceIDManagerå®ä¾‹");
         }
         else
         {
-            LogWarning("ItemInstanceIDManagerÎ´ÕÒµ½ÇÒÎ´ÆôÓÃ×Ô¶¯´´½¨");
+            LogWarning("ItemInstanceIDManageræœªæ‰¾åˆ°ä¸”æœªå¯ç”¨è‡ªåŠ¨åˆ›å»º");
         }
     }
 
     /// <summary>
-    /// ³õÊ¼»¯Éî¶È¼¯³ÉÆ÷
+    /// åˆå§‹åŒ–æ·±åº¦é›†æˆå™¨
     /// </summary>
     private void InitializeDeepIntegrator()
     {
@@ -247,7 +247,7 @@ public class SaveSystemAutoInitializer : MonoBehaviour
 
         if (deepIntegrator == null && createDeepIntegratorIfMissing)
         {
-            LogMessage("´´½¨ItemInstanceIDManagerDeepIntegratorÊµÀı...");
+            LogMessage("åˆ›å»ºItemInstanceIDManagerDeepIntegratorå®ä¾‹...");
 
             var integratorGO = new GameObject("ItemInstanceIDManagerDeepIntegrator");
             deepIntegrator = integratorGO.AddComponent<ItemInstanceIDManagerDeepIntegrator>();
@@ -256,24 +256,24 @@ public class SaveSystemAutoInitializer : MonoBehaviour
             if (saveSystemPersistence != null)
             {
                 integratorGO.transform.SetParent(saveSystemPersistence.transform);
-                LogMessage("ItemInstanceIDManagerDeepIntegratorÒÑÉèÖÃÎªSaveSystemµÄ×Ó¶ÔÏó");
+                LogMessage("ItemInstanceIDManagerDeepIntegratorå·²è®¾ç½®ä¸ºSaveSystemçš„å­å¯¹è±¡");
             }
 
             initStats.deepIntegratorCreated = true;
-            LogMessage("ItemInstanceIDManagerDeepIntegratorÒÑ´´½¨");
+            LogMessage("ItemInstanceIDManagerDeepIntegratorå·²åˆ›å»º");
         }
         else if (deepIntegrator != null)
         {
-            LogMessage("·¢ÏÖÏÖÓĞItemInstanceIDManagerDeepIntegratorÊµÀı");
+            LogMessage("å‘ç°ç°æœ‰ItemInstanceIDManagerDeepIntegratorå®ä¾‹");
         }
         else
         {
-            LogWarning("ItemInstanceIDManagerDeepIntegratorÎ´ÕÒµ½ÇÒÎ´ÆôÓÃ×Ô¶¯´´½¨");
+            LogWarning("ItemInstanceIDManagerDeepIntegratoræœªæ‰¾åˆ°ä¸”æœªå¯ç”¨è‡ªåŠ¨åˆ›å»º");
         }
     }
 
     /// <summary>
-    /// ³õÊ¼»¯ÏµÍ³³õÊ¼»¯Æ÷
+    /// åˆå§‹åŒ–ç³»ç»Ÿåˆå§‹åŒ–å™¨
     /// </summary>
     private void InitializeSystemInitializer()
     {
@@ -281,133 +281,133 @@ public class SaveSystemAutoInitializer : MonoBehaviour
 
         if (systemInitializer == null)
         {
-            LogMessage("´´½¨SaveSystemInitializerÊµÀı...");
+            LogMessage("åˆ›å»ºSaveSystemInitializerå®ä¾‹...");
 
             var initializerGO = new GameObject("SaveSystemInitializer");
             systemInitializer = initializerGO.AddComponent<SaveSystemInitializer>();
 
-            // ½«ĞÂ´´½¨µÄSaveSystemInitializerÉèÖÃÎªSaveSystemµÄ×Ó¶ÔÏó£¨Èç¹û´æÔÚSaveSystem£©
+            // å°†æ–°åˆ›å»ºçš„SaveSystemInitializerè®¾ç½®ä¸ºSaveSystemçš„å­å¯¹è±¡ï¼ˆå¦‚æœå­˜åœ¨SaveSystemï¼‰
             var saveSystemPersistence = FindObjectOfType<SaveSystemPersistence>();
             if (saveSystemPersistence != null)
             {
                 initializerGO.transform.SetParent(saveSystemPersistence.transform);
-                LogMessage("SaveSystemInitializerÒÑÉèÖÃÎªSaveSystemµÄ×Ó¶ÔÏó");
+                LogMessage("SaveSystemInitializerå·²è®¾ç½®ä¸ºSaveSystemçš„å­å¯¹è±¡");
             }
-            // ×¢Òâ£º²»µ÷ÓÃDontDestroyOnLoad£¬ÒòÎªSaveSystemPersistence»á´¦ÀíÕû¸öÏµÍ³µÄ³Ö¾Ã»¯
+            // æ³¨æ„ï¼šä¸è°ƒç”¨DontDestroyOnLoadï¼Œå› ä¸ºSaveSystemPersistenceä¼šå¤„ç†æ•´ä¸ªç³»ç»Ÿçš„æŒä¹…åŒ–
 
             initStats.systemInitializerCreated = true;
-            LogMessage("SaveSystemInitializerÒÑ´´½¨");
+            LogMessage("SaveSystemInitializerå·²åˆ›å»º");
         }
         else
         {
-            LogMessage("·¢ÏÖÏÖÓĞSaveSystemInitializerÊµÀı");
+            LogMessage("å‘ç°ç°æœ‰SaveSystemInitializerå®ä¾‹");
         }
     }
 
     /// <summary>
-    /// ÅäÖÃ×é¼ş
+    /// é…ç½®ç»„ä»¶
     /// </summary>
     private void ConfigureComponents()
     {
-        LogMessage("¿ªÊ¼ÅäÖÃ×é¼ş...");
+        LogMessage("å¼€å§‹é…ç½®ç»„ä»¶...");
 
-        // ÅäÖÃSaveManager
+        // é…ç½®SaveManager
         if (configureSaveManager && saveManager != null)
         {
             ConfigureSaveManager();
             initStats.componentsConfigured++;
         }
 
-        // ÅäÖÃItemInstanceIDManager
+        // é…ç½®ItemInstanceIDManager
         if (configureIDManager && idManager != null)
         {
             ConfigureIDManager();
             initStats.componentsConfigured++;
         }
 
-        // ÅäÖÃÉî¶È¼¯³ÉÆ÷
+        // é…ç½®æ·±åº¦é›†æˆå™¨
         if (configureDeepIntegrator && deepIntegrator != null)
         {
             ConfigureDeepIntegrator();
             initStats.componentsConfigured++;
         }
 
-        LogMessage($"×é¼şÅäÖÃÍê³É£¬¹²ÅäÖÃ{initStats.componentsConfigured}¸ö×é¼ş");
+        LogMessage($"ç»„ä»¶é…ç½®å®Œæˆï¼Œå…±é…ç½®{initStats.componentsConfigured}ä¸ªç»„ä»¶");
     }
 
     /// <summary>
-    /// ÅäÖÃSaveManager
+    /// é…ç½®SaveManager
     /// </summary>
     private void ConfigureSaveManager()
     {
-        // ÕâÀï¿ÉÒÔÌí¼ÓSaveManagerµÄ¾ßÌåÅäÖÃ
-        // ÀıÈçÉèÖÃ±£´æÂ·¾¶¡¢ÎÄ¼ş¸ñÊ½µÈ
-        LogMessage("SaveManagerÅäÖÃÍê³É");
+        // è¿™é‡Œå¯ä»¥æ·»åŠ SaveManagerçš„å…·ä½“é…ç½®
+        // ä¾‹å¦‚è®¾ç½®ä¿å­˜è·¯å¾„ã€æ–‡ä»¶æ ¼å¼ç­‰
+        LogMessage("SaveManageré…ç½®å®Œæˆ");
     }
 
     /// <summary>
-    /// ÅäÖÃItemInstanceIDManager
+    /// é…ç½®ItemInstanceIDManager
     /// </summary>
     private void ConfigureIDManager()
     {
-        // Ê¹ÓÃ·´Éä»ò¹«¹²·½·¨ÅäÖÃItemInstanceIDManager
+        // ä½¿ç”¨åå°„æˆ–å…¬å…±æ–¹æ³•é…ç½®ItemInstanceIDManager
         try
         {
-            // ÆôÓÃ³åÍ»¼ì²â
+            // å¯ç”¨å†²çªæ£€æµ‹
             if (enableConflictDetection)
             {
-                // ¼ÙÉèItemInstanceIDManagerÓĞÏàÓ¦µÄÅäÖÃ·½·¨
-                LogMessage("ÆôÓÃID³åÍ»¼ì²â");
+                // å‡è®¾ItemInstanceIDManageræœ‰ç›¸åº”çš„é…ç½®æ–¹æ³•
+                LogMessage("å¯ç”¨IDå†²çªæ£€æµ‹");
             }
 
-            // ÆôÓÃÊı¾İÑéÖ¤
+            // å¯ç”¨æ•°æ®éªŒè¯
             if (enableDataValidation)
             {
-                LogMessage("ÆôÓÃÊı¾İÑéÖ¤");
+                LogMessage("å¯ç”¨æ•°æ®éªŒè¯");
             }
 
-            LogMessage("ItemInstanceIDManagerÅäÖÃÍê³É");
+            LogMessage("ItemInstanceIDManageré…ç½®å®Œæˆ");
         }
         catch (Exception ex)
         {
-            LogError($"ÅäÖÃItemInstanceIDManagerÊ§°Ü: {ex.Message}");
+            LogError($"é…ç½®ItemInstanceIDManagerå¤±è´¥: {ex.Message}");
             initStats.integrationErrors++;
         }
     }
 
     /// <summary>
-    /// ÅäÖÃÉî¶È¼¯³ÉÆ÷
+    /// é…ç½®æ·±åº¦é›†æˆå™¨
     /// </summary>
     private void ConfigureDeepIntegrator()
     {
-        // Í¨¹ı·´ÉäÉèÖÃÉî¶È¼¯³ÉÆ÷µÄÅäÖÃ
+        // é€šè¿‡åå°„è®¾ç½®æ·±åº¦é›†æˆå™¨çš„é…ç½®
         try
         {
             var integratorType = deepIntegrator.GetType();
 
-            // ÉèÖÃÏòºó¼æÈİĞÔ
+            // è®¾ç½®å‘åå…¼å®¹æ€§
             SetFieldValue(integratorType, "enableBackwardCompatibility", enableBackwardCompatibility);
 
-            // ÉèÖÃ×Ô¶¯¼¯³É
+            // è®¾ç½®è‡ªåŠ¨é›†æˆ
             SetFieldValue(integratorType, "enableAutoIntegration", enableDeepIntegration);
 
-            // ÉèÖÃ³¡¾°³Ö¾Ã»¯
+            // è®¾ç½®åœºæ™¯æŒä¹…åŒ–
             SetFieldValue(integratorType, "enableScenePersistence", enableScenePersistence);
 
-            // ÉèÖÃµ÷ÊÔÈÕÖ¾
+            // è®¾ç½®è°ƒè¯•æ—¥å¿—
             SetFieldValue(integratorType, "enableDebugLogging", enableDebugLogging);
 
-            LogMessage("ItemInstanceIDManagerDeepIntegratorÅäÖÃÍê³É");
+            LogMessage("ItemInstanceIDManagerDeepIntegratoré…ç½®å®Œæˆ");
         }
         catch (Exception ex)
         {
-            LogError($"ÅäÖÃItemInstanceIDManagerDeepIntegratorÊ§°Ü: {ex.Message}");
+            LogError($"é…ç½®ItemInstanceIDManagerDeepIntegratorå¤±è´¥: {ex.Message}");
             initStats.integrationErrors++;
         }
     }
 
     /// <summary>
-    /// ÉèÖÃ×Ö¶ÎÖµ£¨Í¨¹ı·´Éä£©
+    /// è®¾ç½®å­—æ®µå€¼ï¼ˆé€šè¿‡åå°„ï¼‰
     /// </summary>
     private void SetFieldValue(Type type, string fieldName, object value)
     {
@@ -415,41 +415,41 @@ public class SaveSystemAutoInitializer : MonoBehaviour
         if (field != null)
         {
             field.SetValue(deepIntegrator, value);
-            LogMessage($"ÉèÖÃ×Ö¶Î {fieldName} = {value}");
+            LogMessage($"è®¾ç½®å­—æ®µ {fieldName} = {value}");
         }
         else
         {
-            LogWarning($"Î´ÕÒµ½×Ö¶Î: {fieldName}");
+            LogWarning($"æœªæ‰¾åˆ°å­—æ®µ: {fieldName}");
         }
     }
 
     /// <summary>
-    /// Ö´ĞĞÉî¶È¼¯³É
+    /// æ‰§è¡Œæ·±åº¦é›†æˆ
     /// </summary>
     private void PerformDeepIntegration()
     {
         if (deepIntegrator == null)
         {
-            LogWarning("Éî¶È¼¯³ÉÆ÷²»´æÔÚ£¬Ìø¹ıÉî¶È¼¯³É");
+            LogWarning("æ·±åº¦é›†æˆå™¨ä¸å­˜åœ¨ï¼Œè·³è¿‡æ·±åº¦é›†æˆ");
             return;
         }
 
         try
         {
-            LogMessage("¿ªÊ¼Ö´ĞĞÉî¶È¼¯³É...");
+            LogMessage("å¼€å§‹æ‰§è¡Œæ·±åº¦é›†æˆ...");
 
-            // µÈ´ıÒ»Ö¡È·±£ËùÓĞ×é¼ş¶¼ÒÑ³õÊ¼»¯
+            // ç­‰å¾…ä¸€å¸§ç¡®ä¿æ‰€æœ‰ç»„ä»¶éƒ½å·²åˆå§‹åŒ–
             StartCoroutine(DelayedDeepIntegration());
         }
         catch (Exception ex)
         {
-            LogError($"Éî¶È¼¯³ÉÊ§°Ü: {ex.Message}");
+            LogError($"æ·±åº¦é›†æˆå¤±è´¥: {ex.Message}");
             initStats.integrationErrors++;
         }
     }
 
     /// <summary>
-    /// ÑÓ³ÙÖ´ĞĞÉî¶È¼¯³É
+    /// å»¶è¿Ÿæ‰§è¡Œæ·±åº¦é›†æˆ
     /// </summary>
     private IEnumerator DelayedDeepIntegration()
     {
@@ -458,40 +458,40 @@ public class SaveSystemAutoInitializer : MonoBehaviour
         try
         {
             deepIntegrator.ManualDeepIntegration();
-            LogMessage("Éî¶È¼¯³ÉÖ´ĞĞÍê³É");
+            LogMessage("æ·±åº¦é›†æˆæ‰§è¡Œå®Œæˆ");
         }
         catch (Exception ex)
         {
-            LogError($"ÑÓ³ÙÉî¶È¼¯³ÉÊ§°Ü: {ex.Message}");
+            LogError($"å»¶è¿Ÿæ·±åº¦é›†æˆå¤±è´¥: {ex.Message}");
             initStats.integrationErrors++;
         }
     }
 
     /// <summary>
-    /// ÆôÓÃ×Ô¶¯±£´æ
+    /// å¯ç”¨è‡ªåŠ¨ä¿å­˜
     /// </summary>
     private void EnableAutoSave()
     {
         if (saveManager == null)
         {
-            LogWarning("SaveManager²»´æÔÚ£¬ÎŞ·¨ÆôÓÃ×Ô¶¯±£´æ");
+            LogWarning("SaveManagerä¸å­˜åœ¨ï¼Œæ— æ³•å¯ç”¨è‡ªåŠ¨ä¿å­˜");
             return;
         }
 
         try
         {
-            LogMessage($"ÆôÓÃ×Ô¶¯±£´æ£¬¼ä¸ô: {autoSaveInterval}Ãë");
+            LogMessage($"å¯ç”¨è‡ªåŠ¨ä¿å­˜ï¼Œé—´éš”: {autoSaveInterval}ç§’");
             StartCoroutine(AutoSaveCoroutine());
         }
         catch (Exception ex)
         {
-            LogError($"ÆôÓÃ×Ô¶¯±£´æÊ§°Ü: {ex.Message}");
+            LogError($"å¯ç”¨è‡ªåŠ¨ä¿å­˜å¤±è´¥: {ex.Message}");
             initStats.integrationErrors++;
         }
     }
 
     /// <summary>
-    /// ×Ô¶¯±£´æĞ­³Ì
+    /// è‡ªåŠ¨ä¿å­˜åç¨‹
     /// </summary>
     private IEnumerator AutoSaveCoroutine()
     {
@@ -501,51 +501,51 @@ public class SaveSystemAutoInitializer : MonoBehaviour
 
             try
             {
-                LogMessage("Ö´ĞĞ×Ô¶¯±£´æ...");
+                LogMessage("æ‰§è¡Œè‡ªåŠ¨ä¿å­˜...");
                 saveManager.SaveAll("AutoSave");
-                LogMessage("×Ô¶¯±£´æÍê³É");
+                LogMessage("è‡ªåŠ¨ä¿å­˜å®Œæˆ");
             }
             catch (Exception ex)
             {
-                LogError($"×Ô¶¯±£´æÊ§°Ü: {ex.Message}");
+                LogError($"è‡ªåŠ¨ä¿å­˜å¤±è´¥: {ex.Message}");
             }
         }
     }
 
     /// <summary>
-    /// Íê³É³õÊ¼»¯
+    /// å®Œæˆåˆå§‹åŒ–
     /// </summary>
     private void CompleteInitialization()
     {
         isInitialized = true;
         initStats.initializationTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
 
-        // ´¥·¢ÊÂ¼ş
+        // è§¦å‘äº‹ä»¶
         OnSystemInitialized?.Invoke();
         OnInitializationCompleted?.Invoke(initStats);
 
-        LogMessage($"±£´æÏµÍ³³õÊ¼»¯Íê³É£¡Í³¼ÆĞÅÏ¢£º\n" +
-                  $"- SaveManager´´½¨: {initStats.saveManagerCreated}\n" +
-                  $"- IDManager´´½¨: {initStats.idManagerCreated}\n" +
-                  $"- Éî¶È¼¯³ÉÆ÷´´½¨: {initStats.deepIntegratorCreated}\n" +
-                  $"- ÏµÍ³³õÊ¼»¯Æ÷´´½¨: {initStats.systemInitializerCreated}\n" +
-                  $"- ÅäÖÃ×é¼şÊıÁ¿: {initStats.componentsConfigured}\n" +
-                  $"- ¼¯³É´íÎóÊıÁ¿: {initStats.integrationErrors}\n" +
-                  $"- ³õÊ¼»¯Ê±¼ä: {initStats.initializationTime}");
+        LogMessage($"ä¿å­˜ç³»ç»Ÿåˆå§‹åŒ–å®Œæˆï¼ç»Ÿè®¡ä¿¡æ¯ï¼š\n" +
+                  $"- SaveManageråˆ›å»º: {initStats.saveManagerCreated}\n" +
+                  $"- IDManageråˆ›å»º: {initStats.idManagerCreated}\n" +
+                  $"- æ·±åº¦é›†æˆå™¨åˆ›å»º: {initStats.deepIntegratorCreated}\n" +
+                  $"- ç³»ç»Ÿåˆå§‹åŒ–å™¨åˆ›å»º: {initStats.systemInitializerCreated}\n" +
+                  $"- é…ç½®ç»„ä»¶æ•°é‡: {initStats.componentsConfigured}\n" +
+                  $"- é›†æˆé”™è¯¯æ•°é‡: {initStats.integrationErrors}\n" +
+                  $"- åˆå§‹åŒ–æ—¶é—´: {initStats.initializationTime}");
     }
 
-    // === ¹«¹²API·½·¨ ===
+    // === å…¬å…±APIæ–¹æ³• ===
 
     /// <summary>
-    /// ÊÖ¶¯³õÊ¼»¯±£´æÏµÍ³
+    /// æ‰‹åŠ¨åˆå§‹åŒ–ä¿å­˜ç³»ç»Ÿ
     /// </summary>
     public void ManualInitialization()
     {
-        LogMessage("ÊÖ¶¯´¥·¢±£´æÏµÍ³³õÊ¼»¯");
+        LogMessage("æ‰‹åŠ¨è§¦å‘ä¿å­˜ç³»ç»Ÿåˆå§‹åŒ–");
 
         if (isInitialized)
         {
-            LogWarning("ÏµÍ³ÒÑ³õÊ¼»¯£¬½«ÖØĞÂ³õÊ¼»¯");
+            LogWarning("ç³»ç»Ÿå·²åˆå§‹åŒ–ï¼Œå°†é‡æ–°åˆå§‹åŒ–");
             isInitialized = false;
         }
 
@@ -553,7 +553,7 @@ public class SaveSystemAutoInitializer : MonoBehaviour
     }
 
     /// <summary>
-    /// »ñÈ¡³õÊ¼»¯Í³¼ÆĞÅÏ¢
+    /// è·å–åˆå§‹åŒ–ç»Ÿè®¡ä¿¡æ¯
     /// </summary>
     public InitializationStats GetInitializationStats()
     {
@@ -561,7 +561,7 @@ public class SaveSystemAutoInitializer : MonoBehaviour
     }
 
     /// <summary>
-    /// ¼ì²éÏµÍ³ÊÇ·ñÒÑ³õÊ¼»¯
+    /// æ£€æŸ¥ç³»ç»Ÿæ˜¯å¦å·²åˆå§‹åŒ–
     /// </summary>
     public bool IsSystemInitialized()
     {
@@ -569,7 +569,7 @@ public class SaveSystemAutoInitializer : MonoBehaviour
     }
 
     /// <summary>
-    /// »ñÈ¡×é¼şÒıÓÃ
+    /// è·å–ç»„ä»¶å¼•ç”¨
     /// </summary>
     public SaveManager GetSaveManager() => saveManager;
     public ItemInstanceIDManager GetIDManager() => idManager;
@@ -577,7 +577,7 @@ public class SaveSystemAutoInitializer : MonoBehaviour
     public SaveSystemInitializer GetSystemInitializer() => systemInitializer;
 
     /// <summary>
-    /// ÖØÖÃ³õÊ¼»¯×´Ì¬
+    /// é‡ç½®åˆå§‹åŒ–çŠ¶æ€
     /// </summary>
     public void ResetInitializationState()
     {
@@ -585,11 +585,11 @@ public class SaveSystemAutoInitializer : MonoBehaviour
         isInitializing = false;
         initStats = new InitializationStats();
 
-        LogMessage("³õÊ¼»¯×´Ì¬ÒÑÖØÖÃ");
+        LogMessage("åˆå§‹åŒ–çŠ¶æ€å·²é‡ç½®");
     }
 
     /// <summary>
-    /// ÑéÖ¤ÏµÍ³ÍêÕûĞÔ
+    /// éªŒè¯ç³»ç»Ÿå®Œæ•´æ€§
     /// </summary>
     public bool ValidateSystemIntegrity()
     {
@@ -597,25 +597,25 @@ public class SaveSystemAutoInitializer : MonoBehaviour
 
         if (saveManager == null)
         {
-            LogError("SaveManagerÈ±Ê§");
+            LogError("SaveManagerç¼ºå¤±");
             isValid = false;
         }
 
         if (idManager == null)
         {
-            LogError("ItemInstanceIDManagerÈ±Ê§");
+            LogError("ItemInstanceIDManagerç¼ºå¤±");
             isValid = false;
         }
 
         if (deepIntegrator == null)
         {
-            LogError("ItemInstanceIDManagerDeepIntegratorÈ±Ê§");
+            LogError("ItemInstanceIDManagerDeepIntegratorç¼ºå¤±");
             isValid = false;
         }
 
         if (systemInitializer == null)
         {
-            LogError("SaveSystemInitializerÈ±Ê§");
+            LogError("SaveSystemInitializerç¼ºå¤±");
             isValid = false;
         }
 
@@ -624,10 +624,10 @@ public class SaveSystemAutoInitializer : MonoBehaviour
 
     private void OnDestroy()
     {
-        LogMessage("±£´æÏµÍ³×Ô¶¯³õÊ¼»¯Æ÷ÒÑÏú»Ù");
+        LogMessage("ä¿å­˜ç³»ç»Ÿè‡ªåŠ¨åˆå§‹åŒ–å™¨å·²é”€æ¯");
     }
 
-    // === ÈÕÖ¾¹¤¾ß·½·¨ ===
+    // === æ—¥å¿—å·¥å…·æ–¹æ³• ===
 
     private void LogMessage(string message)
     {

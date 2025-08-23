@@ -4,26 +4,26 @@ using UnityEngine;
 namespace InventorySystem.SaveSystem
 {
     /// <summary>
-    /// ±£´æÏµÍ³³õÊ¼»¯Æ÷
-    /// ¸ºÔğÔÚÓÎÏ·Æô¶¯Ê±×Ô¶¯³õÊ¼»¯±£´æÏµÍ³
+    /// ä¿å­˜ç³»ç»Ÿåˆå§‹åŒ–å™¨
+    /// è´Ÿè´£åœ¨æ¸¸æˆå¯åŠ¨æ—¶è‡ªåŠ¨åˆå§‹åŒ–ä¿å­˜ç³»ç»Ÿ
     /// </summary>
     public class SaveSystemInitializer : MonoBehaviour
     {
-        [Header("±£´æÏµÍ³ÅäÖÃ")]
-        [SerializeField] private bool autoInitializeOnStart = true; // ÊÇ·ñÔÚStartÊ±×Ô¶¯³õÊ¼»¯
-        [SerializeField] private bool enableAutoSave = true; // ÊÇ·ñÆôÓÃ×Ô¶¯±£´æ
-        [SerializeField] private float autoSaveInterval = 300f; // ×Ô¶¯±£´æ¼ä¸ô£¨Ãë£©
-        [SerializeField] private bool enableDebugLogging = true; // ÊÇ·ñÆôÓÃµ÷ÊÔÈÕÖ¾
+        [Header("ä¿å­˜ç³»ç»Ÿé…ç½®")]
+        [SerializeField] private bool autoInitializeOnStart = true; // æ˜¯å¦åœ¨Startæ—¶è‡ªåŠ¨åˆå§‹åŒ–
+        [SerializeField] private bool enableAutoSave = true; // æ˜¯å¦å¯ç”¨è‡ªåŠ¨ä¿å­˜
+        [SerializeField] private float autoSaveInterval = 300f; // è‡ªåŠ¨ä¿å­˜é—´éš”ï¼ˆç§’ï¼‰
+        [SerializeField] private bool enableDebugLogging = true; // æ˜¯å¦å¯ç”¨è°ƒè¯•æ—¥å¿—
 
-        [Header("³õÊ¼»¯ÑÓ³ÙÉèÖÃ")]
-        [SerializeField] private float initializationDelay = 1f; // ³õÊ¼»¯ÑÓ³ÙÊ±¼ä
-        [SerializeField] private bool waitForSceneLoad = true; // ÊÇ·ñµÈ´ı³¡¾°ÍêÈ«¼ÓÔØ
+        [Header("åˆå§‹åŒ–å»¶è¿Ÿè®¾ç½®")]
+        [SerializeField] private float initializationDelay = 1f; // åˆå§‹åŒ–å»¶è¿Ÿæ—¶é—´
+        [SerializeField] private bool waitForSceneLoad = true; // æ˜¯å¦ç­‰å¾…åœºæ™¯å®Œå…¨åŠ è½½
 
         private SaveManager saveManager;
         private bool isInitialized = false;
 
         /// <summary>
-        /// Unity Start·½·¨
+        /// Unity Startæ–¹æ³•
         /// </summary>
         private void Start()
         {
@@ -34,78 +34,78 @@ namespace InventorySystem.SaveSystem
         }
 
         /// <summary>
-        /// ³õÊ¼»¯±£´æÏµÍ³µÄĞ­³Ì
+        /// åˆå§‹åŒ–ä¿å­˜ç³»ç»Ÿçš„åç¨‹
         /// </summary>
         private IEnumerator InitializeSaveSystemCoroutine()
         {
-            // µÈ´ı³¡¾°ÍêÈ«¼ÓÔØ
+            // ç­‰å¾…åœºæ™¯å®Œå…¨åŠ è½½
             if (waitForSceneLoad)
             {
                 yield return new WaitForEndOfFrame();
             }
 
-            // µÈ´ıÖ¸¶¨µÄÑÓ³ÙÊ±¼ä
+            // ç­‰å¾…æŒ‡å®šçš„å»¶è¿Ÿæ—¶é—´
             if (initializationDelay > 0)
             {
                 yield return new WaitForSeconds(initializationDelay);
             }
 
-            // ³õÊ¼»¯±£´æÏµÍ³
+            // åˆå§‹åŒ–ä¿å­˜ç³»ç»Ÿ
             InitializeSaveSystem();
         }
 
         /// <summary>
-        /// ÊÖ¶¯³õÊ¼»¯±£´æÏµÍ³
+        /// æ‰‹åŠ¨åˆå§‹åŒ–ä¿å­˜ç³»ç»Ÿ
         /// </summary>
         public void InitializeSaveSystem()
         {
             if (isInitialized)
             {
-                LogWarning("±£´æÏµÍ³ÒÑ¾­³õÊ¼»¯£¬Ìø¹ıÖØ¸´³õÊ¼»¯");
+                LogWarning("ä¿å­˜ç³»ç»Ÿå·²ç»åˆå§‹åŒ–ï¼Œè·³è¿‡é‡å¤åˆå§‹åŒ–");
                 return;
             }
 
             try
             {
-                // »ñÈ¡»ò´´½¨SaveManagerÊµÀı
+                // è·å–æˆ–åˆ›å»ºSaveManagerå®ä¾‹
                 saveManager = SaveManager.Instance;
                 if (saveManager == null)
                 {
-                    LogError("ÎŞ·¨»ñÈ¡SaveManagerÊµÀı");
+                    LogError("æ— æ³•è·å–SaveManagerå®ä¾‹");
                     return;
                 }
 
-                // ³õÊ¼»¯SaveManager
+                // åˆå§‹åŒ–SaveManager
                 saveManager.Initialize();
 
-                // ÅäÖÃ×Ô¶¯±£´æ
+                // é…ç½®è‡ªåŠ¨ä¿å­˜
                 if (enableAutoSave)
                 {
                     saveManager.SetAutoSaveEnabled(true);
                     saveManager.SetAutoSaveInterval(autoSaveInterval);
                 }
 
-                // ÑéÖ¤ISaveable¶ÔÏó¼¯³É
+                // éªŒè¯ISaveableå¯¹è±¡é›†æˆ
                 ValidateISaveableIntegration();
 
                 isInitialized = true;
-                LogMessage("±£´æÏµÍ³³õÊ¼»¯Íê³É");
+                LogMessage("ä¿å­˜ç³»ç»Ÿåˆå§‹åŒ–å®Œæˆ");
 
-                // ´¥·¢³õÊ¼»¯Íê³ÉÊÂ¼ş
+                // è§¦å‘åˆå§‹åŒ–å®Œæˆäº‹ä»¶
                 OnSaveSystemInitialized();
             }
             catch (System.Exception ex)
             {
-                LogError($"±£´æÏµÍ³³õÊ¼»¯Ê§°Ü: {ex.Message}");
+                LogError($"ä¿å­˜ç³»ç»Ÿåˆå§‹åŒ–å¤±è´¥: {ex.Message}");
             }
         }
 
         /// <summary>
-        /// ÑéÖ¤ISaveable¶ÔÏó¼¯³É
+        /// éªŒè¯ISaveableå¯¹è±¡é›†æˆ
         /// </summary>
         private void ValidateISaveableIntegration()
         {
-            // ²éÕÒ³¡¾°ÖĞËùÓĞµÄISaveable¶ÔÏó
+            // æŸ¥æ‰¾åœºæ™¯ä¸­æ‰€æœ‰çš„ISaveableå¯¹è±¡
             var saveableObjects = FindObjectsOfType<MonoBehaviour>();
             int saveableCount = 0;
 
@@ -115,45 +115,45 @@ namespace InventorySystem.SaveSystem
                 {
                     saveableCount++;
 
-                    // ÑéÖ¤SaveIDÊÇ·ñÓĞĞ§
+                    // éªŒè¯SaveIDæ˜¯å¦æœ‰æ•ˆ
                     string saveId = saveable.GetSaveID();
                     if (string.IsNullOrEmpty(saveId))
                     {
-                        LogWarning($"·¢ÏÖÎŞĞ§µÄSaveID: {obj.name}");
+                        LogWarning($"å‘ç°æ— æ•ˆçš„SaveID: {obj.name}");
                     }
 
-                    // ÑéÖ¤ÊÇ·ñÒÑ×¢²áµ½SaveManager
+                    // éªŒè¯æ˜¯å¦å·²æ³¨å†Œåˆ°SaveManager
                     if (!saveManager.IsObjectRegistered(saveable))
                     {
-                        LogWarning($"ISaveable¶ÔÏóÎ´×¢²áµ½SaveManager: {obj.name}");
+                        LogWarning($"ISaveableå¯¹è±¡æœªæ³¨å†Œåˆ°SaveManager: {obj.name}");
                     }
                 }
             }
 
-            LogMessage($"·¢ÏÖ {saveableCount} ¸öISaveable¶ÔÏó");
+            LogMessage($"å‘ç° {saveableCount} ä¸ªISaveableå¯¹è±¡");
         }
 
         /// <summary>
-        /// ±£´æÏµÍ³³õÊ¼»¯Íê³ÉÊÂ¼ş
+        /// ä¿å­˜ç³»ç»Ÿåˆå§‹åŒ–å®Œæˆäº‹ä»¶
         /// </summary>
         protected virtual void OnSaveSystemInitialized()
         {
-            // ×ÓÀà¿ÉÒÔÖØĞ´´Ë·½·¨À´´¦Àí³õÊ¼»¯Íê³ÉÊÂ¼ş
-            LogMessage("±£´æÏµÍ³³õÊ¼»¯Íê³ÉÊÂ¼ş´¥·¢");
+            // å­ç±»å¯ä»¥é‡å†™æ­¤æ–¹æ³•æ¥å¤„ç†åˆå§‹åŒ–å®Œæˆäº‹ä»¶
+            LogMessage("ä¿å­˜ç³»ç»Ÿåˆå§‹åŒ–å®Œæˆäº‹ä»¶è§¦å‘");
         }
 
         /// <summary>
-        /// »ñÈ¡±£´æÏµÍ³×´Ì¬
+        /// è·å–ä¿å­˜ç³»ç»ŸçŠ¶æ€
         /// </summary>
         public bool IsInitialized => isInitialized;
 
         /// <summary>
-        /// »ñÈ¡SaveManagerÊµÀı
+        /// è·å–SaveManagerå®ä¾‹
         /// </summary>
         public SaveManager GetSaveManager() => saveManager;
 
         /// <summary>
-        /// ÉèÖÃ×Ô¶¯±£´æÅäÖÃ
+        /// è®¾ç½®è‡ªåŠ¨ä¿å­˜é…ç½®
         /// </summary>
         public void SetAutoSaveConfig(bool enabled, float interval = 300f)
         {
@@ -168,7 +168,7 @@ namespace InventorySystem.SaveSystem
         }
 
         /// <summary>
-        /// Ç¿ÖÆÖØĞÂ³õÊ¼»¯±£´æÏµÍ³
+        /// å¼ºåˆ¶é‡æ–°åˆå§‹åŒ–ä¿å­˜ç³»ç»Ÿ
         /// </summary>
         public void ForceReinitialize()
         {
@@ -177,31 +177,31 @@ namespace InventorySystem.SaveSystem
         }
 
         /// <summary>
-        /// UnityÓ¦ÓÃ³ÌĞòÔİÍ£Ê±µÄ´¦Àí
+        /// Unityåº”ç”¨ç¨‹åºæš‚åœæ—¶çš„å¤„ç†
         /// </summary>
         private void OnApplicationPause(bool pauseStatus)
         {
             if (pauseStatus && saveManager != null && enableAutoSave)
             {
-                // Ó¦ÓÃ³ÌĞòÔİÍ£Ê±×Ô¶¯±£´æ
+                // åº”ç”¨ç¨‹åºæš‚åœæ—¶è‡ªåŠ¨ä¿å­˜
                 saveManager.SaveGame("AutoSave_OnPause");
             }
         }
 
         /// <summary>
-        /// UnityÓ¦ÓÃ³ÌĞòÍË³öÊ±µÄ´¦Àí
+        /// Unityåº”ç”¨ç¨‹åºé€€å‡ºæ—¶çš„å¤„ç†
         /// </summary>
         private void OnApplicationQuit()
         {
             if (saveManager != null && enableAutoSave)
             {
-                // Ó¦ÓÃ³ÌĞòÍË³öÊ±×Ô¶¯±£´æ
+                // åº”ç”¨ç¨‹åºé€€å‡ºæ—¶è‡ªåŠ¨ä¿å­˜
                 _ = saveManager.SaveGame("AutoSave_OnQuit");
             }
         }
 
         /// <summary>
-        /// ÈÕÖ¾Êä³ö·½·¨
+        /// æ—¥å¿—è¾“å‡ºæ–¹æ³•
         /// </summary>
         private void LogMessage(string message)
         {
@@ -212,7 +212,7 @@ namespace InventorySystem.SaveSystem
         }
 
         /// <summary>
-        /// ¾¯¸æÈÕÖ¾Êä³ö·½·¨
+        /// è­¦å‘Šæ—¥å¿—è¾“å‡ºæ–¹æ³•
         /// </summary>
         private void LogWarning(string message)
         {
@@ -223,28 +223,28 @@ namespace InventorySystem.SaveSystem
         }
 
         /// <summary>
-        /// ´íÎóÈÕÖ¾Êä³ö·½·¨
+        /// é”™è¯¯æ—¥å¿—è¾“å‡ºæ–¹æ³•
         /// </summary>
         private void LogError(string message)
         {
             Debug.LogError($"[SaveSystemInitializer] {message}");
         }
 
-        // ==================== ±à¼­Æ÷Ö§³Ö·½·¨ ====================
+        // ==================== ç¼–è¾‘å™¨æ”¯æŒæ–¹æ³• ====================
 
 #if UNITY_EDITOR
         /// <summary>
-        /// ±à¼­Æ÷ÖĞµÄÑéÖ¤·½·¨
+        /// ç¼–è¾‘å™¨ä¸­çš„éªŒè¯æ–¹æ³•
         /// </summary>
         private void OnValidate()
         {
-            // È·±£×Ô¶¯±£´æ¼ä¸ô²»Ğ¡ÓÚ30Ãë
+            // ç¡®ä¿è‡ªåŠ¨ä¿å­˜é—´éš”ä¸å°äº30ç§’
             if (autoSaveInterval < 30f)
             {
                 autoSaveInterval = 30f;
             }
 
-            // È·±£³õÊ¼»¯ÑÓ³Ù²»Îª¸ºÊı
+            // ç¡®ä¿åˆå§‹åŒ–å»¶è¿Ÿä¸ä¸ºè´Ÿæ•°
             if (initializationDelay < 0f)
             {
                 initializationDelay = 0f;
@@ -252,9 +252,9 @@ namespace InventorySystem.SaveSystem
         }
 
         /// <summary>
-        /// ±à¼­Æ÷ÖĞÊÖ¶¯³õÊ¼»¯±£´æÏµÍ³
+        /// ç¼–è¾‘å™¨ä¸­æ‰‹åŠ¨åˆå§‹åŒ–ä¿å­˜ç³»ç»Ÿ
         /// </summary>
-        [ContextMenu("ÊÖ¶¯³õÊ¼»¯±£´æÏµÍ³")]
+        [ContextMenu("æ‰‹åŠ¨åˆå§‹åŒ–ä¿å­˜ç³»ç»Ÿ")]
         private void EditorInitializeSaveSystem()
         {
             if (Application.isPlaying)
@@ -263,27 +263,27 @@ namespace InventorySystem.SaveSystem
             }
             else
             {
-                Debug.Log("Ö»ÄÜÔÚÔËĞĞÊ±³õÊ¼»¯±£´æÏµÍ³");
+                Debug.Log("åªèƒ½åœ¨è¿è¡Œæ—¶åˆå§‹åŒ–ä¿å­˜ç³»ç»Ÿ");
             }
         }
 
         /// <summary>
-        /// ±à¼­Æ÷ÖĞÏÔÊ¾±£´æÏµÍ³×´Ì¬
+        /// ç¼–è¾‘å™¨ä¸­æ˜¾ç¤ºä¿å­˜ç³»ç»ŸçŠ¶æ€
         /// </summary>
-        [ContextMenu("ÏÔÊ¾±£´æÏµÍ³×´Ì¬")]
+        [ContextMenu("æ˜¾ç¤ºä¿å­˜ç³»ç»ŸçŠ¶æ€")]
         private void EditorShowSaveSystemStatus()
         {
             if (Application.isPlaying)
             {
-                Debug.Log($"±£´æÏµÍ³×´Ì¬: {(isInitialized ? "ÒÑ³õÊ¼»¯" : "Î´³õÊ¼»¯")}");
+                Debug.Log($"ä¿å­˜ç³»ç»ŸçŠ¶æ€: {(isInitialized ? "å·²åˆå§‹åŒ–" : "æœªåˆå§‹åŒ–")}");
                 if (saveManager != null)
                 {
-                    Debug.Log($"×¢²áµÄISaveable¶ÔÏóÊıÁ¿: {saveManager.RegisteredObjectCount}");
+                    Debug.Log($"æ³¨å†Œçš„ISaveableå¯¹è±¡æ•°é‡: {saveManager.RegisteredObjectCount}");
                 }
             }
             else
             {
-                Debug.Log("Ö»ÄÜÔÚÔËĞĞÊ±²é¿´±£´æÏµÍ³×´Ì¬");
+                Debug.Log("åªèƒ½åœ¨è¿è¡Œæ—¶æŸ¥çœ‹ä¿å­˜ç³»ç»ŸçŠ¶æ€");
             }
         }
 #endif

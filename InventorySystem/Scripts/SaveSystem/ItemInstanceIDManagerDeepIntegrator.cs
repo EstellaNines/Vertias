@@ -6,37 +6,37 @@ using UnityEngine.SceneManagement;
 using InventorySystem.SaveSystem;
 
 /// <summary>
-/// ItemInstanceIDManagerÉî¶È¼¯³ÉÆ÷ - ·ÇÇÖÈëÊ½µØ½«ID¹ÜÀíÏµÍ³ÓëÏÖÓĞ×é¼şÉî¶È¼¯³É
-/// Ìá¹©×Ô¶¯³õÊ¼»¯¡¢³¡¾°³Ö¾Ã»¯¡¢Ïòºó¼æÈİĞÔºÍ±£´æÂß¼­¸üĞÂ¹¦ÄÜ
+/// ItemInstanceIDManageræ·±åº¦é›†æˆå™¨ - éä¾µå…¥å¼åœ°å°†IDç®¡ç†ç³»ç»Ÿä¸ç°æœ‰ç»„ä»¶æ·±åº¦é›†æˆ
+/// æä¾›è‡ªåŠ¨åˆå§‹åŒ–ã€åœºæ™¯æŒä¹…åŒ–ã€å‘åå…¼å®¹æ€§å’Œä¿å­˜é€»è¾‘æ›´æ–°åŠŸèƒ½
 /// </summary>
 public class ItemInstanceIDManagerDeepIntegrator : MonoBehaviour
 {
-    [Header("Éî¶È¼¯³ÉÅäÖÃ")]
-    [SerializeField] private bool enableAutoIntegration = true; // ÆôÓÃ×Ô¶¯¼¯³É
-    [SerializeField] private bool enableScenePersistence = true; // ÆôÓÃ³¡¾°³Ö¾Ã»¯
-    [SerializeField] private bool enableBackwardCompatibility = true; // ÆôÓÃÏòºó¼æÈİĞÔ
-    [SerializeField] private bool enableSaveLogicUpdate = true; // ÆôÓÃ±£´æÂß¼­¸üĞÂ
-    [SerializeField] private float integrationDelay = 0.5f; // ¼¯³ÉÑÓ³ÙÊ±¼ä
-    [SerializeField] private bool enableDebugLogging = true; // ÆôÓÃµ÷ÊÔÈÕÖ¾
+    [Header("æ·±åº¦é›†æˆé…ç½®")]
+    [SerializeField] private bool enableAutoIntegration = true; // å¯ç”¨è‡ªåŠ¨é›†æˆ
+    [SerializeField] private bool enableScenePersistence = true; // å¯ç”¨åœºæ™¯æŒä¹…åŒ–
+    [SerializeField] private bool enableBackwardCompatibility = true; // å¯ç”¨å‘åå…¼å®¹æ€§
+    [SerializeField] private bool enableSaveLogicUpdate = true; // å¯ç”¨ä¿å­˜é€»è¾‘æ›´æ–°
+    [SerializeField] private float integrationDelay = 0.5f; // é›†æˆå»¶è¿Ÿæ—¶é—´
+    [SerializeField] private bool enableDebugLogging = true; // å¯ç”¨è°ƒè¯•æ—¥å¿—
 
-    [Header("¼¯³ÉÄ¿±êÅäÖÃ")]
-    [SerializeField] private bool integrateInventoryItems = true; // ¼¯³É¿â´æÎïÆ·
-    [SerializeField] private bool integrateItemGrids = true; // ¼¯³ÉÎïÆ·Íø¸ñ
-    [SerializeField] private bool integrateItemSpawners = true; // ¼¯³ÉÎïÆ·Éú³ÉÆ÷
-    [SerializeField] private bool integrateEquipSlots = true; // ¼¯³É×°±¸²Û
-    [SerializeField] private bool integrateItemDataHolders = true; // ¼¯³ÉÎïÆ·Êı¾İ³ÖÓĞÕß
+    [Header("é›†æˆç›®æ ‡é…ç½®")]
+    [SerializeField] private bool integrateInventoryItems = true; // é›†æˆåº“å­˜ç‰©å“
+    [SerializeField] private bool integrateItemGrids = true; // é›†æˆç‰©å“ç½‘æ ¼
+    [SerializeField] private bool integrateItemSpawners = true; // é›†æˆç‰©å“ç”Ÿæˆå™¨
+    [SerializeField] private bool integrateEquipSlots = true; // é›†æˆè£…å¤‡æ§½
+    [SerializeField] private bool integrateItemDataHolders = true; // é›†æˆç‰©å“æ•°æ®æŒæœ‰è€…
 
-    [Header("¼æÈİĞÔÅäÖÃ")]
-    [SerializeField] private bool preserveExistingIDs = true; // ±£ÁôÏÖÓĞID
-    [SerializeField] private bool migrateOldSaveData = true; // Ç¨ÒÆ¾É±£´æÊı¾İ
-    [SerializeField] private bool validateDataIntegrity = true; // ÑéÖ¤Êı¾İÍêÕûĞÔ
+    [Header("å…¼å®¹æ€§é…ç½®")]
+    [SerializeField] private bool preserveExistingIDs = true; // ä¿ç•™ç°æœ‰ID
+    [SerializeField] private bool migrateOldSaveData = true; // è¿ç§»æ—§ä¿å­˜æ•°æ®
+    [SerializeField] private bool validateDataIntegrity = true; // éªŒè¯æ•°æ®å®Œæ•´æ€§
 
-    // ¼¯³É×´Ì¬¸ú×Ù
+    // é›†æˆçŠ¶æ€è·Ÿè¸ª
     private HashSet<string> integratedObjects = new HashSet<string>();
-    private Dictionary<string, string> idMigrationMap = new Dictionary<string, string>(); // ¾ÉIDµ½ĞÂIDµÄÓ³Éä
-    private List<ISaveable> pendingIntegrations = new List<ISaveable>(); // ´ı¼¯³É¶ÔÏó
+    private Dictionary<string, string> idMigrationMap = new Dictionary<string, string>(); // æ—§IDåˆ°æ–°IDçš„æ˜ å°„
+    private List<ISaveable> pendingIntegrations = new List<ISaveable>(); // å¾…é›†æˆå¯¹è±¡
 
-    // ¼¯³ÉÍ³¼ÆĞÅÏ¢
+    // é›†æˆç»Ÿè®¡ä¿¡æ¯
     [System.Serializable]
     public class DeepIntegrationStats
     {
@@ -51,7 +51,7 @@ public class ItemInstanceIDManagerDeepIntegrator : MonoBehaviour
 
     [SerializeField] private DeepIntegrationStats integrationStats = new DeepIntegrationStats();
 
-    // ÊÂ¼şÏµÍ³
+    // äº‹ä»¶ç³»ç»Ÿ
     public static event System.Action<ISaveable> OnObjectIntegrated;
     public static event System.Action<string, string> OnIDMigrated;
     public static event System.Action<string> OnConflictResolved;
@@ -59,30 +59,30 @@ public class ItemInstanceIDManagerDeepIntegrator : MonoBehaviour
 
     private void Awake()
     {
-        // È·±£ItemInstanceIDManager´æÔÚ
+        // ç¡®ä¿ItemInstanceIDManagerå­˜åœ¨
         if (ItemInstanceIDManager.Instance == null)
         {
-            LogWarning("ItemInstanceIDManagerÊµÀı²»´æÔÚ£¬ÕıÔÚ´´½¨...");
+            LogWarning("ItemInstanceIDManagerå®ä¾‹ä¸å­˜åœ¨ï¼Œæ­£åœ¨åˆ›å»º...");
             var managerGO = new GameObject("ItemInstanceIDManager");
             managerGO.AddComponent<ItemInstanceIDManager>();
 
-            // ½«ĞÂ´´½¨µÄItemInstanceIDManagerÉèÖÃÎªSaveSystemµÄ×Ó¶ÔÏó£¨Èç¹û´æÔÚSaveSystem£©
+            // å°†æ–°åˆ›å»ºçš„ItemInstanceIDManagerè®¾ç½®ä¸ºSaveSystemçš„å­å¯¹è±¡ï¼ˆå¦‚æœå­˜åœ¨SaveSystemï¼‰
             var saveSystemPersistence = FindObjectOfType<SaveSystemPersistence>();
             if (saveSystemPersistence != null)
             {
                 managerGO.transform.SetParent(saveSystemPersistence.transform);
             }
-            // ×¢Òâ£º²»µ÷ÓÃDontDestroyOnLoad£¬ÒòÎªSaveSystemPersistence»á´¦ÀíÕû¸öÏµÍ³µÄ³Ö¾Ã»¯
+            // æ³¨æ„ï¼šä¸è°ƒç”¨DontDestroyOnLoadï¼Œå› ä¸ºSaveSystemPersistenceä¼šå¤„ç†æ•´ä¸ªç³»ç»Ÿçš„æŒä¹…åŒ–
         }
 
-        // ×¢²á³¡¾°ÊÂ¼ş
+        // æ³¨å†Œåœºæ™¯äº‹ä»¶
         if (enableScenePersistence)
         {
             SceneManager.sceneLoaded += OnSceneLoaded;
             SceneManager.sceneUnloaded += OnSceneUnloaded;
         }
 
-        LogMessage("Éî¶È¼¯³ÉÆ÷ÒÑ³õÊ¼»¯");
+        LogMessage("æ·±åº¦é›†æˆå™¨å·²åˆå§‹åŒ–");
     }
 
     private void Start()
@@ -95,88 +95,88 @@ public class ItemInstanceIDManagerDeepIntegrator : MonoBehaviour
 
     private void OnDestroy()
     {
-        // ÇåÀíÊÂ¼ş¶©ÔÄ
+        // æ¸…ç†äº‹ä»¶è®¢é˜…
         if (enableScenePersistence)
         {
             SceneManager.sceneLoaded -= OnSceneLoaded;
             SceneManager.sceneUnloaded -= OnSceneUnloaded;
         }
 
-        LogMessage("Éî¶È¼¯³ÉÆ÷ÒÑÏú»Ù");
+        LogMessage("æ·±åº¦é›†æˆå™¨å·²é”€æ¯");
     }
 
     /// <summary>
-    /// ÑÓ³ÙÖ´ĞĞÉî¶È¼¯³É
+    /// å»¶è¿Ÿæ‰§è¡Œæ·±åº¦é›†æˆ
     /// </summary>
     private IEnumerator DelayedDeepIntegration()
     {
         yield return new WaitForSeconds(integrationDelay);
 
-        LogMessage("¿ªÊ¼Ö´ĞĞÉî¶È¼¯³É...");
+        LogMessage("å¼€å§‹æ‰§è¡Œæ·±åº¦é›†æˆ...");
         PerformDeepIntegration();
     }
 
     /// <summary>
-    /// Ö´ĞĞÉî¶È¼¯³É
+    /// æ‰§è¡Œæ·±åº¦é›†æˆ
     /// </summary>
     public void PerformDeepIntegration()
     {
         try
         {
-            // ÖØÖÃÍ³¼ÆĞÅÏ¢
+            // é‡ç½®ç»Ÿè®¡ä¿¡æ¯
             integrationStats = new DeepIntegrationStats();
             integrationStats.integrationVersion = "1.0.0";
 
-            // ´´½¨±¸·İ
+            // åˆ›å»ºå¤‡ä»½
             if (enableBackwardCompatibility)
             {
                 CreateIntegrationBackup();
             }
 
-            // ·¢ÏÖ²¢ÊÕ¼¯ËùÓĞISaveable¶ÔÏó
+            // å‘ç°å¹¶æ”¶é›†æ‰€æœ‰ISaveableå¯¹è±¡
             CollectISaveableObjects();
 
-            // Ö´ĞĞIDÇ¨ÒÆºÍ¼æÈİĞÔ´¦Àí
+            // æ‰§è¡ŒIDè¿ç§»å’Œå…¼å®¹æ€§å¤„ç†
             if (enableBackwardCompatibility)
             {
                 PerformIDMigration();
             }
 
-            // ¼¯³É¸÷Àà×é¼ş
+            // é›†æˆå„ç±»ç»„ä»¶
             if (integrateInventoryItems) IntegrateInventorySystemItems();
             if (integrateItemGrids) IntegrateBaseItemGrids();
             if (integrateItemSpawners) IntegrateBaseItemSpawners();
             if (integrateEquipSlots) IntegrateEquipSlots();
             if (integrateItemDataHolders) IntegrateItemDataHolders();
 
-            // ÑéÖ¤¼¯³É½á¹û
+            // éªŒè¯é›†æˆç»“æœ
             if (validateDataIntegrity)
             {
                 ValidateIntegrationIntegrity();
             }
 
-            // ½â¾ö³åÍ»
+            // è§£å†³å†²çª
             ResolveIntegrationConflicts();
 
-            // Íê³É¼¯³É
+            // å®Œæˆé›†æˆ
             CompleteIntegration();
 
-            LogMessage($"Éî¶È¼¯³ÉÍê³É£¡¼¯³ÉÁË{integrationStats.totalIntegratedObjects}¸ö¶ÔÏó");
+            LogMessage($"æ·±åº¦é›†æˆå®Œæˆï¼é›†æˆäº†{integrationStats.totalIntegratedObjects}ä¸ªå¯¹è±¡");
         }
         catch (Exception ex)
         {
-            LogError($"Éî¶È¼¯³É¹ı³ÌÖĞ·¢Éú´íÎó: {ex.Message}");
+            LogError($"æ·±åº¦é›†æˆè¿‡ç¨‹ä¸­å‘ç”Ÿé”™è¯¯: {ex.Message}");
         }
     }
 
     /// <summary>
-    /// ÊÕ¼¯³¡¾°ÖĞµÄËùÓĞISaveable¶ÔÏó
+    /// æ”¶é›†åœºæ™¯ä¸­çš„æ‰€æœ‰ISaveableå¯¹è±¡
     /// </summary>
     private void CollectISaveableObjects()
     {
         pendingIntegrations.Clear();
 
-        // ²éÕÒËùÓĞMonoBehaviour×é¼ş
+        // æŸ¥æ‰¾æ‰€æœ‰MonoBehaviourç»„ä»¶
         var allMonoBehaviours = FindObjectsOfType<MonoBehaviour>(true);
 
         foreach (var mb in allMonoBehaviours)
@@ -187,17 +187,17 @@ public class ItemInstanceIDManagerDeepIntegrator : MonoBehaviour
             }
         }
 
-        LogMessage($"·¢ÏÖ{pendingIntegrations.Count}¸öISaveable¶ÔÏó´ı¼¯³É");
+        LogMessage($"å‘ç°{pendingIntegrations.Count}ä¸ªISaveableå¯¹è±¡å¾…é›†æˆ");
     }
 
     /// <summary>
-    /// Ö´ĞĞIDÇ¨ÒÆºÍ¼æÈİĞÔ´¦Àí
+    /// æ‰§è¡ŒIDè¿ç§»å’Œå…¼å®¹æ€§å¤„ç†
     /// </summary>
     private void PerformIDMigration()
     {
         if (!migrateOldSaveData) return;
 
-        LogMessage("¿ªÊ¼Ö´ĞĞIDÇ¨ÒÆ...");
+        LogMessage("å¼€å§‹æ‰§è¡ŒIDè¿ç§»...");
 
         foreach (var saveable in pendingIntegrations)
         {
@@ -205,55 +205,55 @@ public class ItemInstanceIDManagerDeepIntegrator : MonoBehaviour
             {
                 string currentID = saveable.GetSaveID();
 
-                // ¼ì²éID¸ñÊ½ÊÇ·ñĞèÒªÇ¨ÒÆ
+                // æ£€æŸ¥IDæ ¼å¼æ˜¯å¦éœ€è¦è¿ç§»
                 if (NeedsIDMigration(currentID))
                 {
                     string newID = GenerateCompatibleID(saveable, currentID);
 
                     if (!string.IsNullOrEmpty(newID) && newID != currentID)
                     {
-                        // ¼ÇÂ¼Ç¨ÒÆÓ³Éä
+                        // è®°å½•è¿ç§»æ˜ å°„
                         idMigrationMap[currentID] = newID;
 
-                        // ¸üĞÂID
+                        // æ›´æ–°ID
                         saveable.SetSaveID(newID);
                         saveable.MarkAsModified();
 
                         integrationStats.migratedIDs++;
                         OnIDMigrated?.Invoke(currentID, newID);
 
-                        LogMessage($"IDÇ¨ÒÆ: {currentID} -> {newID}");
+                        LogMessage($"IDè¿ç§»: {currentID} -> {newID}");
                     }
                 }
             }
             catch (Exception ex)
             {
-                LogError($"IDÇ¨ÒÆÊ§°Ü: {saveable.GetType().Name}, ´íÎó: {ex.Message}");
+                LogError($"IDè¿ç§»å¤±è´¥: {saveable.GetType().Name}, é”™è¯¯: {ex.Message}");
                 integrationStats.validationErrors++;
             }
         }
 
-        LogMessage($"IDÇ¨ÒÆÍê³É£¬Ç¨ÒÆÁË{integrationStats.migratedIDs}¸öID");
+        LogMessage($"IDè¿ç§»å®Œæˆï¼Œè¿ç§»äº†{integrationStats.migratedIDs}ä¸ªID");
     }
 
     /// <summary>
-    /// ¼ì²éIDÊÇ·ñĞèÒªÇ¨ÒÆ
+    /// æ£€æŸ¥IDæ˜¯å¦éœ€è¦è¿ç§»
     /// </summary>
     private bool NeedsIDMigration(string id)
     {
         if (string.IsNullOrEmpty(id)) return true;
 
-        // ¼ì²éÊÇ·ñÎª¾É¸ñÊ½µÄID£¨ÀıÈç£º²»°üº¬ÀàĞÍÇ°×º£©
+        // æ£€æŸ¥æ˜¯å¦ä¸ºæ—§æ ¼å¼çš„IDï¼ˆä¾‹å¦‚ï¼šä¸åŒ…å«ç±»å‹å‰ç¼€ï¼‰
         if (!id.Contains("_")) return true;
 
-        // ¼ì²éÊÇ·ñÎªGUID¸ñÊ½µ«Ã»ÓĞÀàĞÍĞÅÏ¢
+        // æ£€æŸ¥æ˜¯å¦ä¸ºGUIDæ ¼å¼ä½†æ²¡æœ‰ç±»å‹ä¿¡æ¯
         if (System.Guid.TryParse(id, out _) && !id.Contains("Item_") && !id.Contains("Grid_") && !id.Contains("Spawner_") && !id.Contains("EquipSlot_") && !id.Contains("DataHolder_")) return true;
 
         return false;
     }
 
     /// <summary>
-    /// ¼ì²éIDÊÇ·ñÒÑ¾­ÓĞÕıÈ·µÄÇ°×º
+    /// æ£€æŸ¥IDæ˜¯å¦å·²ç»æœ‰æ­£ç¡®çš„å‰ç¼€
     /// </summary>
     private bool HasCorrectPrefix(string id, ISaveable saveable)
     {
@@ -271,7 +271,7 @@ public class ItemInstanceIDManagerDeepIntegrator : MonoBehaviour
     }
 
     /// <summary>
-    /// Éú³É¼æÈİµÄID
+    /// ç”Ÿæˆå…¼å®¹çš„ID
     /// </summary>
     private string GenerateCompatibleID(ISaveable saveable, string oldID)
     {
@@ -279,13 +279,13 @@ public class ItemInstanceIDManagerDeepIntegrator : MonoBehaviour
 
         if (preserveExistingIDs && !string.IsNullOrEmpty(oldID))
         {
-            // ¼ì²éIDÊÇ·ñÒÑ¾­ÓĞÕıÈ·µÄÇ°×º£¬±ÜÃâÖØ¸´Ìí¼Ó
+            // æ£€æŸ¥IDæ˜¯å¦å·²ç»æœ‰æ­£ç¡®çš„å‰ç¼€ï¼Œé¿å…é‡å¤æ·»åŠ 
             if (HasCorrectPrefix(oldID, saveable))
             {
-                return oldID; // ÒÑÓĞÕıÈ·Ç°×º£¬Ö±½Ó·µ»Ø
+                return oldID; // å·²æœ‰æ­£ç¡®å‰ç¼€ï¼Œç›´æ¥è¿”å›
             }
 
-            // ³¢ÊÔ±£ÁôÔ­ÓĞID£¬Ö»Ìí¼ÓÇ°×º
+            // å°è¯•ä¿ç•™åŸæœ‰IDï¼Œåªæ·»åŠ å‰ç¼€
             if (System.Guid.TryParse(oldID, out _))
             {
                 return $"{prefix}_{oldID}";
@@ -302,7 +302,7 @@ public class ItemInstanceIDManagerDeepIntegrator : MonoBehaviour
     }
 
     /// <summary>
-    /// »ñÈ¡¶ÔÏóÀàĞÍµÄIDÇ°×º
+    /// è·å–å¯¹è±¡ç±»å‹çš„IDå‰ç¼€
     /// </summary>
     private string GetIDPrefix(ISaveable saveable)
     {
@@ -318,12 +318,12 @@ public class ItemInstanceIDManagerDeepIntegrator : MonoBehaviour
     }
 
     /// <summary>
-    /// ¼¯³ÉInventorySystemItem¶ÔÏó
+    /// é›†æˆInventorySystemItemå¯¹è±¡
     /// </summary>
     private void IntegrateInventorySystemItems()
     {
         var items = FindObjectsOfType<InventorySystemItem>(true);
-        LogMessage($"¿ªÊ¼¼¯³É{items.Length}¸öInventorySystemItem¶ÔÏó...");
+        LogMessage($"å¼€å§‹é›†æˆ{items.Length}ä¸ªInventorySystemItemå¯¹è±¡...");
 
         foreach (var item in items)
         {
@@ -333,57 +333,57 @@ public class ItemInstanceIDManagerDeepIntegrator : MonoBehaviour
             }
             catch (Exception ex)
             {
-                LogError($"¼¯³ÉInventorySystemItemÊ§°Ü: {item.name}, ´íÎó: {ex.Message}");
+                LogError($"é›†æˆInventorySystemItemå¤±è´¥: {item.name}, é”™è¯¯: {ex.Message}");
                 integrationStats.validationErrors++;
             }
         }
     }
 
     /// <summary>
-    /// ¼¯³Éµ¥¸öInventorySystemItem
+    /// é›†æˆå•ä¸ªInventorySystemItem
     /// </summary>
     private void IntegrateInventorySystemItem(InventorySystemItem item)
     {
         string instanceID = item.GetItemInstanceID();
 
-        // È·±£ÓĞÓĞĞ§µÄÊµÀıID
+        // ç¡®ä¿æœ‰æœ‰æ•ˆçš„å®ä¾‹ID
         if (string.IsNullOrEmpty(instanceID) || !item.IsItemInstanceIDValid())
         {
             item.GenerateNewItemInstanceID();
             instanceID = item.GetItemInstanceID();
-            LogMessage($"ÎªInventorySystemItemÉú³ÉĞÂID: {instanceID}");
+            LogMessage($"ä¸ºInventorySystemItemç”Ÿæˆæ–°ID: {instanceID}");
         }
 
-        // ×¢²áµ½ItemInstanceIDManager
+        // æ³¨å†Œåˆ°ItemInstanceIDManager
         if (ItemInstanceIDManager.Instance.RegisterInstanceID(instanceID, item.gameObject.name, "InventorySystemItem", item.transform.position))
         {
-            // ±ê¼ÇÎªÒÑ¼¯³É
+            // æ ‡è®°ä¸ºå·²é›†æˆ
             integratedObjects.Add(instanceID);
             integrationStats.totalIntegratedObjects++;
 
-            // ¸üĞÂ±£´æÂß¼­
+            // æ›´æ–°ä¿å­˜é€»è¾‘
             if (enableSaveLogicUpdate)
             {
                 UpdateItemSaveLogic(item);
             }
 
-            // OnObjectIntegrated?.Invoke(item); // ×¢ÊÍµô£ºInventorySystemItemÎ´ÊµÏÖISaveable½Ó¿Ú
-            LogMessage($"³É¹¦¼¯³ÉInventorySystemItem: {instanceID}");
+            // OnObjectIntegrated?.Invoke(item); // æ³¨é‡Šæ‰ï¼šInventorySystemItemæœªå®ç°ISaveableæ¥å£
+            LogMessage($"æˆåŠŸé›†æˆInventorySystemItem: {instanceID}");
         }
         else
         {
-            LogWarning($"×¢²áInventorySystemItemÊ§°Ü: {instanceID}");
+            LogWarning($"æ³¨å†ŒInventorySystemItemå¤±è´¥: {instanceID}");
             integrationStats.validationErrors++;
         }
     }
 
     /// <summary>
-    /// ¼¯³ÉBaseItemGrid¶ÔÏó
+    /// é›†æˆBaseItemGridå¯¹è±¡
     /// </summary>
     private void IntegrateBaseItemGrids()
     {
         var grids = FindObjectsOfType<BaseItemGrid>(true);
-        LogMessage($"¿ªÊ¼¼¯³É{grids.Length}¸öBaseItemGrid¶ÔÏó...");
+        LogMessage($"å¼€å§‹é›†æˆ{grids.Length}ä¸ªBaseItemGridå¯¹è±¡...");
 
         foreach (var grid in grids)
         {
@@ -393,59 +393,59 @@ public class ItemInstanceIDManagerDeepIntegrator : MonoBehaviour
             }
             catch (Exception ex)
             {
-                LogError($"¼¯³ÉBaseItemGridÊ§°Ü: {grid.name}, ´íÎó: {ex.Message}");
+                LogError($"é›†æˆBaseItemGridå¤±è´¥: {grid.name}, é”™è¯¯: {ex.Message}");
                 integrationStats.validationErrors++;
             }
         }
     }
 
     /// <summary>
-    /// ¼¯³Éµ¥¸öBaseItemGrid
+    /// é›†æˆå•ä¸ªBaseItemGrid
     /// </summary>
     private void IntegrateBaseItemGrid(BaseItemGrid grid)
     {
         string gridID = grid.GetSaveID();
 
-        // È·±£ÓĞÓĞĞ§µÄÍø¸ñID
+        // ç¡®ä¿æœ‰æœ‰æ•ˆçš„ç½‘æ ¼ID
         if (string.IsNullOrEmpty(gridID) || !grid.IsSaveIDValid())
         {
             grid.GenerateNewSaveID();
             gridID = grid.GetSaveID();
-            LogMessage($"ÎªBaseItemGridÉú³ÉĞÂID: {gridID}");
+            LogMessage($"ä¸ºBaseItemGridç”Ÿæˆæ–°ID: {gridID}");
         }
 
-        // ×¢²áµ½ItemInstanceIDManager
+        // æ³¨å†Œåˆ°ItemInstanceIDManager
         if (ItemInstanceIDManager.Instance.RegisterInstanceID(gridID, grid.gameObject.name, "BaseItemGrid", grid.transform.position))
         {
-            // ±ê¼ÇÎªÒÑ¼¯³É
+            // æ ‡è®°ä¸ºå·²é›†æˆ
             integratedObjects.Add(gridID);
             integrationStats.totalIntegratedObjects++;
 
-            // ¼¯³ÉÍø¸ñÖĞµÄÎïÆ·
+            // é›†æˆç½‘æ ¼ä¸­çš„ç‰©å“
             IntegrateGridItems(grid);
 
-            // ¸üĞÂ±£´æÂß¼­
+            // æ›´æ–°ä¿å­˜é€»è¾‘
             if (enableSaveLogicUpdate)
             {
                 UpdateGridSaveLogic(grid);
             }
 
-            // OnObjectIntegrated?.Invoke(grid); // ×¢ÊÍµô£ºBaseItemGridÎ´ÊµÏÖISaveable½Ó¿Ú
-            LogMessage($"³É¹¦¼¯³ÉBaseItemGrid: {gridID}");
+            // OnObjectIntegrated?.Invoke(grid); // æ³¨é‡Šæ‰ï¼šBaseItemGridæœªå®ç°ISaveableæ¥å£
+            LogMessage($"æˆåŠŸé›†æˆBaseItemGrid: {gridID}");
         }
         else
         {
-            LogWarning($"×¢²áBaseItemGridÊ§°Ü: {gridID}");
+            LogWarning($"æ³¨å†ŒBaseItemGridå¤±è´¥: {gridID}");
             integrationStats.validationErrors++;
         }
     }
 
     /// <summary>
-    /// ¼¯³ÉÍø¸ñÖĞµÄÎïÆ·
+    /// é›†æˆç½‘æ ¼ä¸­çš„ç‰©å“
     /// </summary>
     private void IntegrateGridItems(BaseItemGrid grid)
     {
-        // »ñÈ¡Íø¸ñÖĞµÄËùÓĞÎïÆ·
+        // è·å–ç½‘æ ¼ä¸­çš„æ‰€æœ‰ç‰©å“
         var gridItems = grid.GetComponentsInChildren<InventorySystemItem>(true);
 
         foreach (var item in gridItems)
@@ -454,29 +454,29 @@ public class ItemInstanceIDManagerDeepIntegrator : MonoBehaviour
             {
                 IntegrateInventorySystemItem(item);
 
-                // ½¨Á¢Íø¸ñÓëÎïÆ·µÄ¹ØÁª
+                // å»ºç«‹ç½‘æ ¼ä¸ç‰©å“çš„å…³è”
                 string gridID = grid.GetSaveID();
                 string itemID = item.GetItemInstanceID();
 
-                // RegisterItemToGrid·½·¨²»´æÔÚ£¬ÔİÊ±×¢ÊÍ
+                // RegisterItemToGridæ–¹æ³•ä¸å­˜åœ¨ï¼Œæš‚æ—¶æ³¨é‡Š
                 // ItemInstanceIDManager.Instance.RegisterItemToGrid(itemID, gridID);
-                LogMessage($"½¨Á¢¹ØÁª: ÎïÆ·{itemID} -> Íø¸ñ{gridID}");
+                LogMessage($"å»ºç«‹å…³è”: ç‰©å“{itemID} -> ç½‘æ ¼{gridID}");
             }
             catch (Exception ex)
             {
-                LogError($"¼¯³ÉÍø¸ñÎïÆ·Ê§°Ü: {item.name}, ´íÎó: {ex.Message}");
+                LogError($"é›†æˆç½‘æ ¼ç‰©å“å¤±è´¥: {item.name}, é”™è¯¯: {ex.Message}");
                 integrationStats.validationErrors++;
             }
         }
     }
 
     /// <summary>
-    /// ¼¯³ÉBaseItemSpawn¶ÔÏó
+    /// é›†æˆBaseItemSpawnå¯¹è±¡
     /// </summary>
     private void IntegrateBaseItemSpawners()
     {
         var spawners = FindObjectsOfType<BaseItemSpawn>(true);
-        LogMessage($"¿ªÊ¼¼¯³É{spawners.Length}¸öBaseItemSpawn¶ÔÏó...");
+        LogMessage($"å¼€å§‹é›†æˆ{spawners.Length}ä¸ªBaseItemSpawnå¯¹è±¡...");
 
         foreach (var spawner in spawners)
         {
@@ -486,57 +486,57 @@ public class ItemInstanceIDManagerDeepIntegrator : MonoBehaviour
             }
             catch (Exception ex)
             {
-                LogError($"¼¯³ÉBaseItemSpawnÊ§°Ü: {spawner.name}, ´íÎó: {ex.Message}");
+                LogError($"é›†æˆBaseItemSpawnå¤±è´¥: {spawner.name}, é”™è¯¯: {ex.Message}");
                 integrationStats.validationErrors++;
             }
         }
     }
 
     /// <summary>
-    /// ¼¯³Éµ¥¸öBaseItemSpawn
+    /// é›†æˆå•ä¸ªBaseItemSpawn
     /// </summary>
     private void IntegrateBaseItemSpawner(BaseItemSpawn spawner)
     {
         string spawnerID = spawner.GetSaveID();
 
-        // È·±£ÓĞÓĞĞ§µÄÉú³ÉÆ÷ID
+        // ç¡®ä¿æœ‰æœ‰æ•ˆçš„ç”Ÿæˆå™¨ID
         if (string.IsNullOrEmpty(spawnerID) || !spawner.IsSaveIDValid())
         {
             spawner.GenerateNewSaveID();
             spawnerID = spawner.GetSaveID();
-            LogMessage($"ÎªBaseItemSpawnÉú³ÉĞÂID: {spawnerID}");
+            LogMessage($"ä¸ºBaseItemSpawnç”Ÿæˆæ–°ID: {spawnerID}");
         }
 
-        // ×¢²áµ½ItemInstanceIDManager
+        // æ³¨å†Œåˆ°ItemInstanceIDManager
         if (ItemInstanceIDManager.Instance.RegisterInstanceID(spawnerID, spawner.gameObject.name, "BaseItemSpawn", spawner.transform.position))
         {
-            // ±ê¼ÇÎªÒÑ¼¯³É
+            // æ ‡è®°ä¸ºå·²é›†æˆ
             integratedObjects.Add(spawnerID);
             integrationStats.totalIntegratedObjects++;
 
-            // ¸üĞÂ±£´æÂß¼­
+            // æ›´æ–°ä¿å­˜é€»è¾‘
             if (enableSaveLogicUpdate)
             {
                 UpdateSpawnerSaveLogic(spawner);
             }
 
             OnObjectIntegrated?.Invoke(spawner);
-            LogMessage($"³É¹¦¼¯³ÉBaseItemSpawn: {spawnerID}");
+            LogMessage($"æˆåŠŸé›†æˆBaseItemSpawn: {spawnerID}");
         }
         else
         {
-            LogWarning($"×¢²áBaseItemSpawnÊ§°Ü: {spawnerID}");
+            LogWarning($"æ³¨å†ŒBaseItemSpawnå¤±è´¥: {spawnerID}");
             integrationStats.validationErrors++;
         }
     }
 
     /// <summary>
-    /// ¼¯³ÉEquipSlot¶ÔÏó
+    /// é›†æˆEquipSlotå¯¹è±¡
     /// </summary>
     private void IntegrateEquipSlots()
     {
         var equipSlots = FindObjectsOfType<EquipSlot>(true);
-        LogMessage($"¿ªÊ¼¼¯³É{equipSlots.Length}¸öEquipSlot¶ÔÏó...");
+        LogMessage($"å¼€å§‹é›†æˆ{equipSlots.Length}ä¸ªEquipSlotå¯¹è±¡...");
 
         foreach (var equipSlot in equipSlots)
         {
@@ -546,57 +546,57 @@ public class ItemInstanceIDManagerDeepIntegrator : MonoBehaviour
             }
             catch (Exception ex)
             {
-                LogError($"¼¯³ÉEquipSlotÊ§°Ü: {equipSlot.name}, ´íÎó: {ex.Message}");
+                LogError($"é›†æˆEquipSlotå¤±è´¥: {equipSlot.name}, é”™è¯¯: {ex.Message}");
                 integrationStats.validationErrors++;
             }
         }
     }
 
     /// <summary>
-    /// ¼¯³Éµ¥¸öEquipSlot
+    /// é›†æˆå•ä¸ªEquipSlot
     /// </summary>
     private void IntegrateEquipSlot(EquipSlot equipSlot)
     {
         string slotID = equipSlot.GetSaveID();
 
-        // È·±£ÓĞÓĞĞ§µÄ×°±¸²ÛID
+        // ç¡®ä¿æœ‰æœ‰æ•ˆçš„è£…å¤‡æ§½ID
         if (string.IsNullOrEmpty(slotID) || !equipSlot.IsSaveIDValid())
         {
             equipSlot.GenerateNewSaveID();
             slotID = equipSlot.GetSaveID();
-            LogMessage($"ÎªEquipSlotÉú³ÉĞÂID: {slotID}");
+            LogMessage($"ä¸ºEquipSlotç”Ÿæˆæ–°ID: {slotID}");
         }
 
-        // ×¢²áµ½ItemInstanceIDManager
+        // æ³¨å†Œåˆ°ItemInstanceIDManager
         if (ItemInstanceIDManager.Instance.RegisterInstanceID(slotID, equipSlot.gameObject.name, "EquipSlot", equipSlot.transform.position))
         {
-            // ±ê¼ÇÎªÒÑ¼¯³É
+            // æ ‡è®°ä¸ºå·²é›†æˆ
             integratedObjects.Add(slotID);
             integrationStats.totalIntegratedObjects++;
 
-            // ¸üĞÂ±£´æÂß¼­
+            // æ›´æ–°ä¿å­˜é€»è¾‘
             if (enableSaveLogicUpdate)
             {
                 UpdateEquipSlotSaveLogic(equipSlot);
             }
 
             OnObjectIntegrated?.Invoke(equipSlot);
-            LogMessage($"³É¹¦¼¯³ÉEquipSlot: {slotID}");
+            LogMessage($"æˆåŠŸé›†æˆEquipSlot: {slotID}");
         }
         else
         {
-            LogWarning($"×¢²áEquipSlotÊ§°Ü: {slotID}");
+            LogWarning($"æ³¨å†ŒEquipSlotå¤±è´¥: {slotID}");
             integrationStats.validationErrors++;
         }
     }
 
     /// <summary>
-    /// ¼¯³ÉItemDataHolder¶ÔÏó
+    /// é›†æˆItemDataHolderå¯¹è±¡
     /// </summary>
     private void IntegrateItemDataHolders()
     {
         var dataHolders = FindObjectsOfType<ItemDataHolder>(true);
-        LogMessage($"¿ªÊ¼¼¯³É{dataHolders.Length}¸öItemDataHolder¶ÔÏó...");
+        LogMessage($"å¼€å§‹é›†æˆ{dataHolders.Length}ä¸ªItemDataHolderå¯¹è±¡...");
 
         foreach (var dataHolder in dataHolders)
         {
@@ -606,63 +606,63 @@ public class ItemInstanceIDManagerDeepIntegrator : MonoBehaviour
             }
             catch (Exception ex)
             {
-                LogError($"¼¯³ÉItemDataHolderÊ§°Ü: {dataHolder.name}, ´íÎó: {ex.Message}");
+                LogError($"é›†æˆItemDataHolderå¤±è´¥: {dataHolder.name}, é”™è¯¯: {ex.Message}");
                 integrationStats.validationErrors++;
             }
         }
     }
 
     /// <summary>
-    /// ¼¯³Éµ¥¸öItemDataHolder
+    /// é›†æˆå•ä¸ªItemDataHolder
     /// </summary>
     private void IntegrateItemDataHolder(ItemDataHolder dataHolder)
     {
         string holderID = dataHolder.GetSaveID();
 
-        // È·±£ÓĞÓĞĞ§µÄÊı¾İ³ÖÓĞÕßID
+        // ç¡®ä¿æœ‰æœ‰æ•ˆçš„æ•°æ®æŒæœ‰è€…ID
         if (string.IsNullOrEmpty(holderID))
         {
             dataHolder.GenerateNewSaveID();
             holderID = dataHolder.GetSaveID();
-            LogMessage($"ÎªItemDataHolderÉú³ÉĞÂID: {holderID}");
+            LogMessage($"ä¸ºItemDataHolderç”Ÿæˆæ–°ID: {holderID}");
         }
 
-        // ×¢²áµ½ItemInstanceIDManager
+        // æ³¨å†Œåˆ°ItemInstanceIDManager
         if (ItemInstanceIDManager.Instance.RegisterInstanceID(holderID, dataHolder.gameObject.name, "ItemDataHolder", dataHolder.transform.position))
         {
-            // ±ê¼ÇÎªÒÑ¼¯³É
+            // æ ‡è®°ä¸ºå·²é›†æˆ
             integratedObjects.Add(holderID);
             integrationStats.totalIntegratedObjects++;
 
-            // ¸üĞÂ±£´æÂß¼­
+            // æ›´æ–°ä¿å­˜é€»è¾‘
             if (enableSaveLogicUpdate)
             {
                 UpdateDataHolderSaveLogic(dataHolder);
             }
 
-            // OnObjectIntegrated?.Invoke(dataHolder); // ×¢ÊÍµô£ºItemDataHolderÎ´ÊµÏÖISaveable½Ó¿Ú
-            LogMessage($"³É¹¦¼¯³ÉItemDataHolder: {holderID}");
+            // OnObjectIntegrated?.Invoke(dataHolder); // æ³¨é‡Šæ‰ï¼šItemDataHolderæœªå®ç°ISaveableæ¥å£
+            LogMessage($"æˆåŠŸé›†æˆItemDataHolder: {holderID}");
         }
         else
         {
-            LogWarning($"×¢²áItemDataHolderÊ§°Ü: {holderID}");
+            LogWarning($"æ³¨å†ŒItemDataHolderå¤±è´¥: {holderID}");
             integrationStats.validationErrors++;
         }
     }
 
     /// <summary>
-    /// ¸üĞÂÎïÆ·±£´æÂß¼­
+    /// æ›´æ–°ç‰©å“ä¿å­˜é€»è¾‘
     /// </summary>
     private void UpdateItemSaveLogic(InventorySystemItem item)
     {
-        // È·±£ÎïÆ·Ê¹ÓÃĞÂµÄIDÏµÍ³
+        // ç¡®ä¿ç‰©å“ä½¿ç”¨æ–°çš„IDç³»ç»Ÿ
         if (!item.IsItemInstanceIDValid())
         {
             item.GenerateNewItemInstanceID();
         }
 
-        // ÎïÆ·±¾ÉíÃ»ÓĞMarkAsModified·½·¨£¬Í¨¹ıÆäËû·½Ê½±ê¼ÇĞŞ¸Ä
-        // ¿ÉÒÔÍ¨¹ıSaveManager±ê¼Ç¶ÔÏó±ä»¯
+        // ç‰©å“æœ¬èº«æ²¡æœ‰MarkAsModifiedæ–¹æ³•ï¼Œé€šè¿‡å…¶ä»–æ–¹å¼æ ‡è®°ä¿®æ”¹
+        // å¯ä»¥é€šè¿‡SaveManageræ ‡è®°å¯¹è±¡å˜åŒ–
         if (SaveManager.Instance != null)
         {
             SaveManager.Instance.MarkObjectChanged(item.GetItemInstanceID());
@@ -670,67 +670,67 @@ public class ItemInstanceIDManagerDeepIntegrator : MonoBehaviour
     }
 
     /// <summary>
-    /// ¸üĞÂÍø¸ñ±£´æÂß¼­
+    /// æ›´æ–°ç½‘æ ¼ä¿å­˜é€»è¾‘
     /// </summary>
     private void UpdateGridSaveLogic(BaseItemGrid grid)
     {
-        // È·±£Íø¸ñÊ¹ÓÃĞÂµÄIDÏµÍ³
+        // ç¡®ä¿ç½‘æ ¼ä½¿ç”¨æ–°çš„IDç³»ç»Ÿ
         if (!grid.IsSaveIDValid())
         {
             grid.GenerateNewSaveID();
         }
 
-        // InitializeSaveSystemÊÇprotected·½·¨£¬²»ÄÜÖ±½Óµ÷ÓÃ
-        // Í¨¹ı·´Éä»òÆäËû·½Ê½µ÷ÓÃ£¬»òÕß×¢ÊÍµô
+        // InitializeSaveSystemæ˜¯protectedæ–¹æ³•ï¼Œä¸èƒ½ç›´æ¥è°ƒç”¨
+        // é€šè¿‡åå°„æˆ–å…¶ä»–æ–¹å¼è°ƒç”¨ï¼Œæˆ–è€…æ³¨é‡Šæ‰
         // grid.InitializeSaveSystem();
 
-        // ±ê¼ÇÎªÒÑĞŞ¸Ä£¬´¥·¢±£´æ
+        // æ ‡è®°ä¸ºå·²ä¿®æ”¹ï¼Œè§¦å‘ä¿å­˜
         grid.MarkAsModified();
     }
 
     /// <summary>
-    /// ¸üĞÂÉú³ÉÆ÷±£´æÂß¼­
+    /// æ›´æ–°ç”Ÿæˆå™¨ä¿å­˜é€»è¾‘
     /// </summary>
     private void UpdateSpawnerSaveLogic(BaseItemSpawn spawner)
     {
-        // È·±£Éú³ÉÆ÷Ê¹ÓÃĞÂµÄIDÏµÍ³
+        // ç¡®ä¿ç”Ÿæˆå™¨ä½¿ç”¨æ–°çš„IDç³»ç»Ÿ
         if (!spawner.IsSaveIDValid())
         {
             spawner.GenerateNewSaveID();
         }
 
-        // ±ê¼ÇÎªÒÑĞŞ¸Ä£¬´¥·¢±£´æ
+        // æ ‡è®°ä¸ºå·²ä¿®æ”¹ï¼Œè§¦å‘ä¿å­˜
         spawner.MarkAsModified();
     }
 
     /// <summary>
-    /// ¸üĞÂ×°±¸²Û±£´æÂß¼­
+    /// æ›´æ–°è£…å¤‡æ§½ä¿å­˜é€»è¾‘
     /// </summary>
     private void UpdateEquipSlotSaveLogic(EquipSlot equipSlot)
     {
-        // È·±£×°±¸²ÛÊ¹ÓÃĞÂµÄIDÏµÍ³
+        // ç¡®ä¿è£…å¤‡æ§½ä½¿ç”¨æ–°çš„IDç³»ç»Ÿ
         if (!equipSlot.IsSaveIDValid())
         {
             equipSlot.GenerateNewSaveID();
         }
 
-        // ±ê¼ÇÎªÒÑĞŞ¸Ä£¬´¥·¢±£´æ
+        // æ ‡è®°ä¸ºå·²ä¿®æ”¹ï¼Œè§¦å‘ä¿å­˜
         equipSlot.MarkAsModified();
     }
 
     /// <summary>
-    /// ¸üĞÂÊı¾İ³ÖÓĞÕß±£´æÂß¼­
+    /// æ›´æ–°æ•°æ®æŒæœ‰è€…ä¿å­˜é€»è¾‘
     /// </summary>
     private void UpdateDataHolderSaveLogic(ItemDataHolder dataHolder)
     {
-        // È·±£Êı¾İ³ÖÓĞÕßÊ¹ÓÃĞÂµÄIDÏµÍ³
-        // ItemDataHolderÃ»ÓĞIsSaveIDValid·½·¨£¬Ö±½Ó¼ì²éSaveID
+        // ç¡®ä¿æ•°æ®æŒæœ‰è€…ä½¿ç”¨æ–°çš„IDç³»ç»Ÿ
+        // ItemDataHolderæ²¡æœ‰IsSaveIDValidæ–¹æ³•ï¼Œç›´æ¥æ£€æŸ¥SaveID
         if (string.IsNullOrEmpty(dataHolder.GetSaveID()))
         {
             dataHolder.GenerateNewSaveID();
         }
 
-        // ItemDataHolderÃ»ÓĞMarkAsModified·½·¨£¬Í¨¹ıSaveManager±ê¼Ç±ä»¯
+        // ItemDataHolderæ²¡æœ‰MarkAsModifiedæ–¹æ³•ï¼Œé€šè¿‡SaveManageræ ‡è®°å˜åŒ–
         if (SaveManager.Instance != null)
         {
             SaveManager.Instance.MarkObjectChanged(dataHolder.GetSaveID());
@@ -738,30 +738,30 @@ public class ItemInstanceIDManagerDeepIntegrator : MonoBehaviour
     }
 
     /// <summary>
-    /// ÑéÖ¤¼¯³ÉÍêÕûĞÔ
+    /// éªŒè¯é›†æˆå®Œæ•´æ€§
     /// </summary>
     private void ValidateIntegrationIntegrity()
     {
-        LogMessage("¿ªÊ¼ÑéÖ¤¼¯³ÉÍêÕûĞÔ...");
+        LogMessage("å¼€å§‹éªŒè¯é›†æˆå®Œæ•´æ€§...");
 
         int validationErrors = 0;
 
-        // ÑéÖ¤ËùÓĞÒÑ¼¯³É¶ÔÏóµÄIDÓĞĞ§ĞÔ
+        // éªŒè¯æ‰€æœ‰å·²é›†æˆå¯¹è±¡çš„IDæœ‰æ•ˆæ€§
         foreach (string objectID in integratedObjects)
         {
             if (!ItemInstanceIDManager.Instance.IsIDRegistered(objectID))
             {
-                LogError($"¼¯³ÉÑéÖ¤Ê§°Ü£ºIDÎ´×¢²á - {objectID}");
+                LogError($"é›†æˆéªŒè¯å¤±è´¥ï¼šIDæœªæ³¨å†Œ - {objectID}");
                 validationErrors++;
             }
         }
 
-        // ÑéÖ¤IDÇ¨ÒÆÓ³ÉäµÄÍêÕûĞÔ
+        // éªŒè¯IDè¿ç§»æ˜ å°„çš„å®Œæ•´æ€§
         foreach (var migration in idMigrationMap)
         {
             if (!ItemInstanceIDManager.Instance.IsIDRegistered(migration.Value))
             {
-                LogError($"IDÇ¨ÒÆÑéÖ¤Ê§°Ü£ºĞÂIDÎ´×¢²á - {migration.Key} -> {migration.Value}");
+                LogError($"IDè¿ç§»éªŒè¯å¤±è´¥ï¼šæ–°IDæœªæ³¨å†Œ - {migration.Key} -> {migration.Value}");
                 validationErrors++;
             }
         }
@@ -770,16 +770,16 @@ public class ItemInstanceIDManagerDeepIntegrator : MonoBehaviour
 
         if (validationErrors == 0)
         {
-            LogMessage("¼¯³ÉÍêÕûĞÔÑéÖ¤Í¨¹ı");
+            LogMessage("é›†æˆå®Œæ•´æ€§éªŒè¯é€šè¿‡");
         }
         else
         {
-            LogWarning($"¼¯³ÉÍêÕûĞÔÑéÖ¤·¢ÏÖ{validationErrors}¸ö´íÎó");
+            LogWarning($"é›†æˆå®Œæ•´æ€§éªŒè¯å‘ç°{validationErrors}ä¸ªé”™è¯¯");
         }
     }
 
     /// <summary>
-    /// ½â¾ö¼¯³É³åÍ»
+    /// è§£å†³é›†æˆå†²çª
     /// </summary>
     private void ResolveIntegrationConflicts()
     {
@@ -787,17 +787,17 @@ public class ItemInstanceIDManagerDeepIntegrator : MonoBehaviour
 
         if (conflicts.Count == 0)
         {
-            LogMessage("Î´·¢ÏÖ¼¯³É³åÍ»");
+            LogMessage("æœªå‘ç°é›†æˆå†²çª");
             return;
         }
 
-        LogMessage($"·¢ÏÖ{conflicts.Count}¸ö¼¯³É³åÍ»£¬¿ªÊ¼½â¾ö...");
+        LogMessage($"å‘ç°{conflicts.Count}ä¸ªé›†æˆå†²çªï¼Œå¼€å§‹è§£å†³...");
 
         foreach (var conflict in conflicts)
         {
             try
             {
-                // ³¢ÊÔ×Ô¶¯½â¾ö³åÍ»£¨ResolveConflict·½·¨²»´æÔÚ£¬Ê¹ÓÃÌæ´ú·½°¸£©
+                // å°è¯•è‡ªåŠ¨è§£å†³å†²çªï¼ˆResolveConflictæ–¹æ³•ä¸å­˜åœ¨ï¼Œä½¿ç”¨æ›¿ä»£æ–¹æ¡ˆï¼‰
                 // bool resolved = ItemInstanceIDManager.Instance.ResolveConflict(conflict.conflictID);
                 bool resolved = TryResolveConflictAlternative(conflict.conflictID);
 
@@ -805,102 +805,102 @@ public class ItemInstanceIDManagerDeepIntegrator : MonoBehaviour
                 {
                     integrationStats.resolvedConflicts++;
                     OnConflictResolved?.Invoke(conflict.conflictID);
-                    LogMessage($"³É¹¦½â¾ö³åÍ»: {conflict.conflictID}");
+                    LogMessage($"æˆåŠŸè§£å†³å†²çª: {conflict.conflictID}");
                 }
                 else
                 {
-                    LogWarning($"ÎŞ·¨×Ô¶¯½â¾ö³åÍ»: {conflict.conflictID}");
+                    LogWarning($"æ— æ³•è‡ªåŠ¨è§£å†³å†²çª: {conflict.conflictID}");
                     integrationStats.validationErrors++;
                 }
             }
             catch (Exception ex)
             {
-                LogError($"½â¾ö³åÍ»Ê±·¢Éú´íÎó: {conflict.conflictID}, ´íÎó: {ex.Message}");
+                LogError($"è§£å†³å†²çªæ—¶å‘ç”Ÿé”™è¯¯: {conflict.conflictID}, é”™è¯¯: {ex.Message}");
                 integrationStats.validationErrors++;
             }
         }
 
-        LogMessage($"³åÍ»½â¾öÍê³É£¬³É¹¦½â¾ö{integrationStats.resolvedConflicts}¸ö³åÍ»");
+        LogMessage($"å†²çªè§£å†³å®Œæˆï¼ŒæˆåŠŸè§£å†³{integrationStats.resolvedConflicts}ä¸ªå†²çª");
     }
 
     /// <summary>
-    /// ´´½¨¼¯³É±¸·İ
+    /// åˆ›å»ºé›†æˆå¤‡ä»½
     /// </summary>
     private void CreateIntegrationBackup()
     {
         try
         {
-            // µ¼³öµ±Ç°IDÓ³ÉäÊı¾İ×÷Îª±¸·İ
+            // å¯¼å‡ºå½“å‰IDæ˜ å°„æ•°æ®ä½œä¸ºå¤‡ä»½
             var backupData = ItemInstanceIDManager.Instance.ExportIDMappingData();
 
             if (!string.IsNullOrEmpty(backupData))
             {
                 string backupPath = $"Assets/InventorySystem/Backups/integration_backup_{DateTime.Now:yyyyMMdd_HHmmss}.json";
 
-                // È·±£±¸·İÄ¿Â¼´æÔÚ
+                // ç¡®ä¿å¤‡ä»½ç›®å½•å­˜åœ¨
                 string backupDir = System.IO.Path.GetDirectoryName(backupPath);
                 if (!System.IO.Directory.Exists(backupDir))
                 {
                     System.IO.Directory.CreateDirectory(backupDir);
                 }
 
-                // Ğ´Èë±¸·İÎÄ¼ş
+                // å†™å…¥å¤‡ä»½æ–‡ä»¶
                 System.IO.File.WriteAllText(backupPath, backupData);
 
                 integrationStats.backupCreated++;
-                LogMessage($"¼¯³É±¸·İÒÑ´´½¨: {backupPath}");
+                LogMessage($"é›†æˆå¤‡ä»½å·²åˆ›å»º: {backupPath}");
             }
         }
         catch (Exception ex)
         {
-            LogError($"´´½¨¼¯³É±¸·İÊ§°Ü: {ex.Message}");
+            LogError($"åˆ›å»ºé›†æˆå¤‡ä»½å¤±è´¥: {ex.Message}");
         }
     }
 
     /// <summary>
-    /// Íê³É¼¯³É
+    /// å®Œæˆé›†æˆ
     /// </summary>
     private void CompleteIntegration()
     {
         integrationStats.lastIntegrationTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
 
-        // ´¥·¢Íê³ÉÊÂ¼ş
+        // è§¦å‘å®Œæˆäº‹ä»¶
         OnIntegrationCompleted?.Invoke(integrationStats);
 
-        // ±£´æ¼¯³É×´Ì¬
+        // ä¿å­˜é›†æˆçŠ¶æ€
         SaveIntegrationState();
 
-        LogMessage($"Éî¶È¼¯³ÉÒÑÍê³É£¡Í³¼ÆĞÅÏ¢£º\n" +
-                  $"- ¼¯³É¶ÔÏó×ÜÊı: {integrationStats.totalIntegratedObjects}\n" +
-                  $"- Ç¨ÒÆIDÊıÁ¿: {integrationStats.migratedIDs}\n" +
-                  $"- ½â¾ö³åÍ»ÊıÁ¿: {integrationStats.resolvedConflicts}\n" +
-                  $"- ÑéÖ¤´íÎóÊıÁ¿: {integrationStats.validationErrors}\n" +
-                  $"- ´´½¨±¸·İÊıÁ¿: {integrationStats.backupCreated}\n" +
-                  $"- ¼¯³ÉÊ±¼ä: {integrationStats.lastIntegrationTime}");
+        LogMessage($"æ·±åº¦é›†æˆå·²å®Œæˆï¼ç»Ÿè®¡ä¿¡æ¯ï¼š\n" +
+                  $"- é›†æˆå¯¹è±¡æ€»æ•°: {integrationStats.totalIntegratedObjects}\n" +
+                  $"- è¿ç§»IDæ•°é‡: {integrationStats.migratedIDs}\n" +
+                  $"- è§£å†³å†²çªæ•°é‡: {integrationStats.resolvedConflicts}\n" +
+                  $"- éªŒè¯é”™è¯¯æ•°é‡: {integrationStats.validationErrors}\n" +
+                  $"- åˆ›å»ºå¤‡ä»½æ•°é‡: {integrationStats.backupCreated}\n" +
+                  $"- é›†æˆæ—¶é—´: {integrationStats.lastIntegrationTime}");
     }
 
     /// <summary>
-    /// ±£´æ¼¯³É×´Ì¬
+    /// ä¿å­˜é›†æˆçŠ¶æ€
     /// </summary>
     private void SaveIntegrationState()
     {
         try
         {
-            // ½«¼¯³É×´Ì¬±£´æµ½PlayerPrefs»òÎÄ¼ş
+            // å°†é›†æˆçŠ¶æ€ä¿å­˜åˆ°PlayerPrefsæˆ–æ–‡ä»¶
             string stateJson = JsonUtility.ToJson(integrationStats, true);
             PlayerPrefs.SetString("ItemInstanceIDManager_IntegrationState", stateJson);
             PlayerPrefs.Save();
 
-            LogMessage("¼¯³É×´Ì¬ÒÑ±£´æ");
+            LogMessage("é›†æˆçŠ¶æ€å·²ä¿å­˜");
         }
         catch (Exception ex)
         {
-            LogError($"±£´æ¼¯³É×´Ì¬Ê§°Ü: {ex.Message}");
+            LogError($"ä¿å­˜é›†æˆçŠ¶æ€å¤±è´¥: {ex.Message}");
         }
     }
 
     /// <summary>
-    /// ¼ÓÔØ¼¯³É×´Ì¬
+    /// åŠ è½½é›†æˆçŠ¶æ€
     /// </summary>
     private void LoadIntegrationState()
     {
@@ -911,43 +911,43 @@ public class ItemInstanceIDManagerDeepIntegrator : MonoBehaviour
             if (!string.IsNullOrEmpty(stateJson))
             {
                 integrationStats = JsonUtility.FromJson<DeepIntegrationStats>(stateJson);
-                LogMessage("¼¯³É×´Ì¬ÒÑ¼ÓÔØ");
+                LogMessage("é›†æˆçŠ¶æ€å·²åŠ è½½");
             }
         }
         catch (Exception ex)
         {
-            LogError($"¼ÓÔØ¼¯³É×´Ì¬Ê§°Ü: {ex.Message}");
+            LogError($"åŠ è½½é›†æˆçŠ¶æ€å¤±è´¥: {ex.Message}");
         }
     }
 
     /// <summary>
-    /// ³¡¾°¼ÓÔØÊÂ¼ş´¦Àí
+    /// åœºæ™¯åŠ è½½äº‹ä»¶å¤„ç†
     /// </summary>
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         if (!enableScenePersistence) return;
 
-        LogMessage($"³¡¾°ÒÑ¼ÓÔØ: {scene.name}£¬¿ªÊ¼³¡¾°¼¯³É...");
+        LogMessage($"åœºæ™¯å·²åŠ è½½: {scene.name}ï¼Œå¼€å§‹åœºæ™¯é›†æˆ...");
 
-        // ÑÓ³ÙÖ´ĞĞ³¡¾°¼¯³É£¬È·±£ËùÓĞ¶ÔÏó¶¼ÒÑ³õÊ¼»¯
+        // å»¶è¿Ÿæ‰§è¡Œåœºæ™¯é›†æˆï¼Œç¡®ä¿æ‰€æœ‰å¯¹è±¡éƒ½å·²åˆå§‹åŒ–
         StartCoroutine(DelayedSceneIntegration());
     }
 
     /// <summary>
-    /// ³¡¾°Ğ¶ÔØÊÂ¼ş´¦Àí
+    /// åœºæ™¯å¸è½½äº‹ä»¶å¤„ç†
     /// </summary>
     private void OnSceneUnloaded(Scene scene)
     {
         if (!enableScenePersistence) return;
 
-        LogMessage($"³¡¾°ÒÑĞ¶ÔØ: {scene.name}£¬ÇåÀí³¡¾°Êı¾İ...");
+        LogMessage($"åœºæ™¯å·²å¸è½½: {scene.name}ï¼Œæ¸…ç†åœºæ™¯æ•°æ®...");
 
-        // ÇåÀí³¡¾°Ïà¹ØµÄ¼¯³ÉÊı¾İ
+        // æ¸…ç†åœºæ™¯ç›¸å…³çš„é›†æˆæ•°æ®
         CleanupSceneIntegration(scene.name);
     }
 
     /// <summary>
-    /// ÑÓ³ÙÖ´ĞĞ³¡¾°¼¯³É
+    /// å»¶è¿Ÿæ‰§è¡Œåœºæ™¯é›†æˆ
     /// </summary>
     private IEnumerator DelayedSceneIntegration()
     {
@@ -960,30 +960,30 @@ public class ItemInstanceIDManagerDeepIntegrator : MonoBehaviour
     }
 
     /// <summary>
-    /// ÇåÀí³¡¾°¼¯³ÉÊı¾İ
+    /// æ¸…ç†åœºæ™¯é›†æˆæ•°æ®
     /// </summary>
     private void CleanupSceneIntegration(string sceneName)
     {
-        // ÇåÀí³¡¾°×¢²áĞÅÏ¢£¨CleanupSceneRegistrationsÊÇprivate·½·¨£¬²»ÄÜÖ±½Óµ÷ÓÃ£©
+        // æ¸…ç†åœºæ™¯æ³¨å†Œä¿¡æ¯ï¼ˆCleanupSceneRegistrationsæ˜¯privateæ–¹æ³•ï¼Œä¸èƒ½ç›´æ¥è°ƒç”¨ï¼‰
         // ItemInstanceIDManager.Instance.CleanupSceneRegistrations(sceneName);
-        LogMessage($"³¡¾°Ğ¶ÔØ£¬ĞèÒªÇåÀí×¢²áĞÅÏ¢: {sceneName}");
+        LogMessage($"åœºæ™¯å¸è½½ï¼Œéœ€è¦æ¸…ç†æ³¨å†Œä¿¡æ¯: {sceneName}");
 
-        LogMessage($"³¡¾°¼¯³ÉÊı¾İÇåÀíÍê³É: {sceneName}");
+        LogMessage($"åœºæ™¯é›†æˆæ•°æ®æ¸…ç†å®Œæˆ: {sceneName}");
     }
 
-    // === ¹«¹²API·½·¨ ===
+    // === å…¬å…±APIæ–¹æ³• ===
 
     /// <summary>
-    /// ÊÖ¶¯´¥·¢Éî¶È¼¯³É
+    /// æ‰‹åŠ¨è§¦å‘æ·±åº¦é›†æˆ
     /// </summary>
     public void ManualDeepIntegration()
     {
-        LogMessage("ÊÖ¶¯´¥·¢Éî¶È¼¯³É");
+        LogMessage("æ‰‹åŠ¨è§¦å‘æ·±åº¦é›†æˆ");
         PerformDeepIntegration();
     }
 
     /// <summary>
-    /// »ñÈ¡¼¯³ÉÍ³¼ÆĞÅÏ¢
+    /// è·å–é›†æˆç»Ÿè®¡ä¿¡æ¯
     /// </summary>
     public DeepIntegrationStats GetIntegrationStats()
     {
@@ -991,7 +991,7 @@ public class ItemInstanceIDManagerDeepIntegrator : MonoBehaviour
     }
 
     /// <summary>
-    /// ¼ì²é¶ÔÏóÊÇ·ñÒÑ¼¯³É
+    /// æ£€æŸ¥å¯¹è±¡æ˜¯å¦å·²é›†æˆ
     /// </summary>
     public bool IsObjectIntegrated(string objectID)
     {
@@ -999,7 +999,7 @@ public class ItemInstanceIDManagerDeepIntegrator : MonoBehaviour
     }
 
     /// <summary>
-    /// »ñÈ¡IDÇ¨ÒÆÓ³Éä
+    /// è·å–IDè¿ç§»æ˜ å°„
     /// </summary>
     public Dictionary<string, string> GetIDMigrationMap()
     {
@@ -1007,7 +1007,7 @@ public class ItemInstanceIDManagerDeepIntegrator : MonoBehaviour
     }
 
     /// <summary>
-    /// Çå³ı¼¯³É×´Ì¬
+    /// æ¸…é™¤é›†æˆçŠ¶æ€
     /// </summary>
     public void ClearIntegrationState()
     {
@@ -1019,11 +1019,11 @@ public class ItemInstanceIDManagerDeepIntegrator : MonoBehaviour
         PlayerPrefs.DeleteKey("ItemInstanceIDManager_IntegrationState");
         PlayerPrefs.Save();
 
-        LogMessage("¼¯³É×´Ì¬ÒÑÇå³ı");
+        LogMessage("é›†æˆçŠ¶æ€å·²æ¸…é™¤");
     }
 
     /// <summary>
-    /// ÖØĞÂ¼¯³ÉÖ¸¶¨¶ÔÏó
+    /// é‡æ–°é›†æˆæŒ‡å®šå¯¹è±¡
     /// </summary>
     public void ReintegrateObject(ISaveable saveable)
     {
@@ -1031,10 +1031,10 @@ public class ItemInstanceIDManagerDeepIntegrator : MonoBehaviour
 
         string objectID = saveable.GetSaveID();
 
-        // ÒÆ³ı¾ÉµÄ¼¯³É¼ÇÂ¼
+        // ç§»é™¤æ—§çš„é›†æˆè®°å½•
         integratedObjects.Remove(objectID);
 
-        // ÖØĞÂ¼¯³É
+        // é‡æ–°é›†æˆ
         switch (saveable)
         {
             case InventorySystemItem item:
@@ -1054,29 +1054,29 @@ public class ItemInstanceIDManagerDeepIntegrator : MonoBehaviour
                 break;
         }
 
-        LogMessage($"¶ÔÏóÖØĞÂ¼¯³ÉÍê³É: {objectID}");
+        LogMessage($"å¯¹è±¡é‡æ–°é›†æˆå®Œæˆ: {objectID}");
     }
 
     /// <summary>
-    /// ÑéÖ¤ÏµÍ³¼¯³É×´Ì¬
+    /// éªŒè¯ç³»ç»Ÿé›†æˆçŠ¶æ€
     /// </summary>
     public bool ValidateSystemIntegration()
     {
         bool isValid = true;
 
-        // ¼ì²éItemInstanceIDManagerÊÇ·ñ´æÔÚ
+        // æ£€æŸ¥ItemInstanceIDManageræ˜¯å¦å­˜åœ¨
         if (ItemInstanceIDManager.Instance == null)
         {
-            LogError("ItemInstanceIDManagerÊµÀı²»´æÔÚ");
+            LogError("ItemInstanceIDManagerå®ä¾‹ä¸å­˜åœ¨");
             isValid = false;
         }
 
-        // ¼ì²é¼¯³É¶ÔÏóµÄÓĞĞ§ĞÔ
+        // æ£€æŸ¥é›†æˆå¯¹è±¡çš„æœ‰æ•ˆæ€§
         foreach (string objectID in integratedObjects)
         {
             if (!ItemInstanceIDManager.Instance.IsIDRegistered(objectID))
             {
-                LogError($"¼¯³É¶ÔÏóIDÎ´×¢²á: {objectID}");
+                LogError($"é›†æˆå¯¹è±¡IDæœªæ³¨å†Œ: {objectID}");
                 isValid = false;
             }
         }
@@ -1085,29 +1085,29 @@ public class ItemInstanceIDManagerDeepIntegrator : MonoBehaviour
     }
 
     /// <summary>
-    /// ³¢ÊÔÊ¹ÓÃÌæ´ú·½°¸½â¾ö³åÍ»
+    /// å°è¯•ä½¿ç”¨æ›¿ä»£æ–¹æ¡ˆè§£å†³å†²çª
     /// </summary>
     private bool TryResolveConflictAlternative(string conflictID)
     {
         try
         {
-            // ÓÉÓÚResolveConflict·½·¨²»´æÔÚ£¬Ê¹ÓÃÌæ´ú·½°¸
-            // ¼ì²é³åÍ»IDÊÇ·ñÈÔÈ»´æÔÚ
+            // ç”±äºResolveConflictæ–¹æ³•ä¸å­˜åœ¨ï¼Œä½¿ç”¨æ›¿ä»£æ–¹æ¡ˆ
+            // æ£€æŸ¥å†²çªIDæ˜¯å¦ä»ç„¶å­˜åœ¨
             if (ItemInstanceIDManager.Instance.IsIDRegistered(conflictID))
             {
-                LogMessage($"³åÍ»IDÈÔÈ»×¢²á£¬±ê¼ÇÎªÒÑ½â¾ö: {conflictID}");
+                LogMessage($"å†²çªIDä»ç„¶æ³¨å†Œï¼Œæ ‡è®°ä¸ºå·²è§£å†³: {conflictID}");
                 return true;
             }
             return false;
         }
         catch (Exception ex)
         {
-            LogError($"½â¾ö³åÍ»Ìæ´ú·½°¸Ê§°Ü: {ex.Message}");
+            LogError($"è§£å†³å†²çªæ›¿ä»£æ–¹æ¡ˆå¤±è´¥: {ex.Message}");
             return false;
         }
     }
 
-    // === ÈÕÖ¾¹¤¾ß·½·¨ ===
+    // === æ—¥å¿—å·¥å…·æ–¹æ³• ===
 
     private void LogMessage(string message)
     {

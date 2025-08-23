@@ -5,189 +5,189 @@ using UnityEngine;
 namespace InventorySystem.Grid
 {
     /// <summary>
-    /// Íø¸ñ¼ì²âÆ÷ÏêÏ¸ĞÅÏ¢Êı¾İ½á¹¹
-    /// °üº¬Íø¸ñµÄÍêÕû×´Ì¬ĞÅÏ¢£¬ÓÃÓÚ¼à¿ØºÍµ÷ÊÔ
+    /// ç½‘æ ¼æ£€æµ‹å™¨è¯¦ç»†ä¿¡æ¯æ•°æ®ç»“æ„
+    /// åŒ…å«ç½‘æ ¼çš„å®Œæ•´çŠ¶æ€ä¿¡æ¯ï¼Œç”¨äºç›‘æ§å’Œè°ƒè¯•
     /// </summary>
     [System.Serializable]
     public class GridDetectorInfo
     {
-        [Header("»ù±¾Íø¸ñĞÅÏ¢")]
-        public string gridID;                                    // Íø¸ñÎ¨Ò»±êÊ¶·û
-        public string gridType;                                  // Íø¸ñÀàĞÍÃû³Æ
-        public Vector2Int gridSize;                              // Íø¸ñ³ß´ç£¨¿íx¸ß£©
-        public int totalCells;                                   // ×Ü¸ñ×ÓÊıÁ¿
+        [Header("åŸºæœ¬ç½‘æ ¼ä¿¡æ¯")]
+        public string gridID;                                    // ç½‘æ ¼å”¯ä¸€æ ‡è¯†ç¬¦
+        public string gridType;                                  // ç½‘æ ¼ç±»å‹åç§°
+        public Vector2Int gridSize;                              // ç½‘æ ¼å°ºå¯¸ï¼ˆå®½xé«˜ï¼‰
+        public int totalCells;                                   // æ€»æ ¼å­æ•°é‡
 
-        [Header("Õ¼ÓÃ×´Ì¬ĞÅÏ¢")]
-        public int occupiedCellsCount;                           // ÒÑÕ¼ÓÃ¸ñ×ÓÊıÁ¿
-        public float occupancyRate;                              // Õ¼ÓÃÂÊ£¨0-1£©
-        public int availableCells;                               // ¿ÉÓÃ¸ñ×ÓÊıÁ¿
+        [Header("å ç”¨çŠ¶æ€ä¿¡æ¯")]
+        public int occupiedCellsCount;                           // å·²å ç”¨æ ¼å­æ•°é‡
+        public float occupancyRate;                              // å ç”¨ç‡ï¼ˆ0-1ï¼‰
+        public int availableCells;                               // å¯ç”¨æ ¼å­æ•°é‡
 
-        [Header("ÎïÆ··Ö²¼ĞÅÏ¢")]
-        public int placedItemsCount;                             // ÒÑ·ÅÖÃÎïÆ·ÊıÁ¿
-        public Dictionary<string, ItemPlacementInfo> itemDistribution; // ÎïÆ··Ö²¼Ó³Éä
-        public int[,] occupancyMatrix;                           // Õ¼ÓÃ¾ØÕó£¨0=¿ÕÏĞ£¬1=Õ¼ÓÃ£©
+        [Header("ç‰©å“åˆ†å¸ƒä¿¡æ¯")]
+        public int placedItemsCount;                             // å·²æ”¾ç½®ç‰©å“æ•°é‡
+        public Dictionary<string, ItemPlacementInfo> itemDistribution; // ç‰©å“åˆ†å¸ƒæ˜ å°„
+        public int[,] occupancyMatrix;                           // å ç”¨çŸ©é˜µï¼ˆ0=ç©ºé—²ï¼Œ1=å ç”¨ï¼‰
 
-        [Header("Ê±¼ä´ÁĞÅÏ¢")]
-        public string lastModified;                              // ×îºóĞŞ¸ÄÊ±¼ä
-        public string detectionTime;                             // ¼ì²âÊ±¼ä
+        [Header("æ—¶é—´æˆ³ä¿¡æ¯")]
+        public string lastModified;                              // æœ€åä¿®æ”¹æ—¶é—´
+        public string detectionTime;                             // æ£€æµ‹æ—¶é—´
 
-        [Header("Íø¸ñÅäÖÃĞÅÏ¢")]
-        public Vector2 cellSize;                                 // µ¥¸ö¸ñ×Ó³ß´ç
-        public Vector3 gridWorldPosition;                        // Íø¸ñÊÀ½ç×ø±ê
-        public bool isActive;                                    // Íø¸ñÊÇ·ñ¼¤»î
+        [Header("ç½‘æ ¼é…ç½®ä¿¡æ¯")]
+        public Vector2 cellSize;                                 // å•ä¸ªæ ¼å­å°ºå¯¸
+        public Vector3 gridWorldPosition;                        // ç½‘æ ¼ä¸–ç•Œåæ ‡
+        public bool isActive;                                    // ç½‘æ ¼æ˜¯å¦æ¿€æ´»
 
         /// <summary>
-        /// »ñÈ¡Íø¸ñ×´Ì¬ÕªÒªĞÅÏ¢
+        /// è·å–ç½‘æ ¼çŠ¶æ€æ‘˜è¦ä¿¡æ¯
         /// </summary>
-        /// <returns>×´Ì¬ÕªÒª×Ö·û´®</returns>
+        /// <returns>çŠ¶æ€æ‘˜è¦å­—ç¬¦ä¸²</returns>
         public string GetStatusSummary()
         {
-            return $"Íø¸ñ[{gridType}] ID:{gridID} ³ß´ç:{gridSize.x}x{gridSize.y} " +
-                   $"Õ¼ÓÃÂÊ:{occupancyRate:P1} ÎïÆ·Êı:{placedItemsCount} ×´Ì¬:{(isActive ? "¼¤»î" : "Î´¼¤»î")}";
+            return $"ç½‘æ ¼[{gridType}] ID:{gridID} å°ºå¯¸:{gridSize.x}x{gridSize.y} " +
+                   $"å ç”¨ç‡:{occupancyRate:P1} ç‰©å“æ•°:{placedItemsCount} çŠ¶æ€:{(isActive ? "æ¿€æ´»" : "æœªæ¿€æ´»")}";
         }
 
     }
 
     /// <summary>
-    /// ÎïÆ··ÅÖÃĞÅÏ¢Êı¾İ½á¹¹
-    /// ¼ÇÂ¼µ¥¸öÎïÆ·ÔÚÍø¸ñÖĞµÄÏêÏ¸·ÅÖÃĞÅÏ¢
+    /// ç‰©å“æ”¾ç½®ä¿¡æ¯æ•°æ®ç»“æ„
+    /// è®°å½•å•ä¸ªç‰©å“åœ¨ç½‘æ ¼ä¸­çš„è¯¦ç»†æ”¾ç½®ä¿¡æ¯
     /// </summary>
     [System.Serializable]
     public class ItemPlacementInfo
     {
-        [Header("ÎïÆ·±êÊ¶ĞÅÏ¢")]
-        public string itemInstanceID;                            // ÎïÆ·ÊµÀıID
-        public string itemName;                                  // ÎïÆ·GameObjectÃû³Æ
-        public string itemDataName;                              // ÎïÆ·Êı¾İÃû³Æ
-        public string itemDataPath;                              // ÎïÆ·Êı¾İ×ÊÔ´Â·¾¶
+        [Header("ç‰©å“æ ‡è¯†ä¿¡æ¯")]
+        public string itemInstanceID;                            // ç‰©å“å®ä¾‹ID
+        public string itemName;                                  // ç‰©å“GameObjectåç§°
+        public string itemDataName;                              // ç‰©å“æ•°æ®åç§°
+        public string itemDataPath;                              // ç‰©å“æ•°æ®èµ„æºè·¯å¾„
 
-        [Header("Î»ÖÃºÍ³ß´çĞÅÏ¢")]
-        public Vector2Int gridPosition;                          // Íø¸ñÖĞµÄÎ»ÖÃ
-        public Vector2Int itemSize;                              // ÎïÆ·³ß´ç
-        public List<Vector2Int> occupiedCells;                   // Õ¼ÓÃµÄËùÓĞ¸ñ×Ó×ø±ê
+        [Header("ä½ç½®å’Œå°ºå¯¸ä¿¡æ¯")]
+        public Vector2Int gridPosition;                          // ç½‘æ ¼ä¸­çš„ä½ç½®
+        public Vector2Int itemSize;                              // ç‰©å“å°ºå¯¸
+        public List<Vector2Int> occupiedCells;                   // å ç”¨çš„æ‰€æœ‰æ ¼å­åæ ‡
 
-        [Header("·ÅÖÃ×´Ì¬ĞÅÏ¢")]
-        public int placementIndex;                               // ÔÚplacedItemsÁĞ±íÖĞµÄË÷Òı
-        public GameObject itemGameObject;                        // ÎïÆ·GameObjectÒıÓÃ
+        [Header("æ”¾ç½®çŠ¶æ€ä¿¡æ¯")]
+        public int placementIndex;                               // åœ¨placedItemsåˆ—è¡¨ä¸­çš„ç´¢å¼•
+        public GameObject itemGameObject;                        // ç‰©å“GameObjectå¼•ç”¨
 
         /// <summary>
-        /// »ñÈ¡ÎïÆ··ÅÖÃÕªÒªĞÅÏ¢
+        /// è·å–ç‰©å“æ”¾ç½®æ‘˜è¦ä¿¡æ¯
         /// </summary>
-        /// <returns>·ÅÖÃÕªÒª×Ö·û´®</returns>
+        /// <returns>æ”¾ç½®æ‘˜è¦å­—ç¬¦ä¸²</returns>
         public string GetPlacementSummary()
         {
-            return $"ÎïÆ·[{itemDataName ?? itemName}] Î»ÖÃ:({gridPosition.x},{gridPosition.y}) " +
-                   $"³ß´ç:{itemSize.x}x{itemSize.y} Õ¼ÓÃ¸ñ×ÓÊı:{occupiedCells?.Count ?? 0}";
+            return $"ç‰©å“[{itemDataName ?? itemName}] ä½ç½®:({gridPosition.x},{gridPosition.y}) " +
+                   $"å°ºå¯¸:{itemSize.x}x{itemSize.y} å ç”¨æ ¼å­æ•°:{occupiedCells?.Count ?? 0}";
         }
     }
 
     /// <summary>
-    /// ÇøÓòÕ¼ÓÃĞÅÏ¢Êı¾İ½á¹¹
-    /// ÓÃÓÚ¼ì²âÖ¸¶¨ÇøÓòµÄÕ¼ÓÃÏêÇé
+    /// åŒºåŸŸå ç”¨ä¿¡æ¯æ•°æ®ç»“æ„
+    /// ç”¨äºæ£€æµ‹æŒ‡å®šåŒºåŸŸçš„å ç”¨è¯¦æƒ…
     /// </summary>
     [System.Serializable]
     public class AreaOccupancyInfo
     {
-        [Header("ÇøÓò»ù±¾ĞÅÏ¢")]
-        public Vector2Int areaPosition;                          // ÇøÓòÆğÊ¼Î»ÖÃ
-        public Vector2Int areaSize;                              // ÇøÓò³ß´ç
-        public int totalCells;                                   // ÇøÓò×Ü¸ñ×ÓÊı
+        [Header("åŒºåŸŸåŸºæœ¬ä¿¡æ¯")]
+        public Vector2Int areaPosition;                          // åŒºåŸŸèµ·å§‹ä½ç½®
+        public Vector2Int areaSize;                              // åŒºåŸŸå°ºå¯¸
+        public int totalCells;                                   // åŒºåŸŸæ€»æ ¼å­æ•°
 
-        [Header("Õ¼ÓÃ×´Ì¬Í³¼Æ")]
-        public int occupiedCellsCount;                           // ÒÑÕ¼ÓÃ¸ñ×ÓÊıÁ¿
-        public int freeCellsCount;                               // ¿ÕÏĞ¸ñ×ÓÊıÁ¿
-        public bool canPlaceItem;                                // ÊÇ·ñ¿ÉÒÔ·ÅÖÃÎïÆ·
-        public string errorMessage;                              // ´íÎóĞÅÏ¢£¨Èç¹ûÓĞ£©
+        [Header("å ç”¨çŠ¶æ€ç»Ÿè®¡")]
+        public int occupiedCellsCount;                           // å·²å ç”¨æ ¼å­æ•°é‡
+        public int freeCellsCount;                               // ç©ºé—²æ ¼å­æ•°é‡
+        public bool canPlaceItem;                                // æ˜¯å¦å¯ä»¥æ”¾ç½®ç‰©å“
+        public string errorMessage;                              // é”™è¯¯ä¿¡æ¯ï¼ˆå¦‚æœæœ‰ï¼‰
 
-        [Header("ÏêÏ¸Õ¼ÓÃĞÅÏ¢")]
-        public List<CellOccupancyInfo> occupiedCells;            // ÒÑÕ¼ÓÃ¸ñ×ÓÏêÇéÁĞ±í
-        public List<Vector2Int> freeCells;                       // ¿ÕÏĞ¸ñ×Ó×ø±êÁĞ±í
+        [Header("è¯¦ç»†å ç”¨ä¿¡æ¯")]
+        public List<CellOccupancyInfo> occupiedCells;            // å·²å ç”¨æ ¼å­è¯¦æƒ…åˆ—è¡¨
+        public List<Vector2Int> freeCells;                       // ç©ºé—²æ ¼å­åæ ‡åˆ—è¡¨
 
         /// <summary>
-        /// »ñÈ¡ÇøÓòÕ¼ÓÃÕªÒªĞÅÏ¢
+        /// è·å–åŒºåŸŸå ç”¨æ‘˜è¦ä¿¡æ¯
         /// </summary>
-        /// <returns>Õ¼ÓÃÕªÒª×Ö·û´®</returns>
+        /// <returns>å ç”¨æ‘˜è¦å­—ç¬¦ä¸²</returns>
         public string GetOccupancySummary()
         {
             float occupancyRate = totalCells > 0 ? (float)occupiedCellsCount / totalCells : 0f;
-            return $"ÇøÓò[{areaPosition.x},{areaPosition.y}] ³ß´ç:{areaSize.x}x{areaSize.y} " +
-                   $"Õ¼ÓÃÂÊ:{occupancyRate:P1} ¿É·ÅÖÃ:{(canPlaceItem ? "ÊÇ" : "·ñ")}";
+            return $"åŒºåŸŸ[{areaPosition.x},{areaPosition.y}] å°ºå¯¸:{areaSize.x}x{areaSize.y} " +
+                   $"å ç”¨ç‡:{occupancyRate:P1} å¯æ”¾ç½®:{(canPlaceItem ? "æ˜¯" : "å¦")}";
         }
     }
 
     /// <summary>
-    /// µ¥¸ö¸ñ×ÓÕ¼ÓÃĞÅÏ¢Êı¾İ½á¹¹
-    /// ¼ÇÂ¼µ¥¸ö¸ñ×ÓµÄÕ¼ÓÃ×´Ì¬ºÍÕ¼ÓÃÎïÆ·ĞÅÏ¢
+    /// å•ä¸ªæ ¼å­å ç”¨ä¿¡æ¯æ•°æ®ç»“æ„
+    /// è®°å½•å•ä¸ªæ ¼å­çš„å ç”¨çŠ¶æ€å’Œå ç”¨ç‰©å“ä¿¡æ¯
     /// </summary>
     [System.Serializable]
     public class CellOccupancyInfo
     {
-        [Header("¸ñ×ÓÎ»ÖÃĞÅÏ¢")]
-        public Vector2Int cellPosition;                          // ¸ñ×Ó×ø±ê
-        public bool isOccupied;                                  // ÊÇ·ñ±»Õ¼ÓÃ
+        [Header("æ ¼å­ä½ç½®ä¿¡æ¯")]
+        public Vector2Int cellPosition;                          // æ ¼å­åæ ‡
+        public bool isOccupied;                                  // æ˜¯å¦è¢«å ç”¨
 
-        [Header("Õ¼ÓÃÎïÆ·ĞÅÏ¢")]
-        public string occupyingItemName;                         // Õ¼ÓÃÎïÆ·Ãû³Æ
-        public string occupyingItemInstanceID;                   // Õ¼ÓÃÎïÆ·ÊµÀıID
+        [Header("å ç”¨ç‰©å“ä¿¡æ¯")]
+        public string occupyingItemName;                         // å ç”¨ç‰©å“åç§°
+        public string occupyingItemInstanceID;                   // å ç”¨ç‰©å“å®ä¾‹ID
 
         /// <summary>
-        /// »ñÈ¡¸ñ×ÓÕ¼ÓÃÕªÒªĞÅÏ¢
+        /// è·å–æ ¼å­å ç”¨æ‘˜è¦ä¿¡æ¯
         /// </summary>
-        /// <returns>Õ¼ÓÃÕªÒª×Ö·û´®</returns>
+        /// <returns>å ç”¨æ‘˜è¦å­—ç¬¦ä¸²</returns>
         public string GetCellSummary()
         {
             if (isOccupied)
             {
-                return $"¸ñ×Ó({cellPosition.x},{cellPosition.y}) ±»Õ¼ÓÃ - ÎïÆ·:{occupyingItemName}";
+                return $"æ ¼å­({cellPosition.x},{cellPosition.y}) è¢«å ç”¨ - ç‰©å“:{occupyingItemName}";
             }
             else
             {
-                return $"¸ñ×Ó({cellPosition.x},{cellPosition.y}) ¿ÕÏĞ";
+                return $"æ ¼å­({cellPosition.x},{cellPosition.y}) ç©ºé—²";
             }
         }
     }
 
     /// <summary>
-    /// ¿ÉÓÃ¿Õ¼äĞÅÏ¢Êı¾İ½á¹¹
-    /// ÓÃÓÚÃèÊöÍø¸ñÖĞÁ¬ĞøµÄ¿ÉÓÃ¿Õ¼äÇøÓò
+    /// å¯ç”¨ç©ºé—´ä¿¡æ¯æ•°æ®ç»“æ„
+    /// ç”¨äºæè¿°ç½‘æ ¼ä¸­è¿ç»­çš„å¯ç”¨ç©ºé—´åŒºåŸŸ
     /// </summary>
     [System.Serializable]
     public class AvailableSpaceInfo
     {
-        [Header("¿Õ¼äÇøÓòĞÅÏ¢")]
-        public Vector2Int startPosition;                         // ¿Õ¼äÆğÊ¼Î»ÖÃ
-        public int totalCells;                                   // ¿Õ¼ä×Ü¸ñ×ÓÊı
-        public List<Vector2Int> availableCells;                  // ¿ÉÓÃ¸ñ×Ó×ø±êÁĞ±í
-        public RectInt boundingBox;                              // ¿Õ¼ä±ß½ç¿ò
+        [Header("ç©ºé—´åŒºåŸŸä¿¡æ¯")]
+        public Vector2Int startPosition;                         // ç©ºé—´èµ·å§‹ä½ç½®
+        public int totalCells;                                   // ç©ºé—´æ€»æ ¼å­æ•°
+        public List<Vector2Int> availableCells;                  // å¯ç”¨æ ¼å­åæ ‡åˆ—è¡¨
+        public RectInt boundingBox;                              // ç©ºé—´è¾¹ç•Œæ¡†
 
-        [Header("ÈİÄÉÄÜÁ¦ĞÅÏ¢")]
-        public Vector2Int maxItemSize;                           // ÄÜÈİÄÉµÄ×î´óÎïÆ·³ß´ç
+        [Header("å®¹çº³èƒ½åŠ›ä¿¡æ¯")]
+        public Vector2Int maxItemSize;                           // èƒ½å®¹çº³çš„æœ€å¤§ç‰©å“å°ºå¯¸
 
         /// <summary>
-        /// »ñÈ¡¿ÉÓÃ¿Õ¼äÕªÒªĞÅÏ¢
+        /// è·å–å¯ç”¨ç©ºé—´æ‘˜è¦ä¿¡æ¯
         /// </summary>
-        /// <returns>¿Õ¼äÕªÒª×Ö·û´®</returns>
+        /// <returns>ç©ºé—´æ‘˜è¦å­—ç¬¦ä¸²</returns>
         public string GetSpaceSummary()
         {
-            return $"¿ÉÓÃ¿Õ¼ä[{startPosition.x},{startPosition.y}] ¸ñ×ÓÊı:{totalCells} " +
-                   $"×î´óÎïÆ·³ß´ç:{maxItemSize.x}x{maxItemSize.y} ±ß½ç:{boundingBox}";
+            return $"å¯ç”¨ç©ºé—´[{startPosition.x},{startPosition.y}] æ ¼å­æ•°:{totalCells} " +
+                   $"æœ€å¤§ç‰©å“å°ºå¯¸:{maxItemSize.x}x{maxItemSize.y} è¾¹ç•Œ:{boundingBox}";
         }
 
         /// <summary>
-        /// ¼ì²éÊÇ·ñÄÜÈİÄÉÖ¸¶¨³ß´çµÄÎïÆ·
+        /// æ£€æŸ¥æ˜¯å¦èƒ½å®¹çº³æŒ‡å®šå°ºå¯¸çš„ç‰©å“
         /// </summary>
-        /// <param name="itemSize">ÎïÆ·³ß´ç</param>
-        /// <returns>ÊÇ·ñÄÜÈİÄÉ</returns>
+        /// <param name="itemSize">ç‰©å“å°ºå¯¸</param>
+        /// <returns>æ˜¯å¦èƒ½å®¹çº³</returns>
         public bool CanFitItem(Vector2Int itemSize)
         {
             return itemSize.x <= maxItemSize.x && itemSize.y <= maxItemSize.y;
         }
 
         /// <summary>
-        /// »ñÈ¡ÍÆ¼öµÄÎïÆ··ÅÖÃÎ»ÖÃ
+        /// è·å–æ¨èçš„ç‰©å“æ”¾ç½®ä½ç½®
         /// </summary>
-        /// <param name="itemSize">ÎïÆ·³ß´ç</param>
-        /// <returns>ÍÆ¼öÎ»ÖÃ£¬Èç¹ûÎŞ·¨·ÅÖÃÔò·µ»Ø(-1,-1)</returns>
+        /// <param name="itemSize">ç‰©å“å°ºå¯¸</param>
+        /// <returns>æ¨èä½ç½®ï¼Œå¦‚æœæ— æ³•æ”¾ç½®åˆ™è¿”å›(-1,-1)</returns>
         public Vector2Int GetRecommendedPlacement(Vector2Int itemSize)
         {
             if (!CanFitItem(itemSize))
@@ -195,7 +195,7 @@ namespace InventorySystem.Grid
                 return new Vector2Int(-1, -1);
             }
 
-            // ³¢ÊÔÔÚ±ß½ç¿òÄÚÕÒµ½ºÏÊÊµÄÎ»ÖÃ
+            // å°è¯•åœ¨è¾¹ç•Œæ¡†å†…æ‰¾åˆ°åˆé€‚çš„ä½ç½®
             for (int x = boundingBox.x; x <= boundingBox.xMax - itemSize.x; x++)
             {
                 for (int y = boundingBox.y; y <= boundingBox.yMax - itemSize.y; y++)
@@ -203,7 +203,7 @@ namespace InventorySystem.Grid
                     Vector2Int testPos = new Vector2Int(x, y);
                     bool canPlace = true;
 
-                    // ¼ì²éÕâ¸öÎ»ÖÃÊÇ·ñËùÓĞĞèÒªµÄ¸ñ×Ó¶¼¿ÉÓÃ
+                    // æ£€æŸ¥è¿™ä¸ªä½ç½®æ˜¯å¦æ‰€æœ‰éœ€è¦çš„æ ¼å­éƒ½å¯ç”¨
                     for (int dx = 0; dx < itemSize.x && canPlace; dx++)
                     {
                         for (int dy = 0; dy < itemSize.y && canPlace; dy++)
@@ -228,17 +228,17 @@ namespace InventorySystem.Grid
     }
 
     /// <summary>
-    /// Íø¸ñ¼ì²âÆ÷ÊÂ¼ş²ÎÊı
-    /// ÓÃÓÚÍø¸ñ×´Ì¬±ä»¯Ê±µÄÊÂ¼şÍ¨Öª
+    /// ç½‘æ ¼æ£€æµ‹å™¨äº‹ä»¶å‚æ•°
+    /// ç”¨äºç½‘æ ¼çŠ¶æ€å˜åŒ–æ—¶çš„äº‹ä»¶é€šçŸ¥
     /// </summary>
     [System.Serializable]
     public class GridDetectorEventArgs : EventArgs
     {
-        public string gridID;                                    // Íø¸ñID
-        public string eventType;                                 // ÊÂ¼şÀàĞÍ
-        public string eventDescription;                          // ÊÂ¼şÃèÊö
-        public DateTime eventTime;                               // ÊÂ¼şÊ±¼ä
-        public GridDetectorInfo gridInfo;                        // Íø¸ñ×´Ì¬ĞÅÏ¢
+        public string gridID;                                    // ç½‘æ ¼ID
+        public string eventType;                                 // äº‹ä»¶ç±»å‹
+        public string eventDescription;                          // äº‹ä»¶æè¿°
+        public DateTime eventTime;                               // äº‹ä»¶æ—¶é—´
+        public GridDetectorInfo gridInfo;                        // ç½‘æ ¼çŠ¶æ€ä¿¡æ¯
 
         public GridDetectorEventArgs(string gridID, string eventType, string description, GridDetectorInfo info)
         {
