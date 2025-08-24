@@ -19,7 +19,7 @@ public class BackpackSystemManager : MonoBehaviour
 
     [SerializeField] private BackpackGridManager backpackGridManager; // 背包网格管理器
 
-    [SerializeField] private InventoryController inventoryController; // 网格控制器
+    // 移除了对InventoryController的引用，因为网格系统已被删除
 
 
     // 单例实例
@@ -184,14 +184,13 @@ public class BackpackSystemManager : MonoBehaviour
             Debug.LogError("BackpackSystemManager: 背包系统预制体未设置");
         }
 
-        // 获取网格系统组件
+        // 获取背包管理器组件
         backpackGridManager = currentBackpackSystem.GetComponentInChildren<BackpackGridManager>();
-        inventoryController = currentBackpackSystem.GetComponentInChildren<InventoryController>();
 
-        // 初始化网格系统
+        // 初始化背包系统
         if (backpackGridManager != null)
         {
-            Debug.Log("BackpackSystemManager: 网格系统已初始化");
+            Debug.Log("BackpackSystemManager: 背包系统已初始化");
         }
     }
 
@@ -363,8 +362,6 @@ public class BackpackSystemManager : MonoBehaviour
         return backpackGridManager;
     }
 
-    public InventoryController GetInventoryController()
-    {
-        return inventoryController;
-    }
+    // GetInventoryController方法已移除，因为InventoryController组件已被删除
+    // 如果需要背包功能，请使用GetBackpackGridManager()方法
 }
