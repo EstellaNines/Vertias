@@ -3,104 +3,27 @@ using System.Collections.Generic;
 
 public class BackpackGridManager : MonoBehaviour
 {
-    [Header("背包网格配置")]
-    [SerializeField] private GridConfig backpackGridConfig;
-    [SerializeField] private ItemGrid backpackGrid;
-    [SerializeField] private InventoryController inventoryController;
-
-    [Header("网格系统组件")]
-    [SerializeField] private GridInteract gridInteract;
+    [Header("背包管理器配置")]
+    [SerializeField] private bool isEnabled = false; // 网格系统已禁用
 
     private void Start()
     {
-        InitializeBackpackGrid();
+        Debug.Log("BackpackGridManager: 网格系统已禁用");
     }
 
-    private void InitializeBackpackGrid()
+    // 保留空方法以避免其他脚本调用时出错
+    public void InitializeBackpackGrid()
     {
-        if (backpackGrid != null && backpackGridConfig != null)
-        {
-            // 设置网格配置
-            backpackGrid.SetGridConfig(backpackGridConfig);
-
-            // 初始化网格
-            backpackGrid.LoadFromGridConfig();
-
-            // 设置库存控制器 - 修复：使用新的API
-            if (inventoryController != null)
-            {
-                inventoryController.SetSelectedMainGrid(backpackGrid);
-            }
-
-            Debug.Log("背包网格系统初始化完成");
-        }
-        else
-        {
-            Debug.LogError("背包网格配置或网格组件未设置！");
-        }
+        Debug.LogWarning("BackpackGridManager: 网格系统已被禁用");
     }
 
-    // 获取背包网格
-    public ItemGrid GetBackpackGrid()
+    public bool IsBackpackGridAvailable()
     {
-        return backpackGrid;
+        return false;
     }
 
-    // 设置网格配置
-    public void SetGridConfig(GridConfig config)
+    public Vector2Int GetTileGridPosition(Vector2 mousePosition)
     {
-        backpackGridConfig = config;
-        if (backpackGrid != null)
-        {
-            backpackGrid.SetGridConfig(config);
-            backpackGrid.LoadFromGridConfig();
-        }
-    }
-
-    // 清空背包网格
-    public void ClearBackpackGrid()
-    {
-        if (backpackGrid != null)
-        {
-            // 获取所有已放置的物品
-            var placedItems = new List<ItemGrid.PlacedItem>();
-            // 注意：需要根据ItemGrid的实际API调整这里的代码
-
-            for (int i = placedItems.Count - 1; i >= 0; i--)
-            {
-                if (placedItems[i].itemObject != null)
-                {
-                    backpackGrid.RemoveItem(placedItems[i].itemObject);
-                    Destroy(placedItems[i].itemObject);
-                }
-            }
-        }
-    }
-
-    // 保存背包状态
-    public void SaveBackpackState()
-    {
-        if (backpackGrid != null)
-        {
-            backpackGrid.SaveToGridConfig();
-        }
-    }
-
-    // 新增：切换到背包网格模式的方法
-    public void SwitchToBackpackMode()
-    {
-        if (inventoryController != null && backpackGrid != null)
-        {
-            inventoryController.SetSelectedMainGrid(backpackGrid);
-        }
-    }
-
-    // 新增：获取当前是否为活跃网格
-    public bool IsActiveGrid()
-    {
-        if (inventoryController == null) return false;
-        
-        return inventoryController.GetActiveGridType() == InventoryController.ActiveGridType.MainGrid &&
-               inventoryController.selectedItemGrid == backpackGrid;
+        return Vector2Int.zero;
     }
 }

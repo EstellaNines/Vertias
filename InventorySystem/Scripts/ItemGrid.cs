@@ -1,129 +1,63 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.EventSystems;
-using Unity.VisualScripting;
 
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
-
-[ExecuteInEditMode]
-public class ItemGrid : BaseItemGrid
+public class ItemGrid : MonoBehaviour
 {
-    [SerializeField][FieldLabel("网格系统宽度格数")] private int inventoryWidth = 10;
-    [SerializeField][FieldLabel("网格系统高度格数")] private int inventoryHeight = 30;
+    // ==================== 检查器数据显示 ====================
+    [SerializeField] int gridSizeWidth = 10;
+    [SerializeField] int gridSizeHeight = 10;
 
-    protected override void Awake()
+    // ==================== 内部数据 ====================
+    // 定义每个格子的宽度和高度
+    const float tileSizeWidth = 64;
+    const float tileSizeHeight = 64;
+
+    // 计算在格子中的位置
+    Vector2 positionOnTheGrid = new Vector2();
+    Vector2Int tileGridPosition = new Vector2Int();
+
+    RectTransform rectTransform;
+    Canvas canvas;
+    private void Start()
     {
-        // 确保在base.Awake()之前加载配置
-        LoadFromGridConfig();
-        base.Awake();
+        rectTransform = GetComponent<RectTransform>();
+        canvas = FindObjectOfType<Canvas>();
+
+        Init(gridSizeWidth, gridSizeHeight);
     }
 
-    public void LoadFromGridConfig()
+    void Init(int width, int height)
     {
-        if (gridConfig != null && !isUpdatingFromConfig)
+    Vector2 size = new Vector2(width * tileSizeWidth, height * tileSizeHeight);
+    rectTransform.sizeDelta = size;
+    }
+
+    private void Update()
+    {
+
+        if (Input.GetMouseButtonDown(0))
         {
-            isUpdatingFromConfig = true;
-            inventoryWidth = gridConfig.inventoryWidth;
-            inventoryHeight = gridConfig.inventoryHeight;
-            width = inventoryWidth;
-            height = inventoryHeight;
-            
-            // 强制更新网格数组
-            InitializeGridArrays();
-            
-            isUpdatingFromConfig = false;
-            
-            // 移除showDebugInfo引用，直接使用Debug.Log
-            Debug.Log($"从GridConfig加载尺寸: {inventoryWidth}x{inventoryHeight}");
+            // 获取当前鼠标位置在网格中的格子坐标，并打印到控制台
+            Debug.Log(GetTileGridPosition(Input.mousePosition));
         }
+
     }
 
-    protected override void Start()
+    // 根据鼠标位置计算在格子中的位置
+    public Vector2Int GetTileGridPosition(Vector2 mousePosition)
     {
-        LoadFromGridConfig();
-        base.Start();
-    }
+        // 计算鼠标位置相对于 RectTransform 的偏移量
+        positionOnTheGrid.x = mousePosition.x - rectTransform.position.x;
+        positionOnTheGrid.y = rectTransform.position.y - mousePosition.y;
 
-    protected override void OnValidate()
-    {
-        if (isUpdatingFromConfig) return;
+        // 将偏移量转换为网格位置
+        // 这里 tileSizeWidth 和 tileSizeHeight 是单个瓦片的宽度和高度
+        // canvas.scaleFactor 是 Canvas 的缩放因子（通常用于 UI 适配不同分辨率）
+        tileGridPosition.x = (int)(positionOnTheGrid.x / tileSizeWidth / canvas.scaleFactor);
+        tileGridPosition.y = (int)(positionOnTheGrid.y / tileSizeHeight / canvas.scaleFactor);
 
-        inventoryWidth = Mathf.Clamp(inventoryWidth, 1, 50);
-        inventoryHeight = Mathf.Clamp(inventoryHeight, 1, 50);
-
-        width = inventoryWidth;
-        height = inventoryHeight;
-
-        base.OnValidate();
-
-#if UNITY_EDITOR
-        if (!Application.isPlaying)
-        {
-            SaveToGridConfigDelayed();
-        }
-#endif
-    }
-
-#if UNITY_EDITOR
-    private void SaveToGridConfigDelayed()
-    {
-        UnityEditor.EditorApplication.delayCall += () =>
-        {
-            SaveToGridConfig();
-        };
-    }
-#endif
-
-    protected override void Init(int width, int height)
-    {
-        if (rectTransform == null) return;
-
-        float cellSize = gridConfig != null ? gridConfig.cellSize : 64f;
-
-        Vector2 size = new Vector2(
-            width * cellSize,
-            height * cellSize
-        );
-        rectTransform.sizeDelta = size;
-    }
-
-    // 删除重复的LoadFromGridConfig方法，只保留上面的一个
-
-    public void SaveToGridConfig()
-    {
-#if UNITY_EDITOR
-        if (gridConfig != null && !isUpdatingFromConfig)
-        {
-            isUpdatingFromConfig = true;
-
-            bool hasChanged = false;
-            if (gridConfig.inventoryWidth != inventoryWidth)
-            {
-                gridConfig.inventoryWidth = inventoryWidth;
-                hasChanged = true;
-            }
-            if (gridConfig.inventoryHeight != inventoryHeight)
-            {
-                gridConfig.inventoryHeight = inventoryHeight;
-                hasChanged = true;
-            }
-
-            if (hasChanged)
-            {
-                EditorUtility.SetDirty(gridConfig);
-                AssetDatabase.SaveAssets();
-            }
-
-            isUpdatingFromConfig = false;
-        }
-#endif
-    }
-
-    public void SyncToGridConfig()
-    {
-        SaveToGridConfig();
+        // 返回计算出的网格位置
+        return tileGridPosition;
     }
 }

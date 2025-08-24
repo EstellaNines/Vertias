@@ -15,13 +15,6 @@ public class BackpackSystemManager : MonoBehaviour
     [Tooltip("用于绑定玩家输入控制器")]
     [SerializeField] private PlayerInputController playerInputController;
 
-    [Header("背包网格管理器")]
-
-    [SerializeField] private BackpackGridManager backpackGridManager; // 背包网格管理器
-
-    [SerializeField] private InventoryController inventoryController; // 网格控制器
-
-
     // 单例实例
     private static BackpackSystemManager instance;
     public static BackpackSystemManager Instance
@@ -184,15 +177,14 @@ public class BackpackSystemManager : MonoBehaviour
             Debug.LogError("BackpackSystemManager: 背包系统预制体未设置");
         }
 
+        // 移除网格系统相关代码
         // 获取网格系统组件
-        backpackGridManager = currentBackpackSystem.GetComponentInChildren<BackpackGridManager>();
-        inventoryController = currentBackpackSystem.GetComponentInChildren<InventoryController>();
-
+        // backpackGridManager = currentBackpackSystem.GetComponentInChildren<BackpackGridManager>();
         // 初始化网格系统
-        if (backpackGridManager != null)
-        {
-            Debug.Log("BackpackSystemManager: 网格系统已初始化");
-        }
+        // if (backpackGridManager != null)
+        // {
+        //     Debug.Log("BackpackSystemManager: 网格系统已初始化");
+        // }
     }
 
     // 设置玩家输入控制器到背包状态
@@ -358,13 +350,9 @@ public class BackpackSystemManager : MonoBehaviour
         return missionManager;
     }
 
-    public BackpackGridManager GetBackpackGridManager()
-    {
-        return backpackGridManager;
-    }
-
-    public InventoryController GetInventoryController()
-    {
-        return inventoryController;
-    }
+    // 移除获取背包网格管理器的方法
+    // public BackpackGridManager GetBackpackGridManager()
+    // {
+    //     return backpackGridManager;
+    // }
 }
