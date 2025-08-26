@@ -2,6 +2,9 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using InventorySystem;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 /// <summary>
 /// 物品数据读取器 - 用于读取和显示物品的ScriptableObject数据
@@ -12,15 +15,27 @@ public class ItemDataReader : MonoBehaviour
     [Header("物品数据")]
     [SerializeField] private ItemDataSO itemData;
 
+    [Header("网格信息")]
+    [SerializeField, FieldLabel("网格宽度")] public int gridWidth;
+    [SerializeField, FieldLabel("网格高度")] public int gridHeight;
+    [SerializeField, FieldLabel("网格大小")] public string gridSizeDisplay;
+
     [Header("UI组件引用")]
     [SerializeField] private Image backgroundImage;
     [SerializeField] private Image iconImage;
     [SerializeField] private TextMeshProUGUI displayText;
 
     [Header("运行时信息")]
-    [SerializeField] private int currentStack = 1;  // 当前堆叠数量
-    [SerializeField] private int currentDurability; // 当前耐久度
-    [SerializeField] private int currentUsageCount; // 当前使用次数
+    [SerializeField, FieldLabel("当前堆叠数量")] public int currentStack;
+    [SerializeField, FieldLabel("当前耐久度")] public int currentDurability;
+    [SerializeField, FieldLabel("当前使用次数")] public int currentUsageCount;
+    [SerializeField, FieldLabel("当前治疗量")] public int currentHealAmount;
+    [SerializeField, FieldLabel("情报值")] public int intelligenceValue;
+    [SerializeField, FieldLabel("货币数量")] public int currencyAmount;
+    [SerializeField, FieldLabel("最大堆叠数")] public int maxStackAmount;
+    [SerializeField, FieldLabel("最大耐久度")] public int maxDurability;
+    [SerializeField, FieldLabel("最大使用次数")] public int maxUsageCount;
+    [SerializeField, FieldLabel("最大治疗量")] public int maxHealAmount;
 
     /// <summary>
     /// 获取物品数据
@@ -80,10 +95,22 @@ public class ItemDataReader : MonoBehaviour
     {
         if (itemData == null) return;
 
+        // 初始化网格信息
+        gridWidth = itemData.width;
+        gridHeight = itemData.height;
+        gridSizeDisplay = $"{itemData.width} × {itemData.height}";
+
         // 根据物品类型初始化运行时数据
         currentStack = 1;
         currentDurability = itemData.durability;
         currentUsageCount = itemData.usageCount;
+        currentHealAmount = itemData.maxHealAmount;
+        intelligenceValue = itemData.intelligenceValue;
+        currencyAmount = 50000; // 货币默认数量为50000
+        maxStackAmount = itemData.maxStack;
+        maxDurability = itemData.durability;
+        maxUsageCount = itemData.usageCount;
+        maxHealAmount = itemData.maxHealAmount;
     }
 
     /// <summary>
@@ -93,10 +120,12 @@ public class ItemDataReader : MonoBehaviour
     {
         if (itemData == null) return;
 
-        // 更新背景颜色
+        // 更新背景颜色，保持0.8的透明度
         if (backgroundImage != null)
         {
-            backgroundImage.color = itemData.backgroundColor;
+            Color backgroundColor = itemData.backgroundColor;
+            backgroundColor.a = 0.8f; // 保持与预制体生成时一致的透明度
+            backgroundImage.color = backgroundColor;
         }
 
         // 更新图标
@@ -126,23 +155,31 @@ public class ItemDataReader : MonoBehaviour
                 // 弹药显示当前数量/最大堆叠数量
                 return itemData.maxStack > 1 ? $"{currentStack}/{itemData.maxStack}" : "";
 
+            case ItemCategory.Helmet:
+            case ItemCategory.Armor:
+                // 头盔护甲显示当前耐久值/最大耐久值
+                return itemData.durability > 0 ? $"{currentDurability}/{itemData.durability}" : "";
+
             case ItemCategory.Currency:
                 // 货币显示当前数量
                 return itemData.maxStack > 1 ? currentStack.ToString() : "";
 
             case ItemCategory.Food:
             case ItemCategory.Drink:
+                // 食物/饮料显示当前使用次数/最大使用次数
+                return itemData.usageCount > 0 ? $"{currentUsageCount}/{itemData.usageCount}" : "";
+
             case ItemCategory.Sedative:
             case ItemCategory.Hemostatic:
-                // 消耗品显示使用次数
-                return currentUsageCount > 0 ? currentUsageCount.ToString() : "";
+                // 其他药品显示当前使用次数/最大使用次数
+                return itemData.usageCount > 0 ? $"{currentUsageCount}/{itemData.usageCount}" : "";
 
             case ItemCategory.Healing:
-                // 治疗物品显示治疗量
-                return itemData.maxHealAmount > 0 ? itemData.maxHealAmount.ToString() : "";
+                // 治疗药物显示当前治疗量/最大治疗量
+                return itemData.maxHealAmount > 0 ? $"{itemData.maxHealAmount}/{itemData.maxHealAmount}" : "";
 
             case ItemCategory.Intelligence:
-                // 智力物品显示智力值
+                // 情报物品显示情报值
                 return itemData.intelligenceValue > 0 ? itemData.intelligenceValue.ToString() : "";
 
             default:

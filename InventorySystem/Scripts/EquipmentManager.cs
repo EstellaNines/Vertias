@@ -3,30 +3,30 @@ using UnityEngine;
 using InventorySystem;
 
 /// <summary>
-/// ×°±¸¹ÜÀíÆ÷ - Í³Ò»¹ÜÀíËùÓĞ×°±¸²ÛÎ»
+/// è£…å¤‡ç®¡ç†å™¨ - ç»Ÿä¸€ç®¡ç†æ‰€æœ‰è£…å¤‡æ§½ä½
 /// </summary>
 public class EquipmentManager : MonoBehaviour
 {
-    [Header("×°±¸²ÛÎ»GameObject")]
-    [SerializeField] private GameObject helmetSlotObject;      // Í·¿ø²ÛÎ»GameObject
-    [SerializeField] private GameObject armorSlotObject;       // »¤¼×²ÛÎ»GameObject
-    [SerializeField] private GameObject tacticalRigSlotObject; // Õ½Êõ±³ĞÄ²ÛÎ»GameObject
-    [SerializeField] private GameObject backpackSlotObject;    // ±³°ü²ÛÎ»GameObject
-    [SerializeField] private GameObject primaryWeaponSlotObject;   // Ö÷ÎäÆ÷²ÛÎ»GameObject
-    [SerializeField] private GameObject secondaryWeaponSlotObject; // ¸±ÎäÆ÷²ÛÎ»GameObject
+    [Header("è£…å¤‡æ§½ä½GameObject")]
+    [SerializeField] private GameObject helmetSlotObject;      // å¤´ç›”æ§½ä½GameObject
+    [SerializeField] private GameObject armorSlotObject;       // æŠ¤ç”²æ§½ä½GameObject
+    [SerializeField] private GameObject tacticalRigSlotObject; // æˆ˜æœ¯èƒŒå¿ƒæ§½ä½GameObject
+    [SerializeField] private GameObject backpackSlotObject;    // èƒŒåŒ…æ§½ä½GameObject
+    [SerializeField] private GameObject primaryWeaponSlotObject;   // ä¸»æ­¦å™¨æ§½ä½GameObject
+    [SerializeField] private GameObject secondaryWeaponSlotObject; // å‰¯æ­¦å™¨æ§½ä½GameObject
 
-    // ×°±¸²ÛÎ»ÒıÓÃ - ¶¯Ì¬»ñÈ¡
-    private EquipmentSlot helmetSlot;      // Í·¿ø²ÛÎ»
-    private EquipmentSlot armorSlot;       // »¤¼×²ÛÎ»
-    private EquipmentSlot tacticalRigSlot; // Õ½Êõ±³ĞÄ²ÛÎ»
-    private EquipmentSlot backpackSlot;    // ±³°ü²ÛÎ»
-    private EquipmentSlot primaryWeaponSlot;   // Ö÷ÎäÆ÷²ÛÎ»
-    private EquipmentSlot secondaryWeaponSlot; // ¸±ÎäÆ÷²ÛÎ»
+    // è£…å¤‡æ§½ä½å¼•ç”¨ - åŠ¨æ€è·å–
+    private EquipmentSlot helmetSlot;      // å¤´ç›”æ§½ä½
+    private EquipmentSlot armorSlot;       // æŠ¤ç”²æ§½ä½
+    private EquipmentSlot tacticalRigSlot; // æˆ˜æœ¯èƒŒå¿ƒæ§½ä½
+    private EquipmentSlot backpackSlot;    // èƒŒåŒ…æ§½ä½
+    private EquipmentSlot primaryWeaponSlot;   // ä¸»æ­¦å™¨æ§½ä½
+    private EquipmentSlot secondaryWeaponSlot; // å‰¯æ­¦å™¨æ§½ä½
 
-    // ×°±¸²ÛÎ»×Öµä£¬±ãÓÚ¹ÜÀí
+    // è£…å¤‡æ§½ä½å­—å…¸ï¼Œä¾¿äºç®¡ç†
     private Dictionary<ItemCategory, List<EquipmentSlot>> equipmentSlots;
 
-    // µ¥ÀıÄ£Ê½
+    // å•ä¾‹æ¨¡å¼
     private static EquipmentManager instance;
     public static EquipmentManager Instance
     {
@@ -42,7 +42,7 @@ public class EquipmentManager : MonoBehaviour
 
     private void Awake()
     {
-        // È·±£µ¥Àı
+        // ç¡®ä¿å•ä¾‹
         if (instance == null)
         {
             instance = this;
@@ -56,128 +56,128 @@ public class EquipmentManager : MonoBehaviour
 
     private void Start()
     {
-        // ÑÓ³Ù³õÊ¼»¯£¬È·±£ËùÓĞÔ¤ÖÆ¼ş¶¼ÒÑÊµÀı»¯
+        // å»¶è¿Ÿåˆå§‹åŒ–ï¼Œç¡®ä¿æ‰€æœ‰é¢„åˆ¶ä»¶éƒ½å·²å®ä¾‹åŒ–
         InitializeEquipmentSlots();
     }
 
     /// <summary>
-    /// ³õÊ¼»¯×°±¸²ÛÎ» - ´Ó¸÷¸öGameObjectÖĞ²éÕÒ
+    /// åˆå§‹åŒ–è£…å¤‡æ§½ä½ - ä»å„ä¸ªGameObjectä¸­æŸ¥æ‰¾
     /// </summary>
     private void InitializeEquipmentSlots()
     {
         equipmentSlots = new Dictionary<ItemCategory, List<EquipmentSlot>>();
 
-        // ´Ó¸÷¸öGameObjectÖĞ²éÕÒEquipmentSlot×é¼ş
+        // ä»å„ä¸ªGameObjectä¸­æŸ¥æ‰¾EquipmentSlotç»„ä»¶
         FindEquipmentSlots();
 
-        // ×¢²á¸÷¸ö×°±¸²ÛÎ»
+        // æ³¨å†Œå„ä¸ªè£…å¤‡æ§½ä½
         RegisterEquipmentSlot(ItemCategory.Helmet, helmetSlot);
         RegisterEquipmentSlot(ItemCategory.Armor, armorSlot);
         RegisterEquipmentSlot(ItemCategory.TacticalRig, tacticalRigSlot);
         RegisterEquipmentSlot(ItemCategory.Backpack, backpackSlot);
 
-        // ×¢²áÁ½¸öÎäÆ÷²ÛÎ»
+        // æ³¨å†Œä¸¤ä¸ªæ­¦å™¨æ§½ä½
         RegisterEquipmentSlot(ItemCategory.Weapon, primaryWeaponSlot);
         RegisterEquipmentSlot(ItemCategory.Weapon, secondaryWeaponSlot);
 
-        Debug.Log("×°±¸¹ÜÀíÆ÷³õÊ¼»¯Íê³É");
+        Debug.Log("è£…å¤‡ç®¡ç†å™¨åˆå§‹åŒ–å®Œæˆ");
     }
 
     /// <summary>
-    /// ´Ó¸÷¸öGameObjectÖĞ²éÕÒEquipmentSlot×é¼ş
+    /// ä»å„ä¸ªGameObjectä¸­æŸ¥æ‰¾EquipmentSlotç»„ä»¶
     /// </summary>
     private void FindEquipmentSlots()
     {
-        // Í·¿ø²ÛÎ»
+        // å¤´ç›”æ§½ä½
         if (helmetSlotObject != null)
         {
             helmetSlot = helmetSlotObject.GetComponentInChildren<EquipmentSlot>();
             if (helmetSlot != null)
-                Debug.Log("ÕÒµ½Í·¿ø²ÛÎ»: " + helmetSlotObject.name);
+                Debug.Log("æ‰¾åˆ°å¤´ç›”æ§½ä½: " + helmetSlotObject.name);
             else
-                Debug.LogWarning("Í·¿ø²ÛÎ»GameObjectÖĞÎ´ÕÒµ½EquipmentSlot×é¼ş: " + helmetSlotObject.name);
+                Debug.LogWarning("å¤´ç›”æ§½ä½GameObjectä¸­æœªæ‰¾åˆ°EquipmentSlotç»„ä»¶: " + helmetSlotObject.name);
         }
         else
         {
-            Debug.LogWarning("Í·¿ø²ÛÎ»GameObjectÎ´ÉèÖÃ£¡");
+            Debug.LogWarning("å¤´ç›”æ§½ä½GameObjectæœªè®¾ç½®ï¼");
         }
 
-        // »¤¼×²ÛÎ»
+        // æŠ¤ç”²æ§½ä½
         if (armorSlotObject != null)
         {
             armorSlot = armorSlotObject.GetComponentInChildren<EquipmentSlot>();
             if (armorSlot != null)
-                Debug.Log("ÕÒµ½»¤¼×²ÛÎ»: " + armorSlotObject.name);
+                Debug.Log("æ‰¾åˆ°æŠ¤ç”²æ§½ä½: " + armorSlotObject.name);
             else
-                Debug.LogWarning("»¤¼×²ÛÎ»GameObjectÖĞÎ´ÕÒµ½EquipmentSlot×é¼ş: " + armorSlotObject.name);
+                Debug.LogWarning("æŠ¤ç”²æ§½ä½GameObjectä¸­æœªæ‰¾åˆ°EquipmentSlotç»„ä»¶: " + armorSlotObject.name);
         }
         else
         {
-            Debug.LogWarning("»¤¼×²ÛÎ»GameObjectÎ´ÉèÖÃ£¡");
+            Debug.LogWarning("æŠ¤ç”²æ§½ä½GameObjectæœªè®¾ç½®ï¼");
         }
 
-        // Õ½Êõ±³ĞÄ²ÛÎ»
+        // æˆ˜æœ¯èƒŒå¿ƒæ§½ä½
         if (tacticalRigSlotObject != null)
         {
             tacticalRigSlot = tacticalRigSlotObject.GetComponentInChildren<EquipmentSlot>();
             if (tacticalRigSlot != null)
-                Debug.Log("ÕÒµ½Õ½Êõ±³ĞÄ²ÛÎ»: " + tacticalRigSlotObject.name);
+                Debug.Log("æ‰¾åˆ°æˆ˜æœ¯èƒŒå¿ƒæ§½ä½: " + tacticalRigSlotObject.name);
             else
-                Debug.LogWarning("Õ½Êõ±³ĞÄ²ÛÎ»GameObjectÖĞÎ´ÕÒµ½EquipmentSlot×é¼ş: " + tacticalRigSlotObject.name);
+                Debug.LogWarning("æˆ˜æœ¯èƒŒå¿ƒæ§½ä½GameObjectä¸­æœªæ‰¾åˆ°EquipmentSlotç»„ä»¶: " + tacticalRigSlotObject.name);
         }
         else
         {
-            Debug.LogWarning("Õ½Êõ±³ĞÄ²ÛÎ»GameObjectÎ´ÉèÖÃ£¡");
+            Debug.LogWarning("æˆ˜æœ¯èƒŒå¿ƒæ§½ä½GameObjectæœªè®¾ç½®ï¼");
         }
 
-        // ±³°ü²ÛÎ»
+        // èƒŒåŒ…æ§½ä½
         if (backpackSlotObject != null)
         {
             backpackSlot = backpackSlotObject.GetComponentInChildren<EquipmentSlot>();
             if (backpackSlot != null)
-                Debug.Log("ÕÒµ½±³°ü²ÛÎ»: " + backpackSlotObject.name);
+                Debug.Log("æ‰¾åˆ°èƒŒåŒ…æ§½ä½: " + backpackSlotObject.name);
             else
-                Debug.LogWarning("±³°ü²ÛÎ»GameObjectÖĞÎ´ÕÒµ½EquipmentSlot×é¼ş: " + backpackSlotObject.name);
+                Debug.LogWarning("èƒŒåŒ…æ§½ä½GameObjectä¸­æœªæ‰¾åˆ°EquipmentSlotç»„ä»¶: " + backpackSlotObject.name);
         }
         else
         {
-            Debug.LogWarning("±³°ü²ÛÎ»GameObjectÎ´ÉèÖÃ£¡");
+            Debug.LogWarning("èƒŒåŒ…æ§½ä½GameObjectæœªè®¾ç½®ï¼");
         }
 
-        // Ö÷ÎäÆ÷²ÛÎ»
+        // ä¸»æ­¦å™¨æ§½ä½
         if (primaryWeaponSlotObject != null)
         {
             primaryWeaponSlot = primaryWeaponSlotObject.GetComponentInChildren<EquipmentSlot>();
             if (primaryWeaponSlot != null)
-                Debug.Log("ÕÒµ½Ö÷ÎäÆ÷²ÛÎ»: " + primaryWeaponSlotObject.name);
+                Debug.Log("æ‰¾åˆ°ä¸»æ­¦å™¨æ§½ä½: " + primaryWeaponSlotObject.name);
             else
-                Debug.LogWarning("Ö÷ÎäÆ÷²ÛÎ»GameObjectÖĞÎ´ÕÒµ½EquipmentSlot×é¼ş: " + primaryWeaponSlotObject.name);
+                Debug.LogWarning("ä¸»æ­¦å™¨æ§½ä½GameObjectä¸­æœªæ‰¾åˆ°EquipmentSlotç»„ä»¶: " + primaryWeaponSlotObject.name);
         }
         else
         {
-            Debug.LogWarning("Ö÷ÎäÆ÷²ÛÎ»GameObjectÎ´ÉèÖÃ£¡");
+            Debug.LogWarning("ä¸»æ­¦å™¨æ§½ä½GameObjectæœªè®¾ç½®ï¼");
         }
 
-        // ¸±ÎäÆ÷²ÛÎ»
+        // å‰¯æ­¦å™¨æ§½ä½
         if (secondaryWeaponSlotObject != null)
         {
             secondaryWeaponSlot = secondaryWeaponSlotObject.GetComponentInChildren<EquipmentSlot>();
             if (secondaryWeaponSlot != null)
-                Debug.Log("ÕÒµ½¸±ÎäÆ÷²ÛÎ»: " + secondaryWeaponSlotObject.name);
+                Debug.Log("æ‰¾åˆ°å‰¯æ­¦å™¨æ§½ä½: " + secondaryWeaponSlotObject.name);
             else
-                Debug.LogWarning("¸±ÎäÆ÷²ÛÎ»GameObjectÖĞÎ´ÕÒµ½EquipmentSlot×é¼ş: " + secondaryWeaponSlotObject.name);
+                Debug.LogWarning("å‰¯æ­¦å™¨æ§½ä½GameObjectä¸­æœªæ‰¾åˆ°EquipmentSlotç»„ä»¶: " + secondaryWeaponSlotObject.name);
         }
         else
         {
-            Debug.LogWarning("¸±ÎäÆ÷²ÛÎ»GameObjectÎ´ÉèÖÃ£¡");
+            Debug.LogWarning("å‰¯æ­¦å™¨æ§½ä½GameObjectæœªè®¾ç½®ï¼");
         }
     }
 
     /// <summary>
-    /// ×¢²á×°±¸²ÛÎ»
+    /// æ³¨å†Œè£…å¤‡æ§½ä½
     /// </summary>
-    /// <param name="category">×°±¸ÀàĞÍ</param>
-    /// <param name="slot">×°±¸²ÛÎ»</param>
+    /// <param name="category">è£…å¤‡ç±»å‹</param>
+    /// <param name="slot">è£…å¤‡æ§½ä½</param>
     private void RegisterEquipmentSlot(ItemCategory category, EquipmentSlot slot)
     {
         if (slot != null)
@@ -193,15 +193,15 @@ public class EquipmentManager : MonoBehaviour
     }
 
     /// <summary>
-    /// »ñÈ¡Ö¸¶¨ÀàĞÍµÄµÚÒ»¸ö¿ÉÓÃ×°±¸²ÛÎ»
+    /// è·å–æŒ‡å®šç±»å‹çš„ç¬¬ä¸€ä¸ªå¯ç”¨è£…å¤‡æ§½ä½
     /// </summary>
-    /// <param name="category">×°±¸ÀàĞÍ</param>
-    /// <returns>×°±¸²ÛÎ»</returns>
+    /// <param name="category">è£…å¤‡ç±»å‹</param>
+    /// <returns>è£…å¤‡æ§½ä½</returns>
     public EquipmentSlot GetAvailableEquipmentSlot(ItemCategory category)
     {
         if (equipmentSlots.TryGetValue(category, out List<EquipmentSlot> slots))
         {
-            // ÓÅÏÈ·µ»Ø¿ÕµÄ²ÛÎ»
+            // ä¼˜å…ˆè¿”å›ç©ºçš„æ§½ä½
             foreach (var slot in slots)
             {
                 if (slot.GetCurrentEquippedItem() == null)
@@ -209,17 +209,17 @@ public class EquipmentManager : MonoBehaviour
                     return slot;
                 }
             }
-            // Èç¹ûÃ»ÓĞ¿Õ²ÛÎ»£¬·µ»ØµÚÒ»¸ö
+            // å¦‚æœæ²¡æœ‰ç©ºæ§½ä½ï¼Œè¿”å›ç¬¬ä¸€ä¸ª
             return slots.Count > 0 ? slots[0] : null;
         }
         return null;
     }
 
     /// <summary>
-    /// »ñÈ¡Ö¸¶¨ÀàĞÍµÄËùÓĞ×°±¸²ÛÎ»
+    /// è·å–æŒ‡å®šç±»å‹çš„æ‰€æœ‰è£…å¤‡æ§½ä½
     /// </summary>
-    /// <param name="category">×°±¸ÀàĞÍ</param>
-    /// <returns>×°±¸²ÛÎ»ÁĞ±í</returns>
+    /// <param name="category">è£…å¤‡ç±»å‹</param>
+    /// <returns>è£…å¤‡æ§½ä½åˆ—è¡¨</returns>
     public List<EquipmentSlot> GetEquipmentSlots(ItemCategory category)
     {
         equipmentSlots.TryGetValue(category, out List<EquipmentSlot> slots);
@@ -227,29 +227,29 @@ public class EquipmentManager : MonoBehaviour
     }
 
     /// <summary>
-    /// »ñÈ¡Ö÷ÎäÆ÷²ÛÎ»
+    /// è·å–ä¸»æ­¦å™¨æ§½ä½
     /// </summary>
-    /// <returns>Ö÷ÎäÆ÷²ÛÎ»</returns>
+    /// <returns>ä¸»æ­¦å™¨æ§½ä½</returns>
     public EquipmentSlot GetPrimaryWeaponSlot()
     {
         return primaryWeaponSlot;
     }
 
     /// <summary>
-    /// »ñÈ¡¸±ÎäÆ÷²ÛÎ»
+    /// è·å–å‰¯æ­¦å™¨æ§½ä½
     /// </summary>
-    /// <returns>¸±ÎäÆ÷²ÛÎ»</returns>
+    /// <returns>å‰¯æ­¦å™¨æ§½ä½</returns>
     public EquipmentSlot GetSecondaryWeaponSlot()
     {
         return secondaryWeaponSlot;
     }
 
     /// <summary>
-    /// ×°±¸ÎïÆ·µ½Ö¸¶¨²ÛÎ»
+    /// è£…å¤‡ç‰©å“åˆ°æŒ‡å®šæ§½ä½
     /// </summary>
-    /// <param name="item">Òª×°±¸µÄÎïÆ·</param>
-    /// <param name="category">×°±¸ÀàĞÍ</param>
-    /// <returns>ÊÇ·ñ×°±¸³É¹¦</returns>
+    /// <param name="item">è¦è£…å¤‡çš„ç‰©å“</param>
+    /// <param name="category">è£…å¤‡ç±»å‹</param>
+    /// <returns>æ˜¯å¦è£…å¤‡æˆåŠŸ</returns>
     public bool EquipItem(GameObject item, ItemCategory category)
     {
         EquipmentSlot slot = GetAvailableEquipmentSlot(category);
@@ -258,7 +258,7 @@ public class EquipmentManager : MonoBehaviour
             ItemDataReader itemDataReader = item.GetComponent<ItemDataReader>();
             if (itemDataReader != null && itemDataReader.ItemData.category == category)
             {
-                // ÕâÀï¿ÉÒÔÌí¼Ó×°±¸Âß¼­
+                // è¿™é‡Œå¯ä»¥æ·»åŠ è£…å¤‡é€»è¾‘
                 return true;
             }
         }
@@ -266,10 +266,10 @@ public class EquipmentManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Ğ¶ÏÂÖ¸¶¨ÀàĞÍµÄ×°±¸
+    /// å¸ä¸‹æŒ‡å®šç±»å‹çš„è£…å¤‡
     /// </summary>
-    /// <param name="category">×°±¸ÀàĞÍ</param>
-    /// <returns>±»Ğ¶ÏÂµÄ×°±¸</returns>
+    /// <param name="category">è£…å¤‡ç±»å‹</param>
+    /// <returns>è¢«å¸ä¸‹çš„è£…å¤‡</returns>
     public GameObject UnequipItem(ItemCategory category)
     {
         if (equipmentSlots.TryGetValue(category, out List<EquipmentSlot> slots))
@@ -288,9 +288,9 @@ public class EquipmentManager : MonoBehaviour
     }
 
     /// <summary>
-    /// »ñÈ¡µ±Ç°×°±¸µÄËùÓĞÎïÆ·
+    /// è·å–å½“å‰è£…å¤‡çš„æ‰€æœ‰ç‰©å“
     /// </summary>
-    /// <returns>×°±¸ÎïÆ·ÁĞ±í</returns>
+    /// <returns>è£…å¤‡ç‰©å“åˆ—è¡¨</returns>
     public List<GameObject> GetAllEquippedItems()
     {
         List<GameObject> equippedItems = new List<GameObject>();
@@ -311,10 +311,10 @@ public class EquipmentManager : MonoBehaviour
     }
 
     /// <summary>
-    /// ¼ì²éÊÇ·ñÓĞÖ¸¶¨ÀàĞÍµÄ×°±¸
+    /// æ£€æŸ¥æ˜¯å¦æœ‰æŒ‡å®šç±»å‹çš„è£…å¤‡
     /// </summary>
-    /// <param name="category">×°±¸ÀàĞÍ</param>
-    /// <returns>ÊÇ·ñÓĞ×°±¸</returns>
+    /// <param name="category">è£…å¤‡ç±»å‹</param>
+    /// <returns>æ˜¯å¦æœ‰è£…å¤‡</returns>
     public bool HasEquipment(ItemCategory category)
     {
         if (equipmentSlots.TryGetValue(category, out List<EquipmentSlot> slots))
@@ -331,7 +331,7 @@ public class EquipmentManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Çå¿ÕËùÓĞ×°±¸
+    /// æ¸…ç©ºæ‰€æœ‰è£…å¤‡
     /// </summary>
     public void ClearAllEquipment()
     {

@@ -10,53 +10,53 @@ namespace InventorySystem.Editor
 {
     public class ItemPrefabGenerator : EditorWindow
     {
-        // é»˜è®¤è·¯å¾„
+        // Ä¬ÈÏÂ·¾¶
         private const string DEFAULT_ITEM_DATA_PATH = "Assets/InventorySystem/GeneratedItems";
         private const string DEFAULT_PREFAB_OUTPUT_PATH = "Assets/InventorySystem/Prefabs";
         private const string DEFAULT_FONT_ASSET_PATH = "Assets/TextMesh Pro/Fonts/SILVER.TTF";
 
-        // ç”¨æˆ·è‡ªå®šä¹‰è·¯å¾„
+        // ÓÃ»§×Ô¶¨ÒåÂ·¾¶
         private string itemDataPath = DEFAULT_ITEM_DATA_PATH;
         private string prefabOutputPath = DEFAULT_PREFAB_OUTPUT_PATH;
         private TMP_FontAsset fontAsset;
 
-        // åˆ†ç±»æ–‡ä»¶å¤¹æ˜ å°„ï¼ˆä¸ItemDataSOGeneratorä¿æŒä¸€è‡´ï¼‰
+        // ·ÖÀàÎÄ¼ş¼ĞÓ³Éä£¨ÓëItemDataSOGenerator±£³ÖÒ»ÖÂ£©
         private static readonly Dictionary<string, string> CategoryFolderNames = new Dictionary<string, string>
         {
-            { "Helmet", "Helmet_å¤´ç›”" },
-            { "Armor", "Armor_æŠ¤ç”²" },
-            { "TacticalRig", "TacticalRig_æˆ˜æœ¯èƒŒå¿ƒ" },
-            { "Backpack", "Backpack_èƒŒåŒ…" },
-            { "Weapon", "Weapon_æ­¦å™¨" },
-            { "Ammunition", "Ammunition_å¼¹è¯" },
-            { "Food", "Food_é£Ÿç‰©" },
-            { "Drink", "Drink_é¥®æ–™" },
-            { "Sedative", "Sedative_é•‡é™å‰‚" },
-            { "Hemostatic", "Hemostatic_æ­¢è¡€å‰‚" },
-            { "Healing", "Healing_æ²»ç–—è¯ç‰©" },
-            { "Intelligence", "Intelligence_æƒ…æŠ¥" },
-            { "Currency", "Currency_è´§å¸" }
+            { "Helmet", "Helmet_Í·¿ø" },
+            { "Armor", "Armor_»¤¼×" },
+            { "TacticalRig", "TacticalRig_Õ½Êõ±³ĞÄ" },
+            { "Backpack", "Backpack_±³°ü" },
+            { "Weapon", "Weapon_ÎäÆ÷" },
+            { "Ammunition", "Ammunition_µ¯Ò©" },
+            { "Food", "Food_Ê³Îï" },
+            { "Drink", "Drink_ÒûÁÏ" },
+            { "Sedative", "Sedative_Õò¾²¼Á" },
+            { "Hemostatic", "Hemostatic_Ö¹Ñª¼Á" },
+            { "Healing", "Healing_ÖÎÁÆÒ©Îï" },
+            { "Intelligence", "Intelligence_Çé±¨" },
+            { "Currency", "Currency_»õ±Ò" }
         };
 
         [MenuItem("Inventory System/Item Prefab Generator")]
         public static void ShowWindow()
         {
-            GetWindow<ItemPrefabGenerator>("ç‰©å“é¢„åˆ¶ä½“ç”Ÿæˆå™¨");
+            GetWindow<ItemPrefabGenerator>("ÎïÆ·Ô¤ÖÆÌåÉú³ÉÆ÷");
         }
 
         private void OnEnable()
         {
-            // ä»EditorPrefsä¸­æ¢å¤ä¿å­˜çš„è·¯å¾„è®¾ç½®
+            // ´ÓEditorPrefsÖĞ»Ö¸´±£´æµÄÂ·¾¶ÉèÖÃ
             itemDataPath = EditorPrefs.GetString("ItemPrefabGenerator_ItemDataPath", DEFAULT_ITEM_DATA_PATH);
             prefabOutputPath = EditorPrefs.GetString("ItemPrefabGenerator_PrefabOutputPath", DEFAULT_PREFAB_OUTPUT_PATH);
 
-            // å°è¯•åŠ è½½é»˜è®¤å­—ä½“
+            // ³¢ÊÔ¼ÓÔØÄ¬ÈÏ×ÖÌå
             LoadDefaultFont();
         }
 
         private void LoadDefaultFont()
         {
-            // æŸ¥æ‰¾TextMeshProé»˜è®¤å­—ä½“
+            // ²éÕÒTextMeshProÄ¬ÈÏ×ÖÌå
             string[] fontGuids = AssetDatabase.FindAssets("t:TMP_FontAsset");
             foreach (string guid in fontGuids)
             {
@@ -72,24 +72,24 @@ namespace InventorySystem.Editor
 
         private void OnGUI()
         {
-            GUILayout.Label("ç‰©å“UIé¢„åˆ¶ä½“ç”Ÿæˆå™¨", EditorStyles.boldLabel);
+            GUILayout.Label("ÎïÆ·UIÔ¤ÖÆÌåÉú³ÉÆ÷", EditorStyles.boldLabel);
             GUILayout.Space(10);
 
-            // è·¯å¾„è®¾ç½®
-            GUILayout.Label("è·¯å¾„è®¾ç½®:", EditorStyles.boldLabel);
+            // Â·¾¶ÉèÖÃ
+            GUILayout.Label("Â·¾¶ÉèÖÃ:", EditorStyles.boldLabel);
 
-            // ItemDataSOè·¯å¾„è®¾ç½®
+            // ItemDataSOÂ·¾¶ÉèÖÃ
             GUILayout.BeginHorizontal();
-            GUILayout.Label("ç‰©å“æ•°æ®è·¯å¾„:", GUILayout.Width(100));
+            GUILayout.Label("ÎïÆ·Êı¾İÂ·¾¶:", GUILayout.Width(100));
             string newItemDataPath = EditorGUILayout.TextField(itemDataPath);
             if (newItemDataPath != itemDataPath)
             {
                 itemDataPath = newItemDataPath;
                 EditorPrefs.SetString("ItemPrefabGenerator_ItemDataPath", itemDataPath);
             }
-            if (GUILayout.Button("æµè§ˆ", GUILayout.Width(60)))
+            if (GUILayout.Button("ä¯ÀÀ", GUILayout.Width(60)))
             {
-                string selectedPath = EditorUtility.OpenFolderPanel("é€‰æ‹©ç‰©å“æ•°æ®æ–‡ä»¶å¤¹", "Assets", "");
+                string selectedPath = EditorUtility.OpenFolderPanel("Ñ¡ÔñÎïÆ·Êı¾İÎÄ¼ş¼Ğ", "Assets", "");
                 if (!string.IsNullOrEmpty(selectedPath))
                 {
                     if (selectedPath.StartsWith(Application.dataPath))
@@ -102,18 +102,18 @@ namespace InventorySystem.Editor
             }
             GUILayout.EndHorizontal();
 
-            // é¢„åˆ¶ä½“è¾“å‡ºè·¯å¾„è®¾ç½®
+            // Ô¤ÖÆÌåÊä³öÂ·¾¶ÉèÖÃ
             GUILayout.BeginHorizontal();
-            GUILayout.Label("é¢„åˆ¶ä½“è¾“å‡ºè·¯å¾„:", GUILayout.Width(100));
+            GUILayout.Label("Ô¤ÖÆÌåÊä³öÂ·¾¶:", GUILayout.Width(100));
             string newPrefabOutputPath = EditorGUILayout.TextField(prefabOutputPath);
             if (newPrefabOutputPath != prefabOutputPath)
             {
                 prefabOutputPath = newPrefabOutputPath;
                 EditorPrefs.SetString("ItemPrefabGenerator_PrefabOutputPath", prefabOutputPath);
             }
-            if (GUILayout.Button("æµè§ˆ", GUILayout.Width(60)))
+            if (GUILayout.Button("ä¯ÀÀ", GUILayout.Width(60)))
             {
-                string selectedPath = EditorUtility.OpenFolderPanel("é€‰æ‹©é¢„åˆ¶ä½“è¾“å‡ºæ–‡ä»¶å¤¹", "Assets", "");
+                string selectedPath = EditorUtility.OpenFolderPanel("Ñ¡ÔñÔ¤ÖÆÌåÊä³öÎÄ¼ş¼Ğ", "Assets", "");
                 if (!string.IsNullOrEmpty(selectedPath))
                 {
                     if (selectedPath.StartsWith(Application.dataPath))
@@ -126,16 +126,16 @@ namespace InventorySystem.Editor
             }
             GUILayout.EndHorizontal();
 
-            // å­—ä½“è®¾ç½®
+            // ×ÖÌåÉèÖÃ
             GUILayout.BeginHorizontal();
-            GUILayout.Label("TMPå­—ä½“èµ„æº:", GUILayout.Width(100));
+            GUILayout.Label("TMP×ÖÌå×ÊÔ´:", GUILayout.Width(100));
             fontAsset = (TMP_FontAsset)EditorGUILayout.ObjectField(fontAsset, typeof(TMP_FontAsset), false);
             GUILayout.EndHorizontal();
 
-            // é‡ç½®æŒ‰é’®
+            // ÖØÖÃ°´Å¥
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
-            if (GUILayout.Button("é‡ç½®ä¸ºé»˜è®¤è·¯å¾„", GUILayout.Width(120)))
+            if (GUILayout.Button("ÖØÖÃÎªÄ¬ÈÏÂ·¾¶", GUILayout.Width(120)))
             {
                 itemDataPath = DEFAULT_ITEM_DATA_PATH;
                 prefabOutputPath = DEFAULT_PREFAB_OUTPUT_PATH;
@@ -147,33 +147,33 @@ namespace InventorySystem.Editor
 
             GUILayout.Space(10);
 
-            // æ˜¾ç¤ºå½“å‰è®¾ç½®
-            GUILayout.Label("å½“å‰è®¾ç½®:", EditorStyles.boldLabel);
-            GUILayout.Label($"ç‰©å“æ•°æ®è·¯å¾„: {itemDataPath}");
-            GUILayout.Label($"é¢„åˆ¶ä½“è¾“å‡ºè·¯å¾„: {prefabOutputPath}");
-            GUILayout.Label($"å­—ä½“èµ„æº: {(fontAsset != null ? fontAsset.name : "æœªè®¾ç½®")}");
+            // ÏÔÊ¾µ±Ç°ÉèÖÃ
+            GUILayout.Label("µ±Ç°ÉèÖÃ:", EditorStyles.boldLabel);
+            GUILayout.Label($"ÎïÆ·Êı¾İÂ·¾¶: {itemDataPath}");
+            GUILayout.Label($"Ô¤ÖÆÌåÊä³öÂ·¾¶: {prefabOutputPath}");
+            GUILayout.Label($"×ÖÌå×ÊÔ´: {(fontAsset != null ? fontAsset.name : "Î´ÉèÖÃ")}");
 
-            // éªŒè¯è·¯å¾„
+            // ÑéÖ¤Â·¾¶
             bool itemDataExists = Directory.Exists(itemDataPath);
             if (!itemDataExists)
             {
-                EditorGUILayout.HelpBox($"è­¦å‘Š: æ‰¾ä¸åˆ°ç‰©å“æ•°æ®æ–‡ä»¶å¤¹ {itemDataPath}", MessageType.Warning);
+                EditorGUILayout.HelpBox($"¾¯¸æ: ÕÒ²»µ½ÎïÆ·Êı¾İÎÄ¼ş¼Ğ {itemDataPath}", MessageType.Warning);
             }
             else
             {
-                EditorGUILayout.HelpBox($"ç‰©å“æ•°æ®æ–‡ä»¶å¤¹å·²æ‰¾åˆ°: {itemDataPath}", MessageType.Info);
+                EditorGUILayout.HelpBox($"ÎïÆ·Êı¾İÎÄ¼ş¼ĞÒÑÕÒµ½: {itemDataPath}", MessageType.Info);
             }
 
             if (fontAsset == null)
             {
-                EditorGUILayout.HelpBox("è­¦å‘Š: æœªè®¾ç½®TMPå­—ä½“èµ„æº", MessageType.Warning);
+                EditorGUILayout.HelpBox("¾¯¸æ: Î´ÉèÖÃTMP×ÖÌå×ÊÔ´", MessageType.Warning);
             }
 
             GUILayout.Space(10);
 
-            // ç”Ÿæˆå’Œæ¸…ç†æŒ‰é’®
+            // Éú³ÉºÍÇåÀí°´Å¥
             EditorGUI.BeginDisabledGroup(!itemDataExists || fontAsset == null);
-            if (GUILayout.Button("ç”Ÿæˆæ‰€æœ‰ç‰©å“UIé¢„åˆ¶ä½“", GUILayout.Height(30)))
+            if (GUILayout.Button("Éú³ÉËùÓĞÎïÆ·UIÔ¤ÖÆÌå", GUILayout.Height(30)))
             {
                 GenerateAllItemPrefabs();
             }
@@ -181,18 +181,18 @@ namespace InventorySystem.Editor
 
             GUILayout.Space(10);
 
-            if (GUILayout.Button("æ¸…ç†æ‰€æœ‰å·²ç”Ÿæˆçš„é¢„åˆ¶ä½“", GUILayout.Height(30)))
+            if (GUILayout.Button("ÇåÀíËùÓĞÒÑÉú³ÉµÄÔ¤ÖÆÌå", GUILayout.Height(30)))
             {
                 ClearAllGeneratedPrefabs();
             }
 
             GUILayout.Space(20);
-            GUILayout.Label("è¯´æ˜:", EditorStyles.boldLabel);
-            GUILayout.Label("â€¢ ä»ItemDataSOä¸ºæ¯ä¸ªç‰©å“ç”Ÿæˆå¯¹åº”çš„UIé¢„åˆ¶ä½“");
-            GUILayout.Label("â€¢ é¢„åˆ¶ä½“åŒ…å«ItemBackgroundã€ItemIconå’ŒTMPæ–‡æœ¬");
-            GUILayout.Label("â€¢ æ ¹æ®ç‰©å“ç±»å‹æ˜¾ç¤ºç›¸åº”æ•°å€¼ï¼ˆå¼¹è¯ã€è´§å¸ç­‰ï¼‰");
-            GUILayout.Label("â€¢ æŒ‰åˆ†ç±»æ–‡ä»¶å¤¹å­˜å‚¨é¢„åˆ¶ä½“");
-            GUILayout.Label("â€¢ TMPæ–‡æœ¬æ ¼å¼ä¸ºå±…å³ä¸æ–‡æœ¬æ¡†å±…ä¸­");
+            GUILayout.Label("ËµÃ÷:", EditorStyles.boldLabel);
+            GUILayout.Label("? ´ÓItemDataSOÎªÃ¿¸öÎïÆ·Éú³É¶ÔÓ¦µÄUIÔ¤ÖÆÌå");
+            GUILayout.Label("? Ô¤ÖÆÌå°üº¬ItemBackground¡¢ItemIconºÍTMPÎÄ±¾");
+            GUILayout.Label("? ¸ù¾İÎïÆ·ÀàĞÍÏÔÊ¾ÏàÓ¦ÊıÖµ£¨µ¯Ò©¡¢»õ±ÒµÈ£©");
+            GUILayout.Label("? °´·ÖÀàÎÄ¼ş¼Ğ´æ´¢Ô¤ÖÆÌå");
+            GUILayout.Label("? TMPÎÄ±¾¸ñÊ½Îª¾ÓÓÒÓëÎÄ±¾¿ò¾ÓÖĞ");
         }
 
         private void GenerateAllItemPrefabs()
@@ -201,11 +201,11 @@ namespace InventorySystem.Editor
             {
                 if (!Directory.Exists(itemDataPath))
                 {
-                    EditorUtility.DisplayDialog("é”™è¯¯", $"æ— æ³•æ‰¾åˆ°ç‰©å“æ•°æ®æ–‡ä»¶å¤¹: {itemDataPath}", "ç¡®å®š");
+                    EditorUtility.DisplayDialog("´íÎó", $"ÎŞ·¨ÕÒµ½ÎïÆ·Êı¾İÎÄ¼ş¼Ğ: {itemDataPath}", "È·¶¨");
                     return;
                 }
 
-                // ç¡®ä¿é¢„åˆ¶ä½“è¾“å‡ºç›®å½•å­˜åœ¨
+                // È·±£Ô¤ÖÆÌåÊä³öÄ¿Â¼´æÔÚ
                 if (!Directory.Exists(prefabOutputPath))
                 {
                     Directory.CreateDirectory(prefabOutputPath);
@@ -214,20 +214,20 @@ namespace InventorySystem.Editor
                 int totalItems = 0;
                 int generatedPrefabs = 0;
 
-                // éå†æ‰€æœ‰åˆ†ç±»æ–‡ä»¶å¤¹
+                // ±éÀúËùÓĞ·ÖÀàÎÄ¼ş¼Ğ
                 string[] categoryFolders = Directory.GetDirectories(itemDataPath);
                 foreach (string categoryFolder in categoryFolders)
                 {
                     string categoryName = Path.GetFileName(categoryFolder);
 
-                    // åˆ›å»ºå¯¹åº”çš„é¢„åˆ¶ä½“åˆ†ç±»æ–‡ä»¶å¤¹
+                    // ´´½¨¶ÔÓ¦µÄÔ¤ÖÆÌå·ÖÀàÎÄ¼ş¼Ğ
                     string prefabCategoryPath = Path.Combine(prefabOutputPath, categoryName);
                     if (!Directory.Exists(prefabCategoryPath))
                     {
                         Directory.CreateDirectory(prefabCategoryPath);
                     }
 
-                    // æŸ¥æ‰¾è¯¥åˆ†ç±»ä¸‹çš„æ‰€æœ‰ItemDataSOæ–‡ä»¶
+                    // ²éÕÒ¸Ã·ÖÀàÏÂµÄËùÓĞItemDataSOÎÄ¼ş
                     string[] assetFiles = Directory.GetFiles(categoryFolder, "*.asset");
                     foreach (string assetFile in assetFiles)
                     {
@@ -249,19 +249,19 @@ namespace InventorySystem.Editor
                     }
                 }
 
-                // åˆ·æ–°èµ„äº§æ•°æ®åº“
+                // Ë¢ĞÂ×Ê²úÊı¾İ¿â
                 AssetDatabase.Refresh();
 
-                EditorUtility.DisplayDialog("å®Œæˆ",
-                    $"ç‰©å“é¢„åˆ¶ä½“ç”Ÿæˆå®Œæˆï¼\næ€»ç‰©å“æ•°: {totalItems}\næˆåŠŸç”Ÿæˆ: {generatedPrefabs}\nè¾“å‡ºè·¯å¾„: {prefabOutputPath}",
-                    "ç¡®å®š");
+                EditorUtility.DisplayDialog("Íê³É",
+                    $"ÎïÆ·Ô¤ÖÆÌåÉú³ÉÍê³É£¡\n×ÜÎïÆ·Êı: {totalItems}\n³É¹¦Éú³É: {generatedPrefabs}\nÊä³öÂ·¾¶: {prefabOutputPath}",
+                    "È·¶¨");
 
-                Debug.Log($"[ItemPrefabGenerator] ç”Ÿæˆå®Œæˆ: {generatedPrefabs}/{totalItems} ä¸ªé¢„åˆ¶ä½“");
+                Debug.Log($"[ItemPrefabGenerator] Éú³ÉÍê³É: {generatedPrefabs}/{totalItems} ¸öÔ¤ÖÆÌå");
             }
             catch (Exception e)
             {
-                EditorUtility.DisplayDialog("é”™è¯¯", $"ç”Ÿæˆè¿‡ç¨‹ä¸­å‘ç”Ÿé”™è¯¯: {e.Message}", "ç¡®å®š");
-                Debug.LogError($"[ItemPrefabGenerator] ç”Ÿæˆé”™è¯¯: {e}");
+                EditorUtility.DisplayDialog("´íÎó", $"Éú³É¹ı³ÌÖĞ·¢Éú´íÎó: {e.Message}", "È·¶¨");
+                Debug.LogError($"[ItemPrefabGenerator] Éú³É´íÎó: {e}");
             }
         }
 
@@ -269,145 +269,198 @@ namespace InventorySystem.Editor
         {
             try
             {
-                // è®¡ç®—åŸºäºç½‘æ ¼çš„å®é™…å°ºå¯¸ï¼ˆæ¯ä¸ªç½‘æ ¼64x64åƒç´ ï¼‰
+                // ¹Ì¶¨Íø¸ñ´óĞ¡Îª64x64ÏñËØ
                 float gridSize = 64f;
                 float itemWidth = itemData.width * gridSize;
                 float itemHeight = itemData.height * gridSize;
                 Vector2 itemSize = new Vector2(itemWidth, itemHeight);
-                
-                // åˆ›å»ºæ ¹GameObject
-                GameObject rootObject = new GameObject(itemData.itemName);
-                rootObject.layer = 5; // UIå±‚
         
-                // æ·»åŠ RectTransformç»„ä»¶
+                // ´´½¨¸ùGameObject
+                GameObject rootObject = new GameObject(itemData.itemName);
+                rootObject.layer = 5; // UI²ã
+        
+                // Ìí¼ÓRectTransform×é¼ş
                 RectTransform rootRect = rootObject.AddComponent<RectTransform>();
                 rootRect.sizeDelta = itemSize;
                 rootRect.anchorMin = new Vector2(0.5f, 0.5f);
                 rootRect.anchorMax = new Vector2(0.5f, 0.5f);
-                rootRect.pivot = new Vector2(0f, 1f); // è½´å¿ƒä¸º(0,1)
+                rootRect.pivot = new Vector2(0.5f, 0.5f); // ÖáĞÄÎª(0.5,0.5)
         
-                // åˆ›å»ºItemBackgroundå­å¯¹è±¡
+                // ´´½¨ItemBackground×Ó¶ÔÏó
                 GameObject backgroundObject = new GameObject("ItemBackground");
                 backgroundObject.transform.SetParent(rootObject.transform);
                 backgroundObject.layer = 5;
         
                 RectTransform backgroundRect = backgroundObject.AddComponent<RectTransform>();
-                backgroundRect.sizeDelta = itemSize;
+                backgroundRect.sizeDelta = itemSize; // ±³¾°´óĞ¡ÓëÖ÷¶ÔÏóÏàÍ¬
                 backgroundRect.anchorMin = new Vector2(0.5f, 0.5f);
                 backgroundRect.anchorMax = new Vector2(0.5f, 0.5f);
-                backgroundRect.pivot = new Vector2(0f, 1f); // è½´å¿ƒä¸º(0,1)
-                // æ ¹æ®å®é™…å°ºå¯¸è®¡ç®—å±…ä¸­ä½ç½®ï¼šXè½´ä¸ºè´Ÿæ•°çš„å®½åº¦ä¸€åŠï¼ŒYè½´ä¸ºé«˜åº¦çš„ä¸€åŠ
-                backgroundRect.anchoredPosition = new Vector2(-itemWidth / 2f, itemHeight / 2f);
+                backgroundRect.pivot = new Vector2(0.5f, 0.5f); // ÖáĞÄÎª(0.5,0.5)
+                backgroundRect.anchoredPosition = Vector2.zero; // ¾ÓÖĞÎ»ÖÃ
         
                 Image backgroundImage = backgroundObject.AddComponent<Image>();
-                backgroundImage.color = itemData.backgroundColor; // ä½¿ç”¨ç‰©å“çš„èƒŒæ™¯é¢œè‰²
+                Color backgroundColor = itemData.backgroundColor;
+                backgroundColor.a = 0.8f; // ÉèÖÃÍ¸Ã÷¶ÈÎª0.8
+                backgroundImage.color = backgroundColor;
                 backgroundImage.raycastTarget = true;
         
-                // åˆ›å»ºItemIconå­å¯¹è±¡
+                // ´´½¨ItemHighlight×Ó¶ÔÏó
+                GameObject highlightObject = new GameObject("ItemHighlight");
+                highlightObject.transform.SetParent(rootObject.transform);
+                highlightObject.layer = 5;
+        
+                RectTransform highlightRect = highlightObject.AddComponent<RectTransform>();
+                highlightRect.sizeDelta = itemSize; // ¸ßÁÁ´óĞ¡ÓëÖ÷¶ÔÏóÏàÍ¬
+                highlightRect.anchorMin = new Vector2(0.5f, 0.5f);
+                highlightRect.anchorMax = new Vector2(0.5f, 0.5f);
+                highlightRect.pivot = new Vector2(0.5f, 0.5f); // ¾ÓÖĞ¶ÔÆë
+                highlightRect.anchoredPosition = Vector2.zero; // ¾ÓÖĞÎ»ÖÃ
+        
+                Image highlightImage = highlightObject.AddComponent<Image>();
+                highlightImage.color = new Color(1f, 1f, 1f, 0f); // ³õÊ¼Í¸Ã÷¶ÈÎª0
+                highlightImage.raycastTarget = true;
+        
+                // ´´½¨ItemIcon×Ó¶ÔÏó
                 GameObject iconObject = new GameObject("ItemIcon");
                 iconObject.transform.SetParent(rootObject.transform);
                 iconObject.layer = 5;
         
                 RectTransform iconRect = iconObject.AddComponent<RectTransform>();
-                iconRect.sizeDelta = itemSize;
+                iconRect.sizeDelta = itemSize; // Í¼±ê´óĞ¡ÓëÖ÷¶ÔÏóÏàÍ¬
                 iconRect.anchorMin = new Vector2(0.5f, 0.5f);
                 iconRect.anchorMax = new Vector2(0.5f, 0.5f);
-                iconRect.pivot = new Vector2(0f, 1f); // è½´å¿ƒä¸º(0,1)
-                // æ ¹æ®å®é™…å°ºå¯¸è®¡ç®—å±…ä¸­ä½ç½®ï¼šXè½´ä¸ºè´Ÿæ•°çš„å®½åº¦ä¸€åŠï¼ŒYè½´ä¸ºé«˜åº¦çš„ä¸€åŠ
-                iconRect.anchoredPosition = new Vector2(-itemWidth / 2f, itemHeight / 2f);
+                iconRect.pivot = new Vector2(0.5f, 0.5f); // ÖáĞÄÎª(0.5,0.5)
+                iconRect.anchoredPosition = Vector2.zero; // ¾ÓÖĞÎ»ÖÃ
         
                 Image iconImage = iconObject.AddComponent<Image>();
                 iconImage.sprite = itemData.itemIcon;
                 iconImage.color = Color.white;
-                iconImage.raycastTarget = true;
+                iconImage.raycastTarget = false; // ½ûÓÃÍ¼±êµÄÉäÏß¼ì²â
         
-                // åˆ›å»ºTMPæ–‡æœ¬å­å¯¹è±¡ï¼ˆæ ¹æ®ç‰©å“ç±»å‹å†³å®šæ˜¯å¦æ˜¾ç¤ºï¼‰
+                // ´´½¨TMPÎÄ±¾×é¼ş£¨Ê¼ÖÕÎ»ÓÚÓÒÏÂ½Ç£©
+                TextMeshProUGUI tmpText = null;
                 string textContent = GetItemDisplayText(itemData);
-                TextMeshProUGUI tmpText = null; // åœ¨å¤–éƒ¨å£°æ˜å˜é‡
                 
-                if (!string.IsNullOrEmpty(textContent))
-                {
-                    GameObject textObject = new GameObject("Text (TMP)");
-                    textObject.transform.SetParent(rootObject.transform);
-                    textObject.layer = 5;
+                // Ê¼ÖÕ´´½¨ÎÄ±¾×é¼ş
+                GameObject textObject = new GameObject("ItemText");
+                textObject.transform.SetParent(rootObject.transform);
+                textObject.layer = 5;
         
-                    RectTransform textRect = textObject.AddComponent<RectTransform>();
-                    
-                    // å…ˆæ·»åŠ TextMeshProUGUIç»„ä»¶ä»¥ä¾¿è®¡ç®—æ–‡æœ¬å¤§å°
-                    tmpText = textObject.AddComponent<TextMeshProUGUI>();
-                    tmpText.text = textContent;
-                    tmpText.font = fontAsset;
-                    tmpText.fontSize = 18;
-                    tmpText.color = Color.white;
-                    tmpText.alignment = TextAlignmentOptions.BottomRight; // å³ä¸‹å¯¹é½
-                    tmpText.enableWordWrapping = false; // ç¦ç”¨æ¢è¡Œä»¥è·å¾—å‡†ç¡®çš„æ–‡æœ¬å¤§å°
-                    tmpText.raycastTarget = true;
-                    
-                    // å¼ºåˆ¶æ›´æ–°æ–‡æœ¬ä»¥è·å¾—å‡†ç¡®çš„å°ºå¯¸
-                    tmpText.ForceMeshUpdate();
-                    
-                    // æ ¹æ®æ–‡æœ¬å†…å®¹è®¡ç®—åˆé€‚çš„æ–‡æœ¬æ¡†å¤§å°
-                    Vector2 textSize = tmpText.GetRenderedValues(false);
-                    float textWidth = Mathf.Max(textSize.x + 8f, 20f); // æœ€å°å®½åº¦20ï¼Œå·¦å³å„4åƒç´ è¾¹è·
-                    float textHeight = Mathf.Max(textSize.y + 4f, 20f); // æœ€å°é«˜åº¦20ï¼Œä¸Šä¸‹å„2åƒç´ è¾¹è·
-                    
-                    // è®¾ç½®æ–‡æœ¬æ¡†å¤§å°
-                    textRect.sizeDelta = new Vector2(textWidth, textHeight);
-                    
-                    // è®¾ç½®é”šç‚¹ä¸ºå³ä¸‹è§’
-                    textRect.anchorMin = new Vector2(1f, 0f);
-                    textRect.anchorMax = new Vector2(1f, 0f);
-                    textRect.pivot = new Vector2(1f, 0f); // è½´å¿ƒä¸ºå³ä¸‹è§’(1,0)
-                    
-                    // æ–‡æœ¬ä½ç½®åœ¨ç‰©å“çš„å³ä¸‹è§’ï¼Œè·ç¦»è¾¹ç¼˜4åƒç´ 
-                    textRect.anchoredPosition = new Vector2(-4f, 4f);
-                }
-
-                // æ·»åŠ ItemDataReaderè„šæœ¬åˆ°ä¸»å¯¹è±¡
+                RectTransform textRect = textObject.AddComponent<RectTransform>();
+                // ÎÄ±¾¿ò´óĞ¡£º¹Ì¶¨ÎªÓÒÏÂ½ÇÇøÓòµÄºÏÊÊ´óĞ¡
+                float textWidth = Mathf.Max(itemWidth * 0.4f, 24f); // ÖÁÉÙ24ÏñËØ¿í
+                float textHeight = Mathf.Max(itemHeight * 0.3f, 16f); // ÖÁÉÙ16ÏñËØ¸ß
+                textRect.sizeDelta = new Vector2(textWidth, textHeight);
+                textRect.anchorMin = new Vector2(0.5f, 0.5f);
+                textRect.anchorMax = new Vector2(0.5f, 0.5f);
+                textRect.pivot = new Vector2(1f, 0f); // ÓÒÏÂ½Ç¶ÔÆë
+                
+                // È·±£ÎÄ±¾Ê¼ÖÕÎ»ÓÚÓÒÏÂ½Ç£¬¾àÀë±ßÔµ3ÏñËØ
+                // Ê¹ÓÃ¾ø¶ÔÎ»ÖÃÈ·±£ÎŞÂÛÎïÆ·ÈçºÎĞı×ª£¬ÎÄ×Ö¶¼ÔÚÊÓ¾õÓÒÏÂ½Ç
+                float textPosX = itemWidth / 2f - 3f; // ¾àÀëÓÒ±ßÔµ3ÏñËØ
+                float textPosY = -itemHeight / 2f + 3f; // ¾àÀëÏÂ±ßÔµ3ÏñËØ
+                textRect.anchoredPosition = new Vector2(textPosX, textPosY);
+                
+                // ÉèÖÃÎÄ±¾¶ÔÏóµÄÃû³Æ£¬·½±ãÔÚÔËĞĞÊ±²éÕÒ
+                textObject.name = "ItemText";
+        
+                tmpText = textObject.AddComponent<TextMeshProUGUI>();
+                tmpText.text = textContent;
+                tmpText.font = fontAsset;
+                // ¸ù¾İÎïÆ·Êµ¼ÊÍø¸ñ´óĞ¡¶¯Ì¬¼ÆËã×ÖÌå´óĞ¡
+                float itemGridSize = Mathf.Max(itemData.width, itemData.height); // È¡¿í¸ßµÄ×î´óÖµ
+                float baseFontSize = 16f + (itemGridSize - 1) * 8f; // 1¸ñ=16ºÅ£¬2¸ñ=24ºÅ£¬3¸ñ=32ºÅ
+                tmpText.fontSize = Mathf.Clamp(baseFontSize, 16f, 48f); // ÏŞÖÆÔÚ16-48Ö®¼ä
+                tmpText.color = Color.white;
+                tmpText.alignment = TextAlignmentOptions.BottomRight; // ÓÒÏÂ¶ÔÆë
+                tmpText.raycastTarget = false;
+                tmpText.enableWordWrapping = false;
+                tmpText.overflowMode = TextOverflowModes.Overflow;
+                
+                // È·±£ÎÄ±¾äÖÈ¾ÔÚ×îÉÏ²ã
+                textObject.transform.SetAsLastSibling();
+        
+                // Ìí¼ÓItemDataReader½Å±¾µ½Ö÷¶ÔÏó
                 ItemDataReader itemDataReader = rootObject.AddComponent<ItemDataReader>();
-                
-                // æ·»åŠ DraggableItemè„šæœ¬åˆ°ä¸»å¯¹è±¡
+        
+                // Ìí¼ÓItem½Å±¾µ½Ö÷¶ÔÏó
+                Item item = rootObject.AddComponent<Item>();
+        
+                // Ìí¼ÓDraggableItem½Å±¾µ½Ö÷¶ÔÏó
                 DraggableItem draggableItem = rootObject.AddComponent<DraggableItem>();
-                
-                // è®¾ç½®ç‰©å“æ•°æ®
-                itemDataReader.SetItemData(itemData);
-                
-                // è‡ªåŠ¨è®¾ç½®UIç»„ä»¶å¼•ç”¨
-                var backgroundImageField = typeof(ItemDataReader).GetField("backgroundImage", 
+        
+                // Ìí¼ÓItemHighlight½Å±¾µ½Ö÷¶ÔÏó
+                ItemHighlight itemHighlight = rootObject.AddComponent<ItemHighlight>();
+        
+                // ÉèÖÃItemHighlight×é¼şµÄhighlightImageÒıÓÃ
+                var highlightImageField = typeof(ItemHighlight).GetField("highlightImage",
                     System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-                var iconImageField = typeof(ItemDataReader).GetField("iconImage", 
+                var highlightColorField = typeof(ItemHighlight).GetField("highlightColor",
                     System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-                var displayTextField = typeof(ItemDataReader).GetField("displayText", 
+                var fadeSpeedField = typeof(ItemHighlight).GetField("fadeSpeed",
                     System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-                
+        
+                if (highlightImageField != null)
+                    highlightImageField.SetValue(itemHighlight, highlightImage);
+                if (highlightColorField != null)
+                    highlightColorField.SetValue(itemHighlight, new Color(1f, 1f, 1f, 0.3f));
+                if (fadeSpeedField != null)
+                    fadeSpeedField.SetValue(itemHighlight, 2f);
+        
+                // ÏÈÉèÖÃUI×é¼şÒıÓÃ£¨ÔÚSetItemDataÖ®Ç°£©
+                var backgroundImageField = typeof(ItemDataReader).GetField("backgroundImage",
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                var iconImageField = typeof(ItemDataReader).GetField("iconImage",
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                var displayTextField = typeof(ItemDataReader).GetField("displayText",
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        
                 if (backgroundImageField != null)
                     backgroundImageField.SetValue(itemDataReader, backgroundImage);
                 if (iconImageField != null)
-                    iconImageField.SetValue(itemDataReader, iconImage); 
+                    iconImageField.SetValue(itemDataReader, iconImage);
                 if (displayTextField != null && tmpText != null)
                     displayTextField.SetValue(itemDataReader, tmpText);
-
-                // ç”Ÿæˆé¢„åˆ¶ä½“æ–‡ä»¶å
+        
+                // ÉèÖÃÎïÆ·Êı¾İ£¨´ËÊ±UI×é¼şÒıÓÃÒÑ¾­ÕıÈ·ÉèÖÃ£©
+                itemDataReader.SetItemData(itemData);
+        
+                // Ö±½ÓÉèÖÃËùÓĞpublicÊıÖµ×Ö¶Î£¬È·±£ÔÚ±à¼­Æ÷ÖĞÏÔÊ¾ÍêÕûĞÅÏ¢
+                itemDataReader.gridWidth = itemData.width;
+                itemDataReader.gridHeight = itemData.height;
+                itemDataReader.gridSizeDisplay = $"{itemData.width} ¡Á {itemData.height}";
+                itemDataReader.currentStack = 1;
+                itemDataReader.currentDurability = itemData.durability;
+                itemDataReader.currentUsageCount = itemData.usageCount;
+                itemDataReader.currentHealAmount = itemData.maxHealAmount;
+                itemDataReader.intelligenceValue = itemData.intelligenceValue;
+                itemDataReader.currencyAmount = 1;
+                itemDataReader.maxStackAmount = itemData.maxStack;
+                itemDataReader.maxDurability = itemData.durability;
+                itemDataReader.maxUsageCount = itemData.usageCount;
+                itemDataReader.maxHealAmount = itemData.maxHealAmount;
+        
+                // Éú³ÉÔ¤ÖÆÌåÎÄ¼şÃû
                 string fileName = $"{itemData.id}__{SanitizeFileName(itemData.itemName)}.prefab";
                 string prefabPath = Path.Combine(outputPath, fileName).Replace("\\", "/");
-
-                // åˆ›å»ºé¢„åˆ¶ä½“
+        
+                // ´´½¨Ô¤ÖÆÌå
                 GameObject prefab = PrefabUtility.SaveAsPrefabAsset(rootObject, prefabPath);
-
-                // æ¸…ç†ä¸´æ—¶å¯¹è±¡
+        
+                // ÇåÀíÁÙÊ±¶ÔÏó
                 DestroyImmediate(rootObject);
-
+        
                 return prefab != null;
             }
             catch (Exception e)
             {
-                Debug.LogError($"[ItemPrefabGenerator] ç”Ÿæˆé¢„åˆ¶ä½“å¤±è´¥ {itemData.itemName}: {e.Message}");
+                Debug.LogError($"[ItemPrefabGenerator] Éú³ÉÔ¤ÖÆÌåÊ§°Ü {itemData.itemName}: {e.Message}");
                 return false;
             }
         }
 
         /// <summary>
-        /// æ ¹æ®ç‰©å“ç±»å‹è·å–è¦æ˜¾ç¤ºçš„æ–‡æœ¬å†…å®¹
+        /// ¸ù¾İÎïÆ·ÀàĞÍ»ñÈ¡ÒªÏÔÊ¾µÄÎÄ±¾ÄÚÈİ
         /// </summary>
         private string GetItemDisplayText(ItemDataSO itemData)
         {
@@ -415,32 +468,32 @@ namespace InventorySystem.Editor
             {
                 case ItemCategory.Helmet:
                 case ItemCategory.Armor:
-                    // å¤´ç›”æŠ¤ç”²æ˜¾ç¤ºè€ä¹…å€¼
+                    // Í·¿ø»¤¼×ÏÔÊ¾ÄÍ¾ÃÖµ
                     return itemData.durability > 0 ? itemData.durability.ToString() : "";
-        
+
                 case ItemCategory.Ammunition:
-                    // å¼¹è¯æ˜¾ç¤ºå †å æ•°é‡
+                    // µ¯Ò©ÏÔÊ¾¶ÑµşÊıÁ¿
                     return itemData.maxStack > 1 ? $"{itemData.maxStack}/{itemData.maxStack}" : "";
-        
+
                 case ItemCategory.Currency:
-                    // è´§å¸æ˜¾ç¤ºå †å æ•°é‡
+                    // »õ±ÒÏÔÊ¾¶ÑµşÊıÁ¿
                     return itemData.maxStack > 1 ? itemData.maxStack.ToString() : "";
-        
+
                 case ItemCategory.Food:
                 case ItemCategory.Drink:
                 case ItemCategory.Sedative:
                 case ItemCategory.Hemostatic:
-                    // æ¶ˆè€—å“æ˜¾ç¤ºä½¿ç”¨æ¬¡æ•°
-                    return itemData.usageCount > 0 ? itemData.usageCount.ToString() : "";
-        
+                    // ÏûºÄÆ·ÏÔÊ¾Ê¹ÓÃ´ÎÊı£¨Ô¤ÖÆÌåÉú³ÉÊ±ÏÔÊ¾×î´óÖµ£©
+                    return itemData.usageCount > 0 ? $"{itemData.usageCount}/{itemData.usageCount}" : "";
+
                 case ItemCategory.Healing:
-                    // æ²»ç–—è¯ç‰©æ˜¾ç¤ºæ²»ç–—é‡
+                    // ÖÎÁÆÒ©ÎïÏÔÊ¾ÖÎÁÆÁ¿
                     return itemData.maxHealAmount > 0 ? itemData.maxHealAmount.ToString() : "";
-        
+
                 case ItemCategory.Intelligence:
-                    // æƒ…æŠ¥ç‰©å“æ˜¾ç¤ºæƒ…æŠ¥å€¼
+                    // Çé±¨ÎïÆ·ÏÔÊ¾Çé±¨Öµ
                     return itemData.intelligenceValue > 0 ? itemData.intelligenceValue.ToString() : "";
-        
+
                 default:
                     return "";
             }
@@ -448,9 +501,9 @@ namespace InventorySystem.Editor
 
         private void ClearAllGeneratedPrefabs()
         {
-            if (EditorUtility.DisplayDialog("ç¡®è®¤åˆ é™¤",
-                $"ç¡®å®šè¦åˆ é™¤æ‰€æœ‰å·²ç”Ÿæˆçš„é¢„åˆ¶ä½“å—ï¼Ÿ\nè·¯å¾„: {prefabOutputPath}\n\næ­¤æ“ä½œä¸å¯æ’¤é”€ï¼",
-                "ç¡®è®¤åˆ é™¤", "å–æ¶ˆ"))
+            if (EditorUtility.DisplayDialog("È·ÈÏÉ¾³ı",
+                $"È·¶¨ÒªÉ¾³ıËùÓĞÒÑÉú³ÉµÄÔ¤ÖÆÌåÂğ£¿\nÂ·¾¶: {prefabOutputPath}\n\n´Ë²Ù×÷²»¿É³·Ïú£¡",
+                "È·ÈÏÉ¾³ı", "È¡Ïû"))
             {
                 try
                 {
@@ -458,44 +511,44 @@ namespace InventorySystem.Editor
                     {
                         int deletedFiles = 0;
 
-                        // é€’å½’åˆ é™¤æ‰€æœ‰å­æ–‡ä»¶å¤¹å†…çš„.prefabæ–‡ä»¶ï¼Œä½†ä¿ç•™æ–‡ä»¶å¤¹ç»“æ„
+                        // µİ¹éÉ¾³ıËùÓĞ×ÓÎÄ¼ş¼ĞÄÚµÄ.prefabÎÄ¼ş£¬µ«±£ÁôÎÄ¼ş¼Ğ½á¹¹
                         DeletePrefabFilesRecursively(prefabOutputPath, ref deletedFiles);
 
-                        // åˆ·æ–°èµ„äº§æ•°æ®åº“
+                        // Ë¢ĞÂ×Ê²úÊı¾İ¿â
                         AssetDatabase.Refresh();
 
-                        EditorUtility.DisplayDialog("å®Œæˆ", $"å·²åˆ é™¤ {deletedFiles} ä¸ªé¢„åˆ¶ä½“æ–‡ä»¶\næ–‡ä»¶å¤¹ç»“æ„å·²ä¿ç•™", "ç¡®å®š");
-                        Debug.Log($"[ItemPrefabGenerator] å·²æ¸…ç† {deletedFiles} ä¸ªé¢„åˆ¶ä½“æ–‡ä»¶ï¼Œä¿ç•™æ–‡ä»¶å¤¹ç»“æ„");
+                        EditorUtility.DisplayDialog("Íê³É", $"ÒÑÉ¾³ı {deletedFiles} ¸öÔ¤ÖÆÌåÎÄ¼ş\nÎÄ¼ş¼Ğ½á¹¹ÒÑ±£Áô", "È·¶¨");
+                        Debug.Log($"[ItemPrefabGenerator] ÒÑÇåÀí {deletedFiles} ¸öÔ¤ÖÆÌåÎÄ¼ş£¬±£ÁôÎÄ¼ş¼Ğ½á¹¹");
                     }
                     else
                     {
-                        EditorUtility.DisplayDialog("æç¤º", "æ²¡æœ‰æ‰¾åˆ°éœ€è¦åˆ é™¤çš„æ–‡ä»¶", "ç¡®å®š");
+                        EditorUtility.DisplayDialog("ÌáÊ¾", "Ã»ÓĞÕÒµ½ĞèÒªÉ¾³ıµÄÎÄ¼ş", "È·¶¨");
                     }
                 }
                 catch (Exception e)
                 {
-                    EditorUtility.DisplayDialog("é”™è¯¯", $"åˆ é™¤è¿‡ç¨‹ä¸­å‘ç”Ÿé”™è¯¯: {e.Message}", "ç¡®å®š");
-                    Debug.LogError($"[ItemPrefabGenerator] åˆ é™¤é”™è¯¯: {e}");
+                    EditorUtility.DisplayDialog("´íÎó", $"É¾³ı¹ı³ÌÖĞ·¢Éú´íÎó: {e.Message}", "È·¶¨");
+                    Debug.LogError($"[ItemPrefabGenerator] É¾³ı´íÎó: {e}");
                 }
             }
         }
 
         /// <summary>
-        /// é€’å½’åˆ é™¤æŒ‡å®šç›®å½•åŠå…¶å­ç›®å½•ä¸­çš„æ‰€æœ‰.prefabæ–‡ä»¶ï¼Œä½†ä¿ç•™æ–‡ä»¶å¤¹ç»“æ„
+        /// µİ¹éÉ¾³ıÖ¸¶¨Ä¿Â¼¼°Æä×ÓÄ¿Â¼ÖĞµÄËùÓĞ.prefabÎÄ¼ş£¬µ«±£ÁôÎÄ¼ş¼Ğ½á¹¹
         /// </summary>
         private void DeletePrefabFilesRecursively(string directoryPath, ref int deletedFiles)
         {
             if (!Directory.Exists(directoryPath))
                 return;
 
-            // åˆ é™¤å½“å‰ç›®å½•ä¸‹çš„æ‰€æœ‰.prefabæ–‡ä»¶
+            // É¾³ıµ±Ç°Ä¿Â¼ÏÂµÄËùÓĞ.prefabÎÄ¼ş
             string[] prefabFiles = Directory.GetFiles(directoryPath, "*.prefab");
             foreach (string file in prefabFiles)
             {
                 File.Delete(file);
                 deletedFiles++;
 
-                // åˆ é™¤å¯¹åº”çš„.metaæ–‡ä»¶
+                // É¾³ı¶ÔÓ¦µÄ.metaÎÄ¼ş
                 string metaFile = file + ".meta";
                 if (File.Exists(metaFile))
                 {
@@ -503,7 +556,7 @@ namespace InventorySystem.Editor
                 }
             }
 
-            // é€’å½’å¤„ç†æ‰€æœ‰å­ç›®å½•
+            // µİ¹é´¦ÀíËùÓĞ×ÓÄ¿Â¼
             string[] subDirectories = Directory.GetDirectories(directoryPath);
             foreach (string subDir in subDirectories)
             {
@@ -516,21 +569,21 @@ namespace InventorySystem.Editor
             if (string.IsNullOrEmpty(fileName))
                 return "Unknown";
 
-            // ç§»é™¤æˆ–æ›¿æ¢æ–‡ä»¶åä¸­çš„éæ³•å­—ç¬¦
+            // ÒÆ³ı»òÌæ»»ÎÄ¼şÃûÖĞµÄ·Ç·¨×Ö·û
             char[] invalidChars = Path.GetInvalidFileNameChars();
             foreach (char c in invalidChars)
             {
                 fileName = fileName.Replace(c, '_');
             }
 
-            // ç§»é™¤ä¸€äº›ç‰¹æ®Šå­—ç¬¦
+            // ÒÆ³ıÒ»Ğ©ÌØÊâ×Ö·û
             fileName = fileName.Replace(" ", "_")
                               .Replace(".", "_")
                               .Replace("-", "_")
                               .Replace("(", "")
                               .Replace(")", "")
-                              .Replace("ï¼ˆ", "")
-                              .Replace("ï¼‰", "");
+                              .Replace("£¨", "")
+                              .Replace("£©", "");
 
             return fileName;
         }

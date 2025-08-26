@@ -5,22 +5,22 @@ using InventorySystem;
 using System.Collections.Generic;
 
 /// <summary>
-/// ×°±¸²ÛÎ»×é¼ş - ´¦Àí×°±¸µÄÍÏ×§½ÓÊÕºÍÀàĞÍÑéÖ¤
+/// è£…å¤‡æ§½ä½ç»„ä»¶ - å¤„ç†è£…å¤‡çš„æ‹–æ‹½æ¥æ”¶å’Œç±»å‹éªŒè¯
 /// </summary>
 public class EquipmentSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, IPointerExitHandler
 {
-    [Header("×°±¸²ÛÎ»ÉèÖÃ")]
-    [SerializeField] private ItemCategory acceptedItemType; // ½ÓÊÜµÄ×°±¸ÀàĞÍ
-    [SerializeField] private Image slotBackground; // ²ÛÎ»±³¾°Í¼Æ¬
-    [SerializeField] private Color normalColor = Color.white; // Õı³£ÑÕÉ«
-    [SerializeField] private Color highlightColor = Color.yellow; // ¸ßÁÁÑÕÉ«
-    [SerializeField] private Color validDropColor = Color.green; // ÓĞĞ§·ÅÖÃÑÕÉ«
-    [SerializeField] private Color invalidDropColor = Color.red; // ÎŞĞ§·ÅÖÃÑÕÉ«
+    [Header("è£…å¤‡æ§½ä½è®¾ç½®")]
+    [SerializeField] private ItemCategory acceptedItemType; // æ¥å—çš„è£…å¤‡ç±»å‹
+    [SerializeField] private Image slotBackground; // æ§½ä½èƒŒæ™¯å›¾ç‰‡
+    [SerializeField] private Color normalColor = Color.white; // æ­£å¸¸é¢œè‰²
+    [SerializeField] private Color highlightColor = Color.yellow; // é«˜äº®é¢œè‰²
+    [SerializeField] private Color validDropColor = Color.green; // æœ‰æ•ˆæ”¾ç½®é¢œè‰²
+    [SerializeField] private Color invalidDropColor = Color.red; // æ— æ•ˆæ”¾ç½®é¢œè‰²
 
-    [Header("²ÛÎ»±ß¾àÉèÖÃ")]
-    [SerializeField] private float slotMargin = 6f; // ²ÛÎ»±ß¾à
+    [Header("æ§½ä½è¾¹è·è®¾ç½®")]
+    [SerializeField] private float slotMargin = 6f; // æ§½ä½è¾¹è·
 
-    private GameObject currentEquippedItem; // µ±Ç°×°±¸µÄÎïÆ·
+    private GameObject currentEquippedItem; // å½“å‰è£…å¤‡çš„ç‰©å“
     private RectTransform rectTransform;
 
     private void Awake()
@@ -35,7 +35,7 @@ public class EquipmentSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, 
 
     private void Start()
     {
-        // ÉèÖÃ³õÊ¼ÑÕÉ«
+        // è®¾ç½®åˆå§‹é¢œè‰²
         if (slotBackground != null)
         {
             slotBackground.color = normalColor;
@@ -44,7 +44,7 @@ public class EquipmentSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, 
 
     public void OnDrop(PointerEventData eventData)
     {
-        // »ñÈ¡±»ÍÏ×§µÄÎïÆ·
+        // è·å–è¢«æ‹–æ‹½çš„ç‰©å“
         DraggableItem draggedItem = eventData.pointerDrag?.GetComponent<DraggableItem>();
 
         if (draggedItem != null)
@@ -53,25 +53,25 @@ public class EquipmentSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, 
 
             if (itemDataReader != null && CanAcceptItem(itemDataReader.ItemData))
             {
-                // Èç¹û²ÛÎ»ÒÑÓĞ×°±¸£¬½«ÆäÒÆ»ØÔ­Î»ÖÃ»ò½»»»
+                // å¦‚æœæ§½ä½å·²æœ‰è£…å¤‡ï¼Œå°†å…¶ç§»å›åŸä½ç½®æˆ–äº¤æ¢
                 if (currentEquippedItem != null)
                 {
                     HandleItemSwap(draggedItem);
                 }
                 else
                 {
-                    // ×°±¸ĞÂÎïÆ·
+                    // è£…å¤‡æ–°ç‰©å“
                     EquipItem(draggedItem.gameObject);
                 }
             }
             else
             {
-                // ÀàĞÍ²»Æ¥Åä£¬ÎïÆ··µ»ØÔ­Î»ÖÃ
-                Debug.Log($"×°±¸ÀàĞÍ²»Æ¥Åä£¡²ÛÎ»½ÓÊÜ: {acceptedItemType}, ÎïÆ·ÀàĞÍ: {itemDataReader?.ItemData?.category}");
+                // ç±»å‹ä¸åŒ¹é…ï¼Œç‰©å“è¿”å›åŸä½ç½®
+                Debug.Log($"è£…å¤‡ç±»å‹ä¸åŒ¹é…ï¼æ§½ä½æ¥å—: {acceptedItemType}, ç‰©å“ç±»å‹: {itemDataReader?.ItemData?.category}");
             }
         }
 
-        // »Ö¸´²ÛÎ»ÑÕÉ«
+        // æ¢å¤æ§½ä½é¢œè‰²
         if (slotBackground != null)
         {
             slotBackground.color = normalColor;
@@ -80,7 +80,7 @@ public class EquipmentSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, 
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        // ¼ì²éÊÇ·ñÕıÔÚÍÏ×§ÎïÆ·
+        // æ£€æŸ¥æ˜¯å¦æ­£åœ¨æ‹–æ‹½ç‰©å“
         if (eventData.pointerDrag != null)
         {
             DraggableItem draggedItem = eventData.pointerDrag.GetComponent<DraggableItem>();
@@ -88,7 +88,7 @@ public class EquipmentSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, 
             {
                 ItemDataReader itemDataReader = draggedItem.GetItemDataReader();
 
-                // ¸ù¾İÊÇ·ñ¿ÉÒÔ½ÓÊÜ¸ÃÎïÆ·À´¸Ä±äÑÕÉ«
+                // æ ¹æ®æ˜¯å¦å¯ä»¥æ¥å—è¯¥ç‰©å“æ¥æ”¹å˜é¢œè‰²
                 if (slotBackground != null)
                 {
                     if (CanAcceptItem(itemDataReader?.ItemData))
@@ -104,7 +104,7 @@ public class EquipmentSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, 
         }
         else
         {
-            // Êó±êĞüÍ£¸ßÁÁ
+            // é¼ æ ‡æ‚¬åœé«˜äº®
             if (slotBackground != null)
             {
                 slotBackground.color = highlightColor;
@@ -114,7 +114,7 @@ public class EquipmentSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, 
 
     public void OnPointerExit(PointerEventData eventData)
     {
-        // »Ö¸´Õı³£ÑÕÉ«
+        // æ¢å¤æ­£å¸¸é¢œè‰²
         if (slotBackground != null)
         {
             slotBackground.color = normalColor;
@@ -122,10 +122,10 @@ public class EquipmentSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, 
     }
 
     /// <summary>
-    /// ¼ì²éÊÇ·ñ¿ÉÒÔ½ÓÊÜ¸ÃÎïÆ·
+    /// æ£€æŸ¥æ˜¯å¦å¯ä»¥æ¥å—è¯¥ç‰©å“
     /// </summary>
-    /// <param name="itemData">ÎïÆ·Êı¾İ</param>
-    /// <returns>ÊÇ·ñ¿ÉÒÔ½ÓÊÜ</returns>
+    /// <param name="itemData">ç‰©å“æ•°æ®</param>
+    /// <returns>æ˜¯å¦å¯ä»¥æ¥å—</returns>
     private bool CanAcceptItem(ItemDataSO itemData)
     {
         if (itemData == null) return false;
@@ -133,97 +133,97 @@ public class EquipmentSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, 
     }
 
     /// <summary>
-    /// ×°±¸ÎïÆ·µ½²ÛÎ»
+    /// è£…å¤‡ç‰©å“åˆ°æ§½ä½
     /// </summary>
-    /// <param name="item">Òª×°±¸µÄÎïÆ·</param>
+    /// <param name="item">è¦è£…å¤‡çš„ç‰©å“</param>
     private void EquipItem(GameObject item)
     {
         currentEquippedItem = item;
 
-        // ÉèÖÃÎïÆ·µÄ¸¸¶ÔÏóÎªµ±Ç°²ÛÎ»
+        // è®¾ç½®ç‰©å“çš„çˆ¶å¯¹è±¡ä¸ºå½“å‰æ§½ä½
         item.transform.SetParent(transform);
 
-        // µ÷ÕûÎïÆ·´óĞ¡ºÍÎ»ÖÃ
+        // è°ƒæ•´ç‰©å“å¤§å°å’Œä½ç½®
         ResizeItemToFitSlot(item);
 
-        Debug.Log($"×°±¸ÁËÎïÆ·: {item.name}");
+        Debug.Log($"è£…å¤‡äº†ç‰©å“: {item.name}");
     }
 
     /// <summary>
-    /// Ğ¶ÏÂµ±Ç°×°±¸µÄÎïÆ·
+    /// å¸ä¸‹å½“å‰è£…å¤‡çš„ç‰©å“
     /// </summary>
     public void UnequipItem()
     {
         if (currentEquippedItem != null)
         {
-            // »Ö¸´Ô­Ê¼´óĞ¡
+            // æ¢å¤åŸå§‹å¤§å°
             RestoreItemOriginalSize(currentEquippedItem);
 
-            // ¿ÉÒÔÔÚÕâÀïÌí¼Ó½«ÎïÆ·ÒÆ»Ø±³°üµÄÂß¼­
+            // å¯ä»¥åœ¨è¿™é‡Œæ·»åŠ å°†ç‰©å“ç§»å›èƒŒåŒ…çš„é€»è¾‘
             currentEquippedItem = null;
         }
     }
 
     /// <summary>
-    /// ´¦ÀíÎïÆ·½»»»
+    /// å¤„ç†ç‰©å“äº¤æ¢
     /// </summary>
-    /// <param name="newItem">ĞÂÎïÆ·</param>
+    /// <param name="newItem">æ–°ç‰©å“</param>
     private void HandleItemSwap(DraggableItem newItem)
     {
-        // »ñÈ¡µ±Ç°×°±¸µÄÎïÆ·µÄDraggableItem×é¼ş
+        // è·å–å½“å‰è£…å¤‡çš„ç‰©å“çš„DraggableItemç»„ä»¶
         DraggableItem currentDraggable = currentEquippedItem.GetComponent<DraggableItem>();
 
         if (currentDraggable != null)
         {
-            // ½«µ±Ç°×°±¸ÒÆ»ØĞÂÎïÆ·µÄÔ­Ê¼Î»ÖÃ
+            // å°†å½“å‰è£…å¤‡ç§»å›æ–°ç‰©å“çš„åŸå§‹ä½ç½®
             Transform newItemOriginalParent = newItem.transform.parent;
             Vector2 newItemOriginalPosition = newItem.GetComponent<RectTransform>().anchoredPosition;
 
-            // ÒÆ¶¯µ±Ç°×°±¸µ½ĞÂÎïÆ·µÄÔ­Ê¼Î»ÖÃ
+            // ç§»åŠ¨å½“å‰è£…å¤‡åˆ°æ–°ç‰©å“çš„åŸå§‹ä½ç½®
             currentEquippedItem.transform.SetParent(newItemOriginalParent);
             currentEquippedItem.GetComponent<RectTransform>().anchoredPosition = newItemOriginalPosition;
 
-            // »Ö¸´µ±Ç°×°±¸µÄÔ­Ê¼´óĞ¡
+            // æ¢å¤å½“å‰è£…å¤‡çš„åŸå§‹å¤§å°
             RestoreItemOriginalSize(currentEquippedItem);
         }
 
-        // ×°±¸ĞÂÎïÆ·
+        // è£…å¤‡æ–°ç‰©å“
         EquipItem(newItem.gameObject);
     }
 
     /// <summary>
-    /// µ÷ÕûÎïÆ·´óĞ¡ÒÔÊÊÓ¦²ÛÎ»
+    /// è°ƒæ•´ç‰©å“å¤§å°ä»¥é€‚åº”æ§½ä½
     /// </summary>
-    /// <param name="item">Òªµ÷ÕûµÄÎïÆ·</param>
+    /// <param name="item">è¦è°ƒæ•´çš„ç‰©å“</param>
     private void ResizeItemToFitSlot(GameObject item)
     {
         RectTransform itemRect = item.GetComponent<RectTransform>();
         if (itemRect != null)
         {
-            // ±£´æÔ­Ê¼´óĞ¡ĞÅÏ¢
+            // ä¿å­˜åŸå§‹å¤§å°ä¿¡æ¯
             ItemSizeInfo sizeInfo = item.GetComponent<ItemSizeInfo>();
             if (sizeInfo == null)
             {
                 sizeInfo = item.AddComponent<ItemSizeInfo>();
                 sizeInfo.originalSize = itemRect.sizeDelta;
                 sizeInfo.originalScale = itemRect.localScale;
-                // ±£´æÔ­Ê¼ÃªµãºÍÖáĞÄµãĞÅÏ¢
+                // ä¿å­˜åŸå§‹é”šç‚¹å’Œè½´å¿ƒç‚¹ä¿¡æ¯
                 sizeInfo.originalAnchorMin = itemRect.anchorMin;
                 sizeInfo.originalAnchorMax = itemRect.anchorMax;
                 sizeInfo.originalPivot = itemRect.pivot;
                 sizeInfo.originalAnchoredPosition = itemRect.anchoredPosition;
             }
 
-            // ¼ÆËãĞÂµÄ´óĞ¡£¨²ÛÎ»´óĞ¡¼õÈ¥±ß¾à£©
+            // è®¡ç®—æ–°çš„å¤§å°ï¼ˆæ§½ä½å¤§å°å‡å»è¾¹è·ï¼‰
             Vector2 slotSize = rectTransform.sizeDelta;
             Vector2 newSize = new Vector2(slotSize.x - slotMargin * 2, slotSize.y - slotMargin * 2);
 
-            // ÉèÖÃĞÂµÄ´óĞ¡
+            // è®¾ç½®æ–°çš„å¤§å°
             itemRect.sizeDelta = newSize;
             itemRect.localScale = Vector3.one;
 
-            // ¸ù¾İÖáĞÄµã¼ÆËãÕıÈ·µÄ¾ÓÖĞÎ»ÖÃ
-            // ¶ÔÓÚÖáĞÄÎª(0,1)µÄÎïÆ·£¬¾ÓÖĞ×ø±êÓ¦¸ÃÊÇ(-114, 114)
+            // æ ¹æ®è½´å¿ƒç‚¹è®¡ç®—æ­£ç¡®çš„å±…ä¸­ä½ç½®
+            // å¯¹äºè½´å¿ƒä¸º(0.5,0.5)çš„ç‰©å“ï¼Œå±…ä¸­åæ ‡åº”è¯¥æ˜¯(0, 0)
             Vector2 pivot = itemRect.pivot;
             Vector2 centeredPosition = new Vector2(
                 (pivot.x - 0.5f) * newSize.x,
@@ -232,46 +232,79 @@ public class EquipmentSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, 
 
             itemRect.anchoredPosition = centeredPosition;
 
-            // µ÷Õû×Ó¶ÔÏó£¨Í¼±ê£©µÄ´óĞ¡
+            // ç¡®ä¿TMPæ–‡å­—ç»„ä»¶ä¿æŒæ­£ç¡®æ–¹å‘å¹¶ä½äºå³ä¸‹è§’
+            Transform textTransform = item.transform.Find("ItemText");
+            if (textTransform != null)
+            {
+                RectTransform textRect = textTransform.GetComponent<RectTransform>();
+                if (textRect != null)
+                {
+                    // è·å–ç‰©å“çš„å½“å‰æ—‹è½¬è§’åº¦
+                    float itemRotation = itemRect.localEulerAngles.z;
+                    // åå‘æ—‹è½¬TMPæ–‡å­—ç»„ä»¶ï¼Œä½¿å…¶ä¿æŒæ­£ç¡®æ–¹å‘
+                    textTransform.localEulerAngles = new Vector3(0f, 0f, -itemRotation);
+                    
+                    // é‡æ–°è®¡ç®—æ–‡å­—ä½ç½®ï¼Œç¡®ä¿å§‹ç»ˆåœ¨è§†è§‰å³ä¸‹è§’
+                    // æ ¹æ®ç‰©å“çš„æ—‹è½¬çŠ¶æ€å’Œè£…å¤‡æ§½çš„æ–°å°ºå¯¸é‡æ–°å®šä½æ–‡å­—
+                    Vector2 textPosition;
+                    bool isRotated = Mathf.Abs(itemRotation - 90f) < 1f; // æ£€æŸ¥æ˜¯å¦æ—‹è½¬äº†90åº¦
+                    
+                    if (isRotated)
+                    {
+                        // ç‰©å“æ—‹è½¬90åº¦æ—¶ï¼Œç”±äºç‰©å“åæ ‡ç³»ä¹Ÿæ—‹è½¬äº†ï¼Œéœ€è¦é‡æ–°è®¡ç®—ä½ç½®
+                        // æ—‹è½¬åçš„è§†è§‰å³ä¸‹è§’åœ¨ç‰©å“åæ ‡ç³»ä¸­çš„ä½ç½®
+                        textPosition = new Vector2(-newSize.y / 2f + 3f, -newSize.x / 2f + 3f);
+                    }
+                    else
+                    {
+                        // ç‰©å“æœªæ—‹è½¬æ—¶ï¼Œä¿æŒåŸå§‹å³ä¸‹è§’ä½ç½®
+                        textPosition = new Vector2(newSize.x / 2f - 3f, -newSize.y / 2f + 3f);
+                    }
+                    
+                    textRect.anchoredPosition = textPosition;
+                }
+            }
+
+            // è°ƒæ•´å­å¯¹è±¡ï¼ˆå›¾æ ‡ï¼‰çš„å¤§å°
             ResizeChildImages(item, newSize);
         }
     }
 
     /// <summary>
-    /// µ÷Õû×Ó¶ÔÏóÍ¼Æ¬µÄ´óĞ¡
+    /// è°ƒæ•´å­å¯¹è±¡å›¾ç‰‡çš„å¤§å°
     /// </summary>
-    /// <param name="item">ÎïÆ·¶ÔÏó</param>
-    /// <param name="newSize">ĞÂµÄ´óĞ¡</param>
+    /// <param name="item">ç‰©å“å¯¹è±¡</param>
+    /// <param name="newSize">æ–°çš„å¤§å°</param>
     private void ResizeChildImages(GameObject item, Vector2 newSize)
     {
         Image[] childImages = item.GetComponentsInChildren<Image>();
 
         foreach (Image childImage in childImages)
         {
-            if (childImage.gameObject != item) // ²»µ÷Õû×ÔÉí
+            if (childImage.gameObject != item) // ä¸è°ƒæ•´è‡ªèº«
             {
                 RectTransform childRect = childImage.GetComponent<RectTransform>();
                 if (childRect != null)
                 {
-                    // ±£´æÔ­Ê¼´óĞ¡ĞÅÏ¢
+                    // ä¿å­˜åŸå§‹å¤§å°ä¿¡æ¯
                     ItemSizeInfo childSizeInfo = childImage.GetComponent<ItemSizeInfo>();
                     if (childSizeInfo == null)
                     {
                         childSizeInfo = childImage.gameObject.AddComponent<ItemSizeInfo>();
                         childSizeInfo.originalSize = childRect.sizeDelta;
                         childSizeInfo.originalScale = childRect.localScale;
-                        // ±£´æ×Ó¶ÔÏóµÄÔ­Ê¼ÃªµãºÍÖáĞÄµãĞÅÏ¢
+                        // ä¿å­˜å­å¯¹è±¡çš„åŸå§‹é”šç‚¹å’Œè½´å¿ƒç‚¹ä¿¡æ¯
                         childSizeInfo.originalAnchorMin = childRect.anchorMin;
                         childSizeInfo.originalAnchorMax = childRect.anchorMax;
                         childSizeInfo.originalPivot = childRect.pivot;
                         childSizeInfo.originalAnchoredPosition = childRect.anchoredPosition;
                     }
 
-                    // ÉèÖÃ×Ó¶ÔÏó´óĞ¡ÎªĞÂµÄ´óĞ¡
+                    // è®¾ç½®å­å¯¹è±¡å¤§å°ä¸ºæ–°çš„å¤§å°
                     childRect.sizeDelta = newSize;
 
-                    // ¸ù¾İ×Ó¶ÔÏóµÄÖáĞÄµã¼ÆËãÕıÈ·µÄ¾ÓÖĞÎ»ÖÃ
-                    // ¶ÔÓÚÖáĞÄÎª(0,1)µÄ×Ó¶ÔÏó£¬¾ÓÖĞ×ø±êÓ¦¸ÃÊÇ(-114, 114)
+                    // æ ¹æ®å­å¯¹è±¡çš„è½´å¿ƒç‚¹è®¡ç®—æ­£ç¡®çš„å±…ä¸­ä½ç½®
+                    // å¯¹äºè½´å¿ƒä¸º(0.5,0.5)çš„å­å¯¹è±¡ï¼Œå±…ä¸­åæ ‡åº”è¯¥æ˜¯(0, 0)
                     Vector2 childPivot = childRect.pivot;
                     Vector2 childCenteredPosition = new Vector2(
                         (childPivot.x - 0.5f) * newSize.x,
@@ -285,9 +318,9 @@ public class EquipmentSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, 
     }
 
     /// <summary>
-    /// »Ö¸´ÎïÆ·µÄÔ­Ê¼´óĞ¡
+    /// æ¢å¤ç‰©å“çš„åŸå§‹å¤§å°
     /// </summary>
-    /// <param name="item">Òª»Ö¸´µÄÎïÆ·</param>
+    /// <param name="item">è¦æ¢å¤çš„ç‰©å“</param>
     private void RestoreItemOriginalSize(GameObject item)
     {
         ItemSizeInfo sizeInfo = item.GetComponent<ItemSizeInfo>();
@@ -296,7 +329,7 @@ public class EquipmentSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, 
             RectTransform itemRect = item.GetComponent<RectTransform>();
             if (itemRect != null)
             {
-                // »Ö¸´ËùÓĞÔ­Ê¼ÊôĞÔ
+                // æ¢å¤æ‰€æœ‰åŸå§‹å±æ€§
                 itemRect.sizeDelta = sizeInfo.originalSize;
                 itemRect.localScale = sizeInfo.originalScale;
                 itemRect.anchorMin = sizeInfo.originalAnchorMin;
@@ -305,27 +338,27 @@ public class EquipmentSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, 
                 itemRect.anchoredPosition = sizeInfo.originalAnchoredPosition;
             }
 
-            // »Ö¸´×Ó¶ÔÏó´óĞ¡
+            // æ¢å¤å­å¯¹è±¡å¤§å°
             RestoreChildImagesSizes(item);
         }
     }
 
     /// <summary>
-    /// »Ö¸´×Ó¶ÔÏóÍ¼Æ¬µÄÔ­Ê¼´óĞ¡
+    /// æ¢å¤å­å¯¹è±¡å›¾ç‰‡çš„åŸå§‹å¤§å°
     /// </summary>
-    /// <param name="item">ÎïÆ·¶ÔÏó</param>
+    /// <param name="item">ç‰©å“å¯¹è±¡</param>
     private void RestoreChildImagesSizes(GameObject item)
     {
         ItemSizeInfo[] childSizeInfos = item.GetComponentsInChildren<ItemSizeInfo>();
 
         foreach (ItemSizeInfo sizeInfo in childSizeInfos)
         {
-            if (sizeInfo.gameObject != item) // ²»´¦Àí×ÔÉí
+            if (sizeInfo.gameObject != item) // ä¸å¤„ç†è‡ªèº«
             {
                 RectTransform childRect = sizeInfo.GetComponent<RectTransform>();
                 if (childRect != null)
                 {
-                    // »Ö¸´×Ó¶ÔÏóµÄËùÓĞÔ­Ê¼ÊôĞÔ
+                    // æ¢å¤å­å¯¹è±¡çš„æ‰€æœ‰åŸå§‹å±æ€§
                     childRect.sizeDelta = sizeInfo.originalSize;
                     childRect.localScale = sizeInfo.originalScale;
                     childRect.anchorMin = sizeInfo.originalAnchorMin;
@@ -338,18 +371,18 @@ public class EquipmentSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, 
     }
 
     /// <summary>
-    /// »ñÈ¡µ±Ç°×°±¸µÄÎïÆ·
+    /// è·å–å½“å‰è£…å¤‡çš„ç‰©å“
     /// </summary>
-    /// <returns>µ±Ç°×°±¸µÄÎïÆ·</returns>
+    /// <returns>å½“å‰è£…å¤‡çš„ç‰©å“</returns>
     public GameObject GetCurrentEquippedItem()
     {
         return currentEquippedItem;
     }
 
     /// <summary>
-    /// ÉèÖÃ½ÓÊÜµÄ×°±¸ÀàĞÍ
+    /// è®¾ç½®æ¥å—çš„è£…å¤‡ç±»å‹
     /// </summary>
-    /// <param name="itemType">×°±¸ÀàĞÍ</param>
+    /// <param name="itemType">è£…å¤‡ç±»å‹</param>
     public void SetAcceptedItemType(ItemCategory itemType)
     {
         acceptedItemType = itemType;

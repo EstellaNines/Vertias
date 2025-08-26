@@ -1,20 +1,20 @@
 using UnityEngine;
 
 /// <summary>
-/// ÎïÆ·³ß´çĞÅÏ¢×é¼ş - ÓÃÓÚ±£´æÎïÆ·µÄÔ­Ê¼³ß´çĞÅÏ¢
+/// ç‰©å“å°ºå¯¸ä¿¡æ¯ç»„ä»¶ - ç”¨äºä¿å­˜ç‰©å“çš„åŸå§‹å°ºå¯¸ä¿¡æ¯
 /// </summary>
 public class ItemSizeInfo : MonoBehaviour
 {
-    [Header("Ô­Ê¼³ß´çĞÅÏ¢")]
-    public Vector2 originalSize; // Ô­Ê¼´óĞ¡
-    public Vector3 originalScale; // Ô­Ê¼Ëõ·Å
-    public Vector2 originalAnchorMin; // Ô­Ê¼Ãªµã×îĞ¡Öµ
-    public Vector2 originalAnchorMax; // Ô­Ê¼Ãªµã×î´óÖµ
-    public Vector2 originalPivot; // Ô­Ê¼ÖáĞÄµã
-    public Vector2 originalAnchoredPosition; // Ô­Ê¼Ãª¶¨Î»ÖÃ
+    [Header("åŸå§‹å°ºå¯¸ä¿¡æ¯")]
+    public Vector2 originalSize; // åŸå§‹å¤§å°
+    public Vector3 originalScale; // åŸå§‹ç¼©æ”¾
+    public Vector2 originalAnchorMin; // åŸå§‹é”šç‚¹æœ€å°å€¼
+    public Vector2 originalAnchorMax; // åŸå§‹é”šç‚¹æœ€å¤§å€¼
+    public Vector2 originalPivot; // åŸå§‹è½´å¿ƒç‚¹
+    public Vector2 originalAnchoredPosition; // åŸå§‹é”šå®šä½ç½®
 
     /// <summary>
-    /// ±£´æµ±Ç°µÄ³ß´çĞÅÏ¢
+    /// ä¿å­˜å½“å‰çš„å°ºå¯¸ä¿¡æ¯
     /// </summary>
     public void SaveCurrentSize()
     {
