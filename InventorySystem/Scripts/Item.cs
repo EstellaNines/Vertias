@@ -10,7 +10,7 @@ public class Item : MonoBehaviour
     [SerializeField] private ItemGrid onGridReference;  // 当前所在的网格引用
     [SerializeField] private Vector2Int onGridPosition = Vector2Int.zero;  // 在网格中的位置
     [SerializeField] private bool isRotated = false;  // 是否旋转（90°）
-    
+
 
 
     private ItemDataReader itemDataReader;  // 物品数据读取器引用
@@ -102,11 +102,11 @@ public class Item : MonoBehaviour
         if (rectTransform == null) return;
         Vector2 size = new Vector2(GetWidth() * ItemGrid.tileSizeWidth, GetHeight() * ItemGrid.tileSizeHeight);
         rectTransform.sizeDelta = size;
-        
+
         // 旋转物品UI，但保持TMP文字组件不旋转且位置正确
         float rotationAngle = isRotated ? 90f : 0f;
         rectTransform.localEulerAngles = new Vector3(0f, 0f, rotationAngle);
-        
+
         // 查找TMP文字组件并调整其位置和旋转
         Transform textTransform = transform.Find("ItemText");
         if (textTransform != null)
@@ -116,11 +116,11 @@ public class Item : MonoBehaviour
             {
                 // 反向旋转TMP文字组件，抵消父物体的旋转
                 textTransform.localEulerAngles = new Vector3(0f, 0f, -rotationAngle);
-                
+
                 // 重新计算文字位置，确保始终在视觉右下角
                 float itemWidth = size.x;
                 float itemHeight = size.y;
-                
+
                 // 根据旋转状态调整文字位置，确保始终在视觉右下角
                 Vector2 textPosition;
                 if (isRotated)
@@ -134,7 +134,7 @@ public class Item : MonoBehaviour
                     // 物品未旋转时，保持原始右下角位置
                     textPosition = new Vector2(itemWidth / 2f - 3f, -itemHeight / 2f + 3f);
                 }
-                
+
                 textRect.anchoredPosition = textPosition;
             }
         }

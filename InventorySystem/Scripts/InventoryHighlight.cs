@@ -3,21 +3,21 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-// Íø¸ñ·ÅÖÃÖ¸Ê¾Æ÷
-// ¸ºÔğÏÔÊ¾ÎïÆ··ÅÖÃÊ±µÄÂÌÉ«£¨¿É·ÅÖÃ£©»òºìÉ«£¨²»¿É·ÅÖÃ£©¸ßÁÁÌáÊ¾
+// æ”¾ç½®é«˜äº®æŒ‡ç¤ºå™¨
+// ç”¨äºåœ¨ç‰©å“æ”¾ç½®æ—¶æ˜¾ç¤ºé«˜äº®ï¼šç»¿è‰²è¡¨ç¤ºå¯æ”¾ç½®ï¼Œçº¢è‰²è¡¨ç¤ºä¸å¯æ”¾ç½®
 public class InventoryHighlight : MonoBehaviour
 {
-    [Header("¸ßÁÁÉèÖÃ")]
-    [SerializeField] private RectTransform highlighter; // ¸ßÁÁ¿òµÄRectTransform
-    [SerializeField] private Image highlightImage; // ¸ßÁÁ¿òµÄImage×é¼ş
+    [Header("é«˜äº®ç»„ä»¶")]
+    [SerializeField] private RectTransform highlighter; // é«˜äº®æ¡† RectTransform
+    [SerializeField] private Image highlightImage; // é«˜äº®æ¡† Image ç»„ä»¶
 
-    [Header("ÑÕÉ«ÅäÖÃ")]
-    [SerializeField] private Color canPlaceColor = new Color(0f, 1f, 0f, 0.5f); // ¿É·ÅÖÃÑÕÉ«£¨ÂÌÉ«£©
-    [SerializeField] private Color cannotPlaceColor = new Color(1f, 0f, 0f, 0.5f); // ²»¿É·ÅÖÃÑÕÉ«£¨ºìÉ«£©
+    [Header("é¢œè‰²è®¾ç½®")]
+    [SerializeField] private Color canPlaceColor = new Color(0f, 1f, 0f, 0.5f); // å¯æ”¾ç½®é¢œè‰²ï¼ˆç»¿è‰²ï¼‰
+    [SerializeField] private Color cannotPlaceColor = new Color(1f, 0f, 0f, 0.5f); // ä¸å¯æ”¾ç½®é¢œè‰²ï¼ˆçº¢è‰²ï¼‰
 
     private void Awake()
     {
-        // Èç¹ûÃ»ÓĞÖ¸¶¨¸ßÁÁ¿ò£¬³¢ÊÔ»ñÈ¡µ±Ç°ÎïÌåµÄ×é¼ş
+        // è‹¥æœªæŒ‡å®šç»„ä»¶ï¼Œåˆ™è‡ªåŠ¨è·å–å½“å‰å¯¹è±¡ä¸Šçš„ç»„ä»¶
         if (highlighter == null)
         {
             highlighter = GetComponent<RectTransform>();
@@ -28,11 +28,11 @@ public class InventoryHighlight : MonoBehaviour
             highlightImage = GetComponent<Image>();
         }
 
-        // ³õÊ¼Ê±Òş²Ø¸ßÁÁ¿ò
+        // åˆå§‹æ—¶éšè—é«˜äº®
         Show(false);
     }
 
-    // ÉèÖÃ¸ßÁÁ¿ò´óĞ¡
+    // æ ¹æ®ç‰©å“è®¾ç½®é«˜äº®å°ºå¯¸
     public void SetSize(Item targetItem)
     {
         if (highlighter == null || targetItem == null) return;
@@ -42,10 +42,10 @@ public class InventoryHighlight : MonoBehaviour
         size.y = targetItem.GetHeight() * ItemGrid.tileSizeHeight;
         highlighter.sizeDelta = size;
 
-        Debug.Log($"InventoryHighlight: ÉèÖÃ¸ßÁÁ¿ò´óĞ¡Îª {size}, ÎïÆ·³ß´ç: {targetItem.GetWidth()}x{targetItem.GetHeight()}");
+        
     }
 
-    // ÉèÖÃ¸ßÁÁ¿ò´óĞ¡£¨Ö±½ÓÖ¸¶¨¿í¸ß£©
+    // ç›´æ¥ä»¥å®½é«˜è®¾ç½®é«˜äº®å°ºå¯¸
     public void SetSize(int width, int height)
     {
         if (highlighter == null) return;
@@ -55,10 +55,10 @@ public class InventoryHighlight : MonoBehaviour
         size.y = height * ItemGrid.tileSizeHeight;
         highlighter.sizeDelta = size;
 
-        Debug.Log($"InventoryHighlight: ÉèÖÃ¸ßÁÁ¿ò´óĞ¡Îª {size}, Íø¸ñ³ß´ç: {width}x{height}");
+        
     }
 
-    // ÉèÖÃ¸ßÁÁ¿òÎ»ÖÃ£¨Ê¹ÓÃÎïÆ·µ±Ç°Î»ÖÃ£©
+    // è®¾ç½®é«˜äº®ä½ç½®ï¼Œä½¿ç”¨ç‰©å“å½“å‰ç½‘æ ¼ä½ç½®
     public void SetPosition(ItemGrid targetGrid, Item targetItem)
     {
         if (highlighter == null || targetGrid == null || targetItem == null) return;
@@ -66,63 +66,59 @@ public class InventoryHighlight : MonoBehaviour
         Vector2 pos = targetGrid.CalculatePositionOnGrid(targetItem, targetItem.OnGridPosition.x, targetItem.OnGridPosition.y);
         highlighter.localPosition = pos;
 
-        Debug.Log($"InventoryHighlight: ÉèÖÃ¸ßÁÁ¿òÎ»ÖÃÎª {pos}, Íø¸ñÎ»ÖÃ: ({targetItem.OnGridPosition.x}, {targetItem.OnGridPosition.y})");
+        
     }
 
-    // ÉèÖÃ¸ßÁÁ¿òÎ»ÖÃ£¨Ö¸¶¨Íø¸ñ×ø±ê£©
-    // ĞŞ¸ÄSetPosition·½·¨£¬Ê¹ÆäÄÜ¹»ÕıÈ·´¦ÀíĞı×ªÎïÆ·
+    // è®¾ç½®é«˜äº®ä½ç½®ï¼ˆæŒ‡å®šæ ¼å­åæ ‡ï¼‰
+    // ä½¿ç”¨ ItemGrid çš„ CalculatePositionOnGridï¼Œå…¼å®¹æ—‹è½¬å°ºå¯¸
     public void SetPosition(ItemGrid targetGrid, Item targetItem, int posX, int posY)
     {
         if (highlighter == null || targetGrid == null || targetItem == null) return;
 
-        // Ê¹ÓÃItemGridµÄCalculatePositionOnGrid·½·¨À´¼ÆËãÕıÈ·Î»ÖÃ
-        // Õâ¸ö·½·¨ÒÑ¾­¿¼ÂÇÁËÎïÆ·µÄÊµ¼Ê³ß´çºÍÍø¸ñ²¼¾Ö
+        // è®¡ç®—å‡†ç¡®ä½ç½®ï¼ˆå·²è€ƒè™‘ç‰©å“å½“å‰å°ºå¯¸ä¸å¸ƒå±€ï¼‰
         Vector2 pos = targetGrid.CalculatePositionOnGrid(targetItem, posX, posY);
         highlighter.localPosition = pos;
 
-        Debug.Log($"InventoryHighlight: ÉèÖÃ¸ßÁÁ¿òÎ»ÖÃÎª {pos}, Ö¸¶¨Î»ÖÃ: ({posX}, {posY}), ÎïÆ·³ß´ç: {targetItem.GetWidth()}x{targetItem.GetHeight()}");
+        
     }
 
-    // ĞŞ¸ÄÖ±½ÓÖ¸¶¨¿í¸ßµÄSetPosition·½·¨
-    // ¼ò»¯µÄÎ»ÖÃÉèÖÃ·½·¨£¬Ê¹ÓÃÓëItemGridÏàÍ¬µÄ¼ÆËãÂß¼­
+    // ç®€åŒ–ç‰ˆæœ¬çš„ä½ç½®è®¾ç½®ï¼šä¸ ItemGrid çš„è®¡ç®—è§„åˆ™ä¸€è‡´
     public void SetPositionSimple(ItemGrid targetGrid, int posX, int posY)
     {
         if (highlighter == null || targetGrid == null) return;
 
-        // ¼ÆËãÍø¸ñµÄ×Ü³ß´ç
+        // ç½‘æ ¼æ•´ä½“å°ºå¯¸
         float gridWidth = targetGrid.gridSizeWidth * ItemGrid.tileSizeWidth;
         float gridHeight = targetGrid.gridSizeHeight * ItemGrid.tileSizeHeight;
 
-        // Ê¹ÓÃÓëItemGrid.CalculatePositionOnGridÏàÍ¬µÄ¼ÆËãÂß¼­
+        // ä¸ ItemGrid.CalculatePositionOnGrid ç›¸åŒçš„å®šä½è§„åˆ™
         Vector2 position = new Vector2();
         position.x = posX * ItemGrid.tileSizeWidth - gridWidth / 2;
         position.y = gridHeight / 2 - posY * ItemGrid.tileSizeHeight;
 
         highlighter.localPosition = position;
 
-        Debug.Log($"InventoryHighlight: ÉèÖÃ¸ßÁÁ¿òÎ»ÖÃÎª {position}, Ö¸¶¨Î»ÖÃ: ({posX}, {posY})");
+        
     }
 
-    // ÏÔÊ¾»òÒş²Ø¸ßÁÁ¿ò
+    // æ˜¾ç¤ºæˆ–éšè—é«˜äº®
     public void Show(bool show)
     {
         if (highlighter != null)
         {
             highlighter.gameObject.SetActive(show);
-            Debug.Log($"InventoryHighlight: {(show ? "ÏÔÊ¾" : "Òş²Ø")}¸ßÁÁ¿ò");
         }
     }
 
-    // ÉèÖÃ¸ßÁÁ¿òµÄ¸¸¼¶
+    // è®¾ç½®é«˜äº®çš„çˆ¶çº§
     public void SetParent(ItemGrid targetGrid)
     {
         if (highlighter == null || targetGrid == null) return;
 
         highlighter.SetParent(targetGrid.GetComponent<RectTransform>(), false);
-        Debug.Log($"InventoryHighlight: ÉèÖÃ¸ßÁÁ¿ò¸¸¼¶Îª {targetGrid.name}");
     }
 
-    // ÉèÖÃ¸ßÁÁ¿òÑÕÉ«£¨¿É·ÅÖÃ/²»¿É·ÅÖÃ£©
+    // è®¾ç½®é«˜äº®é¢œè‰²ï¼ˆå¯æ”¾ç½®/ä¸å¯æ”¾ç½®ï¼‰
     public void SetCanPlace(bool canPlace)
     {
         if (highlightImage == null) return;
@@ -130,25 +126,24 @@ public class InventoryHighlight : MonoBehaviour
         Color targetColor = canPlace ? canPlaceColor : cannotPlaceColor;
         highlightImage.color = targetColor;
 
-        Debug.Log($"InventoryHighlight: ÉèÖÃ¸ßÁÁ¿òÑÕÉ«Îª {(canPlace ? "ÂÌÉ«£¨¿É·ÅÖÃ£©" : "ºìÉ«£¨²»¿É·ÅÖÃ£©")}");
+        
     }
 
-    // ÉèÖÃ×Ô¶¨ÒåÑÕÉ«
+    // è®¾ç½®è‡ªå®šä¹‰é¢œè‰²
     public void SetColor(Color color)
     {
         if (highlightImage == null) return;
 
         highlightImage.color = color;
-        Debug.Log($"InventoryHighlight: ÉèÖÃ×Ô¶¨ÒåÑÕÉ« {color}");
     }
 
-    // »ñÈ¡¸ßÁÁ¿òÊÇ·ñÏÔÊ¾
+    // è·å–é«˜äº®æ˜¯å¦æ˜¾ç¤º
     public bool IsShowing()
     {
         return highlighter != null && highlighter.gameObject.activeInHierarchy;
     }
 
-    // ÖØÖÃ¸ßÁÁ¿òµ½Ä¬ÈÏ×´Ì¬
+    // é‡ç½®é«˜äº®ä¸ºé»˜è®¤çŠ¶æ€
     public void Reset()
     {
         Show(false);
@@ -156,66 +151,62 @@ public class InventoryHighlight : MonoBehaviour
         {
             highlightImage.color = canPlaceColor;
         }
-        Debug.Log("InventoryHighlight: ÖØÖÃ¸ßÁÁ¿òµ½Ä¬ÈÏ×´Ì¬");
+        
     }
 
-    // ÉèÖÃÖØµş¾¯¸æĞ§¹û
-    // ÓÃÓÚÔÚÍÏ×§Ê±ÏÔÊ¾ÎïÆ·ÖØµş³åÍ»µÄÊÓ¾õÌáÊ¾
+    // è®¾ç½®é‡å å†²çªæ•ˆæœ
+    // ç”¨äºåœ¨æ‹–æ‹½æ—¶æ˜¾ç¤ºä¸å…¶ä»–ç‰©å“çš„å†²çªè§†è§‰æ•ˆæœ
     public void SetOverlapWarning(bool hasOverlap)
     {
         if (highlightImage == null) return;
 
         if (hasOverlap)
         {
-            // ÉèÖÃÎªºìÉ«¾¯¸æÑÕÉ«£¬±íÊ¾ÓĞÖØµş³åÍ»
+            // çº¢è‰²è¡¨ç¤ºå­˜åœ¨å†²çª
             highlightImage.color = cannotPlaceColor;
-            Debug.Log("InventoryHighlight: ÉèÖÃÖØµş¾¯¸æĞ§¹û - ºìÉ«");
         }
         else
         {
-            // ÉèÖÃÎªÂÌÉ«Õı³£ÑÕÉ«£¬±íÊ¾¿ÉÒÔ·ÅÖÃ
+            // ç»¿è‰²è¡¨ç¤ºå¯ä»¥æ”¾ç½®
             highlightImage.color = canPlaceColor;
-            Debug.Log("InventoryHighlight: ÉèÖÃÕı³£·ÅÖÃĞ§¹û - ÂÌÉ«");
         }
     }
 
-    // ÉèÖÃÖØµş¾¯¸æĞ§¹û£¨´øÉÁË¸£©
-    // ¿ÉÑ¡µÄÔöÇ¿ÊÓ¾õĞ§¹û£¬Í¨¹ıĞ­³ÌÊµÏÖÉÁË¸ÌáÊ¾
+    // è®¾ç½®é‡å å†²çªæ•ˆæœï¼ˆå¸¦é—ªçƒï¼‰
+    // å¯é€‰çš„æ›´å¼ºè§†è§‰æç¤ºï¼Œé€šè¿‡åç¨‹é—ªçƒæ˜¾ç¤º
     public void SetOverlapWarningWithBlink(bool hasOverlap)
     {
         if (highlightImage == null) return;
 
-        // Í£Ö¹Ö®Ç°µÄÉÁË¸Ğ­³Ì
+        // åœæ­¢ä¹‹å‰çš„é—ªçƒåç¨‹
         StopAllCoroutines();
 
         if (hasOverlap)
         {
-            // ¿ªÊ¼ÉÁË¸Ğ§¹û
+            // å¼€å§‹é—ªçƒæ•ˆæœ
             StartCoroutine(BlinkWarning());
-            Debug.Log("InventoryHighlight: ¿ªÊ¼ÖØµş¾¯¸æÉÁË¸Ğ§¹û");
         }
         else
         {
-            // ÉèÖÃÎªÕı³£ÂÌÉ«
+            // è¿˜åŸä¸ºå¯æ”¾ç½®é¢œè‰²
             highlightImage.color = canPlaceColor;
-            Debug.Log("InventoryHighlight: Í£Ö¹ÉÁË¸£¬ÉèÖÃÕı³£ÑÕÉ«");
         }
     }
 
-    // ÉÁË¸¾¯¸æĞ­³Ì
-    // ÔÚºìÉ«ºÍÍ¸Ã÷Ö®¼äÇĞ»»£¬²úÉúÉÁË¸Ğ§¹û
+    // é—ªçƒæç¤ºçš„åç¨‹
+    // åœ¨çº¢è‰²ä¸åŠé€æ˜çº¢è‰²ä¹‹é—´åˆ‡æ¢ï¼Œå½¢æˆé—ªçƒæ•ˆæœ
     private IEnumerator BlinkWarning()
     {
-        float blinkInterval = 0.3f; // ÉÁË¸¼ä¸ô
+        float blinkInterval = 0.3f; // é—ªçƒé—´éš”
         Color transparentRed = new Color(cannotPlaceColor.r, cannotPlaceColor.g, cannotPlaceColor.b, 0.2f);
 
         while (true)
         {
-            // ÉèÖÃÎªºìÉ«
+            // çº¯çº¢è‰²
             highlightImage.color = cannotPlaceColor;
             yield return new WaitForSeconds(blinkInterval);
 
-            // ÉèÖÃÎª°ëÍ¸Ã÷ºìÉ«
+            // åŠé€æ˜çº¢è‰²
             highlightImage.color = transparentRed;
             yield return new WaitForSeconds(blinkInterval);
         }

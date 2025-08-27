@@ -18,8 +18,6 @@ public class ItemGrid : MonoBehaviour
     Item[,] itemSlot;
 
     // 计算在格子中的位置
-    Vector2 positionOnTheGrid = new Vector2();
-    Vector2Int tileGridPosition = new Vector2Int();
 
     RectTransform rectTransform;
     Canvas canvas;
@@ -126,8 +124,7 @@ public class ItemGrid : MonoBehaviour
 
         // 设置物品的网格状态
         item.SetGridState(this, new Vector2Int(posX, posY));
-
-        Debug.Log($"ItemGrid: 物品已放置在位置 ({posX}, {posY})，占用 {item.GetWidth()}x{item.GetHeight()} 格子");
+        
         return true;
     }
 
@@ -203,12 +200,9 @@ public class ItemGrid : MonoBehaviour
                 }
             }
 
-            Debug.Log($"ItemGrid: 从位置 ({x}, {y}) 拾取了物品 {toReturn.name}，清理了 {itemWidth}x{itemHeight} 格子");
+            
         }
-        else
-        {
-            Debug.Log($"ItemGrid: 位置 ({x}, {y}) 没有物品可拾取");
-        }
+
 
         return toReturn;
     }
@@ -267,13 +261,12 @@ public class ItemGrid : MonoBehaviour
                 Item itemAt = itemSlot[x, y];
                 if (itemAt != null && itemAt != excludeItem)
                 {
-                    Debug.Log($"ItemGrid: 发现冲突 - 位置 ({x}, {y}) 已有物品 {itemAt.name}");
+                    
                     return true; // 发现冲突
                 }
             }
         }
-
-        Debug.Log($"ItemGrid: 位置 ({posX}, {posY}) 到 ({posX + width - 1}, {posY + height - 1}) 没有冲突");
+        
         return false; // 没有冲突
     }
 
@@ -289,10 +282,7 @@ public class ItemGrid : MonoBehaviour
         // 直接返回该位置的物品（现在所有占用格子都存储了物品引用）
         Item item = itemSlot[mouseX, mouseY];
 
-        if (item != null)
-        {
-            Debug.Log($"ItemGrid: 鼠标位置 ({mouseX}, {mouseY}) 检测到物品 {item.name}");
-        }
+        
 
         return item;
     }

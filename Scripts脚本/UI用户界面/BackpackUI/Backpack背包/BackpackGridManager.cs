@@ -3,8 +3,6 @@ using System.Collections.Generic;
 
 public class BackpackGridManager : MonoBehaviour
 {
-    [Header("背包管理器配置")]
-    [SerializeField] private bool isEnabled = false; // 网格系统已禁用
 
     private void Start()
     {

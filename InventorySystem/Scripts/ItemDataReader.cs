@@ -265,11 +265,23 @@ public class ItemDataReader : MonoBehaviour
     public bool UseItem()
     {
         if (itemData == null || currentUsageCount <= 0) return false;
-
+    
         currentUsageCount--;
         UpdateUI();
-
+    
         return currentUsageCount <= 0;
+    }
+
+    /// <summary>
+    /// 设置使用次数
+    /// </summary>
+    /// <param name="usageCount">使用次数</param>
+    public void SetUsageCount(int usageCount)
+    {
+        if (itemData == null) return;
+    
+        currentUsageCount = Mathf.Clamp(usageCount, 0, itemData.usageCount);
+        UpdateUI();
     }
 
     /// <summary>

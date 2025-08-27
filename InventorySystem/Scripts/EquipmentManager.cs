@@ -80,7 +80,7 @@ public class EquipmentManager : MonoBehaviour
         RegisterEquipmentSlot(ItemCategory.Weapon, primaryWeaponSlot);
         RegisterEquipmentSlot(ItemCategory.Weapon, secondaryWeaponSlot);
 
-        Debug.Log("装备管理器初始化完成");
+        
     }
 
     /// <summary>
@@ -93,7 +93,9 @@ public class EquipmentManager : MonoBehaviour
         {
             helmetSlot = helmetSlotObject.GetComponentInChildren<EquipmentSlot>();
             if (helmetSlot != null)
-                Debug.Log("找到头盔槽位: " + helmetSlotObject.name);
+            {
+                    
+            }
             else
                 Debug.LogWarning("头盔槽位GameObject中未找到EquipmentSlot组件: " + helmetSlotObject.name);
         }
@@ -107,7 +109,9 @@ public class EquipmentManager : MonoBehaviour
         {
             armorSlot = armorSlotObject.GetComponentInChildren<EquipmentSlot>();
             if (armorSlot != null)
-                Debug.Log("找到护甲槽位: " + armorSlotObject.name);
+            {
+
+            }
             else
                 Debug.LogWarning("护甲槽位GameObject中未找到EquipmentSlot组件: " + armorSlotObject.name);
         }
@@ -121,7 +125,9 @@ public class EquipmentManager : MonoBehaviour
         {
             tacticalRigSlot = tacticalRigSlotObject.GetComponentInChildren<EquipmentSlot>();
             if (tacticalRigSlot != null)
-                Debug.Log("找到战术背心槽位: " + tacticalRigSlotObject.name);
+            {
+
+            }
             else
                 Debug.LogWarning("战术背心槽位GameObject中未找到EquipmentSlot组件: " + tacticalRigSlotObject.name);
         }
@@ -135,7 +141,9 @@ public class EquipmentManager : MonoBehaviour
         {
             backpackSlot = backpackSlotObject.GetComponentInChildren<EquipmentSlot>();
             if (backpackSlot != null)
-                Debug.Log("找到背包槽位: " + backpackSlotObject.name);
+            {
+
+            }
             else
                 Debug.LogWarning("背包槽位GameObject中未找到EquipmentSlot组件: " + backpackSlotObject.name);
         }
@@ -149,7 +157,9 @@ public class EquipmentManager : MonoBehaviour
         {
             primaryWeaponSlot = primaryWeaponSlotObject.GetComponentInChildren<EquipmentSlot>();
             if (primaryWeaponSlot != null)
-                Debug.Log("找到主武器槽位: " + primaryWeaponSlotObject.name);
+            {
+
+            }
             else
                 Debug.LogWarning("主武器槽位GameObject中未找到EquipmentSlot组件: " + primaryWeaponSlotObject.name);
         }
@@ -163,7 +173,9 @@ public class EquipmentManager : MonoBehaviour
         {
             secondaryWeaponSlot = secondaryWeaponSlotObject.GetComponentInChildren<EquipmentSlot>();
             if (secondaryWeaponSlot != null)
-                Debug.Log("找到副武器槽位: " + secondaryWeaponSlotObject.name);
+            {
+                
+            }
             else
                 Debug.LogWarning("副武器槽位GameObject中未找到EquipmentSlot组件: " + secondaryWeaponSlotObject.name);
         }

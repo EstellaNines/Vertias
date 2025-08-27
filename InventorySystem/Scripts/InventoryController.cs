@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using InventorySystem;
 
 // 背包交互控制器
 // 负责处理物品的选择、拖拽和放置逻辑
@@ -9,6 +10,10 @@ public class InventoryController : MonoBehaviour
 {
     [Header("控制器设置")]
     [FieldLabel("当前操作的背包")] public ItemGrid selectedItemGrid;
+
+    [Header("背包标识")]
+    [FieldLabel("背包唯一ID")] public string inventoryId = "";
+    [FieldLabel("背包显示名称")] public string inventoryName = "";
 
     [Header("放置指示器设置")]
     [FieldLabel("放置指示器组件")] public InventoryHighlight inventoryHighlight;
@@ -40,7 +45,16 @@ public class InventoryController : MonoBehaviour
             }
         }
 
-        Debug.Log("InventoryController: 初始化完成");
+        // 设置默认ID和名称（如果未设置）
+        if (string.IsNullOrEmpty(inventoryId))
+        {
+            inventoryId = gameObject.name;
+        }
+
+        if (string.IsNullOrEmpty(inventoryName))
+        {
+            inventoryName = gameObject.name;
+        }
     }
 
     private void Update()
@@ -58,13 +72,12 @@ public class InventoryController : MonoBehaviour
             UpdateDragHighlight(selectedItem, Input.mousePosition);
         }
     }
-    
+
     // 刷新网格交互组件缓存
     public void RefreshGridInteracts()
     {
         allGridInteracts.Clear();
         allGridInteracts.AddRange(FindObjectsOfType<GridInteract>());
-        Debug.Log($"InventoryController: 缓存了 {allGridInteracts.Count} 个网格交互组件");
     }
 
     // 更新放置指示器
@@ -176,7 +189,6 @@ public class InventoryController : MonoBehaviour
                 ItemGrid grid = draggableItem.GetParentGrid();
                 if (grid != null)
                 {
-                    Debug.Log($"InventoryController: 通过物品 {draggableItem.name} 找到网格 {grid.name}");
                     return grid;
                 }
             }
@@ -188,7 +200,6 @@ public class InventoryController : MonoBehaviour
             ItemGrid itemGrid = result.gameObject.GetComponent<ItemGrid>();
             if (itemGrid != null)
             {
-                Debug.Log($"InventoryController: 直接找到网格 {itemGrid.name}");
                 return itemGrid;
             }
 
@@ -196,7 +207,6 @@ public class InventoryController : MonoBehaviour
             itemGrid = result.gameObject.GetComponentInParent<ItemGrid>();
             if (itemGrid != null)
             {
-                Debug.Log($"InventoryController: 通过子物体 {result.gameObject.name} 找到父网格 {itemGrid.name}");
                 return itemGrid;
             }
         }
@@ -228,11 +238,6 @@ public class InventoryController : MonoBehaviour
     private void TryPickUpItem(int x, int y)
     {
         selectedItem = selectedItemGrid.PickUpItem(x, y);
-
-        if (selectedItem != null)
-        {
-            Debug.Log($"InventoryController: 成功拾取物品 {selectedItem.name}");
-        }
     }
 
     // 尝试放置物品
@@ -243,28 +248,15 @@ public class InventoryController : MonoBehaviour
         // 检查目标位置是否已经有物品
         if (selectedItemGrid.HasItemAt(x, y))
         {
-            Debug.Log($"InventoryController: 位置 ({x}, {y}) 已有物品，尝试交换");
-
             // 如果目标位置有物品，可以实现交换逻辑
             Item targetItem = selectedItemGrid.PickUpItem(x, y);
             selectedItemGrid.PlaceItem(selectedItem, x, y);
             selectedItem = targetItem;
-
-            if (selectedItem != null)
-            {
-                Debug.Log($"InventoryController: 交换成功，现在选中 {selectedItem.name}");
-            }
-            else
-            {
-                Debug.Log("InventoryController: 交换完成，没有选中物品");
-            }
         }
         else
         {
             // 目标位置为空，直接放置
             selectedItemGrid.PlaceItem(selectedItem, x, y);
-            Debug.Log($"InventoryController: 成功放置物品 {selectedItem.name} 到位置 ({x}, {y})");
-
             selectedItem = null;
         }
     }
@@ -273,7 +265,6 @@ public class InventoryController : MonoBehaviour
     public void SetSelectedItemGrid(ItemGrid itemGrid)
     {
         selectedItemGrid = itemGrid;
-        Debug.Log($"InventoryController: 设置目标背包 {itemGrid?.name}");
     }
 
     // 获取当前选中的物品
@@ -287,13 +278,8 @@ public class InventoryController : MonoBehaviour
     {
         selectedItem = item;
 
-        if (selectedItem != null)
+        if (selectedItem == null)
         {
-            Debug.Log($"InventoryController: 设置选中物品 {selectedItem.name}");
-        }
-        else
-        {
-            Debug.Log("InventoryController: 清除选中物品");
             // 清除选中物品时隐藏高亮
             if (isHighlightActive)
             {
@@ -306,7 +292,6 @@ public class InventoryController : MonoBehaviour
     public void OnItemDragStart(Item item)
     {
         SetSelectedItem(item);
-        Debug.Log($"InventoryController: 开始拖拽物品 {item.name}");
     }
 
     // 外部接口：结束拖拽时调用
@@ -316,7 +301,6 @@ public class InventoryController : MonoBehaviour
         {
             HideHighlight();
         }
-        Debug.Log("InventoryController: 结束拖拽");
     }
 
     // 外部接口：强制隐藏高亮
@@ -324,7 +308,38 @@ public class InventoryController : MonoBehaviour
     {
         HideHighlight();
     }
-    
+
+    // 获取背包ID
+    public string GetInventoryId()
+    {
+        return inventoryId;
+    }
+
+    // 获取背包名称
+    public string GetInventoryName()
+    {
+        return inventoryName;
+    }
+
+    // 设置背包ID（运行时修改）
+    public void SetInventoryId(string newId)
+    {
+        if (string.IsNullOrEmpty(newId))
+        {
+            Debug.LogWarning("InventoryController: 尝试设置空的背包ID");
+            return;
+        }
+
+        inventoryId = newId;
+        Debug.Log($"InventoryController: 背包ID已更改为 {inventoryId}");
+    }
+
+    // 设置背包名称（运行时修改）
+    public void SetInventoryName(string newName)
+    {
+        inventoryName = newName;
+    }
+
     // 拖拽时的实时高亮更新（专门用于拖拽场景）
     public void UpdateDragHighlight(Item draggingItem, Vector3 mousePosition)
     {
@@ -337,7 +352,7 @@ public class InventoryController : MonoBehaviour
             }
             return;
         }
-        
+
         // 获取鼠标下的网格
         ItemGrid targetGrid = GetItemGridUnderMouse();
         if (targetGrid == null)
@@ -348,44 +363,44 @@ public class InventoryController : MonoBehaviour
             }
             return;
         }
-        
+
         // 获取网格坐标
         Vector2Int gridPosition = targetGrid.GetTileGridPosition(mousePosition);
-        
+
         // 使用新的重叠检测方法检查是否可以放置
         bool canPlace = targetGrid.CanPlaceItemAtPosition(
-            gridPosition.x, 
-            gridPosition.y, 
-            draggingItem.GetWidth(), 
-            draggingItem.GetHeight(), 
+            gridPosition.x,
+            gridPosition.y,
+            draggingItem.GetWidth(),
+            draggingItem.GetHeight(),
             draggingItem
         );
-        
+
         // 显示高亮并设置颜色（绿色表示可放置，红色表示有重叠冲突）
-        ShowDragHighlight(targetGrid, gridPosition.x, gridPosition.y, 
+        ShowDragHighlight(targetGrid, gridPosition.x, gridPosition.y,
                          draggingItem.GetWidth(), draggingItem.GetHeight(), canPlace);
     }
-    
+
     // 显示拖拽时的放置高亮（与普通高亮分离，避免冲突）
     private void ShowDragHighlight(ItemGrid targetGrid, int x, int y, int width, int height, bool canPlace)
     {
         if (inventoryHighlight == null) return;
-        
+
         // 设置高亮的父级为目标网格
         inventoryHighlight.SetParent(targetGrid);
-        
+
         // 使用简化的位置设置方法
         inventoryHighlight.SetPositionSimple(targetGrid, x, y);
-        
+
         // 设置高亮大小
         inventoryHighlight.SetSize(width, height);
-        
+
         // 设置颜色（绿色表示可放置，红色表示有重叠冲突）
         inventoryHighlight.SetCanPlace(canPlace);
-        
+
         // 显示高亮
         inventoryHighlight.Show(true);
-        
+
         isHighlightActive = true;
     }
 }

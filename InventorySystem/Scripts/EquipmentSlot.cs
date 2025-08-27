@@ -67,7 +67,7 @@ public class EquipmentSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, 
             else
             {
                 // 类型不匹配，物品返回原位置
-                Debug.Log($"装备类型不匹配！槽位接受: {acceptedItemType}, 物品类型: {itemDataReader?.ItemData?.category}");
+                Debug.LogWarning($"装备类型不匹配！槽位接受: {acceptedItemType}, 物品类型: {itemDataReader?.ItemData?.category}");
             }
         }
 
@@ -145,8 +145,7 @@ public class EquipmentSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, 
 
         // 调整物品大小和位置
         ResizeItemToFitSlot(item);
-
-        Debug.Log($"装备了物品: {item.name}");
+        
     }
 
     /// <summary>

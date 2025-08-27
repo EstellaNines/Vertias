@@ -122,7 +122,7 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
             return;
         }
 
-        Debug.Log($"DraggableItem: 开始拖拽物品 {gameObject.name}");
+
 
         // 记录原始位置和父级
         originalPosition = rectTransform.anchoredPosition;
@@ -145,7 +145,6 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
             if (currentGrid != null)
             {
                 currentGrid.PickUpItem(item.OnGridPosition.x, item.OnGridPosition.y);
-                Debug.Log($"DraggableItem: 从 {currentGrid.name} 位置 ({item.OnGridPosition.x}, {item.OnGridPosition.y}) 拾取物品");
             }
             item.ResetGridState();
         }
@@ -166,7 +165,6 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         if (inventoryController != null && item != null)
         {
             inventoryController.SetSelectedItem(item);
-            Debug.Log($"DraggableItem: 通知 InventoryController 选中物品 {item.name}");
         }
     }
 
@@ -174,7 +172,7 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     {
         // 跟随鼠标移动
         rectTransform.anchoredPosition += eventData.delta / canvas.scaleFactor;
-        
+
         // 实时更新拖拽高亮（命中检测）
         if (inventoryController != null && item != null)
         {
@@ -245,7 +243,7 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
                     // 更新物品的网格状态
                     item.SetGridState(targetGrid, gridPosition);
 
-                    Debug.Log($"物品已放置在网格位置: ({gridPosition.x}, {gridPosition.y}), 实际坐标: {tilePosition}");
+
                 }
             }
             else
@@ -253,11 +251,11 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
                 // 输出放置失败原因
                 if (!targetGrid.BoundryCheck(gridPosition.x, gridPosition.y, item.GetWidth(), item.GetHeight()))
                 {
-                    Debug.Log($"物品 {item.name} 在位置 ({gridPosition.x}, {gridPosition.y}) 超出边界，无法放置");
+                    Debug.LogWarning($"物品 {item.name} 在位置 ({gridPosition.x}, {gridPosition.y}) 超出边界，无法放置");
                 }
                 else if (targetGrid.HasOverlapConflict(gridPosition.x, gridPosition.y, item.GetWidth(), item.GetHeight(), item))
                 {
-                    Debug.Log($"物品 {item.name} 在位置 ({gridPosition.x}, {gridPosition.y}) 与其他物品重叠，无法放置");
+                    Debug.LogWarning($"物品 {item.name} 在位置 ({gridPosition.x}, {gridPosition.y}) 与其他物品重叠，无法放置");
                 }
             }
         }
