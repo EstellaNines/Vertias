@@ -406,16 +406,9 @@ public class ItemGrid : MonoBehaviour
         positionOnTheGrid.x = mousePosition.x - rectTransform.position.x;
         positionOnTheGrid.y = rectTransform.position.y - mousePosition.y;
     
-        // 调整到左上角起始点（考虑RectTransform的锚点）
-        float gridWidth = CurrentWidth * tileSizeWidth * canvas.scaleFactor;
-        float gridHeight = CurrentHeight * tileSizeHeight * canvas.scaleFactor;
-    
-        // 如果RectTransform的锚点是中心，需要调整偏移
-        positionOnTheGrid.x += gridWidth / 2;
-        positionOnTheGrid.y += gridHeight / 2;
-    
-        // 转换为网格坐标，考虑Canvas缩放
-        Vector2Int tileGridPosition = new Vector2Int();  // 初始化为默认值
+        // 由于网格轴心现在是(0,1)，不需要额外的偏移调整
+        // 直接转换为网格坐标，考虑Canvas缩放
+        Vector2Int tileGridPosition = new Vector2Int();
         tileGridPosition.x = Mathf.FloorToInt(positionOnTheGrid.x / (tileSizeWidth * canvas.scaleFactor));
         tileGridPosition.y = Mathf.FloorToInt(positionOnTheGrid.y / (tileSizeHeight * canvas.scaleFactor));
     
@@ -496,17 +489,23 @@ public class ItemGrid : MonoBehaviour
     {
         Vector2 position = new Vector2();
 
-        // 计算网格的总尺寸
-        float gridWidth = CurrentWidth * tileSizeWidth;
-        float gridHeight = CurrentHeight * tileSizeHeight;
-
-        // 基于中心对齐计算位置
-        // 物品的中心轴心(0.5,0.5)对准格子的中心
+        // 网格轴心为(0,1)，物品轴心为(0.5,0.5)
+        // 计算物品在网格坐标系中的位置
+        
+        // 物品的尺寸
         float itemWidth = item.GetWidth() * tileSizeWidth;
         float itemHeight = item.GetHeight() * tileSizeHeight;
         
-        position.x = (posX + item.GetWidth() * 0.5f) * tileSizeWidth - gridWidth / 2;
-        position.y = gridHeight / 2 - (posY + item.GetHeight() * 0.5f) * tileSizeHeight;
+        // 计算物品中心点相对于网格左上角的位置
+        // 物品轴心(0.5,0.5)对应物品的中心
+        // 要让物品中心对齐到网格格子的中心
+        // 网格格子中心位置 = 格子左上角 + 格子尺寸的一半
+        float gridCellCenterX = posX * tileSizeWidth + tileSizeWidth * 0.5f;
+        float gridCellCenterY = posY * tileSizeHeight + tileSizeHeight * 0.5f;
+        
+        // 物品中心对齐到网格格子中心
+        position.x = gridCellCenterX;
+        position.y = -gridCellCenterY; // Y轴向下为负
 
         return position;
     }
