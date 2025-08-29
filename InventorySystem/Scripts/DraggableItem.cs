@@ -304,6 +304,25 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         {
             inventoryController.SetSelectedItem(null);
         }
+
+        // 拖拽完成后触发自动保存（仅在成功放置物品时）
+        if (validDrop)
+        {
+            InventorySaveManager saveManager = InventorySaveManager.Instance;
+            if (saveManager != null)
+            {
+                // 触发拖拽保存
+                bool saveResult = saveManager.SaveOnDrag();
+                if (!saveResult)
+                {
+                    Debug.LogWarning("[DraggableItem] 拖拽完成后自动保存失败");
+                }
+            }
+            else
+            {
+                Debug.LogWarning("[DraggableItem] 未找到 InventorySaveManager 实例，无法执行拖拽保存");
+            }
+        }
     }
 
     // 还原物品到原始大小

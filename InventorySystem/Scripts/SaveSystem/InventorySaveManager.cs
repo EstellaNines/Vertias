@@ -106,19 +106,75 @@ public class InventorySaveManager : MonoBehaviour
             RegisterGrid(grid);
         }
     }
-    
-    // 手动注册网格
+
+    // 手动注册网格 - 支持GUID注册
     public void RegisterGrid(ItemGrid grid, string gridName = null)
     {
         if (grid == null) return;
-        string name = gridName ?? grid.gameObject.name;
         
-        if (!registeredGrids.ContainsKey(name))
+        try
         {
-            registeredGrids[name] = grid;
-            if (showSaveLog)
-                Debug.Log($"[InventorySaveManager] 注册网格: {name}");
+            // 优先使用GUID作为注册键，如果没有则使用名称
+            string gridGUID = grid.GridGUID;
+            string registrationKey = !string.IsNullOrEmpty(gridGUID) ? gridGUID : (gridName ?? grid.gameObject.name);
+
+            if (!registeredGrids.ContainsKey(registrationKey))
+            {
+                registeredGrids[registrationKey] = grid;
+                if (showSaveLog)
+                    Debug.Log($"[InventorySaveManager] 注册网格: {registrationKey} (类型: {grid.GridType}, 名称: {grid.GridName})");
+            }
         }
+        catch (Exception e)
+        {
+            Debug.LogError($"[InventorySaveManager] 注册网格时发生异常: {e.Message}");
+        }
+    }
+    
+    /// <summary>
+    /// 根据GUID注册网格
+    /// </summary>
+    /// <param name="grid">网格实例</param>
+    public void RegisterGridByGUID(ItemGrid grid)
+    {
+        if (grid == null) return;
+        
+        try
+        {
+            string guid = grid.GridGUID;
+            if (!string.IsNullOrEmpty(guid) && !registeredGrids.ContainsKey(guid))
+            {
+                registeredGrids[guid] = grid;
+                if (showSaveLog)
+                    Debug.Log($"[InventorySaveManager] 按GUID注册网格: {guid} (类型: {grid.GridType}, 名称: {grid.GridName})");
+            }
+            else if (string.IsNullOrEmpty(guid))
+            {
+                Debug.LogWarning($"[InventorySaveManager] 网格 {grid.gameObject.name} 的GUID为空，无法注册");
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"[InventorySaveManager] 按GUID注册网格时发生异常: {e.Message}");
+        }
+    }
+    
+    /// <summary>
+    /// 根据网格类型获取所有网格
+    /// </summary>
+    /// <param name="gridType">网格类型</param>
+    /// <returns>指定类型的网格列表</returns>
+    public List<ItemGrid> GetGridsByType(GridType gridType)
+    {
+        List<ItemGrid> result = new List<ItemGrid>();
+        foreach (var grid in registeredGrids.Values)
+        {
+            if (grid != null && grid.GridType == gridType)
+            {
+                result.Add(grid);
+            }
+        }
+        return result;
     }
 
     /// <summary>
@@ -250,76 +306,160 @@ public class InventorySaveManager : MonoBehaviour
     }
 
     /// <summary>
+    /// 拖拽触发保存 - 当物品拖拽到新位置时自动保存
+    /// </summary>
+    /// <returns>保存是否成功</returns>
+    public bool SaveOnDrag()
+    {
+        // 检查是否正在保存中，避免重复保存
+        if (isSaving)
+        {
+            if (showSaveLog)
+                Debug.LogWarning("[InventorySaveManager] 正在保存中，跳过拖拽触发保存");
+            return false;
+        }
+
+        // 检查是否启用自动保存
+        if (!enableAutoSave)
+        {
+            if (showSaveLog)
+                Debug.LogWarning("[InventorySaveManager] 自动保存已禁用，跳过拖拽触发保存");
+            return false;
+        }
+
+        try
+        {
+            if (showSaveLog)
+                Debug.Log("[InventorySaveManager] 拖拽触发保存开始");
+
+            // 使用默认文件名进行保存
+            bool saveResult = SaveInventory(defaultSaveFileName);
+            
+            if (saveResult && showSaveLog)
+                Debug.Log("[InventorySaveManager] 拖拽触发保存完成");
+            else if (!saveResult)
+                Debug.LogError("[InventorySaveManager] 拖拽触发保存失败");
+                
+            return saveResult;
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"[InventorySaveManager] 拖拽触发保存时发生异常: {e.Message}");
+            return false;
+        }
+    }
+
+    /// <summary>
     /// 收集所有背包数据
     /// </summary>
     /// <returns>完整的背包保存数据</returns>
     private InventorySaveData CollectInventoryData()
     {
         InventorySaveData saveData = new InventorySaveData();
-        
+
         // 收集所有注册网格的数据
         foreach (var kvp in registeredGrids)
         {
             string gridName = kvp.Key;
             ItemGrid grid = kvp.Value;
-        
+
             if (grid != null)
             {
-                GridSaveData gridData = CollectGridData(grid, gridName);
-                saveData.grids.Add(gridData);
+                try
+                {
+                    GridSaveData gridData = CollectGridData(grid, gridName);
+                    if (gridData != null)
+                    {
+                        saveData.grids.Add(gridData);
+                    }
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError($"[InventorySaveManager] 收集网格数据时发生异常 (网格: {gridName}): {e.Message}");
+                }
+            }
+            else
+            {
+                Debug.LogWarning($"[InventorySaveManager] 注册的网格 {gridName} 为null，跳过收集");
             }
         }
-        
+
         return saveData;
     }
 
     /// <summary>
-    /// 收集单个网格的数据
+    /// 收集单个网格的数据 - 更新以支持新字段
     /// </summary>
     /// <param name="grid">目标网格</param>
     /// <param name="gridName">网格名称</param>
     /// <returns>网格保存数据</returns>
     private GridSaveData CollectGridData(ItemGrid grid, string gridName)
     {
-        GridSaveData gridData = new GridSaveData(gridName, grid.gridSizeWidth, grid.gridSizeHeight);
+        // 使用新的构造函数创建GridSaveData，包含所有新字段
+        GridSaveData gridData = new GridSaveData(grid, gridName);
         HashSet<Item> processedItems = new HashSet<Item>(); // 防止重复处理
-    
+
         // 遍历网格中的所有物品
-        for (int x = 0; x < grid.gridSizeWidth; x++)
+        for (int x = 0; x < grid.CurrentWidth; x++)
         {
-            for (int y = 0; y < grid.gridSizeHeight; y++)
+            for (int y = 0; y < grid.CurrentHeight; y++)
             {
                 Item item = grid.GetItemAt(x, y);
                 if (item != null && !processedItems.Contains(item))
                 {
                     // 使用物品自身存储的网格位置，而不是遍历坐标
                     Vector2Int actualPosition = item.OnGridPosition;
-                    
+
                     // 验证这是物品的起始位置（左上角）
                     if (actualPosition.x == x && actualPosition.y == y)
                     {
                         ItemDataReader itemReader = item.GetComponent<ItemDataReader>();
-                        if (itemReader != null)
+                        if (itemReader != null && itemReader.ItemData != null)
                         {
-                            // 使用物品的实际网格位置
-                            ItemSaveData itemSaveData = new ItemSaveData(itemReader, actualPosition);
-                    
-                            // 如果是容器类物品，递归保存容器内容
-                            if (itemReader.ItemData.IsContainer())
+                            try
                             {
-                                // itemSaveData.containerItems = CollectContainerItems(item);
-                            }
+                                // 使用物品的实际网格位置
+                                ItemSaveData itemSaveData = new ItemSaveData(itemReader, actualPosition);
 
-                            gridData.items.Add(itemSaveData);
-                            processedItems.Add(item); // 标记已处理
-                            
-                            if (showSaveLog)
-                                Debug.Log($"[InventorySaveManager] 保存物品 {itemReader.ItemData.id} 位置: {actualPosition}");
+                                // 验证ItemSaveData是否创建成功（检查是否为默认的错误值）
+                                if (itemSaveData.itemID != "unknown")
+                                {
+                                    // 如果是容器类物品，递归保存容器内容
+                                    if (itemReader.ItemData.IsContainer())
+                                    {
+                                        // itemSaveData.containerItems = CollectContainerItems(item);
+                                    }
+
+                                    gridData.items.Add(itemSaveData);
+                                    processedItems.Add(item); // 标记已处理
+
+                                    if (showSaveLog)
+                                        Debug.Log($"[InventorySaveManager] 保存物品 {itemReader.ItemData.id} 位置: {actualPosition} 到网格 {gridData.gridGUID}");
+                                }
+                                else
+                                {
+                                    Debug.LogWarning($"[InventorySaveManager] 物品 {item.name} 创建ItemSaveData失败，跳过保存");
+                                }
+                            }
+                            catch (Exception e)
+                            {
+                                Debug.LogError($"[InventorySaveManager] 保存物品 {item.name} 时发生异常: {e.Message}");
+                            }
+                        }
+                        else
+                        {
+                            if (itemReader == null)
+                                Debug.LogWarning($"[InventorySaveManager] 物品 {item.name} 缺少ItemDataReader组件，跳过保存");
+                            else if (itemReader.ItemData == null)
+                                Debug.LogWarning($"[InventorySaveManager] 物品 {item.name} 的ItemDataReader.ItemData为null，跳过保存");
                         }
                     }
                 }
             }
         }
+
+        if (showSaveLog)
+            Debug.Log($"[InventorySaveManager] {gridData.GetStatistics()}");
 
         return gridData;
     }
@@ -505,7 +645,7 @@ public class InventorySaveManager : MonoBehaviour
     }
 
     /// <summary>
-    /// 清空所有注册的网格
+    /// 清空所有注册的网格 - 更新以使用CurrentWidth/Height
     /// </summary>
     private void ClearAllGrids()
     {
@@ -514,9 +654,9 @@ public class InventorySaveManager : MonoBehaviour
             if (grid != null)
             {
                 // 清空网格中的所有物品
-                for (int x = 0; x < grid.gridSizeWidth; x++)
+                for (int x = 0; x < grid.CurrentWidth; x++)
                 {
-                    for (int y = 0; y < grid.gridSizeHeight; y++)
+                    for (int y = 0; y < grid.CurrentHeight; y++)
                     {
                         Item item = grid.GetItemAt(x, y);
                         if (item != null)
@@ -531,25 +671,46 @@ public class InventorySaveManager : MonoBehaviour
     }
 
     /// <summary>
-    /// 应用单个网格的数据
+    /// 应用单个网格的数据 - 更新以支持GUID查找
     /// </summary>
     /// <param name="gridData">网格保存数据</param>
     private void ApplyGridData(GridSaveData gridData)
     {
-        if (!registeredGrids.ContainsKey(gridData.gridName))
+        ItemGrid grid = null;
+        
+        // 优先通过GUID查找网格
+        if (!string.IsNullOrEmpty(gridData.gridGUID) && registeredGrids.ContainsKey(gridData.gridGUID))
         {
-            Debug.LogWarning($"[InventorySaveManager] 未找到网格: {gridData.gridName}");
+            grid = registeredGrids[gridData.gridGUID];
+        }
+        // 如果GUID查找失败，尝试通过名称查找
+        else if (!string.IsNullOrEmpty(gridData.gridName) && registeredGrids.ContainsKey(gridData.gridName))
+        {
+            grid = registeredGrids[gridData.gridName];
+        }
+        
+        if (grid == null)
+        {
+            Debug.LogWarning($"[InventorySaveManager] 未找到网格: GUID={gridData.gridGUID}, Name={gridData.gridName}");
             return;
         }
 
-        ItemGrid grid = registeredGrids[gridData.gridName];
-        if (grid == null) return;
-
+        // 恢复网格配置（如果需要）
+        if (grid.GridType != gridData.gridType)
+        {
+            if (showSaveLog)
+                Debug.Log($"[InventorySaveManager] 更新网格类型: {grid.GridType} -> {gridData.gridType}");
+            grid.GridType = gridData.gridType;
+        }
+        
         // 恢复网格中的物品
         foreach (var itemData in gridData.items)
         {
             RestoreItem(grid, itemData);
         }
+        
+        if (showSaveLog)
+            Debug.Log($"[InventorySaveManager] 恢复网格完成: {gridData.GetStatistics()}");
     }
 
     /// <summary>

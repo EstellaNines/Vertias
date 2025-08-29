@@ -28,6 +28,25 @@ public class ItemSaveData
     
     public ItemSaveData(ItemDataReader itemReader, Vector2Int position)
     {
+        // 检查参数有效性
+        if (itemReader == null || itemReader.ItemData == null)
+        {
+            Debug.LogError("[ItemSaveData] ItemDataReader或ItemData为null，无法创建保存数据");
+            // 初始化为默认值，避免null引用
+            itemID = "unknown";
+            globalUniqueID = "unknown";
+            categoryID = 0;
+            gridPosition = Vector2Int.zero;
+            gridWidth = 1;
+            gridHeight = 1;
+            stackCount = 0;
+            durability = 0f;
+            usageCount = 0;
+            isEquipped = false;
+            containerItems = null;
+            return;
+        }
+        
         var itemData = itemReader.ItemData;
         
         // 基础信息

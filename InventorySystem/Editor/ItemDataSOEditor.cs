@@ -133,6 +133,7 @@ namespace InventorySystem.Editor
             // 右侧：基本信息
             EditorGUILayout.BeginVertical();
             EditorGUILayout.LabelField("物品信息概览", EditorStyles.boldLabel);
+            // 显示三位数格式的ID
             EditorGUILayout.LabelField($"ID: {itemData.id}");
             EditorGUILayout.LabelField($"名称: {itemData.itemName}");
             EditorGUILayout.LabelField($"简称: {itemData.shortName}");

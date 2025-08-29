@@ -259,7 +259,9 @@ namespace InventorySystem.Editor
                 ItemDataSO itemData = CreateInstance<ItemDataSO>();
 
                 // 设置基础信息
-                itemData.id = itemJson["id"]?.Value<int>() ?? 0;
+                // 支持新的三位数ID格式，从JSON读取为字符串后转换为int
+                string idStr = itemJson["id"]?.Value<string>() ?? "0";
+                itemData.id = int.Parse(idStr);
                 itemData.itemName = itemJson["name"]?.Value<string>() ?? "";
                 itemData.shortName = itemJson["shortName"]?.Value<string>() ?? "";
                 itemData.category = category;
