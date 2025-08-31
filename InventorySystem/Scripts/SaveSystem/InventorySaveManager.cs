@@ -470,31 +470,8 @@ public class InventorySaveManager : MonoBehaviour
     /// <param name="saveData">保存数据对象</param>
     private void CollectEquipmentData(InventorySaveData saveData)
     {
-        // 查找EquipmentManager并收集装备数据
-        EquipmentManager equipmentManager = FindObjectOfType<EquipmentManager>();
-        if (equipmentManager != null)
-        {
-            // 这里需要根据实际的EquipmentManager实现来收集装备数据
-            // 示例代码，需要根据实际情况调整
-            /*
-            var equippedItems = equipmentManager.GetAllEquippedItems();
-            foreach (var kvp in equippedItems)
-            {
-                string slotName = kvp.Key;
-                Item equippedItem = kvp.Value;
-                if (equippedItem != null)
-                {
-                    ItemDataReader itemReader = equippedItem.GetComponent<ItemDataReader>();
-                    if (itemReader != null)
-                    {
-                        ItemSaveData itemData = new ItemSaveData(itemReader, Vector2Int.zero);
-                        itemData.isEquipped = true;
-                        saveData.equippedItems[slotName] = itemData;
-                    }
-                }
-            }
-            */
-        }
+        // 装备系统待实现
+        Debug.Log("装备系统待实现");
     }
 
     /// <summary>
@@ -776,17 +753,8 @@ public class InventorySaveManager : MonoBehaviour
     /// <param name="equippedItems">装备数据字典</param>
     private void ApplyEquipmentData(Dictionary<string, ItemSaveData> equippedItems)
     {
-        EquipmentManager equipmentManager = FindObjectOfType<EquipmentManager>();
-        if (equipmentManager == null) return;
-
-        foreach (var kvp in equippedItems)
-        {
-            string slotName = kvp.Key;
-            ItemSaveData itemData = kvp.Value;
-
-            // 这里需要根据实际的EquipmentManager实现来恢复装备
-            // RestoreEquippedItem(equipmentManager, slotName, itemData);
-        }
+        // 装备系统待实现
+        Debug.Log("装备系统待实现");
     }
 
     /// <summary>
@@ -817,6 +785,7 @@ public class InventorySaveManager : MonoBehaviour
         if (id >= 11001 && id <= 11999) return ItemCategory.Healing;     // 治疗药物: 11xxx
         if (id >= 12001 && id <= 12999) return ItemCategory.Intelligence;// 情报: 12xxx
         if (id >= 13001 && id <= 13999) return ItemCategory.Currency;    // 货币: 13xxx
+        if (id >= 14001 && id <= 14999) return ItemCategory.Special;    // 特殊物品: 14xxx
 
         // 如果无法通过ID判断，尝试从ItemDataSO获取
         ItemDataSO itemData = Resources.LoadAll<ItemDataSO>("InventorySystemResources/ItemDataSO")
@@ -865,6 +834,8 @@ public class InventorySaveManager : MonoBehaviour
                 return "Intelligence_情报";
             case ItemCategory.Currency:
                 return "Currency_货币";
+            case ItemCategory.Special:
+                return "Special_特殊物品";
             default:
                 Debug.LogWarning($"[InventorySaveManager] 未知的物品类别: {category}");
                 return "Helmet_头盔"; // 默认文件夹

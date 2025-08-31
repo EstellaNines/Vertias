@@ -1,7 +1,7 @@
 namespace InventorySystem
 {
     /// <summary>
-    /// 物品类别枚举，对应JSON数据库中的13个类别
+    /// 物品类别枚举，对应JSON数据库中的14个类别
     /// </summary>
     public enum ItemCategory
     {
@@ -17,6 +17,7 @@ namespace InventorySystem
         Hemostatic = 10,    // 止血剂
         Healing = 11,       // 治疗药物
         Intelligence = 12,  // 情报
-        Currency = 13       // 货币
+        Currency = 13,      // 货币
+        Special = 14        // 特殊物品
     }
 }

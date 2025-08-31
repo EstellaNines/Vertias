@@ -10,6 +10,9 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     [SerializeField] private Canvas canvas;
     [SerializeField] private GraphicRaycaster graphicRaycaster;
     [SerializeField] private CanvasGroup canvasGroup;
+    
+    [Header("拖拽时物品设置")]
+    [SerializeField] private Vector2 dragItemSize = new Vector2(192f, 192f); // 拖拽时物品大小
 
     private RectTransform rectTransform;
     private Vector2 originalPosition;
@@ -18,7 +21,22 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     private Item item; // Item 组件
     private InventoryController inventoryController; // 背包控制器
     private float originalAlpha = 0.8f; // 用于记录原始透明度
-    private ItemHighlight itemHighlight; // 高亮组件
+    private ItemHighlight itemHighlightComponent; // 高亮组件
+    
+    // 拖拽时的状态记录
+    private Vector2 originalSize; // 原始大小
+    private Vector3 originalScale; // 原始缩放
+    private bool originalBackgroundActive; // 原始背景状态
+    private GameObject itemBackground; // 物品背景对象引用
+    
+    // 子对象引用
+    private RectTransform itemIcon; // 物品图标
+    private RectTransform itemText; // 物品文字
+    private RectTransform itemHighlight; // 物品高亮
+    private Vector2 originalIconSize; // 图标原始大小
+    private Vector2 originalTextSize; // 文字原始大小
+    private Vector2 originalTextPosition; // 文字原始位置
+    private Vector2 originalHighlightSize; // 高亮原始大小
 
     private void Awake()
     {
@@ -51,32 +69,76 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         }
 
         // 获取高亮组件
-        itemHighlight = GetComponent<ItemHighlight>();
+        itemHighlightComponent = GetComponent<ItemHighlight>();
+        
+        // 获取物品背景对象引用
+        Transform backgroundTransform = transform.Find("ItemBackground");
+        if (backgroundTransform != null)
+        {
+            itemBackground = backgroundTransform.gameObject;
+        }
+        else
+        {
+            Debug.LogWarning($"物品 {gameObject.name} 未找到ItemBackground子对象");
+        }
+        
+        // 获取物品图标引用
+        Transform iconTransform = transform.Find("ItemIcon");
+        if (iconTransform != null)
+        {
+            itemIcon = iconTransform.GetComponent<RectTransform>();
+        }
+        else
+        {
+            Debug.LogWarning($"物品 {gameObject.name} 未找到ItemIcon子对象");
+        }
+        
+        // 获取物品文字引用
+        Transform textTransform = transform.Find("ItemText");
+        if (textTransform != null)
+        {
+            itemText = textTransform.GetComponent<RectTransform>();
+        }
+        else
+        {
+            Debug.LogWarning($"物品 {gameObject.name} 未找到ItemText子对象");
+        }
+        
+        // 获取物品高亮引用
+        Transform highlightTransform = transform.Find("ItemHighlight");
+        if (highlightTransform != null)
+        {
+            itemHighlight = highlightTransform.GetComponent<RectTransform>();
+        }
+        else
+        {
+            Debug.LogWarning($"物品 {gameObject.name} 未找到ItemHighlight子对象");
+        }
     }
 
     // 鼠标停留事件处理
     public void OnPointerEnter(PointerEventData eventData)
     {
-        if (itemHighlight != null)
+        if (itemHighlightComponent != null)
         {
-            itemHighlight.ShowHighlight();
+            itemHighlightComponent.ShowHighlight();
         }
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
-        if (itemHighlight != null)
+        if (itemHighlightComponent != null)
         {
-            itemHighlight.HideHighlight();
+            itemHighlightComponent.HideHighlight();
         }
     }
 
     public void OnBeginDrag(PointerEventData eventData)
     {
         // 拖拽开始时隐藏高亮
-        if (itemHighlight != null)
+        if (itemHighlightComponent != null)
         {
-            itemHighlight.HideHighlight();
+            itemHighlightComponent.HideHighlight();
         }
 
         // 确保必要组件已经初始化
@@ -127,16 +189,29 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         // 记录原始位置和父级
         originalPosition = rectTransform.anchoredPosition;
         originalParent = transform.parent;
+        
+        // 记录原始状态
+        originalSize = rectTransform.sizeDelta;
+        originalScale = rectTransform.localScale;
+        originalBackgroundActive = itemBackground != null ? itemBackground.activeSelf : false;
+        
+        // 记录子对象原始状态
+        if (itemIcon != null)
+        {
+            originalIconSize = itemIcon.sizeDelta;
+        }
+        if (itemText != null)
+        {
+            originalTextSize = itemText.sizeDelta;
+            originalTextPosition = itemText.anchoredPosition;
+        }
+        if (itemHighlight != null)
+        {
+            originalHighlightSize = itemHighlight.sizeDelta;
+        }
 
         // 若物品在装备槽中，恢复原始大小
-        EquipmentSlot equipmentSlot = originalParent?.GetComponent<EquipmentSlot>();
-        if (equipmentSlot != null)
-        {
-            // 物品从装备槽位置移除时恢复原始大小
-            RestoreItemOriginalSize();
-
-            // 物品已从装备槽移除，恢复原始大小
-        }
+        // 装备槽功能待实现
 
         // 若物品在网格中，从网格移除
         if (item != null && item.IsOnGrid())
@@ -153,6 +228,9 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         originalAlpha = canvasGroup.alpha; // 记录原始透明度
         canvasGroup.alpha = 0.6f;
         canvasGroup.blocksRaycasts = false;
+        
+        // 应用拖拽时的物品设置
+        ApplyDragItemSettings();
 
         // 移动到Canvas最顶层
         if (canvas != null)
@@ -212,6 +290,9 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         // 恢复透明度和交互逻辑
         canvasGroup.alpha = originalAlpha; // 恢复原始透明度，通常为 1.0f
         canvasGroup.blocksRaycasts = true;
+        
+        // 恢复物品原始状态
+        RestoreItemOriginalState();
 
         // 判断是否有有效的放置目标
         bool validDrop = false;
@@ -261,21 +342,7 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         }
 
         // 如果网格放置失败，尝试装备槽
-        if (!validDrop && eventData.pointerEnter != null)
-        {
-            EquipmentSlot equipmentSlot = eventData.pointerEnter.GetComponent<EquipmentSlot>();
-            if (equipmentSlot != null)
-            {
-                // 检查装备槽是否能接收该物品
-                ItemDataReader itemDataReader = GetItemDataReader();
-                if (itemDataReader != null && itemDataReader.ItemData != null)
-                {
-                    // 手动触发装备槽 OnDrop 逻辑
-                    equipmentSlot.OnDrop(eventData);
-                    validDrop = true;
-                }
-            }
-        }
+        // 装备槽功能待实现
 
         // 如果没有有效放置目标，则还原位置
         if (!validDrop)
@@ -325,47 +392,118 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         }
     }
 
-    // 还原物品到原始大小
-    private void RestoreItemOriginalSize()
+    // 应用拖拽时的物品设置
+    private void ApplyDragItemSettings()
     {
-        ItemSizeInfo sizeInfo = GetComponent<ItemSizeInfo>();
-        if (sizeInfo != null)
+        if (rectTransform != null)
         {
-            // 还原本体原始尺寸
-            rectTransform.sizeDelta = sizeInfo.originalSize;
-            rectTransform.localScale = sizeInfo.originalScale;
-            rectTransform.anchorMin = sizeInfo.originalAnchorMin;
-            rectTransform.anchorMax = sizeInfo.originalAnchorMax;
-            rectTransform.pivot = sizeInfo.originalPivot;
-            rectTransform.anchoredPosition = sizeInfo.originalAnchoredPosition;
-
-            // 还原子元素尺寸
-            RestoreChildImagesSizes();
-        }
-    }
-
-    // 还原子对象图片的原始大小
-    private void RestoreChildImagesSizes()
-    {
-        ItemSizeInfo[] childSizeInfos = GetComponentsInChildren<ItemSizeInfo>();
-
-        foreach (ItemSizeInfo sizeInfo in childSizeInfos)
-        {
-            if (sizeInfo.gameObject != gameObject) // 排除自身
+            // 检查物品原始尺寸，只有当大于192*192时才强制修改大小
+            Vector2 currentSize = rectTransform.sizeDelta;
+            if (currentSize.x > dragItemSize.x || currentSize.y > dragItemSize.y)
             {
-                RectTransform childRect = sizeInfo.GetComponent<RectTransform>();
-                if (childRect != null)
-                {
-                    // 还原子对象的原始尺寸
-                    childRect.sizeDelta = sizeInfo.originalSize;
-                    childRect.localScale = sizeInfo.originalScale;
-                    childRect.anchorMin = sizeInfo.originalAnchorMin;
-                    childRect.anchorMax = sizeInfo.originalAnchorMax;
-                    childRect.pivot = sizeInfo.originalPivot;
-                    childRect.anchoredPosition = sizeInfo.originalAnchoredPosition;
-                }
+                // 物品尺寸大于192*192，强制设置为192*192
+                rectTransform.sizeDelta = dragItemSize;
+                rectTransform.localScale = Vector3.one;
+                Debug.Log($"物品 {gameObject.name} 主对象尺寸从 {currentSize} 调整为 {dragItemSize}");
+            }
+            else
+            {
+                // 物品尺寸小于等于192*192，保持原尺寸
+                Debug.Log($"物品 {gameObject.name} 主对象尺寸 {currentSize} 小于等于 {dragItemSize}，保持原尺寸");
             }
         }
+        
+        // 调整物品图标大小为192*192
+        if (itemIcon != null)
+        {
+            itemIcon.sizeDelta = dragItemSize;
+            Debug.Log($"物品 {gameObject.name} 的ItemIcon已调整为 {dragItemSize}");
+        }
+        
+        // 调整物品高亮大小为192*192
+        if (itemHighlight != null)
+        {
+            itemHighlight.sizeDelta = dragItemSize;
+            Debug.Log($"物品 {gameObject.name} 的ItemHighlight已调整为 {dragItemSize}");
+        }
+        
+        // 调整物品文字大小和位置
+        if (itemText != null)
+        {
+            // 计算文字大小（保持比例，但不超过192*192）
+            Vector2 textSize = originalTextSize;
+            if (textSize.x > dragItemSize.x || textSize.y > dragItemSize.y)
+            {
+                float scaleX = dragItemSize.x / textSize.x;
+                float scaleY = dragItemSize.y / textSize.y;
+                float scale = Mathf.Min(scaleX, scaleY);
+                textSize *= scale;
+            }
+            itemText.sizeDelta = textSize;
+            
+            // 固定文字在右下角
+            float rightMargin = 10f; // 右边距
+            float bottomMargin = 10f; // 下边距
+            itemText.anchoredPosition = new Vector2(
+                dragItemSize.x / 2 - rightMargin - textSize.x / 2,
+                -dragItemSize.y / 2 + bottomMargin + textSize.y / 2
+            );
+            
+            Debug.Log($"物品 {gameObject.name} 的ItemText已调整为大小 {textSize}，位置固定在右下角");
+        }
+        
+        // 隐藏物品背景
+        if (itemBackground != null)
+        {
+            itemBackground.SetActive(false);
+            Debug.Log($"物品 {gameObject.name} 的ItemBackground已隐藏");
+        }
+        else
+        {
+            Debug.LogWarning($"物品 {gameObject.name} 未找到ItemBackground，无法隐藏");
+        }
+    }
+    
+    // 恢复物品原始状态
+    private void RestoreItemOriginalState()
+    {
+        if (rectTransform != null)
+        {
+            // 恢复原始大小和缩放
+            rectTransform.sizeDelta = originalSize;
+            rectTransform.localScale = originalScale;
+        }
+        
+        // 恢复物品图标原始大小
+        if (itemIcon != null)
+        {
+            itemIcon.sizeDelta = originalIconSize;
+            Debug.Log($"物品 {gameObject.name} 的ItemIcon已恢复为原始大小: {originalIconSize}");
+        }
+        
+        // 恢复物品高亮原始大小
+        if (itemHighlight != null)
+        {
+            itemHighlight.sizeDelta = originalHighlightSize;
+            Debug.Log($"物品 {gameObject.name} 的ItemHighlight已恢复为原始大小: {originalHighlightSize}");
+        }
+        
+        // 恢复物品文字原始大小和位置
+        if (itemText != null)
+        {
+            itemText.sizeDelta = originalTextSize;
+            itemText.anchoredPosition = originalTextPosition;
+            Debug.Log($"物品 {gameObject.name} 的ItemText已恢复为原始大小: {originalTextSize}，位置: {originalTextPosition}");
+        }
+        
+        // 恢复背景状态
+        if (itemBackground != null)
+        {
+            itemBackground.SetActive(originalBackgroundActive);
+            Debug.Log($"物品 {gameObject.name} 的ItemBackground已恢复为: {originalBackgroundActive}");
+        }
+        
+        Debug.Log($"物品 {gameObject.name} 已恢复原始状态: 主对象大小={originalSize}, 背景状态={originalBackgroundActive}");
     }
 
     // 启用或禁用拖拽

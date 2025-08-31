@@ -494,6 +494,10 @@ namespace InventorySystem.Editor
                     // 情报物品显示情报值
                     return itemData.intelligenceValue > 0 ? itemData.intelligenceValue.ToString() : "";
 
+                case ItemCategory.Special:
+                    // 特殊物品不显示额外信息
+                    return "";
+
                 default:
                     return "";
             }

@@ -182,6 +182,10 @@ public class ItemDataReader : MonoBehaviour
                 // 情报物品显示情报值
                 return itemData.intelligenceValue > 0 ? itemData.intelligenceValue.ToString() : "";
 
+            case ItemCategory.Special:
+                // 特殊物品不显示额外信息
+                return "";
+
             default:
                 return "";
         }
@@ -346,6 +350,7 @@ public class ItemDataReader : MonoBehaviour
             case ItemCategory.Healing: return "治疗";
             case ItemCategory.Intelligence: return "情报";
             case ItemCategory.Currency: return "货币";
+            case ItemCategory.Special: return "特殊物品";
             default: return itemData.category.ToString();
         }
     }

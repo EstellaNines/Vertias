@@ -325,6 +325,11 @@ namespace InventorySystem.Editor
                     EditorGUILayout.PropertyField(serializedObject.FindProperty("maxStack"), new GUIContent("最大堆叠数量"));
                     break;
 
+                case ItemCategory.Special:
+                    EditorGUILayout.LabelField("特殊物品属性", EditorStyles.boldLabel);
+                    EditorGUILayout.PropertyField(serializedObject.FindProperty("maxStack"), new GUIContent("最大堆叠数量"));
+                    break;
+
                 default:
                     EditorGUILayout.LabelField("无特殊属性", EditorStyles.helpBox);
                     break;
@@ -395,6 +400,7 @@ namespace InventorySystem.Editor
                 case ItemCategory.Healing: return "治疗";
                 case ItemCategory.Intelligence: return "情报";
                 case ItemCategory.Currency: return "货币";
+                case ItemCategory.Special: return "特殊物品";
                 default: return category.ToString();
             }
         }
