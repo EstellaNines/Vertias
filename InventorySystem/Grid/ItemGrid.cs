@@ -16,6 +16,7 @@ public enum GridType
     [InspectorName("测试")] Test = 99,
 }
 
+#region 网格特性标志
 // 网格特性标志
 [System.Flags]
 [System.Serializable]
@@ -32,7 +33,9 @@ public enum GridFeatures
     [InspectorName("自动保存")] AutoSave = 1 << 7,
     [InspectorName("临时存储")] TemporaryStorage = 1 << 8
 }
+#endregion
 
+#region 网格访问权限枚举
 // 网格访问权限枚举
 [System.Serializable]
 public enum GridAccessLevel
@@ -42,6 +45,8 @@ public enum GridAccessLevel
     [InspectorName("共享")] Shared = 2,
     [InspectorName("只读")] ReadOnly = 3
 }
+#endregion
+
 
 public class ItemGrid : MonoBehaviour
 {
@@ -107,6 +112,13 @@ public class ItemGrid : MonoBehaviour
     RectTransform rectTransform;
     Canvas canvas;
     
+    // 事件系统
+    public event System.Action<Item, Vector2Int> OnItemPlaced;
+    public event System.Action<Item, Vector2Int> OnItemRemoved;
+    public event System.Action<Item, Vector2Int, Vector2Int> OnItemMoved;
+    public event System.Action<ItemGrid> OnGridInitialized;
+    public event System.Action<ItemGrid> OnGridCleared;
+    
     // 网格GUID属性
     public string GridGUID 
     { 
@@ -137,8 +149,10 @@ public class ItemGrid : MonoBehaviour
         {
             if (gridType != value)
             {
+                GridType oldType = gridType;
                 gridType = value;
                 lastModifiedTime = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+                OnGridTypeChanged(oldType, gridType);
             }
         }
     }
@@ -228,6 +242,23 @@ public class ItemGrid : MonoBehaviour
         return (gridFeatures & feature) == feature;
     }
     
+    // 网格状态变化回调方法（子类可重写）
+    protected virtual void OnGridTypeChanged(GridType oldType, GridType newType)
+    {
+        // 子类可以重写此方法
+        Debug.Log($"网格 {gridName} 类型从 {oldType} 变更为 {newType}");
+    }
+    
+    protected virtual void OnGridFeaturesChanged(GridFeatures oldFeatures, GridFeatures newFeatures)
+    {
+        // 子类可以重写此方法
+    }
+    
+    protected virtual void OnGridSizeChanged(int oldWidth, int oldHeight, int newWidth, int newHeight)
+    {
+        // 子类可以重写此方法
+    }
+    
     // 添加网格特性
     public void AddFeature(GridFeatures feature)
     {
@@ -268,6 +299,29 @@ public class ItemGrid : MonoBehaviour
         
         return count;
     }
+    
+    // 获取空槽位数量
+    public int GetEmptySlotCount()
+    {
+        int emptyCount = 0;
+        for (int x = 0; x < gridSizeWidth; x++)
+        {
+            for (int y = 0; y < gridSizeHeight; y++)
+            {
+                if (itemSlot[x, y] == null)
+                {
+                    emptyCount++;
+                }
+            }
+        }
+        return emptyCount;
+    }
+    
+    // 获取已占用槽位数量
+    public int GetOccupiedSlotCount()
+    {
+        return (gridSizeWidth * gridSizeHeight) - GetEmptySlotCount();
+    }
 
     // 初始化GUID和时间
     private void Awake()
@@ -304,6 +358,9 @@ public class ItemGrid : MonoBehaviour
         
         itemSlot = new Item[gridSizeWidth, gridSizeHeight];
         Init(gridSizeWidth, gridSizeHeight);
+        
+        // 触发网格初始化事件
+        OnGridInitialized?.Invoke(this);
         
         Debug.Log($"ItemGrid [{gridName}] 初始化完成 - 尺寸: {gridSizeWidth}x{gridSizeHeight}, Canvas缩放: {canvas.scaleFactor}");
     }
@@ -356,25 +413,12 @@ public class ItemGrid : MonoBehaviour
     }
 
     // 在指定位置放置物品
-    public bool PlaceItem(Item item, int posX, int posY)
+    public virtual bool PlaceItem(Item item, int posX, int posY)
     {
-        if (BoundryCheck(posX, posY, item.GetWidth(), item.GetHeight()) == false)
+        // 验证物品放置
+        if (!ValidateItemPlacement(item, posX, posY))
         {
-            Debug.LogWarning($"ItemGrid: 物品 {item.name} 在位置 ({posX}, {posY}) 超出边界");
             return false;
-        }
-
-        // 检查位置是否被占用
-        for (int x = posX; x < posX + item.GetWidth(); x++)
-        {
-            for (int y = posY; y < posY + item.GetHeight(); y++)
-            {
-                if (itemSlot[x, y] != null)
-                {
-                    Debug.LogWarning($"ItemGrid: 位置 ({x}, {y}) 已被占用");
-                    return false;
-                }
-            }
         }
 
         // 存储物品到所有占用格子
@@ -390,6 +434,29 @@ public class ItemGrid : MonoBehaviour
         Vector2 position = CalculatePositionOnGrid(item, posX, posY);
         item.transform.localPosition = position;
         item.SetGridState(this, new Vector2Int(posX, posY));
+        
+        // 触发物品放置事件
+        OnItemPlaced?.Invoke(item, new Vector2Int(posX, posY));
+        
+        return true;
+    }
+    
+    // 物品放置验证（子类可重写）
+    protected virtual bool ValidateItemPlacement(Item item, int posX, int posY)
+    {
+        // 基础验证：边界检查
+        if (!BoundryCheck(posX, posY, item.GetWidth(), item.GetHeight()))
+        {
+            Debug.LogWarning($"ItemGrid: 物品 {item.name} 在位置 ({posX}, {posY}) 超出边界");
+            return false;
+        }
+
+        // 基础验证：冲突检查
+        if (HasItemConflict(posX, posY, item.GetWidth(), item.GetHeight()))
+        {
+            Debug.LogWarning($"ItemGrid: 位置 ({posX}, {posY}) 已被占用");
+            return false;
+        }
         
         return true;
     }
@@ -433,11 +500,11 @@ public class ItemGrid : MonoBehaviour
     }
 
     // 从指定位置拾取物品
-    public Item PickUpItem(int x, int y)
+    public virtual Item PickUpItem(int x, int y)
     {
-        if (x < 0 || x >= CurrentWidth || y < 0 || y >= CurrentHeight)
+        // 验证物品拾取
+        if (!ValidateItemPickup(x, y))
         {
-            Debug.LogWarning($"ItemGrid: 尝试从无效位置 ({x}, {y}) 拾取物品");
             return null;
         }
 
@@ -459,9 +526,25 @@ public class ItemGrid : MonoBehaviour
                     }
                 }
             }
+            
+            // 触发物品移除事件
+            OnItemRemoved?.Invoke(toReturn, itemPosition);
         }
 
         return toReturn;
+    }
+    
+    // 物品拾取验证（子类可重写）
+    protected virtual bool ValidateItemPickup(int x, int y)
+    {
+        // 基础验证：位置检查
+        if (x < 0 || x >= CurrentWidth || y < 0 || y >= CurrentHeight)
+        {
+            Debug.LogWarning($"ItemGrid: 尝试从无效位置 ({x}, {y}) 拾取物品");
+            return false;
+        }
+        
+        return true;
     }
 
     // 检查指定位置是否有物品
@@ -567,4 +650,68 @@ public class ItemGrid : MonoBehaviour
 
         return !HasOverlapConflict(posX, posY, width, height, draggingItem);
     }
+    
+    // 获取网格统计信息
+    public virtual GridStatistics GetGridStatistics()
+    {
+        return new GridStatistics
+        {
+            totalSlots = gridSizeWidth * gridSizeHeight,
+            occupiedSlots = GetOccupiedSlotCount(),
+            emptySlots = GetEmptySlotCount(),
+            itemCount = GetCurrentItemCount()
+        };
+    }
+    
+    // 获取指定区域的物品列表
+    public virtual List<Item> GetItemsInArea(int startX, int startY, int width, int height)
+    {
+        List<Item> items = new List<Item>();
+        HashSet<Item> uniqueItems = new HashSet<Item>();
+        
+        for (int x = startX; x < startX + width; x++)
+        {
+            for (int y = startY; y < startY + height; y++)
+            {
+                if (x >= 0 && x < CurrentWidth && y >= 0 && y < CurrentHeight)
+                {
+                    Item item = GetItemAt(x, y);
+                    if (item != null && !uniqueItems.Contains(item))
+                    {
+                        uniqueItems.Add(item);
+                        items.Add(item);
+                    }
+                }
+            }
+        }
+        
+        return items;
+    }
+    
+    // 清空网格
+    public virtual void ClearGrid()
+    {
+        for (int x = 0; x < gridSizeWidth; x++)
+        {
+            for (int y = 0; y < gridSizeHeight; y++)
+            {
+                itemSlot[x, y] = null;
+            }
+        }
+        
+        // 触发网格清空事件
+        OnGridCleared?.Invoke(this);
+    }
+}
+
+// 网格统计信息结构
+[System.Serializable]
+public struct GridStatistics
+{
+    public int totalSlots;
+    public int occupiedSlots;
+    public int emptySlots;
+    public int itemCount;
+    
+    public float occupancyRate => totalSlots > 0 ? (float)occupiedSlots / totalSlots : 0f;
 }

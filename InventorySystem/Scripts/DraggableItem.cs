@@ -397,72 +397,83 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     {
         if (rectTransform != null)
         {
-            // 检查物品原始尺寸，只有当大于192*192时才强制修改大小
+            // 计算等比例缩放后的尺寸
             Vector2 currentSize = rectTransform.sizeDelta;
-            if (currentSize.x > dragItemSize.x || currentSize.y > dragItemSize.y)
-            {
-                // 物品尺寸大于192*192，强制设置为192*192
-                rectTransform.sizeDelta = dragItemSize;
-                rectTransform.localScale = Vector3.one;
-                Debug.Log($"物品 {gameObject.name} 主对象尺寸从 {currentSize} 调整为 {dragItemSize}");
-            }
-            else
-            {
-                // 物品尺寸小于等于192*192，保持原尺寸
-                Debug.Log($"物品 {gameObject.name} 主对象尺寸 {currentSize} 小于等于 {dragItemSize}，保持原尺寸");
-            }
+            Vector2 scaledSize = CalculateProportionalSize(currentSize, dragItemSize);
+            
+            // 应用等比例缩放后的尺寸
+            rectTransform.sizeDelta = scaledSize;
+            rectTransform.localScale = Vector3.one;
+            
+            Debug.Log($"物品 {gameObject.name} 主对象尺寸从 {currentSize} 等比例调整为 {scaledSize}");
         }
         
-        // 调整物品图标大小为192*192
+        // 调整物品图标大小为等比例缩放后的尺寸
         if (itemIcon != null)
         {
-            itemIcon.sizeDelta = dragItemSize;
-            Debug.Log($"物品 {gameObject.name} 的ItemIcon已调整为 {dragItemSize}");
+            Vector2 currentIconSize = originalIconSize;
+            Vector2 scaledIconSize = CalculateProportionalSize(currentIconSize, dragItemSize);
+            itemIcon.sizeDelta = scaledIconSize;
+            Debug.Log($"物品 {gameObject.name} 的ItemIcon已等比例调整为 {scaledIconSize}");
         }
         
-        // 调整物品高亮大小为192*192
+        // 调整物品高亮大小为等比例缩放后的尺寸
         if (itemHighlight != null)
         {
-            itemHighlight.sizeDelta = dragItemSize;
-            Debug.Log($"物品 {gameObject.name} 的ItemHighlight已调整为 {dragItemSize}");
+            Vector2 currentHighlightSize = originalHighlightSize;
+            Vector2 scaledHighlightSize = CalculateProportionalSize(currentHighlightSize, dragItemSize);
+            itemHighlight.sizeDelta = scaledHighlightSize;
+            Debug.Log($"物品 {gameObject.name} 的ItemHighlight已等比例调整为 {scaledHighlightSize}");
         }
         
         // 调整物品文字大小和位置
         if (itemText != null)
         {
-            // 计算文字大小（保持比例，但不超过192*192）
-            Vector2 textSize = originalTextSize;
-            if (textSize.x > dragItemSize.x || textSize.y > dragItemSize.y)
-            {
-                float scaleX = dragItemSize.x / textSize.x;
-                float scaleY = dragItemSize.y / textSize.y;
-                float scale = Mathf.Min(scaleX, scaleY);
-                textSize *= scale;
-            }
-            itemText.sizeDelta = textSize;
+            // 计算文字大小（保持比例，但不超过等比例缩放后的尺寸）
+            Vector2 currentTextSize = originalTextSize;
+            Vector2 scaledTextSize = CalculateProportionalSize(currentTextSize, dragItemSize);
+            itemText.sizeDelta = scaledTextSize;
             
             // 固定文字在右下角
             float rightMargin = 10f; // 右边距
             float bottomMargin = 10f; // 下边距
             itemText.anchoredPosition = new Vector2(
-                dragItemSize.x / 2 - rightMargin - textSize.x / 2,
-                -dragItemSize.y / 2 + bottomMargin + textSize.y / 2
+                dragItemSize.x / 2 - rightMargin - scaledTextSize.x / 2,
+                -dragItemSize.y / 2 + bottomMargin + scaledTextSize.y / 2
             );
             
-            Debug.Log($"物品 {gameObject.name} 的ItemText已调整为大小 {textSize}，位置固定在右下角");
+            Debug.Log($"物品 {gameObject.name} 的ItemText已等比例调整为大小 {scaledTextSize}，位置固定在右下角");
         }
         
         // 隐藏物品背景
         if (itemBackground != null)
         {
             itemBackground.SetActive(false);
-            Debug.Log($"物品 {gameObject.name} 的ItemBackground已隐藏");
-        }
-        else
-        {
-            Debug.LogWarning($"物品 {gameObject.name} 未找到ItemBackground，无法隐藏");
-        }
+                    Debug.Log($"物品 {gameObject.name} 的ItemBackground已隐藏");
     }
+    else
+    {
+        Debug.LogWarning($"物品 {gameObject.name} 未找到ItemBackground，无法隐藏");
+    }
+}
+
+// 计算等比例缩放后的尺寸
+private Vector2 CalculateProportionalSize(Vector2 originalSize, Vector2 targetSize)
+{
+    // 计算宽高比例
+    float scaleX = targetSize.x / originalSize.x;
+    float scaleY = targetSize.y / originalSize.y;
+    
+    // 使用较小的缩放比例，确保物品完全适应目标尺寸且不变形
+    float scale = Mathf.Min(scaleX, scaleY);
+    
+    // 计算缩放后的尺寸
+    Vector2 scaledSize = originalSize * scale;
+    
+    Debug.Log($"等比例缩放计算: 原始尺寸{originalSize} -> 目标尺寸{targetSize} -> 缩放比例{scale} -> 最终尺寸{scaledSize}");
+    
+    return scaledSize;
+}
     
     // 恢复物品原始状态
     private void RestoreItemOriginalState()
