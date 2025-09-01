@@ -32,6 +32,8 @@ public class InventoryController : MonoBehaviour
     {
         canvas = FindObjectOfType<Canvas>();
 
+        // 旧的网格上下文系统已移除
+
         // 缓存所有GridInteract组件
         RefreshGridInteracts();
 
@@ -89,6 +91,31 @@ public class InventoryController : MonoBehaviour
         }
         
         Debug.Log($"[InventoryController] 刷新网格交互列表，找到 {allGridInteracts.Count} 个有效网格");
+    }
+    
+
+    
+
+    
+    // 旧的网格上下文事件处理方法已移除
+    
+    /// <summary>
+    /// 更新库存高亮显示
+    /// 当上下文切换时重新计算高亮位置
+    /// </summary>
+    private void UpdateInventoryHighlight()
+    {
+        if (selectedItem == null || inventoryHighlight == null)
+        {
+            if (isHighlightActive)
+            {
+                HideHighlight();
+            }
+            return;
+        }
+        
+        // 重新执行放置高亮逻辑
+        UpdatePlacementHighlight();
     }
 
     // 更新放置指示器
@@ -471,5 +498,10 @@ public class InventoryController : MonoBehaviour
         inventoryHighlight.SetEquipmentSlotHighlight(equipmentSlot, canEquip);
         
         isHighlightActive = true;
+    }
+    
+    private void OnDestroy()
+    {
+        // 旧的网格上下文系统已移除
     }
 }

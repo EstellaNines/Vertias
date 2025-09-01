@@ -373,6 +373,19 @@ public class ItemGrid : MonoBehaviour
     /// 检查网格是否已完全初始化
     /// </summary>
     public bool IsGridInitialized => itemSlot != null && gridSizeWidth > 0 && gridSizeHeight > 0;
+    
+    /// <summary>
+    /// 公共初始化方法，供外部调用
+    /// </summary>
+    public void InitializeGrid()
+    {
+        if (gridSizeWidth > 0 && gridSizeHeight > 0)
+        {
+            itemSlot = new Item[gridSizeWidth, gridSizeHeight];
+            Init(gridSizeWidth, gridSizeHeight);
+            Debug.Log($"[ItemGrid] 手动初始化网格: {gridSizeWidth}x{gridSizeHeight}");
+        }
+    }
 
     // 初始化网格大小
     void Init(int width, int height)

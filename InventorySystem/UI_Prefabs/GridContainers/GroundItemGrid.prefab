@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &5515042047201907054
+--- !u!1 &7416093962759783166
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,25 +8,25 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 8440646518592586864}
-  - component: {fileID: 4222011333629575062}
-  - component: {fileID: 5031052305317961567}
-  - component: {fileID: 1421864522321834296}
-  - component: {fileID: 5204804620851408900}
+  - component: {fileID: 9199320890921014805}
+  - component: {fileID: 786925866743376889}
+  - component: {fileID: 2604067883665516190}
+  - component: {fileID: 3429840289860569723}
+  - component: {fileID: 7593743715518883849}
   m_Layer: 5
-  m_Name: InventoryGrid
+  m_Name: GroundItemGrid
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!224 &8440646518592586864
+--- !u!224 &9199320890921014805
 RectTransform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5515042047201907054}
+  m_GameObject: {fileID: 7416093962759783166}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
@@ -34,26 +34,26 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 640, y: 1920}
+  m_SizeDelta: {x: 640, y: 512}
   m_Pivot: {x: 0, y: 1}
---- !u!222 &4222011333629575062
+--- !u!222 &786925866743376889
 CanvasRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5515042047201907054}
+  m_GameObject: {fileID: 7416093962759783166}
   m_CullTransparentMesh: 1
---- !u!114 &5031052305317961567
+--- !u!114 &2604067883665516190
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5515042047201907054}
+  m_GameObject: {fileID: 7416093962759783166}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
@@ -61,7 +61,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 0
+  m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -77,31 +77,41 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &1421864522321834296
+--- !u!114 &3429840289860569723
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5515042047201907054}
+  m_GameObject: {fileID: 7416093962759783166}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 36b9062db8f5a2b4abb558c89bba4e4a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gridConfig: {fileID: 11400000, guid: ddde6bc56023bc2478936a7672d21141, type: 2}
-  inventoryWidth: 10
-  inventoryHeight: 30
---- !u!114 &5204804620851408900
+  gridGUID: 
+  gridType: 3
+  gridName: "\u5730\u9762\u7F51\u683C"
+  gridDescription: 
+  gridFeatures: -1
+  accessLevel: 0
+  gridPriority: 50
+  sortWeight: 1
+  isDefaultGrid: 0
+  isGridActive: 1
+  creationTime: 
+  lastModifiedTime: 
+  gridSizeWidth: 10
+  gridSizeHeight: 8
+--- !u!114 &7593743715518883849
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5515042047201907054}
+  m_GameObject: {fileID: 7416093962759783166}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 43eae4255683c9247ad4045bc67a3ccb, type: 3}
+  m_Script: {fileID: 11500000, guid: 41d8dbbd51fb72442a682348ab592b03, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gridPriority: 0

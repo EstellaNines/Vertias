@@ -534,6 +534,179 @@ public class InventorySaveManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 保存单个网格到独立文件
+    /// </summary>
+    /// <param name="grid">要保存的网格</param>
+    /// <param name="fileName">文件名</param>
+    /// <returns>保存是否成功</returns>
+    public bool SaveSingleGrid(ItemGrid grid, string fileName)
+    {
+        if (grid == null)
+        {
+            Debug.LogWarning("[InventorySaveManager] 尝试保存null网格");
+            return false;
+        }
+
+        if (isSaving)
+        {
+            if (showSaveLog)
+                Debug.LogWarning("[InventorySaveManager] 正在保存中，跳过单个网格保存请求");
+            return false;
+        }
+
+        isSaving = true;
+
+        try
+        {
+            // 创建备份
+            if (enableBackup && ES3.FileExists(fileName))
+            {
+                CreateBackup(fileName);
+            }
+
+            // 收集单个网格数据
+            GridSaveData gridData = CollectGridData(grid, grid.GridGUID ?? grid.gameObject.name);
+            
+            if (gridData != null)
+            {
+                // 创建简化的保存数据结构，只包含这一个网格
+                InventorySaveData saveData = new InventorySaveData();
+                saveData.grids.Add(gridData);
+
+                // 使用ES3保存数据
+                ES3.Save("SingleGridData", saveData, fileName);
+
+                if (showSaveLog)
+                    Debug.Log($"[InventorySaveManager] 单个网格保存成功: {fileName}, GUID: {grid.GridGUID}");
+
+                return true;
+            }
+            else
+            {
+                Debug.LogWarning($"[InventorySaveManager] 收集网格数据失败: {grid.GridGUID}");
+                return false;
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"[InventorySaveManager] 单个网格保存失败: {e.Message}");
+            return false;
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    /// <summary>
+    /// 从独立文件加载单个网格
+    /// </summary>
+    /// <param name="grid">要加载到的网格</param>
+    /// <param name="fileName">文件名</param>
+    /// <returns>加载是否成功</returns>
+    public bool LoadSingleGrid(ItemGrid grid, string fileName)
+    {
+        if (grid == null)
+        {
+            Debug.LogWarning("[InventorySaveManager] 尝试加载到null网格");
+            return false;
+        }
+
+        if (isLoading)
+        {
+            if (showSaveLog)
+                Debug.LogWarning("[InventorySaveManager] 正在加载中，跳过单个网格加载请求");
+            return false;
+        }
+
+        if (!ES3.FileExists(fileName))
+        {
+            if (showSaveLog)
+                Debug.Log($"[InventorySaveManager] 单个网格存档文件不存在: {fileName} (首次使用是正常的)");
+            return false;
+        }
+
+        isLoading = true;
+
+        try
+        {
+            // 使用ES3加载数据
+            InventorySaveData saveData = ES3.Load<InventorySaveData>("SingleGridData", fileName);
+
+            // 清空目标网格
+            ClearSingleGrid(grid);
+
+            // 应用加载的数据到指定网格
+            if (saveData.grids.Count > 0)
+            {
+                GridSaveData gridData = saveData.grids[0]; // 单个网格文件只有一个网格数据
+                ApplySingleGridData(grid, gridData);
+
+                if (showSaveLog)
+                    Debug.Log($"[InventorySaveManager] 单个网格加载成功: {fileName}, GUID: {grid.GridGUID}");
+
+                return true;
+            }
+            else
+            {
+                Debug.LogWarning($"[InventorySaveManager] 存档文件中没有网格数据: {fileName}");
+                return false;
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"[InventorySaveManager] 单个网格加载失败: {e.Message}");
+            return false;
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    /// <summary>
+    /// 清空单个网格
+    /// </summary>
+    /// <param name="grid">要清空的网格</param>
+    private void ClearSingleGrid(ItemGrid grid)
+    {
+        if (grid == null) return;
+
+        // 清空网格中的所有物品
+        for (int x = 0; x < grid.CurrentWidth; x++)
+        {
+            for (int y = 0; y < grid.CurrentHeight; y++)
+            {
+                Item item = grid.GetItemAt(x, y);
+                if (item != null)
+                {
+                    grid.PickUpItem(x, y);
+                    Destroy(item.gameObject);
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// 应用网格数据到指定网格
+    /// </summary>
+    /// <param name="targetGrid">目标网格</param>
+    /// <param name="gridData">网格保存数据</param>
+    private void ApplySingleGridData(ItemGrid targetGrid, GridSaveData gridData)
+    {
+        if (targetGrid == null || gridData == null) return;
+
+        // 恢复网格中的物品
+        foreach (var itemData in gridData.items)
+        {
+            RestoreItem(targetGrid, itemData);
+        }
+
+        if (showSaveLog)
+            Debug.Log($"[InventorySaveManager] 恢复单个网格完成: {gridData.GetStatistics()}");
+    }
+
     #endregion
 
     #region 加载方法
@@ -772,23 +945,23 @@ public class InventorySaveManager : MonoBehaviour
         }
 
         // 根据实际数据库的ID分配规则判断类别
-        if (id >= 1001 && id <= 1999) return ItemCategory.Helmet;        // 头盔: 1xxx
-        if (id >= 2001 && id <= 2999) return ItemCategory.Armor;         // 护甲: 2xxx
-        if (id >= 3001 && id <= 3999) return ItemCategory.TacticalRig;   // 战术背心: 3xxx
-        if (id >= 4001 && id <= 4999) return ItemCategory.Backpack;      // 背包: 4xxx
-        if (id >= 5001 && id <= 5999) return ItemCategory.Weapon;        // 武器: 5xxx
-        if (id >= 6001 && id <= 6999) return ItemCategory.Ammunition;    // 弹药: 6xxx
-        if (id >= 7001 && id <= 7999) return ItemCategory.Food;          // 食物: 7xxx
-        if (id >= 8001 && id <= 8999) return ItemCategory.Drink;         // 饮料: 8xxx
-        if (id >= 9001 && id <= 9999) return ItemCategory.Sedative;      // 镇静剂: 9xxx
-        if (id >= 10001 && id <= 10999) return ItemCategory.Hemostatic;  // 止血剂: 10xxx
-        if (id >= 11001 && id <= 11999) return ItemCategory.Healing;     // 治疗药物: 11xxx
-        if (id >= 12001 && id <= 12999) return ItemCategory.Intelligence;// 情报: 12xxx
-        if (id >= 13001 && id <= 13999) return ItemCategory.Currency;    // 货币: 13xxx
-        if (id >= 14001 && id <= 14999) return ItemCategory.Special;    // 特殊物品: 14xxx
+        if (id >= 101 && id <= 199) return ItemCategory.Helmet;        // 头盔: 1xx
+        if (id >= 201 && id <= 299) return ItemCategory.Armor;         // 护甲: 2xx
+        if (id >= 301 && id <= 399) return ItemCategory.TacticalRig;   // 战术背心: 3xx
+        if (id >= 401 && id <= 499) return ItemCategory.Backpack;      // 背包: 4xx
+        if (id >= 501 && id <= 599) return ItemCategory.Weapon;        // 武器: 5xx
+        if (id >= 601 && id <= 699) return ItemCategory.Ammunition;    // 弹药: 6xx
+        if (id >= 701 && id <= 799) return ItemCategory.Food;          // 食物: 7xx
+        if (id >= 801 && id <= 899) return ItemCategory.Drink;         // 饮料: 8xx
+        if (id >= 901 && id <= 999) return ItemCategory.Sedative;      // 镇静剂: 9xx
+        if (id >= 1001 && id <= 1099) return ItemCategory.Hemostatic;  // 止血剂: 10xx
+        if (id >= 1101 && id <= 1199) return ItemCategory.Healing;     // 治疗药物: 11xx
+        if (id >= 1201 && id <= 1299) return ItemCategory.Intelligence;// 情报: 12xx
+        if (id >= 1301 && id <= 1399) return ItemCategory.Currency;    // 货币: 13xx
+        if (id >= 1401 && id <= 1499) return ItemCategory.Special;     // 特殊物品: 14xx
 
-        // 如果无法通过ID判断，尝试从ItemDataSO获取
-        ItemDataSO itemData = Resources.LoadAll<ItemDataSO>("InventorySystemResources/ItemDataSO")
+        // 如果无法通过ID判断，尝试从ItemScriptableObject获取
+        ItemDataSO itemData = Resources.LoadAll<ItemDataSO>("InventorySystemResources/ItemScriptableObject")
             .FirstOrDefault(item => item.id == id);
         if (itemData != null)
         {
