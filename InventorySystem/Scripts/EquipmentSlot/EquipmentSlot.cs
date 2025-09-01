@@ -516,17 +516,21 @@ namespace InventorySystem
             var textComponent = textRect.GetComponent<TMPro.TextMeshProUGUI>();
             if (textComponent == null) return;
             
-            // 按比例缩放位置和尺寸
-            textRect.anchoredPosition = ItemPrefabConstants.ItemTextDefaults.OriginalPosition * scale;
-            textRect.sizeDelta = ItemPrefabConstants.ItemTextDefaults.OriginalSize * scale;
+            // 获取缩放后的物品尺寸
+            var itemRectTransform = currentItemInstance.GetComponent<RectTransform>();
+            if (itemRectTransform == null) return;
             
-            // 缩放字体大小（只有在显著缩放时才调整字体）
-            if (scale < ItemPrefabConstants.ItemTextDefaults.FontScaleThreshold)
-            {
-                textComponent.fontSize = ItemPrefabConstants.ItemTextDefaults.OriginalFontSize * scale;
-            }
+            Vector2 scaledItemSize = itemRectTransform.sizeDelta;
             
-            Debug.Log($"[EquipmentSlot] 缩放文本组件: 位置={textRect.anchoredPosition}, 尺寸={textRect.sizeDelta}, 字体={textComponent.fontSize}");
+            // 使用通用方法计算文本位置和尺寸
+            textRect.anchoredPosition = ItemPrefabConstants.ItemTextDefaults.CalculateTextPosition(scaledItemSize);
+            textRect.sizeDelta = ItemPrefabConstants.ItemTextDefaults.CalculateTextSize(scaledItemSize);
+            
+            // 计算适合的字体大小
+            float fontSize = ItemPrefabConstants.ItemTextDefaults.CalculateFontSize(scaledItemSize, scale);
+            textComponent.fontSize = fontSize;
+            
+            Debug.Log($"[EquipmentSlot] 缩放文本组件: 位置={textRect.anchoredPosition}, 尺寸={textRect.sizeDelta}, 字体={fontSize}");
         }
         
         /// <summary>
@@ -724,7 +728,7 @@ namespace InventorySystem
         }
         
         /// <summary>
-        /// 恢复物品文本组件的原始尺寸和位置
+        /// 恢复物品文本组件的原始尺寸和位置（基于物品当前尺寸）
         /// </summary>
         /// <param name="textRect">文本的RectTransform</param>
         private void RestoreItemTextOriginalSize(RectTransform textRect)
@@ -735,12 +739,18 @@ namespace InventorySystem
             var textComponent = textRect.GetComponent<TMPro.TextMeshProUGUI>();
             if (textComponent == null) return;
             
-            // 恢复原始位置和尺寸
-            textRect.anchoredPosition = ItemPrefabConstants.ItemTextDefaults.OriginalPosition;
-            textRect.sizeDelta = ItemPrefabConstants.ItemTextDefaults.OriginalSize;
-            textComponent.fontSize = ItemPrefabConstants.ItemTextDefaults.OriginalFontSize;
+            // 获取物品当前尺寸
+            var itemRectTransform = textRect.parent.GetComponent<RectTransform>();
+            if (itemRectTransform == null) return;
             
-            Debug.Log($"[EquipmentSlot] 恢复文本组件原始尺寸: 位置={ItemPrefabConstants.ItemTextDefaults.OriginalPosition}, 尺寸={ItemPrefabConstants.ItemTextDefaults.OriginalSize}, 字体={ItemPrefabConstants.ItemTextDefaults.OriginalFontSize}");
+            Vector2 itemSize = itemRectTransform.sizeDelta;
+            
+            // 使用通用方法计算文本位置和尺寸
+            textRect.anchoredPosition = ItemPrefabConstants.ItemTextDefaults.CalculateTextPosition(itemSize);
+            textRect.sizeDelta = ItemPrefabConstants.ItemTextDefaults.CalculateTextSize(itemSize);
+            textComponent.fontSize = ItemPrefabConstants.ItemTextDefaults.CalculateFontSize(itemSize);
+            
+            Debug.Log($"[EquipmentSlot] 恢复文本组件尺寸: 位置={textRect.anchoredPosition}, 尺寸={textRect.sizeDelta}, 字体={textComponent.fontSize}");
         }
         
         /// <summary>

@@ -149,13 +149,14 @@ public class Item : MonoBehaviour
 
                 textRect.anchoredPosition = textPosition;
                 
-                // 恢复文本组件的默认尺寸和字体大小
-                textRect.sizeDelta = InventorySystem.ItemPrefabConstants.ItemTextDefaults.OriginalSize;
+                // 使用通用方法恢复文本组件的尺寸和字体大小
+                Vector2 itemSize = rectTransform.sizeDelta;
+                textRect.sizeDelta = InventorySystem.ItemPrefabConstants.ItemTextDefaults.CalculateTextSize(itemSize);
                 
                 var textComponent = textRect.GetComponent<TMPro.TextMeshProUGUI>();
                 if (textComponent != null)
                 {
-                    textComponent.fontSize = InventorySystem.ItemPrefabConstants.ItemTextDefaults.OriginalFontSize;
+                    textComponent.fontSize = InventorySystem.ItemPrefabConstants.ItemTextDefaults.CalculateFontSize(itemSize);
                 }
             }
         }
@@ -277,15 +278,15 @@ public class Item : MonoBehaviour
                 }
                 else if (childName == InventorySystem.ItemPrefabConstants.ChildNames.ItemText)
                 {
-                    // 文本组件恢复原始位置和尺寸
-                    childRect.anchoredPosition = InventorySystem.ItemPrefabConstants.ItemTextDefaults.OriginalPosition;
-                    childRect.sizeDelta = InventorySystem.ItemPrefabConstants.ItemTextDefaults.OriginalSize;
+                    // 使用通用方法恢复文本组件的位置和尺寸
+                    childRect.anchoredPosition = InventorySystem.ItemPrefabConstants.ItemTextDefaults.CalculateTextPosition(realSize);
+                    childRect.sizeDelta = InventorySystem.ItemPrefabConstants.ItemTextDefaults.CalculateTextSize(realSize);
                     
                     // 恢复字体大小
                     var textComponent = childRect.GetComponent<TMPro.TextMeshProUGUI>();
                     if (textComponent != null)
                     {
-                        textComponent.fontSize = InventorySystem.ItemPrefabConstants.ItemTextDefaults.OriginalFontSize;
+                        textComponent.fontSize = InventorySystem.ItemPrefabConstants.ItemTextDefaults.CalculateFontSize(realSize);
                     }
                 }
             }
