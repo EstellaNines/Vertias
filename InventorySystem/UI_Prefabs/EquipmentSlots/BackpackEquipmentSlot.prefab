@@ -106,6 +106,7 @@ RectTransform:
   m_Children:
   - {fileID: 8187739589202136105}
   - {fileID: 3376772636992776150}
+  - {fileID: 7552379892371235773}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
@@ -129,7 +130,7 @@ MonoBehaviour:
   equipmentSlotBackground: {fileID: 6875954663842609430}
   equipmentSlotTitle: {fileID: 8368374500903997950}
   itemDisplayArea: {fileID: 8187739589202136105}
-  containerParent: {fileID: 3172935649558362231}
+  containerParent: {fileID: 7552379892371235773}
   currentEquippedItem: {fileID: 0}
   currentItemInstance: {fileID: 0}
   isItemEquipped: 0
@@ -213,6 +214,41 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!1 &2207797167245392508
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7552379892371235773}
+  m_Layer: 5
+  m_Name: PackContainer
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &7552379892371235773
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2207797167245392508}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 3172935649558362231}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 112, y: 112}
+  m_SizeDelta: {x: 384, y: 448}
+  m_Pivot: {x: 0, y: 1}
 --- !u!1 &8187512103393669886
 GameObject:
   m_ObjectHideFlags: 0

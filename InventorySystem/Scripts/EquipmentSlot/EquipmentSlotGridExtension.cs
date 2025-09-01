@@ -3,16 +3,16 @@ using UnityEngine;
 namespace InventorySystem
 {
     /// <summary>
-    /// ×°±¸²ÛÍø¸ñÏµÍ³À©Õ¹
-    /// ÎªItemGridÌí¼Ó×°±¸²ÛÏà¹ØµÄÖ§³Ö·½·¨
+    /// è£…å¤‡æ§½ç½‘æ ¼ç³»ç»Ÿæ‰©å±•
+    /// ä¸ºItemGridæ·»åŠ è£…å¤‡æ§½ç›¸å…³çš„æ”¯æŒæ–¹æ³•
     /// </summary>
     public static class EquipmentSlotGridExtension
     {
         /// <summary>
-        /// ¼ì²éÍø¸ñÊÇ·ñÎª×°±¸²ÛÀàĞÍ
+        /// æ£€æŸ¥ç½‘æ ¼æ˜¯å¦ä¸ºè£…å¤‡æ§½ç±»å‹
         /// </summary>
-        /// <param name="grid">Òª¼ì²éµÄÍø¸ñ</param>
-        /// <returns>ÊÇ·ñÎª×°±¸²ÛÍø¸ñ</returns>
+        /// <param name="grid">è¦æ£€æŸ¥çš„ç½‘æ ¼</param>
+        /// <returns>æ˜¯å¦ä¸ºè£…å¤‡æ§½ç½‘æ ¼</returns>
         public static bool IsEquipmentSlotGrid(this ItemGrid grid)
         {
             if (grid == null) return false;
@@ -20,42 +20,42 @@ namespace InventorySystem
         }
         
         /// <summary>
-        /// ÔÚ×°±¸²ÛÖĞ·ÅÖÃÎïÆ·£¨ÈÆ¹ı±ß½ç¼ì²é£©
+        /// åœ¨è£…å¤‡æ§½ä¸­æ”¾ç½®ç‰©å“ï¼ˆç»•è¿‡è¾¹ç•Œæ£€æŸ¥ï¼‰
         /// </summary>
-        /// <param name="grid">×°±¸²ÛÍø¸ñ</param>
-        /// <param name="item">Òª·ÅÖÃµÄÎïÆ·</param>
-        /// <returns>ÊÇ·ñ³É¹¦·ÅÖÃ</returns>
+        /// <param name="grid">è£…å¤‡æ§½ç½‘æ ¼</param>
+        /// <param name="item">è¦æ”¾ç½®çš„ç‰©å“</param>
+        /// <returns>æ˜¯å¦æˆåŠŸæ”¾ç½®</returns>
         public static bool PlaceItemInEquipmentSlot(this ItemGrid grid, Item item)
         {
             if (grid == null || item == null) return false;
             
-            // ¶ÔÓÚ×°±¸²Û£¬²»Ö´ĞĞ´«Í³µÄ±ß½ç¼ì²é
+            // å¯¹äºè£…å¤‡æ§½ï¼Œä¸æ‰§è¡Œä¼ ç»Ÿçš„è¾¹ç•Œæ£€æŸ¥
             if (grid.IsEquipmentSlotGrid())
             {
                 return PlaceItemDirectly(grid, item, 0, 0);
             }
             
-            // ¶ÔÓÚ³£¹æÍø¸ñ£¬Ê¹ÓÃÕı³£µÄ·ÅÖÃÂß¼­
+            // å¯¹äºå¸¸è§„ç½‘æ ¼ï¼Œä½¿ç”¨æ­£å¸¸çš„æ”¾ç½®é€»è¾‘
             return grid.PlaceItem(item, 0, 0);
         }
         
         /// <summary>
-        /// Ö±½Ó·ÅÖÃÎïÆ·µ½Íø¸ñ£¨ÈÆ¹ıÑéÖ¤£©
+        /// ç›´æ¥æ”¾ç½®ç‰©å“åˆ°ç½‘æ ¼ï¼ˆç»•è¿‡éªŒè¯ï¼‰
         /// </summary>
-        /// <param name="grid">Ä¿±êÍø¸ñ</param>
-        /// <param name="item">Òª·ÅÖÃµÄÎïÆ·</param>
-        /// <param name="posX">XÎ»ÖÃ</param>
-        /// <param name="posY">YÎ»ÖÃ</param>
-        /// <returns>ÊÇ·ñ³É¹¦·ÅÖÃ</returns>
+        /// <param name="grid">ç›®æ ‡ç½‘æ ¼</param>
+        /// <param name="item">è¦æ”¾ç½®çš„ç‰©å“</param>
+        /// <param name="posX">Xä½ç½®</param>
+        /// <param name="posY">Yä½ç½®</param>
+        /// <returns>æ˜¯å¦æˆåŠŸæ”¾ç½®</returns>
         private static bool PlaceItemDirectly(ItemGrid grid, Item item, int posX, int posY)
         {
             try
             {
-                // Ö±½ÓÉèÖÃÎïÆ·µÄÍø¸ñ×´Ì¬
+                // ç›´æ¥è®¾ç½®ç‰©å“çš„ç½‘æ ¼çŠ¶æ€
                 item.OnGridReference = grid;
                 item.OnGridPosition = new Vector2Int(posX, posY);
                 
-                // ÉèÖÃÎïÆ·µÄÎ»ÖÃ
+                // è®¾ç½®ç‰©å“çš„ä½ç½®
                 Vector2 targetPosition = grid.CalculatePositionOnGrid(item, posX, posY);
                 RectTransform rectTransform = item.GetComponent<RectTransform>();
                 if (rectTransform != null)
@@ -63,73 +63,73 @@ namespace InventorySystem
                     rectTransform.localPosition = targetPosition;
                 }
                 
-                // ´¥·¢·ÅÖÃÊÂ¼ş
+                // è§¦å‘æ”¾ç½®äº‹ä»¶
                 grid.TriggerItemPlacedEvent(item, new Vector2Int(posX, posY));
                 
                 return true;
             }
             catch (System.Exception e)
             {
-                Debug.LogError($"[EquipmentSlotGridExtension] Ö±½Ó·ÅÖÃÎïÆ·Ê§°Ü: {e.Message}");
+                Debug.LogError($"[EquipmentSlotGridExtension] ç›´æ¥æ”¾ç½®ç‰©å“å¤±è´¥: {e.Message}");
                 return false;
             }
         }
         
         /// <summary>
-        /// ´Ó×°±¸²ÛÖĞ°²È«ÒÆ³ıÎïÆ·
+        /// ä»è£…å¤‡æ§½ä¸­å®‰å…¨ç§»é™¤ç‰©å“
         /// </summary>
-        /// <param name="grid">×°±¸²ÛÍø¸ñ</param>
-        /// <param name="item">ÒªÒÆ³ıµÄÎïÆ·</param>
-        /// <returns>ÊÇ·ñ³É¹¦ÒÆ³ı</returns>
+        /// <param name="grid">è£…å¤‡æ§½ç½‘æ ¼</param>
+        /// <param name="item">è¦ç§»é™¤çš„ç‰©å“</param>
+        /// <returns>æ˜¯å¦æˆåŠŸç§»é™¤</returns>
         public static bool RemoveItemFromEquipmentSlot(this ItemGrid grid, Item item)
         {
             if (grid == null || item == null) return false;
             
             try
             {
-                // Çå³ıÎïÆ·µÄÍø¸ñ×´Ì¬
+                // æ¸…é™¤ç‰©å“çš„ç½‘æ ¼çŠ¶æ€
                 Vector2Int oldPosition = item.OnGridPosition;
                 item.ResetGridState();
                 
-                // ´¥·¢ÒÆ³ıÊÂ¼ş
+                // è§¦å‘ç§»é™¤äº‹ä»¶
                 grid.TriggerItemRemovedEvent(item, oldPosition);
                 
                 return true;
             }
             catch (System.Exception e)
             {
-                Debug.LogError($"[EquipmentSlotGridExtension] ´Ó×°±¸²ÛÒÆ³ıÎïÆ·Ê§°Ü: {e.Message}");
+                Debug.LogError($"[EquipmentSlotGridExtension] ä»è£…å¤‡æ§½ç§»é™¤ç‰©å“å¤±è´¥: {e.Message}");
                 return false;
             }
         }
         
         /// <summary>
-        /// ¼ì²éÎïÆ·ÊÇ·ñ¿ÉÒÔÔÚ×°±¸²ÛÖĞ·ÅÖÃ£¨×°±¸²ÛÌØÊâÂß¼­£©
+        /// æ£€æŸ¥ç‰©å“æ˜¯å¦å¯ä»¥åœ¨è£…å¤‡æ§½ä¸­æ”¾ç½®ï¼ˆè£…å¤‡æ§½ç‰¹æ®Šé€»è¾‘ï¼‰
         /// </summary>
-        /// <param name="grid">×°±¸²ÛÍø¸ñ</param>
-        /// <param name="item">Òª¼ì²éµÄÎïÆ·</param>
-        /// <returns>ÊÇ·ñ¿ÉÒÔ·ÅÖÃ</returns>
+        /// <param name="grid">è£…å¤‡æ§½ç½‘æ ¼</param>
+        /// <param name="item">è¦æ£€æŸ¥çš„ç‰©å“</param>
+        /// <returns>æ˜¯å¦å¯ä»¥æ”¾ç½®</returns>
         public static bool CanPlaceInEquipmentSlot(this ItemGrid grid, Item item)
         {
             if (grid == null || item == null) return false;
             
-            // ×°±¸²Û×ÜÊÇ¿ÉÒÔ·ÅÖÃÎïÆ·£¨ÓÉ×°±¸²Û×é¼ş¸ºÔğÑéÖ¤£©
+            // è£…å¤‡æ§½æ€»æ˜¯å¯ä»¥æ”¾ç½®ç‰©å“ï¼ˆç”±è£…å¤‡æ§½ç»„ä»¶è´Ÿè´£éªŒè¯ï¼‰
             if (grid.IsEquipmentSlotGrid())
             {
                 return true;
             }
             
-            // ³£¹æÍø¸ñÊ¹ÓÃÕı³£µÄÑéÖ¤Âß¼­
+            // å¸¸è§„ç½‘æ ¼ä½¿ç”¨æ­£å¸¸çš„éªŒè¯é€»è¾‘
             return grid.CanPlaceItemAtPosition(0, 0, item.GetWidth(), item.GetHeight(), item);
         }
         
         /// <summary>
-        /// Îª×°±¸²Û´´½¨ÁÙÊ±Íø¸ñ
+        /// ä¸ºè£…å¤‡æ§½åˆ›å»ºä¸´æ—¶ç½‘æ ¼
         /// </summary>
-        /// <param name="slotType">×°±¸²ÛÀàĞÍ</param>
-        /// <param name="size">Íø¸ñ³ß´ç</param>
-        /// <param name="parent">¸¸¼¶Transform</param>
-        /// <returns>´´½¨µÄÍø¸ñ</returns>
+        /// <param name="slotType">è£…å¤‡æ§½ç±»å‹</param>
+        /// <param name="size">ç½‘æ ¼å°ºå¯¸</param>
+        /// <param name="parent">çˆ¶çº§Transform</param>
+        /// <returns>åˆ›å»ºçš„ç½‘æ ¼</returns>
         public static ItemGrid CreateEquipmentSlotGrid(EquipmentSlotType slotType, Vector2Int size, Transform parent = null)
         {
             GameObject gridObject = new GameObject($"EquipmentSlot_{slotType}_Grid");
@@ -139,11 +139,11 @@ namespace InventorySystem
                 gridObject.transform.SetParent(parent);
             }
             
-            // Ìí¼Ó±ØÒªµÄUI×é¼ş
+            // æ·»åŠ å¿…è¦çš„UIç»„ä»¶
             var rectTransform = gridObject.AddComponent<RectTransform>();
-            rectTransform.sizeDelta = new Vector2(size.x * 64f, size.y * 64f); // ¼ÙÉèÃ¿¸ñ64ÏñËØ
+            rectTransform.sizeDelta = new Vector2(size.x * 64f, size.y * 64f); // å‡è®¾æ¯æ ¼64åƒç´ 
             
-            // Ìí¼ÓÍø¸ñ×é¼ş
+            // æ·»åŠ ç½‘æ ¼ç»„ä»¶
             var grid = gridObject.AddComponent<ItemGrid>();
             grid.gridSizeWidth = size.x;
             grid.gridSizeHeight = size.y;

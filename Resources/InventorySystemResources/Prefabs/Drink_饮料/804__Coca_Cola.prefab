@@ -132,8 +132,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemData: {fileID: 11400000, guid: a9269c2741b0c164795f06af7ed6465c, type: 2}
   gridWidth: 1
-  gridHeight: 2
-  gridSizeDisplay: "1 \xD7 2"
+  gridHeight: 1
+  gridSizeDisplay: "1 \xD7 1"
   backgroundImage: {fileID: 4494544518071044708}
   iconImage: {fileID: 7230150135023905188}
   displayText: {fileID: 618069387301801955}
@@ -162,6 +162,7 @@ MonoBehaviour:
   onGridReference: {fileID: 0}
   onGridPosition: {x: 0, y: 0}
   isRotated: 0
+  autoGridSizeAdjustment: 1
 --- !u!114 &8326770443152947449
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -177,6 +178,7 @@ MonoBehaviour:
   canvas: {fileID: 0}
   graphicRaycaster: {fileID: 0}
   canvasGroup: {fileID: 0}
+  dragItemSize: {x: 192, y: 192}
 --- !u!114 &472268109449361403
 MonoBehaviour:
   m_ObjectHideFlags: 0

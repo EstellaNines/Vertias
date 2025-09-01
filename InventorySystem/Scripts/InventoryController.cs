@@ -77,7 +77,18 @@ public class InventoryController : MonoBehaviour
     public void RefreshGridInteracts()
     {
         allGridInteracts.Clear();
-        allGridInteracts.AddRange(FindObjectsOfType<GridInteract>());
+        
+        // 查找所有有效的GridInteract组件，过滤掉已销毁的对象
+        var foundGridInteracts = FindObjectsOfType<GridInteract>();
+        foreach (var gridInteract in foundGridInteracts)
+        {
+            if (gridInteract != null && gridInteract.gameObject != null)
+            {
+                allGridInteracts.Add(gridInteract);
+            }
+        }
+        
+        Debug.Log($"[InventoryController] 刷新网格交互列表，找到 {allGridInteracts.Count} 个有效网格");
     }
 
     // 更新放置指示器
@@ -197,15 +208,18 @@ public class InventoryController : MonoBehaviour
         // 如果没有直接命中物品，再检查是否有网格背景
         foreach (RaycastResult result in results)
         {
+            // 确保result.gameObject存在且未被销毁
+            if (result.gameObject == null) continue;
+            
             ItemGrid itemGrid = result.gameObject.GetComponent<ItemGrid>();
-            if (itemGrid != null)
+            if (itemGrid != null && itemGrid.gameObject != null)
             {
                 return itemGrid;
             }
 
             // 也检查父物体，以防点到网格的子元素
             itemGrid = result.gameObject.GetComponentInParent<ItemGrid>();
-            if (itemGrid != null)
+            if (itemGrid != null && itemGrid.gameObject != null)
             {
                 return itemGrid;
             }

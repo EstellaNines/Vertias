@@ -368,6 +368,11 @@ public class ItemGrid : MonoBehaviour
     // 网格尺寸访问器
     public int CurrentWidth => gridSizeWidth;
     public int CurrentHeight => gridSizeHeight;
+    
+    /// <summary>
+    /// 检查网格是否已完全初始化
+    /// </summary>
+    public bool IsGridInitialized => itemSlot != null && gridSizeWidth > 0 && gridSizeHeight > 0;
 
     // 初始化网格大小
     void Init(int width, int height)
