@@ -95,6 +95,38 @@ public class InventoryHighlight : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 为装备槽设置高亮
+    /// </summary>
+    /// <param name="equipmentSlot">目标装备槽</param>
+    /// <param name="canEquip">是否可以装备</param>
+    public void SetEquipmentSlotHighlight(InventorySystem.EquipmentSlot equipmentSlot, bool canEquip)
+    {
+        if (highlighter == null || equipmentSlot == null) return;
+
+        // 设置父级为装备槽
+        highlighter.SetParent(equipmentSlot.transform);
+        
+        // 设置高亮尺寸为装备槽尺寸
+        RectTransform slotRect = equipmentSlot.GetComponent<RectTransform>();
+        if (slotRect != null)
+        {
+            highlighter.sizeDelta = slotRect.sizeDelta;
+        }
+        
+        // 设置高亮位置为装备槽中心
+        highlighter.localPosition = Vector3.zero;
+        highlighter.anchorMin = new Vector2(0.5f, 0.5f);
+        highlighter.anchorMax = new Vector2(0.5f, 0.5f);
+        highlighter.pivot = new Vector2(0.5f, 0.5f);
+        
+        // 设置高亮颜色
+        SetCanPlace(canEquip);
+        
+        // 显示高亮
+        Show(true);
+    }
+
     // 设置高亮的父级
     public void SetParent(ItemGrid targetGrid)
     {

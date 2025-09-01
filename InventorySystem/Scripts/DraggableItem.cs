@@ -210,8 +210,11 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
             originalHighlightSize = itemHighlight.sizeDelta;
         }
 
-        // 若物品在装备槽中，恢复原始大小
-        // 装备槽功能待实现
+        // 若物品在装备槽中，从装备槽移除
+        if (TryRemoveFromEquipmentSlot())
+        {
+            Debug.Log($"DraggableItem: 从装备槽中移除物品 {item.name}");
+        }
 
         // 若物品在网格中，从网格移除
         if (item != null && item.IsOnGrid())
@@ -222,6 +225,12 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
                 currentGrid.PickUpItem(item.OnGridPosition.x, item.OnGridPosition.y);
             }
             item.ResetGridState();
+        }
+        
+        // 恢复物品的真实视觉尺寸（不使用网格强制的尺寸）
+        if (item != null)
+        {
+            item.RestoreRealVisualSize();
         }
 
         // 设置为半透明并禁用射线检测
@@ -285,6 +294,58 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         return null;
     }
 
+    /// <summary>
+    /// 尝试从装备槽中移除物品
+    /// </summary>
+    /// <returns>是否成功移除</returns>
+    private bool TryRemoveFromEquipmentSlot()
+    {
+        // 检查物品是否在装备槽中
+        InventorySystem.EquipmentSlot currentEquipmentSlot = transform.GetComponentInParent<InventorySystem.EquipmentSlot>();
+        if (currentEquipmentSlot == null) return false;
+
+        // 检查这个装备槽是否确实装备了这个物品
+        if (currentEquipmentSlot.CurrentEquippedItem?.gameObject != gameObject) return false;
+
+        // 从装备槽中卸下物品
+        ItemDataReader unequippedItem = currentEquipmentSlot.UnequipItem();
+        return unequippedItem != null;
+    }
+
+    /// <summary>
+    /// 尝试将物品放置到装备槽中
+    /// </summary>
+    /// <param name="eventData">拖拽事件数据</param>
+    /// <returns>是否成功放置</returns>
+    private bool TryPlaceInEquipmentSlot(PointerEventData eventData)
+    {
+        // 检查鼠标下方是否有装备槽
+        GameObject targetObject = eventData.pointerCurrentRaycast.gameObject;
+        if (targetObject == null) return false;
+
+        // 向上查找装备槽组件
+        InventorySystem.EquipmentSlot equipmentSlot = targetObject.GetComponentInParent<InventorySystem.EquipmentSlot>();
+        if (equipmentSlot == null) return false;
+
+        // 检查物品是否有ItemDataReader组件
+        ItemDataReader itemDataReader = GetComponent<ItemDataReader>();
+        if (itemDataReader == null) return false;
+
+        // 尝试装备物品
+        bool equipSuccess = equipmentSlot.EquipItem(itemDataReader);
+        
+        if (equipSuccess)
+        {
+            Debug.Log($"DraggableItem: 成功将物品 {item.name} 装备到装备槽 {equipmentSlot.SlotType}");
+            return true;
+        }
+        else
+        {
+            Debug.LogWarning($"DraggableItem: 无法将物品 {item.name} 装备到装备槽 {equipmentSlot.SlotType}");
+            return false;
+        }
+    }
+
     public void OnEndDrag(PointerEventData eventData)
     {
         // 恢复透明度和交互逻辑
@@ -342,7 +403,10 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         }
 
         // 如果网格放置失败，尝试装备槽
-        // 装备槽功能待实现
+        if (!validDrop)
+        {
+            validDrop = TryPlaceInEquipmentSlot(eventData);
+        }
 
         // 如果没有有效放置目标，则还原位置
         if (!validDrop)

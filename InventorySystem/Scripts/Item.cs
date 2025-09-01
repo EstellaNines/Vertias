@@ -10,6 +10,7 @@ public class Item : MonoBehaviour
     [SerializeField] private ItemGrid onGridReference;  // 当前所在的网格引用
     [SerializeField] private Vector2Int onGridPosition = Vector2Int.zero;  // 在网格中的位置
     [SerializeField] private bool isRotated = false;  // 是否旋转（90°）
+    [SerializeField] private bool autoGridSizeAdjustment = true;  // 是否自动调整网格尺寸
 
 
 
@@ -100,8 +101,19 @@ public class Item : MonoBehaviour
     public void AdjustVisualSizeForGrid()
     {
         if (rectTransform == null) return;
+        
+        // 如果禁用了自动尺寸调整（比如在装备槽中），则跳过尺寸调整
+        if (!autoGridSizeAdjustment)
+        {
+            Debug.Log($"[Item] 跳过物品 {name} 的自动尺寸调整（装备槽模式）");
+            return;
+        }
+        
         Vector2 size = new Vector2(GetWidth() * ItemGrid.tileSizeWidth, GetHeight() * ItemGrid.tileSizeHeight);
         rectTransform.sizeDelta = size;
+        
+        // 调整所有子组件以适应网格尺寸
+        AdjustChildrenForGridSize(size);
 
         // 旋转物品UI，但保持TMP文字组件不旋转且位置正确
         float rotationAngle = isRotated ? 90f : 0f;
@@ -136,6 +148,46 @@ public class Item : MonoBehaviour
                 }
 
                 textRect.anchoredPosition = textPosition;
+                
+                // 恢复文本组件的默认尺寸和字体大小
+                textRect.sizeDelta = InventorySystem.ItemPrefabConstants.ItemTextDefaults.OriginalSize;
+                
+                var textComponent = textRect.GetComponent<TMPro.TextMeshProUGUI>();
+                if (textComponent != null)
+                {
+                    textComponent.fontSize = InventorySystem.ItemPrefabConstants.ItemTextDefaults.OriginalFontSize;
+                }
+            }
+        }
+        
+        Debug.Log($"[Item] 物品 {name} 已调整为网格尺寸: {size}，旋转: {rotationAngle}度");
+    }
+    
+    /// <summary>
+    /// 调整子组件以适应网格尺寸
+    /// </summary>
+    /// <param name="gridSize">网格尺寸</param>
+    private void AdjustChildrenForGridSize(Vector2 gridSize)
+    {
+        // 调整所有子组件的尺寸以匹配网格要求
+        for (int i = 0; i < rectTransform.childCount; i++)
+        {
+            Transform child = rectTransform.GetChild(i);
+            RectTransform childRect = child.GetComponent<RectTransform>();
+            
+            if (childRect != null)
+            {
+                string childName = child.name;
+                
+                if (childName == InventorySystem.ItemPrefabConstants.ChildNames.ItemBackground || 
+                    childName == InventorySystem.ItemPrefabConstants.ChildNames.ItemIcon || 
+                    childName == InventorySystem.ItemPrefabConstants.ChildNames.ItemHighlight)
+                {
+                    // 背景、图标和高亮需要与主物品同步为网格尺寸
+                    childRect.sizeDelta = gridSize;
+                    Debug.Log($"[Item] 调整子组件 {childName} 为网格尺寸: {gridSize}");
+                }
+                // 文本组件在主方法中单独处理
             }
         }
     }
@@ -145,6 +197,99 @@ public class Item : MonoBehaviour
     {
         onGridReference = null;
         onGridPosition = Vector2Int.zero;
+    }
+    
+    /// <summary>
+    /// 设置是否自动调整网格尺寸
+    /// </summary>
+    /// <param name="enabled">是否启用自动调整</param>
+    public void SetAutoGridSizeAdjustment(bool enabled)
+    {
+        autoGridSizeAdjustment = enabled;
+        Debug.Log($"[Item] 物品 {name} 自动网格尺寸调整: {(enabled ? "启用" : "禁用")}");
+    }
+    
+    /// <summary>
+    /// 获取物品的真实视觉尺寸（基于原始图片）
+    /// </summary>
+    /// <returns>真实视觉尺寸</returns>
+    public Vector2 GetRealVisualSize()
+    {
+        if (itemDataReader?.ItemData?.itemIcon != null)
+        {
+            Sprite itemSprite = itemDataReader.ItemData.itemIcon;
+            return new Vector2(itemSprite.rect.width, itemSprite.rect.height);
+        }
+        
+        // 如果没有图片数据，返回当前尺寸
+        if (rectTransform != null)
+        {
+            return rectTransform.sizeDelta;
+        }
+        
+        return Vector2.zero;
+    }
+    
+    /// <summary>
+    /// 恢复物品的真实视觉尺寸
+    /// </summary>
+    public void RestoreRealVisualSize()
+    {
+        if (rectTransform == null) return;
+        
+        Vector2 realSize = GetRealVisualSize();
+        if (realSize != Vector2.zero)
+        {
+            // 恢复主物品尺寸
+            rectTransform.sizeDelta = realSize;
+            
+            // 恢复所有子组件的尺寸
+            RestoreChildrenRealSize(realSize);
+            
+            Debug.Log($"[Item] 恢复物品 {name} 真实尺寸: {realSize}");
+        }
+    }
+    
+    /// <summary>
+    /// 恢复子组件的真实尺寸
+    /// </summary>
+    /// <param name="realSize">真实尺寸</param>
+    private void RestoreChildrenRealSize(Vector2 realSize)
+    {
+        if (rectTransform == null) return;
+        
+        // 恢复所有子组件的原始尺寸
+        for (int i = 0; i < rectTransform.childCount; i++)
+        {
+            Transform child = rectTransform.GetChild(i);
+            RectTransform childRect = child.GetComponent<RectTransform>();
+            
+            if (childRect != null)
+            {
+                string childName = child.name;
+                
+                if (childName == InventorySystem.ItemPrefabConstants.ChildNames.ItemBackground || 
+                    childName == InventorySystem.ItemPrefabConstants.ChildNames.ItemIcon || 
+                    childName == InventorySystem.ItemPrefabConstants.ChildNames.ItemHighlight)
+                {
+                    // 背景、图标和高亮恢复为与主物品相同的尺寸
+                    childRect.sizeDelta = realSize;
+                }
+                else if (childName == InventorySystem.ItemPrefabConstants.ChildNames.ItemText)
+                {
+                    // 文本组件恢复原始位置和尺寸
+                    childRect.anchoredPosition = InventorySystem.ItemPrefabConstants.ItemTextDefaults.OriginalPosition;
+                    childRect.sizeDelta = InventorySystem.ItemPrefabConstants.ItemTextDefaults.OriginalSize;
+                    
+                    // 恢复字体大小
+                    var textComponent = childRect.GetComponent<TMPro.TextMeshProUGUI>();
+                    if (textComponent != null)
+                    {
+                        textComponent.fontSize = InventorySystem.ItemPrefabConstants.ItemTextDefaults.OriginalFontSize;
+                    }
+                }
+            }
+        }
     }
 
     // 设置物品在网格中的状态

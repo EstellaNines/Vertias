@@ -451,8 +451,8 @@ public class ItemGrid : MonoBehaviour
             return false;
         }
 
-        // 基础验证：冲突检查
-        if (HasItemConflict(posX, posY, item.GetWidth(), item.GetHeight()))
+        // 基础验证：冲突检查（排除当前物品本身）
+        if (HasItemConflict(posX, posY, item.GetWidth(), item.GetHeight(), item))
         {
             Debug.LogWarning($"ItemGrid: 位置 ({posX}, {posY}) 已被占用");
             return false;
@@ -701,6 +701,24 @@ public class ItemGrid : MonoBehaviour
         
         // 触发网格清空事件
         OnGridCleared?.Invoke(this);
+    }
+    
+    // 公共方法：触发物品放置事件（供外部类调用）
+    public void TriggerItemPlacedEvent(Item item, Vector2Int position)
+    {
+        OnItemPlaced?.Invoke(item, position);
+    }
+    
+    // 公共方法：触发物品移除事件（供外部类调用）
+    public void TriggerItemRemovedEvent(Item item, Vector2Int position)
+    {
+        OnItemRemoved?.Invoke(item, position);
+    }
+    
+    // 公共方法：触发物品移动事件（供外部类调用）
+    public void TriggerItemMovedEvent(Item item, Vector2Int oldPosition, Vector2Int newPosition)
+    {
+        OnItemMoved?.Invoke(item, oldPosition, newPosition);
     }
 }
 

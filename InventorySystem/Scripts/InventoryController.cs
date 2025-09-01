@@ -353,6 +353,19 @@ public class InventoryController : MonoBehaviour
             return;
         }
 
+        // 优先检查装备槽
+        InventorySystem.EquipmentSlot targetEquipmentSlot = GetEquipmentSlotUnderMouse();
+        if (targetEquipmentSlot != null)
+        {
+            // 检查物品是否可以装备到这个槽位
+            ItemDataReader itemDataReader = draggingItem.GetComponent<ItemDataReader>();
+            bool canEquip = targetEquipmentSlot.CanAcceptItem(itemDataReader);
+            
+            // 显示装备槽高亮
+            ShowEquipmentSlotHighlight(targetEquipmentSlot, canEquip);
+            return;
+        }
+
         // 获取鼠标下的网格
         ItemGrid targetGrid = GetItemGridUnderMouse();
         if (targetGrid == null)
@@ -401,6 +414,48 @@ public class InventoryController : MonoBehaviour
         // 显示高亮
         inventoryHighlight.Show(true);
 
+        isHighlightActive = true;
+    }
+
+    /// <summary>
+    /// 获取鼠标下方的装备槽
+    /// </summary>
+    /// <returns>鼠标下方的装备槽，如果没有则返回null</returns>
+    private InventorySystem.EquipmentSlot GetEquipmentSlotUnderMouse()
+    {
+        // 使用UI射线检测
+        UnityEngine.EventSystems.PointerEventData pointerData = new UnityEngine.EventSystems.PointerEventData(UnityEngine.EventSystems.EventSystem.current)
+        {
+            position = Input.mousePosition
+        };
+
+        var results = new System.Collections.Generic.List<UnityEngine.EventSystems.RaycastResult>();
+        UnityEngine.EventSystems.EventSystem.current.RaycastAll(pointerData, results);
+
+        foreach (var result in results)
+        {
+            InventorySystem.EquipmentSlot equipmentSlot = result.gameObject.GetComponentInParent<InventorySystem.EquipmentSlot>();
+            if (equipmentSlot != null)
+            {
+                return equipmentSlot;
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// 显示装备槽高亮
+    /// </summary>
+    /// <param name="equipmentSlot">目标装备槽</param>
+    /// <param name="canEquip">是否可以装备</param>
+    private void ShowEquipmentSlotHighlight(InventorySystem.EquipmentSlot equipmentSlot, bool canEquip)
+    {
+        if (inventoryHighlight == null || equipmentSlot == null) return;
+
+        // 使用扩展的装备槽高亮方法
+        inventoryHighlight.SetEquipmentSlotHighlight(equipmentSlot, canEquip);
+        
         isHighlightActive = true;
     }
 }
