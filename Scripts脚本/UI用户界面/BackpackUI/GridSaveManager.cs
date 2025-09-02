@@ -3,6 +3,7 @@ using UnityEngine;
 
 /// <summary>
 /// 网格保存管理器 - 专门处理动态网格的保存和加载
+/// 注意：此管理器不处理高亮提示器，提示器由InventoryController统一管理
 /// </summary>
 public class GridSaveManager : MonoBehaviour
 {
@@ -53,6 +54,49 @@ public class GridSaveManager : MonoBehaviour
         {
             InventorySaveManager.Instance.RegisterGridByGUID(currentItemGrid);
             Debug.Log($"GridSaveManager: 已注册网格到保存系统 - GUID: {currentGridGUID}, 类型: {currentItemGrid.GridType}");
+
+            // 延迟加载数据
+            StartCoroutine(LoadGridDataDelayed());
+        }
+        else
+        {
+            Debug.LogWarning("GridSaveManager: InventorySaveManager实例不存在，无法注册网格保存功能");
+        }
+    }
+    
+    /// <summary>
+    /// 使用指定GUID注册网格到保存系统并加载数据（新方法）
+    /// </summary>
+    /// <param name="uniqueGridGUID">唯一的网格GUID</param>
+    /// <param name="isWarehouse">是否为仓库网格</param>
+    public void RegisterAndLoadGridWithGUID(string uniqueGridGUID, bool isWarehouse)
+    {
+        if (currentItemGrid == null || string.IsNullOrEmpty(uniqueGridGUID))
+        {
+            Debug.LogError("GridSaveManager: 当前网格或GUID未设置！");
+            return;
+        }
+
+        // 使用传入的唯一GUID设置网格属性
+        currentItemGrid.GridGUID = uniqueGridGUID;
+        currentGridGUID = uniqueGridGUID;
+        
+        if (isWarehouse)
+        {
+            currentItemGrid.GridName = $"仓库网格 ({uniqueGridGUID})";
+            currentItemGrid.GridType = GridType.Storage;
+        }
+        else
+        {
+            currentItemGrid.GridName = $"地面网格 ({uniqueGridGUID})";
+            currentItemGrid.GridType = GridType.Ground;
+        }
+
+        // 注册到保存系统
+        if (InventorySaveManager.Instance != null)
+        {
+            InventorySaveManager.Instance.RegisterGridByGUID(currentItemGrid);
+            Debug.Log($"GridSaveManager: 已注册唯一网格到保存系统 - GUID: {currentGridGUID}, 类型: {currentItemGrid.GridType}");
 
             // 延迟加载数据
             StartCoroutine(LoadGridDataDelayed());
@@ -137,9 +181,20 @@ public class GridSaveManager : MonoBehaviour
             return false;
         }
     }
+    
+    /// <summary>
+    /// 强制保存当前网格数据（不管是否有物品）
+    /// </summary>
+    /// <returns>保存是否成功</returns>
+    public bool ForceSaveCurrentGrid()
+    {
+        return SaveCurrentGrid(true);
+    }
 
     /// <summary>
     /// 取消注册当前网格
+    /// 注意：此方法只处理网格数据的注销，不涉及高亮提示器的处理
+    /// 高亮提示器的管理由BackpackPanelController负责调用InventoryController处理
     /// </summary>
     public void UnregisterCurrentGrid()
     {

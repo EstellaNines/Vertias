@@ -27,6 +27,9 @@ public class InventoryController : MonoBehaviour
 
     // 放置指示器状态
     private bool isHighlightActive = false;
+    
+    // 提示器原始父对象（用于恢复）
+    private Transform originalHighlightParent;
 
     private void Start()
     {
@@ -45,6 +48,21 @@ public class InventoryController : MonoBehaviour
             {
                 Debug.LogWarning("InventoryController: 未找到InventoryHighlight组件，放置指示器功能将不可用");
             }
+            else
+            {
+                Debug.Log($"InventoryController: 自动找到InventoryHighlight组件 - {inventoryHighlight.name}");
+            }
+        }
+        else
+        {
+            Debug.Log($"InventoryController: 使用手动分配的InventoryHighlight组件 - {inventoryHighlight.name}");
+        }
+        
+        // 保存提示器的原始父对象
+        if (inventoryHighlight != null)
+        {
+            originalHighlightParent = inventoryHighlight.transform.parent;
+            Debug.Log($"InventoryController: 已保存提示器原始父对象 - {originalHighlightParent?.name}");
         }
 
         // 设置默认ID和名称（如果未设置）
@@ -333,6 +351,34 @@ public class InventoryController : MonoBehaviour
     public void OnItemDragStart(Item item)
     {
         SetSelectedItem(item);
+        
+        // 验证并确保提示器可用
+        if (!IsHighlightAvailable())
+        {
+            Debug.LogError("InventoryController: 拖拽开始时提示器不可用！尝试重新初始化...");
+            
+            // 强制重新查找提示器
+            inventoryHighlight = FindObjectOfType<InventoryHighlight>();
+            if (inventoryHighlight != null)
+            {
+                Debug.Log($"InventoryController: 重新找到提示器 - {inventoryHighlight.name}，父级: {inventoryHighlight.transform.parent?.name}");
+                
+                // 确保提示器在正确的父级下
+                if (inventoryHighlight.transform.parent != this.transform)
+                {
+                    Debug.Log("InventoryController: 将提示器移回InventoryController");
+                    inventoryHighlight.transform.SetParent(this.transform, false);
+                }
+            }
+            else
+            {
+                Debug.LogError("InventoryController: 无法重新找到提示器组件！");
+            }
+        }
+        else
+        {
+            Debug.Log($"InventoryController: 拖拽开始，提示器可用 - {inventoryHighlight.name}，父级: {inventoryHighlight.transform.parent?.name}");
+        }
     }
 
     // 外部接口：结束拖拽时调用
@@ -384,8 +430,22 @@ public class InventoryController : MonoBehaviour
     // 拖拽时的实时高亮更新（专门用于拖拽场景）
     public void UpdateDragHighlight(Item draggingItem, Vector3 mousePosition)
     {
-        // 如果没有拖拽物品或高亮组件，隐藏高亮
-        if (draggingItem == null || inventoryHighlight == null)
+        // 检查提示器组件状态
+        if (inventoryHighlight == null)
+        {
+            Debug.LogWarning("InventoryController: UpdateDragHighlight - inventoryHighlight为null");
+            return;
+        }
+        
+        if (inventoryHighlight.gameObject == null)
+        {
+            Debug.LogWarning("InventoryController: UpdateDragHighlight - inventoryHighlight的GameObject被销毁");
+            inventoryHighlight = null;
+            return;
+        }
+        
+        // 如果没有拖拽物品，隐藏高亮
+        if (draggingItem == null)
         {
             if (isHighlightActive)
             {
@@ -498,6 +558,118 @@ public class InventoryController : MonoBehaviour
         inventoryHighlight.SetEquipmentSlotHighlight(equipmentSlot, canEquip);
         
         isHighlightActive = true;
+    }
+    
+    /// <summary>
+    /// 重置提示器状态
+    /// 简化版本 - 提示器始终保持在InventoryController下
+    /// </summary>
+    public void ResetHighlight()
+    {
+        if (inventoryHighlight == null) return;
+        
+        // 隐藏提示器
+        inventoryHighlight.Show(false);
+        
+        // 重置提示器状态
+        inventoryHighlight.Reset();
+        
+        isHighlightActive = false;
+        
+        Debug.Log("InventoryController: 提示器已重置");
+    }
+    
+    /// <summary>
+    /// 强制将提示器返回到InventoryController
+    /// 用于网格销毁前的安全回收
+    /// </summary>
+    public void ForceReturnHighlightToController()
+    {
+        if (inventoryHighlight == null) return;
+        
+        // 直接检查InventoryHighlight组件的Transform
+        Transform highlighterTransform = inventoryHighlight.transform;
+        
+        // 检查提示器当前是否在其他父级下
+        if (highlighterTransform.parent != this.transform)
+        {
+            string oldParentName = highlighterTransform.parent?.name ?? "null";
+            
+            // 隐藏提示器
+            inventoryHighlight.Show(false);
+            
+            // 将提示器返回到InventoryController下
+            highlighterTransform.SetParent(this.transform, false);
+            
+            // 重置提示器状态
+            inventoryHighlight.Reset();
+            
+            isHighlightActive = false;
+            
+            Debug.Log($"InventoryController: 强制回收提示器从 {oldParentName} 到 InventoryController");
+        }
+        else
+        {
+            Debug.Log("InventoryController: 提示器已经在InventoryController下，无需回收");
+        }
+    }
+    
+    /// <summary>
+    /// 获取高亮提示器组件
+    /// 供外部使用，确保提示器可用
+    /// </summary>
+    public InventoryHighlight GetHighlightComponent()
+    {
+        return inventoryHighlight;
+    }
+    
+    /// <summary>
+    /// 设置高亮提示器组件
+    /// 允许外部重新分配提示器
+    /// </summary>
+    public void SetHighlightComponent(InventoryHighlight highlight)
+    {
+        if (highlight == null)
+        {
+            Debug.LogWarning("InventoryController: 尝试设置空的高亮提示器");
+            return;
+        }
+        
+        inventoryHighlight = highlight;
+        
+        // 更新原始父对象引用
+        if (originalHighlightParent == null)
+        {
+            originalHighlightParent = this.transform;
+        }
+        
+        Debug.Log("InventoryController: 已设置新的高亮提示器组件");
+    }
+    
+    /// <summary>
+    /// 检查提示器是否可用
+    /// </summary>
+    public bool IsHighlightAvailable()
+    {
+        bool isAvailable = inventoryHighlight != null && inventoryHighlight.gameObject != null;
+        
+        if (!isAvailable)
+        {
+            Debug.LogWarning($"InventoryController: 提示器不可用 - inventoryHighlight={inventoryHighlight != null}, gameObject={(inventoryHighlight?.gameObject != null)}");
+            
+            // 尝试重新查找提示器
+            if (inventoryHighlight == null)
+            {
+                inventoryHighlight = FindObjectOfType<InventoryHighlight>();
+                if (inventoryHighlight != null)
+                {
+                    Debug.Log($"InventoryController: 重新找到提示器组件 - {inventoryHighlight.name}");
+                    isAvailable = true;
+                }
+            }
+        }
+        
+        return isAvailable;
     }
     
     private void OnDestroy()

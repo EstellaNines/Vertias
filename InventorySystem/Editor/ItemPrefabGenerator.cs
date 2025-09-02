@@ -188,11 +188,12 @@ namespace InventorySystem.Editor
 
             GUILayout.Space(20);
             GUILayout.Label("说明:", EditorStyles.boldLabel);
-            GUILayout.Label("? 从ItemDataSO为每个物品生成对应的UI预制体");
-            GUILayout.Label("? 预制体包含ItemBackground、ItemIcon和TMP文本");
-            GUILayout.Label("? 根据物品类型显示相应数值（弹药、货币等）");
-            GUILayout.Label("? 按分类文件夹存储预制体");
-            GUILayout.Label("? TMP文本格式为居右与文本框居中");
+            GUILayout.Label("? 根据ItemDataSO为每个物品生成对应的UI预制件");
+            GUILayout.Label("? 预制件包含ItemBackground、ItemIcon、TMP文本");
+            GUILayout.Label("? 根据物品类型显示对应的值（弹药、药品等）");
+            GUILayout.Label("? 按分类文件夹存储预制件");
+            GUILayout.Label("? TMP文本格式为右下角文本显示");
+            EditorGUILayout.HelpBox("预制件命名使用单下划线（与ItemDataSO一致）", MessageType.Info);
         }
 
         private void GenerateAllItemPrefabs()
@@ -441,7 +442,8 @@ namespace InventorySystem.Editor
                 itemDataReader.maxHealAmount = itemData.maxHealAmount;
         
                 // 生成预制体文件名
-                string fileName = $"{itemData.id}__{SanitizeFileName(itemData.itemName)}.prefab";
+                // 生成预制件文件名（使用单下划线，与ItemDataSO命名一致）
+                string fileName = $"{itemData.id}_{SanitizeFileName(itemData.itemName)}.prefab";
                 string prefabPath = Path.Combine(outputPath, fileName).Replace("\\", "/");
         
                 // 创建预制体
@@ -580,7 +582,7 @@ namespace InventorySystem.Editor
                 fileName = fileName.Replace(c, '_');
             }
 
-            // 移除一些特殊字符
+            // 移除一些特殊字符（保持与ItemDataSO命名一致）
             fileName = fileName.Replace(" ", "_")
                               .Replace(".", "_")
                               .Replace("-", "_")

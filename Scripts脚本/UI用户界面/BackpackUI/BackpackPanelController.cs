@@ -22,10 +22,18 @@ public class BackpackPanelController : MonoBehaviour
     [Header("调试设置")]
     [SerializeField] private bool showDebugLog = true;
     
+    [Header("背包标识设置")]
+    [FieldLabel("背包唯一ID")]
+    [Tooltip("背包的唯一标识符，留空则自动生成。不同背包必须有不同的ID！")]
+    [SerializeField] private string backpackUniqueId = "";
+    
     // 当前网格状态
     private GameObject currentGrid;
     private GridSaveManager gridSaveManager;
     private bool isInitialized = false;
+    
+    // InventoryController引用（用于管理提示器）
+    private InventoryController inventoryController;
     
     // 事件：当网格切换完成时触发
     public System.Action<bool> OnGridSwitchCompleted; // bool: isWarehouse
@@ -35,12 +43,37 @@ public class BackpackPanelController : MonoBehaviour
     private void Awake()
     {
         // 在Awake中完成核心初始化，确保更早执行
+        InitializeBackpackId();
         InitializeGridSaveManager();
         EnsureSaveManagerExists();
+        EnsureInventoryControllerExists();
         isInitialized = true;
         
         if (showDebugLog)
-            Debug.Log("BackpackPanelController: Awake初始化完成");
+            Debug.Log($"BackpackPanelController: Awake初始化完成，背包ID: {backpackUniqueId}");
+    }
+    
+    /// <summary>
+    /// 初始化背包唯一ID
+    /// </summary>
+    private void InitializeBackpackId()
+    {
+        // 如果没有设置背包ID，自动生成一个
+        if (string.IsNullOrEmpty(backpackUniqueId))
+        {
+            // 使用GameObject实例ID + 时间戳生成唯一ID
+            int instanceId = GetInstanceID();
+            string timeStamp = System.DateTime.Now.Ticks.ToString();
+            backpackUniqueId = $"backpack_{Mathf.Abs(instanceId)}_{timeStamp.Substring(timeStamp.Length - 8)}";
+            
+            if (showDebugLog)
+                Debug.Log($"BackpackPanelController: 自动生成背包ID: {backpackUniqueId}");
+        }
+        else
+        {
+            if (showDebugLog)
+                Debug.Log($"BackpackPanelController: 使用预设背包ID: {backpackUniqueId}");
+        }
     }
     
     private void Start()
@@ -88,6 +121,27 @@ public class BackpackPanelController : MonoBehaviour
     }
     
     /// <summary>
+    /// 确保InventoryController引用存在
+    /// </summary>
+    private void EnsureInventoryControllerExists()
+    {
+        if (inventoryController == null)
+        {
+            inventoryController = FindObjectOfType<InventoryController>();
+            if (inventoryController == null)
+            {
+                if (showDebugLog)
+                    Debug.LogWarning("BackpackPanelController: 未找到InventoryController，提示器管理功能可能不可用");
+            }
+            else
+            {
+                if (showDebugLog)
+                    Debug.Log("BackpackPanelController: 已找到InventoryController引用");
+            }
+        }
+    }
+    
+    /// <summary>
     /// 强制初始化（用于解决生命周期时序问题）
     /// </summary>
     private void ForceInitialize()
@@ -106,6 +160,7 @@ public class BackpackPanelController : MonoBehaviour
         }
         
         EnsureSaveManagerExists();
+        EnsureInventoryControllerExists();
         isInitialized = true;
         
         if (showDebugLog)
@@ -132,11 +187,32 @@ public class BackpackPanelController : MonoBehaviour
         if (showDebugLog)
             Debug.Log($"BackpackPanelController: 激活面板 - 仓库模式: {isInWarehouse}");
         
-        // 清理当前网格
-        CleanupCurrentGrid();
+        // 检查是否需要切换网格（避免重复打开相同网格时的不必要操作）
+        bool needGridSwitch = ShouldSwitchGrid(isInWarehouse);
         
-        // 创建新网格
-        CreateAndSetupGrid(isInWarehouse);
+        if (needGridSwitch)
+        {
+            if (showDebugLog)
+                Debug.Log($"BackpackPanelController: 需要切换网格到 {(isInWarehouse ? "仓库" : "地面")} 模式");
+            
+            // 清理当前网格（不需要移动提示器）
+            CleanupCurrentGrid(false);
+            
+            // 创建新网格
+            CreateAndSetupGrid(isInWarehouse);
+        }
+        else
+        {
+            if (showDebugLog)
+                Debug.Log($"BackpackPanelController: 网格已是 {(isInWarehouse ? "仓库" : "地面")} 模式，无需切换，保持提示器状态不变");
+            
+            // 当不需要切换网格时，不要做任何可能影响提示器的操作
+            // 让提示器保持当前状态，避免重复设置导致的问题
+            // EnsureHighlightAvailable(); // 注释掉这行，避免重复设置
+        }
+        
+        // 更新标题文本（无论是否切换网格都需要更新）
+        UpdateTitleText(isInWarehouse);
         
         // 触发事件
         OnGridSwitchCompleted?.Invoke(isInWarehouse);
@@ -150,8 +226,14 @@ public class BackpackPanelController : MonoBehaviour
         if (showDebugLog)
             Debug.Log("BackpackPanelController: 关闭面板");
         
+        // 在关闭前强制保存所有数据
+        ForcesSaveAllData();
+        
+        // 重置提示器状态（提示器始终在InventoryController下）
+        ResetHighlightState();
+        
         // 清理当前网格
-        CleanupCurrentGrid();
+        CleanupCurrentGrid(true);
     }
     
     /// <summary>
@@ -278,15 +360,30 @@ public class BackpackPanelController : MonoBehaviour
             return;
         }
 
-        // 设置网格到保存管理器
-        string gridGUID = isInWarehouse ? "warehouse_grid_main" : "ground_grid_main";
+        // 为仓库网格使用预制件中设置的固定GUID，为地面网格使用动态GUID
+        string gridGUID;
+        if (isInWarehouse)
+        {
+            // 仓库网格：使用预制件中设置的固定GUID
+            gridGUID = itemGrid.GridGUID;
+            if (showDebugLog)
+                Debug.Log($"BackpackPanelController: 仓库网格使用固定GUID: {gridGUID}");
+        }
+        else
+        {
+            // 地面网格：使用基于背包ID的动态GUID
+            gridGUID = $"ground_grid_{backpackUniqueId}";
+            if (showDebugLog)
+                Debug.Log($"BackpackPanelController: 地面网格使用动态GUID: {gridGUID}");
+        }
+        
         gridSaveManager.SetCurrentGrid(itemGrid, gridGUID);
 
-        // 注册并加载网格数据
-        gridSaveManager.RegisterAndLoadGrid(isInWarehouse);
+        // 注册并加载网格数据（传递完整的GUID而不是布尔值）
+        gridSaveManager.RegisterAndLoadGridWithGUID(gridGUID, isInWarehouse);
         
         if (showDebugLog)
-            Debug.Log($"BackpackPanelController: 已设置网格保存加载功能 - GUID: {gridGUID}");
+            Debug.Log($"BackpackPanelController: 已设置网格保存加载功能 - 唯一GUID: {gridGUID}");
     }
     
     /// <summary>
@@ -312,8 +409,18 @@ public class BackpackPanelController : MonoBehaviour
     /// <summary>
     /// 清理当前网格
     /// </summary>
-    private void CleanupCurrentGrid()
+    /// <param name="resetHighlight">是否需要重置提示器状态</param>
+    private void CleanupCurrentGrid(bool resetHighlight = true)
     {
+        // 🔥 关键步骤：在销毁网格前，强制将提示器返回到InventoryController
+        ForceReturnHighlightBeforeGridDestroy();
+        
+        // 重置提示器状态（提示器始终保持在InventoryController下）
+        if (resetHighlight)
+        {
+            ResetHighlightState();
+        }
+        
         // 使用GridSaveManager清理并保存
         if (gridSaveManager != null)
         {
@@ -334,17 +441,207 @@ public class BackpackPanelController : MonoBehaviour
         }
     }
     
+    /// <summary>
+    /// 检查是否需要切换网格
+    /// </summary>
+    /// <param name="isInWarehouse">目标是否为仓库网格</param>
+    /// <returns>是否需要切换网格</returns>
+    private bool ShouldSwitchGrid(bool isInWarehouse)
+    {
+        // 如果当前没有网格，需要创建
+        if (currentGrid == null)
+        {
+            return true;
+        }
+        
+        // 检查当前网格类型是否与目标类型匹配
+        bool currentIsWarehouse = IsWarehouseGrid();
+        
+        // 如果类型不匹配，需要切换
+        return currentIsWarehouse != isInWarehouse;
+    }
+    
+    /// <summary>
+    /// 确保高亮提示器可用
+    /// 当不需要切换网格时调用，确保提示器正确设置
+    /// </summary>
+    private void EnsureHighlightAvailable()
+    {
+        if (inventoryController == null)
+        {
+            EnsureInventoryControllerExists();
+        }
+        
+        if (inventoryController != null && inventoryController.IsHighlightAvailable())
+        {
+            // 获取当前网格的ItemGrid组件
+            if (currentGrid != null)
+            {
+                ItemGrid itemGrid = currentGrid.GetComponent<ItemGrid>();
+                if (itemGrid != null)
+                {
+                    // 确保InventoryController知道当前的选中网格
+                    inventoryController.SetSelectedItemGrid(itemGrid);
+                    
+                    if (showDebugLog)
+                        Debug.Log("BackpackPanelController: 已确保提示器可用并设置选中网格");
+                }
+            }
+        }
+        else
+        {
+            if (showDebugLog)
+                Debug.LogWarning("BackpackPanelController: 无法确保提示器可用");
+        }
+    }
+    
+    #endregion
+    
+    #region 提示器管理
+    
+    /// <summary>
+    /// 在网格销毁前强制将提示器返回到InventoryController
+    /// 这是解决提示器随网格销毁而丢失的核心方法
+    /// </summary>
+    private void ForceReturnHighlightBeforeGridDestroy()
+    {
+        if (showDebugLog)
+            Debug.Log("BackpackPanelController: 开始强制回收提示器流程");
+        
+        if (inventoryController == null)
+        {
+            EnsureInventoryControllerExists();
+        }
+        
+        if (inventoryController == null)
+        {
+            if (showDebugLog)
+                Debug.LogWarning("BackpackPanelController: 无法找到InventoryController，跳过提示器回收");
+            return;
+        }
+        
+        if (!inventoryController.IsHighlightAvailable())
+        {
+            if (showDebugLog)
+                Debug.LogWarning("BackpackPanelController: InventoryController的提示器不可用，跳过提示器回收");
+            return;
+        }
+        
+        // 获取提示器的当前状态信息
+        var highlight = inventoryController.GetHighlightComponent();
+        if (highlight != null)
+        {
+            string currentParent = highlight.transform.parent?.name ?? "null";
+            if (showDebugLog)
+                Debug.Log($"BackpackPanelController: 提示器当前父级: {currentParent}");
+        }
+        
+        // 调用InventoryController的强制回收方法
+        inventoryController.ForceReturnHighlightToController();
+        
+        // 验证回收结果
+        if (highlight != null)
+        {
+            string newParent = highlight.transform.parent?.name ?? "null";
+            if (showDebugLog)
+                Debug.Log($"BackpackPanelController: 提示器回收后父级: {newParent}");
+        }
+        
+        if (showDebugLog)
+            Debug.Log("BackpackPanelController: 已在网格销毁前强制回收提示器");
+    }
+    
+    /// <summary>
+    /// 重置高亮提示器状态
+    /// 简化版本 - 提示器始终保持在InventoryController下，只需重置状态
+    /// </summary>
+    private void ResetHighlightState()
+    {
+        if (inventoryController == null)
+        {
+            // 尝试重新查找InventoryController
+            EnsureInventoryControllerExists();
+            
+            if (inventoryController == null)
+            {
+                if (showDebugLog)
+                    Debug.LogWarning("BackpackPanelController: 无法找到InventoryController，跳过提示器重置");
+                return;
+            }
+        }
+        
+        // 检查InventoryController是否有提示器可用
+        if (!inventoryController.IsHighlightAvailable())
+        {
+            if (showDebugLog)
+                Debug.LogWarning("BackpackPanelController: InventoryController的提示器不可用，跳过提示器重置");
+            return;
+        }
+        
+        // 调用InventoryController的方法重置提示器状态
+        inventoryController.ResetHighlight();
+        
+        if (showDebugLog)
+            Debug.Log("BackpackPanelController: 已重置提示器状态");
+    }
+    
     #endregion
     
     #region 生命周期
     
     private void OnDestroy()
     {
-        // 确保在销毁前清理资源
-        CleanupCurrentGrid();
+        // 在销毁前强制保存所有数据
+        try
+        {
+            ForcesSaveAllData();
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError($"BackpackPanelController: OnDestroy中保存数据时发生错误: {e.Message}");
+        }
+        
+        // 确保在销毁前清理资源（包括重置提示器状态）
+        CleanupCurrentGrid(true);
         
         if (showDebugLog)
             Debug.Log("BackpackPanelController: 组件已销毁");
+    }
+    
+    private void OnApplicationPause(bool pauseStatus)
+    {
+        // 当应用暂停时保存数据
+        if (pauseStatus)
+        {
+            try
+            {
+                ForcesSaveAllData();
+                if (showDebugLog)
+                    Debug.Log("BackpackPanelController: 应用暂停，已保存数据");
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError($"BackpackPanelController: 应用暂停时保存数据失败: {e.Message}");
+            }
+        }
+    }
+    
+    private void OnApplicationFocus(bool hasFocus)
+    {
+        // 当应用失去焦点时保存数据
+        if (!hasFocus)
+        {
+            try
+            {
+                ForcesSaveAllData();
+                if (showDebugLog)
+                    Debug.Log("BackpackPanelController: 应用失去焦点，已保存数据");
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError($"BackpackPanelController: 应用失去焦点时保存数据失败: {e.Message}");
+            }
+        }
     }
     
     #endregion
@@ -390,6 +687,186 @@ public class BackpackPanelController : MonoBehaviour
         }
     }
     #endif
+    
+    #endregion
+    
+    #region 背包ID管理
+    
+    /// <summary>
+    /// 获取当前背包的唯一ID
+    /// </summary>
+    public string GetBackpackUniqueId()
+    {
+        return backpackUniqueId;
+    }
+    
+    /// <summary>
+    /// 手动设置背包唯一ID（仅在初始化前有效）
+    /// </summary>
+    /// <param name="newId">新的背包ID</param>
+    public void SetBackpackUniqueId(string newId)
+    {
+        if (isInitialized)
+        {
+            Debug.LogWarning("BackpackPanelController: 背包已初始化，无法更改ID");
+            return;
+        }
+        
+        if (string.IsNullOrEmpty(newId))
+        {
+            Debug.LogWarning("BackpackPanelController: 背包ID不能为空");
+            return;
+        }
+        
+        backpackUniqueId = newId;
+        if (showDebugLog)
+            Debug.Log($"BackpackPanelController: 手动设置背包ID为: {backpackUniqueId}");
+    }
+    
+    /// <summary>
+    /// 重新生成背包ID（用于调试）
+    /// </summary>
+    [ContextMenu("重新生成背包ID")]
+    public void RegenerateBackpackId()
+    {
+        string oldId = backpackUniqueId;
+        backpackUniqueId = "";
+        InitializeBackpackId();
+        
+        Debug.Log($"BackpackPanelController: 背包ID已从 '{oldId}' 重新生成为 '{backpackUniqueId}'");
+        
+        if (isInitialized)
+        {
+            Debug.LogWarning("注意：背包已初始化，新ID将在下次重启后生效");
+        }
+    }
+    
+    #endregion
+    
+    #region 强制保存机制
+    
+    /// <summary>
+    /// 强制保存所有数据（在面板关闭时调用）
+    /// </summary>
+    private void ForcesSaveAllData()
+    {
+        if (showDebugLog)
+            Debug.Log("BackpackPanelController: 开始强制保存所有数据");
+            
+        try
+        {
+            // 保存当前激活的网格（地面或仓库）
+            SaveCurrentGrid();
+            
+            // 保存所有装备栏
+            SaveAllEquipmentSlots();
+            
+            if (showDebugLog)
+                Debug.Log("BackpackPanelController: 强制保存完成");
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError($"BackpackPanelController: 强制保存时发生错误: {e.Message}");
+        }
+    }
+    
+    /// <summary>
+    /// 保存当前激活的网格
+    /// </summary>
+    private void SaveCurrentGrid()
+    {
+        if (currentGrid == null)
+        {
+            if (showDebugLog)
+                Debug.Log("BackpackPanelController: 没有激活的网格需要保存");
+            return;
+        }
+        
+        // 获取网格中的ItemGrid组件
+        var itemGrid = currentGrid.GetComponentInChildren<ItemGrid>();
+        if (itemGrid == null)
+        {
+            Debug.LogWarning("BackpackPanelController: 当前网格没有ItemGrid组件");
+            return;
+        }
+        
+        // 通过GridSaveManager保存网格数据
+        if (gridSaveManager != null)
+        {
+            gridSaveManager.ForceSaveCurrentGrid();
+            
+            if (showDebugLog)
+            {
+                bool isWarehouse = IsWarehouseGrid();
+                string gridType = isWarehouse ? "仓库" : "地面";
+                Debug.Log($"BackpackPanelController: 已强制保存{gridType}网格数据");
+            }
+        }
+        else
+        {
+            Debug.LogWarning("BackpackPanelController: GridSaveManager为空，无法保存网格数据");
+        }
+    }
+    
+    /// <summary>
+    /// 保存所有装备栏
+    /// </summary>
+    private void SaveAllEquipmentSlots()
+    {
+        try
+        {
+            // 查找面板中的所有装备栏组件
+            var equipmentSlots = GetComponentsInChildren<InventorySystem.EquipmentSlot>(true);
+            
+            if (equipmentSlots == null || equipmentSlots.Length == 0)
+            {
+                if (showDebugLog)
+                    Debug.Log("BackpackPanelController: 没有找到装备栏需要保存");
+                return;
+            }
+            
+            // 收集装备系统数据
+            var equipmentData = InventorySystem.EquipmentSlotSaveExtension.CollectEquipmentSystemData();
+            
+            // 保存到PlayerPrefs
+            InventorySystem.EquipmentSlotSaveExtension.SaveEquipmentDataToPlayerPrefs(equipmentData);
+            
+            if (showDebugLog)
+                Debug.Log($"BackpackPanelController: 已强制保存 {equipmentSlots.Length} 个装备栏数据");
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError($"BackpackPanelController: 保存装备栏时发生错误: {e.Message}");
+        }
+    }
+    
+    /// <summary>
+    /// 手动触发强制保存（用于调试）
+    /// </summary>
+    [ContextMenu("强制保存所有数据")]
+    public void ManualForceSave()
+    {
+        ForcesSaveAllData();
+        Debug.Log("BackpackPanelController: 手动强制保存完成");
+    }
+    
+    /// <summary>
+    /// 测试提示器保护机制（用于调试）
+    /// </summary>
+    [ContextMenu("测试提示器保护")]
+    public void TestHighlightProtection()
+    {
+        try
+        {
+            ForceReturnHighlightBeforeGridDestroy();
+            ResetHighlightState();
+            Debug.Log("BackpackPanelController: 提示器保护机制测试完成");
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError($"BackpackPanelController: 提示器保护机制测试失败: {e.Message}");
+        }
+    }
     
     #endregion
 }
