@@ -18,48 +18,39 @@ public class BackpackState : MonoBehaviour
     private bool isBackpackOpen = false; // 背包是否打开
     private bool isInitialized = false; // 是否已初始化
 
-    [SerializeField] private GameObject warehouseGridPrefab;
-    [SerializeField] private GameObject groundGridPrefab;
-    [SerializeField] private RectTransform rightPanelTransform;
-
-    private GameObject currentGrid;
-    private GridSaveManager gridSaveManager; // 网格保存管理器
+    [Header("面板控制器")]
+    [SerializeField] private BackpackPanelController backpackPanelController; // 背包面板控制器
 
     private void Start()
     {
-        // 确保保存管理器存在
-        EnsureSaveManagerExists();
-        
-        // 创建网格保存管理器
-        InitializeGridSaveManager();
-        
         InitializeBackpack();
     }
 
     /// <summary>
-    /// 初始化网格保存管理器
+    /// 验证面板控制器
     /// </summary>
-    private void InitializeGridSaveManager()
+    private void ValidatePanelController()
     {
-        if (gridSaveManager == null)
+        if (backpackPanelController == null)
         {
-            GameObject saveManagerObj = new GameObject("GridSaveManager");
-            saveManagerObj.transform.SetParent(this.transform);
-            gridSaveManager = saveManagerObj.AddComponent<GridSaveManager>();
-            Debug.Log("BackpackState: 已创建GridSaveManager实例");
+            Debug.LogWarning("BackpackState: backpackPanelController字段为空，尝试自动查找...");
+            
+            // 尝试自动查找BackpackPanelController
+            backpackPanelController = FindObjectOfType<BackpackPanelController>();
+            
+            if (backpackPanelController == null)
+            {
+                Debug.LogError("BackpackState: 未找到BackpackPanelController，请在Inspector中设置或确保场景中存在该组件！");
+                Debug.LogError("BackpackState: 请将BackpackPanel上的BackpackPanelController组件拖拽到BackpackState的'Backpack Panel Controller'字段中");
+            }
+            else
+            {
+                Debug.Log($"BackpackState: 自动找到BackpackPanelController - {backpackPanelController.gameObject.name}");
+            }
         }
-    }
-
-    /// <summary>
-    /// 确保保存管理器存在
-    /// </summary>
-    private void EnsureSaveManagerExists()
-    {
-        if (InventorySaveManager.Instance == null)
+        else
         {
-            GameObject saveManager = new GameObject("InventorySaveManager");
-            saveManager.AddComponent<InventorySaveManager>();
-            Debug.Log("BackpackState: 已创建InventorySaveManager实例");
+            Debug.Log($"BackpackState: BackpackPanelController已正确设置 - {backpackPanelController.gameObject.name}");
         }
     }
 
@@ -88,6 +79,9 @@ public class BackpackState : MonoBehaviour
             Debug.Log("BackpackState: 已经初始化过了，跳过重复初始化");
             return;
         }
+
+        // 验证面板控制器
+        ValidatePanelController();
 
         // 初始化时确保背包是关闭状态
         if (backpackCanvas != null)
@@ -158,13 +152,16 @@ public class BackpackState : MonoBehaviour
         // 显示默认面板
         ShowDefaultPanel();
 
-        // 清理旧网格
-        CleanupCurrentGrid();
-
-        // 创建新网格
-        CreateAndSetupGrid();
-        
-        Debug.Log("Backpack opened. isInWarehouse: " + WarehouseTrigger.isInWarehouse + ", Instantiated grid: " + currentGrid.name);
+        // 激活面板控制器
+        if (backpackPanelController != null)
+        {
+            backpackPanelController.ActivatePanel(WarehouseTrigger.isInWarehouse);
+            Debug.Log($"BackpackState: 背包打开，仓库模式: {WarehouseTrigger.isInWarehouse}");
+        }
+        else
+        {
+            Debug.LogError("BackpackState: BackpackPanelController未设置，无法激活面板！");
+        }
     }
 
     // 关闭背包
@@ -186,8 +183,12 @@ public class BackpackState : MonoBehaviour
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
 
-        // 清理当前网格
-        CleanupCurrentGrid();
+        // 关闭面板控制器
+        if (backpackPanelController != null)
+        {
+            backpackPanelController.DeactivatePanel();
+            Debug.Log("BackpackState: 背包关闭，面板已停用");
+        }
 
         // 隐藏所有面板
         HideAllPanels();
@@ -260,88 +261,6 @@ public class BackpackState : MonoBehaviour
         InitializeBackpack();
     }
 
-    /// <summary>
-    /// 创建并设置网格
-    /// </summary>
-    private void CreateAndSetupGrid()
-    {
-        // 根据是否在仓库内选择不同的预制件
-        if (WarehouseTrigger.isInWarehouse)
-        {
-            currentGrid = Instantiate(warehouseGridPrefab, rightPanelTransform);
-        }
-        else
-        {
-            currentGrid = Instantiate(groundGridPrefab, rightPanelTransform);
-        }
 
-        // 根据网格类型设置不同的位置和尺寸
-        RectTransform gridRT = currentGrid.GetComponent<RectTransform>();
-        gridRT.anchorMin = new Vector2(0, 0);
-        gridRT.anchorMax = new Vector2(0, 1);
-        
-        if (WarehouseTrigger.isInWarehouse)
-        {
-            // 仓库网格位置和尺寸
-            gridRT.anchoredPosition = new Vector2(15, -52);
-            gridRT.sizeDelta = new Vector2(640, 896);
-        }
-        else
-        {
-            // 地面网格位置和尺寸
-            gridRT.anchoredPosition = new Vector2(15, -42);
-            gridRT.sizeDelta = new Vector2(640, 512);
-        }
-
-        // 确保网格被激活显示
-        currentGrid.SetActive(true);
-        
-        // 设置保存管理器并注册网格
-        SetupGridSaveLoad();
-    }
-
-    /// <summary>
-    /// 设置网格的保存和加载功能
-    /// </summary>
-    private void SetupGridSaveLoad()
-    {
-        if (currentGrid == null || gridSaveManager == null) return;
-
-        // 获取ItemGrid组件
-        ItemGrid itemGrid = currentGrid.GetComponent<ItemGrid>();
-        if (itemGrid == null)
-        {
-            Debug.LogError("BackpackState: 当前网格缺少ItemGrid组件！");
-            return;
-        }
-
-        // 设置网格到保存管理器
-        string gridGUID = WarehouseTrigger.isInWarehouse ? "warehouse_grid_main" : "ground_grid_main";
-        gridSaveManager.SetCurrentGrid(itemGrid, gridGUID);
-
-        // 注册并加载网格数据
-        gridSaveManager.RegisterAndLoadGrid(WarehouseTrigger.isInWarehouse);
-    }
-
-
-
-    /// <summary>
-    /// 清理当前网格
-    /// </summary>
-    private void CleanupCurrentGrid()
-    {
-        // 使用GridSaveManager清理并保存
-        if (gridSaveManager != null)
-        {
-            gridSaveManager.CleanupAndSave(true); // 强制保存
-        }
-
-        // 销毁游戏对象
-        if (currentGrid != null)
-        {
-            Destroy(currentGrid);
-            currentGrid = null;
-        }
-    }
 }
 

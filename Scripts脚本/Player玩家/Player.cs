@@ -3,112 +3,112 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-// Íæ¼Ò×´Ì¬»úÃ¶¾Ù
+// ç©å®¶çŠ¶æ€æœºæšä¸¾
 public enum PlayerStateType
 {
-    Idle/*´ı»ú*/, Move/*ÒÆ¶¯*/, Attack/*¹¥»÷*/, Dodge/*ÉÁ±Ü*/, Reload/*»»µ¯*/, Run/*ÅÜ²½*/, Crouch/*Ç±ĞĞ*/, Crawl/*ÅÀĞĞ*/, PickUp/*Ê°È¡*/, Die/*ËÀÍö*/, Hurt/*ÊÜÉË*/
+    Idle/*å¾…æœº*/, Move/*ç§»åŠ¨*/, Attack/*æ”»å‡»*/, Dodge/*é—ªé¿*/, Reload/*æ¢å¼¹*/, Run/*è·‘æ­¥*/, Crouch/*æ½œè¡Œ*/, Crawl/*çˆ¬è¡Œ*/, PickUp/*æ‹¾å–*/, Die/*æ­»äº¡*/, Hurt/*å—ä¼¤*/
 }
 
 public class Player : MonoBehaviour
 {
-    // »»µ¯ÊÂ¼ş
+    // æ¢å¼¹äº‹ä»¶
     public static event System.Action<float> OnReloadStarted;
     public static event System.Action OnReloadStopped;
 
-    // ÊôĞÔ
-    // --- ÉúÃüÖµÏµÍ³ ---
-    [Header("ÉúÃüÖµÏµÍ³")]
-    [FieldLabel("×î´óÉúÃüÖµ")] public float MaxHealth = 100f; // ×î´óÉúÃüÖµ
-    [HideInInspector] public float CurrentHealth; // µ±Ç°ÉúÃüÖµ
-    [FieldLabel("×î´ó±¥Ê³¶È")] public float MaxHunger = 100f; // ×î´ó±¥Ê³¶È
-    [HideInInspector] public float CurrentHunger; // µ±Ç°±¥Ê³¶È
-    [FieldLabel("×î´ó¾«ÉñÖµ")] public float MaxMental = 100f; // ×î´ó¾«ÉñÖµ
-    [HideInInspector] public float CurrentMental; // µ±Ç°¾«ÉñÖµ
-    [HideInInspector] public bool isHurt = false; // ÊÇ·ñÊÜÉË
-    [HideInInspector] public bool isDead = false; // ÊÇ·ñËÀÍö
+    // å±æ€§
+    // --- ç”Ÿå‘½å€¼ç³»ç»Ÿ ---
+    [Header("ç”Ÿå‘½å€¼ç³»ç»Ÿ")]
+    [FieldLabel("æœ€å¤§ç”Ÿå‘½å€¼")] public float MaxHealth = 100f; // æœ€å¤§ç”Ÿå‘½å€¼
+    [HideInInspector] public float CurrentHealth; // å½“å‰ç”Ÿå‘½å€¼
+    [FieldLabel("æœ€å¤§é¥±é£Ÿåº¦")] public float MaxHunger = 100f; // æœ€å¤§é¥±é£Ÿåº¦
+    [HideInInspector] public float CurrentHunger; // å½“å‰é¥±é£Ÿåº¦
+    [FieldLabel("æœ€å¤§ç²¾ç¥å€¼")] public float MaxMental = 100f; // æœ€å¤§ç²¾ç¥å€¼
+    [HideInInspector] public float CurrentMental; // å½“å‰ç²¾ç¥å€¼
+    [HideInInspector] public bool isHurt = false; // æ˜¯å¦å—ä¼¤
+    [HideInInspector] public bool isDead = false; // æ˜¯å¦æ­»äº¡
 
-    // --- ÊäÈëÏµÍ³ ---
-    [Header("»ñÈ¡Íæ¼ÒÊäÈëÏµÍ³")]
-    [FieldLabel("ÊäÈëÏµÍ³»ñÈ¡")] public PlayerInputController playerInputController; // »ñÈ¡Íæ¼ÒÊäÈëÏµÍ³
-    [HideInInspector] public Vector2 InputDirection = Vector2.zero; // ¼ÇÂ¼ÊäÈë·½Ïò
+    // --- è¾“å…¥ç³»ç»Ÿ ---
+    [Header("è·å–ç©å®¶è¾“å…¥ç³»ç»Ÿ")]
+    [FieldLabel("è¾“å…¥ç³»ç»Ÿè·å–")] public PlayerInputController playerInputController; // è·å–ç©å®¶è¾“å…¥ç³»ç»Ÿ
+    [HideInInspector] public Vector2 InputDirection = Vector2.zero; // è®°å½•è¾“å…¥æ–¹å‘
 
-    // --- ÒÆ¶¯ ---
-    [Header("ÒÆ¶¯²ÎÊı")]
-    [FieldLabel("ĞĞ×ßËÙ¶È")] public float WalkSpeed = 3f; // ÒÆ¶¯ËÙ¶È
-    [HideInInspector] public float CurrentSpeed; // µ±Ç°ÒÆ¶¯ËÙ¶È
+    // --- ç§»åŠ¨ ---
+    [Header("ç§»åŠ¨å‚æ•°")]
+    [FieldLabel("è¡Œèµ°é€Ÿåº¦")] public float WalkSpeed = 3f; // ç§»åŠ¨é€Ÿåº¦
+    [HideInInspector] public float CurrentSpeed; // å½“å‰ç§»åŠ¨é€Ÿåº¦
 
-    // --- ÅÜ²½ ---
-    [Header("ÅÜ²½²ÎÊı")]
-    [FieldLabel("ÅÜ²½ËÙ¶È")] public float RunSpeed = 5f; // ÅÜ²½ËÙ¶È
-    [HideInInspector] public bool isRunning = false; // ÊÇ·ñÕıÔÚÅÜ²½
+    // --- è·‘æ­¥ ---
+    [Header("è·‘æ­¥å‚æ•°")]
+    [FieldLabel("è·‘æ­¥é€Ÿåº¦")] public float RunSpeed = 5f; // è·‘æ­¥é€Ÿåº¦
+    [HideInInspector] public bool isRunning = false; // æ˜¯å¦æ­£åœ¨è·‘æ­¥
 
-    // --- ¹¥»÷ ---
-    [Header("¹¥»÷²ÎÊı")]
-    [FieldLabel("¹¥»÷Ê±ÒÆ¶¯ËÙ¶È")] public float FireSpeed = 1f; // ¹¥»÷Ê±ÒÆ¶¯ËÙ¶È
-    [FieldLabel("ÊÖ²¿Î»ÖÃ")] public Transform Hand;// ÊÖ²¿Î»ÖÃ
+    // --- æ”»å‡» ---
+    [Header("æ”»å‡»å‚æ•°")]
+    [FieldLabel("æ”»å‡»æ—¶ç§»åŠ¨é€Ÿåº¦")] public float FireSpeed = 1f; // æ”»å‡»æ—¶ç§»åŠ¨é€Ÿåº¦
+    [FieldLabel("æ‰‹éƒ¨ä½ç½®")] public Transform Hand;// æ‰‹éƒ¨ä½ç½®
     [HideInInspector] public bool isWeaponInHand = false;
     [HideInInspector] public bool isFiring = false;
     [HideInInspector] public bool isAttacking = false;
-    [HideInInspector] public WeaponManager currentWeaponController; // ¸ÄÎªWeaponController
-    [HideInInspector] public WeaponTrigger currentWeapon; // ±£Áô¼æÈİĞÔ
+    [HideInInspector] public WeaponManager currentWeaponController; // æ”¹ä¸ºWeaponController
+    [HideInInspector] public WeaponTrigger currentWeapon; // ä¿ç•™å…¼å®¹æ€§
     [HideInInspector] public float fireTimer = 0f;
     [HideInInspector] public Vector3 aimDirection;
     [HideInInspector] public Vector3 worldMousePosition;
     [HideInInspector] public Camera playerCamera;
 
-    // --- ÉÁ±Ü ---
-    [Header("ÉÁ±Ü²ÎÊı")]
-    [FieldLabel("·­¹öÍÆÁ¦")] public float DdogeForce = 5f;
-    [FieldLabel("·­¹ö³ÖĞøÊ±¼ä")] public float DodgeDuration = 0.3f;
+    // --- é—ªé¿ ---
+    [Header("é—ªé¿å‚æ•°")]
+    [FieldLabel("ç¿»æ»šæ¨åŠ›")] public float DdogeForce = 5f;
+    [FieldLabel("ç¿»æ»šæŒç»­æ—¶é—´")] public float DodgeDuration = 0.3f;
     [HideInInspector] public float DodgeTimer = 0f;
-    [FieldLabel("·­¹öÀäÈ´Ê±¼ä")] public float DodgeCooldown = 1f;
+    [FieldLabel("ç¿»æ»šå†·å´æ—¶é—´")] public float DodgeCooldown = 1f;
     [HideInInspector] public bool isDodgeCoolDownEnd = true;
-    [HideInInspector] public bool isDodged = false;// ÉÁ±Ü
+    [HideInInspector] public bool isDodged = false;// é—ªé¿
 
-    // --- Ç±ĞĞ ---
-    [Header("Ç±ĞĞ²ÎÊı")]
-    [FieldLabel("Ç±ĞĞÑÕÉ«")] public Color crouchColor = Color.grey; // Ç±ĞĞÊ±µÄÑÕÉ«
-    [FieldLabel("Ç±ĞĞÍ¸Ã÷¶È")][Range(0, 1)] public float crouchAlpha = 0.5f; // Ç±ĞĞÊ±µÄÍ¸Ã÷¶È
-    [HideInInspector] public bool isCrouching = false; // Ç±ĞĞ×´Ì¬±êÖ¾Î»
-    [HideInInspector] public SpriteRenderer spriteRenderer; // ¾«ÁéäÖÈ¾Æ÷
-    [HideInInspector] public Color originalColor; // Ô­Ê¼ÑÕÉ«
+    // --- æ½œè¡Œ ---
+    [Header("æ½œè¡Œå‚æ•°")]
+    [FieldLabel("æ½œè¡Œé¢œè‰²")] public Color crouchColor = Color.grey; // æ½œè¡Œæ—¶çš„é¢œè‰²
+    [FieldLabel("æ½œè¡Œé€æ˜åº¦")][Range(0, 1)] public float crouchAlpha = 0.5f; // æ½œè¡Œæ—¶çš„é€æ˜åº¦
+    [HideInInspector] public bool isCrouching = false; // æ½œè¡ŒçŠ¶æ€æ ‡å¿—ä½
+    [HideInInspector] public SpriteRenderer spriteRenderer; // ç²¾çµæ¸²æŸ“å™¨
+    [HideInInspector] public Color originalColor; // åŸå§‹é¢œè‰²
 
-    // --- Ê°È¡ ---
-    [Header("Ê°È¡²ÎÊı")]
-    [HideInInspector] public ItemBase currentPickedItem; // µ±Ç°ÒÑÊ°È¡µÄÎïÆ·
-    [HideInInspector] public ItemBase nearbyItem; // ¸½½ü¿ÉÊ°È¡µÄÎïÆ·
-    [HideInInspector] public bool isPickingUp = false; // ÊÇ·ñÕıÔÚÊ°È¡
+    // --- æ‹¾å– ---
+    [Header("æ‹¾å–å‚æ•°")]
+    [HideInInspector] public ItemBase currentPickedItem; // å½“å‰å·²æ‹¾å–çš„ç‰©å“
+    [HideInInspector] public ItemBase nearbyItem; // é™„è¿‘å¯æ‹¾å–çš„ç‰©å“
+    [HideInInspector] public bool isPickingUp = false; // æ˜¯å¦æ­£åœ¨æ‹¾å–
 
-    // --- ÊÜÉË²ÎÊı ---
-    [Header("ÊÜÉË²ÎÊı")]
-    [HideInInspector] public float hurtTimer = 0f; // ÊÜÉË¼ÆÊ±Æ÷
-    [HideInInspector] public bool isInHurtState = false; // ÊÇ·ñ´¦ÓÚÊÜÉË×´Ì¬
+    // --- å—ä¼¤å‚æ•° ---
+    [Header("å—ä¼¤å‚æ•°")]
+    [HideInInspector] public float hurtTimer = 0f; // å—ä¼¤è®¡æ—¶å™¨
+    [HideInInspector] public bool isInHurtState = false; // æ˜¯å¦å¤„äºå—ä¼¤çŠ¶æ€
 
-    // --- ÊÓ½Ç²ÎÊı ---
-    private float screenCenterX; // ÆÁÄ»ÖĞĞÄX×ø±ê
+    // --- è§†è§’å‚æ•° ---
+    private float screenCenterX; // å±å¹•ä¸­å¿ƒXåæ ‡
 
-    // --- ÄÚ²¿ÊôĞÔ×é¼ş ---
-    [HideInInspector] public Rigidbody2D PlayerRB2D;// ¸ÕÌå
-    [HideInInspector] public Animator AIMTOR;// ¶¯»­Æ÷
-    [HideInInspector] public new Collider2D collider2D; // Åö×²Æ÷
-    [HideInInspector] public IState currentState; // µ±Ç°×´Ì¬
-    // ×Öµä
+    // --- å†…éƒ¨å±æ€§ç»„ä»¶ ---
+    [HideInInspector] public Rigidbody2D PlayerRB2D;// åˆšä½“
+    [HideInInspector] public Animator AIMTOR;// åŠ¨ç”»å™¨
+    [HideInInspector] public new Collider2D collider2D; // ç¢°æ’å™¨
+    [HideInInspector] public IState currentState; // å½“å‰çŠ¶æ€
+    // å­—å…¸
     private Dictionary<PlayerStateType, IState> states = new Dictionary<PlayerStateType, IState>();
 
 
-    // º¯Êı
+    // å‡½æ•°
     private void Awake()
     {
-        playerInputController.EnabledGameplayInput(); // ÆôÓÃÍæ¼ÒÊäÈë¿ØÖÆ
+        playerInputController.EnabledGameplayInput(); // å¯ç”¨ç©å®¶è¾“å…¥æ§åˆ¶
 
-        // »ñÈ¡×é¼ş
+        // è·å–ç»„ä»¶
         PlayerRB2D = GetComponent<Rigidbody2D>();
         AIMTOR = GetComponent<Animator>();
         collider2D = GetComponent<Collider2D>();
-        Hand = transform.Find("Hand"); // ²éÕÒÊÖ²¿Î»ÖÃ
-        playerCamera = Camera.main; // »ñÈ¡Ö÷ÉãÏñ»ú
+        Hand = transform.Find("Hand"); // æŸ¥æ‰¾æ‰‹éƒ¨ä½ç½®
+        playerCamera = Camera.main; // è·å–ä¸»æ‘„åƒæœº
 
-        // »ñÈ¡SpriteRenderer×é¼ş²¢±£´æÔ­Ê¼ÑÕÉ«
+        // è·å–SpriteRendererç»„ä»¶å¹¶ä¿å­˜åŸå§‹é¢œè‰²
         spriteRenderer = GetComponent<SpriteRenderer>();
         if (spriteRenderer != null)
         {
@@ -116,136 +116,136 @@ public class Player : MonoBehaviour
         }
 
 
-        // ³õÊ¼»¯ÆÁÄ»ÖĞĞÄ×ø±ê
+        // åˆå§‹åŒ–å±å¹•ä¸­å¿ƒåæ ‡
         screenCenterX = Screen.width / 2f;
-        CurrentSpeed = WalkSpeed; // ÉèÖÃ³õÊ¼ËÙ¶ÈÎªĞĞ×ßËÙ¶È
+        CurrentSpeed = WalkSpeed; // è®¾ç½®åˆå§‹é€Ÿåº¦ä¸ºè¡Œèµ°é€Ÿåº¦
 
-        // ³õÊ¼»¯ÉúÃüÖµÏµÍ³
+        // åˆå§‹åŒ–ç”Ÿå‘½å€¼ç³»ç»Ÿ
         CurrentHealth = MaxHealth;
         CurrentHunger = MaxHunger;
         CurrentMental = MaxMental;
 
-        // »ñÈ¡×´Ì¬»ú
+        // è·å–çŠ¶æ€æœº
         InitializeStateMachine();
 
-        // ÉèÖÃÄ¬ÈÏ×´Ì¬ÎªIdle
+        // è®¾ç½®é»˜è®¤çŠ¶æ€ä¸ºIdle
         transitionState(PlayerStateType.Idle);
 
     }
-    // --- ×´Ì¬»ú¿ª·Åº¯Êı£¨Ìá¹©¸øÈÎºÎ×´Ì¬Ê¹ÓÃµÄº¯Êı£© ---
-    // ÓÃÓÚÇĞ»»×´Ì¬º¯Êı
+    // --- çŠ¶æ€æœºå¼€æ”¾å‡½æ•°ï¼ˆæä¾›ç»™ä»»ä½•çŠ¶æ€ä½¿ç”¨çš„å‡½æ•°ï¼‰ ---
+    // ç”¨äºåˆ‡æ¢çŠ¶æ€å‡½æ•°
     public void transitionState(PlayerStateType type)
     {
-        // µ±Ç°×´Ì¬ÊÇ·ñÎª¿Õ
-        // µ±Ç°×´Ì¬²»Îª¿Õ£¬ÍË³öµ±Ç°×´Ì¬
+        // å½“å‰çŠ¶æ€æ˜¯å¦ä¸ºç©º
+        // å½“å‰çŠ¶æ€ä¸ä¸ºç©ºï¼Œé€€å‡ºå½“å‰çŠ¶æ€
         if (currentState != null)
         {
             currentState.OnExit();
         }
-        // Í¨¹ı×ÖµäµÄ¼üÕÒµ½¶ÔÓ¦µÄ×´Ì¬
+        // é€šè¿‡å­—å…¸çš„é”®æ‰¾åˆ°å¯¹åº”çš„çŠ¶æ€
         currentState = states[type];
         currentState.OnEnter();
     }
 
-    // ¸üĞÂÊÓ½Ç·½Ïò
+    // æ›´æ–°è§†è§’æ–¹å‘
     public void UpdateLookDirection()
     {
-        var mousePos = Mouse.current.position.ReadValue(); // »ñÈ¡Êó±êÎ»ÖÃ
-        // ¸ù¾İÊó±êÎ»ÖÃ¸üĞÂ¶¯»­Æ÷·½Ïò²ÎÊı£¨0Îª×ó£¬1ÎªÓÒ£©
-        float horizontalDirection = (mousePos.x < screenCenterX) ? 0f : 1f; // Ë®Æ½·½Ïò
-        AIMTOR.SetFloat("Horizontial", horizontalDirection); // ÉèÖÃ¶¯»­Æ÷²ÎÊı
+        var mousePos = Mouse.current.position.ReadValue(); // è·å–é¼ æ ‡ä½ç½®
+        // æ ¹æ®é¼ æ ‡ä½ç½®æ›´æ–°åŠ¨ç”»å™¨æ–¹å‘å‚æ•°ï¼ˆ0ä¸ºå·¦ï¼Œ1ä¸ºå³ï¼‰
+        float horizontalDirection = (mousePos.x < screenCenterX) ? 0f : 1f; // æ°´å¹³æ–¹å‘
+        AIMTOR.SetFloat("Horizontial", horizontalDirection); // è®¾ç½®åŠ¨ç”»å™¨å‚æ•°
     }
 
-    // ¸üĞÂÃé×¼·½Ïò£¨ÒÆ³ı²ã¼¶ºÍ¾àÀëÏŞÖÆ£©
+    // æ›´æ–°ç„å‡†æ–¹å‘ï¼ˆç§»é™¤å±‚çº§å’Œè·ç¦»é™åˆ¶ï¼‰
     public void UpdateAiming()
     {
-        if (playerCamera == null) return; // Èç¹ûÃ»ÓĞÏà»ú£¬Ôò·µ»Ø
+        if (playerCamera == null) return; // å¦‚æœæ²¡æœ‰ç›¸æœºï¼Œåˆ™è¿”å›
 
-        // »ñÈ¡Êó±êÆÁÄ»Î»ÖÃ
-        Vector3 mouseScreenPosition = Mouse.current.position.ReadValue(); // »ñÈ¡Êó±êÆÁÄ»Î»ÖÃ
-        mouseScreenPosition.z = playerCamera.nearClipPlane; // ÉèÖÃÆÁÄ»Æ½Ãæ
+        // è·å–é¼ æ ‡å±å¹•ä½ç½®
+        Vector3 mouseScreenPosition = Mouse.current.position.ReadValue(); // è·å–é¼ æ ‡å±å¹•ä½ç½®
+        mouseScreenPosition.z = playerCamera.nearClipPlane; // è®¾ç½®å±å¹•å¹³é¢
 
-        // ×ª»»ÎªÊÀ½ç×ø±ê
+        // è½¬æ¢ä¸ºä¸–ç•Œåæ ‡
         worldMousePosition = playerCamera.ScreenToWorldPoint(mouseScreenPosition);
 
-        // ¼ÆËãÃé×¼·½Ïò£¨ÎŞ¾àÀëÏŞÖÆ£©
+        // è®¡ç®—ç„å‡†æ–¹å‘ï¼ˆæ— è·ç¦»é™åˆ¶ï¼‰
         aimDirection = (worldMousePosition - transform.position).normalized;
 
-        // ¸üĞÂHandµÄĞı×ª
+        // æ›´æ–°Handçš„æ—‹è½¬
         UpdateHandRotation();
     }
 
-    // ¸üĞÂHandĞı×ª
+    // æ›´æ–°Handæ—‹è½¬
     public void UpdateHandRotation()
     {
         if (Hand == null) return;
 
-        // ¼ÆËãHandÓ¦¸ÃÖ¸ÏòµÄ½Ç¶È
+        // è®¡ç®—Handåº”è¯¥æŒ‡å‘çš„è§’åº¦
         float angle = Mathf.Atan2(aimDirection.y, aimDirection.x) * Mathf.Rad2Deg;
 
-        // ÉèÖÃHandĞı×ª
+        // è®¾ç½®Handæ—‹è½¬
         Hand.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
 
-        // Èç¹ûÓĞÎäÆ÷£¬´¦ÀíÎäÆ÷·­×ª
+        // å¦‚æœæœ‰æ­¦å™¨ï¼Œå¤„ç†æ­¦å™¨ç¿»è½¬
         if (isWeaponInHand && currentWeapon != null)
         {
             UpdateWeaponFlip(angle);
         }
     }
 
-    // ¸üĞÂÎäÆ÷·­×ª
+    // æ›´æ–°æ­¦å™¨ç¿»è½¬
     public void UpdateWeaponFlip(float handAngle)
     {
         if (currentWeapon == null) return;
 
         Vector3 weaponScale = currentWeapon.transform.localScale;
 
-        // µ±HandĞı×ª½Ç¶È´óÓÚ90¶È»òĞ¡ÓÚ-90¶ÈÊ±£¬·­×ªÎäÆ÷YÖá
+        // å½“Handæ—‹è½¬è§’åº¦å¤§äº90åº¦æˆ–å°äº-90åº¦æ—¶ï¼Œç¿»è½¬æ­¦å™¨Yè½´
         if (handAngle > 90f || handAngle < -90f)
         {
-            weaponScale.y = -Mathf.Abs(weaponScale.y); // ·­×ªYÖá
+            weaponScale.y = -Mathf.Abs(weaponScale.y); // ç¿»è½¬Yè½´
         }
         else
         {
-            weaponScale.y = Mathf.Abs(weaponScale.y); // ±£³ÖÕı³£
+            weaponScale.y = Mathf.Abs(weaponScale.y); // ä¿æŒæ­£å¸¸
         }
 
         currentWeapon.transform.localScale = weaponScale;
     }
 
-    // ¸üĞÂÎäÆ÷³¯Ïò
+    // æ›´æ–°æ­¦å™¨æœå‘
     public void UpdateWeaponOrientation()
     {
         if (currentWeapon == null || !isWeaponInHand) return;
 
-        // »ñÈ¡µ±Ç°HandµÄĞı×ª½Ç¶È
+        // è·å–å½“å‰Handçš„æ—‹è½¬è§’åº¦
         float handAngle = Hand.eulerAngles.z;
 
-        // ½«½Ç¶È×ª»»Îª-180µ½180µÄ·¶Î§
+        // å°†è§’åº¦è½¬æ¢ä¸º-180åˆ°180çš„èŒƒå›´
         if (handAngle > 180f)
         {
             handAngle -= 360f;
         }
 
-        // ¸üĞÂÎäÆ÷·­×ª
+        // æ›´æ–°æ­¦å™¨ç¿»è½¬
         UpdateWeaponFlip(handAngle);
     }
 
-    // ÊÜÉË´¦Àí·½·¨ 
+    // å—ä¼¤å¤„ç†æ–¹æ³• 
     public void TakeDamage(float damage)
     {
-        if (isDead) return; // Èç¹ûÒÑËÀÍö£¬²»ÔÙÊÜÉË
+        if (isDead) return; // å¦‚æœå·²æ­»äº¡ï¼Œä¸å†å—ä¼¤
 
-        // ¿Û³ıÉúÃüÖµ
+        // æ‰£é™¤ç”Ÿå‘½å€¼
         CurrentHealth -= damage;
-        CurrentHealth = Mathf.Max(0, CurrentHealth); // È·±£ÉúÃüÖµ²»µÍÓÚ0
+        CurrentHealth = Mathf.Max(0, CurrentHealth); // ç¡®ä¿ç”Ÿå‘½å€¼ä¸ä½äº0
 
-        // ÉèÖÃÊÜÉË×´Ì¬
+        // è®¾ç½®å—ä¼¤çŠ¶æ€
         isHurt = true;
         isInHurtState = true;
-        hurtTimer = 0f; // ÖØÖÃÊÜÉË¼ÆÊ±Æ÷
+        hurtTimer = 0f; // é‡ç½®å—ä¼¤è®¡æ—¶å™¨
 
-        // ¼ì²éÊÇ·ñËÀÍö
+        // æ£€æŸ¥æ˜¯å¦æ­»äº¡
         if (CurrentHealth <= 0)
         {
             isDead = true;
@@ -253,36 +253,36 @@ public class Player : MonoBehaviour
             return;
         }
 
-        // Èç¹û²»ÔÚÊÜÉË×´Ì¬£¬ÇĞ»»µ½ÊÜÉË×´Ì¬
+        // å¦‚æœä¸åœ¨å—ä¼¤çŠ¶æ€ï¼Œåˆ‡æ¢åˆ°å—ä¼¤çŠ¶æ€
         if (currentState.GetType() != typeof(PlayerHurtState))
         {
             transitionState(PlayerStateType.Hurt);
         }
 
-        Debug.Log($"Íæ¼ÒÊÜµ½ {damage} µãÉËº¦£¬µ±Ç°ÉúÃüÖµ: {CurrentHealth}");
+        Debug.Log($"ç©å®¶å—åˆ° {damage} ç‚¹ä¼¤å®³ï¼Œå½“å‰ç”Ÿå‘½å€¼: {CurrentHealth}");
     }
 
-    // --- ³£¹æº¯Êı ---
-    // ×´Ì¬»ú»ñÈ¡Æ÷
+    // --- å¸¸è§„å‡½æ•° ---
+    // çŠ¶æ€æœºè·å–å™¨
     private void InitializeStateMachine()
     {
-        states.Add(PlayerStateType.Idle, new PlayerIdleState(this));  // ´ı»ú×´Ì¬
-        states.Add(PlayerStateType.Move, new PlayerMoveState(this)); // ÒÆ¶¯×´Ì¬
-        states.Add(PlayerStateType.Attack, new PlayerAttackState(this)); // ¹¥»÷×´Ì¬
-        states.Add(PlayerStateType.Dodge, new PlayerDodgeState(this)); // ÉÁ±Ü×´Ì¬
-        states.Add(PlayerStateType.Reload, new PlayerReloadState(this)); // »»µ¯×´Ì¬
-        states.Add(PlayerStateType.Run, new PlayerRunState(this)); // ÅÜ²½×´Ì¬
-        states.Add(PlayerStateType.Crouch, new PlayerCrouchState(this)); // Ç±ĞĞ×´Ì¬
-        states.Add(PlayerStateType.PickUp, new PlayerPickUpState(this)); // Ê°È¡ÎïÆ·×´Ì¬
-        states.Add(PlayerStateType.Die, new PlayerDieState(this)); // ËÀÍö×´Ì¬
-        states.Add(PlayerStateType.Hurt, new PlayerHurtState(this)); // ÊÜÉË×´Ì¬
+        states.Add(PlayerStateType.Idle, new PlayerIdleState(this));  // å¾…æœºçŠ¶æ€
+        states.Add(PlayerStateType.Move, new PlayerMoveState(this)); // ç§»åŠ¨çŠ¶æ€
+        states.Add(PlayerStateType.Attack, new PlayerAttackState(this)); // æ”»å‡»çŠ¶æ€
+        states.Add(PlayerStateType.Dodge, new PlayerDodgeState(this)); // é—ªé¿çŠ¶æ€
+        states.Add(PlayerStateType.Reload, new PlayerReloadState(this)); // æ¢å¼¹çŠ¶æ€
+        states.Add(PlayerStateType.Run, new PlayerRunState(this)); // è·‘æ­¥çŠ¶æ€
+        states.Add(PlayerStateType.Crouch, new PlayerCrouchState(this)); // æ½œè¡ŒçŠ¶æ€
+        states.Add(PlayerStateType.PickUp, new PlayerPickUpState(this)); // æ‹¾å–ç‰©å“çŠ¶æ€
+        states.Add(PlayerStateType.Die, new PlayerDieState(this)); // æ­»äº¡çŠ¶æ€
+        states.Add(PlayerStateType.Hurt, new PlayerHurtState(this)); // å—ä¼¤çŠ¶æ€
     }
 
     private void Update()
     {
-        // Çå¿Õ¿ª·¢Õß¿ØÖÆÌ¨²¢ÏÔÊ¾µ±Ç°×´Ì¬
+        // æ¸…ç©ºå¼€å‘è€…æ§åˆ¶å°å¹¶æ˜¾ç¤ºå½“å‰çŠ¶æ€
         Debug.ClearDeveloperConsole();
-        Debug.Log($"µ±Ç°×´Ì¬»ú: {currentState.GetType().Name}");
+        Debug.Log($"å½“å‰çŠ¶æ€æœº: {currentState.GetType().Name}");
 
         WeaponInHand();
 
@@ -293,15 +293,15 @@ public class Player : MonoBehaviour
         currentState.OnFixedUpdate();
     }
 
-    // ¿ª»ğ×´Ì¬¿ØÖÆ
+    // å¼€ç«çŠ¶æ€æ§åˆ¶
     [HideInInspector] public bool isHoldingFire = false;
     [HideInInspector] public float fireHoldTime = 0f;
-    public const float HOLD_THRESHOLD = 0.2f; // ³¤°´ãĞÖµ£¨Ãë£©- ¸ÄÎªpublic
+    public const float HOLD_THRESHOLD = 0.2f; // é•¿æŒ‰é˜ˆå€¼ï¼ˆç§’ï¼‰- æ”¹ä¸ºpublic
 
-    private void OnEnable() // ÆôÓÃÊ±
+    private void OnEnable() // å¯ç”¨æ—¶
     {
         playerInputController.onMovement += Move;
-        playerInputController.onFire += Fire; // Ê¹ÓÃÍ³Ò»µÄ¿ª»ğÊÂ¼ş
+        playerInputController.onFire += Fire; // ä½¿ç”¨ç»Ÿä¸€çš„å¼€ç«äº‹ä»¶
         playerInputController.onDodge += Dodge;
         playerInputController.onPickup += PickUp;
         playerInputController.onRun += Run;
@@ -309,7 +309,7 @@ public class Player : MonoBehaviour
         playerInputController.onReload += Reload;
     }
 
-    private void OnDisable() // ½ûÓÃÊ±
+    private void OnDisable() // ç¦ç”¨æ—¶
     {
         playerInputController.onMovement -= Move;
         playerInputController.onFire -= Fire;
@@ -320,43 +320,43 @@ public class Player : MonoBehaviour
         playerInputController.onReload -= Reload;
     }
 
-    // ÍêÕûÃé×¼¸üĞÂ£¨ÓÃÓÚ¹¥»÷×´Ì¬£©
+    // å®Œæ•´ç„å‡†æ›´æ–°ï¼ˆç”¨äºæ”»å‡»çŠ¶æ€ï¼‰
     public void UpdateFullAiming()
     {
         UpdateAiming();
         UpdateLookDirection();
     }
 
-    // »ù´¡Ãé×¼¸üĞÂ£¨ÓÃÓÚËùÓĞ×´Ì¬£©
+    // åŸºç¡€ç„å‡†æ›´æ–°ï¼ˆç”¨äºæ‰€æœ‰çŠ¶æ€ï¼‰
     public void UpdateBasicAiming()
     {
         UpdateAiming();
         UpdateLookDirection();
     }
 
-    // --- ¹¦ÄÜº¯Êı --- 
-    #region ÒÆ¶¯
+    // --- åŠŸèƒ½å‡½æ•° --- 
+    #region ç§»åŠ¨
     public void Move(Vector2 moveInput)
     {
-        // Ö±½ÓÓ¦ÓÃÊäÈë·½Ïò
+        // ç›´æ¥åº”ç”¨è¾“å…¥æ–¹å‘
         InputDirection = moveInput;
 
-        // Á¢¼´Í£Ö¹ÒÆ¶¯
+        // ç«‹å³åœæ­¢ç§»åŠ¨
         CurrentSpeed = (InputDirection != Vector2.zero && !isFiring) ? WalkSpeed : 0f;
 
-        // ¸üĞÂ¶¯»­²ÎÊı
+        // æ›´æ–°åŠ¨ç”»å‚æ•°
         UpdateLookDirection();
 
-        // Ó¦ÓÃÎïÀíËÙ¶È
+        // åº”ç”¨ç‰©ç†é€Ÿåº¦
         PlayerRB2D.velocity = InputDirection * CurrentSpeed;
 
-        // ¸üĞÂËÙ¶È¶¯»­²ÎÊı
+        // æ›´æ–°é€Ÿåº¦åŠ¨ç”»å‚æ•°
         float speedMagnitude = InputDirection.sqrMagnitude * (CurrentSpeed / WalkSpeed);
         AIMTOR.SetFloat("Speed", speedMagnitude);
     }
     #endregion
-    #region Éä»÷
-    // ¼ì²âÎäÆ÷
+    #region å°„å‡»
+    // æ£€æµ‹æ­¦å™¨
     public void WeaponInHand()
     {
         if (Hand.childCount > 0)
@@ -369,17 +369,17 @@ public class Player : MonoBehaviour
             if (currentWeaponController != newWeaponController)
             {
                 currentWeaponController = newWeaponController;
-                currentWeapon = weaponTransform.GetComponent<WeaponTrigger>(); // ±£Áô¼æÈİĞÔ
+                currentWeapon = weaponTransform.GetComponent<WeaponTrigger>(); // ä¿ç•™å…¼å®¹æ€§
 
                 if (currentWeaponController != null)
                 {
-                    // Í¨ÖªÎäÆ÷¿ØÖÆÆ÷Íæ¼ÒÊ°È¡ÁËÎäÆ÷
+                    // é€šçŸ¥æ­¦å™¨æ§åˆ¶å™¨ç©å®¶æ‹¾å–äº†æ­¦å™¨
                     currentWeaponController.OnPickedUp(this.transform);
-                    Debug.Log($"ÇĞ»»ÎäÆ÷: {currentWeaponController.GetWeaponName()}");
+                    Debug.Log($"åˆ‡æ¢æ­¦å™¨: {currentWeaponController.GetWeaponName()}");
                 }
                 else
                 {
-                    Debug.LogWarning($"ÎäÆ÷ {weaponTransform.name} È±ÉÙWeaponController×é¼ş£¡");
+                    Debug.LogWarning($"æ­¦å™¨ {weaponTransform.name} ç¼ºå°‘WeaponControllerç»„ä»¶ï¼");
                 }
             }
         }
@@ -387,7 +387,7 @@ public class Player : MonoBehaviour
         {
             if (isWeaponInHand)
             {
-                Debug.Log("ÎäÆ÷ÒÑĞ¶ÏÂ");
+                Debug.Log("æ­¦å™¨å·²å¸ä¸‹");
             }
             isWeaponInHand = false;
             currentWeaponController = null;
@@ -395,36 +395,36 @@ public class Player : MonoBehaviour
         }
     }
 
-    // µ¥´ÎÉä»÷·½·¨£¨ĞÂÔö£©
+    // å•æ¬¡å°„å‡»æ–¹æ³•ï¼ˆæ–°å¢ï¼‰
     public void FireSingle()
     {
         if (!isWeaponInHand || currentWeaponController == null)
         {
-            Debug.LogWarning("Ã»ÓĞ×°±¸ÎäÆ÷£¬ÎŞ·¨Éä»÷£¡");
+            Debug.LogWarning("æ²¡æœ‰è£…å¤‡æ­¦å™¨ï¼Œæ— æ³•å°„å‡»ï¼");
             return;
         }
 
-        // ¼ì²éÊÇ·ñ¿ÉÒÔÉä»÷
+        // æ£€æŸ¥æ˜¯å¦å¯ä»¥å°„å‡»
         if (!currentWeaponController.CanFire())
         {
             if (currentWeaponController.NeedsReload())
             {
-                Debug.Log("µ¯Ò©ÓÃ¾¡£¬ĞèÒª»»µ¯£¡");
+                Debug.Log("å¼¹è¯ç”¨å°½ï¼Œéœ€è¦æ¢å¼¹ï¼");
                 transitionState(PlayerStateType.Reload);
                 return;
             }
             else if (currentWeaponController.IsReloading())
             {
-                Debug.Log("ÕıÔÚ»»µ¯ÖĞ£¬ÎŞ·¨Éä»÷");
+                Debug.Log("æ­£åœ¨æ¢å¼¹ä¸­ï¼Œæ— æ³•å°„å‡»");
                 return;
             }
         }
 
-        // Ö´ĞĞµ¥´ÎÉä»÷
+        // æ‰§è¡Œå•æ¬¡å°„å‡»
         currentWeaponController.FireSingle();
-        Debug.Log("Ö´ĞĞµ¥´ÎÉä»÷");
+        Debug.Log("æ‰§è¡Œå•æ¬¡å°„å‡»");
 
-        // Èç¹û²»ÔÚ¹¥»÷×´Ì¬£¬ÇĞ»»µ½¹¥»÷×´Ì¬
+        // å¦‚æœä¸åœ¨æ”»å‡»çŠ¶æ€ï¼Œåˆ‡æ¢åˆ°æ”»å‡»çŠ¶æ€
         if (!isAttacking)
         {
             isAttacking = true;
@@ -432,32 +432,32 @@ public class Player : MonoBehaviour
         }
     }
 
-    // Á¬ĞøÉä»÷·½·¨£¨ĞÂÔö£©
+    // è¿ç»­å°„å‡»æ–¹æ³•ï¼ˆæ–°å¢ï¼‰
     public void FireContinuous(bool isContinuous)
     {
         if (!isWeaponInHand || currentWeaponController == null)
         {
             if (isContinuous)
             {
-                Debug.LogWarning("Ã»ÓĞ×°±¸ÎäÆ÷£¬ÎŞ·¨Á¬ĞøÉä»÷£¡");
+                Debug.LogWarning("æ²¡æœ‰è£…å¤‡æ­¦å™¨ï¼Œæ— æ³•è¿ç»­å°„å‡»ï¼");
             }
             return;
         }
 
         if (isContinuous)
         {
-            // ¿ªÊ¼Á¬ĞøÉä»÷
+            // å¼€å§‹è¿ç»­å°„å‡»
             if (!currentWeaponController.CanFire())
             {
                 if (currentWeaponController.NeedsReload())
                 {
-                    Debug.Log("µ¯Ò©ÓÃ¾¡£¬ĞèÒª»»µ¯£¡");
+                    Debug.Log("å¼¹è¯ç”¨å°½ï¼Œéœ€è¦æ¢å¼¹ï¼");
                     transitionState(PlayerStateType.Reload);
                     return;
                 }
                 else if (currentWeaponController.IsReloading())
                 {
-                    Debug.Log("ÕıÔÚ»»µ¯ÖĞ£¬ÎŞ·¨Éä»÷");
+                    Debug.Log("æ­£åœ¨æ¢å¼¹ä¸­ï¼Œæ— æ³•å°„å‡»");
                     return;
                 }
             }
@@ -471,52 +471,52 @@ public class Player : MonoBehaviour
                 transitionState(PlayerStateType.Attack);
             }
 
-            Debug.Log("¿ªÊ¼Á¬ĞøÉä»÷");
+            Debug.Log("å¼€å§‹è¿ç»­å°„å‡»");
         }
         else
         {
-            // Í£Ö¹Á¬ĞøÉä»÷
+            // åœæ­¢è¿ç»­å°„å‡»
             currentWeaponController.SetFiring(false);
             isFiring = false;
             isAttacking = false;
-            Debug.Log("Í£Ö¹Á¬ĞøÉä»÷");
+            Debug.Log("åœæ­¢è¿ç»­å°„å‡»");
         }
     }
 
-    // Í³Ò»µÄ¿ª»ğ¿ØÖÆ·½·¨
+    // ç»Ÿä¸€çš„å¼€ç«æ§åˆ¶æ–¹æ³•
     public void Fire(bool isPressed)
     {
         if (!isWeaponInHand || currentWeaponController == null)
         {
             if (isPressed)
             {
-                Debug.LogWarning("Ã»ÓĞ×°±¸ÎäÆ÷£¬ÎŞ·¨Éä»÷£¡");
+                Debug.LogWarning("æ²¡æœ‰è£…å¤‡æ­¦å™¨ï¼Œæ— æ³•å°„å‡»ï¼");
             }
             return;
         }
 
         if (isPressed)
         {
-            // °´ÏÂ¿ª»ğ¼ü
+            // æŒ‰ä¸‹å¼€ç«é”®
             if (!currentWeaponController.CanFire())
             {
                 if (currentWeaponController.NeedsReload())
                 {
-                    Debug.Log("µ¯Ò©ÓÃ¾¡£¬ĞèÒª»»µ¯£¡");
+                    Debug.Log("å¼¹è¯ç”¨å°½ï¼Œéœ€è¦æ¢å¼¹ï¼");
                     transitionState(PlayerStateType.Reload);
                     return;
                 }
                 else if (currentWeaponController.IsReloading())
                 {
-                    Debug.Log("ÕıÔÚ»»µ¯ÖĞ£¬ÎŞ·¨Éä»÷");
+                    Debug.Log("æ­£åœ¨æ¢å¼¹ä¸­ï¼Œæ— æ³•å°„å‡»");
                     return;
                 }
             }
 
-            // Á¢¼´Ö´ĞĞµÚÒ»´ÎÉä»÷£¨µ¥´ÎÉä»÷£©
+            // ç«‹å³æ‰§è¡Œç¬¬ä¸€æ¬¡å°„å‡»ï¼ˆå•æ¬¡å°„å‡»ï¼‰
             currentWeaponController.FireSingle();
 
-            // ÉèÖÃ¿ª»ğ×´Ì¬£¬ÈÃ×´Ì¬»ú´¦ÀíÁ¬ĞøÉä»÷
+            // è®¾ç½®å¼€ç«çŠ¶æ€ï¼Œè®©çŠ¶æ€æœºå¤„ç†è¿ç»­å°„å‡»
             isHoldingFire = true;
             fireHoldTime = 0f;
 
@@ -527,29 +527,29 @@ public class Player : MonoBehaviour
                 transitionState(PlayerStateType.Attack);
             }
 
-            Debug.Log("¿ªÊ¼Éä»÷");
+            Debug.Log("å¼€å§‹å°„å‡»");
         }
         else
         {
-            // ÊÍ·Å¿ª»ğ¼ü
+            // é‡Šæ”¾å¼€ç«é”®
             isHoldingFire = false;
             currentWeaponController.SetFiring(false);
             isFiring = false;
             isAttacking = false;
             fireHoldTime = 0f;
 
-            Debug.Log("Í£Ö¹Éä»÷");
+            Debug.Log("åœæ­¢å°„å‡»");
         }
     }
     #endregion
-    #region ÉÁ±Ü
-    // ÉÁ±Ü¶¯×÷
+    #region é—ªé¿
+    // é—ªé¿åŠ¨ä½œ
     public void Dodge()
     {
-        if (!isDodged && isDodgeCoolDownEnd)  // ÀäÈ´½áÊøÊ±²ÅÄÜÉÁ±Ü
+        if (!isDodged && isDodgeCoolDownEnd)  // å†·å´ç»“æŸæ—¶æ‰èƒ½é—ªé¿
         {
-            isDodged = true; // ¿ªÊ¼ÉÁ±Ü
-            Debug.Log("ÉÁ±ÜÊäÈë´¥·¢");
+            isDodged = true; // å¼€å§‹é—ªé¿
+            Debug.Log("é—ªé¿è¾“å…¥è§¦å‘");
         }
     }
     public void DodgeOnCoolDown()
@@ -557,31 +557,31 @@ public class Player : MonoBehaviour
         StartCoroutine(nameof(DodgeOnCoolDownCoroutine));
     }
 
-    // ÉÁ±ÜÀäÈ´Ğ­³Ì
+    // é—ªé¿å†·å´åç¨‹
     public IEnumerator DodgeOnCoolDownCoroutine()
     {
         yield return new WaitForSeconds(DodgeCooldown);
-        isDodgeCoolDownEnd = true; // ÀäÈ´½áÊø£¬ÉèÖÃÎªtrue
-        Debug.Log("ÉÁ±ÜÀäÈ´½áÊø");
+        isDodgeCoolDownEnd = true; // å†·å´ç»“æŸï¼Œè®¾ç½®ä¸ºtrue
+        Debug.Log("é—ªé¿å†·å´ç»“æŸ");
     }
     #endregion
-    #region Ê°È¡
+    #region æ‹¾å–
     public void PickUp()
     {
         if (nearbyItem != null)
         {
             isPickingUp = true;
-            Debug.Log("Ê°È¡ÊäÈë´¥·¢");
+            Debug.Log("æ‹¾å–è¾“å…¥è§¦å‘");
         }
     }
 
-    // ×¢²á¿ÉÊ°È¡ÎïÆ·£¨ÓÉÎïÆ·½Å±¾µ÷ÓÃ£©
+    // æ³¨å†Œå¯æ‹¾å–ç‰©å“ï¼ˆç”±ç‰©å“è„šæœ¬è°ƒç”¨ï¼‰
     public void RegisterItem(ItemBase item)
     {
         nearbyItem = item;
     }
 
-    // È¡Ïû×¢²áÀë¿ª´¥·¢Æ÷µÄÎïÆ·£¨ÓÉÎïÆ·½Å±¾µ÷ÓÃ£©
+    // å–æ¶ˆæ³¨å†Œç¦»å¼€è§¦å‘å™¨çš„ç‰©å“ï¼ˆç”±ç‰©å“è„šæœ¬è°ƒç”¨ï¼‰
     public void UnregisterItem(ItemBase item)
     {
         if (nearbyItem == item)
@@ -590,59 +590,59 @@ public class Player : MonoBehaviour
         }
     }
     #endregion
-    #region ±¼ÅÜ
-    public void Run(bool isRunPressed) // ĞŞ¸ÄÎª½ÓÊÕbool²ÎÊı
+    #region å¥”è·‘
+    public void Run(bool isRunPressed) // ä¿®æ”¹ä¸ºæ¥æ”¶boolå‚æ•°
     {
         isRunning = isRunPressed;
-        Debug.Log($"±¼ÅÜ×´Ì¬: {(isRunning ? "¿ªÆô" : "¹Ø±Õ")}");
+        Debug.Log($"å¥”è·‘çŠ¶æ€: {(isRunning ? "å¼€å¯" : "å…³é—­")}");
     }
     #endregion
-    #region »»µ¯
+    #region æ¢å¼¹
     public void Reload()
     {
         if (isWeaponInHand && currentWeaponController != null)
         {
             if (currentWeaponController.NeedsReload() || currentWeaponController.GetCurrentAmmo() < currentWeaponController.GetMagazineCapacity())
             {
-                Debug.Log("»»µ¯ÊäÈë´¥·¢£¬ÇĞ»»µ½»»µ¯×´Ì¬");
+                Debug.Log("æ¢å¼¹è¾“å…¥è§¦å‘ï¼Œåˆ‡æ¢åˆ°æ¢å¼¹çŠ¶æ€");
                 transitionState(PlayerStateType.Reload);
             }
             else
             {
-                Debug.Log("µ¯¼ĞÒÑÂú£¬ÎŞĞè»»µ¯");
+                Debug.Log("å¼¹å¤¹å·²æ»¡ï¼Œæ— éœ€æ¢å¼¹");
             }
         }
         else
         {
-            Debug.Log("Ã»ÓĞÎäÆ÷£¬ÎŞ·¨»»µ¯");
+            Debug.Log("æ²¡æœ‰æ­¦å™¨ï¼Œæ— æ³•æ¢å¼¹");
         }
     }
 
     /// <summary>
-    /// ´¥·¢»»µ¯¿ªÊ¼ÊÂ¼ş
+    /// è§¦å‘æ¢å¼¹å¼€å§‹äº‹ä»¶
     /// </summary>
-    /// <param name="reloadTime">»»µ¯Ê±¼ä</param>
+    /// <param name="reloadTime">æ¢å¼¹æ—¶é—´</param>
     public void TriggerReloadStarted(float reloadTime)
     {
         OnReloadStarted?.Invoke(reloadTime);
     }
 
     /// <summary>
-    /// ´¥·¢»»µ¯Í£Ö¹ÊÂ¼ş
+    /// è§¦å‘æ¢å¼¹åœæ­¢äº‹ä»¶
     /// </summary>
     public void TriggerReloadStopped()
     {
         OnReloadStopped?.Invoke();
     }
     #endregion
-    #region Ç±ĞĞ
+    #region æ½œè¡Œ
     public void Crouch(bool isCrouchPressed)
     {
         isCrouching = isCrouchPressed;
-        Debug.Log($"Ç±ĞĞ×´Ì¬: {(isCrouching ? "¿ªÆô" : "¹Ø±Õ")}");
+        Debug.Log($"æ½œè¡ŒçŠ¶æ€: {(isCrouching ? "å¼€å¯" : "å…³é—­")}");
     }
 
-    // Ó¦ÓÃÇ±ĞĞÊÓ¾õĞ§¹û
+    // åº”ç”¨æ½œè¡Œè§†è§‰æ•ˆæœ
     public void ApplyCrouchVisual()
     {
         if (spriteRenderer != null)
@@ -653,7 +653,7 @@ public class Player : MonoBehaviour
         }
     }
 
-    // »Ö¸´Ô­Ê¼ÊÓ¾õĞ§¹û
+    // æ¢å¤åŸå§‹è§†è§‰æ•ˆæœ
     public void RestoreOriginalVisual()
     {
         if (spriteRenderer != null)
@@ -662,7 +662,7 @@ public class Player : MonoBehaviour
         }
     }
 
-    // Íâ²¿·ÃÎÊÇ±ĞĞ×´Ì¬
+    // å¤–éƒ¨è®¿é—®æ½œè¡ŒçŠ¶æ€
     public bool IsCrouching()
     {
         return isCrouching;

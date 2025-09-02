@@ -2,7 +2,7 @@ using System.Collections;
 using UnityEngine;
 
 /// <summary>
-/// Íø¸ñ±£´æ¹ÜÀíÆ÷ - ×¨ÃÅ´¦Àí¶¯Ì¬Íø¸ñµÄ±£´æºÍ¼ÓÔØ
+/// ç½‘æ ¼ä¿å­˜ç®¡ç†å™¨ - ä¸“é—¨å¤„ç†åŠ¨æ€ç½‘æ ¼çš„ä¿å­˜å’ŒåŠ è½½
 /// </summary>
 public class GridSaveManager : MonoBehaviour
 {
@@ -10,10 +10,10 @@ public class GridSaveManager : MonoBehaviour
     private string currentGridGUID;
 
     /// <summary>
-    /// ÉèÖÃµ±Ç°¹ÜÀíµÄÍø¸ñ
+    /// è®¾ç½®å½“å‰ç®¡ç†çš„ç½‘æ ¼
     /// </summary>
-    /// <param name="itemGrid">Òª¹ÜÀíµÄÍø¸ñ</param>
-    /// <param name="gridGUID">Íø¸ñµÄGUID</param>
+    /// <param name="itemGrid">è¦ç®¡ç†çš„ç½‘æ ¼</param>
+    /// <param name="gridGUID">ç½‘æ ¼çš„GUID</param>
     public void SetCurrentGrid(ItemGrid itemGrid, string gridGUID)
     {
         currentItemGrid = itemGrid;
@@ -21,86 +21,86 @@ public class GridSaveManager : MonoBehaviour
     }
 
     /// <summary>
-    /// ×¢²áÍø¸ñµ½±£´æÏµÍ³²¢¼ÓÔØÊı¾İ
+    /// æ³¨å†Œç½‘æ ¼åˆ°ä¿å­˜ç³»ç»Ÿå¹¶åŠ è½½æ•°æ®
     /// </summary>
-    /// <param name="isWarehouse">ÊÇ·ñÎª²Ö¿âÍø¸ñ</param>
+    /// <param name="isWarehouse">æ˜¯å¦ä¸ºä»“åº“ç½‘æ ¼</param>
     public void RegisterAndLoadGrid(bool isWarehouse)
     {
         if (currentItemGrid == null || string.IsNullOrEmpty(currentGridGUID))
         {
-            Debug.LogError("GridSaveManager: µ±Ç°Íø¸ñ»òGUIDÎ´ÉèÖÃ£¡");
+            Debug.LogError("GridSaveManager: å½“å‰ç½‘æ ¼æˆ–GUIDæœªè®¾ç½®ï¼");
             return;
         }
 
-        // ÉèÖÃÍø¸ñÊôĞÔ
+        // è®¾ç½®ç½‘æ ¼å±æ€§
         if (isWarehouse)
         {
             currentItemGrid.GridGUID = "warehouse_grid_main";
-            currentItemGrid.GridName = "²Ö¿âÍø¸ñ";
+            currentItemGrid.GridName = "ä»“åº“ç½‘æ ¼";
             currentItemGrid.GridType = GridType.Storage;
         }
         else
         {
             currentItemGrid.GridGUID = "ground_grid_main";
-            currentItemGrid.GridName = "µØÃæÍø¸ñ";
+            currentItemGrid.GridName = "åœ°é¢ç½‘æ ¼";
             currentItemGrid.GridType = GridType.Ground;
         }
 
         currentGridGUID = currentItemGrid.GridGUID;
 
-        // ×¢²áµ½±£´æÏµÍ³
+        // æ³¨å†Œåˆ°ä¿å­˜ç³»ç»Ÿ
         if (InventorySaveManager.Instance != null)
         {
             InventorySaveManager.Instance.RegisterGridByGUID(currentItemGrid);
-            Debug.Log($"GridSaveManager: ÒÑ×¢²áÍø¸ñµ½±£´æÏµÍ³ - GUID: {currentGridGUID}, ÀàĞÍ: {currentItemGrid.GridType}");
+            Debug.Log($"GridSaveManager: å·²æ³¨å†Œç½‘æ ¼åˆ°ä¿å­˜ç³»ç»Ÿ - GUID: {currentGridGUID}, ç±»å‹: {currentItemGrid.GridType}");
 
-            // ÑÓ³Ù¼ÓÔØÊı¾İ
+            // å»¶è¿ŸåŠ è½½æ•°æ®
             StartCoroutine(LoadGridDataDelayed());
         }
         else
         {
-            Debug.LogWarning("GridSaveManager: InventorySaveManagerÊµÀı²»´æÔÚ£¬ÎŞ·¨×¢²áÍø¸ñ±£´æ¹¦ÄÜ");
+            Debug.LogWarning("GridSaveManager: InventorySaveManagerå®ä¾‹ä¸å­˜åœ¨ï¼Œæ— æ³•æ³¨å†Œç½‘æ ¼ä¿å­˜åŠŸèƒ½");
         }
     }
 
     /// <summary>
-    /// ÑÓ³Ù¼ÓÔØÍø¸ñÊı¾İ
+    /// å»¶è¿ŸåŠ è½½ç½‘æ ¼æ•°æ®
     /// </summary>
     private IEnumerator LoadGridDataDelayed()
     {
-        yield return null; // µÈ´ıÒ»Ö¡È·±£Íø¸ñÍêÈ«×¢²á
+        yield return null; // ç­‰å¾…ä¸€å¸§ç¡®ä¿ç½‘æ ¼å®Œå…¨æ³¨å†Œ
 
         if (InventorySaveManager.Instance != null && currentItemGrid != null && !string.IsNullOrEmpty(currentGridGUID))
         {
-            // Éú³É¶ÀÁ¢µÄ´æµµÎÄ¼şÃû
+            // ç”Ÿæˆç‹¬ç«‹çš„å­˜æ¡£æ–‡ä»¶å
             string saveFileName = GetGridSaveFileName(currentGridGUID);
             
-            // Ö»ÔÚ´æµµÎÄ¼ş´æÔÚÊ±²Å¼ÓÔØ
+            // åªåœ¨å­˜æ¡£æ–‡ä»¶å­˜åœ¨æ—¶æ‰åŠ è½½
             if (ES3.FileExists(saveFileName))
             {
                 try
                 {
-                    // Ê¹ÓÃInventorySaveManagerµÄµ¥¸öÍø¸ñ¼ÓÔØÂß¼­
+                    // ä½¿ç”¨InventorySaveManagerçš„å•ä¸ªç½‘æ ¼åŠ è½½é€»è¾‘
                     bool loadResult = InventorySaveManager.Instance.LoadSingleGrid(currentItemGrid, saveFileName);
-                    Debug.Log($"GridSaveManager: ¼ÓÔØÍø¸ñÊı¾İ - GUID: {currentGridGUID}, ÎÄ¼ş: {saveFileName}, ½á¹û: {(loadResult ? "³É¹¦" : "Ê§°Ü")}");
+                    Debug.Log($"GridSaveManager: åŠ è½½ç½‘æ ¼æ•°æ® - GUID: {currentGridGUID}, æ–‡ä»¶: {saveFileName}, ç»“æœ: {(loadResult ? "æˆåŠŸ" : "å¤±è´¥")}");
                 }
                 catch (System.Exception e)
                 {
-                    Debug.LogError($"GridSaveManager: ¼ÓÔØÍø¸ñÊı¾İÊ§°Ü - GUID: {currentGridGUID}, ´íÎó: {e.Message}");
+                    Debug.LogError($"GridSaveManager: åŠ è½½ç½‘æ ¼æ•°æ®å¤±è´¥ - GUID: {currentGridGUID}, é”™è¯¯: {e.Message}");
                 }
             }
             else
             {
-                Debug.Log($"GridSaveManager: ´æµµÎÄ¼ş²»´æÔÚ£¬Ìø¹ı¼ÓÔØ - GUID: {currentGridGUID}, ÎÄ¼ş: {saveFileName}£¨ÕâÊÇÕı³£µÄ£¬¿ÉÄÜÊÇÊ×´ÎÊ¹ÓÃ¸ÃÍø¸ñ£©");
+                Debug.Log($"GridSaveManager: å­˜æ¡£æ–‡ä»¶ä¸å­˜åœ¨ï¼Œè·³è¿‡åŠ è½½ - GUID: {currentGridGUID}, æ–‡ä»¶: {saveFileName}ï¼ˆè¿™æ˜¯æ­£å¸¸çš„ï¼Œå¯èƒ½æ˜¯é¦–æ¬¡ä½¿ç”¨è¯¥ç½‘æ ¼ï¼‰");
             }
         }
     }
 
     /// <summary>
-    /// ±£´æµ±Ç°Íø¸ñÊı¾İ
+    /// ä¿å­˜å½“å‰ç½‘æ ¼æ•°æ®
     /// </summary>
-    /// <param name="force">ÊÇ·ñÇ¿ÖÆ±£´æ£¨ÎŞÂÛÊÇ·ñÓĞÎïÆ·£©</param>
-    /// <returns>±£´æÊÇ·ñ³É¹¦</returns>
+    /// <param name="force">æ˜¯å¦å¼ºåˆ¶ä¿å­˜ï¼ˆæ— è®ºæ˜¯å¦æœ‰ç‰©å“ï¼‰</param>
+    /// <returns>ä¿å­˜æ˜¯å¦æˆåŠŸ</returns>
     public bool SaveCurrentGrid(bool force = false)
     {
         if (currentItemGrid == null || InventorySaveManager.Instance == null || string.IsNullOrEmpty(currentGridGUID))
@@ -110,54 +110,54 @@ public class GridSaveManager : MonoBehaviour
 
         try
         {
-            // ¼ì²éÊÇ·ñĞèÒª±£´æ
+            // æ£€æŸ¥æ˜¯å¦éœ€è¦ä¿å­˜
             bool hasItems = HasItemsInGrid();
             
             if (force || hasItems)
             {
-                // Éú³É¶ÀÁ¢µÄ´æµµÎÄ¼şÃû
+                // ç”Ÿæˆç‹¬ç«‹çš„å­˜æ¡£æ–‡ä»¶å
                 string saveFileName = GetGridSaveFileName(currentGridGUID);
                 
-                // Ê¹ÓÃInventorySaveManagerµÄµ¥¸öÍø¸ñ±£´æÂß¼­
+                // ä½¿ç”¨InventorySaveManagerçš„å•ä¸ªç½‘æ ¼ä¿å­˜é€»è¾‘
                 bool saveResult = InventorySaveManager.Instance.SaveSingleGrid(currentItemGrid, saveFileName);
                 int itemCount = CountItemsInGrid();
                 
-                Debug.Log($"GridSaveManager: ±£´æÍø¸ñÊı¾İ - GUID: {currentGridGUID}, ÎÄ¼ş: {saveFileName}, ½á¹û: {(saveResult ? "³É¹¦" : "Ê§°Ü")}, ÎïÆ·ÊıÁ¿: {itemCount}");
+                Debug.Log($"GridSaveManager: ä¿å­˜ç½‘æ ¼æ•°æ® - GUID: {currentGridGUID}, æ–‡ä»¶: {saveFileName}, ç»“æœ: {(saveResult ? "æˆåŠŸ" : "å¤±è´¥")}, ç‰©å“æ•°é‡: {itemCount}");
                 return saveResult;
             }
             else
             {
-                Debug.Log($"GridSaveManager: Íø¸ñÎª¿Õ£¬Ìø¹ı±£´æ - GUID: {currentGridGUID}");
-                return true; // ¿ÕÍø¸ñÌø¹ı±£´æÒ²Ëã³É¹¦
+                Debug.Log($"GridSaveManager: ç½‘æ ¼ä¸ºç©ºï¼Œè·³è¿‡ä¿å­˜ - GUID: {currentGridGUID}");
+                return true; // ç©ºç½‘æ ¼è·³è¿‡ä¿å­˜ä¹Ÿç®—æˆåŠŸ
             }
         }
         catch (System.Exception e)
         {
-            Debug.LogError($"GridSaveManager: ±£´æÍø¸ñÊ±·¢Éú´íÎó - GUID: {currentGridGUID}, ´íÎó: {e.Message}");
+            Debug.LogError($"GridSaveManager: ä¿å­˜ç½‘æ ¼æ—¶å‘ç”Ÿé”™è¯¯ - GUID: {currentGridGUID}, é”™è¯¯: {e.Message}");
             return false;
         }
     }
 
     /// <summary>
-    /// È¡Ïû×¢²áµ±Ç°Íø¸ñ
+    /// å–æ¶ˆæ³¨å†Œå½“å‰ç½‘æ ¼
     /// </summary>
     public void UnregisterCurrentGrid()
     {
         if (InventorySaveManager.Instance != null && !string.IsNullOrEmpty(currentGridGUID))
         {
             InventorySaveManager.Instance.UnregisterGrid(currentGridGUID);
-            Debug.Log($"GridSaveManager: ÒÑÈ¡Ïû×¢²áÍø¸ñ - GUID: {currentGridGUID}");
+            Debug.Log($"GridSaveManager: å·²å–æ¶ˆæ³¨å†Œç½‘æ ¼ - GUID: {currentGridGUID}");
         }
 
-        // ÇåÀíÒıÓÃ
+        // æ¸…ç†å¼•ç”¨
         currentItemGrid = null;
         currentGridGUID = null;
     }
 
     /// <summary>
-    /// ÇåÀí²¢±£´æµ±Ç°Íø¸ñ
+    /// æ¸…ç†å¹¶ä¿å­˜å½“å‰ç½‘æ ¼
     /// </summary>
-    /// <param name="force">ÊÇ·ñÇ¿ÖÆ±£´æ</param>
+    /// <param name="force">æ˜¯å¦å¼ºåˆ¶ä¿å­˜</param>
     public void CleanupAndSave(bool force = false)
     {
         SaveCurrentGrid(force);
@@ -165,7 +165,7 @@ public class GridSaveManager : MonoBehaviour
     }
 
     /// <summary>
-    /// ¼ì²éÍø¸ñÖĞÊÇ·ñÓĞÎïÆ·
+    /// æ£€æŸ¥ç½‘æ ¼ä¸­æ˜¯å¦æœ‰ç‰©å“
     /// </summary>
     private bool HasItemsInGrid()
     {
@@ -185,7 +185,7 @@ public class GridSaveManager : MonoBehaviour
     }
 
     /// <summary>
-    /// ¼ÆËãÍø¸ñÖĞµÄÎïÆ·ÊıÁ¿
+    /// è®¡ç®—ç½‘æ ¼ä¸­çš„ç‰©å“æ•°é‡
     /// </summary>
     private int CountItemsInGrid()
     {
@@ -206,13 +206,13 @@ public class GridSaveManager : MonoBehaviour
     }
 
     /// <summary>
-    /// ¸ù¾İÍø¸ñGUIDÉú³É´æµµÎÄ¼şÃû
+    /// æ ¹æ®ç½‘æ ¼GUIDç”Ÿæˆå­˜æ¡£æ–‡ä»¶å
     /// </summary>
-    /// <param name="gridGUID">Íø¸ñGUID</param>
-    /// <returns>´æµµÎÄ¼şÃû</returns>
+    /// <param name="gridGUID">ç½‘æ ¼GUID</param>
+    /// <returns>å­˜æ¡£æ–‡ä»¶å</returns>
     private string GetGridSaveFileName(string gridGUID)
     {
-        // Îª²»Í¬ÀàĞÍµÄÍø¸ñÉú³É²»Í¬µÄÎÄ¼şÃû
+        // ä¸ºä¸åŒç±»å‹çš„ç½‘æ ¼ç”Ÿæˆä¸åŒçš„æ–‡ä»¶å
         switch (gridGUID)
         {
             case "ground_grid_main":
@@ -220,7 +220,7 @@ public class GridSaveManager : MonoBehaviour
             case "warehouse_grid_main":
                 return "warehouse_grid_inventory.es3";
             default:
-                // ¶ÔÓÚÆäËûÍø¸ñ£¨Èç±³°üÍø¸ñ£©£¬Ê¹ÓÃGUID×÷ÎªÎÄ¼şÃû
+                // å¯¹äºå…¶ä»–ç½‘æ ¼ï¼ˆå¦‚èƒŒåŒ…ç½‘æ ¼ï¼‰ï¼Œä½¿ç”¨GUIDä½œä¸ºæ–‡ä»¶å
                 return $"{gridGUID}_inventory.es3";
         }
     }
