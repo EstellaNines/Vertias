@@ -18,7 +18,6 @@ namespace InventorySystem.SpawnSystem.Editor
         private SerializedProperty enableDetailedLoggingProp;
         
         private bool showBasicInfo = true;
-        private bool showContainerConfig = true;
         private bool showItemTemplates = true;
         private bool showAdvancedSettings = false;
         

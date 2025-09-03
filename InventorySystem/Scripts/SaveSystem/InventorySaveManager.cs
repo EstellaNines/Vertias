@@ -93,8 +93,11 @@ public class InventorySaveManager : MonoBehaviour
         // 自动注册场景中的网格
         RegisterAllGridsInScene();
 
+        // 注册装备变化事件监听
+        RegisterEquipmentEventHandlers();
+
         if (showSaveLog)
-            Debug.Log("[InventorySaveManager] 保存管理器初始化完成");
+            Debug.Log("[InventorySaveManager] 保存管理器初始化完成（包含装备事件监听）");
     }
 
     // 自动注册场景中的所有网格
@@ -384,6 +387,12 @@ public class InventorySaveManager : MonoBehaviour
             }
         }
 
+        // 收集装备数据
+        CollectEquipmentData(saveData);
+        
+        // 计算统计信息
+        CalculateStatistics(saveData);
+
         return saveData;
     }
 
@@ -470,8 +479,74 @@ public class InventorySaveManager : MonoBehaviour
     /// <param name="saveData">保存数据对象</param>
     private void CollectEquipmentData(InventorySaveData saveData)
     {
-        // 装备系统待实现
-        Debug.Log("装备系统待实现");
+        try
+        {
+            // 获取装备槽管理器
+            var equipmentManager = InventorySystem.EquipmentSlotManager.Instance;
+            if (equipmentManager == null)
+            {
+                if (showSaveLog)
+                    Debug.LogWarning("[InventorySaveManager] 未找到装备槽管理器，跳过装备数据收集");
+                return;
+            }
+
+            // 清空现有装备数据
+            saveData.equippedItems.Clear();
+
+            // 获取所有装备物品
+            var allEquippedItems = equipmentManager.GetAllEquippedItems();
+            
+            if (showSaveLog)
+                Debug.Log($"[InventorySaveManager] 开始收集装备数据，发现 {allEquippedItems.Count} 个装备物品");
+
+            // 逐个收集装备数据
+            foreach (var kvp in allEquippedItems)
+            {
+                EquipmentSlotType slotType = kvp.Key;
+                ItemDataReader equippedItem = kvp.Value;
+
+                if (equippedItem != null)
+                {
+                    try
+                    {
+                        // 创建装备物品的保存数据
+                        ItemSaveData equipmentSaveData = new ItemSaveData(equippedItem, Vector2Int.zero);
+                        
+                        // 标记为装备状态
+                        equipmentSaveData.isEquipped = true;
+                        
+                        // 使用装备槽类型作为键
+                        string slotKey = slotType.ToString();
+                        saveData.equippedItems[slotKey] = equipmentSaveData;
+
+                        if (showSaveLog)
+                            Debug.Log($"[InventorySaveManager] 收集装备: {slotType} -> {equippedItem.ItemData.itemName}");
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.LogError($"[InventorySaveManager] 收集装备数据时发生异常 (槽位: {slotType}): {e.Message}");
+                    }
+                }
+            }
+
+            // 更新装备元数据
+            saveData.equipmentMetadata.totalEquippedCount = saveData.equippedItems.Count;
+            saveData.equipmentMetadata.lastEquipmentSaveTime = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+            saveData.equipmentMetadata.isEquipmentDataValid = true;
+
+            if (showSaveLog)
+                Debug.Log($"[InventorySaveManager] 装备数据收集完成，共收集 {saveData.equippedItems.Count} 个装备");
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"[InventorySaveManager] 收集装备数据时发生严重异常: {e.Message}");
+            
+            // 设置错误状态
+            if (saveData.equipmentMetadata != null)
+            {
+                saveData.equipmentMetadata.isEquipmentDataValid = false;
+            }
+        }
     }
 
     /// <summary>
@@ -924,10 +999,181 @@ public class InventorySaveManager : MonoBehaviour
     /// 应用装备数据
     /// </summary>
     /// <param name="equippedItems">装备数据字典</param>
+    /// <summary>
+    /// 应用装备数据
+    /// </summary>
+    /// <param name="equippedItems">装备数据字典</param>
     private void ApplyEquipmentData(Dictionary<string, ItemSaveData> equippedItems)
     {
-        // 装备系统待实现
-        Debug.Log("装备系统待实现");
+        if (equippedItems == null || equippedItems.Count == 0)
+        {
+            if (showSaveLog)
+                Debug.Log("[InventorySaveManager] 没有装备数据需要恢复");
+            return;
+        }
+
+        try
+        {
+            // 获取装备槽管理器
+            var equipmentManager = InventorySystem.EquipmentSlotManager.Instance;
+            if (equipmentManager == null)
+            {
+                Debug.LogError("[InventorySaveManager] 未找到装备槽管理器，无法恢复装备数据");
+                return;
+            }
+
+            if (showSaveLog)
+                Debug.Log($"[InventorySaveManager] 开始恢复装备数据，共 {equippedItems.Count} 个装备");
+
+            // 先清空所有当前装备
+            var currentEquipped = equipmentManager.GetAllEquippedItems();
+            foreach (var kvp in currentEquipped)
+            {
+                equipmentManager.UnequipItem(kvp.Key);
+            }
+
+            if (showSaveLog)
+                Debug.Log("[InventorySaveManager] 已清空所有当前装备");
+
+            // 逐个恢复装备
+            int restoredCount = 0;
+            int attemptedCount = 0;
+
+            foreach (var kvp in equippedItems)
+            {
+                string slotTypeString = kvp.Key;
+                ItemSaveData equipmentSaveData = kvp.Value;
+
+                attemptedCount++;
+
+                try
+                {
+                    // 解析装备槽类型
+                    if (!System.Enum.TryParse<EquipmentSlotType>(slotTypeString, out EquipmentSlotType slotType))
+                    {
+                        Debug.LogError($"[InventorySaveManager] 无效的装备槽类型: {slotTypeString}");
+                        continue;
+                    }
+
+                    // 创建装备物品实例
+                    GameObject equipmentInstance = CreateItemFromSaveData(equipmentSaveData);
+                    if (equipmentInstance == null)
+                    {
+                        Debug.LogError($"[InventorySaveManager] 无法创建装备物品实例: {equipmentSaveData.itemID}");
+                        continue;
+                    }
+
+                    // 获取ItemDataReader组件
+                    var itemDataReader = equipmentInstance.GetComponent<ItemDataReader>();
+                    if (itemDataReader == null)
+                    {
+                        Debug.LogError($"[InventorySaveManager] 装备物品缺少ItemDataReader组件: {equipmentSaveData.itemID}");
+                        Destroy(equipmentInstance);
+                        continue;
+                    }
+
+                    // 恢复物品状态
+                    RestoreItemState(itemDataReader, equipmentSaveData);
+
+                    // 尝试装备到指定槽位
+                    bool equipSuccess = equipmentManager.EquipItem(slotType, itemDataReader);
+                    if (equipSuccess)
+                    {
+                        restoredCount++;
+                        if (showSaveLog)
+                            Debug.Log($"[InventorySaveManager] ✅ 成功恢复装备: {slotType} -> {itemDataReader.ItemData.itemName}");
+                    }
+                    else
+                    {
+                        Debug.LogError($"[InventorySaveManager] ❌ 装备到槽位失败: {slotType} -> {itemDataReader.ItemData.itemName}");
+                        Destroy(equipmentInstance);
+                    }
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError($"[InventorySaveManager] 恢复装备时发生异常 (槽位: {slotTypeString}): {e.Message}");
+                }
+            }
+
+            if (showSaveLog)
+                Debug.Log($"[InventorySaveManager] 装备恢复完成: 成功 {restoredCount}/{attemptedCount}");
+
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"[InventorySaveManager] 应用装备数据时发生严重异常: {e.Message}");
+        }
+    }
+
+    /// <summary>
+    /// 从保存数据创建物品实例
+    /// </summary>
+    /// <param name="itemSaveData">物品保存数据</param>
+    /// <returns>创建的物品GameObject</returns>
+    private GameObject CreateItemFromSaveData(ItemSaveData itemSaveData)
+    {
+        if (itemSaveData == null) return null;
+
+        try
+        {
+            // 获取物品类别
+            ItemCategory category = GetCategoryByID(itemSaveData.itemID);
+            
+            // 加载物品预制件
+            GameObject prefab = LoadItemPrefabByCategory(category, itemSaveData.itemID);
+            if (prefab == null)
+            {
+                Debug.LogWarning($"[InventorySaveManager] 无法找到物品预制件: {itemSaveData.itemID}");
+                return null;
+            }
+            
+            // 实例化物品
+            GameObject itemInstance = Instantiate(prefab);
+            return itemInstance;
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"[InventorySaveManager] 创建物品实例时发生异常: {e.Message}");
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// 恢复物品状态
+    /// </summary>
+    /// <param name="itemDataReader">物品数据读取器</param>
+    /// <param name="itemSaveData">物品保存数据</param>
+    private void RestoreItemState(ItemDataReader itemDataReader, ItemSaveData itemSaveData)
+    {
+        if (itemDataReader == null || itemSaveData == null) return;
+
+        try
+        {
+            // 恢复堆叠数量
+            if (itemSaveData.stackCount > 0)
+            {
+                itemDataReader.SetStack(itemSaveData.stackCount);
+            }
+
+            // 恢复耐久度
+            if (itemSaveData.durability > 0)
+            {
+                itemDataReader.SetDurability(Mathf.RoundToInt(itemSaveData.durability));
+            }
+
+            // 恢复使用次数
+            if (itemSaveData.usageCount > 0)
+            {
+                itemDataReader.SetUsageCount(itemSaveData.usageCount);
+            }
+
+            if (showSaveLog)
+                Debug.Log($"[InventorySaveManager] 恢复物品状态: {itemDataReader.ItemData.itemName} (堆叠: {itemSaveData.stackCount}, 耐久: {itemSaveData.durability})");
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"[InventorySaveManager] 恢复物品状态时发生异常: {e.Message}");
+        }
     }
 
     /// <summary>
@@ -1205,5 +1451,144 @@ public class InventorySaveManager : MonoBehaviour
 
         return null;
     }
+
+
+    #region 装备事件处理
+
+    /// <summary>
+    /// 注册装备事件处理器
+    /// </summary>
+    private void RegisterEquipmentEventHandlers()
+    {
+        try
+        {
+            // 监听装备槽事件
+            InventorySystem.EquipmentSlot.OnItemEquipped += OnEquipmentChanged;
+            InventorySystem.EquipmentSlot.OnItemUnequipped += OnEquipmentChanged;
+            
+            // 监听装备管理器事件
+            InventorySystem.EquipmentSlotManager.OnEquipmentChanged += OnEquipmentManagerChanged;
+
+            if (showSaveLog)
+                Debug.Log("[InventorySaveManager] 装备事件监听器注册完成");
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"[InventorySaveManager] 注册装备事件监听器时发生异常: {e.Message}");
+        }
+    }
+
+    /// <summary>
+    /// 注销装备事件处理器
+    /// </summary>
+    private void UnregisterEquipmentEventHandlers()
+    {
+        try
+        {
+            // 注销装备槽事件
+            InventorySystem.EquipmentSlot.OnItemEquipped -= OnEquipmentChanged;
+            InventorySystem.EquipmentSlot.OnItemUnequipped -= OnEquipmentChanged;
+            
+            // 注销装备管理器事件
+            InventorySystem.EquipmentSlotManager.OnEquipmentChanged -= OnEquipmentManagerChanged;
+
+            if (showSaveLog)
+                Debug.Log("[InventorySaveManager] 装备事件监听器注销完成");
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"[InventorySaveManager] 注销装备事件监听器时发生异常: {e.Message}");
+        }
+    }
+
+    /// <summary>
+    /// 处理装备变化事件（装备槽级别）
+    /// </summary>
+    /// <param name="slotType">装备槽类型</param>
+    /// <param name="item">装备的物品（null表示卸装）</param>
+    private void OnEquipmentChanged(InventorySystem.EquipmentSlotType slotType, ItemDataReader item)
+    {
+        if (!enableAutoSave) return;
+
+        try
+        {
+            string action = item != null ? "装备" : "卸装";
+            string itemName = item?.ItemData.itemName ?? "无";
+            
+            if (showSaveLog)
+                Debug.Log($"[InventorySaveManager] 装备变化触发: {slotType} - {action} {itemName}");
+
+            // 延迟保存避免频繁IO
+            DelayedEquipmentSave();
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"[InventorySaveManager] 处理装备变化事件时发生异常: {e.Message}");
+        }
+    }
+
+    /// <summary>
+    /// 处理装备管理器变化事件
+    /// </summary>
+    /// <param name="slotType">装备槽类型</param>
+    /// <param name="item">装备的物品（null表示卸装）</param>
+    private void OnEquipmentManagerChanged(InventorySystem.EquipmentSlotType slotType, ItemDataReader item)
+    {
+        if (!enableAutoSave) return;
+
+        try
+        {
+            if (showSaveLog)
+                Debug.Log($"[InventorySaveManager] 装备管理器变化: {slotType}");
+
+            // 延迟保存避免频繁IO
+            DelayedEquipmentSave();
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"[InventorySaveManager] 处理装备管理器变化事件时发生异常: {e.Message}");
+        }
+    }
+
+    /// <summary>
+    /// 延迟装备保存（避免频繁IO）
+    /// </summary>
+    private void DelayedEquipmentSave()
+    {
+        // 取消之前的延迟保存
+        CancelInvoke(nameof(ExecuteEquipmentSave));
+        
+        // 延迟500ms执行保存
+        Invoke(nameof(ExecuteEquipmentSave), 0.5f);
+    }
+
+    /// <summary>
+    /// 执行装备保存
+    /// </summary>
+    private void ExecuteEquipmentSave()
+    {
+        try
+        {
+            if (showSaveLog)
+                Debug.Log("[InventorySaveManager] 执行装备变化触发的保存");
+
+            // 使用现有的保存方法
+            SaveInventory();
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"[InventorySaveManager] 执行装备保存时发生异常: {e.Message}");
+        }
+    }
+
+    /// <summary>
+    /// 在对象销毁时清理事件监听
+    /// </summary>
+    private void OnDestroy()
+    {
+        UnregisterEquipmentEventHandlers();
+    }
+
+    #endregion
 
 }

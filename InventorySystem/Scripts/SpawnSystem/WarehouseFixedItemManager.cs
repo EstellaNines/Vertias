@@ -28,8 +28,7 @@ namespace InventorySystem.SpawnSystem
         [FieldLabel("启用调试日志")]
         [SerializeField] private bool enableDebugLog = true;
         
-        [FieldLabel("显示详细日志")]
-        [SerializeField] private bool enableDetailedLog = false;
+
         
         // 单例模式
         private static WarehouseFixedItemManager instance;
@@ -304,17 +303,26 @@ namespace InventorySystem.SpawnSystem
             
             // 使用FixedItemSpawnManager进行实际生成
             var spawnManager = FixedItemSpawnManager.Instance;
-            if (spawnManager != null)
+            if (spawnManager == null)
             {
-                // 异步生成物品
-                spawnManager.SpawnFixedItems(targetGrid, warehouseConfig, containerId, OnWarehouseItemsGenerated);
-                return true;
+                LogError("FixedItemSpawnManager实例不存在，尝试在场景中查找...");
+                
+                // 尝试查找现有实例
+                spawnManager = UnityEngine.Object.FindObjectOfType<FixedItemSpawnManager>();
+                if (spawnManager == null)
+                {
+                    LogError("场景中没有找到FixedItemSpawnManager，无法生成物品");
+                    return false;
+                }
+                else
+                {
+                    LogDebug("找到了FixedItemSpawnManager实例，继续生成");
+                }
             }
-            else
-            {
-                LogError("FixedItemSpawnManager实例不存在");
-                return false;
-            }
+            
+            // 异步生成物品
+            spawnManager.SpawnFixedItems(targetGrid, warehouseConfig, containerId, OnWarehouseItemsGenerated);
+            return true;
         }
         
         /// <summary>
@@ -602,6 +610,87 @@ namespace InventorySystem.SpawnSystem
             #if UNITY_EDITOR
             UnityEditor.EditorUtility.DisplayDialog("清除完成", 
                 $"已清除所有仓库相关数据。\n\n删除的记录: {keysToDelete.Count}\n\n新存档ID: {saveGameId}\n\n现在可以重新开始测试。", "确定");
+            #endif
+        }
+        
+        /// <summary>
+        /// 检测当前存档生成状态（详细版本）
+        /// </summary>
+        [ContextMenu("检测当前存档生成状态")]
+        public void DetectCurrentSaveGenerationStatus()
+        {
+            string statusReport = "=== 仓库存档生成状态检测报告 ===\n";
+            
+            // 基本信息
+            statusReport += $"当前存档ID: {saveGameId}\n";
+            statusReport += $"仓库生成状态: {(HasWarehouseGenerated() ? "✅ 已生成" : "❌ 未生成")}\n";
+            statusReport += $"强制重新生成: {forceRegenerate}\n\n";
+            
+            // 配置信息
+            if (warehouseConfig != null)
+            {
+                var stats = warehouseConfig.GetStatistics();
+                statusReport += $"配置文件: {warehouseConfig.configName}\n";
+                statusReport += $"配置物品总数: {stats.totalItems}\n";
+                statusReport += $"有效物品数: {stats.validItems}\n";
+                statusReport += $"关键物品数: {stats.criticalItems}\n";
+                statusReport += $"总占用面积: {stats.totalRequiredArea} 格\n\n";
+            }
+            else
+            {
+                statusReport += "配置文件: ❌ 未设置\n\n";
+            }
+            
+            // PlayerPrefs存储状态
+            string warehouseKey = WAREHOUSE_GENERATED_KEY_PREFIX + saveGameId;
+            string persistentKey = "WarehouseManager_PersistentSaveId";
+            string timeKey = $"WarehouseManager_SaveCreationTime_{saveGameId}";
+            
+            statusReport += "PlayerPrefs 存储状态:\n";
+            statusReport += $"• 仓库生成键: {warehouseKey}\n";
+            statusReport += $"  存在: {(PlayerPrefs.HasKey(warehouseKey) ? $"✅ 是 (值: {PlayerPrefs.GetInt(warehouseKey)})" : "❌ 否")}\n";
+            statusReport += $"• 持久存档键: {persistentKey}\n";
+            statusReport += $"  存在: {(PlayerPrefs.HasKey(persistentKey) ? $"✅ 是 (值: {PlayerPrefs.GetString(persistentKey)})" : "❌ 否")}\n";
+            statusReport += $"• 创建时间键: {timeKey}\n";
+            statusReport += $"  存在: {(PlayerPrefs.HasKey(timeKey) ? $"✅ 是 (值: {PlayerPrefs.GetString(timeKey)})" : "❌ 否")}\n\n";
+            
+            // 系统建议
+            statusReport += "系统建议:\n";
+            if (!HasWarehouseGenerated() && warehouseConfig != null)
+            {
+                statusReport += "• ✅ 可以执行物品生成操作\n";
+                statusReport += "• 建议先检查目标仓库网格是否存在\n";
+            }
+            else if (HasWarehouseGenerated())
+            {
+                statusReport += "• ℹ️ 仓库已生成过物品，若要重新生成请先重置状态\n";
+                statusReport += "• 可以使用'强制生成物品'进行测试\n";
+            }
+            else
+            {
+                statusReport += "• ⚠️ 请先设置仓库生成配置文件\n";
+            }
+            
+            // 查找可用的仓库网格
+            var warehouseGrids = FindObjectsOfType<ItemGrid>();
+            int warehouseGridCount = 0;
+            
+            foreach (var grid in warehouseGrids)
+            {
+                if (grid.GridType == GridType.Storage || 
+                    grid.name.ToLower().Contains("warehouse") ||
+                    grid.GridGUID.ToLower().Contains("warehouse"))
+                {
+                    warehouseGridCount++;
+                }
+            }
+            
+            statusReport += $"\n场景中的仓库网格数量: {warehouseGridCount}\n";
+            
+            LogDebug(statusReport);
+            
+            #if UNITY_EDITOR
+            UnityEditor.EditorUtility.DisplayDialog("存档生成状态检测", statusReport, "确定");
             #endif
         }
         

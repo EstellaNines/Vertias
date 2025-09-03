@@ -5,16 +5,16 @@ using System.Linq;
 namespace InventorySystem
 {
     /// <summary>
-    /// å®¹å™¨å†…å®¹ä¿å­˜æ•°æ®
+    /// ÈİÆ÷ÄÚÈİ±£´æÊı¾İ
     /// </summary>
     [System.Serializable]
     public class ContainerSaveData
     {
-        public string containerItemID;              // å®¹å™¨ç‰©å“ID
-        public string containerGlobalID;            // å®¹å™¨å…¨å±€å”¯ä¸€ID
-        public EquipmentSlotType slotType;          // è£…å¤‡æ§½ç±»å‹
-        public List<ItemSaveData> containerItems;  // å®¹å™¨å†…çš„ç‰©å“æ•°æ®
-        public string saveTime;                     // ä¿å­˜æ—¶é—´
+        public string containerItemID;              // ÈİÆ÷ÎïÆ·ID
+        public string containerGlobalID;            // ÈİÆ÷È«¾ÖÎ¨Ò»ID
+        public EquipmentSlotType slotType;          // ×°±¸²ÛÀàĞÍ
+        public List<ItemSaveData> containerItems;  // ÈİÆ÷ÄÚµÄÎïÆ·Êı¾İ
+        public string saveTime;                     // ±£´æÊ±¼ä
         
         public ContainerSaveData()
         {
@@ -30,7 +30,7 @@ namespace InventorySystem
             containerItems = new List<ItemSaveData>();
             saveTime = System.DateTime.Now.ToBinary().ToString();
             
-            // æ”¶é›†å®¹å™¨ç½‘æ ¼ä¸­çš„æ‰€æœ‰ç‰©å“
+            // ÊÕ¼¯ÈİÆ÷Íø¸ñÖĞµÄËùÓĞÎïÆ·
             if (containerGrid != null)
             {
                 CollectContainerItems(containerGrid);
@@ -38,26 +38,26 @@ namespace InventorySystem
         }
         
         /// <summary>
-        /// æ”¶é›†å®¹å™¨ç½‘æ ¼ä¸­çš„æ‰€æœ‰ç‰©å“
+        /// ÊÕ¼¯ÈİÆ÷Íø¸ñÖĞµÄËùÓĞÎïÆ·
         /// </summary>
         private void CollectContainerItems(ItemGrid containerGrid)
         {
             containerItems.Clear();
             
-            // æ£€æŸ¥å®¹å™¨ç½‘æ ¼æ˜¯å¦å·²æ­£ç¡®åˆå§‹åŒ–
+            // ¼ì²éÈİÆ÷Íø¸ñÊÇ·ñÒÑÕıÈ·³õÊ¼»¯
             if (containerGrid == null)
             {
-                Debug.LogWarning("[ContainerSaveManager] å®¹å™¨ç½‘æ ¼ä¸ºnullï¼Œæ— æ³•æ”¶é›†ç‰©å“");
+                Debug.LogWarning("[ContainerSaveManager] ÈİÆ÷Íø¸ñÎªnull£¬ÎŞ·¨ÊÕ¼¯ÎïÆ·");
                 return;
             }
             
             if (!containerGrid.IsGridInitialized)
             {
-                Debug.LogWarning($"[ContainerSaveManager] å®¹å™¨ç½‘æ ¼æœªå®Œå…¨åˆå§‹åŒ–ï¼Œè·³è¿‡ç‰©å“æ”¶é›†");
+                Debug.LogWarning($"[ContainerSaveManager] ÈİÆ÷Íø¸ñÎ´ÍêÈ«³õÊ¼»¯£¬Ìø¹ıÎïÆ·ÊÕ¼¯");
                 return;
             }
             
-            // éå†ç½‘æ ¼æ”¶é›†ç‰©å“
+            // ±éÀúÍø¸ñÊÕ¼¯ÎïÆ·
             HashSet<Item> processedItems = new HashSet<Item>();
             
             for (int x = 0; x < containerGrid.CurrentWidth; x++)
@@ -81,18 +81,18 @@ namespace InventorySystem
                     }
                     catch (System.Exception e)
                     {
-                        Debug.LogWarning($"[ContainerSaveManager] æ”¶é›†ä½ç½®({x},{y})çš„ç‰©å“æ—¶å‡ºé”™: {e.Message}");
+                        Debug.LogWarning($"[ContainerSaveManager] ÊÕ¼¯Î»ÖÃ({x},{y})µÄÎïÆ·Ê±³ö´í: {e.Message}");
                     }
                 }
             }
             
-            Debug.Log($"[ContainerSaveManager] æ”¶é›†åˆ° {containerItems.Count} ä¸ªå®¹å™¨ç‰©å“");
+            Debug.Log($"[ContainerSaveManager] ÊÕ¼¯µ½ {containerItems.Count} ¸öÈİÆ÷ÎïÆ·");
         }
     }
     
     /// <summary>
-    /// å®¹å™¨ä¿å­˜ç®¡ç†å™¨
-    /// è´Ÿè´£ç®¡ç†å®¹å™¨å†…å®¹çš„ä¿å­˜å’ŒåŠ è½½
+    /// ÈİÆ÷±£´æ¹ÜÀíÆ÷
+    /// ¸ºÔğ¹ÜÀíÈİÆ÷ÄÚÈİµÄ±£´æºÍ¼ÓÔØ
     /// </summary>
     public class ContainerSaveManager : MonoBehaviour
     {
@@ -133,11 +133,11 @@ namespace InventorySystem
         }
         
         /// <summary>
-        /// ä¿å­˜å®¹å™¨å†…å®¹
+        /// ±£´æÈİÆ÷ÄÚÈİ
         /// </summary>
-        /// <param name="containerItem">å®¹å™¨ç‰©å“</param>
-        /// <param name="slotType">è£…å¤‡æ§½ç±»å‹</param>
-        /// <param name="containerGrid">å®¹å™¨ç½‘æ ¼</param>
+        /// <param name="containerItem">ÈİÆ÷ÎïÆ·</param>
+        /// <param name="slotType">×°±¸²ÛÀàĞÍ</param>
+        /// <param name="containerGrid">ÈİÆ÷Íø¸ñ</param>
         public void SaveContainerContent(ItemDataReader containerItem, EquipmentSlotType slotType, ItemGrid containerGrid)
         {
             if (containerItem == null || containerGrid == null) return;
@@ -153,15 +153,15 @@ namespace InventorySystem
             containerSaveData[containerKey] = saveData;
             SaveToPlayerPrefs();
             
-            Debug.Log($"[ContainerSaveManager] ä¿å­˜å®¹å™¨å†…å®¹: {containerKey}, ç‰©å“æ•°é‡: {saveData.containerItems.Count}");
+            Debug.Log($"[ContainerSaveManager] ±£´æÈİÆ÷ÄÚÈİ: {containerKey}, ÎïÆ·ÊıÁ¿: {saveData.containerItems.Count}");
         }
         
         /// <summary>
-        /// åŠ è½½å®¹å™¨å†…å®¹
+        /// ¼ÓÔØÈİÆ÷ÄÚÈİ
         /// </summary>
-        /// <param name="containerItem">å®¹å™¨ç‰©å“</param>
-        /// <param name="slotType">è£…å¤‡æ§½ç±»å‹</param>
-        /// <param name="containerGrid">å®¹å™¨ç½‘æ ¼</param>
+        /// <param name="containerItem">ÈİÆ÷ÎïÆ·</param>
+        /// <param name="slotType">×°±¸²ÛÀàĞÍ</param>
+        /// <param name="containerGrid">ÈİÆ÷Íø¸ñ</param>
         public void LoadContainerContent(ItemDataReader containerItem, EquipmentSlotType slotType, ItemGrid containerGrid)
         {
             if (containerItem == null || containerGrid == null) return;
@@ -171,20 +171,20 @@ namespace InventorySystem
             if (containerSaveData.TryGetValue(containerKey, out ContainerSaveData saveData))
             {
                 StartCoroutine(RestoreContainerItems(saveData, containerGrid));
-                Debug.Log($"[ContainerSaveManager] åŠ è½½å®¹å™¨å†…å®¹: {containerKey}, ç‰©å“æ•°é‡: {saveData.containerItems.Count}");
+                Debug.Log($"[ContainerSaveManager] ¼ÓÔØÈİÆ÷ÄÚÈİ: {containerKey}, ÎïÆ·ÊıÁ¿: {saveData.containerItems.Count}");
             }
             else
             {
-                Debug.Log($"[ContainerSaveManager] æ²¡æœ‰æ‰¾åˆ°å®¹å™¨ä¿å­˜æ•°æ®: {containerKey}");
+                Debug.Log($"[ContainerSaveManager] Ã»ÓĞÕÒµ½ÈİÆ÷±£´æÊı¾İ: {containerKey}");
             }
         }
         
         /// <summary>
-        /// æ¢å¤å®¹å™¨ä¸­çš„ç‰©å“
+        /// »Ö¸´ÈİÆ÷ÖĞµÄÎïÆ·
         /// </summary>
         private System.Collections.IEnumerator RestoreContainerItems(ContainerSaveData saveData, ItemGrid containerGrid)
         {
-            yield return null; // ç­‰å¾…ä¸€å¸§ç¡®ä¿ç½‘æ ¼å®Œå…¨åˆå§‹åŒ–
+            yield return null; // µÈ´ıÒ»Ö¡È·±£Íø¸ñÍêÈ«³õÊ¼»¯
             
             foreach (ItemSaveData itemData in saveData.containerItems)
             {
@@ -196,19 +196,19 @@ namespace InventorySystem
                     
                     if (itemReader != null)
                     {
-                        // æ¢å¤ç‰©å“çŠ¶æ€
+                        // »Ö¸´ÎïÆ·×´Ì¬
                         itemReader.SetStack(itemData.stackCount);
                         itemReader.SetDurability((int)itemData.durability);
                         itemReader.SetUsageCount(itemData.usageCount);
                         
-                        // å°è¯•æ”¾ç½®åˆ°å®¹å™¨ç½‘æ ¼ä¸­
+                        // ³¢ÊÔ·ÅÖÃµ½ÈİÆ÷Íø¸ñÖĞ
                         if (containerGrid.PlaceItem(itemInstance.GetComponent<Item>(), itemData.gridPosition.x, itemData.gridPosition.y))
                         {
-                            Debug.Log($"[ContainerSaveManager] æˆåŠŸæ¢å¤ç‰©å“: {itemReader.ItemData.itemName} åˆ°ä½ç½® {itemData.gridPosition}");
+                            Debug.Log($"[ContainerSaveManager] ³É¹¦»Ö¸´ÎïÆ·: {itemReader.ItemData.itemName} µ½Î»ÖÃ {itemData.gridPosition}");
                         }
                         else
                         {
-                            Debug.LogWarning($"[ContainerSaveManager] æ— æ³•æ”¾ç½®ç‰©å“: {itemReader.ItemData.itemName} åˆ°ä½ç½® {itemData.gridPosition}");
+                            Debug.LogWarning($"[ContainerSaveManager] ÎŞ·¨·ÅÖÃÎïÆ·: {itemReader.ItemData.itemName} µ½Î»ÖÃ {itemData.gridPosition}");
                             Destroy(itemInstance);
                         }
                     }
@@ -218,12 +218,12 @@ namespace InventorySystem
                     }
                 }
                 
-                yield return null; // æ¯ä¸ªç‰©å“ä¹‹é—´ç­‰å¾…ä¸€å¸§
+                yield return null; // Ã¿¸öÎïÆ·Ö®¼äµÈ´ıÒ»Ö¡
             }
         }
         
         /// <summary>
-        /// ç”Ÿæˆå®¹å™¨å”¯ä¸€é”®
+        /// Éú³ÉÈİÆ÷Î¨Ò»¼ü
         /// </summary>
         private string GetContainerKey(ItemDataReader containerItem, EquipmentSlotType slotType)
         {
@@ -231,16 +231,16 @@ namespace InventorySystem
         }
         
         /// <summary>
-        /// åŠ è½½ç‰©å“é¢„åˆ¶ä½“
+        /// ¼ÓÔØÎïÆ·Ô¤ÖÆÌå
         /// </summary>
         private GameObject LoadItemPrefab(ItemSaveData itemData)
         {
-            // æ ¹æ®ç‰©å“IDå’Œç±»åˆ«IDæŸ¥æ‰¾é¢„åˆ¶ä½“
+            // ¸ù¾İÎïÆ·IDºÍÀà±ğID²éÕÒÔ¤ÖÆÌå
             ItemCategory category = (ItemCategory)itemData.categoryID;
             string categoryFolder = GetCategoryFolderName(category);
             string prefabPath = $"InventorySystemResources/Prefabs/{categoryFolder}";
             
-            // æŸ¥æ‰¾åŒ¹é…çš„é¢„åˆ¶ä½“
+            // ²éÕÒÆ¥ÅäµÄÔ¤ÖÆÌå
             GameObject[] prefabs = Resources.LoadAll<GameObject>(prefabPath);
             foreach (GameObject prefab in prefabs)
             {
@@ -251,37 +251,37 @@ namespace InventorySystem
                 }
             }
             
-            Debug.LogWarning($"[ContainerSaveManager] æœªæ‰¾åˆ°ç‰©å“é¢„åˆ¶ä½“: ID={itemData.itemID}, Category={category}");
+            Debug.LogWarning($"[ContainerSaveManager] Î´ÕÒµ½ÎïÆ·Ô¤ÖÆÌå: ID={itemData.itemID}, Category={category}");
             return null;
         }
         
         /// <summary>
-        /// è·å–ç±»åˆ«æ–‡ä»¶å¤¹åç§°
+        /// »ñÈ¡Àà±ğÎÄ¼ş¼ĞÃû³Æ
         /// </summary>
         private string GetCategoryFolderName(ItemCategory category)
         {
             switch (category)
             {
-                case ItemCategory.Helmet: return "Helmet_å¤´ç›”";
-                case ItemCategory.Armor: return "Armor_æŠ¤ç”²";
-                case ItemCategory.TacticalRig: return "TacticalRig_æˆ˜æœ¯èƒŒå¿ƒ";
-                case ItemCategory.Backpack: return "Backpack_èƒŒåŒ…";
-                case ItemCategory.Weapon: return "Weapon_æ­¦å™¨";
-                case ItemCategory.Ammunition: return "Ammunition_å¼¹è¯";
-                case ItemCategory.Food: return "Food_é£Ÿç‰©";
-                case ItemCategory.Drink: return "Drink_é¥®æ–™";
-                case ItemCategory.Sedative: return "Sedative_é•‡é™å‰‚";
-                case ItemCategory.Hemostatic: return "Hemostatic_æ­¢è¡€å‰‚";
-                case ItemCategory.Healing: return "Healing_æ²»ç–—è¯ç‰©";
-                case ItemCategory.Intelligence: return "Intelligence_æƒ…æŠ¥";
-                case ItemCategory.Currency: return "Currency_è´§å¸";
-                case ItemCategory.Special: return "Special_ç‰¹æ®Šç‰©å“";
+                case ItemCategory.Helmet: return "Helmet_Í·¿ø";
+                case ItemCategory.Armor: return "Armor_»¤¼×";
+                case ItemCategory.TacticalRig: return "TacticalRig_Õ½Êõ±³ĞÄ";
+                case ItemCategory.Backpack: return "Backpack_±³°ü";
+                case ItemCategory.Weapon: return "Weapon_ÎäÆ÷";
+                case ItemCategory.Ammunition: return "Ammunition_µ¯Ò©";
+                case ItemCategory.Food: return "Food_Ê³Îï";
+                case ItemCategory.Drink: return "Drink_ÒûÁÏ";
+                case ItemCategory.Sedative: return "Sedative_Õò¾²¼Á";
+                case ItemCategory.Hemostatic: return "Hemostatic_Ö¹Ñª¼Á";
+                case ItemCategory.Healing: return "Healing_ÖÎÁÆÒ©Îï";
+                case ItemCategory.Intelligence: return "Intelligence_Çé±¨";
+                case ItemCategory.Currency: return "Currency_»õ±Ò";
+                case ItemCategory.Special: return "Special_ÌØÊâÎïÆ·";
                 default: return "Other";
             }
         }
         
         /// <summary>
-        /// ä¿å­˜åˆ°PlayerPrefs
+        /// ±£´æµ½PlayerPrefs
         /// </summary>
         private void SaveToPlayerPrefs()
         {
@@ -294,16 +294,16 @@ namespace InventorySystem
                 PlayerPrefs.SetString(CONTAINER_SAVE_KEY, json);
                 PlayerPrefs.Save();
                 
-                Debug.Log($"[ContainerSaveManager] ä¿å­˜äº† {containerSaveData.Count} ä¸ªå®¹å™¨æ•°æ®åˆ°PlayerPrefs");
+                Debug.Log($"[ContainerSaveManager] ±£´æÁË {containerSaveData.Count} ¸öÈİÆ÷Êı¾İµ½PlayerPrefs");
             }
             catch (System.Exception e)
             {
-                Debug.LogError($"[ContainerSaveManager] ä¿å­˜å®¹å™¨æ•°æ®å¤±è´¥: {e.Message}");
+                Debug.LogError($"[ContainerSaveManager] ±£´æÈİÆ÷Êı¾İÊ§°Ü: {e.Message}");
             }
         }
         
         /// <summary>
-        /// ä»PlayerPrefsåŠ è½½
+        /// ´ÓPlayerPrefs¼ÓÔØ
         /// </summary>
         private void LoadAllContainerData()
         {
@@ -321,29 +321,29 @@ namespace InventorySystem
                         containerSaveData[key] = data;
                     }
                     
-                    Debug.Log($"[ContainerSaveManager] ä»PlayerPrefsåŠ è½½äº† {containerSaveData.Count} ä¸ªå®¹å™¨æ•°æ®");
+                    Debug.Log($"[ContainerSaveManager] ´ÓPlayerPrefs¼ÓÔØÁË {containerSaveData.Count} ¸öÈİÆ÷Êı¾İ");
                 }
             }
             catch (System.Exception e)
             {
-                Debug.LogError($"[ContainerSaveManager] åŠ è½½å®¹å™¨æ•°æ®å¤±è´¥: {e.Message}");
+                Debug.LogError($"[ContainerSaveManager] ¼ÓÔØÈİÆ÷Êı¾İÊ§°Ü: {e.Message}");
             }
         }
         
         /// <summary>
-        /// æ¸…é™¤æ‰€æœ‰å®¹å™¨ä¿å­˜æ•°æ®
+        /// Çå³ıËùÓĞÈİÆ÷±£´æÊı¾İ
         /// </summary>
         public void ClearAllContainerData()
         {
             containerSaveData.Clear();
             PlayerPrefs.DeleteKey(CONTAINER_SAVE_KEY);
             PlayerPrefs.Save();
-            Debug.Log("[ContainerSaveManager] æ¸…é™¤äº†æ‰€æœ‰å®¹å™¨ä¿å­˜æ•°æ®");
+            Debug.Log("[ContainerSaveManager] Çå³ıÁËËùÓĞÈİÆ÷±£´æÊı¾İ");
         }
     }
     
     /// <summary>
-    /// å®¹å™¨ä¿å­˜æ•°æ®é›†åˆï¼ˆç”¨äºJSONåºåˆ—åŒ–ï¼‰
+    /// ÈİÆ÷±£´æÊı¾İ¼¯ºÏ£¨ÓÃÓÚJSONĞòÁĞ»¯£©
     /// </summary>
     [System.Serializable]
     public class ContainerSaveDataCollection

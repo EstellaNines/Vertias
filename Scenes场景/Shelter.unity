@@ -6932,55 +6932,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 6a74b808f5888aa4b8a4a0625262b9b1, type: 3}
---- !u!1 &126110379
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 126110380}
-  - component: {fileID: 126110381}
-  m_Layer: 0
-  m_Name: InventorySaveManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &126110380
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 126110379}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &126110381
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 126110379}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 382ed220426df6f4ca73b0dfbdfedd11, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  defaultSaveFileName: InventorySave.es3
-  autoSaveInterval: 5
-  enableAutoSave: 1
-  enableBackup: 1
-  showSaveLog: 0
 --- !u!1 &176556149
 GameObject:
   m_ObjectHideFlags: 0
@@ -10411,10 +10362,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   warehouseConfig: {fileID: 11400000, guid: 751cac96e58d30442800e7223112e548, type: 2}
-  saveGameId: 
+  saveGameId: warehouse_save_main
   forceRegenerate: 0
   enableDebugLog: 1
-  enableDetailedLog: 0
 --- !u!1 &935695348
 GameObject:
   m_ObjectHideFlags: 0
@@ -17316,6 +17266,55 @@ Transform:
   - {fileID: 790757294}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &2036249714
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2036249715}
+  - component: {fileID: 2036249716}
+  m_Layer: 0
+  m_Name: InventorySaveManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2036249715
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2036249714}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2036249716
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2036249714}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 382ed220426df6f4ca73b0dfbdfedd11, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  defaultSaveFileName: InventorySave.es3
+  autoSaveInterval: 5
+  enableAutoSave: 1
+  enableBackup: 1
+  showSaveLog: 1
 --- !u!114 &2040901361 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 2048375072447678059, guid: 6a74b808f5888aa4b8a4a0625262b9b1, type: 3}
@@ -18760,13 +18759,13 @@ SceneRoots:
   - {fileID: 791203392}
   - {fileID: 1669177374}
   - {fileID: 45693370}
-  - {fileID: 1176647053}
-  - {fileID: 411852340}
-  - {fileID: 126110380}
-  - {fileID: 901093857}
   - {fileID: 1730889373}
   - {fileID: 1533225133}
   - {fileID: 125148775}
   - {fileID: 1872840147}
   - {fileID: 117570944}
   - {fileID: 622268361}
+  - {fileID: 1176647053}
+  - {fileID: 411852340}
+  - {fileID: 901093857}
+  - {fileID: 2036249715}

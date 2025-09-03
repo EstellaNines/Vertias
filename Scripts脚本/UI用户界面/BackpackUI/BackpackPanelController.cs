@@ -1,6 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using TMPro;
+using InventorySystem;
 
 /// <summary>
 /// BackpackPanel 内部控制器 - 专门负责管理面板内的网格切换逻辑
@@ -20,7 +21,7 @@ public class BackpackPanelController : MonoBehaviour
     [SerializeField] private string groundTitleText = "Ground"; // 地面模式显示的文本
     
     [Header("调试设置")]
-    [SerializeField] private bool showDebugLog = true;
+    [SerializeField] private bool showDebugLog = false;
     
     [Header("背包标识设置")]
     [FieldLabel("背包唯一ID")]
@@ -49,8 +50,7 @@ public class BackpackPanelController : MonoBehaviour
         EnsureInventoryControllerExists();
         isInitialized = true;
         
-        if (showDebugLog)
-            Debug.Log($"BackpackPanelController: Awake初始化完成，背包ID: {backpackUniqueId}");
+        if (showDebugLog) Debug.Log($"BackpackPanelController: Awake初始化完成，背包ID: {backpackUniqueId}");
     }
     
     /// <summary>
@@ -66,13 +66,11 @@ public class BackpackPanelController : MonoBehaviour
             string timeStamp = System.DateTime.Now.Ticks.ToString();
             backpackUniqueId = $"backpack_{Mathf.Abs(instanceId)}_{timeStamp.Substring(timeStamp.Length - 8)}";
             
-            if (showDebugLog)
-                Debug.Log($"BackpackPanelController: 自动生成背包ID: {backpackUniqueId}");
+            if (showDebugLog) Debug.Log($"BackpackPanelController: 自动生成背包ID: {backpackUniqueId}");
         }
         else
         {
-            if (showDebugLog)
-                Debug.Log($"BackpackPanelController: 使用预设背包ID: {backpackUniqueId}");
+            if (showDebugLog) Debug.Log($"BackpackPanelController: 使用预设背包ID: {backpackUniqueId}");
         }
     }
     
@@ -85,8 +83,84 @@ public class BackpackPanelController : MonoBehaviour
             ForceInitialize();
         }
         
+        if (showDebugLog) Debug.Log("BackpackPanelController: Start验证完成");
+    }
+    
+    private void OnEnable()
+    {
         if (showDebugLog)
-            Debug.Log("BackpackPanelController: Start验证完成");
+            Debug.Log("BackpackPanelController: OnEnable - 背包面板打开，开始检测装备槽");
+        
+        // 背包面板被激活时，重新检测和注册装备槽
+        StartCoroutine(DetectAndRegisterEquipmentSlotsDelayed());
+    }
+    
+    private void OnDisable()
+    {
+        if (showDebugLog)
+            Debug.Log("BackpackPanelController: OnDisable - 背包面板关闭，强制保存装备数据");
+        
+        // 背包面板被禁用时，强制保存装备数据
+        try
+        {
+            ForcesSaveAllData();
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError($"BackpackPanelController: OnDisable保存失败: {e.Message}");
+        }
+    }
+    
+    private void OnDestroy()
+    {
+        if (showDebugLog)
+            Debug.Log("BackpackPanelController: OnDestroy - 执行清理和保存");
+        
+        // 在销毁前强制保存所有数据
+        try
+        {
+            ForcesSaveAllData();
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError($"BackpackPanelController: OnDestroy保存失败: {e.Message}");
+        }
+    }
+    
+    private void OnApplicationPause(bool pauseStatus)
+    {
+        if (pauseStatus)
+        {
+            if (showDebugLog)
+                Debug.Log("BackpackPanelController: 应用暂停 - 执行保存");
+            
+            try
+            {
+                ForcesSaveAllData();
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError($"BackpackPanelController: OnApplicationPause保存失败: {e.Message}");
+            }
+        }
+    }
+    
+    private void OnApplicationFocus(bool hasFocus)
+    {
+        if (!hasFocus)
+        {
+            if (showDebugLog)
+                Debug.Log("BackpackPanelController: 应用失去焦点 - 执行保存");
+            
+            try
+            {
+                ForcesSaveAllData();
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError($"BackpackPanelController: OnApplicationFocus保存失败: {e.Message}");
+            }
+        }
     }
     
     /// <summary>
@@ -113,10 +187,46 @@ public class BackpackPanelController : MonoBehaviour
         if (InventorySaveManager.Instance == null)
         {
             GameObject saveManager = new GameObject("InventorySaveManager");
-            saveManager.AddComponent<InventorySaveManager>();
+            var saveManagerComponent = saveManager.AddComponent<InventorySaveManager>();
+            
+            // 确保DontDestroyOnLoad
+            DontDestroyOnLoad(saveManager);
             
             if (showDebugLog)
                 Debug.Log("BackpackPanelController: 已创建InventorySaveManager实例");
+                
+            // 等待一帧确保初始化完成
+            StartCoroutine(DelayedSaveManagerSetup(saveManagerComponent));
+        }
+    }
+    
+    private System.Collections.IEnumerator DelayedSaveManagerSetup(InventorySaveManager saveManager)
+    {
+        yield return null; // 等待一帧
+        
+        if (saveManager != null)
+        {
+            // 通过反射设置必要的配置
+            var saveManagerType = saveManager.GetType();
+            
+            // 启用自动保存
+            var enableAutoSaveField = saveManagerType.GetField("enableAutoSave", 
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            if (enableAutoSaveField != null)
+            {
+                enableAutoSaveField.SetValue(saveManager, true);
+            }
+            
+            // 启用保存日志（调试用）
+            var showSaveLogField = saveManagerType.GetField("showSaveLog", 
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            if (showSaveLogField != null)
+            {
+                showSaveLogField.SetValue(saveManager, true);
+            }
+            
+            if (showDebugLog)
+                Debug.Log("BackpackPanelController: InventorySaveManager配置完成");
         }
     }
     
@@ -587,64 +697,7 @@ public class BackpackPanelController : MonoBehaviour
     
     #endregion
     
-    #region 生命周期
-    
-    private void OnDestroy()
-    {
-        // 在销毁前强制保存所有数据
-        try
-        {
-            ForcesSaveAllData();
-        }
-        catch (System.Exception e)
-        {
-            Debug.LogError($"BackpackPanelController: OnDestroy中保存数据时发生错误: {e.Message}");
-        }
-        
-        // 确保在销毁前清理资源（包括重置提示器状态）
-        CleanupCurrentGrid(true);
-        
-        if (showDebugLog)
-            Debug.Log("BackpackPanelController: 组件已销毁");
-    }
-    
-    private void OnApplicationPause(bool pauseStatus)
-    {
-        // 当应用暂停时保存数据
-        if (pauseStatus)
-        {
-            try
-            {
-                ForcesSaveAllData();
-                if (showDebugLog)
-                    Debug.Log("BackpackPanelController: 应用暂停，已保存数据");
-            }
-            catch (System.Exception e)
-            {
-                Debug.LogError($"BackpackPanelController: 应用暂停时保存数据失败: {e.Message}");
-            }
-        }
-    }
-    
-    private void OnApplicationFocus(bool hasFocus)
-    {
-        // 当应用失去焦点时保存数据
-        if (!hasFocus)
-        {
-            try
-            {
-                ForcesSaveAllData();
-                if (showDebugLog)
-                    Debug.Log("BackpackPanelController: 应用失去焦点，已保存数据");
-            }
-            catch (System.Exception e)
-            {
-                Debug.LogError($"BackpackPanelController: 应用失去焦点时保存数据失败: {e.Message}");
-            }
-        }
-    }
-    
-    #endregion
+
     
     #region 编辑器支持
     
@@ -815,7 +868,7 @@ public class BackpackPanelController : MonoBehaviour
     {
         try
         {
-            // 查找面板中的所有装备栏组件
+            // 使用传统方法保存装备数据
             var equipmentSlots = GetComponentsInChildren<InventorySystem.EquipmentSlot>(true);
             
             if (equipmentSlots == null || equipmentSlots.Length == 0)
@@ -839,6 +892,8 @@ public class BackpackPanelController : MonoBehaviour
             Debug.LogError($"BackpackPanelController: 保存装备栏时发生错误: {e.Message}");
         }
     }
+    
+
     
     /// <summary>
     /// 手动触发强制保存（用于调试）
@@ -866,6 +921,94 @@ public class BackpackPanelController : MonoBehaviour
         {
             Debug.LogError($"BackpackPanelController: 提示器保护机制测试失败: {e.Message}");
         }
+    }
+    
+    #endregion
+    
+    #region 装备槽检测和管理
+    
+    /// <summary>
+    /// 延迟检测和注册装备槽
+    /// </summary>
+    /// <returns></returns>
+    private IEnumerator DetectAndRegisterEquipmentSlotsDelayed()
+    {
+        // 等待一帧，确保背包面板完全激活
+        yield return null;
+        
+        if (showDebugLog)
+            Debug.Log("BackpackPanelController: 开始检测背包面板中的装备槽组件");
+        
+        // 检测装备槽管理器
+        var equipmentManager = EquipmentSlotManager.Instance;
+        if (equipmentManager == null)
+        {
+            Debug.LogWarning("BackpackPanelController: 装备槽管理器不存在，尝试查找");
+            equipmentManager = FindObjectOfType<EquipmentSlotManager>();
+            if (equipmentManager == null)
+            {
+                Debug.LogError("BackpackPanelController: 无法找到装备槽管理器");
+                yield break;
+            }
+        }
+        
+        // 触发装备槽检测
+        Debug.Log("BackpackPanelController: 触发装备槽检测");
+        equipmentManager.TriggerSlotDetection();
+        
+        // 等待一帧让注册完成
+        yield return null;
+        
+        // 检查注册结果
+        var allSlots = equipmentManager.GetAllEquipmentSlots();
+        Debug.Log($"BackpackPanelController: 装备槽检测完成，共注册 {allSlots.Count} 个装备槽");
+        
+        // 详细显示注册的装备槽
+        foreach (var kvp in allSlots)
+        {
+            Debug.Log($"BackpackPanelController: 已注册装备槽: {kvp.Key} -> {kvp.Value.name}");
+        }
+        
+        // 自动保存管理器已移除，使用传统保存方法
+        Debug.Log("BackpackPanelController: 装备槽检测完成，使用传统保存方法");
+        
+        // 尝试加载装备数据
+        yield return StartCoroutine(LoadEquipmentDataDelayed());
+    }
+    
+    /// <summary>
+    /// 延迟加载装备数据
+    /// </summary>
+    /// <returns></returns>
+    private IEnumerator LoadEquipmentDataDelayed()
+    {
+        // 等待几帧，确保所有装备槽都已正确注册
+        for (int i = 0; i < 3; i++)
+        {
+            yield return null;
+        }
+        
+        Debug.Log("BackpackPanelController: 开始加载装备数据");
+        
+        // 使用传统方法加载装备数据
+        if (InventorySystem.EquipmentSlotSaveExtension.HasEquipmentSaveData())
+        {
+            Debug.Log("BackpackPanelController: 发现装备存档数据，开始加载");
+            InventorySystem.EquipmentSlotSaveExtension.LoadEquipmentDataFromPlayerPrefs();
+        }
+        else
+        {
+            Debug.Log("BackpackPanelController: 没有发现装备存档数据");
+        }
+    }
+    
+    /// <summary>
+    /// 手动触发装备槽检测（用于调试）
+    /// </summary>
+    [ContextMenu("手动检测装备槽")]
+    public void ManualDetectEquipmentSlots()
+    {
+        StartCoroutine(DetectAndRegisterEquipmentSlotsDelayed());
     }
     
     #endregion

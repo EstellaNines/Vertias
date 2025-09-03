@@ -20,8 +20,8 @@ public class ItemSaveData
     public int usageCount;                   // 使用次数
     public bool isEquipped;                  // 是否已装备
     
-    // 容器数据（如果是容器类物品）
-    public ItemSaveData[] containerItems;    // 容器内的物品数据
+    // 注意：容器数据现在由 ContainerSaveManager 单独处理以避免循环引用
+    // 不再在 ItemSaveData 中存储容器数据
     
     // 构造函数
     public ItemSaveData() { }
@@ -43,7 +43,7 @@ public class ItemSaveData
             durability = 0f;
             usageCount = 0;
             isEquipped = false;
-            containerItems = null;
+
             return;
         }
         
@@ -65,7 +65,6 @@ public class ItemSaveData
         usageCount = itemReader.CurrentUsageCount;
         isEquipped = false; // 网格中的物品默认未装备
         
-        // 容器数据初始化为空，后续单独处理
-        containerItems = null;
+        // 注意：容器数据由ContainerSaveManager单独处理以避免循环引用
     }
 }

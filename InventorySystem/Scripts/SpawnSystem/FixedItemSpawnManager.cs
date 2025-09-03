@@ -186,14 +186,38 @@ namespace InventorySystem.SpawnSystem
         
         private void Initialize()
         {
-            stateTracker = SpawnStateTracker.Instance;
-            stateTracker.EnableDebugLog = enableDetailedLogging;
-            
-            loadedConfigs = new Dictionary<string, FixedItemSpawnConfig>();
-            spawnQueue = new Queue<SpawnRequest>();
-            isSpawning = false;
-            
-            LogDebug("FixedItemSpawnManager 初始化完成");
+            try
+            {
+                // 初始化状态追踪器
+                stateTracker = SpawnStateTracker.Instance;
+                if (stateTracker != null)
+                {
+                    stateTracker.EnableDebugLog = enableDetailedLogging;
+                }
+                else
+                {
+                    LogError("无法获取 SpawnStateTracker 实例");
+                }
+                
+                // 初始化集合
+                loadedConfigs = new Dictionary<string, FixedItemSpawnConfig>();
+                spawnQueue = new Queue<SpawnRequest>();
+                isSpawning = false;
+                
+                LogDebug("FixedItemSpawnManager 初始化完成");
+            }
+            catch (System.Exception ex)
+            {
+                LogError($"FixedItemSpawnManager 初始化失败: {ex.Message}");
+                
+                // 至少确保基本集合被初始化
+                if (loadedConfigs == null)
+                    loadedConfigs = new Dictionary<string, FixedItemSpawnConfig>();
+                if (spawnQueue == null)
+                    spawnQueue = new Queue<SpawnRequest>();
+                
+                isSpawning = false;
+            }
         }
         
         private void OnDestroy()
@@ -227,6 +251,20 @@ namespace InventorySystem.SpawnSystem
         public void SpawnFixedItems(ItemGrid targetGrid, FixedItemSpawnConfig config, 
                                   string containerId = null, System.Action<SpawnResult> onComplete = null)
         {
+            // 确保初始化完成
+            if (spawnQueue == null || loadedConfigs == null)
+            {
+                LogError("FixedItemSpawnManager 未正确初始化，尝试重新初始化...");
+                Initialize();
+                
+                if (spawnQueue == null)
+                {
+                    LogError("FixedItemSpawnManager 初始化失败");
+                    onComplete?.Invoke(CreateFailureResult("生成管理器初始化失败"));
+                    return;
+                }
+            }
+            
             if (targetGrid == null)
             {
                 LogError("目标网格不能为空");
@@ -1406,6 +1444,20 @@ namespace InventorySystem.SpawnSystem
             {
                 LogError("未找到测试用ItemDataSO");
             }
+        }
+        
+        [ContextMenu("检查管理器状态")]
+        public void CheckManagerStatus()
+        {
+            LogWarning("=== FixedItemSpawnManager 状态检查 ===");
+            LogWarning($"实例存在: {(instance != null ? "是" : "否")}");
+            LogWarning($"spawnQueue初始化: {(spawnQueue != null ? "是" : "否")}");
+            LogWarning($"loadedConfigs初始化: {(loadedConfigs != null ? "是" : "否")}");
+            LogWarning($"stateTracker初始化: {(stateTracker != null ? "是" : "否")}");
+            LogWarning($"当前正在生成: {isSpawning}");
+            LogWarning($"队列中的请求: {spawnQueue?.Count ?? 0}");
+            LogWarning($"已加载配置: {loadedConfigs?.Count ?? 0}");
+            LogWarning("=====================================");
         }
         
         #endregion

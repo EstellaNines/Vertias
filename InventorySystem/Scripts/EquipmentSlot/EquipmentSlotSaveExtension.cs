@@ -4,16 +4,16 @@ using UnityEngine;
 namespace InventorySystem
 {
     /// <summary>
-    /// è£…å¤‡æ§½å­˜æ¡£æ•°æ®
+    /// ×°±¸²Û´æµµÊı¾İ
     /// </summary>
     [System.Serializable]
     public class EquipmentSlotSaveData
     {
-        public EquipmentSlotType slotType;          // æ§½ä½ç±»å‹
-        public string slotName;                     // æ§½ä½åç§°
-        public bool hasEquippedItem;                // æ˜¯å¦æœ‰è£…å¤‡
-        public ItemSaveData equippedItemData;       // è£…å¤‡çš„ç‰©å“æ•°æ®
-        public string saveTime;                     // ä¿å­˜æ—¶é—´
+        public EquipmentSlotType slotType;          // ²ÛÎ»ÀàĞÍ
+        public string slotName;                     // ²ÛÎ»Ãû³Æ
+        public bool hasEquippedItem;                // ÊÇ·ñÓĞ×°±¸
+        public ItemSaveData equippedItemData;       // ×°±¸µÄÎïÆ·Êı¾İ
+        public string saveTime;                     // ±£´æÊ±¼ä
         
         public EquipmentSlotSaveData()
         {
@@ -36,14 +36,14 @@ namespace InventorySystem
     }
     
     /// <summary>
-    /// è£…å¤‡ç³»ç»Ÿå­˜æ¡£æ•°æ®
+    /// ×°±¸ÏµÍ³´æµµÊı¾İ
     /// </summary>
     [System.Serializable]
     public class EquipmentSystemSaveData
     {
-        public List<EquipmentSlotSaveData> equipmentSlots;  // æ‰€æœ‰è£…å¤‡æ§½æ•°æ®
-        public int totalEquippedItems;                      // æ€»è£…å¤‡æ•°é‡
-        public string lastSaveTime;                         // æœ€åä¿å­˜æ—¶é—´
+        public List<EquipmentSlotSaveData> equipmentSlots;  // ËùÓĞ×°±¸²ÛÊı¾İ
+        public int totalEquippedItems;                      // ×Ü×°±¸ÊıÁ¿
+        public string lastSaveTime;                         // ×îºó±£´æÊ±¼ä
         
         public EquipmentSystemSaveData()
         {
@@ -53,17 +53,17 @@ namespace InventorySystem
     }
     
     /// <summary>
-    /// è£…å¤‡æ§½å­˜æ¡£ç³»ç»Ÿæ‰©å±•
-    /// ä¸ºç°æœ‰å­˜æ¡£ç³»ç»Ÿæ·»åŠ è£…å¤‡æ§½æ”¯æŒ
+    /// ×°±¸²Û´æµµÏµÍ³À©Õ¹
+    /// ÎªÏÖÓĞ´æµµÏµÍ³Ìí¼Ó×°±¸²ÛÖ§³Ö
     /// </summary>
     public static class EquipmentSlotSaveExtension
     {
         private const string EQUIPMENT_SAVE_KEY = "EquipmentSystemData";
         
         /// <summary>
-        /// æ”¶é›†è£…å¤‡ç³»ç»Ÿæ•°æ®
+        /// ÊÕ¼¯×°±¸ÏµÍ³Êı¾İ
         /// </summary>
-        /// <returns>è£…å¤‡ç³»ç»Ÿå­˜æ¡£æ•°æ®</returns>
+        /// <returns>×°±¸ÏµÍ³´æµµÊı¾İ</returns>
         public static EquipmentSystemSaveData CollectEquipmentSystemData()
         {
             var saveData = new EquipmentSystemSaveData();
@@ -71,12 +71,31 @@ namespace InventorySystem
             
             if (equipmentManager == null)
             {
-                Debug.LogWarning("[EquipmentSlotSaveExtension] æœªæ‰¾åˆ°è£…å¤‡æ§½ç®¡ç†å™¨");
+                Debug.LogWarning("[EquipmentSlotSaveExtension] Î´ÕÒµ½×°±¸²Û¹ÜÀíÆ÷");
                 return saveData;
             }
             
-            // æ”¶é›†æ‰€æœ‰è£…å¤‡æ§½æ•°æ®
+            Debug.Log("[EquipmentSlotSaveExtension] ¿ªÊ¼ÊÕ¼¯×°±¸ÏµÍ³Êı¾İ...");
+            
+            // ÊÕ¼¯ËùÓĞ×°±¸²ÛÊı¾İ
             var allEquippedItems = equipmentManager.GetAllEquippedItems();
+            Debug.Log($"[EquipmentSlotSaveExtension] µ±Ç°×°±¸ÎïÆ·×ÜÊı: {allEquippedItems.Count}");
+            
+            foreach (var kvp in allEquippedItems)
+            {
+                string itemName = kvp.Value?.ItemData?.itemName ?? "Î´ÖªÎïÆ·";
+                Debug.Log($"[EquipmentSlotSaveExtension] ×°±¸: {kvp.Key} -> {itemName}");
+            }
+            
+            // Ê×ÏÈ¼ì²é×°±¸²Û¹ÜÀíÆ÷µÄ×´Ì¬
+            var allRegisteredSlots = equipmentManager.GetAllEquipmentSlots();
+            Debug.Log($"[EquipmentSlotSaveExtension] ×°±¸²Û¹ÜÀíÆ÷ÖĞÒÑ×¢²á²ÛÎ»ÊıÁ¿: {allRegisteredSlots.Count}");
+            
+            foreach (var kvp in allRegisteredSlots)
+            {
+                Debug.Log($"[EquipmentSlotSaveExtension] ÒÑ×¢²á²ÛÎ»: {kvp.Key} -> {kvp.Value.name} (ÊÇ·ñÓĞ×°±¸: {kvp.Value.HasEquippedItem})");
+            }
+            
             foreach (var slotType in System.Enum.GetValues(typeof(EquipmentSlotType)))
             {
                 var slot = equipmentManager.GetEquipmentSlot((EquipmentSlotType)slotType);
@@ -84,138 +103,209 @@ namespace InventorySystem
                 {
                     var slotSaveData = new EquipmentSlotSaveData(slot);
                     saveData.equipmentSlots.Add(slotSaveData);
+                    
+                    Debug.Log($"[EquipmentSlotSaveExtension] ²ÛÎ» {slotType}: {(slotSaveData.hasEquippedItem ? "ÓĞ×°±¸" : "ÎŞ×°±¸")}");
+                    
+                    if (slotSaveData.hasEquippedItem)
+                    {
+                        Debug.Log($"[EquipmentSlotSaveExtension] -> ×°±¸ÎïÆ·: {slotSaveData.equippedItemData.itemID}");
+                    }
+                }
+                else
+                {
+                    Debug.Log($"[EquipmentSlotSaveExtension] ²ÛÎ» {slotType}: Î´ÕÒµ½");
                 }
             }
             
             saveData.totalEquippedItems = allEquippedItems.Count;
             
-            Debug.Log($"[EquipmentSlotSaveExtension] æ”¶é›†è£…å¤‡æ•°æ®å®Œæˆï¼Œå…± {saveData.equipmentSlots.Count} ä¸ªæ§½ä½ï¼Œ{saveData.totalEquippedItems} ä¸ªè£…å¤‡");
+            Debug.Log($"[EquipmentSlotSaveExtension] ÊÕ¼¯×°±¸Êı¾İÍê³É£¬¹² {saveData.equipmentSlots.Count} ¸ö²ÛÎ»£¬{saveData.totalEquippedItems} ¸ö×°±¸");
             
             return saveData;
         }
         
         /// <summary>
-        /// åº”ç”¨è£…å¤‡ç³»ç»Ÿæ•°æ®
+        /// Ó¦ÓÃ×°±¸ÏµÍ³Êı¾İ
         /// </summary>
-        /// <param name="saveData">è£…å¤‡ç³»ç»Ÿå­˜æ¡£æ•°æ®</param>
+        /// <param name="saveData">×°±¸ÏµÍ³´æµµÊı¾İ</param>
         public static void ApplyEquipmentSystemData(EquipmentSystemSaveData saveData)
         {
             if (saveData == null)
             {
-                Debug.LogWarning("[EquipmentSlotSaveExtension] è£…å¤‡å­˜æ¡£æ•°æ®ä¸ºç©º");
+                Debug.LogWarning("[EquipmentSlotSaveExtension] ×°±¸´æµµÊı¾İÎª¿Õ");
                 return;
             }
+            
+            Debug.Log($"[EquipmentSlotSaveExtension] ¿ªÊ¼Ó¦ÓÃ×°±¸ÏµÍ³Êı¾İ£¬´æµµÖĞÓĞ {saveData.totalEquippedItems} ¸ö×°±¸");
             
             var equipmentManager = EquipmentSlotManager.Instance;
             if (equipmentManager == null)
             {
-                Debug.LogError("[EquipmentSlotSaveExtension] æœªæ‰¾åˆ°è£…å¤‡æ§½ç®¡ç†å™¨");
+                Debug.LogError("[EquipmentSlotSaveExtension] Î´ÕÒµ½×°±¸²Û¹ÜÀíÆ÷");
                 return;
             }
             
-            // å…ˆæ¸…ç©ºæ‰€æœ‰è£…å¤‡
+            // ¼ì²é×°±¸²ÛÊÇ·ñÒÑ×¢²á
+            var allSlots = equipmentManager.GetAllEquipmentSlots();
+            Debug.Log($"[EquipmentSlotSaveExtension] µ±Ç°ÒÑ×¢²á×°±¸²ÛÊıÁ¿: {allSlots.Count}");
+            
+            if (allSlots.Count == 0)
+            {
+                Debug.LogError("[EquipmentSlotSaveExtension] Ã»ÓĞ×¢²áµÄ×°±¸²Û£¬ÎŞ·¨»Ö¸´×°±¸");
+                return;
+            }
+            
+            // ÏÈÇå¿ÕËùÓĞ×°±¸
             equipmentManager.UnequipAllItems();
+            Debug.Log("[EquipmentSlotSaveExtension] ÒÑÇå¿ÕËùÓĞµ±Ç°×°±¸");
             
             int restoredCount = 0;
+            int attemptedCount = 0;
             
-            // æ¢å¤æ¯ä¸ªæ§½ä½çš„è£…å¤‡
+            // »Ö¸´Ã¿¸ö²ÛÎ»µÄ×°±¸
             foreach (var slotData in saveData.equipmentSlots)
             {
+                Debug.Log($"[EquipmentSlotSaveExtension] ´¦Àí²ÛÎ» {slotData.slotType}: {(slotData.hasEquippedItem ? "ÓĞ×°±¸" : "ÎŞ×°±¸")}");
+                
                 if (slotData.hasEquippedItem && slotData.equippedItemData != null)
                 {
+                    attemptedCount++;
+                    Debug.Log($"[EquipmentSlotSaveExtension] ³¢ÊÔ»Ö¸´×°±¸: {slotData.equippedItemData.itemID} -> {slotData.slotType}");
+                    
                     bool restored = RestoreEquippedItem(slotData);
                     if (restored)
                     {
                         restoredCount++;
+                        Debug.Log($"[EquipmentSlotSaveExtension] 7¼3 ×°±¸»Ö¸´³É¹¦: {slotData.slotType}");
+                    }
+                    else
+                    {
+                        Debug.LogError($"[EquipmentSlotSaveExtension] 7Ã4 ×°±¸»Ö¸´Ê§°Ü: {slotData.slotType}");
                     }
                 }
             }
             
-            Debug.Log($"[EquipmentSlotSaveExtension] è£…å¤‡æ¢å¤å®Œæˆï¼ŒæˆåŠŸæ¢å¤ {restoredCount}/{saveData.totalEquippedItems} ä¸ªè£…å¤‡");
+            Debug.Log($"[EquipmentSlotSaveExtension] ×°±¸»Ö¸´Íê³É£¬³É¹¦»Ö¸´ {restoredCount}/{attemptedCount} ¸ö×°±¸£¨´æµµ×ÜÊı: {saveData.totalEquippedItems}£©");
+            
+            // ÑéÖ¤»Ö¸´½á¹û
+            var currentEquipped = equipmentManager.GetAllEquippedItems();
+            Debug.Log($"[EquipmentSlotSaveExtension] »Ö¸´ºóµ±Ç°×°±¸ÊıÁ¿: {currentEquipped.Count}");
+            
+            foreach (var kvp in currentEquipped)
+            {
+                Debug.Log($"[EquipmentSlotSaveExtension] µ±Ç°×°±¸: {kvp.Key} -> {kvp.Value.ItemData.itemName}");
+            }
         }
         
         /// <summary>
-        /// æ¢å¤è£…å¤‡ç‰©å“
+        /// »Ö¸´×°±¸ÎïÆ·
         /// </summary>
-        /// <param name="slotData">æ§½ä½å­˜æ¡£æ•°æ®</param>
-        /// <returns>æ˜¯å¦æ¢å¤æˆåŠŸ</returns>
+        /// <param name="slotData">²ÛÎ»´æµµÊı¾İ</param>
+        /// <returns>ÊÇ·ñ»Ö¸´³É¹¦</returns>
         private static bool RestoreEquippedItem(EquipmentSlotSaveData slotData)
         {
+            Debug.Log($"[EquipmentSlotSaveExtension] ¿ªÊ¼»Ö¸´×°±¸µ½²ÛÎ» {slotData.slotType}");
+            
             var equipmentManager = EquipmentSlotManager.Instance;
             var slot = equipmentManager.GetEquipmentSlot(slotData.slotType);
             
             if (slot == null)
             {
-                Debug.LogWarning($"[EquipmentSlotSaveExtension] æœªæ‰¾åˆ°ç±»å‹ä¸º {slotData.slotType} çš„è£…å¤‡æ§½");
+                Debug.LogError($"[EquipmentSlotSaveExtension] 7Ã4 Î´ÕÒµ½ÀàĞÍÎª {slotData.slotType} µÄ×°±¸²Û");
                 return false;
             }
             
-            // åˆ›å»ºç‰©å“å®ä¾‹
+            Debug.Log($"[EquipmentSlotSaveExtension] 7¼3 ÕÒµ½×°±¸²Û: {slot.name}");
+            
+            // ´´½¨ÎïÆ·ÊµÀı
+            Debug.Log($"[EquipmentSlotSaveExtension] ¿ªÊ¼´´½¨ÎïÆ·ÊµÀı: {slotData.equippedItemData.itemID}");
             var itemInstance = CreateItemFromSaveData(slotData.equippedItemData);
             if (itemInstance == null)
             {
-                Debug.LogWarning($"[EquipmentSlotSaveExtension] æ— æ³•åˆ›å»ºç‰©å“å®ä¾‹: {slotData.equippedItemData.itemID}");
+                Debug.LogError($"[EquipmentSlotSaveExtension] 7Ã4 ÎŞ·¨´´½¨ÎïÆ·ÊµÀı: {slotData.equippedItemData.itemID}");
                 return false;
             }
             
-            // è£…å¤‡ç‰©å“
+            Debug.Log($"[EquipmentSlotSaveExtension] 7¼3 ³É¹¦´´½¨ÎïÆ·ÊµÀı: {itemInstance.name}");
+            
+            // ×°±¸ÎïÆ·
             var itemDataReader = itemInstance.GetComponent<ItemDataReader>();
-            if (itemDataReader != null)
+            if (itemDataReader == null)
             {
-                bool success = slot.EquipItem(itemDataReader);
-                if (success)
-                {
-                    Debug.Log($"[EquipmentSlotSaveExtension] æˆåŠŸæ¢å¤è£…å¤‡: {itemDataReader.ItemData.itemName} -> {slotData.slotType}");
-                    return true;
-                }
-            }
-            
-            // å¦‚æœè£…å¤‡å¤±è´¥ï¼Œé”€æ¯åˆ›å»ºçš„å®ä¾‹
-            if (itemInstance != null)
-            {
+                Debug.LogError($"[EquipmentSlotSaveExtension] 7Ã4 ÎïÆ·ÊµÀıÈ±ÉÙ ItemDataReader ×é¼ş");
                 Object.Destroy(itemInstance);
+                return false;
             }
             
-            return false;
+            Debug.Log($"[EquipmentSlotSaveExtension] 7¼3 ÕÒµ½ ItemDataReader£¬ÎïÆ·Ãû³Æ: {itemDataReader.ItemData.itemName}");
+            
+            // ³¢ÊÔ×°±¸ÎïÆ·
+            Debug.Log($"[EquipmentSlotSaveExtension] ³¢ÊÔ½«ÎïÆ·×°±¸µ½²ÛÎ»...");
+            bool success = slot.EquipItem(itemDataReader);
+            
+            if (success)
+            {
+                Debug.Log($"[EquipmentSlotSaveExtension] 7¼3 ³É¹¦»Ö¸´×°±¸: {itemDataReader.ItemData.itemName} -> {slotData.slotType}");
+                
+                // ÑéÖ¤×°±¸ÊÇ·ñÕæµÄÔÚ²ÛÎ»ÖĞ
+                if (slot.HasEquippedItem)
+                {
+                    Debug.Log($"[EquipmentSlotSaveExtension] 7¼3 ÑéÖ¤³É¹¦£¬²ÛÎ»ÖĞÓĞ×°±¸: {slot.CurrentEquippedItem.ItemData.itemName}");
+                }
+                else
+                {
+                    Debug.LogError($"[EquipmentSlotSaveExtension] 7Ã4 ÑéÖ¤Ê§°Ü£¬²ÛÎ»ÖĞÃ»ÓĞ×°±¸");
+                }
+                
+                return true;
+            }
+            else
+            {
+                Debug.LogError($"[EquipmentSlotSaveExtension] 7Ã4 ×°±¸µ½²ÛÎ»Ê§°Ü");
+                
+                // Èç¹û×°±¸Ê§°Ü£¬Ïú»Ù´´½¨µÄÊµÀı
+                Object.Destroy(itemInstance);
+                return false;
+            }
         }
         
         /// <summary>
-        /// ä»å­˜æ¡£æ•°æ®åˆ›å»ºç‰©å“å®ä¾‹
+        /// ´Ó´æµµÊı¾İ´´½¨ÎïÆ·ÊµÀı
         /// </summary>
-        /// <param name="itemSaveData">ç‰©å“å­˜æ¡£æ•°æ®</param>
-        /// <returns>åˆ›å»ºçš„ç‰©å“GameObject</returns>
+        /// <param name="itemSaveData">ÎïÆ·´æµµÊı¾İ</param>
+        /// <returns>´´½¨µÄÎïÆ·GameObject</returns>
         private static GameObject CreateItemFromSaveData(ItemSaveData itemSaveData)
         {
             if (itemSaveData == null) return null;
             
-            // è·å–ç‰©å“ç±»åˆ«
+            // »ñÈ¡ÎïÆ·Àà±ğ
             var category = GetCategoryByID(itemSaveData.itemID);
             
-            // åŠ è½½ç‰©å“é¢„åˆ¶ä»¶
+            // ¼ÓÔØÎïÆ·Ô¤ÖÆ¼ş
             var prefab = LoadItemPrefabByCategory(category, itemSaveData.itemID);
             if (prefab == null)
             {
-                Debug.LogWarning($"[EquipmentSlotSaveExtension] æ— æ³•æ‰¾åˆ°ç‰©å“é¢„åˆ¶ä»¶: {itemSaveData.itemID}");
+                Debug.LogWarning($"[EquipmentSlotSaveExtension] ÎŞ·¨ÕÒµ½ÎïÆ·Ô¤ÖÆ¼ş: {itemSaveData.itemID}");
                 return null;
             }
             
-            // å®ä¾‹åŒ–ç‰©å“
+            // ÊµÀı»¯ÎïÆ·
             var itemInstance = Object.Instantiate(prefab);
             
-            // æ¢å¤ç‰©å“æ•°æ®
+            // »Ö¸´ÎïÆ·Êı¾İ
             var itemDataReader = itemInstance.GetComponent<ItemDataReader>();
             if (itemDataReader != null)
             {
-                // æ¢å¤å †å æ•°é‡
+                // »Ö¸´¶ÑµşÊıÁ¿
                 itemDataReader.SetStack(itemSaveData.stackCount);
                 
-                // æ¢å¤è€ä¹…åº¦
+                // »Ö¸´ÄÍ¾Ã¶È
                 if (itemSaveData.durability > 0)
                 {
                     itemDataReader.SetDurability(Mathf.RoundToInt(itemSaveData.durability));
                 }
                 
-                // æ¢å¤ä½¿ç”¨æ¬¡æ•°
+                // »Ö¸´Ê¹ÓÃ´ÎÊı
                 if (itemSaveData.usageCount > 0)
                 {
                     itemDataReader.SetUsageCount(itemSaveData.usageCount);
@@ -226,15 +316,15 @@ namespace InventorySystem
         }
         
         /// <summary>
-        /// æ ¹æ®ç‰©å“IDè·å–ç±»åˆ«
+        /// ¸ù¾İÎïÆ·ID»ñÈ¡Àà±ğ
         /// </summary>
-        /// <param name="itemID">ç‰©å“ID</param>
-        /// <returns>ç‰©å“ç±»åˆ«</returns>
+        /// <param name="itemID">ÎïÆ·ID</param>
+        /// <returns>ÎïÆ·Àà±ğ</returns>
         private static ItemCategory GetCategoryByID(string itemID)
         {
             if (string.IsNullOrEmpty(itemID)) return ItemCategory.Special;
             
-            // æ ¹æ®IDå‰ç¼€åˆ¤æ–­ç±»åˆ«
+            // ¸ù¾İIDÇ°×ºÅĞ¶ÏÀà±ğ
             if (itemID.StartsWith("1")) return ItemCategory.Helmet;
             if (itemID.StartsWith("2")) return ItemCategory.Armor;
             if (itemID.StartsWith("3")) return ItemCategory.TacticalRig;
@@ -245,17 +335,17 @@ namespace InventorySystem
         }
         
         /// <summary>
-        /// æ ¹æ®ç±»åˆ«å’ŒIDåŠ è½½ç‰©å“é¢„åˆ¶ä»¶
+        /// ¸ù¾İÀà±ğºÍID¼ÓÔØÎïÆ·Ô¤ÖÆ¼ş
         /// </summary>
-        /// <param name="category">ç‰©å“ç±»åˆ«</param>
-        /// <param name="itemID">ç‰©å“ID</param>
-        /// <returns>ç‰©å“é¢„åˆ¶ä»¶</returns>
+        /// <param name="category">ÎïÆ·Àà±ğ</param>
+        /// <param name="itemID">ÎïÆ·ID</param>
+        /// <returns>ÎïÆ·Ô¤ÖÆ¼ş</returns>
         private static GameObject LoadItemPrefabByCategory(ItemCategory category, string itemID)
         {
             string categoryFolder = GetCategoryFolderName(category);
             string prefabPath = $"InventorySystemResources/Prefabs/{categoryFolder}";
             
-            // å°è¯•æŒ‰IDæŸ¥æ‰¾é¢„åˆ¶ä»¶
+            // ³¢ÊÔ°´ID²éÕÒÔ¤ÖÆ¼ş
             string[] possibleNames = {
                 $"{itemID}__*",
                 $"{itemID}_*",
@@ -274,42 +364,42 @@ namespace InventorySystem
                 }
             }
             
-            Debug.LogWarning($"[EquipmentSlotSaveExtension] æœªæ‰¾åˆ°ç‰©å“é¢„åˆ¶ä»¶: {itemID} in {prefabPath}");
+            Debug.LogWarning($"[EquipmentSlotSaveExtension] Î´ÕÒµ½ÎïÆ·Ô¤ÖÆ¼ş: {itemID} in {prefabPath}");
             return null;
         }
         
         /// <summary>
-        /// è·å–ç±»åˆ«æ–‡ä»¶å¤¹åç§°
+        /// »ñÈ¡Àà±ğÎÄ¼ş¼ĞÃû³Æ
         /// </summary>
-        /// <param name="category">ç‰©å“ç±»åˆ«</param>
-        /// <returns>æ–‡ä»¶å¤¹åç§°</returns>
+        /// <param name="category">ÎïÆ·Àà±ğ</param>
+        /// <returns>ÎÄ¼ş¼ĞÃû³Æ</returns>
         private static string GetCategoryFolderName(ItemCategory category)
         {
             switch (category)
             {
-                case ItemCategory.Helmet: return "Helmet_å¤´ç›”";
-                case ItemCategory.Armor: return "Armor_æŠ¤ç”²";
-                case ItemCategory.TacticalRig: return "TacticalRig_æˆ˜æœ¯èƒŒå¿ƒ";
-                case ItemCategory.Backpack: return "Backpack_èƒŒåŒ…";
-                case ItemCategory.Weapon: return "Weapon_æ­¦å™¨";
-                case ItemCategory.Ammunition: return "Ammunition_å¼¹è¯";
-                case ItemCategory.Food: return "Food_é£Ÿç‰©";
-                case ItemCategory.Drink: return "Drink_é¥®æ–™";
-                case ItemCategory.Sedative: return "Sedative_é•‡é™å‰‚";
-                case ItemCategory.Hemostatic: return "Hemostatic_æ­¢è¡€å‰‚";
-                case ItemCategory.Healing: return "Healing_æ²»ç–—è¯ç‰©";
-                case ItemCategory.Intelligence: return "Intelligence_æƒ…æŠ¥";
-                case ItemCategory.Currency: return "Currency_è´§å¸";
-                case ItemCategory.Special: return "Special_ç‰¹æ®Šç‰©å“";
+                case ItemCategory.Helmet: return "Helmet_Í·¿ø";
+                case ItemCategory.Armor: return "Armor_»¤¼×";
+                case ItemCategory.TacticalRig: return "TacticalRig_Õ½Êõ±³ĞÄ";
+                case ItemCategory.Backpack: return "Backpack_±³°ü";
+                case ItemCategory.Weapon: return "Weapon_ÎäÆ÷";
+                case ItemCategory.Ammunition: return "Ammunition_µ¯Ò©";
+                case ItemCategory.Food: return "Food_Ê³Îï";
+                case ItemCategory.Drink: return "Drink_ÒûÁÏ";
+                case ItemCategory.Sedative: return "Sedative_Õò¾²¼Á";
+                case ItemCategory.Hemostatic: return "Hemostatic_Ö¹Ñª¼Á";
+                case ItemCategory.Healing: return "Healing_ÖÎÁÆÒ©Îï";
+                case ItemCategory.Intelligence: return "Intelligence_Çé±¨";
+                case ItemCategory.Currency: return "Currency_»õ±Ò";
+                case ItemCategory.Special: return "Special_ÌØÊâÎïÆ·";
                 default: return "Unknown";
             }
         }
         
         /// <summary>
-        /// ä¿å­˜è£…å¤‡ç³»ç»Ÿæ•°æ®åˆ°PlayerPrefs
+        /// ±£´æ×°±¸ÏµÍ³Êı¾İµ½PlayerPrefs
         /// </summary>
-        /// <param name="saveData">è¦ä¿å­˜çš„æ•°æ®</param>
-        /// <param name="saveSlot">ä¿å­˜æ§½ä½</param>
+        /// <param name="saveData">Òª±£´æµÄÊı¾İ</param>
+        /// <param name="saveSlot">±£´æ²ÛÎ»</param>
         public static void SaveEquipmentDataToPlayerPrefs(EquipmentSystemSaveData saveData, string saveSlot = "default")
         {
             string key = $"{EQUIPMENT_SAVE_KEY}_{saveSlot}";
@@ -317,14 +407,14 @@ namespace InventorySystem
             PlayerPrefs.SetString(key, jsonData);
             PlayerPrefs.Save();
             
-            Debug.Log($"[EquipmentSlotSaveExtension] è£…å¤‡æ•°æ®å·²ä¿å­˜åˆ° PlayerPrefs: {key}");
+            Debug.Log($"[EquipmentSlotSaveExtension] ×°±¸Êı¾İÒÑ±£´æµ½ PlayerPrefs: {key}");
         }
         
         /// <summary>
-        /// ä»PlayerPrefsåŠ è½½è£…å¤‡ç³»ç»Ÿæ•°æ®
+        /// ´ÓPlayerPrefs¼ÓÔØ×°±¸ÏµÍ³Êı¾İ
         /// </summary>
-        /// <param name="saveSlot">ä¿å­˜æ§½ä½</param>
-        /// <returns>è£…å¤‡ç³»ç»Ÿæ•°æ®</returns>
+        /// <param name="saveSlot">±£´æ²ÛÎ»</param>
+        /// <returns>×°±¸ÏµÍ³Êı¾İ</returns>
         public static EquipmentSystemSaveData LoadEquipmentDataFromPlayerPrefs(string saveSlot = "default")
         {
             string key = $"{EQUIPMENT_SAVE_KEY}_{saveSlot}";
@@ -335,27 +425,27 @@ namespace InventorySystem
                 try
                 {
                     var saveData = JsonUtility.FromJson<EquipmentSystemSaveData>(jsonData);
-                    Debug.Log($"[EquipmentSlotSaveExtension] è£…å¤‡æ•°æ®å·²ä» PlayerPrefs åŠ è½½: {key}");
+                    Debug.Log($"[EquipmentSlotSaveExtension] ×°±¸Êı¾İÒÑ´Ó PlayerPrefs ¼ÓÔØ: {key}");
                     return saveData;
                 }
                 catch (System.Exception e)
                 {
-                    Debug.LogError($"[EquipmentSlotSaveExtension] è£…å¤‡æ•°æ®è§£æå¤±è´¥: {e.Message}");
+                    Debug.LogError($"[EquipmentSlotSaveExtension] ×°±¸Êı¾İ½âÎöÊ§°Ü: {e.Message}");
                 }
             }
             else
             {
-                Debug.LogWarning($"[EquipmentSlotSaveExtension] æœªæ‰¾åˆ°è£…å¤‡å­˜æ¡£æ•°æ®: {key}");
+                Debug.LogWarning($"[EquipmentSlotSaveExtension] Î´ÕÒµ½×°±¸´æµµÊı¾İ: {key}");
             }
             
             return new EquipmentSystemSaveData();
         }
         
         /// <summary>
-        /// æ£€æŸ¥æ˜¯å¦å­˜åœ¨è£…å¤‡å­˜æ¡£æ•°æ®
+        /// ¼ì²éÊÇ·ñ´æÔÚ×°±¸´æµµÊı¾İ
         /// </summary>
-        /// <param name="saveSlot">ä¿å­˜æ§½ä½</param>
-        /// <returns>æ˜¯å¦å­˜åœ¨å­˜æ¡£</returns>
+        /// <param name="saveSlot">±£´æ²ÛÎ»</param>
+        /// <returns>ÊÇ·ñ´æÔÚ´æµµ</returns>
         public static bool HasEquipmentSaveData(string saveSlot = "default")
         {
             string key = $"{EQUIPMENT_SAVE_KEY}_{saveSlot}";
@@ -363,17 +453,130 @@ namespace InventorySystem
         }
         
         /// <summary>
-        /// åˆ é™¤è£…å¤‡å­˜æ¡£æ•°æ®
+        /// É¾³ı×°±¸´æµµÊı¾İ
         /// </summary>
-        /// <param name="saveSlot">ä¿å­˜æ§½ä½</param>
+        /// <param name="saveSlot">±£´æ²ÛÎ»</param>
         public static void DeleteEquipmentSaveData(string saveSlot = "default")
         {
             string key = $"{EQUIPMENT_SAVE_KEY}_{saveSlot}";
             if (PlayerPrefs.HasKey(key))
             {
                 PlayerPrefs.DeleteKey(key);
-                Debug.Log($"[EquipmentSlotSaveExtension] å·²åˆ é™¤è£…å¤‡å­˜æ¡£æ•°æ®: {key}");
+                Debug.Log($"[EquipmentSlotSaveExtension] ÒÑÉ¾³ı×°±¸´æµµÊı¾İ: {key}");
             }
         }
+        
+        #region ES3´æ´¢Ö§³Ö
+        
+        /// <summary>
+        /// ±£´æ×°±¸ÏµÍ³Êı¾İµ½ES3ÎÄ¼ş
+        /// </summary>
+        /// <param name="saveData">Òª±£´æµÄÊı¾İ</param>
+        /// <param name="filePath">ES3ÎÄ¼şÂ·¾¶</param>
+        public static void SaveEquipmentDataToES3(EquipmentSystemSaveData saveData, string filePath)
+        {
+            try
+            {
+                // ´´½¨±¸·İ
+                string backupPath = filePath.Replace(".es3", "_backup.es3");
+                if (ES3.FileExists(filePath))
+                {
+                    ES3.CopyFile(filePath, backupPath);
+                }
+                
+                // ±£´æÊı¾İ
+                ES3.Save("EquipmentData", saveData, filePath);
+                
+                Debug.Log($"[EquipmentSlotSaveExtension] ×°±¸Êı¾İÒÑ±£´æµ½ES3ÎÄ¼ş: {filePath}");
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError($"[EquipmentSlotSaveExtension] ±£´æ×°±¸Êı¾İµ½ES3Ê§°Ü: {e.Message}");
+            }
+        }
+        
+        /// <summary>
+        /// ´ÓES3ÎÄ¼ş¼ÓÔØ×°±¸ÏµÍ³Êı¾İ
+        /// </summary>
+        /// <param name="filePath">ES3ÎÄ¼şÂ·¾¶</param>
+        /// <returns>×°±¸ÏµÍ³Êı¾İ</returns>
+        public static EquipmentSystemSaveData LoadEquipmentDataFromES3(string filePath)
+        {
+            try
+            {
+                if (ES3.FileExists(filePath) && ES3.KeyExists("EquipmentData", filePath))
+                {
+                    var saveData = ES3.Load<EquipmentSystemSaveData>("EquipmentData", filePath);
+                    Debug.Log($"[EquipmentSlotSaveExtension] ×°±¸Êı¾İÒÑ´ÓES3ÎÄ¼ş¼ÓÔØ: {filePath}");
+                    return saveData;
+                }
+                else
+                {
+                    Debug.LogWarning($"[EquipmentSlotSaveExtension] ES3ÎÄ¼ş²»´æÔÚ»òÎŞÊı¾İ: {filePath}");
+                }
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError($"[EquipmentSlotSaveExtension] ´ÓES3ÎÄ¼ş¼ÓÔØ×°±¸Êı¾İÊ§°Ü: {e.Message}");
+                
+                // ³¢ÊÔ´Ó±¸·İ¼ÓÔØ
+                string backupPath = filePath.Replace(".es3", "_backup.es3");
+                if (ES3.FileExists(backupPath))
+                {
+                    try
+                    {
+                        var backupData = ES3.Load<EquipmentSystemSaveData>("EquipmentData", backupPath);
+                        Debug.LogWarning($"[EquipmentSlotSaveExtension] ÒÑ´Ó±¸·İÎÄ¼ş»Ö¸´: {backupPath}");
+                        return backupData;
+                    }
+                    catch (System.Exception backupError)
+                    {
+                        Debug.LogError($"[EquipmentSlotSaveExtension] ±¸·İÎÄ¼şÒ²ÎŞ·¨¼ÓÔØ: {backupError.Message}");
+                    }
+                }
+            }
+            
+            return new EquipmentSystemSaveData();
+        }
+        
+        /// <summary>
+        /// ¼ì²éES3ÎÄ¼şÖĞÊÇ·ñ´æÔÚ×°±¸´æµµÊı¾İ
+        /// </summary>
+        /// <param name="filePath">ES3ÎÄ¼şÂ·¾¶</param>
+        /// <returns>ÊÇ·ñ´æÔÚ´æµµ</returns>
+        public static bool HasEquipmentSaveDataInES3(string filePath)
+        {
+            return ES3.FileExists(filePath) && ES3.KeyExists("EquipmentData", filePath);
+        }
+        
+        /// <summary>
+        /// É¾³ıES3ÎÄ¼şÖĞµÄ×°±¸´æµµÊı¾İ
+        /// </summary>
+        /// <param name="filePath">ES3ÎÄ¼şÂ·¾¶</param>
+        public static void DeleteEquipmentSaveDataFromES3(string filePath)
+        {
+            try
+            {
+                if (ES3.FileExists(filePath))
+                {
+                    ES3.DeleteFile(filePath);
+                    Debug.Log($"[EquipmentSlotSaveExtension] ÒÑÉ¾³ıES3×°±¸´æµµ: {filePath}");
+                }
+                
+                // É¾³ı±¸·İÎÄ¼ş
+                string backupPath = filePath.Replace(".es3", "_backup.es3");
+                if (ES3.FileExists(backupPath))
+                {
+                    ES3.DeleteFile(backupPath);
+                    Debug.Log($"[EquipmentSlotSaveExtension] ÒÑÉ¾³ıES3×°±¸±¸·İ: {backupPath}");
+                }
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError($"[EquipmentSlotSaveExtension] É¾³ıES3×°±¸´æµµÊ§°Ü: {e.Message}");
+            }
+        }
+        
+        #endregion
     }
 }
