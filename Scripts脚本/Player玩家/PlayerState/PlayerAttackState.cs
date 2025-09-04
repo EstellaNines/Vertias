@@ -4,10 +4,10 @@ using UnityEngine;
 
 public class PlayerAttackState : IState
 {
-    // --- »ñÈ¡Íæ¼Ò×é¼ş ---
+    // --- è·å–ç©å®¶ç»„ä»¶ ---
     public Player player;
 
-    // ¹¹Ôìº¯Êı
+    // æ„é€ å‡½æ•°
     public PlayerAttackState(Player player)
     {
         this.player = player;
@@ -15,65 +15,65 @@ public class PlayerAttackState : IState
 
     public void OnEnter()
     {
-        // ÉèÖÃ¹¥»÷Ê±µÄÒÆ¶¯ËÙ¶È
+        // è®¾ç½®æ”»å‡»æ—¶çš„ç§»åŠ¨é€Ÿåº¦
         player.CurrentSpeed = player.FireSpeed;
 
-        // ²¥·ÅÉä»÷¶¯»­
+        // æ’­æ”¾å°„å‡»åŠ¨ç”»
         if (player.isWeaponInHand)
         {
             player.AIMTOR.Play("Shoot_Idle");
 
-            // ÑéÖ¤µ±Ç°ÎäÆ÷¿ØÖÆÆ÷
+            // éªŒè¯å½“å‰æ­¦å™¨æ§åˆ¶å™¨
             if (player.currentWeaponController != null)
             {
-                Debug.Log($"½øÈë¹¥»÷×´Ì¬ - µ±Ç°ÎäÆ÷: {player.currentWeaponController.GetWeaponName()}");
+                Debug.Log($"è¿›å…¥æ”»å‡»çŠ¶æ€ - å½“å‰æ­¦å™¨: {player.currentWeaponController.GetWeaponName()}");
             }
             else
             {
-                Debug.LogWarning("½øÈë¹¥»÷×´Ì¬µ«ÎäÆ÷¿ØÖÆÆ÷Î´ÕıÈ·ÉèÖÃ£¡");
+                Debug.LogWarning("è¿›å…¥æ”»å‡»çŠ¶æ€ä½†æ­¦å™¨æ§åˆ¶å™¨æœªæ­£ç¡®è®¾ç½®ï¼");
             }
         }
 
-        Debug.Log("½øÈë¹¥»÷×´Ì¬");
+        Debug.Log("è¿›å…¥æ”»å‡»çŠ¶æ€");
     }
 
     public void OnExit()
     {
-        // »Ö¸´Õı³£ÒÆ¶¯ËÙ¶È
+        // æ¢å¤æ­£å¸¸ç§»åŠ¨é€Ÿåº¦
         player.CurrentSpeed = player.WalkSpeed;
 
-        // Í£Ö¹Éä»÷
+        // åœæ­¢å°„å‡»
         player.isFiring = false;
         player.isAttacking = false;
 
-        // È·±£ÎäÆ÷Í£Ö¹Éä»÷
+        // ç¡®ä¿æ­¦å™¨åœæ­¢å°„å‡»
         if (player.currentWeaponController != null)
         {
             player.currentWeaponController.SetFiring(false);
         }
 
-        Debug.Log("ÍË³ö¹¥»÷×´Ì¬");
+        Debug.Log("é€€å‡ºæ”»å‡»çŠ¶æ€");
     }
 
     public void OnFixedUpdate()
     {
-        // ¹¥»÷×´Ì¬ÏÂµÄÎïÀí¸üĞÂ
-        // ¿ÉÒÔÒÆ¶¯µ«ËÙ¶È½ÏÂı
+        // æ”»å‡»çŠ¶æ€ä¸‹çš„ç‰©ç†æ›´æ–°
+        // å¯ä»¥ç§»åŠ¨ä½†é€Ÿåº¦è¾ƒæ…¢
         player.PlayerRB2D.velocity = player.InputDirection * player.CurrentSpeed;
     }
 
     public void OnUpdate()
     {
-        // ÍêÕûÃé×¼¹¦ÄÜ£¨°üÀ¨ÎäÆ÷³¯Ïò£©
+        // å®Œæ•´ç„å‡†åŠŸèƒ½ï¼ˆåŒ…æ‹¬æ­¦å™¨æœå‘ï¼‰
         player.UpdateFullAiming();
 
-        // ´¦ÀíÁ¬ĞøÉä»÷Âß¼­
+        // å¤„ç†è¿ç»­å°„å‡»é€»è¾‘
         if (player.isHoldingFire && player.currentWeaponController != null)
         {
             player.fireHoldTime += Time.deltaTime;
             
-            // Èç¹û°´×¡Ê±¼ä³¬¹ıãĞÖµ£¬¿ªÊ¼Á¬ĞøÉä»÷
-            if (player.fireHoldTime >= Player.HOLD_THRESHOLD) // Ê¹ÓÃÀàĞÍÃû·ÃÎÊ¾²Ì¬³ÉÔ±
+            // å¦‚æœæŒ‰ä½æ—¶é—´è¶…è¿‡é˜ˆå€¼ï¼Œå¼€å§‹è¿ç»­å°„å‡»
+            if (player.fireHoldTime >= Player.HOLD_THRESHOLD) // ä½¿ç”¨ç±»å‹åè®¿é—®é™æ€æˆå‘˜
             {
                 if (player.currentWeaponController.CanFire())
                 {
@@ -82,41 +82,41 @@ public class PlayerAttackState : IState
                 }
                 else if (player.currentWeaponController.NeedsReload())
                 {
-                    Debug.Log("µ¯Ò©ÓÃ¾¡£¬×Ô¶¯ÇĞ»»µ½»»µ¯×´Ì¬");
+                    Debug.Log("å¼¹è¯ç”¨å°½ï¼Œè‡ªåŠ¨åˆ‡æ¢åˆ°æ¢å¼¹çŠ¶æ€");
                     player.transitionState(PlayerStateType.Reload);
                     return;
                 }
             }
         }
 
-        // ¼ì²éÎäÆ÷µ¯Ò©
+        // æ£€æŸ¥æ­¦å™¨å¼¹è¯
         if (player.currentWeaponController != null && player.currentWeaponController.NeedsReload())
         {
-            Debug.Log("µ¯Ò©ÓÃ¾¡£¬×Ô¶¯ÇĞ»»µ½»»µ¯×´Ì¬");
+            Debug.Log("å¼¹è¯ç”¨å°½ï¼Œè‡ªåŠ¨åˆ‡æ¢åˆ°æ¢å¼¹çŠ¶æ€");
             player.transitionState(PlayerStateType.Reload);
             return;
         }
 
-        // ´¦ÀíÉä»÷¶¯»­
+        // å¤„ç†å°„å‡»åŠ¨ç”»
         if (player.isFiring && player.isWeaponInHand)
         {
-            // ÑéÖ¤ÎäÆ÷¿ØÖÆÆ÷
+            // éªŒè¯æ­¦å™¨æ§åˆ¶å™¨
             if (player.currentWeaponController == null)
             {
-                Debug.LogError("¹¥»÷×´Ì¬ÏÂÎäÆ÷¿ØÖÆÆ÷¶ªÊ§£¬ÍË³ö¹¥»÷×´Ì¬");
+                Debug.LogError("æ”»å‡»çŠ¶æ€ä¸‹æ­¦å™¨æ§åˆ¶å™¨ä¸¢å¤±ï¼Œé€€å‡ºæ”»å‡»çŠ¶æ€");
                 player.transitionState(PlayerStateType.Idle);
                 return;
             }
 
-            // ¼ì²éÊÇ·ñ¿ÉÒÔ¼ÌĞøÉä»÷
+            // æ£€æŸ¥æ˜¯å¦å¯ä»¥ç»§ç»­å°„å‡»
             if (!player.currentWeaponController.CanFire())
             {
-                Debug.Log("ÎŞ·¨¼ÌĞøÉä»÷£¬ÍË³ö¹¥»÷×´Ì¬");
+                Debug.Log("æ— æ³•ç»§ç»­å°„å‡»ï¼Œé€€å‡ºæ”»å‡»çŠ¶æ€");
                 player.transitionState(PlayerStateType.Idle);
                 return;
             }
 
-            // ²¥·ÅÉä»÷¶¯»­
+            // æ’­æ”¾å°„å‡»åŠ¨ç”»
             if (player.InputDirection != Vector2.zero)
             {
                 player.AIMTOR.Play("Shoot_Walk");
@@ -127,25 +127,25 @@ public class PlayerAttackState : IState
             }
         }
 
-        // Ê°È¡ÇĞ»»£¨¹¥»÷Ê±Ò²¿ÉÒÔÊ°È¡£©
+        // æ‹¾å–åˆ‡æ¢ï¼ˆæ”»å‡»æ—¶ä¹Ÿå¯ä»¥æ‹¾å–ï¼‰
         if (player.isPickingUp)
         {
             player.transitionState(PlayerStateType.PickUp);
             return;
         }
-        // ÊÜÉË
+        // å—ä¼¤
         if (player.isHurt)
         {
             player.transitionState(PlayerStateType.Hurt);
         }
-        // ÉÁ±ÜÇĞ»»£¨¹¥»÷Ê±Ò²¿ÉÒÔÉÁ±Ü£©
+        // é—ªé¿åˆ‡æ¢ï¼ˆæ”»å‡»æ—¶ä¹Ÿå¯ä»¥é—ªé¿ï¼‰
         if (player.isDodged)
         {
             player.transitionState(PlayerStateType.Dodge);
             return;
         }
 
-        // Èç¹ûÍ£Ö¹Éä»÷£¬¸ù¾İµ±Ç°×´Ì¬ÇĞ»»
+        // å¦‚æœåœæ­¢å°„å‡»ï¼Œæ ¹æ®å½“å‰çŠ¶æ€åˆ‡æ¢
         if (!player.isFiring || !player.isWeaponInHand)
         {
             if (player.InputDirection != Vector2.zero)

@@ -1,817 +1,613 @@
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.UI;
-using System.Collections;
-using System.Collections.Generic;
-using Unity.VisualScripting;
+using UnityEngine.EventSystems;
+using InventorySystem;
 
-[RequireComponent(typeof(CanvasGroup))]
+// å¯æ‹–æ‹½ç‰©å“
 public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerEnterHandler, IPointerExitHandler
 {
-    [Header("ÍÏ×§Ê±×Ô¶¯Ñ°ÕÒ")]
-    [SerializeField] private InventorySystemItem item;
+    [Header("æ‹–æ‹½è®¾ç½®")]
+    [SerializeField] private Canvas canvas;
+    [SerializeField] private GraphicRaycaster graphicRaycaster;
+    [SerializeField] private CanvasGroup canvasGroup;
+    
+    [Header("æ‹–æ‹½æ—¶ç‰©å“è®¾ç½®")]
+    [SerializeField] private Vector2 dragItemSize = new Vector2(192f, 192f); // æ‹–æ‹½æ—¶ç‰©å“å¤§å°
 
     private RectTransform rectTransform;
-    private CanvasGroup canvasGroup;
-    public Transform originalParent;
-    public Vector2 originalPos;
-    private bool wasInEquipSlot = false;
-
-    private GameObject itemBackground;
-    private Vector2 originalSize;
-    private Vector3 originalScale;
-
-    private ItemSpawner itemSpawner;
-    private Vector2Int gridPosition;
-
-    private List<Image> allImages = new List<Image>();
-    private List<bool> originalRaycastTargets = new List<bool>();
-
-    private Vector2 originalAnchorMin;
-    private Vector2 originalAnchorMax;
-    private Vector2 originalPivot;
-    public bool isDragging { get; private set; } = false; // ÍÏ×§×´Ì¬±êÊ¶
-
-
-
-    private ItemDataHolder itemDataHolder;
+    private Vector2 originalPosition;
+    private Transform originalParent;
+    private ItemDataReader itemDataReader; // ç‰©å“æ•°æ®è¯»å–å™¨
+    private Item item; // Item ç»„ä»¶
+    private InventoryController inventoryController; // èƒŒåŒ…æ§åˆ¶å™¨
+    private float originalAlpha = 0.8f; // ç”¨äºè®°å½•åŸå§‹é€æ˜åº¦
+    private ItemHighlight itemHighlightComponent; // é«˜äº®ç»„ä»¶
+    
+    // æ‹–æ‹½æ—¶çš„çŠ¶æ€è®°å½•
+    private Vector2 originalSize; // åŸå§‹å¤§å°
+    private Vector3 originalScale; // åŸå§‹ç¼©æ”¾
+    private bool originalBackgroundActive; // åŸå§‹èƒŒæ™¯çŠ¶æ€
+    private GameObject itemBackground; // ç‰©å“èƒŒæ™¯å¯¹è±¡å¼•ç”¨
+    
+    // å­å¯¹è±¡å¼•ç”¨
+    private RectTransform itemIcon; // ç‰©å“å›¾æ ‡
+    private RectTransform itemText; // ç‰©å“æ–‡å­—
+    private RectTransform itemHighlight; // ç‰©å“é«˜äº®
+    private Vector2 originalIconSize; // å›¾æ ‡åŸå§‹å¤§å°
+    private Vector2 originalTextSize; // æ–‡å­—åŸå§‹å¤§å°
+    private Vector2 originalTextPosition; // æ–‡å­—åŸå§‹ä½ç½®
+    private Vector2 originalHighlightSize; // é«˜äº®åŸå§‹å¤§å°
 
     private void Awake()
     {
         rectTransform = GetComponent<RectTransform>();
         canvasGroup = GetComponent<CanvasGroup>();
-        if (item == null) item = GetComponent<InventorySystemItem>();
+        itemDataReader = GetComponent<ItemDataReader>();
+        item = GetComponent<Item>();
 
-        // ³õÊ¼»¯ ItemDataHolder
-        itemDataHolder = GetComponent<ItemDataHolder>();
-        if (itemDataHolder == null)
+        // å¦‚æœæ²¡æœ‰CanvasGroupåˆ™è‡ªåŠ¨æ·»åŠ 
+        if (canvasGroup == null)
         {
-            itemDataHolder = gameObject.AddComponent<ItemDataHolder>();
+            canvasGroup = gameObject.AddComponent<CanvasGroup>();
         }
 
-        itemSpawner = FindObjectOfType<ItemSpawner>();
-        itemBackground = transform.Find("ItemBackground")?.gameObject;
-        CacheImageComponents();
-
-        originalAnchorMin = rectTransform.anchorMin;
-        originalAnchorMax = rectTransform.anchorMax;
-        originalPivot = rectTransform.pivot;
-
-        originalSize = rectTransform.sizeDelta;
-        originalScale = rectTransform.localScale;
-
-    }
-
-    private void CacheImageComponents()
-    {
-        allImages.Clear();
-        originalRaycastTargets.Clear();
-
-        Image[] images = GetComponentsInChildren<Image>(true);
-
-        foreach (Image img in images)
+        // è®¾ç½®Canvaså’ŒGraphicRaycaster
+        if (canvas == null)
         {
-            allImages.Add(img);
-            originalRaycastTargets.Add(img.raycastTarget);
+            canvas = GetComponentInParent<Canvas>();
+        }
+
+        if (graphicRaycaster == null)
+        {
+            graphicRaycaster = GetComponentInParent<GraphicRaycaster>();
+        }
+
+        // è·å–InventoryController
+        if (inventoryController == null)
+        {
+            inventoryController = FindObjectOfType<InventoryController>();
+        }
+
+        // è·å–é«˜äº®ç»„ä»¶
+        itemHighlightComponent = GetComponent<ItemHighlight>();
+        
+        // è·å–ç‰©å“èƒŒæ™¯å¯¹è±¡å¼•ç”¨
+        Transform backgroundTransform = transform.Find("ItemBackground");
+        if (backgroundTransform != null)
+        {
+            itemBackground = backgroundTransform.gameObject;
+        }
+        else
+        {
+            Debug.LogWarning($"ç‰©å“ {gameObject.name} æœªæ‰¾åˆ°ItemBackgroundå­å¯¹è±¡");
+        }
+        
+        // è·å–ç‰©å“å›¾æ ‡å¼•ç”¨
+        Transform iconTransform = transform.Find("ItemIcon");
+        if (iconTransform != null)
+        {
+            itemIcon = iconTransform.GetComponent<RectTransform>();
+        }
+        else
+        {
+            Debug.LogWarning($"ç‰©å“ {gameObject.name} æœªæ‰¾åˆ°ItemIconå­å¯¹è±¡");
+        }
+        
+        // è·å–ç‰©å“æ–‡å­—å¼•ç”¨
+        Transform textTransform = transform.Find("ItemText");
+        if (textTransform != null)
+        {
+            itemText = textTransform.GetComponent<RectTransform>();
+        }
+        else
+        {
+            Debug.LogWarning($"ç‰©å“ {gameObject.name} æœªæ‰¾åˆ°ItemTextå­å¯¹è±¡");
+        }
+        
+        // è·å–ç‰©å“é«˜äº®å¼•ç”¨
+        Transform highlightTransform = transform.Find("ItemHighlight");
+        if (highlightTransform != null)
+        {
+            itemHighlight = highlightTransform.GetComponent<RectTransform>();
+        }
+        else
+        {
+            Debug.LogWarning($"ç‰©å“ {gameObject.name} æœªæ‰¾åˆ°ItemHighlightå­å¯¹è±¡");
         }
     }
 
-    private void DisableAllRaycastTargets()
+    // é¼ æ ‡åœç•™äº‹ä»¶å¤„ç†
+    public void OnPointerEnter(PointerEventData eventData)
     {
-        foreach (Image img in allImages)
+        if (itemHighlightComponent != null)
         {
-            if (img != null)
-            {
-                img.raycastTarget = false;
-            }
+            itemHighlightComponent.ShowHighlight();
         }
     }
 
-    private void RestoreAllRaycastTargets()
+    public void OnPointerExit(PointerEventData eventData)
     {
-        for (int i = 0; i < allImages.Count && i < originalRaycastTargets.Count; i++)
+        if (itemHighlightComponent != null)
         {
-            if (allImages[i] != null)
-            {
-                allImages[i].raycastTarget = originalRaycastTargets[i];
-            }
+            itemHighlightComponent.HideHighlight();
         }
     }
-
-    private void Update()
-    {
-        // Ğı×ª¹¦ÄÜÒÑÒÆ³ı
-    }
-
-
-
-
-
-
-
-
-
 
     public void OnBeginDrag(PointerEventData eventData)
     {
-        if (!item.IsDraggable) return;
+        // æ‹–æ‹½å¼€å§‹æ—¶éšè—é«˜äº®
+        if (itemHighlightComponent != null)
+        {
+            itemHighlightComponent.HideHighlight();
+        }
 
-        isDragging = true; // ÉèÖÃÍÏ×§×´Ì¬
-        canvasGroup.alpha = 1.0f;
-        canvasGroup.blocksRaycasts = false;
+        // ç¡®ä¿å¿…è¦ç»„ä»¶å·²ç»åˆå§‹åŒ–
+        if (item == null)
+        {
+            item = GetComponent<Item>();
+        }
 
-        wasInEquipSlot = GetComponentInParent<EquipSlot>() != null;
+        if (rectTransform == null)
+        {
+            rectTransform = GetComponent<RectTransform>();
+        }
+
+        if (canvasGroup == null)
+        {
+            canvasGroup = GetComponent<CanvasGroup>();
+            if (canvasGroup == null)
+            {
+                canvasGroup = gameObject.AddComponent<CanvasGroup>();
+            }
+        }
+
+        if (canvas == null)
+        {
+            canvas = GetComponentInParent<Canvas>();
+        }
+
+        if (inventoryController == null)
+        {
+            inventoryController = FindObjectOfType<InventoryController>();
+        }
+
+        // è‹¥ä»ç„¶ç¼ºå°‘å…³é”®ç»„ä»¶åˆ™æŠ¥é”™å¹¶è¿”å›
+        if (item == null)
+        {
+            Debug.LogError($"DraggableItem: ç‰©å“ {gameObject.name} ç¼ºå°‘ Item ç»„ä»¶ï¼Œæ— æ³•æ‹–æ‹½");
+            return;
+        }
+
+        if (rectTransform == null)
+        {
+            Debug.LogError($"DraggableItem: ç‰©å“ {gameObject.name} ç¼ºå°‘ RectTransform ç»„ä»¶ï¼Œæ— æ³•æ‹–æ‹½");
+            return;
+        }
+
+
+
+        // è®°å½•åŸå§‹ä½ç½®å’Œçˆ¶çº§
+        originalPosition = rectTransform.anchoredPosition;
         originalParent = transform.parent;
-        originalPos = rectTransform.anchoredPosition;
-
-        Vector3 worldPosition = rectTransform.position;
-
-        rectTransform.anchorMin = new Vector2(0.5f, 0.5f);
-        rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
-        rectTransform.pivot = new Vector2(0.5f, 0.5f);
-        rectTransform.position = worldPosition;
-
-        if (!wasInEquipSlot)
+        
+        // è®°å½•åŸå§‹çŠ¶æ€
+        originalSize = rectTransform.sizeDelta;
+        originalScale = rectTransform.localScale;
+        originalBackgroundActive = itemBackground != null ? itemBackground.activeSelf : false;
+        
+        // è®°å½•å­å¯¹è±¡åŸå§‹çŠ¶æ€
+        if (itemIcon != null)
         {
-            // ¼ì²é²»Í¬ÀàĞÍµÄÍø¸ñ
-            object parentGrid = null;
-            System.Type gridType = null;
-
-            ItemGrid itemGrid = originalParent.GetComponent<ItemGrid>();
-            if (itemGrid != null)
-            {
-                parentGrid = itemGrid;
-                gridType = typeof(ItemGrid);
-            }
-            else
-            {
-                BackpackItemGrid backpackGrid = originalParent.GetComponent<BackpackItemGrid>();
-                if (backpackGrid != null)
-                {
-                    parentGrid = backpackGrid;
-                    gridType = typeof(BackpackItemGrid);
-                }
-                else
-                {
-                    TactiaclRigItemGrid tacticalRigGrid = originalParent.GetComponent<TactiaclRigItemGrid>();
-                    if (tacticalRigGrid != null)
-                    {
-                        parentGrid = tacticalRigGrid;
-                        gridType = typeof(TactiaclRigItemGrid);
-                    }
-                }
-            }
-
-            if (parentGrid != null)
-            {
-                // Ê¹ÓÃ·´Éäµ÷ÓÃ RemoveItem
-                var removeItemMethod = gridType.GetMethod("RemoveItem",
-                    System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
-                if (removeItemMethod != null)
-                {
-                    removeItemMethod.Invoke(parentGrid, new object[] { gameObject });
-                }
-            }
+            originalIconSize = itemIcon.sizeDelta;
+        }
+        if (itemText != null)
+        {
+            originalTextSize = itemText.sizeDelta;
+            originalTextPosition = itemText.anchoredPosition;
+        }
+        if (itemHighlight != null)
+        {
+            originalHighlightSize = itemHighlight.sizeDelta;
         }
 
-        if (wasInEquipSlot)
+        // è‹¥ç‰©å“åœ¨è£…å¤‡æ§½ä¸­ï¼Œä»è£…å¤‡æ§½ç§»é™¤
+        if (TryRemoveFromEquipmentSlot())
         {
-            RestoreOriginalSize();
+            Debug.Log($"DraggableItem: ä»è£…å¤‡æ§½ä¸­ç§»é™¤ç‰©å“ {item.name}");
         }
 
-        if (itemBackground != null)
+        // è‹¥ç‰©å“åœ¨ç½‘æ ¼ä¸­ï¼Œä»ç½‘æ ¼ç§»é™¤
+        if (item != null && item.IsOnGrid())
         {
-            // ÍÏ×§Ê±±³¾°ÏûÊ§
-            itemBackground.SetActive(false);
+            ItemGrid currentGrid = item.OnGridReference;
+            if (currentGrid != null)
+            {
+                currentGrid.PickUpItem(item.OnGridPosition.x, item.OnGridPosition.y);
+            }
+            item.ResetGridState();
+        }
+        
+        // æ¢å¤ç‰©å“çš„çœŸå®è§†è§‰å°ºå¯¸ï¼ˆä¸ä½¿ç”¨ç½‘æ ¼å¼ºåˆ¶çš„å°ºå¯¸ï¼‰
+        if (item != null)
+        {
+            item.RestoreRealVisualSize();
         }
 
-        DisableAllRaycastTargets();
-        transform.SetParent(item.GetComponentInParent<Canvas>().transform, true);
-        canvasGroup.alpha = 1.0f;
+        // è®¾ç½®ä¸ºåŠé€æ˜å¹¶ç¦ç”¨å°„çº¿æ£€æµ‹
+        originalAlpha = canvasGroup.alpha; // è®°å½•åŸå§‹é€æ˜åº¦
+        canvasGroup.alpha = 0.6f;
         canvasGroup.blocksRaycasts = false;
+        
+        // åº”ç”¨æ‹–æ‹½æ—¶çš„ç‰©å“è®¾ç½®
+        ApplyDragItemSettings();
 
-        // Í¨Öª InventoryController ¿ªÊ¼ÍÏ×§
-        var inventoryController = FindObjectOfType<InventoryController>();
-        if (inventoryController != null)
+        // ç§»åŠ¨åˆ°Canvasæœ€é¡¶å±‚
+        if (canvas != null)
         {
-            inventoryController.SetDraggedItem(item);
+            transform.SetParent(canvas.transform);
+            transform.SetAsLastSibling();
+        }
+
+        // é€šçŸ¥InventoryControllerå¼€å§‹æ‹–æ‹½
+        if (inventoryController != null && item != null)
+        {
+            inventoryController.SetSelectedItem(item);
         }
     }
 
     public void OnDrag(PointerEventData eventData)
     {
-        if (!item.IsDraggable) return;
+        // è·Ÿéšé¼ æ ‡ç§»åŠ¨
+        rectTransform.anchoredPosition += eventData.delta / canvas.scaleFactor;
 
-        Vector2 localPointerPosition;
-        Canvas canvas = item.GetComponentInParent<Canvas>();
-        RectTransformUtility.ScreenPointToLocalPointInRectangle(
-            canvas.transform as RectTransform,
-            eventData.position,
-            eventData.pressEventCamera,
-            out localPointerPosition);
-
-        rectTransform.anchoredPosition = localPointerPosition;
-        
-        // ¼ì²â×°±¸À¸²¢ÏÔÊ¾¸ßÁÁÌáÊ¾
-        CheckEquipSlotHighlight(eventData);
-    }
-    
-    /// <summary>
-    /// ¼ì²â×°±¸À¸²¢ÏÔÊ¾¸ßÁÁÌáÊ¾
-    /// </summary>
-    /// <param name="eventData">ÍÏ×§ÊÂ¼şÊı¾İ</param>
-    private void CheckEquipSlotHighlight(PointerEventData eventData)
-    {
-        // ½øĞĞÉäÏß¼ì²â
-        var results = new System.Collections.Generic.List<RaycastResult>();
-        EventSystem.current.RaycastAll(eventData, results);
-        
-        EquipSlot targetEquipSlot = null;
-        
-        // ²éÕÒ×°±¸À¸
-        foreach (var result in results)
+        // å®æ—¶æ›´æ–°æ‹–æ‹½é«˜äº®ï¼ˆå‘½ä¸­æ£€æµ‹ï¼‰
+        if (inventoryController != null && item != null)
         {
-            EquipSlot equipSlot = result.gameObject.GetComponent<EquipSlot>();
-            if (equipSlot != null)
+            inventoryController.UpdateDragHighlight(item, Input.mousePosition);
+        }
+    }
+
+    // è·å–ç‰©å“æ‰€åœ¨çš„æ ¼å­
+    public ItemGrid GetParentGrid()
+    {
+        // å…ˆæ£€æŸ¥å½“å‰çˆ¶èŠ‚ç‚¹
+        if (transform.parent != null)
+        {
+            ItemGrid grid = transform.parent.GetComponent<ItemGrid>();
+            if (grid != null)
             {
-                targetEquipSlot = equipSlot;
-                break;
+                return grid;
             }
         }
-        
-        // Èç¹ûÕÒµ½×°±¸À¸£¬ÏÔÊ¾¸ßÁÁÌáÊ¾
-        if (targetEquipSlot != null)
+
+        // å¦‚æœå½“å‰çˆ¶èŠ‚ç‚¹æ²¡æœ‰ï¼Œåˆ™ä½¿ç”¨æ‹–æ‹½å‰çš„åŸå§‹çˆ¶èŠ‚ç‚¹
+        if (originalParent != null)
         {
-            var itemComponent = GetComponent<InventorySystemItem>();
-            if (itemComponent != null)
+            ItemGrid grid = originalParent.GetComponent<ItemGrid>();
+            if (grid != null)
             {
-                bool canEquip = CanEquipToSlot(targetEquipSlot, itemComponent);
-                targetEquipSlot.ShowEquipHighlight(canEquip);
+                return grid;
             }
+        }
+
+        // è‹¥ä»æœªæ‰¾åˆ°åˆ™è¿”å› null
+        return null;
+    }
+
+    /// <summary>
+    /// å°è¯•ä»è£…å¤‡æ§½ä¸­ç§»é™¤ç‰©å“
+    /// </summary>
+    /// <returns>æ˜¯å¦æˆåŠŸç§»é™¤</returns>
+    private bool TryRemoveFromEquipmentSlot()
+    {
+        // æ£€æŸ¥ç‰©å“æ˜¯å¦åœ¨è£…å¤‡æ§½ä¸­
+        InventorySystem.EquipmentSlot currentEquipmentSlot = transform.GetComponentInParent<InventorySystem.EquipmentSlot>();
+        if (currentEquipmentSlot == null) return false;
+
+        // æ£€æŸ¥è¿™ä¸ªè£…å¤‡æ§½æ˜¯å¦ç¡®å®è£…å¤‡äº†è¿™ä¸ªç‰©å“
+        if (currentEquipmentSlot.CurrentEquippedItem?.gameObject != gameObject) return false;
+
+        // ä»è£…å¤‡æ§½ä¸­å¸ä¸‹ç‰©å“
+        ItemDataReader unequippedItem = currentEquipmentSlot.UnequipItem();
+        return unequippedItem != null;
+    }
+
+    /// <summary>
+    /// å°è¯•å°†ç‰©å“æ”¾ç½®åˆ°è£…å¤‡æ§½ä¸­
+    /// </summary>
+    /// <param name="eventData">æ‹–æ‹½äº‹ä»¶æ•°æ®</param>
+    /// <returns>æ˜¯å¦æˆåŠŸæ”¾ç½®</returns>
+    private bool TryPlaceInEquipmentSlot(PointerEventData eventData)
+    {
+        // æ£€æŸ¥é¼ æ ‡ä¸‹æ–¹æ˜¯å¦æœ‰è£…å¤‡æ§½
+        GameObject targetObject = eventData.pointerCurrentRaycast.gameObject;
+        if (targetObject == null) return false;
+
+        // å‘ä¸ŠæŸ¥æ‰¾è£…å¤‡æ§½ç»„ä»¶
+        InventorySystem.EquipmentSlot equipmentSlot = targetObject.GetComponentInParent<InventorySystem.EquipmentSlot>();
+        if (equipmentSlot == null) return false;
+
+        // æ£€æŸ¥ç‰©å“æ˜¯å¦æœ‰ItemDataReaderç»„ä»¶
+        ItemDataReader itemDataReader = GetComponent<ItemDataReader>();
+        if (itemDataReader == null) return false;
+
+        // å°è¯•è£…å¤‡ç‰©å“
+        bool equipSuccess = equipmentSlot.EquipItem(itemDataReader);
+        
+        if (equipSuccess)
+        {
+            Debug.Log($"DraggableItem: æˆåŠŸå°†ç‰©å“ {item.name} è£…å¤‡åˆ°è£…å¤‡æ§½ {equipmentSlot.SlotType}");
+            return true;
         }
         else
         {
-            // Èç¹ûÃ»ÓĞÕÒµ½×°±¸À¸£¬Òş²ØËùÓĞ×°±¸À¸¸ßÁÁ
-            HideAllEquipSlotHighlights();
-        }
-    }
-    
-    /// <summary>
-    /// Òş²ØËùÓĞ×°±¸À¸¸ßÁÁ
-    /// </summary>
-    private void HideAllEquipSlotHighlights()
-    {
-        EquipSlot[] allEquipSlots = FindObjectsOfType<EquipSlot>();
-        foreach (var equipSlot in allEquipSlots)
-        {
-            equipSlot.HideEquipHighlight();
+            Debug.LogWarning($"DraggableItem: æ— æ³•å°†ç‰©å“ {item.name} è£…å¤‡åˆ°è£…å¤‡æ§½ {equipmentSlot.SlotType}");
+            return false;
         }
     }
 
     public void OnEndDrag(PointerEventData eventData)
     {
-        if (!item.IsDraggable) return;
-
-        // ÇåÀíËùÓĞ×°±¸À¸¸ßÁÁÏÔÊ¾
-        HideAllEquipSlotHighlights();
-
-        bool placementSuccessful = false;
-
-        EquipSlot originalEquipSlot = originalParent.GetComponent<EquipSlot>();
-        if (originalEquipSlot != null && wasInEquipSlot)
-        {
-            originalEquipSlot.OnItemRemoved();
-        }
-
-        var results = new System.Collections.Generic.List<RaycastResult>();
-        EventSystem.current.RaycastAll(eventData, results);
-
-        // ¼ì²é×°±¸²Û
-        foreach (var result in results)
-        {
-            EquipSlot equipSlot = result.gameObject.GetComponent<EquipSlot>();
-            if (equipSlot != null)
-            {
-                var itemComponent = GetComponent<InventorySystemItem>();
-                if (itemComponent != null && CanEquipToSlot(equipSlot, itemComponent))
-                {
-                    transform.SetParent(equipSlot.transform, false);
-                    placementSuccessful = true;
-                    FitToEquipSlot(equipSlot);
-
-                    if (itemBackground != null)
-                    {
-                        // ·ÅÈë×°±¸²Ûºó»Ö¸´±³¾°ÏÔÊ¾
-                        itemBackground.SetActive(true);
-                    }
-                    break;
-                }
-            }
-        }
-
-        // ¼ì²éÍø¸ñ
-        if (!placementSuccessful)
-        {
-            object targetGrid = null;
-            System.Type gridType = null;
-
-            foreach (var result in results)
-            {
-                // ¼ì²é ItemGrid
-                ItemGrid itemGrid = result.gameObject.GetComponent<ItemGrid>();
-                if (itemGrid != null)
-                {
-                    targetGrid = itemGrid;
-                    gridType = typeof(ItemGrid);
-                    break;
-                }
-                itemGrid = result.gameObject.GetComponentInParent<ItemGrid>();
-                if (itemGrid != null)
-                {
-                    targetGrid = itemGrid;
-                    gridType = typeof(ItemGrid);
-                    break;
-                }
-                itemGrid = result.gameObject.GetComponentInChildren<ItemGrid>();
-                if (itemGrid != null)
-                {
-                    targetGrid = itemGrid;
-                    gridType = typeof(ItemGrid);
-                    break;
-                }
-
-                // ¼ì²é BackpackItemGrid
-                BackpackItemGrid backpackGrid = result.gameObject.GetComponent<BackpackItemGrid>();
-                if (backpackGrid != null)
-                {
-                    targetGrid = backpackGrid;
-                    gridType = typeof(BackpackItemGrid);
-                    break;
-                }
-                backpackGrid = result.gameObject.GetComponentInParent<BackpackItemGrid>();
-                if (backpackGrid != null)
-                {
-                    targetGrid = backpackGrid;
-                    gridType = typeof(BackpackItemGrid);
-                    break;
-                }
-                backpackGrid = result.gameObject.GetComponentInChildren<BackpackItemGrid>();
-                if (backpackGrid != null)
-                {
-                    targetGrid = backpackGrid;
-                    gridType = typeof(BackpackItemGrid);
-                    break;
-                }
-
-                // ¼ì²é TactiaclRigItemGrid
-                TactiaclRigItemGrid tacticalRigGrid = result.gameObject.GetComponent<TactiaclRigItemGrid>();
-                if (tacticalRigGrid != null)
-                {
-                    targetGrid = tacticalRigGrid;
-                    gridType = typeof(TactiaclRigItemGrid);
-                    break;
-                }
-                tacticalRigGrid = result.gameObject.GetComponentInParent<TactiaclRigItemGrid>();
-                if (tacticalRigGrid != null)
-                {
-                    targetGrid = tacticalRigGrid;
-                    gridType = typeof(TactiaclRigItemGrid);
-                    break;
-                }
-                tacticalRigGrid = result.gameObject.GetComponentInChildren<TactiaclRigItemGrid>();
-                if (tacticalRigGrid != null)
-                {
-                    targetGrid = tacticalRigGrid;
-                    gridType = typeof(TactiaclRigItemGrid);
-                    break;
-                }
-            }
-
-            if (targetGrid != null)
-            {
-                Vector2Int dropPosition = Vector2Int.zero;
-                // Ê¹ÓÃÔ­Ê¼³ß´ç½øĞĞÕ¼Î»¼ì²â
-                Vector2Int itemSize = item.Size;
-
-                // µ÷ÓÃ¶ÔÓ¦µÄ GetTileGridPosition ·½·¨
-                if (gridType == typeof(ItemGrid))
-                {
-                    dropPosition = ((ItemGrid)targetGrid).GetTileGridPosition(eventData.position);
-                }
-                else if (gridType == typeof(BackpackItemGrid))
-                {
-                    dropPosition = ((BackpackItemGrid)targetGrid).GetTileGridPosition(eventData.position);
-                }
-                else if (gridType == typeof(TactiaclRigItemGrid))
-                {
-                    dropPosition = ((TactiaclRigItemGrid)targetGrid).GetTileGridPosition(eventData.position);
-                }
-
-                Debug.Log($"³¢ÊÔ·ÅÖÃµ½Íø¸ñÎ»ÖÃ: ({dropPosition.x}, {dropPosition.y}), ÎïÆ·´óĞ¡: ({itemSize.x}, {itemSize.y})");
-
-                bool canPlace = false;
-
-                // µ÷ÓÃ¶ÔÓ¦µÄ CanPlaceItem ·½·¨£¨Ê¹ÓÃÖÇÄÜ¼ì²â£©
-                if (gridType == typeof(ItemGrid))
-                {
-                    canPlace = ((ItemGrid)targetGrid).CanPlaceItem(gameObject, dropPosition);
-                }
-                else if (gridType == typeof(BackpackItemGrid))
-                {
-                    canPlace = ((BackpackItemGrid)targetGrid).CanPlaceItem(gameObject, dropPosition);
-                }
-                else if (gridType == typeof(TactiaclRigItemGrid))
-                {
-                    canPlace = ((TactiaclRigItemGrid)targetGrid).CanPlaceItem(gameObject, dropPosition);
-                }
-
-                if (canPlace)
-                {
-                    transform.SetParent(((MonoBehaviour)targetGrid).transform, false);
-
-                    // Ö±½Óµ÷ÓÃPlaceItem·½·¨£¨²»ÔÙÊ¹ÓÃ·´Éä£©
-                    if (gridType == typeof(ItemGrid))
-                    {
-                        ((ItemGrid)targetGrid).PlaceItem(gameObject, dropPosition, itemSize);
-                    }
-                    else if (gridType == typeof(BackpackItemGrid))
-                    {
-                        ((BackpackItemGrid)targetGrid).PlaceItem(gameObject, dropPosition, itemSize);
-                    }
-                    else if (gridType == typeof(TactiaclRigItemGrid))
-                    {
-                        ((TactiaclRigItemGrid)targetGrid).PlaceItem(gameObject, dropPosition, itemSize);
-                    }
-
-                    placementSuccessful = true;
-                    RestoreOriginalSize();
-
-                    if (itemBackground != null)
-                    {
-                        // ·Åµ½ÈÎÒâÍø¸ñºó»Ö¸´±³¾°
-                        itemBackground.SetActive(true);
-                    }
-
-                    Debug.Log($"ÎïÆ··ÅÖÃ³É¹¦£¬·ÅÖÃµ½Íø¸ñÎ»ÖÃ: ({dropPosition.x}, {dropPosition.y})");
-                }
-                else
-                {
-                    Debug.Log($"ÎŞ·¨·ÅÖÃµ½Íø¸ñÎ»ÖÃ: ({dropPosition.x}, {dropPosition.y}) - Î»ÖÃ±»Õ¼ÓÃ»ò³¬³ö±ß½ç");
-                }
-            }
-            else
-            {
-                Debug.Log("Î´¼ì²âµ½ÓĞĞ§µÄÍø¸ñÄ¿±ê");
-            }
-        }
-
-        // ·µ»ØÔ­Î»ÖÃ
-        if (!placementSuccessful)
-        {
-            transform.SetParent(originalParent, false);
-
-            rectTransform.anchorMin = originalAnchorMin;
-            rectTransform.anchorMax = originalAnchorMax;
-            rectTransform.pivot = originalPivot;
-            rectTransform.anchoredPosition = originalPos;
-
-            if (wasInEquipSlot)
-            {
-                if (originalEquipSlot != null)
-                {
-                    // ÖØĞÂ×°±¸ÎïÆ·µ½×°±¸²Û
-                    originalEquipSlot.ReequipItem(this);
-                }
-
-                if (itemBackground != null)
-                {
-                    // ÈÔÔÚ×°±¸²Û£¬±³¾°ÏÔÊ¾
-                    itemBackground.SetActive(true);
-                }
-            }
-            else
-            {
-                // ¼ì²é²»Í¬ÀàĞÍµÄÍø¸ñ²¢·µ»ØÔ­Î»ÖÃ
-                ItemGrid itemGrid = originalParent.GetComponent<ItemGrid>();
-                if (itemGrid != null)
-                {
-                    Vector2Int gridPos = itemGrid.GetTileGridPosition(originalPos + (Vector2)itemGrid.transform.position);
-                    // Ê¹ÓÃÔ­Ê¼³ß´ç
-                    Vector2Int itemSize = item.Size;
-
-                    // Ö±½Óµ÷ÓÃPlaceItem·½·¨£¨²»ÔÙÊ¹ÓÃ·´Éä£©
-                    itemGrid.PlaceItem(gameObject, gridPos, itemSize);
-                }
-                else
-                {
-                    BackpackItemGrid backpackGrid = originalParent.GetComponent<BackpackItemGrid>();
-                    if (backpackGrid != null)
-                    {
-                        Vector2Int gridPos = backpackGrid.GetTileGridPosition(originalPos + (Vector2)backpackGrid.transform.position);
-                        // Ê¹ÓÃÔ­Ê¼³ß´ç
-                        Vector2Int itemSize = item.Size;
-
-                        // Ö±½Óµ÷ÓÃPlaceItem·½·¨
-                        backpackGrid.PlaceItem(gameObject, gridPos, itemSize);
-                    }
-                    else
-                    {
-                        TactiaclRigItemGrid tacticalGrid = originalParent.GetComponent<TactiaclRigItemGrid>();
-                        if (tacticalGrid != null)
-                        {
-                            Vector2Int gridPos = tacticalGrid.GetTileGridPosition(originalPos + (Vector2)tacticalGrid.transform.position);
-                            // Ê¹ÓÃÔ­Ê¼³ß´ç
-                            Vector2Int itemSize = item.Size;
-
-                            // Ö±½Óµ÷ÓÃPlaceItem·½·¨
-                            tacticalGrid.PlaceItem(gameObject, gridPos, itemSize);
-                        }
-                    }
-                }
-            }
-
-            RestoreOriginalSize();
-
-            if (itemBackground != null)
-            {
-                // »Øµ½Ô­Íø¸ñ£¬±³¾°ÏÔÊ¾
-                itemBackground.SetActive(true);
-            }
-        }
-
-        RestoreAllRaycastTargets();
-        canvasGroup.alpha = 1f;
+        // æ¢å¤é€æ˜åº¦å’Œäº¤äº’é€»è¾‘
+        canvasGroup.alpha = originalAlpha; // æ¢å¤åŸå§‹é€æ˜åº¦ï¼Œé€šå¸¸ä¸º 1.0f
         canvasGroup.blocksRaycasts = true;
+        
+        // æ¢å¤ç‰©å“åŸå§‹çŠ¶æ€
+        RestoreItemOriginalState();
 
-        // Í¨Öª InventoryController ½áÊøÍÏ×§
-        var inventoryController = FindObjectOfType<InventoryController>();
+        // åˆ¤æ–­æ˜¯å¦æœ‰æœ‰æ•ˆçš„æ”¾ç½®ç›®æ ‡
+        bool validDrop = false;
+
+        // ä¼˜å…ˆæ£€æŸ¥èƒŒåŒ…ç½‘æ ¼
+        if (inventoryController != null && inventoryController.selectedItemGrid != null)
+        {
+            ItemGrid targetGrid = inventoryController.selectedItemGrid;
+            Vector2Int gridPosition = targetGrid.GetTileGridPosition(Input.mousePosition);
+
+            // ä½¿ç”¨æ–°çš„å‘½ä¸­æ£€æµ‹æ–¹æ³•éªŒè¯æ”¾ç½®ä½ç½®
+            if (targetGrid.CanPlaceItemAtPosition(gridPosition.x, gridPosition.y, item.GetWidth(), item.GetHeight(), item))
+            {
+                // åœ¨ç›®æ ‡ç½‘æ ¼ä¸­æ”¾ç½®ç‰©å“
+                if (targetGrid.PlaceItem(item, gridPosition.x, gridPosition.y))
+                {
+                    validDrop = true;
+
+                    // è®¾ç½®ç‰©å“çš„çˆ¶çº§ä¸ºç½‘æ ¼
+                    transform.SetParent(targetGrid.transform);
+
+                    // è®¾ç½®ç‰©å“åœ¨ç½‘æ ¼ä¸­çš„ä½ç½®
+                    Vector2 tilePosition = targetGrid.CalculatePositionOnGrid(item, gridPosition.x, gridPosition.y);
+                    rectTransform.localPosition = tilePosition;
+
+                    // æŒ‰å½“å‰æ—‹è½¬åˆ·æ–°å¯è§†å°ºå¯¸/è§’åº¦ï¼ˆç¡®ä¿ä¸ç½‘æ ¼å°ºå¯¸ä¸€è‡´ï¼‰
+                    item.AdjustVisualSizeForGrid();
+
+                    // æ›´æ–°ç‰©å“çš„ç½‘æ ¼çŠ¶æ€
+                    item.SetGridState(targetGrid, gridPosition);
+
+
+                }
+            }
+            else
+            {
+                // è¾“å‡ºæ”¾ç½®å¤±è´¥åŸå› 
+                if (!targetGrid.BoundryCheck(gridPosition.x, gridPosition.y, item.GetWidth(), item.GetHeight()))
+                {
+                    Debug.LogWarning($"ç‰©å“ {item.name} åœ¨ä½ç½® ({gridPosition.x}, {gridPosition.y}) è¶…å‡ºè¾¹ç•Œï¼Œæ— æ³•æ”¾ç½®");
+                }
+                else if (targetGrid.HasOverlapConflict(gridPosition.x, gridPosition.y, item.GetWidth(), item.GetHeight(), item))
+                {
+                    Debug.LogWarning($"ç‰©å“ {item.name} åœ¨ä½ç½® ({gridPosition.x}, {gridPosition.y}) ä¸å…¶ä»–ç‰©å“é‡å ï¼Œæ— æ³•æ”¾ç½®");
+                }
+            }
+        }
+
+        // å¦‚æœç½‘æ ¼æ”¾ç½®å¤±è´¥ï¼Œå°è¯•è£…å¤‡æ§½
+        if (!validDrop)
+        {
+            validDrop = TryPlaceInEquipmentSlot(eventData);
+        }
+
+        // å¦‚æœæ²¡æœ‰æœ‰æ•ˆæ”¾ç½®ç›®æ ‡ï¼Œåˆ™è¿˜åŸä½ç½®
+        if (!validDrop)
+        {
+            transform.SetParent(originalParent);
+            rectTransform.anchoredPosition = originalPosition;
+
+            // å¦‚æœåŸçˆ¶çº§æ˜¯ç½‘æ ¼ï¼Œè¿˜åŸç½‘æ ¼çŠ¶æ€
+            if (item != null && originalParent != null)
+            {
+                ItemGrid originalGrid = originalParent.GetComponent<ItemGrid>();
+                if (originalGrid != null)
+                {
+                    // é‡æ–°è®¡ç®—åŸå§‹ç½‘æ ¼ä½ç½®
+                    Vector2Int originalGridPos = originalGrid.GetTileGridPosition(originalPosition);
+                    if (originalGrid.PlaceItem(item, originalGridPos.x, originalGridPos.y))
+                    {
+                        item.SetGridState(originalGrid, originalGridPos);
+                    }
+                }
+            }
+        }
+
+        // æ¸…ç©º InventoryController çš„é€‰ä¸­ç‰©å“
         if (inventoryController != null)
         {
-            inventoryController.ClearDraggedItem();
+            inventoryController.SetSelectedItem(null);
         }
 
-        isDragging = false; // Çå³ıÍÏ×§×´Ì¬
+        // æ‹–æ‹½å®Œæˆåè§¦å‘è‡ªåŠ¨ä¿å­˜ï¼ˆä»…åœ¨æˆåŠŸæ”¾ç½®ç‰©å“æ—¶ï¼‰
+        if (validDrop)
+        {
+            InventorySaveManager saveManager = InventorySaveManager.Instance;
+            if (saveManager != null)
+            {
+                // è§¦å‘æ‹–æ‹½ä¿å­˜
+                bool saveResult = saveManager.SaveOnDrag();
+                if (!saveResult)
+                {
+                    Debug.LogWarning("[DraggableItem] æ‹–æ‹½å®Œæˆåè‡ªåŠ¨ä¿å­˜å¤±è´¥");
+                }
+            }
+            else
+            {
+                Debug.LogWarning("[DraggableItem] æœªæ‰¾åˆ° InventorySaveManager å®ä¾‹ï¼Œæ— æ³•æ‰§è¡Œæ‹–æ‹½ä¿å­˜");
+            }
+        }
     }
 
-    private void FitToEquipSlot(EquipSlot equipSlot)
+    // åº”ç”¨æ‹–æ‹½æ—¶çš„ç‰©å“è®¾ç½®
+    private void ApplyDragItemSettings()
     {
-        RectTransform slotRect = equipSlot.GetComponent<RectTransform>();
-        if (slotRect == null) return;
-
-        var paddingField = typeof(EquipSlot).GetField("padding",
-            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-        float padding = paddingField != null ? (float)paddingField.GetValue(equipSlot) : 10f;
-
-        Vector2 availableSize = slotRect.sizeDelta - new Vector2(padding * 2, padding * 2);
-
-        float scaleX = availableSize.x / originalSize.x;
-        float scaleY = availableSize.y / originalSize.y;
-        float scale = Mathf.Min(scaleX, scaleY, 1f);
-
-        rectTransform.anchorMin = new Vector2(0.5f, 0.5f);
-        rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
-        rectTransform.pivot = new Vector2(0.5f, 0.5f);
-        rectTransform.localScale = originalScale * scale;
-        rectTransform.anchoredPosition = Vector2.zero;
-        rectTransform.sizeDelta = originalSize;
-    }
-
-    private void RestoreOriginalSize()
-    {
-        rectTransform.sizeDelta = originalSize;
-        rectTransform.localScale = originalScale;
-    }
-
-    public void OnRemovedFromEquipSlot()
-    {
-        RestoreOriginalSize();
-
+        if (rectTransform != null)
+        {
+            // è®¡ç®—ç­‰æ¯”ä¾‹ç¼©æ”¾åçš„å°ºå¯¸
+            Vector2 currentSize = rectTransform.sizeDelta;
+            Vector2 scaledSize = CalculateProportionalSize(currentSize, dragItemSize);
+            
+            // åº”ç”¨ç­‰æ¯”ä¾‹ç¼©æ”¾åçš„å°ºå¯¸
+            rectTransform.sizeDelta = scaledSize;
+            rectTransform.localScale = Vector3.one;
+            
+            Debug.Log($"ç‰©å“ {gameObject.name} ä¸»å¯¹è±¡å°ºå¯¸ä» {currentSize} ç­‰æ¯”ä¾‹è°ƒæ•´ä¸º {scaledSize}");
+        }
+        
+        // è°ƒæ•´ç‰©å“å›¾æ ‡å¤§å°ä¸ºç­‰æ¯”ä¾‹ç¼©æ”¾åçš„å°ºå¯¸
+        if (itemIcon != null)
+        {
+            Vector2 currentIconSize = originalIconSize;
+            Vector2 scaledIconSize = CalculateProportionalSize(currentIconSize, dragItemSize);
+            itemIcon.sizeDelta = scaledIconSize;
+            Debug.Log($"ç‰©å“ {gameObject.name} çš„ItemIconå·²ç­‰æ¯”ä¾‹è°ƒæ•´ä¸º {scaledIconSize}");
+        }
+        
+        // è°ƒæ•´ç‰©å“é«˜äº®å¤§å°ä¸ºç­‰æ¯”ä¾‹ç¼©æ”¾åçš„å°ºå¯¸
+        if (itemHighlight != null)
+        {
+            Vector2 currentHighlightSize = originalHighlightSize;
+            Vector2 scaledHighlightSize = CalculateProportionalSize(currentHighlightSize, dragItemSize);
+            itemHighlight.sizeDelta = scaledHighlightSize;
+            Debug.Log($"ç‰©å“ {gameObject.name} çš„ItemHighlightå·²ç­‰æ¯”ä¾‹è°ƒæ•´ä¸º {scaledHighlightSize}");
+        }
+        
+        // è°ƒæ•´ç‰©å“æ–‡å­—å¤§å°å’Œä½ç½®
+        if (itemText != null)
+        {
+            // è®¡ç®—æ–‡å­—å¤§å°ï¼ˆä¿æŒæ¯”ä¾‹ï¼Œä½†ä¸è¶…è¿‡ç­‰æ¯”ä¾‹ç¼©æ”¾åçš„å°ºå¯¸ï¼‰
+            Vector2 currentTextSize = originalTextSize;
+            Vector2 scaledTextSize = CalculateProportionalSize(currentTextSize, dragItemSize);
+            itemText.sizeDelta = scaledTextSize;
+            
+            // å›ºå®šæ–‡å­—åœ¨å³ä¸‹è§’
+            float rightMargin = 10f; // å³è¾¹è·
+            float bottomMargin = 10f; // ä¸‹è¾¹è·
+            itemText.anchoredPosition = new Vector2(
+                dragItemSize.x / 2 - rightMargin - scaledTextSize.x / 2,
+                -dragItemSize.y / 2 + bottomMargin + scaledTextSize.y / 2
+            );
+            
+            Debug.Log($"ç‰©å“ {gameObject.name} çš„ItemTextå·²ç­‰æ¯”ä¾‹è°ƒæ•´ä¸ºå¤§å° {scaledTextSize}ï¼Œä½ç½®å›ºå®šåœ¨å³ä¸‹è§’");
+        }
+        
+        // éšè—ç‰©å“èƒŒæ™¯
         if (itemBackground != null)
         {
-            itemBackground.SetActive(true);
+            itemBackground.SetActive(false);
+                    Debug.Log($"ç‰©å“ {gameObject.name} çš„ItemBackgroundå·²éšè—");
+    }
+    else
+    {
+        Debug.LogWarning($"ç‰©å“ {gameObject.name} æœªæ‰¾åˆ°ItemBackgroundï¼Œæ— æ³•éšè—");
+    }
+}
+
+// è®¡ç®—ç­‰æ¯”ä¾‹ç¼©æ”¾åçš„å°ºå¯¸
+private Vector2 CalculateProportionalSize(Vector2 originalSize, Vector2 targetSize)
+{
+    // è®¡ç®—å®½é«˜æ¯”ä¾‹
+    float scaleX = targetSize.x / originalSize.x;
+    float scaleY = targetSize.y / originalSize.y;
+    
+    // ä½¿ç”¨è¾ƒå°çš„ç¼©æ”¾æ¯”ä¾‹ï¼Œç¡®ä¿ç‰©å“å®Œå…¨é€‚åº”ç›®æ ‡å°ºå¯¸ä¸”ä¸å˜å½¢
+    float scale = Mathf.Min(scaleX, scaleY);
+    
+    // è®¡ç®—ç¼©æ”¾åçš„å°ºå¯¸
+    Vector2 scaledSize = originalSize * scale;
+    
+    Debug.Log($"ç­‰æ¯”ä¾‹ç¼©æ”¾è®¡ç®—: åŸå§‹å°ºå¯¸{originalSize} -> ç›®æ ‡å°ºå¯¸{targetSize} -> ç¼©æ”¾æ¯”ä¾‹{scale} -> æœ€ç»ˆå°ºå¯¸{scaledSize}");
+    
+    return scaledSize;
+}
+    
+    // æ¢å¤ç‰©å“åŸå§‹çŠ¶æ€
+    private void RestoreItemOriginalState()
+    {
+        if (rectTransform != null)
+        {
+            // æ¢å¤åŸå§‹å¤§å°å’Œç¼©æ”¾
+            rectTransform.sizeDelta = originalSize;
+            rectTransform.localScale = originalScale;
         }
+        
+        // æ¢å¤ç‰©å“å›¾æ ‡åŸå§‹å¤§å°
+        if (itemIcon != null)
+        {
+            itemIcon.sizeDelta = originalIconSize;
+            Debug.Log($"ç‰©å“ {gameObject.name} çš„ItemIconå·²æ¢å¤ä¸ºåŸå§‹å¤§å°: {originalIconSize}");
+        }
+        
+        // æ¢å¤ç‰©å“é«˜äº®åŸå§‹å¤§å°
+        if (itemHighlight != null)
+        {
+            itemHighlight.sizeDelta = originalHighlightSize;
+            Debug.Log($"ç‰©å“ {gameObject.name} çš„ItemHighlightå·²æ¢å¤ä¸ºåŸå§‹å¤§å°: {originalHighlightSize}");
+        }
+        
+        // æ¢å¤ç‰©å“æ–‡å­—åŸå§‹å¤§å°å’Œä½ç½®
+        if (itemText != null)
+        {
+            itemText.sizeDelta = originalTextSize;
+            itemText.anchoredPosition = originalTextPosition;
+            Debug.Log($"ç‰©å“ {gameObject.name} çš„ItemTextå·²æ¢å¤ä¸ºåŸå§‹å¤§å°: {originalTextSize}ï¼Œä½ç½®: {originalTextPosition}");
+        }
+        
+        // æ¢å¤èƒŒæ™¯çŠ¶æ€
+        if (itemBackground != null)
+        {
+            itemBackground.SetActive(originalBackgroundActive);
+            Debug.Log($"ç‰©å“ {gameObject.name} çš„ItemBackgroundå·²æ¢å¤ä¸º: {originalBackgroundActive}");
+        }
+        
+        Debug.Log($"ç‰©å“ {gameObject.name} å·²æ¢å¤åŸå§‹çŠ¶æ€: ä¸»å¯¹è±¡å¤§å°={originalSize}, èƒŒæ™¯çŠ¶æ€={originalBackgroundActive}");
     }
 
-    private bool CanEquipToSlot(EquipSlot equipSlot, InventorySystemItem itemComponent)
+    // å¯ç”¨æˆ–ç¦ç”¨æ‹–æ‹½
+    public void SetDragEnabled(bool enabled)
     {
-        var acceptedTypeField = typeof(EquipSlot).GetField("acceptedType",
-            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-
-        if (acceptedTypeField != null)
-        {
-            InventorySystemItemCategory acceptedType = (InventorySystemItemCategory)acceptedTypeField.GetValue(equipSlot);
-            return itemComponent.Data.itemCategory == acceptedType;
-        }
-
-        return false;
+        canvasGroup.blocksRaycasts = enabled;
     }
 
-    // ÔÚOnEndDrag·½·¨ºóÌí¼ÓĞüÍ£ÊÂ¼ş´¦Àí·½·¨
-
-    /// <summary>
-    /// Êó±ê½øÈëÎïÆ·Ê±´¥·¢
-    /// </summary>
-    public void OnPointerEnter(PointerEventData eventData)
+    // è·å–ç‰©å“æ•°æ®è¯»å–å™¨
+    public ItemDataReader GetItemDataReader()
     {
-        // Ö»ÓĞÔÚ·ÇÍÏ×§×´Ì¬ÏÂ²ÅÏÔÊ¾ĞüÍ£¸ßÁÁ
-        if (!isDragging && item.IsDraggable)
-        {
-            var inventoryController = FindObjectOfType<InventoryController>();
-            if (inventoryController != null)
-            {
-                // ¼ì²âÊÇ·ñÔÚ×°±¸À¸ÖĞ
-                EquipSlot equipSlot = GetComponentInParent<EquipSlot>();
-                if (equipSlot != null)
-                {
-                    // ÔÚ×°±¸À¸ÖĞ£¬´«µİ×°±¸À¸ĞÅÏ¢ÒÔÊÊÅä´óĞ¡
-                    inventoryController.ShowHoverHighlight(item, equipSlot.transform, equipSlot);
-                }
-                else
-                {
-                    // ÔÚÆÕÍ¨Íø¸ñÖĞ£¬»ñÈ¡ÕıÈ·µÄ¸¸¼¶Íø¸ñ¶ÔÏó
-                    Transform parentGrid = GetParentGridTransform();
-                    if (parentGrid != null)
-                    {
-                        inventoryController.ShowHoverHighlight(item, parentGrid);
-                    }
-                    else
-                    {
-                        Debug.LogWarning($"ÎŞ·¨»ñÈ¡ÎïÆ· {item.name} µÄ¸¸¼¶Íø¸ñ");
-                    }
-                }
-            }
-        }
+        return itemDataReader;
     }
 
-    /// <summary>
-    /// Êó±êÀë¿ªÎïÆ·Ê±´¥·¢
-    /// </summary>
-    public void OnPointerExit(PointerEventData eventData)
+    // è·å– Item ç»„ä»¶
+    public Item GetItem()
     {
-        // Òş²ØĞüÍ£¸ßÁÁ
-        if (!isDragging)
-        {
-            var inventoryController = FindObjectOfType<InventoryController>();
-            if (inventoryController != null)
-            {
-                inventoryController.HideHoverHighlight();
-            }
-        }
+        return item;
     }
 
-    // Ìí¼ÓÈ±Ê§µÄ·½·¨
-
-    /// <summary>
-    /// »ñÈ¡µ±Ç°ÎïÆ·ÔÚÍø¸ñÖĞµÄÎ»ÖÃ
-    /// </summary>
-    private Vector2Int GetCurrentGridPosition()
+    // è·å–åŸå§‹ä½ç½®
+    public Vector2 GetOriginalPosition()
     {
-        // »ñÈ¡µ±Ç°Êó±êÎ»ÖÃÏÂµÄÍø¸ñ
-        var results = new System.Collections.Generic.List<RaycastResult>();
-        PointerEventData eventData = new PointerEventData(EventSystem.current)
-        {
-            position = Input.mousePosition
-        };
-        EventSystem.current.RaycastAll(eventData, results);
-
-        foreach (var result in results)
-        {
-            // ¼ì²éBaseItemGrid£¨Í³Ò»½Ó¿Ú£©
-            BaseItemGrid baseGrid = result.gameObject.GetComponent<BaseItemGrid>();
-            if (baseGrid == null)
-                baseGrid = result.gameObject.GetComponentInParent<BaseItemGrid>();
-
-            if (baseGrid != null)
-            {
-                return baseGrid.GetTileGridPosition(Input.mousePosition);
-            }
-
-            // ¼æÈİ¾ÉµÄBackpackItemGrid£¨Èç¹û»¹Ã»ÓĞ¼Ì³ĞBaseItemGrid£©
-            BackpackItemGrid backpackGrid = result.gameObject.GetComponent<BackpackItemGrid>();
-            if (backpackGrid == null)
-                backpackGrid = result.gameObject.GetComponentInParent<BackpackItemGrid>();
-
-            if (backpackGrid != null)
-            {
-                return backpackGrid.GetTileGridPosition(Input.mousePosition);
-            }
-        }
-
-        return Vector2Int.zero;
+        return originalPosition;
     }
 
-    /// <summary>
-    /// ¼ì²éÖ¸¶¨Î»ÖÃÊÇ·ñ¿ÉÒÔ·ÅÖÃÎïÆ·
-    /// </summary>
-    private bool CanPlaceAtPosition(Vector2Int position, Vector2Int size)
+    // è·å–åŸå§‹çˆ¶çº§
+    public Transform GetOriginalParent()
     {
-        // »ñÈ¡µ±Ç°Êó±êÎ»ÖÃÏÂµÄÍø¸ñ
-        var results = new System.Collections.Generic.List<RaycastResult>();
-        PointerEventData eventData = new PointerEventData(EventSystem.current)
-        {
-            position = Input.mousePosition
-        };
-        EventSystem.current.RaycastAll(eventData, results);
-
-        foreach (var result in results)
-        {
-            // ¼ì²éBaseItemGrid£¨Í³Ò»½Ó¿Ú£©
-            BaseItemGrid baseGrid = result.gameObject.GetComponent<BaseItemGrid>();
-            if (baseGrid == null)
-                baseGrid = result.gameObject.GetComponentInParent<BaseItemGrid>();
-
-            if (baseGrid != null)
-            {
-                return baseGrid.CanPlaceItem(position, size);
-            }
-
-            // ¼æÈİ¾ÉµÄBackpackItemGrid
-            BackpackItemGrid backpackGrid = result.gameObject.GetComponent<BackpackItemGrid>();
-            if (backpackGrid == null)
-                backpackGrid = result.gameObject.GetComponentInParent<BackpackItemGrid>();
-
-            if (backpackGrid != null)
-            {
-                return backpackGrid.CanPlaceItem(position, size);
-            }
-        }
-
-        return false;
-    }
-
-    /// <summary>
-    /// ½«Êó±ê¹â±êÒÆ¶¯µ½Ö¸¶¨Íø¸ñÎ»ÖÃ£¨Ä£Äâ¹¦ÄÜ£©
-    /// </summary>
-    private void MoveCursorToGridPosition(Vector2Int gridPosition)
-    {
-        // »ñÈ¡µ±Ç°Íø¸ñ
-        var results = new System.Collections.Generic.List<RaycastResult>();
-        PointerEventData eventData = new PointerEventData(EventSystem.current)
-        {
-            position = Input.mousePosition
-        };
-        EventSystem.current.RaycastAll(eventData, results);
-
-        foreach (var result in results)
-        {
-            BaseItemGrid baseGrid = result.gameObject.GetComponent<BaseItemGrid>();
-            if (baseGrid == null)
-                baseGrid = result.gameObject.GetComponentInParent<BaseItemGrid>();
-
-            if (baseGrid != null)
-            {
-                float cellSize = baseGrid.GetCellSize();
-                Vector2 worldPosition = baseGrid.CalculatePositionOnGrid(1, 1, gridPosition.x, gridPosition.y);
-
-                // ½«ÊÀ½ç×ø±ê×ª»»ÎªÆÁÄ»×ø±ê
-                Camera camera = Camera.main;
-                if (camera != null)
-                {
-                    Vector3 screenPos = camera.WorldToScreenPoint(worldPosition);
-                    // ×¢Òâ£ºÊµ¼ÊÉÏÎŞ·¨Ö±½ÓÒÆ¶¯Êó±ê¹â±ê£¬ÕâÀïÖ»ÊÇ¼ÇÂ¼Ä¿±êÎ»ÖÃ
-                    Debug.Log($"Ä¿±êÆÁÄ»Î»ÖÃ: {screenPos}");
-                }
-                break;
-            }
-        }
-    }
-
-    /// <summary>
-    /// »ñÈ¡ÎïÆ·µÄ¸¸¼¶Íø¸ñTransform
-    /// </summary>
-    /// <returns>¸¸¼¶Íø¸ñTransform</returns>
-    private Transform GetParentGridTransform()
-    {
-        // ³¢ÊÔ»ñÈ¡BaseItemGrid
-        var baseGrid = GetComponentInParent<BaseItemGrid>();
-        if (baseGrid != null)
-        {
-            return baseGrid.transform;
-        }
-
-        // ³¢ÊÔ»ñÈ¡BackpackItemGrid
-        var backpackGrid = GetComponentInParent<BackpackItemGrid>();
-        if (backpackGrid != null)
-        {
-            return backpackGrid.transform;
-        }
-
-        // ³¢ÊÔ»ñÈ¡TactiaclRigItemGrid
-        var tacticalGrid = GetComponentInParent<TactiaclRigItemGrid>();
-        if (tacticalGrid != null)
-        {
-            return tacticalGrid.transform;
-        }
-
-        // ³¢ÊÔ»ñÈ¡ItemGrid
-        var itemGrid = GetComponentInParent<ItemGrid>();
-        if (itemGrid != null)
-        {
-            return itemGrid.transform;
-        }
-
-        // Èç¹û¶¼ÕÒ²»µ½£¬·µ»Øtransform.parent
-        Debug.LogWarning($"ÎŞ·¨ÕÒµ½ÎïÆ· {item.name} µÄÍø¸ñ¸¸¼¶£¬Ê¹ÓÃÄ¬ÈÏ¸¸¼¶: {transform.parent?.name}");
-        return transform.parent;
+        return originalParent;
     }
 }

@@ -15,9 +15,6 @@ public class ZombieIdleState : IState
     {
         zombie.animator.Play("Idle"); // 播放待机动画
         zombie.rb.velocity = Vector2.zero; // 待机状态不能动
-
-        // 调试
-        Debug.Log("不走了");
     }
 
     public void OnExit()

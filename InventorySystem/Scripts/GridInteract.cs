@@ -1,187 +1,104 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class GridInteract : MonoBehaviour
+// 网格交互组件
+// 负责管理网格状态和背包数据同步
+[RequireComponent(typeof(ItemGrid))]
+public class GridInteract : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
-    public enum GridType
-    {
-        MainGrid,
-        BackpackGrid,
-        TacticalRigGrid
-    }
-
-    [Header("网格优先级 (数值越小优先级越高)")]
-    public int gridPriority = 0;
-    
-    private InventoryController inventoryController;
+    // 组件引用
     private ItemGrid itemGrid;
-    private BackpackItemGrid backpackGrid;
-    private TactiaclRigItemGrid tacticalRigGrid;
-    private RectTransform rectTransform;
-    private Canvas canvas;
-    private bool wasInGrid = false;
-    private GridType currentGridType;
-    
-    // 静态变量用于跟踪当前活跃的网格
-    private static GridInteract currentActiveGridInteract;
+    private InventoryController inventoryController; // 添加InventoryController引用
+
+    // 鼠标是否在网格范围内
+    public bool IsMouseInGrid { get; private set; } = false;
+
+    // 背包数据同步事件
+    public System.Action<ItemGrid> OnInventoryDataChanged;
 
     private void Awake()
     {
-        inventoryController = FindObjectOfType<InventoryController>();
-
-        // 检测当前GameObject上的网格类型
+        // 获取当前物体的ItemGrid组件
         itemGrid = GetComponent<ItemGrid>();
-        backpackGrid = GetComponent<BackpackItemGrid>();
-        tacticalRigGrid = GetComponent<TactiaclRigItemGrid>();
+        if (itemGrid == null)
+        {
+            Debug.LogError("GridInteract: 当前物体没有ItemGrid组件！");
+        }
 
-        // 确定网格类型和默认优先级
+        // 查找InventoryController
+        inventoryController = FindObjectOfType<InventoryController>();
+        if (inventoryController == null)
+        {
+            Debug.LogWarning("GridInteract: 未找到InventoryController组件！");
+        }
+    }
+
+    // 鼠标进入网格范围
+    public void OnPointerEnter(PointerEventData eventData)
+    {
+        IsMouseInGrid = true;
+
+
+        // 通知InventoryController设置当前网格为选中背包
+        if (inventoryController != null && itemGrid != null)
+        {
+            inventoryController.SetSelectedItemGrid(itemGrid);
+
+        }
+
+        // 触发背包数据同步事件
+        OnInventoryDataChanged?.Invoke(itemGrid);
+    }
+
+    // 鼠标离开网格范围
+    public void OnPointerExit(PointerEventData eventData)
+    {
+        IsMouseInGrid = false;
+
+
+        // 清除InventoryController中的选中背包
+        if (inventoryController != null)
+        {
+            inventoryController.SetSelectedItemGrid(null);
+
+        }
+    }
+
+    // 获取关联的ItemGrid组件
+    public ItemGrid GetItemGrid()
+    {
+        return itemGrid;
+    }
+
+    // 手动同步背包数据
+    public void SyncInventoryData()
+    {
         if (itemGrid != null)
         {
-            currentGridType = GridType.MainGrid;
-            if (gridPriority == 0) gridPriority = 1; // 主网格默认优先级
-        }
-        else if (backpackGrid != null)
-        {
-            currentGridType = GridType.BackpackGrid;
-            if (gridPriority == 0) gridPriority = 2; // 背包网格默认优先级
-        }
-        else if (tacticalRigGrid != null)
-        {
-            currentGridType = GridType.TacticalRigGrid;
-            if (gridPriority == 0) gridPriority = 3; // 战术挂具默认优先级
-        }
-        else
-        {
-            Debug.LogError($"GridInteract on {gameObject.name} requires one of: ItemGrid, BackpackItemGrid, or TactiaclRigItemGrid component!");
-            enabled = false;
-            return;
-        }
+            OnInventoryDataChanged?.Invoke(itemGrid);
 
-        rectTransform = GetComponent<RectTransform>();
-        canvas = FindObjectOfType<Canvas>();
-
-        Debug.Log($"GridInteract initialized on {gameObject.name} as {currentGridType} with priority {gridPriority}");
-    }
-
-    private void Update()
-    {
-        if (inventoryController == null) return;
-
-        Vector2 mousePosition = Input.mousePosition;
-        bool isInGrid = IsMouseInGridBounds(mousePosition);
-
-        if (isInGrid != wasInGrid)
-        {
-            if (isInGrid)
-            {
-                // 检查是否有更高优先级的网格已经激活
-                if (currentActiveGridInteract == null || gridPriority < currentActiveGridInteract.gridPriority)
-                {
-                    // 清除之前的选择
-                    if (currentActiveGridInteract != null)
-                    {
-                        currentActiveGridInteract.ForceExit();
-                    }
-                    
-                    currentActiveGridInteract = this;
-                    SetAsSelectedGrid();
-                    Debug.Log($"鼠标进入{currentGridType}网格: {gameObject.name} (优先级: {gridPriority})");
-                }
-            }
-            else
-            {
-                if (currentActiveGridInteract == this)
-                {
-                    ClearIfSelected();
-                    currentActiveGridInteract = null;
-                    Debug.Log($"鼠标离开{currentGridType}网格: {gameObject.name}");
-                }
-            }
-
-            wasInGrid = isInGrid;
         }
     }
 
-    private void ForceExit()
+    // 检查指定位置是否在网格范围内（简化版本）
+    public bool IsPositionInGrid(Vector2 screenPosition)
     {
-        wasInGrid = false;
-        ClearIfSelected();
+        if (itemGrid == null) return false;
+
+        // 将屏幕坐标转换为网格坐标
+        Vector2Int gridPos = itemGrid.GetTileGridPosition(screenPosition);
+
+        // 检查坐标是否在有效范围内
+        return gridPos.x >= 0 && gridPos.x < itemGrid.gridSizeWidth &&
+               gridPos.y >= 0 && gridPos.y < itemGrid.gridSizeHeight;
     }
 
-    private void SetAsSelectedGrid()
+    // 手动设置InventoryController引用（用于运行时动态设置）
+    public void SetInventoryController(InventoryController controller)
     {
-        // 首先清除所有网格选择并重置活跃网格类型
-        inventoryController.ClearSelectedGrid();
-        
-        // 然后设置当前网格
-        switch (currentGridType)
-        {
-            case GridType.MainGrid:
-                inventoryController.SetSelectedMainGrid(itemGrid);
-                break;
-            case GridType.BackpackGrid:
-                inventoryController.SetSelectedBackpackGrid(backpackGrid);
-                break;
-            case GridType.TacticalRigGrid:
-                inventoryController.SetSelectedTacticalRigGrid(tacticalRigGrid);
-                break;
-        }
-    }
+        inventoryController = controller;
 
-    private void ClearIfSelected()
-    {
-        switch (currentGridType)
-        {
-            case GridType.MainGrid:
-                if (inventoryController.selectedItemGrid == itemGrid)
-                {
-                    inventoryController.selectedItemGrid = null;
-                }
-                break;
-            case GridType.BackpackGrid:
-                if (inventoryController.selectedBackpackGrid == backpackGrid)
-                {
-                    inventoryController.selectedBackpackGrid = null;
-                }
-                break;
-            case GridType.TacticalRigGrid:
-                if (inventoryController.selectedTacticalRigGrid == tacticalRigGrid)
-                {
-                    inventoryController.selectedTacticalRigGrid = null;
-                }
-                break;
-        }
-    }
-
-    private bool IsMouseInGridBounds(Vector2 mousePosition)
-    {
-        if (rectTransform == null || canvas == null) return false;
-
-        Vector2 localMousePosition;
-        RectTransformUtility.ScreenPointToLocalPointInRectangle(
-            rectTransform,
-            mousePosition,
-            canvas.worldCamera,
-            out localMousePosition
-        );
-
-        Rect gridRect = rectTransform.rect;
-        return gridRect.Contains(localMousePosition);
-    }
-
-    public bool IsMouseInThisGrid()
-    {
-        return IsMouseInGridBounds(Input.mousePosition);
-    }
-
-    public GridType GetCurrentGridType()
-    {
-        return currentGridType;
-    }
-    
-    // 静态方法用于清除所有网格选择
-    public static void ClearAllGridSelections()
-    {
-        currentActiveGridInteract = null;
     }
 }

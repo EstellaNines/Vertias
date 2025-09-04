@@ -1,0 +1,164 @@
+using UnityEngine;
+
+namespace InventorySystem
+{
+    [CreateAssetMenu(fileName = "New Item", menuName = "Inventory System/Item Data")]
+    public class ItemDataSO : ScriptableObject
+    {
+        [Header("基础信息")]
+        [FieldLabel("物品ID")]
+        public int id;                          // 物品原始ID
+        [FieldLabel("物品名称")]
+        public string itemName;                 // 物品名称
+        [FieldLabel("物品简称")]
+        public string shortName;                // 物品简称
+        [FieldLabel("物品类别")]
+        public ItemCategory category;           // 物品类别
+        [FieldLabel("稀有度")]
+        public string rarity;                   // 稀有度
+        [FieldLabel("背景颜色")]
+        public Color backgroundColor;           // 背景颜色（直接显示颜色）
+        [FieldLabel("物品图标")]
+        public Sprite itemIcon;                 // 物品图标精灵引用
+
+        [Header("尺寸属性")]
+        [FieldLabel("物品高度")]
+        public int height = 1;                  // 物品高度
+        [FieldLabel("物品宽度")]
+        public int width = 1;                   // 物品宽度
+
+        [Header("装备属性")]
+        [FieldLabel("耐久度")]
+        public int durability = 0;              // 耐久度（头盔、护甲等）
+
+        [Header("容器属性")]
+        [FieldLabel("水平格子数")]
+        public int cellH = 0;                   // 容器水平格子数（战术背心、背包等）
+        [FieldLabel("垂直格子数")]
+        public int cellV = 0;                   // 容器垂直格子数（战术背心、背包等）
+
+        [Header("弹药属性")]
+        [FieldLabel("弹药类型")]
+        public string ammunitionType;           // 弹药类型（pistol, assault_rifle, submachine_gun等）
+        [FieldLabel("最大堆叠数量")]
+        public int maxStack = 1;                // 最大堆叠数量
+
+        [Header("消耗品属性")]
+        [FieldLabel("使用次数")]
+        public int usageCount = 0;              // 使用次数（食物、饮料、药品等）
+
+        [Header("治疗属性")]
+        [FieldLabel("治疗量")]
+        public int maxHealAmount = 0;           // 治疗量（治疗药物）
+
+        [Header("情报属性")]
+        [FieldLabel("情报值")]
+        public int intelligenceValue = 0;       // 情报值（情报物品）
+
+        [Header("运行时数据")]
+        [FieldLabel("全局唯一ID")]
+        [SerializeField] private long globalId; // 全局唯一ID（long类型）
+
+        /// <summary>
+        /// 获取全局唯一ID
+        /// </summary>
+        public long GlobalId => globalId;
+
+        /// <summary>
+        /// 设置全局唯一ID（仅供生成器使用）
+        /// </summary>
+        public void SetGlobalId(long id)
+        {
+            globalId = id;
+        }
+
+        /// <summary>
+        /// 根据珍贵等级获取背景颜色
+        /// </summary>
+        public Color GetBackgroundColor()
+        {
+            switch (rarity)
+            {
+                case "1":
+                    return HexToColor("#2d3c4b"); // 普通 - 深蓝灰色
+                case "2":
+                    return HexToColor("#583b80"); // 稀有 - 紫色
+                case "3":
+                    return HexToColor("#80550d"); // 史诗 - 橙色
+                case "4":
+                    return HexToColor("#350000"); // 传说 - 深红色
+                default:
+                    return HexToColor("#2d3c4b"); // 默认普通等级
+            }
+        }
+
+        /// <summary>
+        /// 将十六进制颜色字符串转换为Color
+        /// </summary>
+        private Color HexToColor(string hex)
+        {
+            if (ColorUtility.TryParseHtmlString(hex, out Color color))
+            {
+                return color;
+            }
+            return Color.white; // 解析失败时返回白色
+        }
+
+        /// <summary>
+        /// 设置物品背景颜色（根据珍贵等级自动设置）
+        /// </summary>
+        public void SetBackgroundColorByRarity()
+        {
+            backgroundColor = GetBackgroundColor();
+        }
+
+        /// <summary>
+        /// 创建物品实例的副本
+        /// </summary>
+        public ItemDataSO CreateInstance()
+        {
+            ItemDataSO instance = Instantiate(this);
+            return instance;
+        }
+
+        /// <summary>
+        /// 获取物品显示名称
+        /// </summary>
+        public string GetDisplayName()
+        {
+            return !string.IsNullOrEmpty(shortName) ? shortName : itemName;
+        }
+
+        /// <summary>
+        /// 检查是否为容器类物品
+        /// </summary>
+        public bool IsContainer()
+        {
+            return cellH > 0 && cellV > 0;
+        }
+
+        /// <summary>
+        /// 检查是否为可堆叠物品
+        /// </summary>
+        public bool IsStackable()
+        {
+            return maxStack > 1;
+        }
+
+        /// <summary>
+        /// 检查是否为消耗品
+        /// </summary>
+        public bool IsConsumable()
+        {
+            return usageCount > 0;
+        }
+
+        /// <summary>
+        /// 检查是否有耐久度
+        /// </summary>
+        public bool HasDurability()
+        {
+            return durability > 0;
+        }
+    }
+}

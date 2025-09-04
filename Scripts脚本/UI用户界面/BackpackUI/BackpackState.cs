@@ -18,9 +18,40 @@ public class BackpackState : MonoBehaviour
     private bool isBackpackOpen = false; // 背包是否打开
     private bool isInitialized = false; // 是否已初始化
 
+    [Header("面板控制器")]
+    [SerializeField] private BackpackPanelController backpackPanelController; // 背包面板控制器
+
     private void Start()
     {
         InitializeBackpack();
+    }
+
+    /// <summary>
+    /// 验证面板控制器
+    /// </summary>
+    private void ValidatePanelController()
+    {
+        if (backpackPanelController == null)
+        {
+            Debug.LogWarning("BackpackState: backpackPanelController字段为空，尝试自动查找...");
+            
+            // 尝试自动查找BackpackPanelController
+            backpackPanelController = FindObjectOfType<BackpackPanelController>();
+            
+            if (backpackPanelController == null)
+            {
+                Debug.LogError("BackpackState: 未找到BackpackPanelController，请在Inspector中设置或确保场景中存在该组件！");
+                Debug.LogError("BackpackState: 请将BackpackPanel上的BackpackPanelController组件拖拽到BackpackState的'Backpack Panel Controller'字段中");
+            }
+            else
+            {
+                Debug.Log($"BackpackState: 自动找到BackpackPanelController - {backpackPanelController.gameObject.name}");
+            }
+        }
+        else
+        {
+            Debug.Log($"BackpackState: BackpackPanelController已正确设置 - {backpackPanelController.gameObject.name}");
+        }
     }
 
     // 设置玩家输入控制器，这个方法可以被外部调用来动态设置输入控制器
@@ -48,6 +79,9 @@ public class BackpackState : MonoBehaviour
             Debug.Log("BackpackState: 已经初始化过了，跳过重复初始化");
             return;
         }
+
+        // 验证面板控制器
+        ValidatePanelController();
 
         // 初始化时确保背包是关闭状态
         if (backpackCanvas != null)
@@ -117,6 +151,17 @@ public class BackpackState : MonoBehaviour
 
         // 显示默认面板
         ShowDefaultPanel();
+
+        // 激活面板控制器
+        if (backpackPanelController != null)
+        {
+            backpackPanelController.ActivatePanel(WarehouseTrigger.isInWarehouse);
+            Debug.Log($"BackpackState: 背包打开，仓库模式: {WarehouseTrigger.isInWarehouse}");
+        }
+        else
+        {
+            Debug.LogError("BackpackState: BackpackPanelController未设置，无法激活面板！");
+        }
     }
 
     // 关闭背包
@@ -137,6 +182,13 @@ public class BackpackState : MonoBehaviour
         // 根据游戏需要决定是否隐藏光标，这里保持显示状态
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
+
+        // 关闭面板控制器
+        if (backpackPanelController != null)
+        {
+            backpackPanelController.DeactivatePanel();
+            Debug.Log("BackpackState: 背包关闭，面板已停用");
+        }
 
         // 隐藏所有面板
         HideAllPanels();
@@ -208,5 +260,7 @@ public class BackpackState : MonoBehaviour
         isInitialized = false;
         InitializeBackpack();
     }
+
+
 }
 

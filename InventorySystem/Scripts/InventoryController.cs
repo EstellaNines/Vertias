@@ -1,491 +1,679 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
+using InventorySystem;
 
+// èƒŒåŒ…äº¤äº’æ§åˆ¶å™¨
+// è´Ÿè´£å¤„ç†ç‰©å“çš„é€‰æ‹©ã€æ‹–æ‹½å’Œæ”¾ç½®é€»è¾‘
 public class InventoryController : MonoBehaviour
 {
-    [Header("¿â´æ¿ØÖÆÆ÷ÉèÖÃ")]
-    public ItemGrid selectedItemGrid; // µ±Ç°Ñ¡ÖĞµÄÖ÷Íø¸ñ
-    public BackpackItemGrid selectedBackpackGrid; // µ±Ç°Ñ¡ÖĞµÄ±³°üÍø¸ñ
-    public TactiaclRigItemGrid selectedTacticalRigGrid; // µ±Ç°Ñ¡ÖĞµÄÕ½Êõ¹Ò¾ßÍø¸ñ
+    [Header("æ§åˆ¶å™¨è®¾ç½®")]
+    [FieldLabel("å½“å‰æ“ä½œçš„èƒŒåŒ…")] public ItemGrid selectedItemGrid;
 
-    [Header("µ÷ÊÔĞÅÏ¢ÉèÖÃ")]
-    [SerializeField] private bool showDebugInfo = true; // ÊÇ·ñÏÔÊ¾µ÷ÊÔĞÅÏ¢
+    [Header("èƒŒåŒ…æ ‡è¯†")]
+    [FieldLabel("èƒŒåŒ…å”¯ä¸€ID")] public string inventoryId = "";
+    [FieldLabel("èƒŒåŒ…æ˜¾ç¤ºåç§°")] public string inventoryName = "";
 
-    [Header("Ô¤ÀÀÉèÖÃ")]
-    [SerializeField] private bool enablePreview = true; // ÊÇ·ñÆôÓÃÔ¤ÀÀ¹¦ÄÜ
-    [SerializeField] private Vector2Int previewItemSize = new Vector2Int(2, 1); // Ô¤ÀÀÎïÆ·´óĞ¡£¨ÓÃÓÚ²âÊÔ£©
+    [Header("æ”¾ç½®æŒ‡ç¤ºå™¨è®¾ç½®")]
+    [FieldLabel("æ”¾ç½®æŒ‡ç¤ºå™¨ç»„ä»¶")] public InventoryHighlight inventoryHighlight;
 
-    // ¸ßÁÁ×é¼ş
-    private InventoryHighlight inventoryHighlight;
-    private HoverHighlight hoverHighlight; // ĞüÍ£¸ßÁÁ×é¼ş
+    // å†…éƒ¨çŠ¶æ€
+    private Item selectedItem;
+    private Canvas canvas;
 
-    // µ±Ç°ÍÏ×§µÄÎïÆ·£¨ÓÃÓÚÔ¤ÀÀ£©
-    private InventorySystemItem draggedItem;
+    // ç¼“å­˜æ‰€æœ‰ç½‘æ ¼äº¤äº’ç»„ä»¶ï¼Œæé«˜æ€§èƒ½
+    private List<GridInteract> allGridInteracts = new List<GridInteract>();
 
-    // µ±Ç°»îÔ¾µÄÍø¸ñÀàĞÍÃ¶¾Ù
-    public enum ActiveGridType
-    {
-        None,
-        MainGrid,
-        BackpackGrid,
-        TacticalRigGrid
-    }
-
-    [SerializeField] private ActiveGridType currentActiveGrid = ActiveGridType.None;
+    // æ”¾ç½®æŒ‡ç¤ºå™¨çŠ¶æ€
+    private bool isHighlightActive = false;
+    
+    // æç¤ºå™¨åŸå§‹çˆ¶å¯¹è±¡ï¼ˆç”¨äºæ¢å¤ï¼‰
+    private Transform originalHighlightParent;
 
     private void Start()
     {
-        // »ñÈ¡»òÌí¼ÓInventoryHighlight×é¼ş
-        inventoryHighlight = GetComponent<InventoryHighlight>();
+        canvas = FindObjectOfType<Canvas>();
+
+        // æ—§çš„ç½‘æ ¼ä¸Šä¸‹æ–‡ç³»ç»Ÿå·²ç§»é™¤
+
+        // ç¼“å­˜æ‰€æœ‰GridInteractç»„ä»¶
+        RefreshGridInteracts();
+
+        // å¦‚æœæ²¡æœ‰æ‰‹åŠ¨åˆ†é…InventoryHighlightï¼Œå°è¯•è‡ªåŠ¨æŸ¥æ‰¾
         if (inventoryHighlight == null)
         {
-            inventoryHighlight = gameObject.AddComponent<InventoryHighlight>();
+            inventoryHighlight = FindObjectOfType<InventoryHighlight>();
+            if (inventoryHighlight == null)
+            {
+                Debug.LogWarning("InventoryController: æœªæ‰¾åˆ°InventoryHighlightç»„ä»¶ï¼Œæ”¾ç½®æŒ‡ç¤ºå™¨åŠŸèƒ½å°†ä¸å¯ç”¨");
+            }
+            else
+            {
+                Debug.Log($"InventoryController: è‡ªåŠ¨æ‰¾åˆ°InventoryHighlightç»„ä»¶ - {inventoryHighlight.name}");
+            }
+        }
+        else
+        {
+            Debug.Log($"InventoryController: ä½¿ç”¨æ‰‹åŠ¨åˆ†é…çš„InventoryHighlightç»„ä»¶ - {inventoryHighlight.name}");
+        }
+        
+        // ä¿å­˜æç¤ºå™¨çš„åŸå§‹çˆ¶å¯¹è±¡
+        if (inventoryHighlight != null)
+        {
+            originalHighlightParent = inventoryHighlight.transform.parent;
+            Debug.Log($"InventoryController: å·²ä¿å­˜æç¤ºå™¨åŸå§‹çˆ¶å¯¹è±¡ - {originalHighlightParent?.name}");
         }
 
-        // »ñÈ¡»òÌí¼ÓHoverHighlight×é¼ş
-        hoverHighlight = GetComponent<HoverHighlight>();
-        if (hoverHighlight == null)
+        // è®¾ç½®é»˜è®¤IDå’Œåç§°ï¼ˆå¦‚æœæœªè®¾ç½®ï¼‰
+        if (string.IsNullOrEmpty(inventoryId))
         {
-            hoverHighlight = gameObject.AddComponent<HoverHighlight>();
+            inventoryId = gameObject.name;
+        }
+
+        if (string.IsNullOrEmpty(inventoryName))
+        {
+            inventoryName = gameObject.name;
         }
     }
 
     private void Update()
     {
-        // Ö»ÓĞÔÚÍÏ×§ÎïÆ·Ê±²Å¼ì²âÍø¸ñÇĞ»»
-        if (draggedItem != null)
-        {
-            DetectHoveredGrid();
-        }
+        // æ›´æ–°æ”¾ç½®æŒ‡ç¤ºå™¨
+        UpdatePlacementHighlight();
 
-        // ¸ù¾İµ±Ç°»îÔ¾Íø¸ñÀàĞÍ´¦ÀíÊäÈë - Ö»´¦Àíµ±Ç°»îÔ¾µÄÍø¸ñ
-        switch (currentActiveGrid)
+        // æ—‹è½¬é”®ç›‘å¬ï¼ˆRï¼‰ï¼šå½“æœ‰é€‰ä¸­ç‰©å“æ—¶åˆ‡æ¢æ—‹è½¬å¹¶åˆ·æ–°é«˜äº®
+        if (Input.GetKeyDown(KeyCode.R) && selectedItem != null)
         {
-            case ActiveGridType.MainGrid:
-                if (selectedItemGrid != null)
-                    HandleMainGridInput();
-                break;
-            case ActiveGridType.BackpackGrid:
-                if (selectedBackpackGrid != null)
-                    HandleBackpackGridInput();
-                break;
-            case ActiveGridType.TacticalRigGrid:
-                if (selectedTacticalRigGrid != null)
-                    HandleTacticalRigGridInput();
-                break;
-        }
+            selectedItem.ToggleRotation();
+            selectedItem.AdjustVisualSizeForGrid();
 
-        // ´¦ÀíÔ¤ÀÀ¹¦ÄÜ
-        if (enablePreview)
-        {
-            HandlePreview();
+            // åœ¨æ‹–æ‹½æˆ–ç§»åŠ¨ä¸­ï¼Œç«‹å³åˆ·æ–°é«˜äº®åé¦ˆ
+            UpdateDragHighlight(selectedItem, Input.mousePosition);
         }
     }
 
-    // ´¦ÀíÔ¤ÀÀ¹¦ÄÜ
-    private void HandlePreview()
+    // åˆ·æ–°ç½‘æ ¼äº¤äº’ç»„ä»¶ç¼“å­˜
+    public void RefreshGridInteracts()
     {
-        // Ö»ÓĞÔÚÍÏ×§ÎïÆ·Ê±²ÅÏÔÊ¾Ô¤ÀÀ
-        if (draggedItem == null)
+        allGridInteracts.Clear();
+        
+        // æŸ¥æ‰¾æ‰€æœ‰æœ‰æ•ˆçš„GridInteractç»„ä»¶ï¼Œè¿‡æ»¤æ‰å·²é”€æ¯çš„å¯¹è±¡
+        var foundGridInteracts = FindObjectsOfType<GridInteract>();
+        foreach (var gridInteract in foundGridInteracts)
         {
-            inventoryHighlight.Hide();
+            if (gridInteract != null && gridInteract.gameObject != null)
+            {
+                allGridInteracts.Add(gridInteract);
+            }
+        }
+        
+        Debug.Log($"[InventoryController] åˆ·æ–°ç½‘æ ¼äº¤äº’åˆ—è¡¨ï¼Œæ‰¾åˆ° {allGridInteracts.Count} ä¸ªæœ‰æ•ˆç½‘æ ¼");
+    }
+    
+
+    
+
+    
+    // æ—§çš„ç½‘æ ¼ä¸Šä¸‹æ–‡äº‹ä»¶å¤„ç†æ–¹æ³•å·²ç§»é™¤
+    
+    /// <summary>
+    /// æ›´æ–°åº“å­˜é«˜äº®æ˜¾ç¤º
+    /// å½“ä¸Šä¸‹æ–‡åˆ‡æ¢æ—¶é‡æ–°è®¡ç®—é«˜äº®ä½ç½®
+    /// </summary>
+    private void UpdateInventoryHighlight()
+    {
+        if (selectedItem == null || inventoryHighlight == null)
+        {
+            if (isHighlightActive)
+            {
+                HideHighlight();
+            }
+            return;
+        }
+        
+        // é‡æ–°æ‰§è¡Œæ”¾ç½®é«˜äº®é€»è¾‘
+        UpdatePlacementHighlight();
+    }
+
+    // æ›´æ–°æ”¾ç½®æŒ‡ç¤ºå™¨
+    private void UpdatePlacementHighlight()
+    {
+        // åªæœ‰åœ¨æœ‰é€‰ä¸­ç‰©å“ä¸”æŒ‡ç¤ºå™¨ç»„ä»¶å­˜åœ¨æ—¶æ‰æ›´æ–°
+        if (selectedItem == null || inventoryHighlight == null)
+        {
+            if (isHighlightActive)
+            {
+                HideHighlight();
+            }
             return;
         }
 
-        // ¼ì²éÊÇ·ñÓĞ»îÔ¾µÄÍø¸ñ
-        object targetGrid = GetCurrentActiveGrid();
+        // è·å–é¼ æ ‡ä¸‹çš„ç½‘æ ¼
+        ItemGrid targetGrid = GetItemGridUnderMouse();
         if (targetGrid == null)
         {
-            inventoryHighlight.Hide();
+            if (isHighlightActive)
+            {
+                HideHighlight();
+            }
             return;
         }
 
-        // »ñÈ¡Êó±êÎ»ÖÃ
-        Vector2 mousePos = Input.mousePosition;
-        Vector2Int tilePos = GetTileGridPosition(targetGrid, mousePos);
+        // è·å–ç½‘æ ¼åæ ‡
+        Vector2Int gridPosition = targetGrid.GetTileGridPosition(Input.mousePosition);
 
-        // ¼ì²éÎ»ÖÃÊÇ·ñÓĞĞ§
-        if (tilePos.x < 0 || tilePos.y < 0)
-        {
-            inventoryHighlight.Hide();
-            return;
-        }
+        // æ£€æŸ¥æ˜¯å¦å¯ä»¥æ”¾ç½®
+        bool canPlace = CanPlaceItemAt(targetGrid, gridPosition.x, gridPosition.y, selectedItem);
 
-        // »ñÈ¡ÎïÆ·³ß´ç
-        Vector2Int itemSize = previewItemSize; // Ä¬ÈÏ´óĞ¡
-        
-        // ´ÓÎïÆ·Êı¾İ»ñÈ¡³ß´çĞÅÏ¢
-        if (draggedItem.Data != null)
-        {
-            // Ê¹ÓÃÔ­Ê¼Êı¾İ
-            itemSize = new Vector2Int(draggedItem.Data.width, draggedItem.Data.height);
-        }
+        // æ˜¾ç¤ºé«˜äº®å¹¶è®¾ç½®é¢œè‰²
+        ShowHighlight(targetGrid, gridPosition.x, gridPosition.y, selectedItem.GetWidth(), selectedItem.GetHeight(), canPlace);
+    }
 
-        // ¼ì²éÊÇ·ñ¿ÉÒÔ·ÅÖÃ£¨Ê¹ÓÃÖÇÄÜ¼ì²â£©
-        bool canPlace = false;
-        if (targetGrid is ItemGrid itemGrid)
+    // æ£€æŸ¥æ˜¯å¦å¯ä»¥åœ¨æŒ‡å®šä½ç½®æ”¾ç½®ç‰©å“
+    private bool CanPlaceItemAt(ItemGrid targetGrid, int x, int y, Item item)
+    {
+        if (targetGrid == null || item == null) return false;
+
+        // æ£€æŸ¥è¾¹ç•Œ
+        if (!targetGrid.BoundryCheck(x, y, item.GetWidth(), item.GetHeight()))
         {
-            canPlace = itemGrid.CanPlaceItem(draggedItem.gameObject, tilePos);
-        }
-        else if (targetGrid is BackpackItemGrid backpackGrid)
-        {
-            canPlace = backpackGrid.CanPlaceItem(draggedItem.gameObject, tilePos);
-        }
-        else if (targetGrid is TactiaclRigItemGrid tacticalGrid)
-        {
-            canPlace = tacticalGrid.CanPlaceItem(draggedItem.gameObject, tilePos);
+            return false;
         }
 
-        // ÏÔÊ¾Ô¤ÀÀ
-        inventoryHighlight.Show(true);
+        // æ£€æŸ¥æ˜¯å¦æœ‰ç‰©å“å†²çªï¼ˆæ’é™¤è‡ªèº«ï¼‰
+        if (targetGrid.HasItemConflict(x, y, item.GetWidth(), item.GetHeight(), item))
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    // æ˜¾ç¤ºæ”¾ç½®é«˜äº®
+    private void ShowHighlight(ItemGrid targetGrid, int x, int y, int width, int height, bool canPlace)
+    {
+        if (inventoryHighlight == null) return;
+
+        // è®¾ç½®é«˜äº®çš„çˆ¶çº§ä¸ºç›®æ ‡ç½‘æ ¼
         inventoryHighlight.SetParent(targetGrid);
-        
-        // ÉèÖÃÎ»ÖÃºÍ³ß´ç
-        inventoryHighlight.SetPosition(targetGrid, draggedItem, tilePos.x, tilePos.y);
-        inventoryHighlight.SetSize(itemSize.x, itemSize.y);
-        
-        // ÉèÖÃÑÕÉ«
+
+        // ä½¿ç”¨ç®€åŒ–çš„ä½ç½®è®¾ç½®æ–¹æ³•
+        inventoryHighlight.SetPositionSimple(targetGrid, x, y);
+
+        // è®¾ç½®é«˜äº®å¤§å°
+        inventoryHighlight.SetSize(width, height);
+
+        // è®¾ç½®é¢œè‰²ï¼ˆç»¿è‰²è¡¨ç¤ºå¯æ”¾ç½®ï¼Œçº¢è‰²è¡¨ç¤ºä¸å¯æ”¾ç½®ï¼‰
         inventoryHighlight.SetCanPlace(canPlace);
 
-        // Ç¿ÖÆË¢ĞÂ¸ßÁÁ¶ÔÏó£¬È·±£ÕıÈ·ÏÔÊ¾
-        inventoryHighlight.ForceRefresh();
+        // æ˜¾ç¤ºé«˜äº®
+        inventoryHighlight.Show(true);
 
-        // µ÷ÊÔ¸ßÁÁ¶ÔÏó×´Ì¬
-        if (showDebugInfo)
-        {
-            inventoryHighlight.DebugHighlightState();
-        }
-
-        if (showDebugInfo)
-        {
-            Debug.Log($"Ô¤ÀÀÎ»ÖÃ: ({tilePos.x}, {tilePos.y}) - ¿É·ÅÖÃ: {canPlace} - Íø¸ñÀàĞÍ: {currentActiveGrid} - ÎïÆ·³ß´ç: {itemSize.x}x{itemSize.y}");
-        }
+        isHighlightActive = true;
     }
 
-    // »ñÈ¡µ±Ç°»îÔ¾µÄÍø¸ñ
-    private object GetCurrentActiveGrid()
+    // éšè—æ”¾ç½®é«˜äº®
+    private void HideHighlight()
     {
-        switch (currentActiveGrid)
+        if (inventoryHighlight != null)
         {
-            case ActiveGridType.MainGrid:
-                return selectedItemGrid;
-            case ActiveGridType.BackpackGrid:
-                return selectedBackpackGrid;
-            case ActiveGridType.TacticalRigGrid:
-                return selectedTacticalRigGrid;
-            default:
-                return null;
+            inventoryHighlight.Show(false);
         }
+        isHighlightActive = false;
     }
 
-    // »ñÈ¡Íø¸ñÎ»ÖÃ
-    private Vector2Int GetTileGridPosition(object grid, Vector2 screenPos)
+    // é€šè¿‡å¤šç§æ–¹å¼è·å–é¼ æ ‡ä¸‹çš„ItemGridï¼ˆé‡æ„ç‰ˆï¼‰
+    private ItemGrid GetItemGridUnderMouse()
     {
-        if (grid is ItemGrid itemGrid)
+        // ä½¿ç”¨UIå°„çº¿æ£€æµ‹
+        PointerEventData pointerData = new PointerEventData(EventSystem.current)
         {
-            return itemGrid.GetTileGridPosition(screenPos);
-        }
-        else if (grid is BackpackItemGrid backpackGrid)
+            position = Input.mousePosition
+        };
+
+        List<RaycastResult> results = new List<RaycastResult>();
+        EventSystem.current.RaycastAll(pointerData, results);
+
+        // ä¼˜å…ˆä»æ£€æµ‹ç»“æœä¸­å¯»æ‰¾DraggableItemï¼Œå› ä¸ºå®ƒåœ¨æœ€ä¸Šå±‚
+        foreach (RaycastResult result in results)
         {
-            return backpackGrid.GetTileGridPosition(screenPos);
-        }
-        else if (grid is TactiaclRigItemGrid tacticalGrid)
-        {
-            return tacticalGrid.GetTileGridPosition(screenPos);
-        }
-
-        return new Vector2Int(-1, -1);
-    }
-
-    // ¼ì²éÊÇ·ñ¿ÉÒÔ·ÅÖÃÎïÆ·
-    private bool CanPlaceItem(object grid, Vector2Int position, Vector2Int size)
-    {
-        if (grid is ItemGrid itemGrid)
-        {
-            return itemGrid.CanPlaceItem(position, size);
-        }
-        else if (grid is BackpackItemGrid backpackGrid)
-        {
-            return backpackGrid.CanPlaceItem(position, size);
-        }
-        else if (grid is TactiaclRigItemGrid tacticalGrid)
-        {
-            return tacticalGrid.CanPlaceItem(position, size);
-        }
-
-        return false;
-    }
-
-    // ÉèÖÃµ±Ç°ÍÏ×§µÄÎïÆ·£¨¹©Íâ²¿µ÷ÓÃ£©
-    public void SetDraggedItem(InventorySystemItem item)
-    {
-        draggedItem = item;
-    }
-
-    // Çå³ıÍÏ×§µÄÎïÆ·
-    public void ClearDraggedItem()
-    {
-        draggedItem = null;
-        inventoryHighlight.Hide();
-    }
-
-    // ´¦ÀíÖ÷Íø¸ñÊäÈë
-    private void HandleMainGridInput()
-    {
-        if (selectedItemGrid == null) return;
-
-        // ×ó¼üµã»÷Ê±»ñÈ¡Íø¸ñÎ»ÖÃ²¢Êä³öµ÷ÊÔĞÅÏ¢
-        if (Input.GetMouseButtonDown(0))
-        {
-            Vector2Int gridPosition = selectedItemGrid.GetTileGridPosition(Input.mousePosition);
-
-            if (showDebugInfo)
+            DraggableItem draggableItem = result.gameObject.GetComponent<DraggableItem>();
+            if (draggableItem != null)
             {
-                Debug.Log($"µã»÷Ö÷Íø¸ñÎ»ÖÃ: ({gridPosition.x}, {gridPosition.y}) - Íø¸ñÃû³Æ: {selectedItemGrid.gameObject.name}");
-            }
-        }
-    }
-
-    // ´¦Àí±³°üÍø¸ñÊäÈë
-    private void HandleBackpackGridInput()
-    {
-        if (selectedBackpackGrid == null) return;
-
-        // ×ó¼üµã»÷Ê±»ñÈ¡Íø¸ñÎ»ÖÃ²¢Êä³öµ÷ÊÔĞÅÏ¢
-        if (Input.GetMouseButtonDown(0))
-        {
-            Vector2Int gridPosition = selectedBackpackGrid.GetTileGridPosition(Input.mousePosition);
-
-            if (showDebugInfo)
-            {
-                Debug.Log($"µã»÷±³°üÍø¸ñÎ»ÖÃ: ({gridPosition.x}, {gridPosition.y}) - Íø¸ñÃû³Æ: {selectedBackpackGrid.gameObject.name}");
-            }
-        }
-    }
-
-    // ´¦ÀíÕ½Êõ¹Ò¾ßÍø¸ñÊäÈë
-    private void HandleTacticalRigGridInput()
-    {
-        if (selectedTacticalRigGrid == null) return;
-
-        // ×ó¼üµã»÷Ê±»ñÈ¡Íø¸ñÎ»ÖÃ²¢Êä³öµ÷ÊÔĞÅÏ¢
-        if (Input.GetMouseButtonDown(0))
-        {
-            Vector2Int gridPosition = selectedTacticalRigGrid.GetTileGridPosition(Input.mousePosition);
-
-            if (showDebugInfo)
-            {
-                Debug.Log($"µã»÷Õ½Êõ¹Ò¾ßÍø¸ñÎ»ÖÃ: ({gridPosition.x}, {gridPosition.y}) - Íø¸ñÃû³Æ: {selectedTacticalRigGrid.gameObject.name}");
-            }
-        }
-    }
-
-    // ÉèÖÃÑ¡ÖĞµÄÖ÷Íø¸ñ
-    public void SetSelectedMainGrid(ItemGrid itemGrid)
-    {
-        if (selectedItemGrid != itemGrid)
-        {
-            selectedItemGrid = itemGrid;
-            currentActiveGrid = ActiveGridType.MainGrid;
-            if (showDebugInfo)
-            {
-                Debug.Log($"ÇĞ»»Ñ¡ÖĞÖ÷Íø¸ñ: {(itemGrid != null ? itemGrid.gameObject.name : "ÎŞ")}");
-            }
-        }
-    }
-
-    // ÉèÖÃÑ¡ÖĞµÄ±³°üÍø¸ñ
-    public void SetSelectedBackpackGrid(BackpackItemGrid backpackGrid)
-    {
-        if (selectedBackpackGrid != backpackGrid)
-        {
-            selectedBackpackGrid = backpackGrid;
-            currentActiveGrid = ActiveGridType.BackpackGrid;
-            if (showDebugInfo)
-            {
-                Debug.Log($"ÇĞ»»Ñ¡ÖĞ±³°üÍø¸ñ: {(backpackGrid != null ? backpackGrid.gameObject.name : "ÎŞ")}");
-            }
-        }
-    }
-
-    // ÉèÖÃÑ¡ÖĞµÄÕ½Êõ¹Ò¾ßÍø¸ñ
-    public void SetSelectedTacticalRigGrid(TactiaclRigItemGrid tacticalRigGrid)
-    {
-        if (selectedTacticalRigGrid != tacticalRigGrid)
-        {
-            selectedTacticalRigGrid = tacticalRigGrid;
-            currentActiveGrid = ActiveGridType.TacticalRigGrid;
-            if (showDebugInfo)
-            {
-                Debug.Log($"ÇĞ»»Ñ¡ÖĞÕ½Êõ¹Ò¾ßÍø¸ñ: {(tacticalRigGrid != null ? tacticalRigGrid.gameObject.name : "ÎŞ")}");
-            }
-        }
-    }
-
-    // Çå³ıÑ¡ÖĞµÄÍø¸ñ
-    public void ClearSelectedGrid()
-    {
-        if (showDebugInfo)
-        {
-            string gridName = "ÎŞ";
-            switch (currentActiveGrid)
-            {
-                case ActiveGridType.MainGrid:
-                    gridName = selectedItemGrid?.gameObject.name ?? "ÎŞ";
-                    break;
-                case ActiveGridType.BackpackGrid:
-                    gridName = selectedBackpackGrid?.gameObject.name ?? "ÎŞ";
-                    break;
-                case ActiveGridType.TacticalRigGrid:
-                    gridName = selectedTacticalRigGrid?.gameObject.name ?? "ÎŞ";
-                    break;
-            }
-            Debug.Log($"Çå³ıÑ¡ÖĞÍø¸ñ: {gridName}");
-        }
-
-        selectedItemGrid = null;
-        selectedBackpackGrid = null;
-        selectedTacticalRigGrid = null;
-        currentActiveGrid = ActiveGridType.None;
-    }
-
-    // »ñÈ¡ÊÇ·ñÓĞÑ¡ÖĞµÄÍø¸ñ
-    public bool HasSelectedGrid()
-    {
-        return currentActiveGrid != ActiveGridType.None &&
-               (selectedItemGrid != null || selectedBackpackGrid != null || selectedTacticalRigGrid != null);
-    }
-
-    // »ñÈ¡µ±Ç°»îÔ¾µÄÍø¸ñÀàĞÍ
-    public ActiveGridType GetActiveGridType()
-    {
-        return currentActiveGrid;
-    }
-
-    // »ñÈ¡µ±Ç°»îÔ¾µÄÍø¸ñ¶ÔÏó£¨Í¨ÓÃ·½·¨£©
-    public GameObject GetActiveGridObject()
-    {
-        switch (currentActiveGrid)
-        {
-            case ActiveGridType.MainGrid:
-                return selectedItemGrid?.gameObject;
-            case ActiveGridType.BackpackGrid:
-                return selectedBackpackGrid?.gameObject;
-            case ActiveGridType.TacticalRigGrid:
-                return selectedTacticalRigGrid?.gameObject;
-            default:
-                return null;
-        }
-    }
-
-    // ¼ì²âÊó±êµ±Ç°ĞüÍ£µÄÍø¸ñ²¢×Ô¶¯ÇĞ»»»îÔ¾Íø¸ñ
-    private void DetectHoveredGrid()
-    {
-        Vector2 mousePos = Input.mousePosition;
-
-        // ¼ì²éÖ÷Íø¸ñ
-        if (selectedItemGrid != null && IsMouseOverGrid(selectedItemGrid.transform, mousePos))
-        {
-            if (currentActiveGrid != ActiveGridType.MainGrid)
-            {
-                currentActiveGrid = ActiveGridType.MainGrid;
-                if (showDebugInfo)
+                // å¦‚æœæ‰¾åˆ°äº†å¯æ‹–æ‹½ç‰©å“ï¼Œç›´æ¥è¿”å›å®ƒæ‰€åœ¨çš„ç½‘æ ¼
+                ItemGrid grid = draggableItem.GetParentGrid();
+                if (grid != null)
                 {
-                    Debug.Log("ÇĞ»»µ½Ö÷Íø¸ñ");
+                    return grid;
                 }
+            }
+        }
+
+        // å¦‚æœæ²¡æœ‰ç›´æ¥å‘½ä¸­ç‰©å“ï¼Œå†æ£€æŸ¥æ˜¯å¦æœ‰ç½‘æ ¼èƒŒæ™¯
+        foreach (RaycastResult result in results)
+        {
+            // ç¡®ä¿result.gameObjectå­˜åœ¨ä¸”æœªè¢«é”€æ¯
+            if (result.gameObject == null) continue;
+            
+            ItemGrid itemGrid = result.gameObject.GetComponent<ItemGrid>();
+            if (itemGrid != null && itemGrid.gameObject != null)
+            {
+                return itemGrid;
+            }
+
+            // ä¹Ÿæ£€æŸ¥çˆ¶ç‰©ä½“ï¼Œä»¥é˜²ç‚¹åˆ°ç½‘æ ¼çš„å­å…ƒç´ 
+            itemGrid = result.gameObject.GetComponentInParent<ItemGrid>();
+            if (itemGrid != null && itemGrid.gameObject != null)
+            {
+                return itemGrid;
+            }
+        }
+
+        return null;
+    }
+
+    // é¼ æ ‡åæ ‡è½¬åŒ–ä¸ºæ ¼å­åæ ‡
+    private Vector2Int GetTileGridPosition()
+    {
+        Vector2 position = Input.mousePosition;
+
+        if (selectedItemGrid != null)
+        {
+            Vector2Int tileGridPosition = selectedItemGrid.GetTileGridPosition(position);
+            return tileGridPosition;
+        }
+
+        // å¦‚æœæ²¡æœ‰é€‰ä¸­çš„ç½‘æ ¼ï¼Œå°è¯•æ‰¾åˆ°é¼ æ ‡ä¸‹çš„ç½‘æ ¼
+        ItemGrid targetGrid = GetItemGridUnderMouse();
+        if (targetGrid != null)
+        {
+            return targetGrid.GetTileGridPosition(position);
+        }
+
+        return Vector2Int.zero;
+    }
+
+    private void TryPickUpItem(int x, int y)
+    {
+        selectedItem = selectedItemGrid.PickUpItem(x, y);
+    }
+
+    // å°è¯•æ”¾ç½®ç‰©å“
+    private void TryPlaceItem(int x, int y)
+    {
+        if (selectedItem == null) return;
+
+        // æ£€æŸ¥ç›®æ ‡ä½ç½®æ˜¯å¦å·²ç»æœ‰ç‰©å“
+        if (selectedItemGrid.HasItemAt(x, y))
+        {
+            // å¦‚æœç›®æ ‡ä½ç½®æœ‰ç‰©å“ï¼Œå¯ä»¥å®ç°äº¤æ¢é€»è¾‘
+            Item targetItem = selectedItemGrid.PickUpItem(x, y);
+            selectedItemGrid.PlaceItem(selectedItem, x, y);
+            selectedItem = targetItem;
+        }
+        else
+        {
+            // ç›®æ ‡ä½ç½®ä¸ºç©ºï¼Œç›´æ¥æ”¾ç½®
+            selectedItemGrid.PlaceItem(selectedItem, x, y);
+            selectedItem = null;
+        }
+    }
+
+    // è®¾ç½®å½“å‰æ“ä½œçš„èƒŒåŒ…
+    public void SetSelectedItemGrid(ItemGrid itemGrid)
+    {
+        selectedItemGrid = itemGrid;
+    }
+
+    // è·å–å½“å‰é€‰ä¸­çš„ç‰©å“
+    public Item GetSelectedItem()
+    {
+        return selectedItem;
+    }
+
+    // è®¾ç½®å½“å‰é€‰ä¸­çš„ç‰©å“ï¼ˆç”¨äºæ‹–æ‹½ç³»ç»Ÿï¼‰
+    public void SetSelectedItem(Item item)
+    {
+        selectedItem = item;
+
+        if (selectedItem == null)
+        {
+            // æ¸…é™¤é€‰ä¸­ç‰©å“æ—¶éšè—é«˜äº®
+            if (isHighlightActive)
+            {
+                HideHighlight();
+            }
+        }
+    }
+
+    // å¤–éƒ¨æ¥å£ï¼šå¼€å§‹æ‹–æ‹½æ—¶è°ƒç”¨
+    public void OnItemDragStart(Item item)
+    {
+        SetSelectedItem(item);
+        
+        // éªŒè¯å¹¶ç¡®ä¿æç¤ºå™¨å¯ç”¨
+        if (!IsHighlightAvailable())
+        {
+            Debug.LogError("InventoryController: æ‹–æ‹½å¼€å§‹æ—¶æç¤ºå™¨ä¸å¯ç”¨ï¼å°è¯•é‡æ–°åˆå§‹åŒ–...");
+            
+            // å¼ºåˆ¶é‡æ–°æŸ¥æ‰¾æç¤ºå™¨
+            inventoryHighlight = FindObjectOfType<InventoryHighlight>();
+            if (inventoryHighlight != null)
+            {
+                Debug.Log($"InventoryController: é‡æ–°æ‰¾åˆ°æç¤ºå™¨ - {inventoryHighlight.name}ï¼Œçˆ¶çº§: {inventoryHighlight.transform.parent?.name}");
+                
+                // ç¡®ä¿æç¤ºå™¨åœ¨æ­£ç¡®çš„çˆ¶çº§ä¸‹
+                if (inventoryHighlight.transform.parent != this.transform)
+                {
+                    Debug.Log("InventoryController: å°†æç¤ºå™¨ç§»å›InventoryController");
+                    inventoryHighlight.transform.SetParent(this.transform, false);
+                }
+            }
+            else
+            {
+                Debug.LogError("InventoryController: æ— æ³•é‡æ–°æ‰¾åˆ°æç¤ºå™¨ç»„ä»¶ï¼");
+            }
+        }
+        else
+        {
+            Debug.Log($"InventoryController: æ‹–æ‹½å¼€å§‹ï¼Œæç¤ºå™¨å¯ç”¨ - {inventoryHighlight.name}ï¼Œçˆ¶çº§: {inventoryHighlight.transform.parent?.name}");
+        }
+    }
+
+    // å¤–éƒ¨æ¥å£ï¼šç»“æŸæ‹–æ‹½æ—¶è°ƒç”¨
+    public void OnItemDragEnd()
+    {
+        if (isHighlightActive)
+        {
+            HideHighlight();
+        }
+    }
+
+    // å¤–éƒ¨æ¥å£ï¼šå¼ºåˆ¶éšè—é«˜äº®
+    public void ForceHideHighlight()
+    {
+        HideHighlight();
+    }
+
+    // è·å–èƒŒåŒ…ID
+    public string GetInventoryId()
+    {
+        return inventoryId;
+    }
+
+    // è·å–èƒŒåŒ…åç§°
+    public string GetInventoryName()
+    {
+        return inventoryName;
+    }
+
+    // è®¾ç½®èƒŒåŒ…IDï¼ˆè¿è¡Œæ—¶ä¿®æ”¹ï¼‰
+    public void SetInventoryId(string newId)
+    {
+        if (string.IsNullOrEmpty(newId))
+        {
+            Debug.LogWarning("InventoryController: å°è¯•è®¾ç½®ç©ºçš„èƒŒåŒ…ID");
+            return;
+        }
+
+        inventoryId = newId;
+        Debug.Log($"InventoryController: èƒŒåŒ…IDå·²æ›´æ”¹ä¸º {inventoryId}");
+    }
+
+    // è®¾ç½®èƒŒåŒ…åç§°ï¼ˆè¿è¡Œæ—¶ä¿®æ”¹ï¼‰
+    public void SetInventoryName(string newName)
+    {
+        inventoryName = newName;
+    }
+
+    // æ‹–æ‹½æ—¶çš„å®æ—¶é«˜äº®æ›´æ–°ï¼ˆä¸“é—¨ç”¨äºæ‹–æ‹½åœºæ™¯ï¼‰
+    public void UpdateDragHighlight(Item draggingItem, Vector3 mousePosition)
+    {
+        // æ£€æŸ¥æç¤ºå™¨ç»„ä»¶çŠ¶æ€
+        if (inventoryHighlight == null)
+        {
+            Debug.LogWarning("InventoryController: UpdateDragHighlight - inventoryHighlightä¸ºnull");
+            return;
+        }
+        
+        if (inventoryHighlight.gameObject == null)
+        {
+            Debug.LogWarning("InventoryController: UpdateDragHighlight - inventoryHighlightçš„GameObjectè¢«é”€æ¯");
+            inventoryHighlight = null;
+            return;
+        }
+        
+        // å¦‚æœæ²¡æœ‰æ‹–æ‹½ç‰©å“ï¼Œéšè—é«˜äº®
+        if (draggingItem == null)
+        {
+            if (isHighlightActive)
+            {
+                HideHighlight();
             }
             return;
         }
 
-        // ¼ì²é±³°üÍø¸ñ
-        if (selectedBackpackGrid != null && IsMouseOverGrid(selectedBackpackGrid.transform, mousePos))
+        // ä¼˜å…ˆæ£€æŸ¥è£…å¤‡æ§½
+        InventorySystem.EquipmentSlot targetEquipmentSlot = GetEquipmentSlotUnderMouse();
+        if (targetEquipmentSlot != null)
         {
-            if (currentActiveGrid != ActiveGridType.BackpackGrid)
+            // æ£€æŸ¥ç‰©å“æ˜¯å¦å¯ä»¥è£…å¤‡åˆ°è¿™ä¸ªæ§½ä½
+            ItemDataReader itemDataReader = draggingItem.GetComponent<ItemDataReader>();
+            bool canEquip = targetEquipmentSlot.CanAcceptItem(itemDataReader);
+            
+            // æ˜¾ç¤ºè£…å¤‡æ§½é«˜äº®
+            ShowEquipmentSlotHighlight(targetEquipmentSlot, canEquip);
+            return;
+        }
+
+        // è·å–é¼ æ ‡ä¸‹çš„ç½‘æ ¼
+        ItemGrid targetGrid = GetItemGridUnderMouse();
+        if (targetGrid == null)
+        {
+            if (isHighlightActive)
             {
-                currentActiveGrid = ActiveGridType.BackpackGrid;
-                if (showDebugInfo)
-                {
-                    Debug.Log("ÇĞ»»µ½±³°üÍø¸ñ");
-                }
+                HideHighlight();
             }
             return;
         }
 
-        // ¼ì²éÕ½Êõ¹Ò¾ßÍø¸ñ
-        if (selectedTacticalRigGrid != null && IsMouseOverGrid(selectedTacticalRigGrid.transform, mousePos))
+        // è·å–ç½‘æ ¼åæ ‡
+        Vector2Int gridPosition = targetGrid.GetTileGridPosition(mousePosition);
+
+        // ä½¿ç”¨æ–°çš„é‡å æ£€æµ‹æ–¹æ³•æ£€æŸ¥æ˜¯å¦å¯ä»¥æ”¾ç½®
+        bool canPlace = targetGrid.CanPlaceItemAtPosition(
+            gridPosition.x,
+            gridPosition.y,
+            draggingItem.GetWidth(),
+            draggingItem.GetHeight(),
+            draggingItem
+        );
+
+        // æ˜¾ç¤ºé«˜äº®å¹¶è®¾ç½®é¢œè‰²ï¼ˆç»¿è‰²è¡¨ç¤ºå¯æ”¾ç½®ï¼Œçº¢è‰²è¡¨ç¤ºæœ‰é‡å å†²çªï¼‰
+        ShowDragHighlight(targetGrid, gridPosition.x, gridPosition.y,
+                         draggingItem.GetWidth(), draggingItem.GetHeight(), canPlace);
+    }
+
+    // æ˜¾ç¤ºæ‹–æ‹½æ—¶çš„æ”¾ç½®é«˜äº®ï¼ˆä¸æ™®é€šé«˜äº®åˆ†ç¦»ï¼Œé¿å…å†²çªï¼‰
+    private void ShowDragHighlight(ItemGrid targetGrid, int x, int y, int width, int height, bool canPlace)
+    {
+        if (inventoryHighlight == null) return;
+
+        // è®¾ç½®é«˜äº®çš„çˆ¶çº§ä¸ºç›®æ ‡ç½‘æ ¼
+        inventoryHighlight.SetParent(targetGrid);
+
+        // ä½¿ç”¨ç®€åŒ–çš„ä½ç½®è®¾ç½®æ–¹æ³•
+        inventoryHighlight.SetPositionSimple(targetGrid, x, y);
+
+        // è®¾ç½®é«˜äº®å¤§å°
+        inventoryHighlight.SetSize(width, height);
+
+        // è®¾ç½®é¢œè‰²ï¼ˆç»¿è‰²è¡¨ç¤ºå¯æ”¾ç½®ï¼Œçº¢è‰²è¡¨ç¤ºæœ‰é‡å å†²çªï¼‰
+        inventoryHighlight.SetCanPlace(canPlace);
+
+        // æ˜¾ç¤ºé«˜äº®
+        inventoryHighlight.Show(true);
+
+        isHighlightActive = true;
+    }
+
+    /// <summary>
+    /// è·å–é¼ æ ‡ä¸‹æ–¹çš„è£…å¤‡æ§½
+    /// </summary>
+    /// <returns>é¼ æ ‡ä¸‹æ–¹çš„è£…å¤‡æ§½ï¼Œå¦‚æœæ²¡æœ‰åˆ™è¿”å›null</returns>
+    private InventorySystem.EquipmentSlot GetEquipmentSlotUnderMouse()
+    {
+        // ä½¿ç”¨UIå°„çº¿æ£€æµ‹
+        UnityEngine.EventSystems.PointerEventData pointerData = new UnityEngine.EventSystems.PointerEventData(UnityEngine.EventSystems.EventSystem.current)
         {
-            if (currentActiveGrid != ActiveGridType.TacticalRigGrid)
+            position = Input.mousePosition
+        };
+
+        var results = new System.Collections.Generic.List<UnityEngine.EventSystems.RaycastResult>();
+        UnityEngine.EventSystems.EventSystem.current.RaycastAll(pointerData, results);
+
+        foreach (var result in results)
+        {
+            InventorySystem.EquipmentSlot equipmentSlot = result.gameObject.GetComponentInParent<InventorySystem.EquipmentSlot>();
+            if (equipmentSlot != null)
             {
-                currentActiveGrid = ActiveGridType.TacticalRigGrid;
-                if (showDebugInfo)
-                {
-                    Debug.Log("ÇĞ»»µ½Õ½Êõ¹Ò¾ßÍø¸ñ");
-                }
+                return equipmentSlot;
             }
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// æ˜¾ç¤ºè£…å¤‡æ§½é«˜äº®
+    /// </summary>
+    /// <param name="equipmentSlot">ç›®æ ‡è£…å¤‡æ§½</param>
+    /// <param name="canEquip">æ˜¯å¦å¯ä»¥è£…å¤‡</param>
+    private void ShowEquipmentSlotHighlight(InventorySystem.EquipmentSlot equipmentSlot, bool canEquip)
+    {
+        if (inventoryHighlight == null || equipmentSlot == null) return;
+
+        // ä½¿ç”¨æ‰©å±•çš„è£…å¤‡æ§½é«˜äº®æ–¹æ³•
+        inventoryHighlight.SetEquipmentSlotHighlight(equipmentSlot, canEquip);
+        
+        isHighlightActive = true;
+    }
+    
+    /// <summary>
+    /// é‡ç½®æç¤ºå™¨çŠ¶æ€
+    /// ç®€åŒ–ç‰ˆæœ¬ - æç¤ºå™¨å§‹ç»ˆä¿æŒåœ¨InventoryControllerä¸‹
+    /// </summary>
+    public void ResetHighlight()
+    {
+        if (inventoryHighlight == null) return;
+        
+        // éšè—æç¤ºå™¨
+        inventoryHighlight.Show(false);
+        
+        // é‡ç½®æç¤ºå™¨çŠ¶æ€
+        inventoryHighlight.Reset();
+        
+        isHighlightActive = false;
+        
+        Debug.Log("InventoryController: æç¤ºå™¨å·²é‡ç½®");
+    }
+    
+    /// <summary>
+    /// å¼ºåˆ¶å°†æç¤ºå™¨è¿”å›åˆ°InventoryController
+    /// ç”¨äºç½‘æ ¼é”€æ¯å‰çš„å®‰å…¨å›æ”¶
+    /// </summary>
+    public void ForceReturnHighlightToController()
+    {
+        if (inventoryHighlight == null) return;
+        
+        // ç›´æ¥æ£€æŸ¥InventoryHighlightç»„ä»¶çš„Transform
+        Transform highlighterTransform = inventoryHighlight.transform;
+        
+        // æ£€æŸ¥æç¤ºå™¨å½“å‰æ˜¯å¦åœ¨å…¶ä»–çˆ¶çº§ä¸‹
+        if (highlighterTransform.parent != this.transform)
+        {
+            string oldParentName = highlighterTransform.parent?.name ?? "null";
+            
+            // éšè—æç¤ºå™¨
+            inventoryHighlight.Show(false);
+            
+            // å°†æç¤ºå™¨è¿”å›åˆ°InventoryControllerä¸‹
+            highlighterTransform.SetParent(this.transform, false);
+            
+            // é‡ç½®æç¤ºå™¨çŠ¶æ€
+            inventoryHighlight.Reset();
+            
+            isHighlightActive = false;
+            
+            Debug.Log($"InventoryController: å¼ºåˆ¶å›æ”¶æç¤ºå™¨ä» {oldParentName} åˆ° InventoryController");
+        }
+        else
+        {
+            Debug.Log("InventoryController: æç¤ºå™¨å·²ç»åœ¨InventoryControllerä¸‹ï¼Œæ— éœ€å›æ”¶");
+        }
+    }
+    
+    /// <summary>
+    /// è·å–é«˜äº®æç¤ºå™¨ç»„ä»¶
+    /// ä¾›å¤–éƒ¨ä½¿ç”¨ï¼Œç¡®ä¿æç¤ºå™¨å¯ç”¨
+    /// </summary>
+    public InventoryHighlight GetHighlightComponent()
+    {
+        return inventoryHighlight;
+    }
+    
+    /// <summary>
+    /// è®¾ç½®é«˜äº®æç¤ºå™¨ç»„ä»¶
+    /// å…è®¸å¤–éƒ¨é‡æ–°åˆ†é…æç¤ºå™¨
+    /// </summary>
+    public void SetHighlightComponent(InventoryHighlight highlight)
+    {
+        if (highlight == null)
+        {
+            Debug.LogWarning("InventoryController: å°è¯•è®¾ç½®ç©ºçš„é«˜äº®æç¤ºå™¨");
             return;
         }
-    }
-
-    // ¼ì²éÊó±êÊÇ·ñÔÚÖ¸¶¨Íø¸ñÉÏ·½
-    private bool IsMouseOverGrid(Transform gridTransform, Vector2 mousePos)
-    {
-        if (gridTransform == null) return false;
-
-        RectTransform rectTransform = gridTransform.GetComponent<RectTransform>();
-        if (rectTransform == null) return false;
-
-        return RectTransformUtility.RectangleContainsScreenPoint(rectTransform, mousePos, null);
-    }
-
-    /// <summary>
-    /// ÏÔÊ¾ĞüÍ£¸ßÁÁ
-    /// </summary>
-    /// <param name="item">Òª¸ßÁÁµÄÎïÆ·</param>
-    /// <param name="parentGrid">¸¸¼¶Íø¸ñ</param>
-    public void ShowHoverHighlight(InventorySystemItem item, Transform parentGrid)
-    {
-        if (hoverHighlight != null)
+        
+        inventoryHighlight = highlight;
+        
+        // æ›´æ–°åŸå§‹çˆ¶å¯¹è±¡å¼•ç”¨
+        if (originalHighlightParent == null)
         {
-            hoverHighlight.ShowHoverHighlight(item, parentGrid);
+            originalHighlightParent = this.transform;
         }
+        
+        Debug.Log("InventoryController: å·²è®¾ç½®æ–°çš„é«˜äº®æç¤ºå™¨ç»„ä»¶");
     }
-
+    
     /// <summary>
-    /// ÏÔÊ¾ĞüÍ£¸ßÁÁ£¨×°±¸À¸°æ±¾£©
+    /// æ£€æŸ¥æç¤ºå™¨æ˜¯å¦å¯ç”¨
     /// </summary>
-    /// <param name="item">Òª¸ßÁÁµÄÎïÆ·</param>
-    /// <param name="parentGrid">¸¸¼¶Íø¸ñ</param>
-    /// <param name="equipSlot">×°±¸À¸ÒıÓÃ</param>
-    public void ShowHoverHighlight(InventorySystemItem item, Transform parentGrid, EquipSlot equipSlot)
+    public bool IsHighlightAvailable()
     {
-        if (hoverHighlight != null)
+        bool isAvailable = inventoryHighlight != null && inventoryHighlight.gameObject != null;
+        
+        if (!isAvailable)
         {
-            hoverHighlight.ShowHoverHighlight(item, parentGrid, equipSlot);
+            Debug.LogWarning($"InventoryController: æç¤ºå™¨ä¸å¯ç”¨ - inventoryHighlight={inventoryHighlight != null}, gameObject={(inventoryHighlight?.gameObject != null)}");
+            
+            // å°è¯•é‡æ–°æŸ¥æ‰¾æç¤ºå™¨
+            if (inventoryHighlight == null)
+            {
+                inventoryHighlight = FindObjectOfType<InventoryHighlight>();
+                if (inventoryHighlight != null)
+                {
+                    Debug.Log($"InventoryController: é‡æ–°æ‰¾åˆ°æç¤ºå™¨ç»„ä»¶ - {inventoryHighlight.name}");
+                    isAvailable = true;
+                }
+            }
         }
+        
+        return isAvailable;
     }
-
-    /// <summary>
-    /// Òş²ØĞüÍ£¸ßÁÁ
-    /// </summary>
-    public void HideHoverHighlight()
+    
+    private void OnDestroy()
     {
-        if (hoverHighlight != null)
-        {
-            hoverHighlight.HideHoverHighlight();
-        }
-    }
-
-    /// <summary>
-    /// Ç¿ÖÆË¢ĞÂÔ¤ÀÀ
-    /// </summary>
-    public void ForceRefreshPreview()
-    {
-        // Ç¿ÖÆË¢ĞÂÔ¤ÀÀ
-        if (enablePreview && draggedItem != null)
-        {
-            HandlePreview();
-        }
+        // æ—§çš„ç½‘æ ¼ä¸Šä¸‹æ–‡ç³»ç»Ÿå·²ç§»é™¤
     }
 }
-

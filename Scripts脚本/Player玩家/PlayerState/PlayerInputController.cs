@@ -5,33 +5,33 @@ using UnityEngine.InputSystem;
 [CreateAssetMenu(fileName = "PlayerInputController")]
 public class PlayerInputController : ScriptableObject, PlayerInputAction.IGamePlayActions, PlayerInputAction.IUIActions
 {
-    // ÊäÈë¶¯×÷ÏµÍ³
+    // è¾“å…¥åŠ¨ä½œç³»ç»Ÿ
     private PlayerInputAction playerInputAction;
 
-    // ÓÎÏ·Íæ·¨ÊÂ¼ş
-    [Header("ÓÎÏ·Íæ·¨ÊÂ¼ş")]
-    public UnityAction<Vector2> onMovement; // ÒÆ¶¯ÊÂ¼ş
-    public UnityAction<Vector2> onLook; // ÊÓ½ÇÊÂ¼ş
-    public UnityAction<bool> onFire; // Í³Ò»µÄ¿ª»ğÊÂ¼ş£¨true=°´ÏÂ£¬false=ÊÍ·Å£©
-    public UnityAction onDodge; // ÉÁ±ÜÊÂ¼ş
-    public UnityAction onReload; // ÖØĞÂ×°µ¯ÊÂ¼ş
-    public UnityAction<bool> onRun; // ±¼ÅÜÊÂ¼ş
-    public UnityAction<bool> onCrouch; // ¶×ÏÂÊÂ¼ş
-    public UnityAction onCrawl; // ÅÀĞĞÊÂ¼ş
-    public UnityAction onPickup; // Ê°È¡ÊÂ¼ş
+    // æ¸¸æˆç©æ³•äº‹ä»¶
+    [Header("æ¸¸æˆç©æ³•äº‹ä»¶")]
+    public UnityAction<Vector2> onMovement; // ç§»åŠ¨äº‹ä»¶
+    public UnityAction<Vector2> onLook; // è§†è§’äº‹ä»¶
+    public UnityAction<bool> onFire; // ç»Ÿä¸€çš„å¼€ç«äº‹ä»¶ï¼ˆtrue=æŒ‰ä¸‹ï¼Œfalse=é‡Šæ”¾ï¼‰
+    public UnityAction onDodge; // é—ªé¿äº‹ä»¶
+    public UnityAction onReload; // é‡æ–°è£…å¼¹äº‹ä»¶
+    public UnityAction<bool> onRun; // å¥”è·‘äº‹ä»¶
+    public UnityAction<bool> onCrouch; // è¹²ä¸‹äº‹ä»¶
+    public UnityAction onCrawl; // çˆ¬è¡Œäº‹ä»¶
+    public UnityAction onPickup; // æ‹¾å–äº‹ä»¶
 
-    // UIÏà¹ØÊÂ¼ş
-    [Header("UIÏà¹ØÊÂ¼ş")]
-    public UnityAction onBackPack; // ±³°üÊÂ¼ş
-    public UnityAction onOperate; // ²Ù×÷ÊÂ¼ş
-    public UnityAction onWeaponInspection; // ÎäÆ÷¼ì²éÊÂ¼ş
-    public UnityAction onEscape; // ÍË³öÊÂ¼ş
+    // UIç›¸å…³äº‹ä»¶
+    [Header("UIç›¸å…³äº‹ä»¶")]
+    public UnityAction onBackPack; // èƒŒåŒ…äº‹ä»¶
+    public UnityAction onOperate; // æ“ä½œäº‹ä»¶
+    public UnityAction onWeaponInspection; // æ­¦å™¨æ£€æŸ¥äº‹ä»¶
+    public UnityAction onEscape; // é€€å‡ºäº‹ä»¶
 
-    // ×´Ì¬±äÁ¿
-    [Header("×´Ì¬±äÁ¿")]
-    public bool isRunPressed = false; // ÊÇ·ñ°´ÏÂ±¼ÅÜ
-    public bool isCrouchPressed = false; // ÊÇ·ñ°´ÏÂ¶×ÏÂ
-    public bool isFirePressed = false; // ÊÇ·ñ°´ÏÂ¿ª»ğ
+    // çŠ¶æ€å˜é‡
+    [Header("çŠ¶æ€å˜é‡")]
+    public bool isRunPressed = false; // æ˜¯å¦æŒ‰ä¸‹å¥”è·‘
+    public bool isCrouchPressed = false; // æ˜¯å¦æŒ‰ä¸‹è¹²ä¸‹
+    public bool isFirePressed = false; // æ˜¯å¦æŒ‰ä¸‹å¼€ç«
 
     private void OnEnable()
     {
@@ -40,7 +40,7 @@ public class PlayerInputController : ScriptableObject, PlayerInputAction.IGamePl
             playerInputAction = new PlayerInputAction();
         }
 
-        // ÉèÖÃ»Øµ÷
+        // è®¾ç½®å›è°ƒ
         playerInputAction.GamePlay.SetCallbacks(this);
         playerInputAction.UI.SetCallbacks(this);
     }
@@ -50,190 +50,190 @@ public class PlayerInputController : ScriptableObject, PlayerInputAction.IGamePl
         DisableAllInput();
     }
 
-    // ÆôÓÃÓÎÏ·Íæ·¨ÊäÈë
+    // å¯ç”¨æ¸¸æˆç©æ³•è¾“å…¥
     public void EnabledGameplayInput()
     {
         playerInputAction.GamePlay.Enable();
-        Debug.Log("ÓÎÏ·Íæ·¨ÊäÈëÒÑÆôÓÃ");
+        Debug.Log("æ¸¸æˆç©æ³•è¾“å…¥å·²å¯ç”¨");
     }
 
-    // ½ûÓÃÓÎÏ·Íæ·¨ÊäÈë
+    // ç¦ç”¨æ¸¸æˆç©æ³•è¾“å…¥
     public void DisableGameplayInput()
     {
         playerInputAction.GamePlay.Disable();
-        Debug.Log("ÓÎÏ·Íæ·¨ÊäÈëÒÑ½ûÓÃ");
+        Debug.Log("æ¸¸æˆç©æ³•è¾“å…¥å·²ç¦ç”¨");
     }
 
-    // ÆôÓÃUIÊäÈë
+    // å¯ç”¨UIè¾“å…¥
     public void EnabledUIInput()
     {
         playerInputAction.UI.Enable();
-        Debug.Log("UIÊäÈëÒÑÆôÓÃ");
+        Debug.Log("UIè¾“å…¥å·²å¯ç”¨");
     }
 
-    // ½ûÓÃUIÊäÈë
+    // ç¦ç”¨UIè¾“å…¥
     public void DisableUIInput()
     {
         playerInputAction.UI.Disable();
-        Debug.Log("UIÊäÈëÒÑ½ûÓÃ");
+        Debug.Log("UIè¾“å…¥å·²ç¦ç”¨");
     }
 
-    // ½ûÓÃËùÓĞÊäÈë
+    // ç¦ç”¨æ‰€æœ‰è¾“å…¥
     public void DisableAllInput()
     {
         playerInputAction?.GamePlay.Disable();
         playerInputAction?.UI.Disable();
-        Debug.Log("ËùÓĞÊäÈëÒÑ½ûÓÃ");
+        Debug.Log("æ‰€æœ‰è¾“å…¥å·²ç¦ç”¨");
     }
 
-    // ÆôÓÃËùÓĞÊäÈë
+    // å¯ç”¨æ‰€æœ‰è¾“å…¥
     public void EnableAllInput()
     {
         EnabledGameplayInput();
         EnabledUIInput();
-        Debug.Log("ËùÓĞÊäÈëÒÑÆôÓÃ");
+        Debug.Log("æ‰€æœ‰è¾“å…¥å·²å¯ç”¨");
     }
 
-    // === ÓÎÏ·Íæ·¨½Ó¿ÚÊµÏÖ ===
+    // === æ¸¸æˆç©æ³•æ¥å£å®ç° ===
 
-    // ÒÆ¶¯ÊäÈë
+    // ç§»åŠ¨è¾“å…¥
     public void OnMove(InputAction.CallbackContext context)
     {
         Vector2 inputVector = context.ReadValue<Vector2>();
         onMovement?.Invoke(inputVector);
     }
 
-    // ÊÓ½ÇÊäÈë
+    // è§†è§’è¾“å…¥
     public void OnLook(InputAction.CallbackContext context)
     {
         Vector2 lookVector = context.ReadValue<Vector2>();
         onLook?.Invoke(lookVector);
     }
 
-    // Í³Ò»µÄ¿ª»ğÊäÈë´¦Àí
+    // ç»Ÿä¸€çš„å¼€ç«è¾“å…¥å¤„ç†
     public void OnFire(InputAction.CallbackContext context)
     {
         if (context.started)
         {
-            // °´¼ü¿ªÊ¼°´ÏÂ
+            // æŒ‰é”®å¼€å§‹æŒ‰ä¸‹
             isFirePressed = true;
             onFire?.Invoke(true);
-            Debug.Log("¿ª»ğ°´¼ü°´ÏÂ");
+            Debug.Log("å¼€ç«æŒ‰é”®æŒ‰ä¸‹");
         }
         else if (context.canceled)
         {
-            // °´¼üÊÍ·Å
+            // æŒ‰é”®é‡Šæ”¾
             isFirePressed = false;
             onFire?.Invoke(false);
-            Debug.Log("¿ª»ğ°´¼üÊÍ·Å");
+            Debug.Log("å¼€ç«æŒ‰é”®é‡Šæ”¾");
         }
     }
 
-    // ÉÁ±ÜÊäÈë
+    // é—ªé¿è¾“å…¥
     public void OnDodge(InputAction.CallbackContext context)
     {
         if (context.performed)
         {
             onDodge?.Invoke();
-            Debug.Log("ÉÁ±Ü´¥·¢");
+            Debug.Log("é—ªé¿è§¦å‘");
         }
     }
 
-    // ÖØĞÂ×°µ¯ÊäÈë
+    // é‡æ–°è£…å¼¹è¾“å…¥
     public void OnReload(InputAction.CallbackContext context)
     {
         if (context.performed)
         {
             onReload?.Invoke();
-            Debug.Log("ÖØĞÂ×°µ¯´¥·¢");
+            Debug.Log("é‡æ–°è£…å¼¹è§¦å‘");
         }
     }
 
-    // ±¼ÅÜÊäÈë
+    // å¥”è·‘è¾“å…¥
     public void OnRun(InputAction.CallbackContext context)
     {
         if (context.performed)
         {
             isRunPressed = true;
             onRun?.Invoke(true);
-            Debug.Log("±¼ÅÜ°´ÏÂ");
+            Debug.Log("å¥”è·‘æŒ‰ä¸‹");
         }
         else if (context.canceled)
         {
             isRunPressed = false;
             onRun?.Invoke(false);
-            Debug.Log("±¼ÅÜÊÍ·Å");
+            Debug.Log("å¥”è·‘é‡Šæ”¾");
         }
     }
 
-    // ¶×ÏÂÊäÈë
+    // è¹²ä¸‹è¾“å…¥
     public void OnCrouch(InputAction.CallbackContext context)
     {
         if (context.performed)
         {
-            isCrouchPressed = !isCrouchPressed; // ÇĞ»»×´Ì¬
+            isCrouchPressed = !isCrouchPressed; // åˆ‡æ¢çŠ¶æ€
             onCrouch?.Invoke(isCrouchPressed);
-            Debug.Log($"¶×ÏÂ×´Ì¬: {isCrouchPressed}");
+            Debug.Log($"è¹²ä¸‹çŠ¶æ€: {isCrouchPressed}");
         }
     }
 
-    // ÅÀĞĞÊäÈë
+    // çˆ¬è¡Œè¾“å…¥
     public void OnCrawl(InputAction.CallbackContext context)
     {
         if (context.performed)
         {
             onCrawl?.Invoke();
-            Debug.Log("ÅÀĞĞ´¥·¢");
+            Debug.Log("çˆ¬è¡Œè§¦å‘");
         }
     }
 
-    // Ê°È¡ÊäÈë
+    // æ‹¾å–è¾“å…¥
     public void OnPickUp(InputAction.CallbackContext context)
     {
         if (context.performed)
         {
             onPickup?.Invoke();
-            Debug.Log("Ê°È¡´¥·¢");
+            Debug.Log("æ‹¾å–è§¦å‘");
         }
     }
 
-    // === UI½Ó¿ÚÊµÏÖ ===
+    // === UIæ¥å£å®ç° ===
 
-    // ²Ù×÷ÊäÈë
+    // æ“ä½œè¾“å…¥
     public void OnOperate(InputAction.CallbackContext context)
     {
         if (context.performed)
         {
             onOperate?.Invoke();
-            Debug.Log("²Ù×÷´¥·¢");
+            Debug.Log("æ“ä½œè§¦å‘");
         }
     }
 
-    // ÎäÆ÷¼ì²éÊäÈë
+    // æ­¦å™¨æ£€æŸ¥è¾“å…¥
     public void OnWeaponInspection(InputAction.CallbackContext context)
     {
         if (context.performed)
         {
             onWeaponInspection?.Invoke();
-            Debug.Log("ÎäÆ÷¼ì²é´¥·¢");
+            Debug.Log("æ­¦å™¨æ£€æŸ¥è§¦å‘");
         }
     }
 
-    // ±³°üÊäÈë
+    // èƒŒåŒ…è¾“å…¥
     public void OnBackPack(InputAction.CallbackContext context)
     {
         if (context.performed)
         {
             onBackPack?.Invoke();
-            Debug.Log("±³°ü´¥·¢");
+            Debug.Log("èƒŒåŒ…è§¦å‘");
         }
     }
 
 
 
-    // === ¸¨Öú·½·¨ ===
+    // === è¾…åŠ©æ–¹æ³• ===
 
-    // »ñÈ¡ÒÆ¶¯ÊäÈëÖµ
+    // è·å–ç§»åŠ¨è¾“å…¥å€¼
     public Vector2 GetMovementInput()
     {
         if (playerInputAction != null && playerInputAction.GamePlay.enabled)
@@ -243,29 +243,29 @@ public class PlayerInputController : ScriptableObject, PlayerInputAction.IGamePl
         return Vector2.zero;
     }
 
-    // ¼ì²éÊÇ·ñÓĞÒÆ¶¯ÊäÈë
+    // æ£€æŸ¥æ˜¯å¦æœ‰ç§»åŠ¨è¾“å…¥
     public bool HasMovementInput()
     {
         Vector2 movement = GetMovementInput();
         return movement.magnitude > 0.1f;
     }
 
-    // ÖØÖÃÊäÈë×´Ì¬
+    // é‡ç½®è¾“å…¥çŠ¶æ€
     public void ResetInputStates()
     {
         isRunPressed = false;
         isCrouchPressed = false;
         isFirePressed = false;
-        Debug.Log("ÊäÈë×´Ì¬ÒÑÖØÖÃ");
+        Debug.Log("è¾“å…¥çŠ¶æ€å·²é‡ç½®");
     }
 
-    // »ñÈ¡ÊäÈë¶¯×÷
+    // è·å–è¾“å…¥åŠ¨ä½œ
     public PlayerInputAction GetInputAction()
     {
         return playerInputAction;
     }
 
-    // ×é¼şÏú»Ù
+    // ç»„ä»¶é”€æ¯
     private void OnDestroy()
     {
         DisableAllInput();
