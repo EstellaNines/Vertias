@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace InventorySystem
 {
@@ -22,6 +23,15 @@ namespace InventorySystem
     /// </summary>
     public class BackpackEquipmentEventHandler : MonoBehaviour
     {
+        #region 静态事件
+        
+        /// <summary>
+        /// 背包首次打开事件（用于容器内容恢复）
+        /// </summary>
+        public static System.Action OnBackpackFirstOpened;
+        
+        #endregion
+        
         [Header("事件处理设置")]
         [FieldLabel("启用自动保存")]
         [Tooltip("背包关闭时自动保存装备数据")]
@@ -57,12 +67,23 @@ namespace InventorySystem
         private bool isBackpackOpen = false;
         private int backpackOpenCount = 0; // 防止重复触发
         
+        // 容器恢复相关
+        private static bool hasTriggeredFirstOpen = false;
+        
         #region Unity生命周期
         
         private void Awake()
         {
             // 确保跨场景持久化
             DontDestroyOnLoad(gameObject);
+            
+            // 重置首次打开标志（每次场景加载时重置）
+            hasTriggeredFirstOpen = false;
+            LogDebug("重置背包首次打开标志");
+            
+            // 监听场景加载事件以重置首次打开标志
+            SceneManager.sceneLoaded += OnSceneLoaded;
+            
             InitializeComponents();
         }
         
@@ -124,7 +145,19 @@ namespace InventorySystem
         
         private void OnDestroy()
         {
+            // 注销场景加载事件
+            SceneManager.sceneLoaded -= OnSceneLoaded;
             CleanupEventHandler();
+        }
+        
+        /// <summary>
+        /// 场景加载事件处理（重置首次打开标志）
+        /// </summary>
+        private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+        {
+            // 每次场景加载时重置首次打开标志
+            hasTriggeredFirstOpen = false;
+            LogDebug($"场景 {scene.name} 加载，重置背包首次打开标志");
         }
         
         private void OnEnable()
@@ -264,6 +297,14 @@ namespace InventorySystem
             
             isBackpackOpen = true;
             LogDebug($"背包打开事件触发 (计数: {backpackOpenCount})");
+            
+            // 触发首次打开事件（用于容器内容恢复）
+            if (!hasTriggeredFirstOpen)
+            {
+                hasTriggeredFirstOpen = true;
+                LogDebug("🎯 触发背包首次打开事件");
+                OnBackpackFirstOpened?.Invoke();
+            }
             
             if (verboseEventLogs)
             {

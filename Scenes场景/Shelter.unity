@@ -8216,6 +8216,8 @@ MonoBehaviour:
   autoLoad: 1
   useES3Storage: 0
   saveFilePath: EquipmentSave.es3
+  enableBackup: 1
+  enableCompression: 0
   showDebugLogs: 1
   verboseLogging: 0
 --- !u!1 &362181730
@@ -13493,6 +13495,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1469532741}
   - component: {fileID: 1469532742}
+  - component: {fileID: 1469532743}
   m_Layer: 0
   m_Name: Test
   m_TagString: Untagged
@@ -13531,6 +13534,20 @@ MonoBehaviour:
   verboseLogging: 1
   lastTestResult: 1
   testStatusInfo: "\u672A\u8FD0\u884C\u6D4B\u8BD5"
+--- !u!114 &1469532743
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1469532740}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ad63d94bc2e60714c8cd0554be2980ee, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  verboseLogging: 1
+  testDelay: 1
 --- !u!1 &1475433457
 GameObject:
   m_ObjectHideFlags: 0
@@ -17116,6 +17133,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1766941364}
   - component: {fileID: 1766941365}
+  - component: {fileID: 1766941366}
   m_Layer: 0
   m_Name: ContainerSystemManager
   m_TagString: Untagged
@@ -17150,6 +17168,29 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ebc4cb11edacf8545bdde46b538498b2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  containerSaveFileName: ContainerData.es3
+  showDebugLog: 1
+  enableBackup: 1
+  enableCrossSessionSave: 1
+  crossSessionDataKey: CrossSessionContainerData
+  autoSaveOnChange: 1
+--- !u!114 &1766941366
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1766941363}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7bc0de53bde7cd04eb9d2977bad3d75c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  enableCrossSessionPersistence: 1
+  equipmentRestoreDelay: 1
+  forceQuitSaveDelay: 0.5
+  showDebugLogs: 1
+  verboseLogging: 1
 --- !u!1 &1778054756
 GameObject:
   m_ObjectHideFlags: 0

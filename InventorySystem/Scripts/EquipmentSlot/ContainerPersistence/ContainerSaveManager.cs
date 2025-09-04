@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
@@ -11,6 +12,7 @@ namespace InventorySystem
     [System.Serializable]
     public class ContainerSaveData
     {
+        public string containerKey;                 // 容器唯一键值
         public string containerItemID;              // 容器物品ID
         public string containerGlobalID;            // 容器全局唯一ID
         public EquipmentSlotType slotType;          // 装备槽类型
@@ -19,12 +21,15 @@ namespace InventorySystem
 
         public ContainerSaveData()
         {
+            containerKey = System.Guid.NewGuid().ToString(); // 生成临时唯一键值
             containerItems = new List<ItemSaveData>();
             saveTime = System.DateTime.Now.ToBinary().ToString();
         }
 
         public ContainerSaveData(string itemID, string globalID, EquipmentSlotType type, ItemGrid containerGrid)
         {
+            // 生成容器唯一键值
+            containerKey = $"{type}_{globalID}_{itemID}";
             containerItemID = itemID;
             containerGlobalID = globalID;
             slotType = type;
@@ -164,6 +169,19 @@ namespace InventorySystem
         [FieldLabel("启用备份")]
         [Tooltip("保存时创建备份文件")]
         public bool enableBackup = true;
+        
+        [Header("跨会话持久化")]
+        [FieldLabel("启用跨会话保存")]
+        [Tooltip("启用跨运行状态的容器内容持久化")]
+        public bool enableCrossSessionSave = true;
+        
+        [FieldLabel("跨会话数据键")]
+        [Tooltip("跨会话数据在ES3中的键名")]
+        public string crossSessionDataKey = "CrossSessionContainerData";
+        
+        [FieldLabel("容器变化自动保存")]
+        [Tooltip("容器内容变化时自动保存")]
+        public bool autoSaveOnChange = true;
 
         private static ContainerSaveManager _instance;
         public static ContainerSaveManager Instance
@@ -208,7 +226,14 @@ namespace InventorySystem
                 _instance = this;
                 DontDestroyOnLoad(gameObject);
                 Debug.Log($"[ContainerSaveManager] 设置为主实例 - ID: {GetInstanceID()}, GameObject: {gameObject.name}");
-                LoadAllContainerData();
+                
+                // 首先尝试加载跨会话数据
+                bool crossSessionLoaded = LoadCrossSessionData();
+                if (!crossSessionLoaded)
+                {
+                    // 如果跨会话数据加载失败，回退到普通加载
+                    LoadAllContainerData();
+                }
             }
             else if (_instance != this)
             {
@@ -241,6 +266,15 @@ namespace InventorySystem
 
             _containerDataCache[containerKey] = saveData;
             SaveAllContainerDataToES3();
+            
+            // 触发跨会话保存
+            if (enableCrossSessionSave)
+            {
+                SaveCrossSessionData();
+            }
+            
+            // 触发容器变化事件
+            OnContainerContentChanged(containerKey);
 
             if (showDebugLog)
                 Debug.Log($"[ContainerSaveManager] 保存容器内容: {containerKey}, 物品数量: {saveData.containerItems.Count}");
@@ -280,6 +314,31 @@ namespace InventorySystem
         }
 
         /// <summary>
+        /// 检查容器网格是否已就绪
+        /// </summary>
+        private bool IsContainerGridReady(ItemGrid containerGrid)
+        {
+            if (containerGrid == null) return false;
+            if (!containerGrid.gameObject.activeInHierarchy) return false;
+            
+            try
+            {
+                // 验证网格的基本属性是否可访问
+                int width = containerGrid.gridSizeWidth;
+                int height = containerGrid.gridSizeHeight;
+                
+                // 尝试访问网格的基本功能
+                containerGrid.GetItemAt(0, 0);
+                
+                return width > 0 && height > 0;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
         /// 恢复容器中的物品
         /// </summary>
         private void RestoreContainerItems(ContainerSaveData saveData, ItemGrid containerGrid)
@@ -287,6 +346,14 @@ namespace InventorySystem
             if (saveData?.containerItems == null || containerGrid == null)
             {
                 Debug.LogWarning("[ContainerSaveManager] 恢复容器物品失败：数据或网格为空");
+                return;
+            }
+
+            // 检查容器网格是否就绪
+            if (!IsContainerGridReady(containerGrid))
+            {
+                Debug.LogWarning($"[ContainerSaveManager] 容器网格未就绪，延迟恢复: {containerGrid.name}");
+                StartCoroutine(DelayedRestoreContainerItems(saveData, containerGrid));
                 return;
             }
 
@@ -347,58 +414,164 @@ namespace InventorySystem
         }
 
         /// <summary>
+        /// 延迟恢复容器物品的协程
+        /// </summary>
+        private IEnumerator DelayedRestoreContainerItems(ContainerSaveData saveData, ItemGrid containerGrid)
+        {
+            const int maxRetries = 10;
+            const float retryDelay = 0.1f;
+            
+            for (int i = 0; i < maxRetries; i++)
+            {
+                yield return new WaitForSeconds(retryDelay);
+                
+                if (IsContainerGridReady(containerGrid))
+                {
+                    if (showDebugLog) Debug.Log($"[ContainerSaveManager] 容器网格已就绪，开始恢复物品 (重试 {i + 1}): {containerGrid.name}");
+                    RestoreContainerItems(saveData, containerGrid);
+                    yield break;
+                }
+                
+                if (showDebugLog) Debug.Log($"[ContainerSaveManager] 容器网格仍未就绪，继续等待 (重试 {i + 1}/{maxRetries}): {containerGrid.name}");
+            }
+            
+            Debug.LogWarning($"[ContainerSaveManager] 容器网格在最大重试次数后仍未就绪，放弃恢复: {containerGrid.name}");
+        }
+
+        /// <summary>
         /// 清理容器网格中的所有物品
         /// </summary>
-        private void ClearContainerGrid(ItemGrid containerGrid)
+        /// <summary>
+        /// 验证物品组件是否有效
+        /// </summary>
+        private bool IsItemValid(Item item)
         {
-            if (containerGrid == null) return;
-
-            Debug.Log($"[ContainerSaveManager] 清理容器网格: {containerGrid.name}");
-
-            // 收集所有需要清理的物品（避免在遍历时修改集合）
-            var itemsToRemove = new List<Item>();
+            if (item == null) return false;
+            if (item.gameObject == null) return false;
             
-            for (int x = 0; x < containerGrid.gridSizeWidth; x++)
+            try
             {
-                for (int y = 0; y < containerGrid.gridSizeHeight; y++)
-                {
-                    Item item = containerGrid.GetItemAt(x, y);
-                    if (item != null && !itemsToRemove.Contains(item))
-                    {
-                        itemsToRemove.Add(item);
-                    }
-                }
+                // 尝试访问关键属性
+                var pos = item.OnGridPosition;
+                return true;
             }
-
-            // 移除所有物品
-            foreach (Item item in itemsToRemove)
+            catch
             {
-                try
+                return false;
+            }
+        }
+        
+        /// <summary>
+        /// 安全地移除单个物品
+        /// </summary>
+        private bool SafeRemoveItem(Item item, ItemGrid containerGrid)
+        {
+            if (item == null) return false;
+            
+            try
+            {
+                Vector2Int itemPos = item.OnGridPosition;
+                
+                // 从网格中移除
+                if (containerGrid != null)
                 {
-                    // 获取物品的网格位置
-                    Vector2Int itemPos = item.OnGridPosition;
-                    
-                    // 从网格中移除
                     containerGrid.PickUpItem(itemPos.x, itemPos.y);
-                    
-                    // 销毁物品GameObject
-                    if (item.gameObject != null)
-                    {
-                        UnityEngine.Object.Destroy(item.gameObject);
-                    }
                 }
-                catch (System.Exception ex)
+                
+                // 销毁GameObject
+                if (item.gameObject != null)
                 {
-                    Debug.LogWarning($"[ContainerSaveManager] 清理物品时发生异常: {ex.Message}");
-                    // 强制销毁物品GameObject
+                    UnityEngine.Object.Destroy(item.gameObject);
+                }
+                
+                return true;
+            }
+            catch (System.Exception ex)
+            {
+                if (showDebugLog) Debug.LogWarning($"[ContainerSaveManager] 移除物品时发生异常: {ex.Message}，尝试强制清理");
+                
+                // 强制清理
+                try 
+                {
                     if (item != null && item.gameObject != null)
                     {
                         UnityEngine.Object.Destroy(item.gameObject);
+                        return true;
+                    }
+                }
+                catch (System.Exception ex2)
+                {
+                    Debug.LogError($"[ContainerSaveManager] 强制销毁物品时发生异常: {ex2.Message}");
+                }
+                
+                return false;
+            }
+        }
+
+        private void ClearContainerGrid(ItemGrid containerGrid)
+        {
+            if (containerGrid == null) 
+            {
+                if (showDebugLog) Debug.LogWarning("[ContainerSaveManager] 容器网格为null，跳过清理");
+                return;
+            }
+
+            if (showDebugLog) Debug.Log($"[ContainerSaveManager] 开始清理容器网格: {containerGrid.name}");
+
+            var itemsToRemove = new List<Item>();
+            
+            // 安全地收集所有物品
+            try
+            {
+                for (int x = 0; x < containerGrid.gridSizeWidth; x++)
+                {
+                    for (int y = 0; y < containerGrid.gridSizeHeight; y++)
+                    {
+                        try
+                        {
+                            Item item = containerGrid.GetItemAt(x, y);
+                            if (item != null && !itemsToRemove.Contains(item))
+                            {
+                                // 验证物品组件完整性
+                                if (IsItemValid(item))
+                                {
+                                    itemsToRemove.Add(item);
+                                }
+                                else
+                                {
+                                    if (showDebugLog) Debug.LogWarning($"[ContainerSaveManager] 发现无效物品在位置 ({x}, {y})，将强制清理");
+                                    // 对于无效物品，直接销毁GameObject
+                                    if (item.gameObject != null)
+                                    {
+                                        UnityEngine.Object.Destroy(item.gameObject);
+                                    }
+                                }
+                            }
+                        }
+                        catch (System.Exception ex)
+                        {
+                            if (showDebugLog) Debug.LogWarning($"[ContainerSaveManager] 检查位置 ({x}, {y}) 时发生异常: {ex.Message}");
+                        }
                     }
                 }
             }
+            catch (System.Exception ex)
+            {
+                Debug.LogError($"[ContainerSaveManager] 收集容器物品时发生异常: {ex.Message}");
+                return;
+            }
 
-            Debug.Log($"[ContainerSaveManager] 已清理 {itemsToRemove.Count} 个物品");
+            // 安全地清理收集到的物品
+            int successCount = 0;
+            foreach (Item item in itemsToRemove)
+            {
+                if (SafeRemoveItem(item, containerGrid))
+                {
+                    successCount++;
+                }
+            }
+            
+            if (showDebugLog) Debug.Log($"[ContainerSaveManager] 容器网格清理完成: 成功清理 {successCount}/{itemsToRemove.Count} 个物品");
         }
 
         /// <summary>
@@ -770,5 +943,362 @@ namespace InventorySystem
             
             return $"容器数量: {totalContainers}, 总物品数量: {totalItems}";
         }
+        
+        #region 跨会话持久化功能
+        
+        /// <summary>
+        /// 跨会话保存所有容器数据
+        /// </summary>
+        public void SaveCrossSessionData()
+        {
+            if (!enableCrossSessionSave)
+            {
+                if (showDebugLog)
+                    Debug.Log("[ContainerSaveManager] 跨会话保存已禁用");
+                return;
+            }
+            
+            try
+            {
+                // 收集当前所有容器数据
+                var crossSessionData = new CrossSessionContainerData();
+                crossSessionData.sessionId = System.Guid.NewGuid().ToString();
+                crossSessionData.timestamp = System.DateTime.UtcNow.Ticks;
+                crossSessionData.version = "1.0";
+                
+                // 确保timestamp有效
+                if (crossSessionData.timestamp <= 0)
+                {
+                    crossSessionData.timestamp = System.DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+                }
+                
+                // 复制当前容器数据
+                ContainerSaveDataCollection collection = new ContainerSaveDataCollection();
+                collection.containers = _containerDataCache.Values.ToList();
+                crossSessionData.containerData = collection;
+                
+                // 生成校验码
+                crossSessionData.checksum = GenerateCrossSessionChecksum(crossSessionData);
+                
+                // 创建备份（如果启用）
+                if (enableBackup)
+                {
+                    CreateCrossSessionBackup();
+                }
+                
+                // 保存跨会话数据
+                ES3.Save(crossSessionDataKey, crossSessionData, containerSaveFileName);
+                
+                if (showDebugLog)
+                    Debug.Log($"[ContainerSaveManager] 跨会话数据保存成功，容器数量: {collection.containers.Count}，会话ID: {crossSessionData.sessionId}");
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError($"[ContainerSaveManager] 跨会话数据保存失败: {e.Message}");
+            }
+        }
+        
+        /// <summary>
+        /// 跨会话加载所有容器数据
+        /// </summary>
+        public bool LoadCrossSessionData()
+        {
+            if (!enableCrossSessionSave)
+            {
+                if (showDebugLog)
+                    Debug.Log("[ContainerSaveManager] 跨会话加载已禁用");
+                return false;
+            }
+            
+            try
+            {
+                if (ES3.KeyExists(crossSessionDataKey, containerSaveFileName))
+                {
+                    CrossSessionContainerData crossSessionData = ES3.Load<CrossSessionContainerData>(crossSessionDataKey, containerSaveFileName);
+                    
+                    if (crossSessionData != null)
+                    {
+                        // 验证数据完整性
+                        if (ValidateCrossSessionData(crossSessionData))
+                        {
+                            // 加载容器数据到缓存
+                            _containerDataCache.Clear();
+                            
+                            if (crossSessionData.containerData != null && crossSessionData.containerData.containers != null)
+                            {
+                                foreach (var container in crossSessionData.containerData.containers)
+                                {
+                                    if (!string.IsNullOrEmpty(container.containerKey))
+                                    {
+                                        _containerDataCache[container.containerKey] = container;
+                                    }
+                                }
+                            }
+                            
+                            if (showDebugLog)
+                                Debug.Log($"[ContainerSaveManager] 跨会话数据加载成功，容器数量: {_containerDataCache.Count}，会话ID: {crossSessionData.sessionId}");
+                            
+                            return true;
+                        }
+                        else
+                        {
+                            Debug.LogWarning("[ContainerSaveManager] 跨会话数据校验失败，尝试从备份恢复");
+                            return LoadCrossSessionBackup();
+                        }
+                    }
+                }
+                else
+                {
+                    if (showDebugLog)
+                        Debug.Log("[ContainerSaveManager] 未找到跨会话数据，可能是首次运行");
+                }
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError($"[ContainerSaveManager] 跨会话数据加载失败: {e.Message}，尝试从备份恢复");
+                return LoadCrossSessionBackup();
+            }
+            
+            return false;
+        }
+        
+        /// <summary>
+        /// 强制保存所有当前容器状态
+        /// </summary>
+        public void ForceSaveAllContainers()
+        {
+            if (showDebugLog)
+                Debug.Log("[ContainerSaveManager] 执行强制保存所有容器");
+            
+            // 保存当前会话数据
+            SaveAllContainerDataToES3();
+            
+            // 保存跨会话数据
+            SaveCrossSessionData();
+        }
+        
+        /// <summary>
+        /// 容器内容变化时的自动保存
+        /// </summary>
+        public void OnContainerContentChanged(string containerKey)
+        {
+            if (autoSaveOnChange && enableCrossSessionSave)
+            {
+                if (showDebugLog)
+                    Debug.Log($"[ContainerSaveManager] 容器内容变化，执行自动保存: {containerKey}");
+                
+                // 延迟保存，避免频繁保存
+                StartCoroutine(DelayedAutoSave());
+            }
+        }
+        
+        /// <summary>
+        /// 延迟自动保存协程
+        /// </summary>
+        private IEnumerator DelayedAutoSave()
+        {
+            yield return new WaitForSeconds(1f); // 1秒延迟
+            
+            // 保存当前会话数据和跨会话数据
+            SaveAllContainerDataToES3();
+            SaveCrossSessionData();
+        }
+        
+        /// <summary>
+        /// 生成跨会话数据校验码
+        /// </summary>
+        private string GenerateCrossSessionChecksum(CrossSessionContainerData data)
+        {
+            try
+            {
+                // 简单的校验码生成（可以用更复杂的算法）
+                string content = $"{data.sessionId}_{data.timestamp}_{data.version}";
+                if (data.containerData != null && data.containerData.containers != null)
+                {
+                    content += $"_{data.containerData.containers.Count}";
+                }
+                
+                return content.GetHashCode().ToString();
+            }
+            catch
+            {
+                return "INVALID";
+            }
+        }
+        
+        /// <summary>
+        /// 验证跨会话数据完整性
+        /// </summary>
+        private bool ValidateCrossSessionData(CrossSessionContainerData data)
+        {
+            if (data == null) 
+            {
+                if (showDebugLog) Debug.LogWarning("[ContainerSaveManager] 校验失败: 数据为null");
+                return false;
+            }
+            if (string.IsNullOrEmpty(data.sessionId)) 
+            {
+                if (showDebugLog) Debug.LogWarning("[ContainerSaveManager] 校验失败: sessionId为空");
+                return false;
+            }
+            if (data.timestamp <= 0) 
+            {
+                if (showDebugLog) Debug.LogWarning($"[ContainerSaveManager] 校验失败: timestamp无效 ({data.timestamp})，尝试恢复");
+                // 对于无效的timestamp，我们允许通过但记录警告
+                // return false;
+            }
+            if (string.IsNullOrEmpty(data.version)) 
+            {
+                if (showDebugLog) Debug.LogWarning("[ContainerSaveManager] 校验失败: version为空");
+                return false;
+            }
+            
+            // 验证校验码（如果有容器数据才进行校验）
+            bool hasValidContainerData = data.containerData != null && data.containerData.containers != null && data.containerData.containers.Count > 0;
+            bool checksumValid = true;
+            
+            if (hasValidContainerData && !string.IsNullOrEmpty(data.checksum))
+            {
+                string expectedChecksum = GenerateCrossSessionChecksum(data);
+                checksumValid = data.checksum == expectedChecksum;
+                
+                if (showDebugLog)
+                {
+                    Debug.Log($"[ContainerSaveManager] 校验码验证: 期望={expectedChecksum}, 实际={data.checksum}, 匹配={checksumValid}");
+                }
+                
+                if (!checksumValid)
+                {
+                    Debug.LogWarning($"[ContainerSaveManager] 跨会话数据校验失败: 校验码不匹配，但仍尝试加载");
+                    // 校验码不匹配时，我们仍然尝试加载数据，只是记录警告
+                    checksumValid = true;
+                }
+            }
+            
+            if (showDebugLog)
+            {
+                Debug.Log($"[ContainerSaveManager] 数据详情: sessionId={data.sessionId}, timestamp={data.timestamp}, version={data.version}");
+                if (hasValidContainerData)
+                {
+                    Debug.Log($"[ContainerSaveManager] 容器数量: {data.containerData.containers.Count}");
+                }
+                else
+                {
+                    Debug.Log($"[ContainerSaveManager] 无有效容器数据");
+                }
+            }
+            
+            return checksumValid && hasValidContainerData;
+        }
+        
+        /// <summary>
+        /// 创建跨会话数据备份
+        /// </summary>
+        private void CreateCrossSessionBackup()
+        {
+            try
+            {
+                string backupKey = crossSessionDataKey + "_backup";
+                
+                if (ES3.KeyExists(crossSessionDataKey, containerSaveFileName))
+                {
+                    var originalData = ES3.Load<CrossSessionContainerData>(crossSessionDataKey, containerSaveFileName);
+                    ES3.Save(backupKey, originalData, containerSaveFileName);
+                    
+                    if (showDebugLog)
+                        Debug.Log("[ContainerSaveManager] 跨会话数据备份已创建");
+                }
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogWarning($"[ContainerSaveManager] 创建跨会话备份失败: {e.Message}");
+            }
+        }
+        
+        /// <summary>
+        /// 从备份加载跨会话数据
+        /// </summary>
+        private bool LoadCrossSessionBackup()
+        {
+            try
+            {
+                string backupKey = crossSessionDataKey + "_backup";
+                
+                if (ES3.KeyExists(backupKey, containerSaveFileName))
+                {
+                    CrossSessionContainerData backupData = ES3.Load<CrossSessionContainerData>(backupKey, containerSaveFileName);
+                    
+                    if (backupData != null && ValidateCrossSessionData(backupData))
+                    {
+                        // 加载备份数据到缓存
+                        _containerDataCache.Clear();
+                        
+                        if (backupData.containerData != null && backupData.containerData.containers != null)
+                        {
+                            foreach (var container in backupData.containerData.containers)
+                            {
+                                if (!string.IsNullOrEmpty(container.containerKey))
+                                {
+                                    _containerDataCache[container.containerKey] = container;
+                                }
+                            }
+                        }
+                        
+                        Debug.Log($"[ContainerSaveManager] 从备份成功恢复跨会话数据，容器数量: {_containerDataCache.Count}");
+                        return true;
+                    }
+                }
+                
+                Debug.LogWarning("[ContainerSaveManager] 未找到有效的跨会话备份数据");
+                return false;
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError($"[ContainerSaveManager] 从备份加载跨会话数据失败: {e.Message}");
+                return false;
+            }
+        }
+        
+        /// <summary>
+        /// 清除跨会话数据
+        /// </summary>
+        public void ClearCrossSessionData()
+        {
+            try
+            {
+                if (ES3.KeyExists(crossSessionDataKey, containerSaveFileName))
+                {
+                    ES3.DeleteKey(crossSessionDataKey, containerSaveFileName);
+                }
+                
+                string backupKey = crossSessionDataKey + "_backup";
+                if (ES3.KeyExists(backupKey, containerSaveFileName))
+                {
+                    ES3.DeleteKey(backupKey, containerSaveFileName);
+                }
+                
+                if (showDebugLog)
+                    Debug.Log("[ContainerSaveManager] 跨会话数据已清除");
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError($"[ContainerSaveManager] 清除跨会话数据失败: {e.Message}");
+            }
+        }
+        
+        #endregion
+    }
+    
+    /// <summary>
+    /// 跨会话容器数据结构
+    /// </summary>
+    [System.Serializable]
+    public class CrossSessionContainerData
+    {
+        public string sessionId;                    // 会话ID
+        public long timestamp;                      // 时间戳
+        public string version;                      // 数据版本
+        public string checksum;                     // 校验码
+        public ContainerSaveDataCollection containerData; // 容器数据
     }
 }

@@ -31,6 +31,12 @@ namespace InventorySystem
     /// </summary>
     public class EquipmentPersistenceManager : MonoBehaviour
     {
+        [Header("事件")]
+        /// <summary>
+        /// 装备恢复完成事件
+        /// </summary>
+        public static System.Action OnEquipmentRestored;
+        
         [Header("持久化设置")]
         [FieldLabel("自动保存")]
         [Tooltip("背包关闭时自动保存装备状态")]
@@ -42,11 +48,20 @@ namespace InventorySystem
         
         [FieldLabel("使用ES3存储")]
         [Tooltip("使用ES3文件系统而非PlayerPrefs")]
-        public bool useES3Storage = false;
+        public bool useES3Storage = true;
         
         [FieldLabel("存档文件路径")]
         [Tooltip("ES3存档文件的路径")]
         public string saveFilePath = "EquipmentSave.es3";
+        
+        [Header("ES3 高级设置")]
+        [FieldLabel("启用备份")]
+        [Tooltip("保存时自动创建备份文件")]
+        public bool enableBackup = true;
+        
+        [FieldLabel("数据压缩")]
+        [Tooltip("启用ES3数据压缩以节省空间")]
+        public bool enableCompression = false;
         
         [Header("调试设置")]
         [FieldLabel("显示调试日志")]
@@ -537,16 +552,22 @@ namespace InventorySystem
             {
                 if (useES3Storage)
                 {
-                    // 创建备份
-                    string backupPath = saveFilePath.Replace(".es3", "_backup.es3");
-                    if (ES3.FileExists(saveFilePath))
+                    // 创建备份（如果启用）
+                    if (enableBackup)
                     {
-                        ES3.CopyFile(saveFilePath, backupPath);
+                        CreateEquipmentBackup();
+                    }
+                    
+                    // 准备ES3设置
+                    ES3Settings settings = new ES3Settings();
+                    if (enableCompression)
+                    {
+                        settings.compressionType = ES3.CompressionType.Gzip;
                     }
                     
                     // 保存新数据
-                    ES3.Save("EquipmentData", data, saveFilePath);
-                    LogDebug($"装备数据已保存到ES3文件: {saveFilePath}");
+                    ES3.Save("EquipmentData", data, saveFilePath, settings);
+                    LogDebug($"装备数据已保存到ES3文件: {saveFilePath} (压缩: {enableCompression}, 备份: {enableBackup})");
                 }
                 else
                 {
@@ -557,7 +578,7 @@ namespace InventorySystem
                     PlayerPrefs.SetString(PLAYERPREFS_KEY, jsonData);
                     PlayerPrefs.Save();
                     
-                    LogDebug("装备数据已保存到PlayerPrefs");
+                    LogDebug("装备数据已保存到PlayerPrefs（建议切换到ES3模式以获得更好的功能）");
                 }
                 
                 return true;
@@ -634,9 +655,20 @@ namespace InventorySystem
                 {
                     if (ES3.FileExists(saveFilePath) && ES3.KeyExists("EquipmentData", saveFilePath))
                     {
-                        var data = ES3.Load<EquipmentSystemPersistenceData>("EquipmentData", saveFilePath);
-                        LogDebug($"从ES3文件加载数据: {saveFilePath}");
+                        // 准备ES3设置
+                        ES3Settings settings = new ES3Settings();
+                        if (enableCompression)
+                        {
+                            settings.compressionType = ES3.CompressionType.Gzip;
+                        }
+                        
+                        var data = ES3.Load<EquipmentSystemPersistenceData>("EquipmentData", saveFilePath, settings);
+                        LogDebug($"从ES3文件加载数据: {saveFilePath} (压缩: {enableCompression})");
                         return data;
+                    }
+                    else
+                    {
+                        LogDebug($"ES3文件不存在或无数据键: {saveFilePath}");
                     }
                 }
                 else
@@ -645,7 +677,7 @@ namespace InventorySystem
                     {
                         string jsonData = PlayerPrefs.GetString(PLAYERPREFS_KEY);
                         var data = JsonUtility.FromJson<EquipmentSystemPersistenceData>(jsonData);
-                        LogDebug("从PlayerPrefs加载数据");
+                        LogDebug("从PlayerPrefs加载数据（建议切换到ES3模式）");
                         return data;
                     }
                 }
@@ -693,8 +725,8 @@ namespace InventorySystem
                     successCount++;
                     LogDebug($"�7�3 装备恢复成功: {slotData.slotType}");
                     
-                    // 如果装备恢复成功，尝试恢复容器内容
-                    yield return StartCoroutine(RestoreContainerContentIfNeeded(slotData.slotType));
+                    // 容器内容恢复现在由ContainerSessionManager处理，这里不再处理
+                    // yield return StartCoroutine(RestoreContainerContentIfNeeded(slotData.slotType));
                 }
                 else
                 {
@@ -705,6 +737,10 @@ namespace InventorySystem
             }
             
             LogDebug($"装备数据应用完成，成功恢复 {successCount}/{attemptCount} 个装备");
+            
+            // 触发装备恢复完成事件
+            OnEquipmentRestored?.Invoke();
+            LogDebug("✅ 装备恢复事件已触发");
         }
 
         /// <summary>
@@ -1176,6 +1212,183 @@ namespace InventorySystem
             summary.AppendLine($"  存在保存数据: {HasSavedData()}");
             
             return summary.ToString();
+        }
+        
+        #endregion
+        
+        #region ES3 高级管理功能
+        
+        /// <summary>
+        /// 创建装备数据备份
+        /// </summary>
+        private void CreateEquipmentBackup()
+        {
+            try
+            {
+                string backupPath = saveFilePath.Replace(".es3", "_backup.es3");
+                
+                if (ES3.FileExists(saveFilePath))
+                {
+                    byte[] originalData = ES3.LoadRawBytes(saveFilePath);
+                    ES3.SaveRaw(originalData, backupPath);
+                    
+                    if (verboseLogging)
+                        LogDebug($"装备数据备份已创建: {backupPath}");
+                }
+            }
+            catch (System.Exception e)
+            {
+                LogWarning($"创建备份失败: {e.Message}");
+            }
+        }
+        
+        /// <summary>
+        /// 恢复装备数据备份
+        /// </summary>
+        public bool RestoreFromBackup()
+        {
+            try
+            {
+                string backupPath = saveFilePath.Replace(".es3", "_backup.es3");
+                
+                if (ES3.FileExists(backupPath))
+                {
+                    byte[] backupData = ES3.LoadRawBytes(backupPath);
+                    ES3.SaveRaw(backupData, saveFilePath);
+                    
+                    LogDebug($"装备数据已从备份恢复: {backupPath} -> {saveFilePath}");
+                    return true;
+                }
+                else
+                {
+                    LogDebug("未找到装备数据备份文件");
+                    return false;
+                }
+            }
+            catch (System.Exception e)
+            {
+                LogError($"恢复备份失败: {e.Message}");
+                return false;
+            }
+        }
+        
+        /// <summary>
+        /// 获取装备保存数据统计信息
+        /// </summary>
+        public void LogEquipmentSaveStatistics()
+        {
+            try
+            {
+                if (useES3Storage && ES3.FileExists(saveFilePath))
+                {
+                    string backupPath = saveFilePath.Replace(".es3", "_backup.es3");
+                    bool hasBackup = ES3.FileExists(backupPath);
+                    
+                    // 获取文件信息（ES3文件存储在persistentDataPath中）
+                    string fullPath = System.IO.Path.Combine(UnityEngine.Application.persistentDataPath, saveFilePath);
+                    
+                    LogDebug("=== 装备保存数据统计 ===");
+                    LogDebug($"主文件: {saveFilePath}");
+                    
+                    if (System.IO.File.Exists(fullPath))
+                    {
+                        var fileInfo = new System.IO.FileInfo(fullPath);
+                        LogDebug($"文件大小: {fileInfo.Length} 字节");
+                        LogDebug($"最后修改: {fileInfo.LastWriteTime}");
+                    }
+                    else
+                    {
+                        LogDebug("文件信息: ES3虚拟文件系统");
+                    }
+                    
+                    LogDebug($"备份文件: {(hasBackup ? "存在" : "不存在")}");
+                    LogDebug($"压缩模式: {(enableCompression ? "启用" : "禁用")}");
+                }
+                else if (!useES3Storage)
+                {
+                    bool hasData = PlayerPrefs.HasKey(PLAYERPREFS_KEY);
+                    LogDebug("=== 装备保存数据统计 ===");
+                    LogDebug("保存方式: PlayerPrefs");
+                    LogDebug($"数据状态: {(hasData ? "存在" : "不存在")}");
+                }
+                else
+                {
+                    LogDebug("=== 装备保存数据统计 ===");
+                    LogDebug("状态: 无保存数据");
+                }
+            }
+            catch (System.Exception e)
+            {
+                LogError($"获取统计信息失败: {e.Message}");
+            }
+        }
+        
+        /// <summary>
+        /// 清除所有保存的数据
+        /// </summary>
+        public void ClearAllSaveData()
+        {
+            try
+            {
+                if (useES3Storage)
+                {
+                    // 清除ES3文件
+                    if (ES3.FileExists(saveFilePath))
+                    {
+                        ES3.DeleteFile(saveFilePath);
+                        LogDebug($"已删除ES3文件: {saveFilePath}");
+                    }
+                    
+                    // 清除备份文件
+                    string backupPath = saveFilePath.Replace(".es3", "_backup.es3");
+                    if (ES3.FileExists(backupPath))
+                    {
+                        ES3.DeleteFile(backupPath);
+                        LogDebug($"已删除备份文件: {backupPath}");
+                    }
+                }
+                else
+                {
+                    if (PlayerPrefs.HasKey(PLAYERPREFS_KEY))
+                    {
+                        PlayerPrefs.DeleteKey(PLAYERPREFS_KEY);
+                        PlayerPrefs.Save();
+                        LogDebug("已清除PlayerPrefs数据");
+                    }
+                }
+                
+                LogDebug("所有装备保存数据已清除");
+            }
+            catch (System.Exception e)
+            {
+                LogError($"清除数据时发生错误: {e.Message}");
+            }
+        }
+        
+        /// <summary>
+        /// 手动触发ES3保存
+        /// </summary>
+        public void ManualSave()
+        {
+            if (equipmentSlotManager != null)
+            {
+                var data = CollectEquipmentData();
+                bool success = SaveDataToStorage(data);
+                LogDebug($"手动保存装备数据: {(success ? "成功" : "失败")}");
+            }
+            else
+            {
+                LogWarning("装备槽管理器未找到，无法执行手动保存");
+            }
+        }
+        
+        /// <summary>
+        /// 手动触发ES3加载
+        /// </summary>
+        public void ManualLoad()
+        {
+            StartCoroutine(LoadEquipmentDataCoroutine());
+            LogDebug("已触发手动加载装备数据");
         }
         
         #endregion
