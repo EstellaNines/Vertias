@@ -708,15 +708,29 @@ public class InventorySaveManager : MonoBehaviour
         {
             // 使用ES3加载数据
             InventorySaveData saveData = ES3.Load<InventorySaveData>("SingleGridData", fileName);
+            
+            if (saveData == null)
+            {
+                Debug.LogWarning($"[InventorySaveManager] 加载的存档数据为空: {fileName}");
+                return false;
+            }
 
             // 清空目标网格
             ClearSingleGrid(grid);
 
             // 应用加载的数据到指定网格
-            if (saveData.grids.Count > 0)
+            if (saveData.grids != null && saveData.grids.Count > 0)
             {
                 GridSaveData gridData = saveData.grids[0]; // 单个网格文件只有一个网格数据
-                ApplySingleGridData(grid, gridData);
+                if (gridData != null)
+                {
+                    ApplySingleGridData(grid, gridData);
+                }
+                else
+                {
+                    Debug.LogWarning($"[InventorySaveManager] 网格数据为空: {fileName}");
+                    return false;
+                }
 
                 if (showSaveLog)
                     Debug.Log($"[InventorySaveManager] 单个网格加载成功: {fileName}, GUID: {grid.GridGUID}");
@@ -1398,26 +1412,32 @@ public class InventorySaveManager : MonoBehaviour
         string categoryPath = $"InventorySystemResources/ItemScriptableObject/{categoryFolder}";
         ItemDataSO[] categoryItems = Resources.LoadAll<ItemDataSO>(categoryPath);
 
-        foreach (var item in categoryItems)
+        if (categoryItems != null)
         {
-            if (item.id == id)
+            foreach (var item in categoryItems)
             {
-                if (showSaveLog)
-                    Debug.Log($"[InventorySaveManager] 在类别 {category} 中找到物品数据: {itemID}");
-                return item;
+                if (item != null && item.id == id)
+                {
+                    if (showSaveLog)
+                        Debug.Log($"[InventorySaveManager] 在类别 {category} 中找到物品数据: {itemID}");
+                    return item;
+                }
             }
         }
 
         // 如果在对应类别中未找到，则在所有ItemScriptableObject中搜索
         ItemDataSO[] allItems = Resources.LoadAll<ItemDataSO>("InventorySystemResources/ItemScriptableObject");
 
-        foreach (var item in allItems)
+        if (allItems != null)
         {
-            if (item.id == id)
+            foreach (var item in allItems)
             {
-                if (showSaveLog)
-                    Debug.Log($"[InventorySaveManager] 在全局搜索中找到物品数据: {itemID}");
-                return item;
+                if (item != null && item.id == id)
+                {
+                    if (showSaveLog)
+                        Debug.Log($"[InventorySaveManager] 在全局搜索中找到物品数据: {itemID}");
+                    return item;
+                }
             }
         }
 

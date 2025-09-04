@@ -2,30 +2,30 @@
 # Unity Global Messaging Center  
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-> Ò»¸ö **ÁãÒÀÀµ¡¢¸ßĞÔÄÜ¡¢ÀàĞÍ°²È«** µÄÈ«¾ÖÏûÏ¢/ÊÂ¼şÏµÍ³£¬ÊÊÓÃÓÚ Unity ÈÎÒâÏîÄ¿¹æÄ£¡£  
+> ä¸€ä¸ª **é›¶ä¾èµ–ã€é«˜æ€§èƒ½ã€ç±»å‹å®‰å…¨** çš„å…¨å±€æ¶ˆæ¯/äº‹ä»¶ç³»ç»Ÿï¼Œé€‚ç”¨äº Unity ä»»æ„é¡¹ç›®è§„æ¨¡ã€‚  
 
 ---
 
-## 7¿8 ¹¦ÄÜÁÁµã
-| ÌØĞÔ | ÃèÊö |
+## ï¿½7ï¿½8 åŠŸèƒ½äº®ç‚¹
+| ç‰¹æ€§ | æè¿° |
 |---|---|
-| •0‹4 **ÎŞ·´Éä** | ´¿ C# ·ºĞÍÊµÏÖ£¬Áã GC¡¢Áã×°Ïä |
-| ”9ä8 **ÀàĞÍ°²È«** | ±àÒëÆÚ¼´¿É·¢ÏÖÏûÏ¢ÀàĞÍ´íÎó |
-| •0â7 **¼´²å¼´ÓÃ** | µ¥ÎÄ¼ş¼´¿É¼¯³É£¬ÎŞĞè¶îÍâ×Ê²ú |
-| ”9±4 **¿ç³¡¾°** | ³¡¾°ÇĞ»»ºóÈÔ¿ÉÊÕ·¢ |
-| •0â8 **Ò×µ÷ÊÔ** | ¿ÉÔÚ IDE/¿ØÖÆÌ¨Ö±½Ó²é¿´ÏûÏ¢Á÷ |
-| •0ä3 **×Ô¶¯ÇåÀí** | Ìá¹© `Clear()` ·ÀÖ¹ÄÚ´æĞ¹Â© |
+| ï¿½0ï¿½4 **æ— åå°„** | çº¯ C# æ³›å‹å®ç°ï¼Œé›¶ GCã€é›¶è£…ç®± |
+| ï¿½9ï¿½8 **ç±»å‹å®‰å…¨** | ç¼–è¯‘æœŸå³å¯å‘ç°æ¶ˆæ¯ç±»å‹é”™è¯¯ |
+| ï¿½0ï¿½7 **å³æ’å³ç”¨** | å•æ–‡ä»¶å³å¯é›†æˆï¼Œæ— éœ€é¢å¤–èµ„äº§ |
+| ï¿½9ï¿½4 **è·¨åœºæ™¯** | åœºæ™¯åˆ‡æ¢åä»å¯æ”¶å‘ |
+| ï¿½0ï¿½8 **æ˜“è°ƒè¯•** | å¯åœ¨ IDE/æ§åˆ¶å°ç›´æ¥æŸ¥çœ‹æ¶ˆæ¯æµ |
+| ï¿½0ï¿½3 **è‡ªåŠ¨æ¸…ç†** | æä¾› `Clear()` é˜²æ­¢å†…å­˜æ³„æ¼ |
 
 ---
 
-## ”9à4 ¿ìËÙ¿ªÊ¼£¨30 Ãë£©
+## ï¿½9ï¿½4 å¿«é€Ÿå¼€å§‹ï¼ˆ30 ç§’ï¼‰
 
-### 1. ¸´ÖÆ½Å±¾
-½«ÏÂÁĞÎÄ¼ş·ÅÈë `Assets/Scripts/GlobalMessaging/`  
+### 1. å¤åˆ¶è„šæœ¬
+å°†ä¸‹åˆ—æ–‡ä»¶æ”¾å…¥ `Assets/Scripts/GlobalMessaging/`  
 - `IMessage.cs`  
 - `MessagingCenter.cs`  
 
-### 2. ¶¨ÒåÒ»ÌõÏûÏ¢
+### 2. å®šä¹‰ä¸€æ¡æ¶ˆæ¯
 ```csharp
 public struct PlayerDamaged : IMessage
 {
@@ -34,41 +34,41 @@ public struct PlayerDamaged : IMessage
 }
 ```
 
-### 3. ¼àÌı & ·¢ËÍ
+### 3. ç›‘å¬ & å‘é€
 
 ```csharp
-// ¼àÌı
+// ç›‘å¬
 MessagingCenter.Instance.Register<PlayerDamaged>(OnPlayerDamaged);
 
-// ·¢ËÍ
+// å‘é€
 MessagingCenter.Instance.Send(new PlayerDamaged(25));
 ```
 
 ---
 
-## ”9ß2 API ËÙ²é
+## ï¿½9ï¿½2 API é€ŸæŸ¥
 
-| ·½·¨ | ÓÃÍ¾ |
+| æ–¹æ³• | ç”¨é€” |
 |---|---|
-| `Register<T>(Action<T>)` | ¶©ÔÄÏûÏ¢ |
-| `Unregister<T>(Action<T>)` | È¡Ïû¶©ÔÄ |
-| `Send<T>(T message)` | ¹ã²¥ÏûÏ¢ |
-| `Clear()` | Çå¿ÕËùÓĞ¶©ÔÄ£¨³¡¾°ÇĞ»»Ê±µ÷ÓÃ£© |
+| `Register<T>(Action<T>)` | è®¢é˜…æ¶ˆæ¯ |
+| `Unregister<T>(Action<T>)` | å–æ¶ˆè®¢é˜… |
+| `Send<T>(T message)` | å¹¿æ’­æ¶ˆæ¯ |
+| `Clear()` | æ¸…ç©ºæ‰€æœ‰è®¢é˜…ï¼ˆåœºæ™¯åˆ‡æ¢æ—¶è°ƒç”¨ï¼‰ |
 
 ---
 
-## •0•0 ×î¼ÑÊµ¼ù
+## ï¿½0ï¿½0 æœ€ä½³å®è·µ
 
-1. **ÉúÃüÖÜÆÚÅä¶Ô**  
-   ÔÚ `MonoBehaviour.OnEnable` ¶©ÔÄ£¬ÔÚ `OnDisable` È¡Ïû¶©ÔÄ¡£  
+1. **ç”Ÿå‘½å‘¨æœŸé…å¯¹**  
+   åœ¨ `MonoBehaviour.OnEnable` è®¢é˜…ï¼Œåœ¨ `OnDisable` å–æ¶ˆè®¢é˜…ã€‚  
 
    ```csharp
    void OnEnable()  => MessagingCenter.Instance.Register<XXX>(OnXXX);
    void OnDisable() => MessagingCenter.Instance.Unregister<XXX>(OnXXX);
    ```
 
-2. **³¡¾°ÇĞ»»**  
-   ÔÚ³¡¾°¹ÜÀíÆ÷ÖĞÌí¼Ó£º
+2. **åœºæ™¯åˆ‡æ¢**  
+   åœ¨åœºæ™¯ç®¡ç†å™¨ä¸­æ·»åŠ ï¼š
 
    ```csharp
    void OnSceneLoaded(Scene scene, LoadSceneMode mode)
@@ -77,43 +77,43 @@ MessagingCenter.Instance.Send(new PlayerDamaged(25));
    }
    ```
 
-3. **ĞÔÄÜÃô¸Ğ³¡¾°**  
-   - ±ÜÃâÔÚ `Update` ÖĞ¸ßÆµ `Send`£¬¿ÉÊ¹ÓÃ `MessageBuffer` ÅúÁ¿ÍÆËÍ¡£  
-   - ¶ÔÓÚ´óĞÍÏîÄ¿£¬¿ÉÀ©Õ¹Îª´øÓÅÏÈ¼¶µÄ `IPriorityMessage` ½Ó¿Ú¡£
+3. **æ€§èƒ½æ•æ„Ÿåœºæ™¯**  
+   - é¿å…åœ¨ `Update` ä¸­é«˜é¢‘ `Send`ï¼Œå¯ä½¿ç”¨ `MessageBuffer` æ‰¹é‡æ¨é€ã€‚  
+   - å¯¹äºå¤§å‹é¡¹ç›®ï¼Œå¯æ‰©å±•ä¸ºå¸¦ä¼˜å…ˆçº§çš„ `IPriorityMessage` æ¥å£ã€‚
 
 ---
 
-## •0â8 Ê¾Àı³¡¾°
+## ï¿½0ï¿½8 ç¤ºä¾‹åœºæ™¯
 
-| ³¡¾° | ÏûÏ¢Àà | ¼àÌıÕß | ´¥·¢Õß |
+| åœºæ™¯ | æ¶ˆæ¯ç±» | ç›‘å¬è€… | è§¦å‘è€… |
 |---|---|---|---|
-| Íæ¼ÒÊÜÉË | `PlayerDamaged` | `HUDManager` | `HealthSystem` |
-| ÓÎÏ·ÔİÍ£ | `GamePaused` | `AudioManager` | `PauseMenu` |
-| ÈÎÎñÍê³É | `QuestCompleted` | `QuestUI` | `QuestManager` |
+| ç©å®¶å—ä¼¤ | `PlayerDamaged` | `HUDManager` | `HealthSystem` |
+| æ¸¸æˆæš‚åœ | `GamePaused` | `AudioManager` | `PauseMenu` |
+| ä»»åŠ¡å®Œæˆ | `QuestCompleted` | `QuestUI` | `QuestManager` |
 
 ---
 
-## ”9ä3 ³£¼ûÎÊÌâ
+## ï¿½9ï¿½3 å¸¸è§é—®é¢˜
 
-**Q1£º¿ÉÒÔ¿çÏß³ÌÂğ£¿**  
-A£ºµ±Ç°ÊµÏÖÎªµ¥Ïß³Ì£¬ÈçĞè¶àÏß³ÌÇë×ÔĞĞ¼ÓËø»òÊ¹ÓÃ `ConcurrentQueue`¡£
+**Q1ï¼šå¯ä»¥è·¨çº¿ç¨‹å—ï¼Ÿ**  
+Aï¼šå½“å‰å®ç°ä¸ºå•çº¿ç¨‹ï¼Œå¦‚éœ€å¤šçº¿ç¨‹è¯·è‡ªè¡ŒåŠ é”æˆ–ä½¿ç”¨ `ConcurrentQueue`ã€‚
 
-**Q2£ºÈçºÎµ÷ÊÔÏûÏ¢Á÷£¿**  
-A£ºÔÚ `MessagingCenter.Send<T>` ÄÚ¼ÓÈë `Debug.Log($"[Msg] {typeof(T).Name}")`¡£
+**Q2ï¼šå¦‚ä½•è°ƒè¯•æ¶ˆæ¯æµï¼Ÿ**  
+Aï¼šåœ¨ `MessagingCenter.Send<T>` å†…åŠ å…¥ `Debug.Log($"[Msg] {typeof(T).Name}")`ã€‚
 
-**Q3£ºÓë UnityEvent ÓĞºÎÇø±ğ£¿**  
-A£ºUnityEvent ĞèÒª Inspector ÅäÖÃ£¬ÊÊºÏ UI£»±¾ÏµÍ³´¿´úÂë£¬ÊÊºÏÂß¼­²ã½âñî¡£
-
----
-
-## ”9İ0 License
-
-MIT 0„8 2024 YourName
+**Q3ï¼šä¸ UnityEvent æœ‰ä½•åŒºåˆ«ï¼Ÿ**  
+Aï¼šUnityEvent éœ€è¦ Inspector é…ç½®ï¼Œé€‚åˆ UIï¼›æœ¬ç³»ç»Ÿçº¯ä»£ç ï¼Œé€‚åˆé€»è¾‘å±‚è§£è€¦ã€‚
 
 ---
 
-## •0Î3 ¹±Ï×
+## ï¿½9ï¿½0 License
 
-»¶Ó­ PR & Issue£¡Ò»ÆğÈÃËü¸üÇ¿´ó ”9½5
+MIT ï¿½0ï¿½8 2024 YourName
+
+---
+
+## ï¿½0ï¿½3 è´¡çŒ®
+
+æ¬¢è¿ PR & Issueï¼ä¸€èµ·è®©å®ƒæ›´å¼ºå¤§ ï¿½9ï¿½5
 
 ```

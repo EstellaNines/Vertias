@@ -797,7 +797,7 @@ namespace InventorySystem
         #region 容器功能
 
         /// <summary>
-        /// 激活容器网格
+        /// 激活容器网格（重构版本，集成新系统）
         /// </summary>
         private void ActivateContainerGrid()
         {
@@ -808,6 +808,9 @@ namespace InventorySystem
 
             // 创建容器网格
             CreateContainerGrid(containerSize);
+            
+            // 加载容器内容
+            LoadContainerContent();
 
             // 触发容器激活事件
             OnContainerSlotActivated?.Invoke(config.slotType, containerGrid);
@@ -816,14 +819,14 @@ namespace InventorySystem
         }
 
         /// <summary>
-        /// 停用容器网格
+        /// 停用容器网格（重构版本，集成新系统）
         /// </summary>
         private void DeactivateContainerGrid()
         {
             if (containerGrid == null) return;
 
-            // 保存容器内容
-            SaveContainerContent();
+            // 立即保存容器内容（网格销毁前）
+            SaveContainerImmediate();
 
             // 取消事件监听，防止内存泄漏
             CleanupContainerEventListeners();
@@ -831,18 +834,37 @@ namespace InventorySystem
             // 触发容器停用事件
             OnContainerSlotDeactivated?.Invoke(config.slotType, containerGrid);
 
-            // 销毁容器网格
-            if (containerGrid.gameObject != null)
+            // 延迟销毁容器网格，确保保存操作完成
+            var gridToDestroy = containerGrid.gameObject;
+            containerGrid = null; // 先清空引用
+            
+            if (gridToDestroy != null)
             {
-                DestroyImmediate(containerGrid.gameObject);
+                // 使用延迟销毁而不是立即销毁
+                StartCoroutine(DelayedDestroyGrid(gridToDestroy));
             }
-
-            containerGrid = null;
 
             // 通知InventoryController刷新网格列表，清除已销毁的网格引用
             RefreshInventoryControllerGrids();
 
             Debug.Log($"[EquipmentSlot] 停用容器网格");
+        }
+
+        /// <summary>
+        /// 延迟销毁网格GameObject
+        /// </summary>
+        /// <param name="gridToDestroy">要销毁的网格GameObject</param>
+        private System.Collections.IEnumerator DelayedDestroyGrid(GameObject gridToDestroy)
+        {
+            // 等待几帧确保保存操作完全完成
+            yield return null;
+            yield return null;
+            
+            if (gridToDestroy != null)
+            {
+                Destroy(gridToDestroy);
+                LogDebugInfo($"延迟销毁容器网格完成");
+            }
         }
 
         /// <summary>
@@ -932,8 +954,7 @@ namespace InventorySystem
                 // 确保容器网格支持完整的交互功能
                 SetupContainerGridInteraction(containerGrid);
 
-                // 加载容器保存的内容
-                LoadContainerContent();
+                // 容器内容加载已移除
 
                 LogDebugInfo($"创建容器网格 - 尺寸: {size.x}x{size.y}, UI尺寸: {size.x * 64}x{size.y * 64}");
             }
@@ -1038,8 +1059,9 @@ namespace InventorySystem
         private void OnContainerItemPlaced(Item item, Vector2Int position)
         {
             LogDebugInfo($"容器中放置物品: {item.name} 到位置 {position}");
-            // 延迟保存，避免在拖拽过程中频繁保存
-            StartCoroutine(DelayedSaveContainer());
+            
+            // 即时保存容器内容
+            SaveContainerContent();
         }
 
         /// <summary>
@@ -1050,8 +1072,9 @@ namespace InventorySystem
         private void OnContainerItemRemoved(Item item, Vector2Int position)
         {
             LogDebugInfo($"从容器中移除物品: {item.name} 从位置 {position}");
-            // 延迟保存，避免在拖拽过程中频繁保存
-            StartCoroutine(DelayedSaveContainer());
+            
+            // 即时保存容器内容
+            SaveContainerContent();
         }
 
         /// <summary>
@@ -1064,69 +1087,6 @@ namespace InventorySystem
                 containerGrid.OnItemPlaced -= OnContainerItemPlaced;
                 containerGrid.OnItemRemoved -= OnContainerItemRemoved;
                 LogDebugInfo($"清理容器事件监听器");
-            }
-        }
-
-        /// <summary>
-        /// 延迟保存容器内容（避免频繁保存）
-        /// </summary>
-        private System.Collections.IEnumerator DelayedSaveContainer()
-        {
-            yield return new WaitForSeconds(0.1f); // 等待100毫秒
-            SaveContainerContent();
-        }
-
-        /// <summary>
-        /// 保存容器内容
-        /// </summary>
-        private void SaveContainerContent()
-        {
-            if (containerGrid == null || !isItemEquipped || currentEquippedItem == null)
-                return;
-
-            // 检查容器网格是否已完全初始化
-            if (!containerGrid.IsGridInitialized)
-            {
-                LogDebugInfo($"容器网格未完全初始化，跳过保存");
-                return;
-            }
-
-            var containerSaveManager = ContainerSaveManager.Instance;
-            if (containerSaveManager != null)
-            {
-                containerSaveManager.SaveContainerContent(currentEquippedItem, config.slotType, containerGrid);
-                LogDebugInfo($"保存容器内容完成");
-            }
-        }
-
-        /// <summary>
-        /// 加载容器内容
-        /// </summary>
-        private void LoadContainerContent()
-        {
-            if (containerGrid == null || !isItemEquipped || currentEquippedItem == null)
-                return;
-
-            var containerSaveManager = ContainerSaveManager.Instance;
-            if (containerSaveManager != null)
-            {
-                // 延迟加载，确保网格完全初始化
-                StartCoroutine(DelayedLoadContainerContent());
-            }
-        }
-
-        /// <summary>
-        /// 延迟加载容器内容
-        /// </summary>
-        private System.Collections.IEnumerator DelayedLoadContainerContent()
-        {
-            yield return new WaitForEndOfFrame(); // 等待当前帧结束
-
-            var containerSaveManager = ContainerSaveManager.Instance;
-            if (containerSaveManager != null && containerGrid != null && currentEquippedItem != null)
-            {
-                containerSaveManager.LoadContainerContent(currentEquippedItem, config.slotType, containerGrid);
-                LogDebugInfo($"加载容器内容完成");
             }
         }
 
@@ -1442,5 +1402,98 @@ namespace InventorySystem
         }
 
         #endregion
+
+        #region 容器持久化集成 - ContainerSaveManager
+
+        /// <summary>
+        /// 保存容器内容
+        /// </summary>
+        private void SaveContainerContent()
+        {
+            if (containerGrid == null || currentEquippedItem == null) return;
+
+            try
+            {
+                ContainerSaveManager.Instance.SaveContainerContent(
+                    currentEquippedItem,
+                    config.slotType,
+                    containerGrid
+                );
+                LogDebugInfo($"触发容器内容保存");
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError($"[EquipmentSlot] 保存容器内容失败: {e.Message}");
+            }
+        }
+
+        /// <summary>
+        /// 加载容器内容
+        /// </summary>
+        private void LoadContainerContent()
+        {
+            if (containerGrid == null || currentEquippedItem == null) return;
+
+            try
+            {
+                // 延迟一帧加载，确保网格完全初始化
+                StartCoroutine(DelayedLoadContainerContent());
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError($"[EquipmentSlot] 加载容器内容失败: {e.Message}");
+            }
+        }
+
+        /// <summary>
+        /// 延迟加载容器内容
+        /// </summary>
+        private System.Collections.IEnumerator DelayedLoadContainerContent()
+        {
+            yield return null; // 等待一帧确保网格完全初始化
+
+            if (containerGrid != null && currentEquippedItem != null)
+            {
+                ContainerSaveManager.Instance.LoadContainerContent(
+                    currentEquippedItem,
+                    config.slotType,
+                    containerGrid
+                );
+                LogDebugInfo($"触发容器内容加载");
+            }
+        }
+
+        /// <summary>
+        /// 立即保存容器内容（用于对象销毁前）
+        /// </summary>
+        private void SaveContainerImmediate()
+        {
+            if (containerGrid == null || currentEquippedItem == null) return;
+
+            try
+            {
+                // 确保网格初始化完成再保存
+                if (!containerGrid.IsGridInitialized)
+                {
+                    LogDebugInfo($"网格未初始化，跳过立即保存");
+                    return;
+                }
+
+                // 直接调用保存，不依赖协程
+                ContainerSaveManager.Instance.SaveContainerContent(
+                    currentEquippedItem,
+                    config.slotType,
+                    containerGrid
+                );
+                LogDebugInfo($"立即保存容器内容完成");
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError($"[EquipmentSlot] 立即保存容器内容失败: {e.Message}");
+            }
+        }
+
+        #endregion
+
     }
 }

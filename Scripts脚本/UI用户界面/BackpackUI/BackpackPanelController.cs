@@ -878,10 +878,12 @@ public class BackpackPanelController : MonoBehaviour
                 return;
             }
             
-            // 收集装备系统数据
+            // 收集装备系统数据 - 新系统已接管此功能
+            // 注意：新的EquipmentPersistenceManager系统已接管装备保存功能
+            // 保留旧代码以防需要回退，但新系统更稳定
             var equipmentData = InventorySystem.EquipmentSlotSaveExtension.CollectEquipmentSystemData();
             
-            // 保存到PlayerPrefs
+            // 保存到PlayerPrefs - 旧系统保存已被新系统替代
             InventorySystem.EquipmentSlotSaveExtension.SaveEquipmentDataToPlayerPrefs(equipmentData);
             
             if (showDebugLog)
@@ -990,10 +992,12 @@ public class BackpackPanelController : MonoBehaviour
         
         Debug.Log("BackpackPanelController: 开始加载装备数据");
         
-        // 使用传统方法加载装备数据
+        // 使用传统方法加载装备数据 - 新系统已接管此功能
+        // 注意：新的EquipmentPersistenceManager系统已接管装备加载功能
+        // 保留旧代码以防需要回退，但新系统通过BackpackEquipmentEventHandler自动处理
         if (InventorySystem.EquipmentSlotSaveExtension.HasEquipmentSaveData())
         {
-            Debug.Log("BackpackPanelController: 发现装备存档数据，开始加载");
+            Debug.Log("BackpackPanelController: 发现装备存档数据，开始加载（旧系统兼容性）");
             InventorySystem.EquipmentSlotSaveExtension.LoadEquipmentDataFromPlayerPrefs();
         }
         else

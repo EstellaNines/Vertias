@@ -1,27 +1,28 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using InventorySystem.Database;
 
 namespace InventorySystem
 {
     /// <summary>
-    /// ÈİÆ÷ÄÚÈİ±£´æÊı¾İ
+    /// å®¹å™¨å†…å®¹ä¿å­˜æ•°æ®
     /// </summary>
     [System.Serializable]
     public class ContainerSaveData
     {
-        public string containerItemID;              // ÈİÆ÷ÎïÆ·ID
-        public string containerGlobalID;            // ÈİÆ÷È«¾ÖÎ¨Ò»ID
-        public EquipmentSlotType slotType;          // ×°±¸²ÛÀàĞÍ
-        public List<ItemSaveData> containerItems;  // ÈİÆ÷ÄÚµÄÎïÆ·Êı¾İ
-        public string saveTime;                     // ±£´æÊ±¼ä
-        
+        public string containerItemID;              // å®¹å™¨ç‰©å“ID
+        public string containerGlobalID;            // å®¹å™¨å…¨å±€å”¯ä¸€ID
+        public EquipmentSlotType slotType;          // è£…å¤‡æ§½ç±»å‹
+        public List<ItemSaveData> containerItems;  // å®¹å™¨å†…çš„ç‰©å“æ•°æ®
+        public string saveTime;                     // ä¿å­˜æ—¶é—´
+
         public ContainerSaveData()
         {
             containerItems = new List<ItemSaveData>();
             saveTime = System.DateTime.Now.ToBinary().ToString();
         }
-        
+
         public ContainerSaveData(string itemID, string globalID, EquipmentSlotType type, ItemGrid containerGrid)
         {
             containerItemID = itemID;
@@ -29,119 +30,128 @@ namespace InventorySystem
             slotType = type;
             containerItems = new List<ItemSaveData>();
             saveTime = System.DateTime.Now.ToBinary().ToString();
-            
-            // ÊÕ¼¯ÈİÆ÷Íø¸ñÖĞµÄËùÓĞÎïÆ·
+
+            // æ”¶é›†å®¹å™¨ç½‘æ ¼ä¸­çš„æ‰€æœ‰ç‰©å“
             if (containerGrid != null)
             {
                 CollectContainerItems(containerGrid);
             }
         }
-        
+
         /// <summary>
-        /// ÊÕ¼¯ÈİÆ÷Íø¸ñÖĞµÄËùÓĞÎïÆ·
+        /// æ”¶é›†å®¹å™¨ç½‘æ ¼ä¸­çš„æ‰€æœ‰ç‰©å“
         /// </summary>
         private void CollectContainerItems(ItemGrid containerGrid)
         {
             containerItems.Clear();
-            
-            // ¼ì²éÈİÆ÷Íø¸ñÊÇ·ñÒÑÕıÈ·³õÊ¼»¯
+
+            // æ£€æŸ¥å®¹å™¨ç½‘æ ¼æ˜¯å¦å·²æ­£ç¡®åˆå§‹åŒ–
             if (containerGrid == null)
             {
-                Debug.LogWarning("[ContainerSaveManager] ÈİÆ÷Íø¸ñÎªnull£¬ÎŞ·¨ÊÕ¼¯ÎïÆ·");
+                Debug.LogWarning("[ContainerSaveData] å®¹å™¨ç½‘æ ¼ä¸ºç©ºï¼Œæ— æ³•æ”¶é›†ç‰©å“");
                 return;
             }
-            
-            if (!containerGrid.IsGridInitialized)
+
+            // éå†ç½‘æ ¼ä¸­çš„æ‰€æœ‰ç‰©å“
+            for (int x = 0; x < containerGrid.gridSizeWidth; x++)
             {
-                Debug.LogWarning($"[ContainerSaveManager] ÈİÆ÷Íø¸ñÎ´ÍêÈ«³õÊ¼»¯£¬Ìø¹ıÎïÆ·ÊÕ¼¯");
-                return;
-            }
-            
-            // ±éÀúÍø¸ñÊÕ¼¯ÎïÆ·
-            HashSet<Item> processedItems = new HashSet<Item>();
-            
-            for (int x = 0; x < containerGrid.CurrentWidth; x++)
-            {
-                for (int y = 0; y < containerGrid.CurrentHeight; y++)
+                for (int y = 0; y < containerGrid.gridSizeHeight; y++)
                 {
-                    try
+                    Item item = containerGrid.GetItemAt(x, y);
+                    if (item != null)
                     {
-                        Item item = containerGrid.GetItemAt(x, y);
-                        if (item != null && !processedItems.Contains(item))
+                        // è·å–ç‰©å“çš„ItemDataReaderç»„ä»¶
+                        ItemDataReader itemReader = item.GetComponent<ItemDataReader>();
+                        if (itemReader != null && itemReader.ItemData != null)
                         {
-                            processedItems.Add(item);
-                            
-                            ItemDataReader itemReader = item.GetComponent<ItemDataReader>();
-                            if (itemReader != null)
+                            // åˆ›å»ºç‰©å“ä¿å­˜æ•°æ®
+                            ItemSaveData itemSaveData = new ItemSaveData
                             {
-                                ItemSaveData itemSaveData = new ItemSaveData(itemReader, item.OnGridPosition);
-                                containerItems.Add(itemSaveData);
-                            }
+                                itemID = itemReader.ItemData.id.ToString(),
+                                categoryID = (int)itemReader.ItemData.category,
+                                stackCount = itemReader.currentStack,
+                                durability = itemReader.currentDurability,
+                                usageCount = itemReader.currentUsageCount,
+                                gridPosition = new Vector2Int(x, y)
+                            };
+
+                            containerItems.Add(itemSaveData);
                         }
-                    }
-                    catch (System.Exception e)
-                    {
-                        Debug.LogWarning($"[ContainerSaveManager] ÊÕ¼¯Î»ÖÃ({x},{y})µÄÎïÆ·Ê±³ö´í: {e.Message}");
                     }
                 }
             }
-            
-            Debug.Log($"[ContainerSaveManager] ÊÕ¼¯µ½ {containerItems.Count} ¸öÈİÆ÷ÎïÆ·");
+
+            Debug.Log($"[ContainerSaveData] æ”¶é›†åˆ° {containerItems.Count} ä¸ªå®¹å™¨ç‰©å“");
         }
     }
-    
+
     /// <summary>
-    /// ÈİÆ÷±£´æ¹ÜÀíÆ÷
-    /// ¸ºÔğ¹ÜÀíÈİÆ÷ÄÚÈİµÄ±£´æºÍ¼ÓÔØ
+    /// å®¹å™¨ä¿å­˜æ•°æ®é›†åˆ
+    /// </summary>
+    [System.Serializable]
+    public class ContainerSaveDataCollection
+    {
+        public List<ContainerSaveData> containers;
+
+        public ContainerSaveDataCollection()
+        {
+            containers = new List<ContainerSaveData>();
+        }
+    }
+
+    /// <summary>
+    /// å®¹å™¨ä¿å­˜ç®¡ç†å™¨
+    /// è´Ÿè´£ç®¡ç†å®¹å™¨ï¼ˆå¦‚èƒŒåŒ…ï¼‰å†…ç‰©å“çš„æŒä¹…åŒ–
     /// </summary>
     public class ContainerSaveManager : MonoBehaviour
     {
-        private static ContainerSaveManager instance;
+        private static ContainerSaveManager _instance;
         public static ContainerSaveManager Instance
         {
             get
             {
-                if (instance == null)
+                if (_instance == null)
                 {
-                    instance = FindObjectOfType<ContainerSaveManager>();
-                    if (instance == null)
+                    _instance = FindObjectOfType<ContainerSaveManager>();
+                    if (_instance == null)
                     {
                         GameObject go = new GameObject("ContainerSaveManager");
-                        instance = go.AddComponent<ContainerSaveManager>();
+                        _instance = go.AddComponent<ContainerSaveManager>();
                         DontDestroyOnLoad(go);
                     }
                 }
-                return instance;
+                return _instance;
             }
         }
-        
-        private Dictionary<string, ContainerSaveData> containerSaveData = new Dictionary<string, ContainerSaveData>();
-        private const string CONTAINER_SAVE_KEY = "ContainerData";
-        
+
+        private const string CONTAINER_SAVE_KEY = "ContainerSaveData";
+        private Dictionary<string, ContainerSaveData> _containerDataCache = new Dictionary<string, ContainerSaveData>();
+
         private void Awake()
         {
-            if (instance == null)
+            if (_instance == null)
             {
-                instance = this;
+                _instance = this;
                 DontDestroyOnLoad(gameObject);
                 LoadAllContainerData();
             }
-            else if (instance != this)
+            else if (_instance != this)
             {
                 Destroy(gameObject);
             }
         }
-        
+
         /// <summary>
-        /// ±£´æÈİÆ÷ÄÚÈİ
+        /// ä¿å­˜æŒ‡å®šå®¹å™¨çš„å†…å®¹
         /// </summary>
-        /// <param name="containerItem">ÈİÆ÷ÎïÆ·</param>
-        /// <param name="slotType">×°±¸²ÛÀàĞÍ</param>
-        /// <param name="containerGrid">ÈİÆ÷Íø¸ñ</param>
         public void SaveContainerContent(ItemDataReader containerItem, EquipmentSlotType slotType, ItemGrid containerGrid)
         {
-            if (containerItem == null || containerGrid == null) return;
-            
+            if (containerItem?.ItemData == null || containerGrid == null)
+            {
+                Debug.LogWarning("[ContainerSaveManager] ä¿å­˜å®¹å™¨å†…å®¹å¤±è´¥ï¼šå®¹å™¨ç‰©å“æˆ–ç½‘æ ¼ä¸ºç©º");
+                return;
+            }
+
             string containerKey = GetContainerKey(containerItem, slotType);
             ContainerSaveData saveData = new ContainerSaveData(
                 containerItem.ItemData.id.ToString(),
@@ -149,205 +159,399 @@ namespace InventorySystem
                 slotType,
                 containerGrid
             );
-            
-            containerSaveData[containerKey] = saveData;
-            SaveToPlayerPrefs();
-            
-            Debug.Log($"[ContainerSaveManager] ±£´æÈİÆ÷ÄÚÈİ: {containerKey}, ÎïÆ·ÊıÁ¿: {saveData.containerItems.Count}");
+
+            _containerDataCache[containerKey] = saveData;
+            SaveAllContainerDataToPlayerPrefs();
+
+            Debug.Log($"[ContainerSaveManager] ä¿å­˜å®¹å™¨å†…å®¹: {containerKey}, ç‰©å“æ•°é‡: {saveData.containerItems.Count}");
         }
-        
+
         /// <summary>
-        /// ¼ÓÔØÈİÆ÷ÄÚÈİ
+        /// åŠ è½½æŒ‡å®šå®¹å™¨çš„å†…å®¹
         /// </summary>
-        /// <param name="containerItem">ÈİÆ÷ÎïÆ·</param>
-        /// <param name="slotType">×°±¸²ÛÀàĞÍ</param>
-        /// <param name="containerGrid">ÈİÆ÷Íø¸ñ</param>
         public void LoadContainerContent(ItemDataReader containerItem, EquipmentSlotType slotType, ItemGrid containerGrid)
         {
-            if (containerItem == null || containerGrid == null) return;
-            
+            if (containerItem?.ItemData == null || containerGrid == null)
+            {
+                Debug.LogWarning("[ContainerSaveManager] åŠ è½½å®¹å™¨å†…å®¹å¤±è´¥ï¼šå®¹å™¨ç‰©å“æˆ–ç½‘æ ¼ä¸ºç©º");
+                return;
+            }
+
             string containerKey = GetContainerKey(containerItem, slotType);
             
-            if (containerSaveData.TryGetValue(containerKey, out ContainerSaveData saveData))
+            if (_containerDataCache.TryGetValue(containerKey, out ContainerSaveData saveData))
             {
-                StartCoroutine(RestoreContainerItems(saveData, containerGrid));
-                Debug.Log($"[ContainerSaveManager] ¼ÓÔØÈİÆ÷ÄÚÈİ: {containerKey}, ÎïÆ·ÊıÁ¿: {saveData.containerItems.Count}");
+                Debug.Log($"[ContainerSaveManager] åŠ è½½å®¹å™¨å†…å®¹: {containerKey}, ç‰©å“æ•°é‡: {saveData.containerItems.Count}");
+                RestoreContainerItems(saveData, containerGrid);
             }
             else
             {
-                Debug.Log($"[ContainerSaveManager] Ã»ÓĞÕÒµ½ÈİÆ÷±£´æÊı¾İ: {containerKey}");
+                Debug.Log($"[ContainerSaveManager] å®¹å™¨ {containerKey} æ— ä¿å­˜æ•°æ®");
             }
         }
-        
+
         /// <summary>
-        /// »Ö¸´ÈİÆ÷ÖĞµÄÎïÆ·
+        /// æ¢å¤å®¹å™¨ä¸­çš„ç‰©å“
         /// </summary>
-        private System.Collections.IEnumerator RestoreContainerItems(ContainerSaveData saveData, ItemGrid containerGrid)
+        private void RestoreContainerItems(ContainerSaveData saveData, ItemGrid containerGrid)
         {
-            yield return null; // µÈ´ıÒ»Ö¡È·±£Íø¸ñÍêÈ«³õÊ¼»¯
-            
+            if (saveData?.containerItems == null || containerGrid == null)
+            {
+                Debug.LogWarning("[ContainerSaveManager] æ¢å¤å®¹å™¨ç‰©å“å¤±è´¥ï¼šæ•°æ®æˆ–ç½‘æ ¼ä¸ºç©º");
+                return;
+            }
+
+            // æ¸…ç†å®¹å™¨ç½‘æ ¼ä¸­çš„æ‰€æœ‰ç°æœ‰ç‰©å“
+            ClearContainerGrid(containerGrid);
+
+            Debug.Log($"[ContainerSaveManager] å¼€å§‹æ¢å¤å®¹å™¨ç‰©å“ - å®¹å™¨: {saveData.containerItemID}_{saveData.containerGlobalID} ({saveData.slotType}), ç‰©å“æ•°é‡: {saveData.containerItems.Count}");
+
+            int successCount = 0;
+            int failCount = 0;
+
             foreach (ItemSaveData itemData in saveData.containerItems)
             {
-                GameObject itemPrefab = LoadItemPrefab(itemData);
-                if (itemPrefab != null)
+                Debug.Log($"[ContainerSaveManager] å°è¯•æ¢å¤ç‰©å“ - ID: {itemData.itemID}, ä½ç½®: {itemData.gridPosition}, å †å : {itemData.stackCount}");
+                
+                GameObject itemInstance = LoadItemPrefab(itemData);
+                if (itemInstance != null)
                 {
-                    GameObject itemInstance = Instantiate(itemPrefab);
                     ItemDataReader itemReader = itemInstance.GetComponent<ItemDataReader>();
-                    
-                    if (itemReader != null)
+                    Item itemComponent = itemInstance.GetComponent<Item>();
+
+                    if (itemReader != null && itemComponent != null)
                     {
-                        // »Ö¸´ÎïÆ·×´Ì¬
-                        itemReader.SetStack(itemData.stackCount);
-                        itemReader.SetDurability((int)itemData.durability);
-                        itemReader.SetUsageCount(itemData.usageCount);
-                        
-                        // ³¢ÊÔ·ÅÖÃµ½ÈİÆ÷Íø¸ñÖĞ
-                        if (containerGrid.PlaceItem(itemInstance.GetComponent<Item>(), itemData.gridPosition.x, itemData.gridPosition.y))
+                        // è®¾ç½®ç‰©å“çš„çˆ¶çº§ä¸ºå®¹å™¨ç½‘æ ¼
+                        itemInstance.transform.SetParent(containerGrid.transform, false);
+
+                        // å°è¯•å°†ç‰©å“æ”¾ç½®åˆ°æŒ‡å®šä½ç½®
+                        Vector2Int gridPos = itemData.gridPosition;
+                        if (containerGrid.PlaceItem(itemComponent, gridPos.x, gridPos.y))
                         {
-                            Debug.Log($"[ContainerSaveManager] ³É¹¦»Ö¸´ÎïÆ·: {itemReader.ItemData.itemName} µ½Î»ÖÃ {itemData.gridPosition}");
+                            // åå¤„ç†æ¢å¤çš„ç‰©å“
+                            PostProcessRestoredItem(itemInstance, itemComponent, itemData, containerGrid);
+                            successCount++;
+                            Debug.Log($"[ContainerSaveManager] âœ… æˆåŠŸæ¢å¤ç‰©å“: {itemReader.ItemData?.itemName} åˆ°ä½ç½® ({gridPos.x}, {gridPos.y})");
                         }
                         else
                         {
-                            Debug.LogWarning($"[ContainerSaveManager] ÎŞ·¨·ÅÖÃÎïÆ·: {itemReader.ItemData.itemName} µ½Î»ÖÃ {itemData.gridPosition}");
+                            Debug.LogWarning($"[ContainerSaveManager] âŒ æ— æ³•æ”¾ç½®ç‰©å“: {itemReader.ItemData?.itemName} åˆ°ä½ç½® ({gridPos.x}, {gridPos.y}) - ç½‘æ ¼å¯èƒ½å·²è¢«å ç”¨");
                             Destroy(itemInstance);
+                            failCount++;
                         }
                     }
                     else
                     {
+                        Debug.LogError($"[ContainerSaveManager] ç‰©å“ {itemInstance.name} ç¼ºå°‘å¿…è¦ç»„ä»¶");
                         Destroy(itemInstance);
+                        failCount++;
                     }
                 }
-                
-                yield return null; // Ã¿¸öÎïÆ·Ö®¼äµÈ´ıÒ»Ö¡
+                else
+                {
+                    Debug.LogError($"[ContainerSaveManager] æ— æ³•åˆ›å»ºç‰©å“å®ä¾‹: ID={itemData.itemID}");
+                    failCount++;
+                }
             }
+
+            Debug.Log($"[ContainerSaveManager] å®¹å™¨æ¢å¤å®Œæˆ - æˆåŠŸ: {successCount}, å¤±è´¥: {failCount}");
         }
-        
+
         /// <summary>
-        /// Éú³ÉÈİÆ÷Î¨Ò»¼ü
+        /// æ¸…ç†å®¹å™¨ç½‘æ ¼ä¸­çš„æ‰€æœ‰ç‰©å“
         /// </summary>
-        private string GetContainerKey(ItemDataReader containerItem, EquipmentSlotType slotType)
+        private void ClearContainerGrid(ItemGrid containerGrid)
         {
-            return $"{slotType}_{containerItem.ItemData.id}_{containerItem.ItemData.GlobalId}";
+            if (containerGrid == null) return;
+
+            Debug.Log($"[ContainerSaveManager] æ¸…ç†å®¹å™¨ç½‘æ ¼: {containerGrid.name}");
+
+            // æ”¶é›†æ‰€æœ‰éœ€è¦æ¸…ç†çš„ç‰©å“ï¼ˆé¿å…åœ¨éå†æ—¶ä¿®æ”¹é›†åˆï¼‰
+            var itemsToRemove = new List<Item>();
+            
+            for (int x = 0; x < containerGrid.gridSizeWidth; x++)
+            {
+                for (int y = 0; y < containerGrid.gridSizeHeight; y++)
+                {
+                    Item item = containerGrid.GetItemAt(x, y);
+                    if (item != null && !itemsToRemove.Contains(item))
+                    {
+                        itemsToRemove.Add(item);
+                    }
+                }
+            }
+
+            // ç§»é™¤æ‰€æœ‰ç‰©å“
+            foreach (Item item in itemsToRemove)
+            {
+                // è·å–ç‰©å“çš„ç½‘æ ¼ä½ç½®
+                Vector2Int itemPos = item.OnGridPosition;
+                
+                // ä»ç½‘æ ¼ä¸­ç§»é™¤
+                containerGrid.PickUpItem(itemPos.x, itemPos.y);
+                
+                // é”€æ¯ç‰©å“GameObject
+                if (item.gameObject != null)
+                {
+                    UnityEngine.Object.Destroy(item.gameObject);
+                }
+            }
+
+            Debug.Log($"[ContainerSaveManager] å·²æ¸…ç† {itemsToRemove.Count} ä¸ªç‰©å“");
         }
-        
+
         /// <summary>
-        /// ¼ÓÔØÎïÆ·Ô¤ÖÆÌå
+        /// ä»é¢„åˆ¶ä½“åŠ è½½ç‰©å“å®ä¾‹
+        /// æ¢å¤åŸæ¥çš„é¢„åˆ¶ä½“åŠ è½½æœºåˆ¶ä»¥ç¡®ä¿å®Œæ•´çš„ç»„ä»¶é…ç½®
         /// </summary>
         private GameObject LoadItemPrefab(ItemSaveData itemData)
         {
-            // ¸ù¾İÎïÆ·IDºÍÀà±ğID²éÕÒÔ¤ÖÆÌå
+            Debug.Log($"[ContainerSaveManager] å¼€å§‹åŠ è½½ç‰©å“é¢„åˆ¶ä½“ - ID={itemData.itemID}, ç±»åˆ«={itemData.categoryID}, å †å ={itemData.stackCount}");
+
+            // æ ¹æ®ç±»åˆ«IDç¡®å®šé¢„åˆ¶ä½“æ–‡ä»¶å¤¹
             ItemCategory category = (ItemCategory)itemData.categoryID;
             string categoryFolder = GetCategoryFolderName(category);
-            string prefabPath = $"InventorySystemResources/Prefabs/{categoryFolder}";
             
-            // ²éÕÒÆ¥ÅäµÄÔ¤ÖÆÌå
+            if (string.IsNullOrEmpty(categoryFolder))
+            {
+                Debug.LogError($"[ContainerSaveManager] æœªçŸ¥çš„ç‰©å“ç±»åˆ«: {category}");
+                return null;
+            }
+
+            // æ„å»ºé¢„åˆ¶ä½“è·¯å¾„å¹¶åŠ è½½
+            string prefabPath = $"InventorySystemResources/Prefabs/{categoryFolder}";
             GameObject[] prefabs = Resources.LoadAll<GameObject>(prefabPath);
+            
+            Debug.Log($"[ContainerSaveManager] åœ¨è·¯å¾„ {prefabPath} ä¸­æ‰¾åˆ° {prefabs.Length} ä¸ªé¢„åˆ¶ä½“");
+
+            // æŸ¥æ‰¾åŒ¹é…çš„é¢„åˆ¶ä½“
+            GameObject targetPrefab = null;
             foreach (GameObject prefab in prefabs)
             {
-                ItemDataReader reader = prefab.GetComponent<ItemDataReader>();
-                if (reader != null && reader.ItemData != null && reader.ItemData.id.ToString() == itemData.itemID)
+                if (prefab.name.StartsWith(itemData.itemID + "_"))
                 {
-                    return prefab;
+                    targetPrefab = prefab;
+                    Debug.Log($"[ContainerSaveManager] é€šè¿‡å‰ç¼€åŒ¹é…æ‰¾åˆ°é¢„åˆ¶ä½“: {prefab.name}");
+                    break;
                 }
             }
+
+            if (targetPrefab == null)
+            {
+                Debug.LogError($"[ContainerSaveManager] æœªæ‰¾åˆ°ç‰©å“é¢„åˆ¶ä½“: ID={itemData.itemID}, Category={category}");
+                return null;
+            }
+
+            // å®ä¾‹åŒ–é¢„åˆ¶ä½“
+            GameObject itemInstance = Instantiate(targetPrefab);
             
-            Debug.LogWarning($"[ContainerSaveManager] Î´ÕÒµ½ÎïÆ·Ô¤ÖÆÌå: ID={itemData.itemID}, Category={category}");
-            return null;
+            if (itemInstance != null)
+            {
+                Debug.Log($"[ContainerSaveManager] âœ… é¢„åˆ¶ä½“å®ä¾‹åŒ–æˆåŠŸ: {itemInstance.name}");
+
+                // æ¢å¤ç‰©å“çš„è¿è¡Œæ—¶æ•°æ®
+                ItemDataReader itemReader = itemInstance.GetComponent<ItemDataReader>();
+                if (itemReader != null)
+                {
+                    itemReader.currentStack = itemData.stackCount;
+                    itemReader.currentDurability = (int)itemData.durability;
+                    itemReader.currentUsageCount = itemData.usageCount;
+                    Debug.Log($"[ContainerSaveManager] æ¢å¤ç‰©å“è¿è¡Œæ—¶æ•°æ®: å †å ={itemData.stackCount}, è€ä¹…={itemData.durability}, ä½¿ç”¨æ¬¡æ•°={itemData.usageCount}");
+                }
+                else
+                {
+                    Debug.LogWarning($"[ContainerSaveManager] ç‰©å“ {itemInstance.name} ç¼ºå°‘ ItemDataReader ç»„ä»¶");
+                }
+            }
+            else
+            {
+                Debug.LogError($"[ContainerSaveManager] âŒ é¢„åˆ¶ä½“å®ä¾‹åŒ–å¤±è´¥: {targetPrefab.name}");
+            }
+
+            return itemInstance;
         }
-        
+
         /// <summary>
-        /// »ñÈ¡Àà±ğÎÄ¼ş¼ĞÃû³Æ
+        /// æ ¹æ®ç‰©å“ç±»åˆ«è·å–å¯¹åº”çš„é¢„åˆ¶ä½“æ–‡ä»¶å¤¹åç§°
         /// </summary>
         private string GetCategoryFolderName(ItemCategory category)
         {
             switch (category)
             {
-                case ItemCategory.Helmet: return "Helmet_Í·¿ø";
-                case ItemCategory.Armor: return "Armor_»¤¼×";
-                case ItemCategory.TacticalRig: return "TacticalRig_Õ½Êõ±³ĞÄ";
-                case ItemCategory.Backpack: return "Backpack_±³°ü";
-                case ItemCategory.Weapon: return "Weapon_ÎäÆ÷";
-                case ItemCategory.Ammunition: return "Ammunition_µ¯Ò©";
-                case ItemCategory.Food: return "Food_Ê³Îï";
-                case ItemCategory.Drink: return "Drink_ÒûÁÏ";
-                case ItemCategory.Sedative: return "Sedative_Õò¾²¼Á";
-                case ItemCategory.Hemostatic: return "Hemostatic_Ö¹Ñª¼Á";
-                case ItemCategory.Healing: return "Healing_ÖÎÁÆÒ©Îï";
-                case ItemCategory.Intelligence: return "Intelligence_Çé±¨";
-                case ItemCategory.Currency: return "Currency_»õ±Ò";
-                case ItemCategory.Special: return "Special_ÌØÊâÎïÆ·";
-                default: return "Other";
+                case ItemCategory.Weapon:
+                    return "Weapon_æ­¦å™¨";
+                case ItemCategory.Ammunition:
+                    return "Ammunition_å¼¹è¯";
+                case ItemCategory.Armor:
+                    return "Armor_æŠ¤ç”²";
+                case ItemCategory.Helmet:
+                    return "Helmet_å¤´ç›”";
+                case ItemCategory.TacticalRig:
+                    return "TacticalRig_æˆ˜æœ¯èƒŒå¿ƒ";
+                case ItemCategory.Backpack:
+                    return "Backpack_èƒŒåŒ…";
+                case ItemCategory.Healing:
+                    return "Healing_æ²»ç–—è¯ç‰©";
+                case ItemCategory.Food:
+                    return "Food_é£Ÿç‰©";
+                case ItemCategory.Drink:
+                    return "Drink_é¥®æ–™";
+                case ItemCategory.Hemostatic:
+                    return "Hemostatic_æ­¢è¡€å‰‚";
+                case ItemCategory.Sedative:
+                    return "Sedative_é•‡é™å‰‚";
+                case ItemCategory.Intelligence:
+                    return "Intelligence_æƒ…æŠ¥";
+                case ItemCategory.Currency:
+                    return "Currency_è´§å¸";
+                case ItemCategory.Special:
+                    return "Special";
+                default:
+                    Debug.LogWarning($"[ContainerSaveManager] æœªçŸ¥çš„ç‰©å“ç±»åˆ«: {category}");
+                    return null;
             }
         }
-        
+
         /// <summary>
-        /// ±£´æµ½PlayerPrefs
+        /// é€šè¿‡ç‰©å“IDæŸ¥æ‰¾ItemDataSOï¼ˆéå†æ‰€æœ‰ç‰©å“ï¼‰
+        /// æ³¨æ„ï¼šè¿™ä¸ªæ–¹æ³•ä¿ç•™ç”¨äºæµ‹è¯•å™¨ï¼Œä½†åœ¨æ­£å¸¸è¿è¡Œæ—¶ä¸ä½¿ç”¨
         /// </summary>
-        private void SaveToPlayerPrefs()
+        private ItemDataSO FindItemByID(int itemId)
         {
-            try
+            if (!ItemDatabase.Instance.IsInitialized)
             {
-                ContainerSaveDataCollection collection = new ContainerSaveDataCollection();
-                collection.containers = containerSaveData.Values.ToList();
-                
-                string json = JsonUtility.ToJson(collection, true);
-                PlayerPrefs.SetString(CONTAINER_SAVE_KEY, json);
-                PlayerPrefs.Save();
-                
-                Debug.Log($"[ContainerSaveManager] ±£´æÁË {containerSaveData.Count} ¸öÈİÆ÷Êı¾İµ½PlayerPrefs");
+                return null;
             }
-            catch (System.Exception e)
+            
+            var allItems = ItemDatabase.Instance.GetAllItems();
+            foreach (var item in allItems)
             {
-                Debug.LogError($"[ContainerSaveManager] ±£´æÈİÆ÷Êı¾İÊ§°Ü: {e.Message}");
+                if (item.id == itemId)
+                {
+                    return item;
+                }
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// å¯¹æ¢å¤çš„ç‰©å“è¿›è¡Œåå¤„ç†
+        /// </summary>
+        private void PostProcessRestoredItem(GameObject itemInstance, Item itemComponent, ItemSaveData itemData, ItemGrid containerGrid)
+        {
+            // è®¾ç½®ç‰©å“çš„ç½‘æ ¼å¼•ç”¨å’Œä½ç½®
+            itemComponent.OnGridReference = containerGrid;
+            itemComponent.OnGridPosition = itemData.gridPosition;
+
+            // è°ƒæ•´ç‰©å“çš„è§†è§‰å¤§å°ä»¥é€‚é…ç½‘æ ¼
+            itemComponent.AdjustVisualSizeForGrid();
+
+            // ç¡®ä¿DraggableItemç»„ä»¶å·²å°±ç»ª
+            DraggableItem draggableItem = itemInstance.GetComponent<DraggableItem>();
+            if (draggableItem != null)
+            {
+                Debug.Log($"[ContainerSaveManager] DraggableItemç»„ä»¶å·²å°±ç»ª");
+            }
+
+            // æ›´æ–°ç‰©å“çš„å †å æ˜¾ç¤º
+            UpdateItemStackDisplay(itemInstance, itemData.stackCount);
+
+            // ç¡®ä¿ç‰©å“åœ¨æ­£ç¡®çš„æ¸²æŸ“å±‚çº§
+            RectTransform rectTransform = itemInstance.GetComponent<RectTransform>();
+            if (rectTransform != null)
+            {
+                rectTransform.SetAsLastSibling();
+            }
+
+            Debug.Log($"[ContainerSaveManager] ç‰©å“åå¤„ç†å®Œæˆ: {itemInstance.name}");
+        }
+
+        /// <summary>
+        /// æ›´æ–°ç‰©å“å †å æ˜¾ç¤º
+        /// </summary>
+        private void UpdateItemStackDisplay(GameObject itemInstance, int stackCount)
+        {
+            // å¦‚æœæœ‰å †å æ˜¾ç¤ºçš„Textç»„ä»¶ï¼Œæ›´æ–°å®ƒ
+            Transform textTransform = itemInstance.transform.Find("ItemText");
+            if (textTransform != null)
+            {
+                var textComponent = textTransform.GetComponent<TMPro.TextMeshProUGUI>();
+                if (textComponent != null && stackCount > 1)
+                {
+                    textComponent.text = stackCount.ToString();
+                }
             }
         }
-        
+
         /// <summary>
-        /// ´ÓPlayerPrefs¼ÓÔØ
+        /// ç”Ÿæˆå®¹å™¨å”¯ä¸€æ ‡è¯†ç¬¦
+        /// </summary>
+        private string GetContainerKey(ItemDataReader containerItem, EquipmentSlotType slotType)
+        {
+            return $"{slotType}_{containerItem.ItemData.id}_{containerItem.ItemData.GlobalId}";
+        }
+
+        /// <summary>
+        /// ä¿å­˜æ‰€æœ‰å®¹å™¨æ•°æ®åˆ°PlayerPrefs
+        /// </summary>
+        private void SaveAllContainerDataToPlayerPrefs()
+        {
+            ContainerSaveDataCollection collection = new ContainerSaveDataCollection();
+            collection.containers = _containerDataCache.Values.ToList();
+
+            string json = JsonUtility.ToJson(collection, true);
+            PlayerPrefs.SetString(CONTAINER_SAVE_KEY, json);
+            PlayerPrefs.Save();
+
+            Debug.Log($"[ContainerSaveManager] ä¿å­˜äº† {collection.containers.Count} ä¸ªå®¹å™¨æ•°æ®åˆ°PlayerPrefs");
+        }
+
+        /// <summary>
+        /// ä»PlayerPrefsåŠ è½½æ‰€æœ‰å®¹å™¨æ•°æ®
         /// </summary>
         private void LoadAllContainerData()
         {
-            try
+            _containerDataCache.Clear();
+
+            if (PlayerPrefs.HasKey(CONTAINER_SAVE_KEY))
             {
-                if (PlayerPrefs.HasKey(CONTAINER_SAVE_KEY))
+                string json = PlayerPrefs.GetString(CONTAINER_SAVE_KEY);
+                if (!string.IsNullOrEmpty(json))
                 {
-                    string json = PlayerPrefs.GetString(CONTAINER_SAVE_KEY);
-                    ContainerSaveDataCollection collection = JsonUtility.FromJson<ContainerSaveDataCollection>(json);
-                    
-                    containerSaveData.Clear();
-                    foreach (ContainerSaveData data in collection.containers)
+                    try
                     {
-                        string key = $"{data.slotType}_{data.containerItemID}_{data.containerGlobalID}";
-                        containerSaveData[key] = data;
+                        ContainerSaveDataCollection collection = JsonUtility.FromJson<ContainerSaveDataCollection>(json);
+                        if (collection?.containers != null)
+                        {
+                            foreach (ContainerSaveData saveData in collection.containers)
+                            {
+                                string key = $"{saveData.slotType}_{saveData.containerItemID}_{saveData.containerGlobalID}";
+                                _containerDataCache[key] = saveData;
+                            }
+                        }
                     }
-                    
-                    Debug.Log($"[ContainerSaveManager] ´ÓPlayerPrefs¼ÓÔØÁË {containerSaveData.Count} ¸öÈİÆ÷Êı¾İ");
+                    catch (System.Exception e)
+                    {
+                        Debug.LogError($"[ContainerSaveManager] åŠ è½½å®¹å™¨æ•°æ®å¤±è´¥: {e.Message}");
+                    }
                 }
             }
-            catch (System.Exception e)
-            {
-                Debug.LogError($"[ContainerSaveManager] ¼ÓÔØÈİÆ÷Êı¾İÊ§°Ü: {e.Message}");
-            }
+
+            Debug.Log($"[ContainerSaveManager] ä»PlayerPrefsåŠ è½½äº† {_containerDataCache.Count} ä¸ªå®¹å™¨æ•°æ®");
         }
-        
+
         /// <summary>
-        /// Çå³ıËùÓĞÈİÆ÷±£´æÊı¾İ
+        /// æ¸…é™¤æ‰€æœ‰å®¹å™¨ä¿å­˜æ•°æ®
         /// </summary>
         public void ClearAllContainerData()
         {
-            containerSaveData.Clear();
-            PlayerPrefs.DeleteKey(CONTAINER_SAVE_KEY);
-            PlayerPrefs.Save();
-            Debug.Log("[ContainerSaveManager] Çå³ıÁËËùÓĞÈİÆ÷±£´æÊı¾İ");
+            _containerDataCache.Clear();
+            if (PlayerPrefs.HasKey(CONTAINER_SAVE_KEY))
+            {
+                PlayerPrefs.DeleteKey(CONTAINER_SAVE_KEY);
+                PlayerPrefs.Save();
+            }
+            Debug.Log("[ContainerSaveManager] æ¸…é™¤äº†æ‰€æœ‰å®¹å™¨ä¿å­˜æ•°æ®");
         }
-    }
-    
-    /// <summary>
-    /// ÈİÆ÷±£´æÊı¾İ¼¯ºÏ£¨ÓÃÓÚJSONĞòÁĞ»¯£©
-    /// </summary>
-    [System.Serializable]
-    public class ContainerSaveDataCollection
-    {
-        public List<ContainerSaveData> containers = new List<ContainerSaveData>();
     }
 }
