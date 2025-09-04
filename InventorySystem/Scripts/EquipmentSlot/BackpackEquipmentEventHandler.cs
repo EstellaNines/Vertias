@@ -61,6 +61,8 @@ namespace InventorySystem
         
         private void Awake()
         {
+            // 确保跨场景持久化
+            DontDestroyOnLoad(gameObject);
             InitializeComponents();
         }
         

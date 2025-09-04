@@ -39,7 +39,7 @@ namespace InventorySystem
         }
 
         /// <summary>
-        /// 收集容器网格中的所有物品
+        /// 收集容器网格中的所有物品（采用SpawnSystem的智能检测机制）
         /// </summary>
         private void CollectContainerItems(ItemGrid containerGrid)
         {
@@ -52,17 +52,23 @@ namespace InventorySystem
                 return;
             }
 
-            // 遍历网格中的所有物品
-            for (int x = 0; x < containerGrid.gridSizeWidth; x++)
+            // 方法1：直接从网格的子对象收集物品（更可靠）
+            List<Item> allItems = GetAllItemsInGrid(containerGrid);
+            
+            foreach (Item item in allItems)
             {
-                for (int y = 0; y < containerGrid.gridSizeHeight; y++)
+                if (item != null)
                 {
-                    Item item = containerGrid.GetItemAt(x, y);
-                    if (item != null)
+                    // 获取物品的ItemDataReader组件
+                    ItemDataReader itemReader = item.GetComponent<ItemDataReader>();
+                    if (itemReader != null && itemReader.ItemData != null)
                     {
-                        // 获取物品的ItemDataReader组件
-                        ItemDataReader itemReader = item.GetComponent<ItemDataReader>();
-                        if (itemReader != null && itemReader.ItemData != null)
+                        // 获取物品在网格中的起始位置（左上角位置）
+                        Vector2Int itemPosition = item.OnGridPosition;
+                        
+                        // 验证物品尺寸和位置的合理性
+                        Vector2Int itemSize = new Vector2Int(itemReader.ItemData.width, itemReader.ItemData.height);
+                        if (IsValidItemPlacement(containerGrid, itemPosition, itemSize))
                         {
                             // 创建物品保存数据
                             ItemSaveData itemSaveData = new ItemSaveData
@@ -72,16 +78,57 @@ namespace InventorySystem
                                 stackCount = itemReader.currentStack,
                                 durability = itemReader.currentDurability,
                                 usageCount = itemReader.currentUsageCount,
-                                gridPosition = new Vector2Int(x, y)
+                                gridPosition = itemPosition  // 使用物品的实际起始位置
                             };
 
                             containerItems.Add(itemSaveData);
+                        }
+                        else
+                        {
+                            Debug.LogWarning($"[ContainerSaveData] 物品 {itemReader.ItemData.itemName} 位置或尺寸异常: 位置={itemPosition}, 尺寸={itemSize}");
                         }
                     }
                 }
             }
 
             Debug.Log($"[ContainerSaveData] 收集到 {containerItems.Count} 个容器物品");
+        }
+        
+        /// <summary>
+        /// 获取网格中的所有物品（SpawnSystem风格）
+        /// </summary>
+        private List<Item> GetAllItemsInGrid(ItemGrid targetGrid)
+        {
+            List<Item> items = new List<Item>();
+            
+            // 遍历网格的所有子对象
+            for (int i = 0; i < targetGrid.transform.childCount; i++)
+            {
+                Transform child = targetGrid.transform.GetChild(i);
+                Item item = child.GetComponent<Item>();
+                if (item != null)
+                {
+                    items.Add(item);
+                }
+            }
+            
+            return items;
+        }
+        
+        /// <summary>
+        /// 验证物品放置的合理性（SpawnSystem风格）
+        /// </summary>
+        private bool IsValidItemPlacement(ItemGrid grid, Vector2Int position, Vector2Int itemSize)
+        {
+            // 边界检查
+            if (position.x < 0 || position.y < 0 ||
+                position.x + itemSize.x > grid.gridSizeWidth ||
+                position.y + itemSize.y > grid.gridSizeHeight)
+            {
+                return false;
+            }
+            
+            return true;
         }
     }
 
@@ -105,6 +152,19 @@ namespace InventorySystem
     /// </summary>
     public class ContainerSaveManager : MonoBehaviour
     {
+        [Header("ES3 保存设置")]
+        [FieldLabel("容器数据文件名")]
+        [Tooltip("用于保存容器数据的ES3文件名")]
+        public string containerSaveFileName = "ContainerData.es3";
+        
+        [FieldLabel("启用调试日志")]
+        [Tooltip("显示详细的保存/加载日志")]
+        public bool showDebugLog = true;
+        
+        [FieldLabel("启用备份")]
+        [Tooltip("保存时创建备份文件")]
+        public bool enableBackup = true;
+
         private static ContainerSaveManager _instance;
         public static ContainerSaveManager Instance
         {
@@ -112,31 +172,47 @@ namespace InventorySystem
             {
                 if (_instance == null)
                 {
+                    Debug.LogWarning("[ContainerSaveManager] 单例实例为null，尝试查找现有实例...");
                     _instance = FindObjectOfType<ContainerSaveManager>();
                     if (_instance == null)
                     {
+                        Debug.LogWarning("[ContainerSaveManager] 未找到现有实例，创建新实例");
                         GameObject go = new GameObject("ContainerSaveManager");
                         _instance = go.AddComponent<ContainerSaveManager>();
                         DontDestroyOnLoad(go);
                     }
+                    else
+                    {
+                        if (_instance.showDebugLog)
+                            Debug.Log($"[ContainerSaveManager] 通过FindObjectOfType找到实例 - ID: {_instance.GetInstanceID()}, 缓存大小: {_instance._containerDataCache.Count}");
+                    }
+                }
+                else
+                {
+                    if (_instance.showDebugLog)
+                        Debug.Log($"[ContainerSaveManager] 返回现有单例实例 - ID: {_instance.GetInstanceID()}, 缓存大小: {_instance._containerDataCache.Count}");
                 }
                 return _instance;
             }
         }
 
-        private const string CONTAINER_SAVE_KEY = "ContainerSaveData";
+        private const string CONTAINER_DATA_KEY = "ContainerDataCollection";
         private Dictionary<string, ContainerSaveData> _containerDataCache = new Dictionary<string, ContainerSaveData>();
 
         private void Awake()
         {
+            Debug.Log($"[ContainerSaveManager] Awake调用 - 实例ID: {GetInstanceID()}, 现有_instance: {(_instance != null ? _instance.GetInstanceID().ToString() : "null")}");
+            
             if (_instance == null)
             {
                 _instance = this;
                 DontDestroyOnLoad(gameObject);
+                Debug.Log($"[ContainerSaveManager] 设置为主实例 - ID: {GetInstanceID()}, GameObject: {gameObject.name}");
                 LoadAllContainerData();
             }
             else if (_instance != this)
             {
+                Debug.LogWarning($"[ContainerSaveManager] 发现重复实例 - 当前ID: {GetInstanceID()}, 主实例ID: {_instance.GetInstanceID()}, 销毁重复实例");
                 Destroy(gameObject);
             }
         }
@@ -153,6 +229,9 @@ namespace InventorySystem
             }
 
             string containerKey = GetContainerKey(containerItem, slotType);
+            Debug.Log($"[ContainerSaveManager] 保存容器键值: {containerKey}");
+            Debug.Log($"[ContainerSaveManager] 保存物品信息: ID={containerItem.ItemData.id}, GlobalId={containerItem.ItemData.GlobalId}, 名称={containerItem.ItemData.itemName}");
+            
             ContainerSaveData saveData = new ContainerSaveData(
                 containerItem.ItemData.id.ToString(),
                 containerItem.ItemData.GlobalId.ToString(),
@@ -161,9 +240,10 @@ namespace InventorySystem
             );
 
             _containerDataCache[containerKey] = saveData;
-            SaveAllContainerDataToPlayerPrefs();
+            SaveAllContainerDataToES3();
 
-            Debug.Log($"[ContainerSaveManager] 保存容器内容: {containerKey}, 物品数量: {saveData.containerItems.Count}");
+            if (showDebugLog)
+                Debug.Log($"[ContainerSaveManager] 保存容器内容: {containerKey}, 物品数量: {saveData.containerItems.Count}");
         }
 
         /// <summary>
@@ -179,14 +259,23 @@ namespace InventorySystem
 
             string containerKey = GetContainerKey(containerItem, slotType);
             
+            if (showDebugLog)
+            {
+                Debug.Log($"[ContainerSaveManager] 尝试加载容器: {containerKey}");
+                Debug.Log($"[ContainerSaveManager] 物品信息: ID={containerItem.ItemData.id}, GlobalId={containerItem.ItemData.GlobalId}, 名称={containerItem.ItemData.itemName}");
+                Debug.Log($"[ContainerSaveManager] 缓存中的键值列表: [{string.Join(", ", _containerDataCache.Keys)}]");
+            }
+            
             if (_containerDataCache.TryGetValue(containerKey, out ContainerSaveData saveData))
             {
-                Debug.Log($"[ContainerSaveManager] 加载容器内容: {containerKey}, 物品数量: {saveData.containerItems.Count}");
+                if (showDebugLog)
+                    Debug.Log($"[ContainerSaveManager] 加载容器内容: {containerKey}, 物品数量: {saveData.containerItems.Count}");
                 RestoreContainerItems(saveData, containerGrid);
             }
             else
             {
-                Debug.Log($"[ContainerSaveManager] 容器 {containerKey} 无保存数据");
+                if (showDebugLog)
+                    Debug.Log($"[ContainerSaveManager] 容器 {containerKey} 无保存数据");
             }
         }
 
@@ -284,16 +373,28 @@ namespace InventorySystem
             // 移除所有物品
             foreach (Item item in itemsToRemove)
             {
-                // 获取物品的网格位置
-                Vector2Int itemPos = item.OnGridPosition;
-                
-                // 从网格中移除
-                containerGrid.PickUpItem(itemPos.x, itemPos.y);
-                
-                // 销毁物品GameObject
-                if (item.gameObject != null)
+                try
                 {
-                    UnityEngine.Object.Destroy(item.gameObject);
+                    // 获取物品的网格位置
+                    Vector2Int itemPos = item.OnGridPosition;
+                    
+                    // 从网格中移除
+                    containerGrid.PickUpItem(itemPos.x, itemPos.y);
+                    
+                    // 销毁物品GameObject
+                    if (item.gameObject != null)
+                    {
+                        UnityEngine.Object.Destroy(item.gameObject);
+                    }
+                }
+                catch (System.Exception ex)
+                {
+                    Debug.LogWarning($"[ContainerSaveManager] 清理物品时发生异常: {ex.Message}");
+                    // 强制销毁物品GameObject
+                    if (item != null && item.gameObject != null)
+                    {
+                        UnityEngine.Object.Destroy(item.gameObject);
+                    }
                 }
             }
 
@@ -306,7 +407,8 @@ namespace InventorySystem
         /// </summary>
         private GameObject LoadItemPrefab(ItemSaveData itemData)
         {
-            Debug.Log($"[ContainerSaveManager] 开始加载物品预制体 - ID={itemData.itemID}, 类别={itemData.categoryID}, 堆叠={itemData.stackCount}");
+            if (showDebugLog)
+                Debug.Log($"[ContainerSaveManager] 开始加载物品预制体 - ID={itemData.itemID}, 类别={itemData.categoryID}, 堆叠={itemData.stackCount}");
 
             // 根据类别ID确定预制体文件夹
             ItemCategory category = (ItemCategory)itemData.categoryID;
@@ -322,7 +424,8 @@ namespace InventorySystem
             string prefabPath = $"InventorySystemResources/Prefabs/{categoryFolder}";
             GameObject[] prefabs = Resources.LoadAll<GameObject>(prefabPath);
             
-            Debug.Log($"[ContainerSaveManager] 在路径 {prefabPath} 中找到 {prefabs.Length} 个预制体");
+            if (showDebugLog)
+                Debug.Log($"[ContainerSaveManager] 在路径 {prefabPath} 中找到 {prefabs.Length} 个预制体");
 
             // 查找匹配的预制体
             GameObject targetPrefab = null;
@@ -331,7 +434,8 @@ namespace InventorySystem
                 if (prefab.name.StartsWith(itemData.itemID + "_"))
                 {
                     targetPrefab = prefab;
-                    Debug.Log($"[ContainerSaveManager] 通过前缀匹配找到预制体: {prefab.name}");
+                    if (showDebugLog)
+                        Debug.Log($"[ContainerSaveManager] 通过前缀匹配找到预制体: {prefab.name}");
                     break;
                 }
             }
@@ -347,7 +451,8 @@ namespace InventorySystem
             
             if (itemInstance != null)
             {
-                Debug.Log($"[ContainerSaveManager] ✅ 预制体实例化成功: {itemInstance.name}");
+                if (showDebugLog)
+                    Debug.Log($"[ContainerSaveManager] ✅ 预制体实例化成功: {itemInstance.name}");
 
                 // 恢复物品的运行时数据
                 ItemDataReader itemReader = itemInstance.GetComponent<ItemDataReader>();
@@ -356,7 +461,9 @@ namespace InventorySystem
                     itemReader.currentStack = itemData.stackCount;
                     itemReader.currentDurability = (int)itemData.durability;
                     itemReader.currentUsageCount = itemData.usageCount;
-                    Debug.Log($"[ContainerSaveManager] 恢复物品运行时数据: 堆叠={itemData.stackCount}, 耐久={itemData.durability}, 使用次数={itemData.usageCount}");
+                    
+                    if (showDebugLog)
+                        Debug.Log($"[ContainerSaveManager] 恢复物品运行时数据: 堆叠={itemData.stackCount}, 耐久={itemData.durability}, 使用次数={itemData.usageCount}");
                 }
                 else
                 {
@@ -492,52 +599,120 @@ namespace InventorySystem
         }
 
         /// <summary>
-        /// 保存所有容器数据到PlayerPrefs
+        /// 保存所有容器数据到ES3文件
         /// </summary>
-        private void SaveAllContainerDataToPlayerPrefs()
+        private void SaveAllContainerDataToES3()
         {
-            ContainerSaveDataCollection collection = new ContainerSaveDataCollection();
-            collection.containers = _containerDataCache.Values.ToList();
+            try
+            {
+                ContainerSaveDataCollection collection = new ContainerSaveDataCollection();
+                collection.containers = _containerDataCache.Values.ToList();
 
-            string json = JsonUtility.ToJson(collection, true);
-            PlayerPrefs.SetString(CONTAINER_SAVE_KEY, json);
-            PlayerPrefs.Save();
+                // 创建备份（如果启用）
+                if (enableBackup && ES3.FileExists(containerSaveFileName))
+                {
+                    CreateBackupFile();
+                }
 
-            Debug.Log($"[ContainerSaveManager] 保存了 {collection.containers.Count} 个容器数据到PlayerPrefs");
+                // 使用ES3保存数据
+                ES3.Save(CONTAINER_DATA_KEY, collection, containerSaveFileName);
+
+                if (showDebugLog)
+                    Debug.Log($"[ContainerSaveManager] 保存了 {collection.containers.Count} 个容器数据到ES3文件: {containerSaveFileName}");
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError($"[ContainerSaveManager] ES3保存失败: {e.Message}");
+            }
         }
 
         /// <summary>
-        /// 从PlayerPrefs加载所有容器数据
+        /// 从ES3文件加载所有容器数据
         /// </summary>
         private void LoadAllContainerData()
         {
             _containerDataCache.Clear();
 
-            if (PlayerPrefs.HasKey(CONTAINER_SAVE_KEY))
+            if (showDebugLog)
+                Debug.Log($"[ContainerSaveManager] 开始从ES3文件加载容器数据: {containerSaveFileName}");
+
+            if (ES3.FileExists(containerSaveFileName))
             {
-                string json = PlayerPrefs.GetString(CONTAINER_SAVE_KEY);
-                if (!string.IsNullOrEmpty(json))
+                try
                 {
-                    try
+                    if (ES3.KeyExists(CONTAINER_DATA_KEY, containerSaveFileName))
                     {
-                        ContainerSaveDataCollection collection = JsonUtility.FromJson<ContainerSaveDataCollection>(json);
+                        ContainerSaveDataCollection collection = ES3.Load<ContainerSaveDataCollection>(CONTAINER_DATA_KEY, containerSaveFileName);
+                        
+                        if (showDebugLog)
+                            Debug.Log($"[ContainerSaveManager] ES3加载成功，collection是否为null: {collection == null}");
+                        
                         if (collection?.containers != null)
                         {
+                            if (showDebugLog)
+                                Debug.Log($"[ContainerSaveManager] collection.containers数量: {collection.containers.Count}");
+                            
                             foreach (ContainerSaveData saveData in collection.containers)
                             {
                                 string key = $"{saveData.slotType}_{saveData.containerItemID}_{saveData.containerGlobalID}";
                                 _containerDataCache[key] = saveData;
+                                
+                                if (showDebugLog)
+                                    Debug.Log($"[ContainerSaveManager] 已加载容器数据到缓存: {key}, 物品数量: {saveData.containerItems?.Count ?? 0}");
                             }
                         }
+                        else
+                        {
+                            Debug.LogWarning($"[ContainerSaveManager] collection或collection.containers为null");
+                        }
                     }
-                    catch (System.Exception e)
+                    else
                     {
-                        Debug.LogError($"[ContainerSaveManager] 加载容器数据失败: {e.Message}");
+                        if (showDebugLog)
+                            Debug.Log($"[ContainerSaveManager] ES3文件中没有找到容器数据键: {CONTAINER_DATA_KEY}");
                     }
                 }
+                catch (System.Exception e)
+                {
+                    Debug.LogError($"[ContainerSaveManager] ES3加载容器数据失败: {e.Message}");
+                    Debug.LogError($"[ContainerSaveManager] 异常堆栈: {e.StackTrace}");
+                }
+            }
+            else
+            {
+                if (showDebugLog)
+                    Debug.Log($"[ContainerSaveManager] ES3文件不存在: {containerSaveFileName} (首次运行是正常的)");
             }
 
-            Debug.Log($"[ContainerSaveManager] 从PlayerPrefs加载了 {_containerDataCache.Count} 个容器数据");
+            if (showDebugLog)
+            {
+                Debug.Log($"[ContainerSaveManager] 从ES3文件加载了 {_containerDataCache.Count} 个容器数据");
+                Debug.Log($"[ContainerSaveManager] 缓存中的所有键值: [{string.Join(", ", _containerDataCache.Keys)}]");
+            }
+        }
+
+        /// <summary>
+        /// 创建备份文件
+        /// </summary>
+        private void CreateBackupFile()
+        {
+            try
+            {
+                string backupFileName = containerSaveFileName.Replace(".es3", "_backup.es3");
+                
+                if (ES3.FileExists(containerSaveFileName))
+                {
+                    byte[] originalData = ES3.LoadRawBytes(containerSaveFileName);
+                    ES3.SaveRaw(originalData, backupFileName);
+                    
+                    if (showDebugLog)
+                        Debug.Log($"[ContainerSaveManager] 创建备份文件: {backupFileName}");
+                }
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogWarning($"[ContainerSaveManager] 创建备份文件失败: {e.Message}");
+            }
         }
 
         /// <summary>
@@ -546,12 +721,54 @@ namespace InventorySystem
         public void ClearAllContainerData()
         {
             _containerDataCache.Clear();
-            if (PlayerPrefs.HasKey(CONTAINER_SAVE_KEY))
+            
+            // 删除ES3文件
+            if (ES3.FileExists(containerSaveFileName))
             {
-                PlayerPrefs.DeleteKey(CONTAINER_SAVE_KEY);
+                ES3.DeleteFile(containerSaveFileName);
+            }
+            
+            // 同时清理旧的PlayerPrefs数据（迁移兼容性）
+            if (PlayerPrefs.HasKey("ContainerSaveData"))
+            {
+                PlayerPrefs.DeleteKey("ContainerSaveData");
                 PlayerPrefs.Save();
             }
-            Debug.Log("[ContainerSaveManager] 清除了所有容器保存数据");
+            
+            if (showDebugLog)
+                Debug.Log("[ContainerSaveManager] 清除了所有容器保存数据（ES3文件和旧PlayerPrefs数据）");
+        }
+
+        /// <summary>
+        /// 手动保存容器数据（供外部调用）
+        /// </summary>
+        public void ManualSave()
+        {
+            SaveAllContainerDataToES3();
+        }
+
+        /// <summary>
+        /// 手动加载容器数据（供外部调用）
+        /// </summary>
+        public void ManualLoad()
+        {
+            LoadAllContainerData();
+        }
+
+        /// <summary>
+        /// 获取容器数据统计信息
+        /// </summary>
+        public string GetContainerStats()
+        {
+            int totalContainers = _containerDataCache.Count;
+            int totalItems = 0;
+            
+            foreach (var container in _containerDataCache.Values)
+            {
+                totalItems += container.containerItems?.Count ?? 0;
+            }
+            
+            return $"容器数量: {totalContainers}, 总物品数量: {totalItems}";
         }
     }
 }

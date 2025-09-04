@@ -117,6 +117,10 @@ namespace InventorySystem
                 instance = this;
                 DontDestroyOnLoad(gameObject);
                 InitializeManager();
+                
+                // 注册场景加载事件，确保跨场景重新初始化
+                UnityEngine.SceneManagement.SceneManager.sceneLoaded += OnSceneLoaded;
+                LogDebug("已注册场景加载事件监听器");
             }
             else if (instance != this)
             {
@@ -134,12 +138,15 @@ namespace InventorySystem
         {
             if (instance == this)
             {
+                // 取消注册场景加载事件
+                UnityEngine.SceneManagement.SceneManager.sceneLoaded -= OnSceneLoaded;
+                
                 instance = null;
                 
                 // 确保在场景切换时正确清理
                 if (Application.isPlaying)
                 {
-                    Debug.Log("[EquipmentPersistenceManager] 单例实例已清理");
+                    LogDebug("单例实例已清理，场景事件监听器已移除");
                 }
             }
         }
@@ -238,6 +245,59 @@ namespace InventorySystem
             else
             {
                 LogError("未找到装备槽管理器，持久化系统无法正常工作");
+            }
+        }
+        
+        /// <summary>
+        /// 场景加载时的重新初始化处理
+        /// </summary>
+        private void OnSceneLoaded(UnityEngine.SceneManagement.Scene scene, UnityEngine.SceneManagement.LoadSceneMode mode)
+        {
+            LogDebug($"场景加载事件触发: {scene.name}, 模式: {mode}");
+            
+            // 重置组件引用，因为场景切换可能导致引用失效
+            equipmentSlotManager = null;
+            
+            // 延迟重新初始化，确保新场景中的组件已经创建
+            StartCoroutine(DelayedReinitialization());
+        }
+        
+        /// <summary>
+        /// 场景切换后的延迟重新初始化
+        /// </summary>
+        private IEnumerator DelayedReinitialization()
+        {
+            LogDebug("开始场景切换后的重新初始化...");
+            
+            // 等待新场景完全加载
+            yield return new WaitForSeconds(0.5f);
+            
+            // 重新查找装备槽管理器
+            if (equipmentSlotManager == null)
+            {
+                equipmentSlotManager = EquipmentSlotManager.Instance;
+            }
+            
+            if (equipmentSlotManager != null)
+            {
+                isInitialized = true;
+                LogDebug("场景切换后重新找到装备槽管理器");
+                
+                // 检查是否需要自动加载装备（跨会话恢复）
+                if (autoLoad && HasSavedData())
+                {
+                    LogDebug("场景切换后检测到保存的装备数据，开始自动加载");
+                    yield return new WaitForSeconds(1.0f); // 等待装备槽完全初始化
+                    
+                    if (Application.isPlaying)
+                    {
+                        StartCoroutine(LoadEquipmentDataCoroutine());
+                    }
+                }
+            }
+            else
+            {
+                LogWarning("场景切换后仍未找到装备槽管理器，将在下次场景加载时重试");
             }
         }
         
@@ -632,6 +692,9 @@ namespace InventorySystem
                 {
                     successCount++;
                     LogDebug($"�7�3 装备恢复成功: {slotData.slotType}");
+                    
+                    // 如果装备恢复成功，尝试恢复容器内容
+                    yield return StartCoroutine(RestoreContainerContentIfNeeded(slotData.slotType));
                 }
                 else
                 {
@@ -642,6 +705,61 @@ namespace InventorySystem
             }
             
             LogDebug($"装备数据应用完成，成功恢复 {successCount}/{attemptCount} 个装备");
+        }
+
+        /// <summary>
+        /// 恢复容器内容（如果需要）
+        /// </summary>
+        /// <param name="slotType">装备槽类型</param>
+        private IEnumerator RestoreContainerContentIfNeeded(EquipmentSlotType slotType)
+        {
+            // 只有容器类型的装备才需要恢复内容
+            if (slotType != EquipmentSlotType.Backpack && slotType != EquipmentSlotType.TacticalRig)
+            {
+                yield break;
+            }
+
+            // 等待一帧确保装备槽完全初始化
+            yield return null;
+
+            // 查找对应的装备槽
+            var equipmentSlot = equipmentSlotManager.GetEquipmentSlot(slotType);
+            if (equipmentSlot == null)
+            {
+                LogWarning($"未找到装备槽: {slotType}");
+                yield break;
+            }
+
+            // 获取当前装备的物品
+            var equippedItem = equipmentSlot.CurrentEquippedItem;
+            if (equippedItem == null)
+            {
+                LogWarning($"装备槽 {slotType} 中没有装备物品");
+                yield break;
+            }
+
+            // 获取容器网格
+            var containerGrid = equipmentSlot.GetComponentInChildren<ItemGrid>();
+            if (containerGrid == null)
+            {
+                LogWarning($"装备槽 {slotType} 没有找到容器网格");
+                yield break;
+            }
+
+            // 调用ContainerSaveManager恢复容器内容
+            var containerSaveManager = ContainerSaveManager.Instance;
+            if (containerSaveManager != null)
+            {
+                LogDebug($"开始恢复容器内容: {slotType}");
+                containerSaveManager.LoadContainerContent(equippedItem, slotType, containerGrid);
+                LogDebug($"容器内容恢复完成: {slotType}");
+            }
+            else
+            {
+                LogError("ContainerSaveManager实例不存在，无法恢复容器内容");
+            }
+
+            yield return null;
         }
         
         /// <summary>

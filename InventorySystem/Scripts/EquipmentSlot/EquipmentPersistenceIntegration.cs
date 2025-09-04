@@ -71,6 +71,8 @@ namespace InventorySystem
         
         private void Awake()
         {
+            // 确保跨场景持久化
+            DontDestroyOnLoad(gameObject);
             LogDebug("装备持久化系统集成组件启动");
         }
         

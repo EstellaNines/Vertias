@@ -62,7 +62,7 @@ namespace InventorySystem
             allTestsPassed &= TestEquipmentSlotIntegration();
             
             // 测试4: 检查PlayerPrefs操作
-            allTestsPassed &= TestPlayerPrefsOperations();
+            allTestsPassed &= TestES3Operations();
             
             // 测试5: 检查ItemDatabase和ItemDataSO系统
             yield return StartCoroutine(TestItemDatabaseSystemCoroutine());
@@ -177,23 +177,43 @@ namespace InventorySystem
         /// <summary>
         /// 测试PlayerPrefs操作
         /// </summary>
-        private bool TestPlayerPrefsOperations()
+        private bool TestES3Operations()
         {
-            LogTest("--- 测试4: PlayerPrefs操作测试 ---");
+            LogTest("--- 测试4: ES3保存系统操作测试 ---");
             
             try
             {
                 var manager = ContainerSaveManager.Instance;
                 
-                // 测试清理操作（安全测试）
-                manager.ClearAllContainerData();
-                LogTest("✅ ClearAllContainerData 执行成功");
+                // 测试统计信息获取
+                string stats = manager.GetContainerStats();
+                LogTest($"📊 容器统计信息: {stats}");
+                
+                // 测试手动保存功能
+                manager.ManualSave();
+                LogTest("✅ 手动保存功能测试成功");
+                
+                // 测试手动加载功能
+                manager.ManualLoad();
+                LogTest("✅ 手动加载功能测试成功");
+                
+                // 注意：不在运行时清理数据，以免影响用户保存的容器内容
+                if (Application.isEditor && !Application.isPlaying)
+                {
+                    // 只在编辑器非运行模式下测试清理功能
+                    manager.ClearAllContainerData();
+                    LogTest("✅ ClearAllContainerData 执行成功（仅限编辑器模式）");
+                }
+                else
+                {
+                    LogTest("⚠️ 跳过数据清理测试（保护运行时容器数据）");
+                }
                 
                 return true;
             }
             catch (System.Exception e)
             {
-                LogTest($"❌ PlayerPrefs操作测试异常: {e.Message}");
+                LogTest($"❌ ES3操作测试异常: {e.Message}");
                 return false;
             }
         }
