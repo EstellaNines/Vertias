@@ -1,11 +1,3 @@
-冲突解决策略  
-1. 保留你本地（TPS-v0.2.6-5-Beta1-背包系统重做）的全部代码——功能最全、最新。  
-2. 把 main 分支里“纯注释”或“空行”类改动拿过来，不影响逻辑，但能提升可读性。  
-3. 其余 main 分支的代码（特别是 `SetPositionSimple` 重写、缺失的 `SetEquipmentSlotHighlight` 方法等）全部丢弃。  
-
-整合后的最终文件（可直接覆盖到仓库，解决冲突）：  
-
-```csharp
 // ==========================================================================
 // 物品放置高亮指示器
 // 用于在物品放置时显示高亮：绿色表示可放置，红色表示不可放置
@@ -22,7 +14,7 @@ public class InventoryHighlight : MonoBehaviour
     [SerializeField] private Image highlightImage;        // 高亮框 Image 组件
 
     [Header("颜色设置")]
-    [SerializeField] private Color canPlaceColor    = new Color(0f, 1f, 0f, 0.5f); // 可放置颜色（绿色）
+    [SerializeField] private Color canPlaceColor = new Color(0f, 1f, 0f, 0.5f); // 可放置颜色（绿色）
     [SerializeField] private Color cannotPlaceColor = new Color(1f, 0f, 0f, 0.5f); // 不可放置颜色（红色）
 
     private void Awake()
@@ -46,7 +38,7 @@ public class InventoryHighlight : MonoBehaviour
 
         Vector2 size = new Vector2
         {
-            x = targetItem.GetWidth()  * ItemGrid.tileSizeWidth,
+            x = targetItem.GetWidth() * ItemGrid.tileSizeWidth,
             y = targetItem.GetHeight() * ItemGrid.tileSizeHeight
         };
         highlighter.sizeDelta = size;
@@ -59,7 +51,7 @@ public class InventoryHighlight : MonoBehaviour
 
         Vector2 size = new Vector2
         {
-            x = width  * ItemGrid.tileSizeWidth,
+            x = width * ItemGrid.tileSizeWidth,
             y = height * ItemGrid.tileSizeHeight
         };
         highlighter.sizeDelta = size;
@@ -166,10 +158,10 @@ public class InventoryHighlight : MonoBehaviour
             highlighter.sizeDelta = slotRect.sizeDelta;
 
         // 设置高亮位置为装备槽中心
-        highlighter.localPosition   = Vector3.zero;
-        highlighter.anchorMin       = new Vector2(0.5f, 0.5f);
-        highlighter.anchorMax       = new Vector2(0.5f, 0.5f);
-        highlighter.pivot           = new Vector2(0.5f, 0.5f);
+        highlighter.localPosition = Vector3.zero;
+        highlighter.anchorMin = new Vector2(0.5f, 0.5f);
+        highlighter.anchorMax = new Vector2(0.5f, 0.5f);
+        highlighter.pivot = new Vector2(0.5f, 0.5f);
 
         // 设置高亮颜色并显示
         SetCanPlace(canEquip);
@@ -219,6 +211,3 @@ public class InventoryHighlight : MonoBehaviour
     }
     #endregion
 }
-```
-
-把以上代码直接提交即可解决该 Git 冲突，同时保留你所需的所有功能与注释。
