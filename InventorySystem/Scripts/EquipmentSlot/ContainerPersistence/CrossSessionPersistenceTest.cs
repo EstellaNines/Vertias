@@ -37,7 +37,7 @@ namespace InventorySystem
             var sessionManager = FindObjectOfType<ContainerSessionManager>();
             if (sessionManager != null)
             {
-                LogTest("�7�3 ContainerSessionManager已找到");
+                LogTest("✅ ContainerSessionManager已找到");
                 LogTest($"状态: {sessionManager.GetCurrentStatus()}");
             }
             else
@@ -50,7 +50,7 @@ namespace InventorySystem
             if (EquipmentPersistenceManager.OnEquipmentRestored != null)
             {
                 var listeners = EquipmentPersistenceManager.OnEquipmentRestored.GetInvocationList();
-                LogTest($"�7�3 装备恢复事件有 {listeners.Length} 个监听器");
+                LogTest($"✅ 装备恢复事件有 {listeners.Length} 个监听器");
                 
                 foreach (var listener in listeners)
                 {
@@ -66,7 +66,7 @@ namespace InventorySystem
             var containerManager = ContainerSaveManager.Instance;
             if (containerManager != null)
             {
-                LogTest("�7�3 ContainerSaveManager已找到");
+                LogTest("✅ ContainerSaveManager已找到");
                 
                 // 检查是否有保存的跨会话数据
                 yield return new WaitForSeconds(0.5f);
@@ -81,12 +81,12 @@ namespace InventorySystem
             var slotManager = EquipmentSlotManager.Instance;
             if (slotManager != null)
             {
-                LogTest("�7�3 EquipmentSlotManager已找到");
+                LogTest("✅ EquipmentSlotManager已找到");
                 
                 var backpackSlot = slotManager.GetEquipmentSlot(EquipmentSlotType.Backpack);
                 if (backpackSlot != null && backpackSlot.HasEquippedItem)
                 {
-                    LogTest("�7�3 背包已装备");
+                    LogTest("✅ 背包已装备");
                     
                     var containerGrid = backpackSlot.GetComponentInChildren<ItemGrid>();
                     if (containerGrid != null)

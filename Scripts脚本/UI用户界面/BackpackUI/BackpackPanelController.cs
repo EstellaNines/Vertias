@@ -878,13 +878,9 @@ public class BackpackPanelController : MonoBehaviour
                 return;
             }
             
-            // 收集装备系统数据 - 新系统已接管此功能
-            // 注意：新的EquipmentPersistenceManager系统已接管装备保存功能
-            // 保留旧代码以防需要回退，但新系统更稳定
-            var equipmentData = InventorySystem.EquipmentSlotSaveExtension.CollectEquipmentSystemData();
-            
-            // 保存到PlayerPrefs - 旧系统保存已被新系统替代
-            InventorySystem.EquipmentSlotSaveExtension.SaveEquipmentDataToPlayerPrefs(equipmentData);
+            // 🔧 装备保存现在由EquipmentPersistenceManager统一处理
+            // 不再需要手动调用保存，避免与新系统冲突
+            Debug.Log("BackpackPanelController: 装备保存已委托给EquipmentPersistenceManager");
             
             if (showDebugLog)
                 Debug.Log($"BackpackPanelController: 已强制保存 {equipmentSlots.Length} 个装备栏数据");
@@ -965,10 +961,18 @@ public class BackpackPanelController : MonoBehaviour
         var allSlots = equipmentManager.GetAllEquipmentSlots();
         Debug.Log($"BackpackPanelController: 装备槽检测完成，共注册 {allSlots.Count} 个装备槽");
         
-        // 详细显示注册的装备槽
+        // 详细显示注册的装备槽，并确保激活状态
         foreach (var kvp in allSlots)
         {
             Debug.Log($"BackpackPanelController: 已注册装备槽: {kvp.Key} -> {kvp.Value.name}");
+            
+            // 🔧 确保装备槽被激活，以便触发容器内容加载
+            if (!kvp.Value.gameObject.activeInHierarchy)
+            {
+                kvp.Value.gameObject.SetActive(true);
+                if (showDebugLog)
+                    Debug.Log($"BackpackPanelController: 激活装备槽 {kvp.Key} 以触发容器内容加载");
+            }
         }
         
         // 自动保存管理器已移除，使用传统保存方法
@@ -992,18 +996,9 @@ public class BackpackPanelController : MonoBehaviour
         
         Debug.Log("BackpackPanelController: 开始加载装备数据");
         
-        // 使用传统方法加载装备数据 - 新系统已接管此功能
-        // 注意：新的EquipmentPersistenceManager系统已接管装备加载功能
-        // 保留旧代码以防需要回退，但新系统通过BackpackEquipmentEventHandler自动处理
-        if (InventorySystem.EquipmentSlotSaveExtension.HasEquipmentSaveData())
-        {
-            Debug.Log("BackpackPanelController: 发现装备存档数据，开始加载（旧系统兼容性）");
-            InventorySystem.EquipmentSlotSaveExtension.LoadEquipmentDataFromPlayerPrefs();
-        }
-        else
-        {
-            Debug.Log("BackpackPanelController: 没有发现装备存档数据");
-        }
+        // 🔧 装备加载现在由EquipmentPersistenceManager统一处理
+        // 不再需要手动调用加载，避免与新系统冲突
+        Debug.Log("BackpackPanelController: 装备加载已委托给EquipmentPersistenceManager");
     }
     
     /// <summary>

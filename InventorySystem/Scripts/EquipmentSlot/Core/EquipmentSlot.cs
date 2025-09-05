@@ -67,6 +67,9 @@ namespace InventorySystem
         private InventoryController inventoryController;
         private Canvas canvas;
         private bool isDragHovering = false;
+        
+        // 🔧 容器内容加载标志
+        private bool needsContainerContentLoad = false;
 
         #region Unity生命周期
 
@@ -80,6 +83,25 @@ namespace InventorySystem
         {
             InitializeSlot();
             FindSystemComponents();
+        }
+
+        private void OnEnable()
+        {
+            // 🔧 检查是否需要加载容器内容
+            if (needsContainerContentLoad && containerGrid != null && currentEquippedItem != null)
+            {
+                needsContainerContentLoad = false; // 重置标志
+                LogDebugInfo($"装备槽激活，开始加载容器内容");
+                
+                try
+                {
+                    StartCoroutine(DelayedLoadContainerContent());
+                }
+                catch (System.Exception e)
+                {
+                    Debug.LogError($"[EquipmentSlot] OnEnable中加载容器内容失败: {e.Message}");
+                }
+            }
         }
 
         private void OnValidate()
@@ -1436,8 +1458,18 @@ namespace InventorySystem
 
             try
             {
-                // 延迟一帧加载，确保网格完全初始化
-                StartCoroutine(DelayedLoadContainerContent());
+                // 🔧 修复：检查GameObject是否激活，如果不激活则设置标志待后续加载
+                if (gameObject.activeInHierarchy)
+                {
+                    // 延迟一帧加载，确保网格完全初始化
+                    StartCoroutine(DelayedLoadContainerContent());
+                }
+                else
+                {
+                    // 设置标志，在OnEnable时加载
+                    needsContainerContentLoad = true;
+                    LogDebugInfo($"装备槽未激活，设置延迟加载标志");
+                }
             }
             catch (System.Exception e)
             {

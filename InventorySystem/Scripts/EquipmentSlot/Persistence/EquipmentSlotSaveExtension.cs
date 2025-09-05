@@ -176,7 +176,7 @@ namespace InventorySystem
                     if (restored)
                     {
                         restoredCount++;
-                        Debug.Log($"[EquipmentSlotSaveExtension] �7�3 装备恢复成功: {slotData.slotType}");
+                        Debug.Log($"[EquipmentSlotSaveExtension] ✅ 装备恢复成功: {slotData.slotType}");
                     }
                     else
                     {
@@ -215,7 +215,7 @@ namespace InventorySystem
                 return false;
             }
             
-            Debug.Log($"[EquipmentSlotSaveExtension] �7�3 找到装备槽: {slot.name}");
+            Debug.Log($"[EquipmentSlotSaveExtension] ✅ 找到装备槽: {slot.name}");
             
             // 创建物品实例
             Debug.Log($"[EquipmentSlotSaveExtension] 开始创建物品实例: {slotData.equippedItemData.itemID}");
@@ -226,7 +226,7 @@ namespace InventorySystem
                 return false;
             }
             
-            Debug.Log($"[EquipmentSlotSaveExtension] �7�3 成功创建物品实例: {itemInstance.name}");
+            Debug.Log($"[EquipmentSlotSaveExtension] ✅ 成功创建物品实例: {itemInstance.name}");
             
             // 装备物品
             var itemDataReader = itemInstance.GetComponent<ItemDataReader>();
@@ -237,7 +237,7 @@ namespace InventorySystem
                 return false;
             }
             
-            Debug.Log($"[EquipmentSlotSaveExtension] �7�3 找到 ItemDataReader，物品名称: {itemDataReader.ItemData.itemName}");
+            Debug.Log($"[EquipmentSlotSaveExtension] ✅ 找到 ItemDataReader，物品名称: {itemDataReader.ItemData.itemName}");
             
             // 尝试装备物品
             Debug.Log($"[EquipmentSlotSaveExtension] 尝试将物品装备到槽位...");
@@ -245,12 +245,12 @@ namespace InventorySystem
             
             if (success)
             {
-                Debug.Log($"[EquipmentSlotSaveExtension] �7�3 成功恢复装备: {itemDataReader.ItemData.itemName} -> {slotData.slotType}");
+                Debug.Log($"[EquipmentSlotSaveExtension] ✅ 成功恢复装备: {itemDataReader.ItemData.itemName} -> {slotData.slotType}");
                 
                 // 验证装备是否真的在槽位中
                 if (slot.HasEquippedItem)
                 {
-                    Debug.Log($"[EquipmentSlotSaveExtension] �7�3 验证成功，槽位中有装备: {slot.CurrentEquippedItem.ItemData.itemName}");
+                    Debug.Log($"[EquipmentSlotSaveExtension] ✅ 验证成功，槽位中有装备: {slot.CurrentEquippedItem.ItemData.itemName}");
                 }
                 else
                 {

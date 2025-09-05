@@ -147,7 +147,7 @@ namespace InventorySystem
                 {
                     isInitialized = true;
                     initializationFailed = false;
-                    LogDebug("�7�3 装备持久化系统初始化成功");
+                    LogDebug("✅ 装备持久化系统初始化成功");
                     
                     // 输出系统状态摘要
                     if (showDebugLogs)

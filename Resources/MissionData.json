@@ -4,6 +4,7 @@
             "id": 0,
             "name": "Shortage of materials",
             "type": "explore",
+            "category": "daily",
             "iconPath": "MissionIcon/explore_icon",
             "legendPath": "MissionLegend/explore_legend1",
             "description": "After a certain amount of time, Johnclaw realized that the food resources in her hiding place were insufficient, and decided to venture to the abandoned shopping center area to search for food.",
@@ -18,6 +19,46 @@
                 "intelligenceIconPath": "RewardIcons/intelligence_icon"
             },
             "publisher": "Johnclaw"
+        },
+        {
+            "id": 1,
+            "name": "Harbor Investigation",
+            "type": "explore",
+            "category": "main",
+            "iconPath": "MissionIcon/explore_icon",
+            "legendPath": "MissionLegend/Harbour",
+            "description": "Day 8 Mission - Investigate the harbor area to gather crucial intelligence for the ongoing operation.",
+            "reward": {
+                "money": 1000,
+                "weapon": 1,
+                "food": 0,
+                "intelligence": 0,
+                "moneyIconPath": "RewardIcons/money_icon",
+                "weaponIconPath": "RewardIcons/weapon_icon",
+                "foodIconPath": "RewardIcons/food_icon",
+                "intelligenceIconPath": "RewardIcons/intelligence_icon"
+            },
+            "publisher": "L.S.S."
+        },
+        {
+            "id": 2,
+            "name": "Quartermaster's Request",
+            "type": "explore",
+            "category": "side",
+            "iconPath": "MissionIcon/talk_icon",
+            "legendPath": "MissionLegend/Mission3",
+            "description": "The quartermaster needs to gather more garrison intelligence to implement his plan. After meeting you by chance, he now requests your assistance in investigating the harbor thoroughly, offering you a handsome reward in return.",
+            "reward": {
+                "money": 0,
+                "weapon": 0,
+                "food": 0,
+                "intelligence": 2,
+                "moneyIconPath": "RewardIcons/money_icon",
+                "weaponIconPath": "RewardIcons/weapon_icon",
+                "foodIconPath": "RewardIcons/food_icon",
+                "intelligenceIconPath": "RewardIcons/intelligence_icon"
+            },
+            "publisher": "Logan Stryke"
         }
     ]
 }

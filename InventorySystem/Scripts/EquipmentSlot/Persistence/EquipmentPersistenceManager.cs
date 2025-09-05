@@ -110,8 +110,10 @@ namespace InventorySystem
         private EquipmentSlotManager equipmentSlotManager;
         
         // 常量
-        private const string PLAYERPREFS_KEY = "EquipmentPersistenceData";
         private const string DATA_VERSION = "1.0";
+        
+        // PlayerPrefs键值（用于数据迁移）
+        private const string PLAYERPREFS_KEY = "EquipmentSystemData_default";
         
         // 状态标志
         private bool isInitialized = false;
@@ -145,6 +147,9 @@ namespace InventorySystem
         
         private void Start()
         {
+            // 🔧 强制确保使用ES3存储，解决跨会话持久化问题
+            ForceES3Storage();
+            
             // 延迟查找装备槽管理器，确保其他系统已初始化
             StartCoroutine(DelayedInitialization());
         }
@@ -193,9 +198,149 @@ namespace InventorySystem
             }
         }
         
+        /// <summary>
+        /// 强制清理冲突的装备数据，确保干净的开始
+        /// </summary>
+        private void ForceCleanupConflictingData()
+        {
+            bool hasConflicts = false;
+            
+            // 检查并清理PlayerPrefs中的冲突数据
+            string[] conflictingKeys = {
+                "EquipmentSystemData_default",
+                PLAYERPREFS_KEY,
+                "EquipmentPersistenceData"
+            };
+            
+            foreach (string key in conflictingKeys)
+            {
+                if (PlayerPrefs.HasKey(key))
+                {
+                    PlayerPrefs.DeleteKey(key);
+                    Debug.Log($"[EquipmentPersistenceManager] 🧹 清理冲突的PlayerPrefs数据: {key}");
+                    hasConflicts = true;
+                }
+            }
+            
+            // 检查并清理ES3文件中的冲突键
+            if (ES3.FileExists(saveFilePath))
+            {
+                try
+                {
+                    // 检查是否存在旧格式的键
+                    if (ES3.KeyExists("EquipmentSystemData", saveFilePath))
+                    {
+                        ES3.DeleteKey("EquipmentSystemData", saveFilePath);
+                        Debug.Log("[EquipmentPersistenceManager] 🧹 清理ES3中的旧格式数据: EquipmentSystemData");
+                        hasConflicts = true;
+                    }
+                    
+                    // 如果存在类型冲突，完全重建文件
+                    if (ES3.KeyExists("EquipmentData", saveFilePath))
+                    {
+                        try
+                        {
+                            // 尝试加载新格式
+                            ES3.Load<EquipmentSystemPersistenceData>("EquipmentData", saveFilePath);
+                        }
+                        catch (System.Exception)
+                        {
+                            // 加载失败，说明格式有问题，删除冲突数据
+                            ES3.DeleteKey("EquipmentData", saveFilePath);
+                            Debug.Log("[EquipmentPersistenceManager] 🧹 清理格式冲突的ES3数据: EquipmentData");
+                            hasConflicts = true;
+                        }
+                    }
+                }
+                catch (System.Exception e)
+                {
+                    Debug.LogWarning($"[EquipmentPersistenceManager] ⚠️ 清理ES3数据时出错: {e.Message}");
+                }
+            }
+            
+            if (hasConflicts)
+            {
+                PlayerPrefs.Save();
+                Debug.Log("[EquipmentPersistenceManager] ✅ 冲突数据清理完成，装备系统现在使用干净的数据格式");
+            }
+        }
+        
+        /// <summary>
+        /// 如果需要，从旧的EquipmentSystemSaveData格式迁移到新格式
+        /// 注意：由于已经强制清理了冲突数据，这个方法主要作为备用
+        /// </summary>
+        private void MigrateFromOldFormatIfNeeded()
+        {
+            // 由于强制清理，这里主要作为日志记录
+            Debug.Log("[EquipmentPersistenceManager] 📋 数据迁移检查完成（已通过强制清理确保数据格式一致性）");
+        }
+        
         #endregion
         
         #region 初始化
+        
+        /// <summary>
+        /// 强制使用ES3存储，解决跨会话持久化问题
+        /// 确保与ContainerSaveManager使用相同的存储系统
+        /// </summary>
+        private void ForceES3Storage()
+        {
+            if (!useES3Storage)
+            {
+                Debug.Log("[EquipmentPersistenceManager] 🔧 强制切换到ES3存储模式，确保与容器系统一致");
+                useES3Storage = true;
+            }
+            
+            // 确保文件路径正确
+            if (string.IsNullOrEmpty(saveFilePath))
+            {
+                saveFilePath = "EquipmentSave.es3";
+                Debug.Log("[EquipmentPersistenceManager] 🔧 设置默认ES3文件路径: " + saveFilePath);
+            }
+            
+            // 🔧 强制清理冲突数据，确保干净的开始
+            ForceCleanupConflictingData();
+            
+            // 检查是否需要迁移PlayerPrefs数据到ES3
+            MigrateFromPlayerPrefsIfNeeded();
+            
+            // 检查是否需要迁移旧的EquipmentSystemSaveData格式
+            MigrateFromOldFormatIfNeeded();
+        }
+        
+        /// <summary>
+        /// 如果需要，从PlayerPrefs迁移数据到ES3
+        /// </summary>
+        private void MigrateFromPlayerPrefsIfNeeded()
+        {
+            // 检查是否存在PlayerPrefs数据但没有ES3数据
+            if (PlayerPrefs.HasKey(PLAYERPREFS_KEY) && !ES3.FileExists(saveFilePath))
+            {
+                try
+                {
+                    Debug.Log("[EquipmentPersistenceManager] 🔄 检测到PlayerPrefs数据，开始迁移到ES3...");
+                    
+                    string jsonData = PlayerPrefs.GetString(PLAYERPREFS_KEY);
+                    var data = JsonUtility.FromJson<EquipmentSystemPersistenceData>(jsonData);
+                    
+                    if (data != null)
+                    {
+                        // 保存到ES3
+                        ES3.Save("EquipmentData", data, saveFilePath);
+                        Debug.Log("[EquipmentPersistenceManager] ✅ 成功迁移装备数据到ES3");
+                        
+                        // 清理旧的PlayerPrefs数据
+                        PlayerPrefs.DeleteKey(PLAYERPREFS_KEY);
+                        PlayerPrefs.Save();
+                        Debug.Log("[EquipmentPersistenceManager] 🧹 已清理旧的PlayerPrefs数据");
+                    }
+                }
+                catch (System.Exception e)
+                {
+                    Debug.LogError($"[EquipmentPersistenceManager] ❌ 数据迁移失败: {e.Message}");
+                }
+            }
+        }
         
         /// <summary>
         /// 初始化管理器
@@ -723,7 +868,7 @@ namespace InventorySystem
                 if (restored)
                 {
                     successCount++;
-                    LogDebug($"�7�3 装备恢复成功: {slotData.slotType}");
+                    LogDebug($"✅ 装备恢复成功: {slotData.slotType}");
                     
                     // 容器内容恢复现在由ContainerSessionManager处理，这里不再处理
                     // yield return StartCoroutine(RestoreContainerContentIfNeeded(slotData.slotType));

@@ -10,7 +10,8 @@ public class MissionData
 {
     public int id;                    // 任务唯一标识符
     public string name;               // 任务名称
-    public string type;               // 任务类型："探索"、"战斗"、"对话" 等类型
+    public string type;               // 任务类型："explore"、"combat"、"talk" 等类型
+    public string category;           // 任务分类："main"（主线）、"side"（支线）、"daily"（日常）
     public string iconPath;           // 任务图标路径（相对于Resources文件夹的路径）
     public string legendPath;         // 任务图例路径（相对于Resources文件夹的路径）
     public string description;        // 任务描述信息
@@ -82,6 +83,9 @@ public class MissionManager : MonoBehaviour
 
     // 任务类型常量定义
     public static readonly string[] MISSION_TYPES = { "explore", "combat", "talk" };
+    
+    // 任务分类常量定义
+    public static readonly string[] MISSION_CATEGORIES = { "main", "side", "daily" };
 
     void Start()
     {
@@ -177,6 +181,12 @@ public class MissionManager : MonoBehaviour
     {
         return System.Array.Exists(MISSION_TYPES, t => t == type);
     }
+    
+    // 验证任务分类是否有效
+    public bool IsValidMissionCategory(string category)
+    {
+        return System.Array.Exists(MISSION_CATEGORIES, c => c == category);
+    }
 
     // 显示指定任务的详细信息
     public void ShowMissionDescription(int missionIndex)
@@ -208,8 +218,13 @@ public class MissionManager : MonoBehaviour
     {
         // 更新文本内容
         if (missionNameText != null) missionNameText.text = missionData.name;
-        if (missionDescriptionText != null) missionDescriptionText.text = missionData.description;
         if (missionPublisherText != null) missionPublisherText.text = missionData.publisher;
+
+        // 显示任务描述
+        if (missionDescriptionText != null)
+        {
+            missionDescriptionText.text = missionData.description;
+        }
 
         // 加载并设置任务图标（Image组件）
         LoadAndSetSprite(missionData.iconPath, missionIconImage);
@@ -368,6 +383,41 @@ public class MissionManager : MonoBehaviour
             return missionDataDict[missionIndex];
         }
         return null;
+    }
+    
+    // 根据分类获取任务列表
+    public List<MissionData> GetMissionsByCategory(string category)
+    {
+        List<MissionData> categoryMissions = new List<MissionData>();
+        if (missionDataCollection != null && missionDataCollection.missions != null)
+        {
+            foreach (MissionData mission in missionDataCollection.missions)
+            {
+                if (mission.category == category)
+                {
+                    categoryMissions.Add(mission);
+                }
+            }
+        }
+        return categoryMissions;
+    }
+    
+    // 获取主线任务
+    public List<MissionData> GetMainMissions()
+    {
+        return GetMissionsByCategory("main");
+    }
+    
+    // 获取支线任务
+    public List<MissionData> GetSideMissions()
+    {
+        return GetMissionsByCategory("side");
+    }
+    
+    // 获取日常任务
+    public List<MissionData> GetDailyMissions()
+    {
+        return GetMissionsByCategory("daily");
     }
 
     // 重新加载任务数据（用于运行时更新数据）

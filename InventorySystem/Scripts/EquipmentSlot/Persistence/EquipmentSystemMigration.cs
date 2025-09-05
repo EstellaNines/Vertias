@@ -112,7 +112,7 @@ namespace InventorySystem
                 bool saveSuccess = newManager.SaveDataToStorage(newData);
                 if (saveSuccess)
                 {
-                    Debug.Log($"[EquipmentSystemMigration] �7�3 成功迁移 {newData.equipmentSlots.Count} 个装备槽数据");
+                    Debug.Log($"[EquipmentSystemMigration] ✅ 成功迁移 {newData.equipmentSlots.Count} 个装备槽数据");
                     
                     // 迁移成功后，清理旧数据
                     CleanupOldSystemData();
@@ -144,7 +144,7 @@ namespace InventorySystem
                 // 删除旧系统的PlayerPrefs数据
                 EquipmentSlotSaveExtension.DeleteEquipmentSaveData();
                 
-                Debug.Log("[EquipmentSystemMigration] �7�3 旧系统数据清理完成");
+                Debug.Log("[EquipmentSystemMigration] ✅ 旧系统数据清理完成");
             }
             catch (System.Exception e)
             {
@@ -165,7 +165,7 @@ namespace InventorySystem
             var newManager = EquipmentPersistenceManager.Instance;
             if (newManager != null)
             {
-                report.AppendLine("�7�3 新系统 (EquipmentPersistenceManager): 已启用");
+                report.AppendLine("✅ 新系统 (EquipmentPersistenceManager): 已启用");
                 report.AppendLine($"   - 初始化状态: {newManager.IsInitialized}");
                 report.AppendLine($"   - 存在保存数据: {newManager.HasSavedData()}");
             }
@@ -186,7 +186,7 @@ namespace InventorySystem
             }
             else
             {
-                report.AppendLine("�7�3 无系统冲突");
+                report.AppendLine("✅ 无系统冲突");
             }
             
             return report.ToString();
