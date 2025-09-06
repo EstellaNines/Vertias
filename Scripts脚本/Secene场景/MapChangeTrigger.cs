@@ -4,7 +4,7 @@ using System; // 引入System命名空间以支持反射功能
 
 /// <summary>
 /// 地图触发器 - 继承自BaseContainerTrigger基类
-/// 实现进入地图区域时按F键直接打开背包的地图面板功能
+/// 实现进入地图区域时按Tab键直接打开背包的地图面板功能
 /// 支持TMP文本自动定位到玩家附近位置显示
 /// </summary>
 public class MapChangeTrigger : BaseContainerTrigger
@@ -259,7 +259,7 @@ public class MapChangeTrigger : BaseContainerTrigger
         if (tmpText != null)
         {
             // 设置文本内容为地图相关的提示
-            displayText = "[F] Open Map";
+            displayText = "[Tab] Open Map";
             tmpText.text = displayText;
             // 默认隐藏文本
             tmpText.gameObject.SetActive(false);

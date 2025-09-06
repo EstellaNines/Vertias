@@ -411,9 +411,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 9160086239374874348}
-  - component: {fileID: 5000311489446831469}
-  - component: {fileID: 9013711347559996247}
-  - component: {fileID: 8084657118881823242}
   m_Layer: 5
   m_Name: Scripts
   m_TagString: Untagged
@@ -440,72 +437,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &5000311489446831469
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1936660863967909298}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5af8bfbc33d89da4ab0ee75c4b09a67e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  loadingPanel: {fileID: 7459597481610143190}
-  openKey: 102
-  closeOnComplete: 1
-  progressText: {fileID: 7521244476329843220}
-  loadingDuration: 5
-  progressFormat: '{0}%'
-  circularLoader: {fileID: 5093176882145889419}
-  cmdScanner: {fileID: 7613184589272433451}
-  loadingTitleTypewriter: {fileID: 1936346445780396372}
-  descriptionTypewriter: {fileID: 1718519103938035871}
-  simpleTitleTypewriter: {fileID: 0}
-  simpleDescriptionTypewriter: {fileID: 0}
-  titleStartDelay: 0.2
-  descriptionStartDelay: 0
-  audioSource: {fileID: 0}
-  loadingStartSound: {fileID: 0}
-  loadingCompleteSound: {fileID: 0}
-  soundVolume: 0.5
-  showDebugInfo: 0
---- !u!114 &9013711347559996247
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1936660863967909298}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3617c5538843d13429eb91fdb0c84a96, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  autoFindSlots: 1
-  manualSlots: []
-  showDebugInfo: 0
---- !u!114 &8084657118881823242
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1936660863967909298}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 33e6bbe822e19b446b06903ba62f6290, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  autoSave: 1
-  autoLoad: 1
-  useES3Storage: 1
-  saveFilePath: EquipmentSave.es3
-  enableBackup: 1
-  enableCompression: 0
-  showDebugLogs: 0
-  verboseLogging: 0
 --- !u!1 &2486394030808841231
 GameObject:
   m_ObjectHideFlags: 0
@@ -1756,7 +1687,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &8852069667311475174
 RectTransform:
   m_ObjectHideFlags: 0
