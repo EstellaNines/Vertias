@@ -76,6 +76,9 @@ public class MapChangeTrigger : BaseContainerTrigger
 
         // 初始化TMP文本
         InitializeTMPText();
+        
+        // 设置地图触发器的提示文本为F键
+        displayText = "[F] Open Map";
 
         if (debugMode)
         {
@@ -258,8 +261,8 @@ public class MapChangeTrigger : BaseContainerTrigger
     {
         if (tmpText != null)
         {
-            // 设置文本内容为地图相关的提示
-            displayText = "[Tab] Open Map";
+            // 设置文本内容为地图相关的提示（F键）
+            displayText = "[F] Open Map";
             tmpText.text = displayText;
             // 默认隐藏文本
             tmpText.gameObject.SetActive(false);
@@ -373,10 +376,24 @@ public class MapChangeTrigger : BaseContainerTrigger
     }
 
     /// <summary>
-    /// Update方法，持续更新TMP文本位置
+    /// Update方法，处理F键输入和更新TMP文本位置
     /// </summary>
     private void Update()
     {
+        // 检查是否按下了F键
+        if (Input.GetKeyDown(KeyCode.F))
+        {
+            // 如果玩家在范围内，或者地图面板已经打开，都可以使用F键
+            if (playerInRange || IsContainerOpen())
+            {
+                ToggleContainer();
+                if (debugMode)
+                {
+                    Debug.Log("MapChangeTrigger: 通过F键切换地图面板");
+                }
+            }
+        }
+        
         // 如果TMP文本处于激活状态且玩家在触发器范围内，持续更新文本位置
         if (tmpText != null && tmpText.gameObject.activeInHierarchy && playerInRange)
         {

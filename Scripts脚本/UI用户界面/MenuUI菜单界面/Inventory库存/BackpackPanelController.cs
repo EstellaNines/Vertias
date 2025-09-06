@@ -11,6 +11,7 @@ public class BackpackPanelController : MonoBehaviour
     [Header("网格预制件设置")]
     [SerializeField] private GameObject warehouseGridPrefab;
     [SerializeField] private GameObject groundGridPrefab;
+    [SerializeField] private GameObject shelfGridPrefab; // 货架网格预制件
     
     [Header("面板引用")]
     [SerializeField] private RectTransform rightPanelTransform; // 网格的父容器
@@ -19,6 +20,7 @@ public class BackpackPanelController : MonoBehaviour
     [Header("标题文本设置")]
     [SerializeField] private string warehouseTitleText = "Storage"; // 仓库模式显示的文本
     [SerializeField] private string groundTitleText = "Ground"; // 地面模式显示的文本
+    [SerializeField] private string shelfTitleText = "Shelf"; // 货架模式显示的文本
     
     [Header("调试设置")]
     [SerializeField] private bool showDebugLog = false;
@@ -30,6 +32,7 @@ public class BackpackPanelController : MonoBehaviour
     
     // 当前网格状态
     private GameObject currentGrid;
+    private GridType currentGridType = GridType.Ground;
     private GridSaveManager gridSaveManager;
     private bool isInitialized = false;
     
@@ -37,7 +40,7 @@ public class BackpackPanelController : MonoBehaviour
     private InventoryController inventoryController;
     
     // 事件：当网格切换完成时触发
-    public System.Action<bool> OnGridSwitchCompleted; // bool: isWarehouse
+    public System.Action<GridType> OnGridSwitchCompleted; // GridType: 当前网格类型
     
     #region 初始化
     
@@ -287,6 +290,16 @@ public class BackpackPanelController : MonoBehaviour
     /// <param name="isInWarehouse">是否在仓库中</param>
     public void ActivatePanel(bool isInWarehouse)
     {
+        GridType targetType = isInWarehouse ? GridType.Storage : GridType.Ground;
+        ActivatePanel(targetType);
+    }
+    
+    /// <summary>
+    /// 激活面板并切换到指定类型的网格
+    /// </summary>
+    /// <param name="gridType">目标网格类型</param>
+    public void ActivatePanel(GridType gridType)
+    {
         // 如果未初始化，强制初始化
         if (!isInitialized)
         {
@@ -295,26 +308,26 @@ public class BackpackPanelController : MonoBehaviour
         }
         
         if (showDebugLog)
-            Debug.Log($"BackpackPanelController: 激活面板 - 仓库模式: {isInWarehouse}");
+            Debug.Log($"BackpackPanelController: 激活面板 - 网格类型: {gridType}");
         
         // 检查是否需要切换网格（避免重复打开相同网格时的不必要操作）
-        bool needGridSwitch = ShouldSwitchGrid(isInWarehouse);
+        bool needGridSwitch = ShouldSwitchGrid(gridType);
         
         if (needGridSwitch)
         {
             if (showDebugLog)
-                Debug.Log($"BackpackPanelController: 需要切换网格到 {(isInWarehouse ? "仓库" : "地面")} 模式");
+                Debug.Log($"BackpackPanelController: 需要切换网格到 {gridType} 模式");
             
             // 清理当前网格（不需要移动提示器）
             CleanupCurrentGrid(false);
             
             // 创建新网格
-            CreateAndSetupGrid(isInWarehouse);
+            CreateAndSetupGrid(gridType);
         }
         else
         {
             if (showDebugLog)
-                Debug.Log($"BackpackPanelController: 网格已是 {(isInWarehouse ? "仓库" : "地面")} 模式，无需切换，保持提示器状态不变");
+                Debug.Log($"BackpackPanelController: 网格已是 {gridType} 模式，无需切换，保持提示器状态不变");
             
             // 当不需要切换网格时，不要做任何可能影响提示器的操作
             // 让提示器保持当前状态，避免重复设置导致的问题
@@ -322,10 +335,18 @@ public class BackpackPanelController : MonoBehaviour
         }
         
         // 更新标题文本（无论是否切换网格都需要更新）
-        UpdateTitleText(isInWarehouse);
+        UpdateTitleText(gridType);
         
         // 触发事件
-        OnGridSwitchCompleted?.Invoke(isInWarehouse);
+        OnGridSwitchCompleted?.Invoke(gridType);
+    }
+    
+    /// <summary>
+    /// 激活货架模式（快捷方法）
+    /// </summary>
+    public void ActivateShelfMode()
+    {
+        ActivatePanel(GridType.Container);
     }
     
     /// <summary>
@@ -352,8 +373,25 @@ public class BackpackPanelController : MonoBehaviour
     /// <returns>是否为仓库网格</returns>
     public bool IsWarehouseGrid()
     {
-        if (currentGrid == null) return false;
-        return currentGrid.name.Contains("Warehouse");
+        return currentGridType == GridType.Storage;
+    }
+    
+    /// <summary>
+    /// 获取当前网格类型
+    /// </summary>
+    /// <returns>当前网格类型</returns>
+    public GridType GetCurrentGridType()
+    {
+        return currentGridType;
+    }
+    
+    /// <summary>
+    /// 检查当前是否为货架模式
+    /// </summary>
+    /// <returns>是否为货架模式</returns>
+    public bool IsShelfMode()
+    {
+        return currentGridType == GridType.Container;
     }
     
     /// <summary>
@@ -362,7 +400,17 @@ public class BackpackPanelController : MonoBehaviour
     /// <param name="isInWarehouse">是否在仓库中</param>
     public void UpdateRightTitle(bool isInWarehouse)
     {
-        UpdateTitleText(isInWarehouse);
+        GridType targetType = isInWarehouse ? GridType.Storage : GridType.Ground;
+        UpdateTitleText(targetType);
+    }
+    
+    /// <summary>
+    /// 公共方法：更新右侧标题文本（使用网格类型）
+    /// </summary>
+    /// <param name="gridType">网格类型</param>
+    public void UpdateRightTitle(GridType gridType)
+    {
+        UpdateTitleText(gridType);
     }
     
     /// <summary>
@@ -394,38 +442,65 @@ public class BackpackPanelController : MonoBehaviour
     /// <param name="isInWarehouse">是否在仓库中</param>
     private void CreateAndSetupGrid(bool isInWarehouse)
     {
+        GridType targetType = isInWarehouse ? GridType.Storage : GridType.Ground;
+        CreateAndSetupGrid(targetType);
+    }
+    
+    /// <summary>
+    /// 创建并设置指定类型的网格
+    /// </summary>
+    /// <param name="gridType">网格类型</param>
+    private void CreateAndSetupGrid(GridType gridType)
+    {
         if (rightPanelTransform == null)
         {
             Debug.LogError("BackpackPanelController: rightPanelTransform 未设置！");
             return;
         }
         
-        // 根据是否在仓库内选择不同的预制件
-        GameObject gridPrefab = isInWarehouse ? warehouseGridPrefab : groundGridPrefab;
+        // 根据网格类型选择预制件
+        GameObject gridPrefab = GetGridPrefab(gridType);
         
         if (gridPrefab == null)
         {
-            Debug.LogError($"BackpackPanelController: {(isInWarehouse ? "仓库" : "地面")}网格预制件未设置！");
+            Debug.LogError($"BackpackPanelController: {gridType}网格预制件未设置！");
             return;
         }
         
         // 实例化网格
         currentGrid = Instantiate(gridPrefab, rightPanelTransform);
+        currentGridType = gridType; // 更新当前网格类型
         
         // 设置网格位置和尺寸
-        SetupGridTransform(isInWarehouse);
+        SetupGridTransform(gridType);
         
         // 确保网格被激活显示
         currentGrid.SetActive(true);
         
         // 设置保存管理器并注册网格
-        SetupGridSaveLoad(isInWarehouse);
+        SetupGridSaveLoad(gridType);
         
         // 更新标题文本
-        UpdateTitleText(isInWarehouse);
+        UpdateTitleText(gridType);
         
         if (showDebugLog)
-            Debug.Log($"BackpackPanelController: 已创建{(isInWarehouse ? "仓库" : "地面")}网格 - {currentGrid.name}");
+            Debug.Log($"BackpackPanelController: 已创建{gridType}网格 - {currentGrid.name}");
+    }
+    
+    /// <summary>
+    /// 根据网格类型获取对应的预制件
+    /// </summary>
+    /// <param name="gridType">网格类型</param>
+    /// <returns>网格预制件</returns>
+    private GameObject GetGridPrefab(GridType gridType)
+    {
+        return gridType switch
+        {
+            GridType.Storage => warehouseGridPrefab,
+            GridType.Ground => groundGridPrefab,
+            GridType.Container => shelfGridPrefab,
+            _ => groundGridPrefab
+        };
     }
     
     /// <summary>
@@ -434,23 +509,47 @@ public class BackpackPanelController : MonoBehaviour
     /// <param name="isInWarehouse">是否为仓库网格</param>
     private void SetupGridTransform(bool isInWarehouse)
     {
+        GridType targetType = isInWarehouse ? GridType.Storage : GridType.Ground;
+        SetupGridTransform(targetType);
+    }
+    
+    /// <summary>
+    /// 设置指定类型网格的变换组件
+    /// </summary>
+    /// <param name="gridType">网格类型</param>
+    private void SetupGridTransform(GridType gridType)
+    {
         RectTransform gridRT = currentGrid.GetComponent<RectTransform>();
         if (gridRT == null) return;
         
         gridRT.anchorMin = new Vector2(0, 0);
         gridRT.anchorMax = new Vector2(0, 1);
         
-        if (isInWarehouse)
+        switch (gridType)
         {
-            // 仓库网格位置和尺寸
-            gridRT.anchoredPosition = new Vector2(15, -52);
-            gridRT.sizeDelta = new Vector2(640, 896);
-        }
-        else
-        {
-            // 地面网格位置和尺寸
-            gridRT.anchoredPosition = new Vector2(15, -42);
-            gridRT.sizeDelta = new Vector2(640, 512);
+            case GridType.Storage:
+                // 仓库网格位置和尺寸
+                gridRT.anchoredPosition = new Vector2(15, -52);
+                gridRT.sizeDelta = new Vector2(640, 896);
+                break;
+                
+            case GridType.Ground:
+                // 地面网格位置和尺寸
+                gridRT.anchoredPosition = new Vector2(15, -42);
+                gridRT.sizeDelta = new Vector2(640, 512);
+                break;
+                
+            case GridType.Container:
+                // 货架网格位置和尺寸（可根据需要调整）
+                gridRT.anchoredPosition = new Vector2(15, -52);
+                gridRT.sizeDelta = new Vector2(640, 768);
+                break;
+                
+            default:
+                // 默认使用地面网格设置
+                gridRT.anchoredPosition = new Vector2(15, -42);
+                gridRT.sizeDelta = new Vector2(640, 512);
+                break;
         }
     }
     
@@ -459,6 +558,16 @@ public class BackpackPanelController : MonoBehaviour
     /// </summary>
     /// <param name="isInWarehouse">是否为仓库网格</param>
     private void SetupGridSaveLoad(bool isInWarehouse)
+    {
+        GridType targetType = isInWarehouse ? GridType.Storage : GridType.Ground;
+        SetupGridSaveLoad(targetType);
+    }
+    
+    /// <summary>
+    /// 设置指定类型网格的保存和加载功能
+    /// </summary>
+    /// <param name="gridType">网格类型</param>
+    private void SetupGridSaveLoad(GridType gridType)
     {
         if (currentGrid == null || gridSaveManager == null) return;
 
@@ -470,30 +579,58 @@ public class BackpackPanelController : MonoBehaviour
             return;
         }
 
-        // 为仓库网格使用预制件中设置的固定GUID，为地面网格使用动态GUID
-        string gridGUID;
-        if (isInWarehouse)
-        {
-            // 仓库网格：使用预制件中设置的固定GUID
-            gridGUID = itemGrid.GridGUID;
-            if (showDebugLog)
-                Debug.Log($"BackpackPanelController: 仓库网格使用固定GUID: {gridGUID}");
-        }
-        else
-        {
-            // 地面网格：使用基于背包ID的动态GUID
-            gridGUID = $"ground_grid_{backpackUniqueId}";
-            if (showDebugLog)
-                Debug.Log($"BackpackPanelController: 地面网格使用动态GUID: {gridGUID}");
-        }
+        // 根据网格类型生成GUID
+        string gridGUID = GenerateGridGUID(gridType, itemGrid);
         
         gridSaveManager.SetCurrentGrid(itemGrid, gridGUID);
 
-        // 注册并加载网格数据（传递完整的GUID而不是布尔值）
-        gridSaveManager.RegisterAndLoadGridWithGUID(gridGUID, isInWarehouse);
+        // 注册并加载网格数据
+        bool isWarehouse = (gridType == GridType.Storage);
+        gridSaveManager.RegisterAndLoadGridWithGUID(gridGUID, isWarehouse);
         
         if (showDebugLog)
-            Debug.Log($"BackpackPanelController: 已设置网格保存加载功能 - 唯一GUID: {gridGUID}");
+            Debug.Log($"BackpackPanelController: 已设置{gridType}网格保存加载功能 - 唯一GUID: {gridGUID}");
+    }
+    
+    /// <summary>
+    /// 根据网格类型生成GUID
+    /// </summary>
+    /// <param name="gridType">网格类型</param>
+    /// <param name="itemGrid">ItemGrid组件</param>
+    /// <returns>生成的GUID</returns>
+    private string GenerateGridGUID(GridType gridType, ItemGrid itemGrid)
+    {
+        string gridGUID = gridType switch
+        {
+            GridType.Storage => itemGrid.GridGUID, // 仓库使用固定GUID
+            GridType.Ground => $"ground_grid_{backpackUniqueId}", // 地面使用动态GUID
+            GridType.Container => GenerateContainerGUID(), // 货架使用基于活跃货架ID的GUID
+            _ => $"unknown_grid_{backpackUniqueId}"
+        };
+        
+        if (showDebugLog)
+            Debug.Log($"BackpackPanelController: {gridType}网格使用GUID: {gridGUID}");
+            
+        return gridGUID;
+    }
+    
+    /// <summary>
+    /// 生成Container网格的专用GUID（支持货架独立存档）
+    /// </summary>
+    /// <returns>包含货架ID的Container网格GUID</returns>
+    private string GenerateContainerGUID()
+    {
+        // 暂时移除货架ID功能，等待重新实现
+        // TODO: 重新实现货架ID系统
+        
+        // 使用通用的Container GUID
+        {
+            // 如果没有活跃的货架ID，使用通用的Container GUID
+            string defaultGUID = $"container_grid_{backpackUniqueId}";
+            if (showDebugLog)
+                Debug.Log($"BackpackPanelController: 使用默认Container GUID: {defaultGUID} (无活跃货架)");
+            return defaultGUID;
+        }
     }
     
     /// <summary>
@@ -502,6 +639,16 @@ public class BackpackPanelController : MonoBehaviour
     /// <param name="isInWarehouse">是否为仓库模式</param>
     private void UpdateTitleText(bool isInWarehouse)
     {
+        GridType targetType = isInWarehouse ? GridType.Storage : GridType.Ground;
+        UpdateTitleText(targetType);
+    }
+    
+    /// <summary>
+    /// 更新指定类型的标题文本
+    /// </summary>
+    /// <param name="gridType">网格类型</param>
+    private void UpdateTitleText(GridType gridType)
+    {
         if (rightTitleText == null)
         {
             if (showDebugLog)
@@ -509,11 +656,18 @@ public class BackpackPanelController : MonoBehaviour
             return;
         }
         
-        string newTitle = isInWarehouse ? warehouseTitleText : groundTitleText;
+        string newTitle = gridType switch
+        {
+            GridType.Storage => warehouseTitleText,
+            GridType.Ground => groundTitleText,
+            GridType.Container => shelfTitleText,
+            _ => groundTitleText
+        };
+        
         rightTitleText.text = newTitle;
         
         if (showDebugLog)
-            Debug.Log($"BackpackPanelController: 已更新标题文本为 '{newTitle}'");
+            Debug.Log($"BackpackPanelController: 已更新标题文本为 '{newTitle}' (网格类型: {gridType})");
     }
     
     /// <summary>
@@ -558,6 +712,17 @@ public class BackpackPanelController : MonoBehaviour
     /// <returns>是否需要切换网格</returns>
     private bool ShouldSwitchGrid(bool isInWarehouse)
     {
+        GridType targetType = isInWarehouse ? GridType.Storage : GridType.Ground;
+        return ShouldSwitchGrid(targetType);
+    }
+    
+    /// <summary>
+    /// 检查是否需要切换到指定类型的网格
+    /// </summary>
+    /// <param name="targetGridType">目标网格类型</param>
+    /// <returns>是否需要切换网格</returns>
+    private bool ShouldSwitchGrid(GridType targetGridType)
+    {
         // 如果当前没有网格，需要创建
         if (currentGrid == null)
         {
@@ -565,10 +730,7 @@ public class BackpackPanelController : MonoBehaviour
         }
         
         // 检查当前网格类型是否与目标类型匹配
-        bool currentIsWarehouse = IsWarehouseGrid();
-        
-        // 如果类型不匹配，需要切换
-        return currentIsWarehouse != isInWarehouse;
+        return currentGridType != targetGridType;
     }
     
     /// <summary>

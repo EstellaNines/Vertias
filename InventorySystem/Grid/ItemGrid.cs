@@ -2,18 +2,24 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using InventorySystem;
 
-// 网格类型枚举
+/// <summary>
+/// 网格类型枚举 - 定义不同类型的物品容器
+/// Grid Type Enumeration - Defines different types of item containers
+/// </summary>
 [System.Serializable]
 public enum GridType
 {
-    [InspectorName("背包")] Backpack = 0,
-    [InspectorName("仓库")] Storage = 1,
-    [InspectorName("挂具")] Equipment = 2,
-    [InspectorName("地面")] Ground = 3,
-    [InspectorName("其他")] Other = 4,
-    [InspectorName("自定义")] Custom = 5,
-    [InspectorName("测试")] Test = 99,
+    [InspectorName("背包")] Backpack = 0,     // 玩家随身背包 | Player's personal backpack
+    [InspectorName("仓库")] Storage = 1,      // 固定存储仓库 | Fixed storage warehouse  
+    [InspectorName("挂具")] Equipment = 2,    // 装备槽位 | Equipment slots
+    [InspectorName("地面")] Ground = 3,       // 地面掉落物品 | Ground dropped items
+    [InspectorName("容器")] Container = 4,    // 物理容器(箱子/货架等) | Physical containers (chests/shelves etc.)
+    [InspectorName("其他")] Other = 5,        // 其他类型容器 | Other container types
+    [InspectorName("自定义")] Custom = 6,     // 自定义容器 | Custom containers
+    [InspectorName("交易")] Trading = 7,      // 交易界面容器 | Trading interface container
+    [InspectorName("测试")] Test = 99,        // 测试专用 | Testing purposes only
 }
 
 #region 网格特性标志
@@ -245,8 +251,23 @@ public class ItemGrid : MonoBehaviour
     // 网格状态变化回调方法（子类可重写）
     protected virtual void OnGridTypeChanged(GridType oldType, GridType newType)
     {
-        // 子类可以重写此方法
+        // 子类可以重写此方法处理特定类型的逻辑
         Debug.Log($"网格 {gridName} 类型从 {oldType} 变更为 {newType}");
+        
+        // 可以根据不同的网格类型执行特定的初始化或配置逻辑
+        switch (newType)
+        {
+            case GridType.Container:
+                // 容器网格的特殊处理逻辑 - 可搜索的物理容器
+                Debug.Log($"网格 {gridName} 切换为容器模式 - 启用搜索功能");
+                // 可以在这里添加容器特有的功能，如搜索标记、交互提示等
+                break;
+            case GridType.Trading:
+                // 交易网格的特殊处理逻辑
+                Debug.Log($"网格 {gridName} 切换为交易模式");
+                break;
+                // 其他类型的处理可以在这里添加
+        }
     }
     
     protected virtual void OnGridFeaturesChanged(GridFeatures oldFeatures, GridFeatures newFeatures)
@@ -738,6 +759,109 @@ public class ItemGrid : MonoBehaviour
     {
         OnItemMoved?.Invoke(item, oldPosition, newPosition);
     }
+    
+    #region Container容器特有功能
+    
+    /// <summary>
+    /// 检查当前网格是否为容器类型
+    /// Check if current grid is a container type
+    /// </summary>
+    public bool IsContainerType()
+    {
+        return gridType == GridType.Container;
+    }
+    
+    /// <summary>
+    /// 搜索容器中的物品（按名称）
+    /// Search items in container by name
+    /// </summary>
+    /// <param name="searchTerm">搜索词</param>
+    /// <returns>匹配的物品列表</returns>
+    public List<Item> SearchItemsByName(string searchTerm)
+    {
+        List<Item> foundItems = new List<Item>();
+        if (!IsContainerType() || string.IsNullOrEmpty(searchTerm))
+        {
+            return foundItems;
+        }
+        
+        HashSet<Item> uniqueItems = new HashSet<Item>();
+        
+        for (int x = 0; x < gridSizeWidth; x++)
+        {
+            for (int y = 0; y < gridSizeHeight; y++)
+            {
+                Item item = itemSlot[x, y];
+                if (item != null && !uniqueItems.Contains(item))
+                {
+                    // 检查物品名称是否包含搜索词（不区分大小写）
+                    if (item.name.ToLower().Contains(searchTerm.ToLower()) ||
+                        (item.ItemDataReader?.ItemData != null && item.ItemDataReader.ItemData.GetDisplayName().ToLower().Contains(searchTerm.ToLower())))
+                    {
+                        uniqueItems.Add(item);
+                        foundItems.Add(item);
+                    }
+                }
+            }
+        }
+        
+        return foundItems;
+    }
+    
+    /// <summary>
+    /// 搜索容器中的物品（按类别）
+    /// Search items in container by category
+    /// </summary>
+    /// <param name="itemCategory">物品类别</param>
+    /// <returns>匹配的物品列表</returns>
+    public List<Item> SearchItemsByCategory(ItemCategory itemCategory)
+    {
+        List<Item> foundItems = new List<Item>();
+        if (!IsContainerType())
+        {
+            return foundItems;
+        }
+        
+        HashSet<Item> uniqueItems = new HashSet<Item>();
+        
+        for (int x = 0; x < gridSizeWidth; x++)
+        {
+            for (int y = 0; y < gridSizeHeight; y++)
+            {
+                Item item = itemSlot[x, y];
+                if (item != null && !uniqueItems.Contains(item))
+                {
+                    if (item.ItemDataReader?.ItemData != null && item.ItemDataReader.ItemData.category == itemCategory)
+                    {
+                        uniqueItems.Add(item);
+                        foundItems.Add(item);
+                    }
+                }
+            }
+        }
+        
+        return foundItems;
+    }
+    
+    /// <summary>
+    /// 获取容器标识信息（用于搜索系统）
+    /// Get container identification info for search system
+    /// </summary>
+    public ContainerInfo GetContainerInfo()
+    {
+        return new ContainerInfo
+        {
+            gridGUID = this.GridGUID,
+            gridName = this.GridName,
+            gridType = this.GridType,
+            position = transform.position,
+            itemCount = GetCurrentItemCount(),
+            maxCapacity = gridSizeWidth * gridSizeHeight,
+            isAccessible = isGridActive
+        };
+    }
+    
+    #endregion
 }
 
 // 网格统计信息结构
@@ -750,4 +874,19 @@ public struct GridStatistics
     public int itemCount;
     
     public float occupancyRate => totalSlots > 0 ? (float)occupiedSlots / totalSlots : 0f;
+}
+
+// 容器信息结构（用于搜索系统）
+[System.Serializable]
+public struct ContainerInfo
+{
+    public string gridGUID;         // 容器唯一标识
+    public string gridName;         // 容器名称
+    public GridType gridType;       // 容器类型
+    public Vector3 position;        // 容器世界坐标
+    public int itemCount;           // 当前物品数量
+    public int maxCapacity;         // 最大容量
+    public bool isAccessible;       // 是否可访问
+    
+    public float fillRate => maxCapacity > 0 ? (float)itemCount / maxCapacity : 0f;
 }

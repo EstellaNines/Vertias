@@ -1450,10 +1450,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   warehouseGridPrefab: {fileID: 2124216074788225064, guid: 97b39a39cd86d4a478d17c8d2aaa48da, type: 3}
   groundGridPrefab: {fileID: 7416093962759783166, guid: 86f9133bb5889ff4ba6830bc174f1340, type: 3}
+  shelfGridPrefab: {fileID: 7881993252548275350, guid: 24ab583ade1369a4bbcaaaaa39a96da8, type: 3}
   rightPanelTransform: {fileID: 8872630908344797532}
   rightTitleText: {fileID: 4359670190506937761}
   warehouseTitleText: Storage
   groundTitleText: Ground
+  shelfTitleText: Shelf
   showDebugLog: 0
   backpackUniqueId: 
 --- !u!1 &4907720578683278178
@@ -1603,6 +1605,8 @@ MonoBehaviour:
   highlightImage: {fileID: 6645083270825816834}
   canPlaceColor: {r: 0, g: 1, b: 0, a: 0.5}
   cannotPlaceColor: {r: 1, g: 0, b: 0, a: 0.5}
+  enableAutoProtection: 1
+  parentCheckInterval: 0.1
 --- !u!1 &6135303981592944581
 GameObject:
   m_ObjectHideFlags: 0
