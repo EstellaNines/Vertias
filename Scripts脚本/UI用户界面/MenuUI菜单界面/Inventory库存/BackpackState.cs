@@ -157,19 +157,25 @@ public class BackpackState : MonoBehaviour
         {
             // 检查是否在仓库范围内
             bool isInWarehouse = WarehouseTrigger.isInWarehouse;
-            // TODO: 重新实现货架检测系统
-            // bool isInShelf = ShelfTrigger.isInShelf;
+            // 检查是否在货架范围内
+            bool isInShelf = ShelfTrigger.isInShelf;
             
-            if (isInWarehouse)
+            if (isInShelf)
+            {
+                // 在货架范围内，激活Container网格
+                backpackPanelController.ActivatePanel(GridType.Container);
+                Debug.Log($"BackpackState: 背包打开，货架模式: {isInShelf}");
+            }
+            else if (isInWarehouse)
             {
                 // 在仓库范围内，激活Storage网格
-                backpackPanelController.ActivatePanel(true);
+                backpackPanelController.ActivatePanel(GridType.Storage);
                 Debug.Log($"BackpackState: 背包打开，仓库模式: {isInWarehouse}");
             }
             else
             {
                 // 其他情况，激活Ground网格
-                backpackPanelController.ActivatePanel(false);
+                backpackPanelController.ActivatePanel(GridType.Ground);
                 Debug.Log("BackpackState: 背包打开，地面模式");
             }
         }
