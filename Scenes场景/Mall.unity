@@ -902,7 +902,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tmpText: {fileID: 1150689915}
-  displayText: '[Tab/F] Open'
+  displayText: '[F] Open'
   playerInputController: {fileID: 11400000, guid: 3d954a4b456254d419ca2667d11f8389, type: 2}
   backpackState: {fileID: 0}
   mapPanelIndex: 2
@@ -1001,7 +1001,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tmpText: {fileID: 1998787595}
-  displayText: '[Tab/F] Open'
+  displayText: '[F] Open'
   playerInputController: {fileID: 11400000, guid: 3d954a4b456254d419ca2667d11f8389, type: 2}
   backpackState: {fileID: 0}
   mapPanelIndex: 2
@@ -2486,7 +2486,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1441874054315084153, guid: 584ca0b3ffbe4c14399c1bcb38cd4f78, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3339347851242471401, guid: 584ca0b3ffbe4c14399c1bcb38cd4f78, type: 3}
       propertyPath: m_Pivot.x
@@ -2804,7 +2804,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &455179658
 RectTransform:
   m_ObjectHideFlags: 0
@@ -3073,6 +3073,54 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!1 &514940388
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 514940389}
+  - component: {fileID: 514940390}
+  m_Layer: 0
+  m_Name: FixedItemSpawnManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &514940389
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 514940388}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &514940390
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 514940388}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cae54bcd47892fd479c9d23b760cff72, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  enableDetailedLogging: 1
+  useAsyncSpawning: 1
+  maxSpawnsPerFrame: 10
+  spawnInterval: 0.001
 --- !u!1 &516013173
 GameObject:
   m_ObjectHideFlags: 0
@@ -3454,6 +3502,10 @@ MonoBehaviour:
   displayText: '[Tab] Search'
   playerInputController: {fileID: 11400000, guid: 3d954a4b456254d419ca2667d11f8389, type: 2}
   backpackState: {fileID: 0}
+  enableRandomGeneration: 1
+  randomConfig: {fileID: 11400000, guid: 7d81c4b04984d804a930a66720250ff9, type: 2}
+  targetItemGrid: {fileID: 1502888464209145963, guid: 24ab583ade1369a4bbcaaaaa39a96da8, type: 3}
+  debugRandomGeneration: 1
 --- !u!61 &530481885
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -3646,7 +3698,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &576777536
 RectTransform:
   m_ObjectHideFlags: 0
@@ -38404,7 +38456,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tmpText: {fileID: 1229879212}
-  displayText: '[Tab/F] Open'
+  displayText: '[F] Open'
   playerInputController: {fileID: 11400000, guid: 3d954a4b456254d419ca2667d11f8389, type: 2}
   backpackState: {fileID: 0}
   mapPanelIndex: 2
@@ -38963,6 +39015,10 @@ MonoBehaviour:
   displayText: '[Tab] Search'
   playerInputController: {fileID: 11400000, guid: 3d954a4b456254d419ca2667d11f8389, type: 2}
   backpackState: {fileID: 0}
+  enableRandomGeneration: 1
+  randomConfig: {fileID: 11400000, guid: 83c76f026da1faf46b8e03a6e766b59f, type: 2}
+  targetItemGrid: {fileID: 1502888464209145963, guid: 24ab583ade1369a4bbcaaaaa39a96da8, type: 3}
+  debugRandomGeneration: 1
 --- !u!61 &865107460
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -60533,7 +60589,7 @@ MonoBehaviour:
   playerInputController: {fileID: 11400000, guid: 3d954a4b456254d419ca2667d11f8389, type: 2}
   promptUI: {fileID: 1870163264}
   promptText: {fileID: 1870163266}
-  promptMessage: "\xB7 \u9000\u51FA"
+  promptMessage: "\xB7 Exit"
 --- !u!4 &1362158438
 Transform:
   m_ObjectHideFlags: 0
@@ -92484,7 +92540,7 @@ MonoBehaviour:
   playerInputController: {fileID: 11400000, guid: 3d954a4b456254d419ca2667d11f8389, type: 2}
   promptUI: {fileID: 1151828826}
   promptText: {fileID: 1151828828}
-  promptMessage: "\xB7\u8FDB\u5165"
+  promptMessage: "\xB7 Enter"
 --- !u!4 &1551539811
 Transform:
   m_ObjectHideFlags: 0
@@ -94357,7 +94413,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tmpText: {fileID: 1195776975}
-  displayText: '[Tab/F] Open'
+  displayText: '[F] Open'
   playerInputController: {fileID: 11400000, guid: 3d954a4b456254d419ca2667d11f8389, type: 2}
   backpackState: {fileID: 0}
   mapPanelIndex: 2
@@ -104330,6 +104386,56 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!1 &1934430405
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1934430406}
+  - component: {fileID: 1934430407}
+  m_Layer: 0
+  m_Name: RandomItemSpawnerManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1934430406
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1934430405}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1934430407
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1934430405}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 165beb6aec39e8f4a9b31d1e08ef249f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  defaultConfig: {fileID: 11400000, guid: 7d81c4b04984d804a930a66720250ff9, type: 2}
+  autoInitialize: 1
+  enableAutoNumbering: 1
+  enableDebugLog: 1
+  showGenerationStatistics: 1
+  generationTimeout: 30
 --- !u!1 &1943554101
 GameObject:
   m_ObjectHideFlags: 0
@@ -106832,3 +106938,5 @@ SceneRoots:
   - {fileID: 284991345}
   - {fileID: 530481883}
   - {fileID: 865107458}
+  - {fileID: 1934430406}
+  - {fileID: 514940389}

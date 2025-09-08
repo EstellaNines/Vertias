@@ -40,16 +40,20 @@ namespace InventorySystem.Database
         #region 核心数据
 
         [Header("数据库状态")]
+        [FieldLabel("初始化状态")]
         [SerializeField, Tooltip("数据库是否已初始化")]
         private bool isInitialized = false;
 
+        [FieldLabel("物品总数")]
         [SerializeField, Tooltip("已加载的物品总数")]
         private int totalItemCount = 0;
 
+        [FieldLabel("加载时间(毫秒)")]
         [SerializeField, Tooltip("数据库加载时间(毫秒)")]
         private float loadTimeMs = 0f;
 
         [Header("映射表")]
+        [FieldLabel("映射表大小")]
         [SerializeField, Tooltip("GlobalId映射表的大小")]
         private int mappingTableSize = 0;
 

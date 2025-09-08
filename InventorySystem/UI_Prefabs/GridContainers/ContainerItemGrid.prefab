@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 5279738308435594399}
   - component: {fileID: 1502888464209145963}
   - component: {fileID: 1486414306158337104}
+  - component: {fileID: 753326787626769482}
   m_Layer: 5
   m_Name: ContainerItemGrid
   m_TagString: Untagged
@@ -115,3 +116,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 41d8dbbd51fb72442a682348ab592b03, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &753326787626769482
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7881993252548275350}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 76d97e5a34a17ce4f8a6ff7e69f0f856, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  targetGrid: {fileID: 1502888464209145963}
+  randomConfig: {fileID: 11400000, guid: 7d81c4b04984d804a930a66720250ff9, type: 2}
+  shelfObject: {fileID: 7881993252548275350}
+  autoStartOnAwake: 1
+  startDelay: 0
+  spawnTiming: 1
+  enableDebugLog: 1
+  showSpawnResults: 1
+  showGenerationStatistics: 1

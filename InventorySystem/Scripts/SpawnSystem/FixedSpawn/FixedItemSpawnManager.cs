@@ -362,6 +362,34 @@ namespace InventorySystem.SpawnSystem
         #region 内部实现
         
         /// <summary>
+        /// 创建模板实例副本（用于多数量生成）
+        /// </summary>
+        private FixedItemTemplate CreateInstanceTemplate(FixedItemTemplate original, string instanceId, int quantity)
+        {
+            // 创建模板副本，避免修改原始模板
+            var instanceTemplate = new FixedItemTemplate
+            {
+                templateId = instanceId,
+                itemData = original.itemData,
+                quantity = quantity, // 单个实例的数量为1
+                placementType = original.placementType,
+                exactPosition = original.exactPosition,
+                constrainedArea = original.constrainedArea,
+                preferredArea = original.preferredArea,
+                priority = original.priority,
+                scanPattern = original.scanPattern,
+                allowRotation = original.allowRotation,
+                conflictResolution = original.conflictResolution,
+                isUniqueSpawn = false, // 实例不是唯一生成
+                conditionTags = original.conditionTags,
+                maxRetryAttempts = original.maxRetryAttempts,
+                enableDebugLog = original.enableDebugLog
+            };
+            
+            return instanceTemplate;
+        }
+        
+        /// <summary>
         /// 处理生成队列
         /// </summary>
         private IEnumerator ProcessSpawnQueue()
@@ -446,26 +474,52 @@ namespace InventorySystem.SpawnSystem
                     continue;
                 }
                 
-                // 生成单个物品
-                var itemResult = SpawnSingleItem(targetGrid, template, containerId, analyzer, strategy);
-                result.AddItemResult(itemResult);
+                // 🔧 修复：根据template.quantity生成指定数量的物品
+                int successfulCount = 0;
+                int totalQuantity = Mathf.Max(1, template.quantity); // 确保至少生成1个
                 
-                // 如果物品生成成功，重新分析网格状态
-                if (itemResult.IsSuccess)
+                LogDebug($"准备异步生成物品 {template.templateId}，数量: {totalQuantity}");
+                
+                for (int i = 0; i < totalQuantity; i++)
                 {
-                    LogDebug($"物品 {template.templateId} 生成成功，重新分析网格状态");
-                    analyzer.AnalyzeGrid(true); // 强制重新分析
-                    strategy = new SmartPlacementStrategy(analyzer, enableDetailedLogging); // 重新创建策略
+                    // 为每个物品实例生成唯一的模板ID
+                    string instanceTemplateId = totalQuantity > 1 ? $"{template.templateId}_instance_{i + 1}" : template.templateId;
+                    
+                    // 创建临时模板副本，用于单个实例
+                    var instanceTemplate = CreateInstanceTemplate(template, instanceTemplateId, 1); // 单个实例的数量为1
+                    
+                    // 生成单个物品实例
+                    var itemResult = SpawnSingleItem(targetGrid, instanceTemplate, containerId, analyzer, strategy);
+                    
+                    // 修改结果以反映原始模板ID
+                    itemResult.templateId = template.templateId; // 保持原始模板ID用于统计
+                    
+                    result.AddItemResult(itemResult);
+                    
+                    // 如果物品生成成功，重新分析网格状态
+                    if (itemResult.IsSuccess)
+                    {
+                        successfulCount++;
+                        LogDebug($"物品 {template.templateId} 实例 {i + 1}/{totalQuantity} 异步生成成功，重新分析网格状态");
+                        analyzer.AnalyzeGrid(true); // 强制重新分析
+                        strategy = new SmartPlacementStrategy(analyzer, enableDetailedLogging); // 重新创建策略
+                    }
+                    else
+                    {
+                        LogWarning($"物品 {template.templateId} 实例 {i + 1}/{totalQuantity} 异步生成失败: {itemResult.failureReason}");
+                    }
+                    
+                    processedCount++;
+                    
+                    // 控制每帧处理数量
+                    if (processedCount >= maxSpawnsPerFrame)
+                    {
+                        processedCount = 0;
+                        yield return null;
+                    }
                 }
                 
-                processedCount++;
-                
-                // 控制每帧处理数量
-                if (processedCount >= maxSpawnsPerFrame)
-                {
-                    processedCount = 0;
-                    yield return null;
-                }
+                LogDebug($"物品 {template.templateId} 异步生成完成: 成功 {successfulCount}/{totalQuantity}");
             }
             
             result.totalSpawnTime = Time.realtimeSinceStartup - startTime;
@@ -515,28 +569,53 @@ namespace InventorySystem.SpawnSystem
                     continue;
                 }
                 
-                // 生成单个物品
-                var itemResult = SpawnSingleItem(targetGrid, template, containerId, analyzer, strategy);
-                result.AddItemResult(itemResult);
+                // 🔧 修复：根据template.quantity生成指定数量的物品
+                int successfulCount = 0;
+                int totalQuantity = Mathf.Max(1, template.quantity); // 确保至少生成1个
                 
-                // 如果物品生成成功，重新分析网格状态
-                if (itemResult.IsSuccess)
-                {
-                    LogDebug($"物品 {template.templateId} 生成成功，重新分析网格状态");
-                    analyzer.AnalyzeGrid(true); // 强制重新分析
-                    strategy = new SmartPlacementStrategy(analyzer, enableDetailedLogging); // 重新创建策略
-                }
+                LogDebug($"准备生成物品 {template.templateId}，数量: {totalQuantity}");
                 
-                // 如果是关键物品且生成失败，考虑是否继续
-                if (template.priority == SpawnPriority.Critical && !itemResult.IsSuccess)
+                for (int i = 0; i < totalQuantity; i++)
                 {
-                    if (!config.continueOnFailure)
+                    // 为每个物品实例生成唯一的模板ID
+                    string instanceTemplateId = totalQuantity > 1 ? $"{template.templateId}_instance_{i + 1}" : template.templateId;
+                    
+                    // 创建临时模板副本，用于单个实例
+                    var instanceTemplate = CreateInstanceTemplate(template, instanceTemplateId, 1); // 单个实例的数量为1
+                    
+                    // 生成单个物品实例
+                    var itemResult = SpawnSingleItem(targetGrid, instanceTemplate, containerId, analyzer, strategy);
+                    
+                    // 修改结果以反映原始模板ID
+                    itemResult.templateId = template.templateId; // 保持原始模板ID用于统计
+                    
+                    result.AddItemResult(itemResult);
+                    
+                    // 如果物品生成成功，重新分析网格状态
+                    if (itemResult.IsSuccess)
                     {
-                        LogError($"关键物品 {template.templateId} 生成失败，停止后续生成");
-                        break;
+                        successfulCount++;
+                        LogDebug($"物品 {template.templateId} 实例 {i + 1}/{totalQuantity} 生成成功，重新分析网格状态");
+                        analyzer.AnalyzeGrid(true); // 强制重新分析
+                        strategy = new SmartPlacementStrategy(analyzer, enableDetailedLogging); // 重新创建策略
+                    }
+                    else
+                    {
+                        LogWarning($"物品 {template.templateId} 实例 {i + 1}/{totalQuantity} 生成失败: {itemResult.failureReason}");
+                        
+                        // 如果是关键物品且生成失败，根据配置决定是否继续
+                        if (template.priority == SpawnPriority.Critical && !config.continueOnFailure)
+                        {
+                            LogError($"关键物品 {template.templateId} 实例 {i + 1} 生成失败，停止后续生成");
+                            goto exitLoop; // 跳出双层循环
+                        }
                     }
                 }
+                
+                LogDebug($"物品 {template.templateId} 生成完成: 成功 {successfulCount}/{totalQuantity}");
             }
+            
+            exitLoop:;
             
             result.totalSpawnTime = Time.realtimeSinceStartup - startTime;
             result.isSuccess = result.successfulItems > 0;

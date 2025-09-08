@@ -1,0 +1,110 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 99f7a18fba3c1fa418e78d8de718e4db, type: 3}
+  m_Name: ShelfRandomItemSpawnConfig
+  m_EditorClassIdentifier: 
+  configName: Random_1
+  description: 
+  version: 1.0.0
+  targetContainerType: 999
+  containerIdentifier: ContainerItemGrid
+  minimumGridSize: {x: 10, y: 6}
+  minTotalItems: 3
+  maxTotalItems: 20
+  quantityMode: 0
+  itemCategories:
+  - category: 7
+    categoryName: "\u98DF\u7269"
+    description: 1
+    minSpawnCount: 1
+    maxSpawnCount: 8
+    rarityGroups:
+    - rarity: 0
+      weight: 0.6
+      items:
+      - {fileID: 11400000, guid: 13f3e5f7de685db46a029decb8b7c836, type: 2}
+    - rarity: 1
+      weight: 0.2
+      items:
+      - {fileID: 11400000, guid: eca5d32591258c24cb936fe1135d7d66, type: 2}
+    - rarity: 2
+      weight: 0.15
+      items:
+      - {fileID: 11400000, guid: 814aad6716188e1438649a5e6df1a3a1, type: 2}
+    - rarity: 3
+      weight: 0.05
+      items:
+      - {fileID: 11400000, guid: be8f5ec5337f0bf429863e73ba1fff1e, type: 2}
+    isEnabled: 1
+    priority: 5
+    enableDebugLog: 0
+  - category: 8
+    categoryName: "\u996E\u54C1"
+    description: 2
+    minSpawnCount: 1
+    maxSpawnCount: 6
+    rarityGroups:
+    - rarity: 0
+      weight: 0.6
+      items:
+      - {fileID: 11400000, guid: 63a802c097997b94ea1c675cb43313af, type: 2}
+    - rarity: 1
+      weight: 0.2
+      items:
+      - {fileID: 11400000, guid: 90978bb64679c404cab31efef4f4a746, type: 2}
+    - rarity: 2
+      weight: 0.15
+      items:
+      - {fileID: 11400000, guid: 6bed36fffa8b3bd4b9314e04ff8a32ac, type: 2}
+    - rarity: 3
+      weight: 0.05
+      items:
+      - {fileID: 11400000, guid: a9269c2741b0c164795f06af7ed6465c, type: 2}
+    isEnabled: 1
+    priority: 5
+    enableDebugLog: 0
+  - category: 13
+    categoryName: "\u8D27\u5E01"
+    description: 3
+    minSpawnCount: 1
+    maxSpawnCount: 6
+    rarityGroups:
+    - rarity: 0
+      weight: 0
+      items:
+      - {fileID: 11400000, guid: dd469595d87d41b49946a93f8cf6ef0b, type: 2}
+    - rarity: 1
+      weight: 0
+      items:
+      - {fileID: 11400000, guid: dd469595d87d41b49946a93f8cf6ef0b, type: 2}
+    - rarity: 2
+      weight: 0
+      items:
+      - {fileID: 11400000, guid: dd469595d87d41b49946a93f8cf6ef0b, type: 2}
+    - rarity: 3
+      weight: 1
+      items:
+      - {fileID: 11400000, guid: dd469595d87d41b49946a93f8cf6ef0b, type: 2}
+      - {fileID: 11400000, guid: d8fba5b70fc1f6b44935f51bbc1d803e, type: 2}
+    isEnabled: 1
+    priority: 5
+    enableDebugLog: 0
+  categoryStrategy: 1
+  rarityBalance: 0
+  avoidDuplicateItems: 1
+  maxRetryAttempts: 10
+  enablePreview: 1
+  previewSeed: 750549
+  previewGridSize: {x: 10, y: 6}
+  enableDetailedLogging: 0
+  generationTimeout: 10
+  strictCompatibilityCheck: 1

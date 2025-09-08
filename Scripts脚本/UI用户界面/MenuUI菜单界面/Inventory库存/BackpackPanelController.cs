@@ -478,13 +478,30 @@ public class BackpackPanelController : MonoBehaviour
         currentGrid.SetActive(true);
         
         // 设置保存管理器并注册网格
-        SetupGridSaveLoad(gridType);
+        if (gridType == GridType.Container && ShelfTrigger.isInShelf)
+        {
+            // 为货架Container网格设置独立的GUID
+            SetupShelfContainerGrid();
+        }
+        else
+        {
+            SetupGridSaveLoad(gridType);
+        }
+        
+        // 记录当前网格的类型和GUID（用于清理时参考）
+        currentGridType = gridType;
         
         // 更新标题文本
         UpdateTitleText(gridType);
         
         if (showDebugLog)
             Debug.Log($"BackpackPanelController: 已创建{gridType}网格 - {currentGrid.name}");
+            
+        // 如果是Container网格且在货架中，通知ShelfTrigger开始生成随机物品
+        if (gridType == GridType.Container && ShelfTrigger.isInShelf)
+        {
+            TriggerShelfRandomGeneration();
+        }
     }
     
     /// <summary>
@@ -620,10 +637,18 @@ public class BackpackPanelController : MonoBehaviour
     /// <returns>包含货架ID的Container网格GUID</returns>
     private string GenerateContainerGUID()
     {
-        // 暂时移除货架ID功能，等待重新实现
-        // TODO: 重新实现货架ID系统
+        // 尝试获取当前活跃的货架ID
+        string activeShelfId = GetActiveShelfId();
         
-        // 使用通用的Container GUID
+        if (!string.IsNullOrEmpty(activeShelfId))
+        {
+            // 使用货架ID生成独立的GUID
+            string shelfGUID = $"shelf_container_{activeShelfId}_{backpackUniqueId}";
+            if (showDebugLog)
+                Debug.Log($"BackpackPanelController: 使用货架专用GUID: {shelfGUID} (货架: {activeShelfId})");
+            return shelfGUID;
+        }
+        else
         {
             // 如果没有活跃的货架ID，使用通用的Container GUID
             string defaultGUID = $"container_grid_{backpackUniqueId}";
@@ -631,6 +656,387 @@ public class BackpackPanelController : MonoBehaviour
                 Debug.Log($"BackpackPanelController: 使用默认Container GUID: {defaultGUID} (无活跃货架)");
             return defaultGUID;
         }
+    }
+    
+    /// <summary>
+    /// 获取当前活跃的货架ID
+    /// </summary>
+    /// <returns>货架ID，如果没有则返回null</returns>
+    private string GetActiveShelfId()
+    {
+        // 通过ShelfTrigger的静态状态检查是否在货架中
+        if (ShelfTrigger.isInShelf)
+        {
+            // 查找所有ShelfTrigger，找到玩家当前所在的货架
+            var allShelfTriggers = FindObjectsOfType<ShelfTrigger>();
+            foreach (var trigger in allShelfTriggers)
+            {
+                // 检查触发器范围内是否有玩家
+                if (IsPlayerInTrigger(trigger))
+                {
+                    return trigger.GetUniqueContainerIdentifier().Replace("shelf_container_", "");
+                }
+            }
+        }
+        
+        return null;
+    }
+    
+    /// <summary>
+    /// 检查玩家是否在指定触发器范围内
+    /// </summary>
+    /// <param name="trigger">要检查的触发器</param>
+    /// <returns>玩家是否在范围内</returns>
+    private bool IsPlayerInTrigger(ShelfTrigger trigger)
+    {
+        if (trigger == null)
+        {
+            if (showDebugLog)
+                Debug.Log("BackpackPanelController: 触发器为null");
+            return false;
+        }
+        
+        // 获取玩家对象
+        GameObject player = GameObject.FindWithTag("Player");
+        if (player == null)
+        {
+            if (showDebugLog)
+                Debug.Log("BackpackPanelController: 未找到Player对象");
+            return false;
+        }
+        
+        // 获取触发器的碰撞体
+        Collider2D triggerCollider = trigger.GetComponent<Collider2D>();
+        if (triggerCollider == null)
+        {
+            if (showDebugLog)
+                Debug.Log($"BackpackPanelController: 触发器 {trigger.name} 没有Collider2D组件");
+            return false;
+        }
+        
+        // 检查玩家是否在触发器范围内
+        Collider2D playerCollider = player.GetComponent<Collider2D>();
+        if (playerCollider == null)
+        {
+            if (showDebugLog)
+                Debug.Log("BackpackPanelController: 玩家没有Collider2D组件");
+            return false;
+        }
+        
+        // 使用2D边界检测，忽略Z轴差异
+        Bounds triggerBounds = triggerCollider.bounds;
+        Bounds playerBounds = playerCollider.bounds;
+        
+        // 2D边界检测逻辑
+        bool intersects2D = (triggerBounds.min.x <= playerBounds.max.x && triggerBounds.max.x >= playerBounds.min.x) &&
+                           (triggerBounds.min.y <= playerBounds.max.y && triggerBounds.max.y >= playerBounds.min.y);
+        
+        if (showDebugLog)
+        {
+            Debug.Log($"BackpackPanelController: 触发器 {trigger.name} 2D碰撞检测 - " +
+                     $"触发器边界: {triggerBounds}, 玩家边界: {playerBounds}, 2D相交: {intersects2D}");
+        }
+        
+        return intersects2D;
+    }
+    
+    /// <summary>
+    /// 触发货架随机物品生成
+    /// </summary>
+    private void TriggerShelfRandomGeneration()
+    {
+        try
+        {
+            // 获取当前创建的网格的ItemGrid组件
+            if (currentGrid == null)
+            {
+                if (showDebugLog)
+                    Debug.LogWarning("BackpackPanelController: 无法触发随机生成 - 当前网格为空");
+                return;
+            }
+            
+            ItemGrid itemGrid = currentGrid.GetComponent<ItemGrid>();
+            if (itemGrid == null)
+            {
+                if (showDebugLog)
+                    Debug.LogWarning("BackpackPanelController: 无法触发随机生成 - 网格没有ItemGrid组件");
+                return;
+            }
+            
+            // 查找当前活跃的ShelfTrigger
+            var activeShelfTrigger = GetActiveShelfTrigger();
+            if (activeShelfTrigger != null)
+            {
+                if (showDebugLog)
+                    Debug.Log($"BackpackPanelController: 通知货架触发器生成随机物品 - {activeShelfTrigger.name}");
+                    
+                activeShelfTrigger.OnContainerGridCreated(itemGrid);
+            }
+            else
+            {
+                if (showDebugLog)
+                    Debug.LogWarning("BackpackPanelController: 未找到活跃的货架触发器，尝试其他方法查找");
+                    
+                // 备用方法：查找最近分配编号的货架
+                var fallbackShelfTrigger = FindFallbackShelfTrigger();
+                if (fallbackShelfTrigger != null)
+                {
+                    if (showDebugLog)
+                        Debug.Log($"BackpackPanelController: 使用备用方法找到货架触发器 - {fallbackShelfTrigger.name}");
+                        
+                    fallbackShelfTrigger.OnContainerGridCreated(itemGrid);
+                }
+                else
+                {
+                    if (showDebugLog)
+                        Debug.LogWarning("BackpackPanelController: 备用方法也未找到货架触发器");
+                }
+            }
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"BackpackPanelController: 触发随机生成时发生错误: {ex.Message}");
+        }
+    }
+    
+    /// <summary>
+    /// 备用方法：查找最近的货架触发器
+    /// </summary>
+    /// <returns>最近的货架触发器</returns>
+    private ShelfTrigger FindFallbackShelfTrigger()
+    {
+        if (!ShelfTrigger.isInShelf)
+        {
+            if (showDebugLog)
+                Debug.Log("BackpackPanelController: 玩家不在任何货架范围内，无法使用备用方法");
+            return null;
+        }
+        
+        var allShelfTriggers = FindObjectsOfType<ShelfTrigger>();
+        ShelfTrigger closestTrigger = null;
+        float closestDistance = float.MaxValue;
+        
+        // 获取玩家位置
+        GameObject player = GameObject.FindWithTag("Player");
+        if (player == null)
+        {
+            if (showDebugLog)
+                Debug.LogWarning("BackpackPanelController: 备用方法无法找到玩家对象");
+            return null;
+        }
+        
+        Vector3 playerPosition = player.transform.position;
+        
+        foreach (var trigger in allShelfTriggers)
+        {
+            // 检查是否有分配的货架编号
+            if (!string.IsNullOrEmpty(trigger.AssignedShelfId))
+            {
+                // 计算距离（只考虑XY平面）
+                Vector3 triggerPosition = trigger.transform.position;
+                float distance = Vector2.Distance(
+                    new Vector2(playerPosition.x, playerPosition.y),
+                    new Vector2(triggerPosition.x, triggerPosition.y)
+                );
+                
+                if (showDebugLog)
+                    Debug.Log($"BackpackPanelController: 检查货架 {trigger.name} (编号: {trigger.AssignedShelfId}), 距离: {distance:F2}");
+                
+                // 选择最近的货架
+                if (distance < closestDistance)
+                {
+                    closestDistance = distance;
+                    closestTrigger = trigger;
+                }
+            }
+        }
+        
+        if (closestTrigger != null && showDebugLog)
+        {
+            Debug.Log($"BackpackPanelController: 备用方法选择最近货架: {closestTrigger.name} (编号: {closestTrigger.AssignedShelfId}), 距离: {closestDistance:F2}");
+        }
+        
+        return closestTrigger;
+    }
+    
+    /// <summary>
+    /// 为货架生成独立的Container GUID
+    /// </summary>
+    /// <param name="shelfTrigger">货架触发器</param>
+    /// <returns>独立的GUID</returns>
+    private string GenerateShelfContainerGUID(ShelfTrigger shelfTrigger)
+    {
+        if (shelfTrigger != null && !string.IsNullOrEmpty(shelfTrigger.AssignedShelfId))
+        {
+            // 使用货架的AssignedShelfId作为唯一标识符
+            // 格式：shelf_container_{货架编号}_{场景名称}
+            string sceneName = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
+            string shelfGUID = $"shelf_container_{shelfTrigger.AssignedShelfId}_{sceneName}";
+            
+            if (showDebugLog)
+                Debug.Log($"BackpackPanelController: 为货架生成独立GUID: {shelfGUID} (货架: {shelfTrigger.AssignedShelfId}, 场景: {sceneName})");
+            return shelfGUID;
+        }
+        else
+        {
+            // 回退到场景级别的默认GUID
+            string sceneName = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
+            string defaultGUID = $"container_grid_default_{sceneName}_{backpackUniqueId}";
+            
+            if (showDebugLog)
+                Debug.Log($"BackpackPanelController: 使用默认Container GUID: {defaultGUID} (无活跃货架)");
+            return defaultGUID;
+        }
+    }
+    
+    /// <summary>
+    /// 为货架Container网格设置独立的保存和加载
+    /// </summary>
+    private void SetupShelfContainerGrid()
+    {
+        try
+        {
+            // 获取活跃的货架触发器
+            var activeShelfTrigger = GetActiveShelfTrigger();
+            if (activeShelfTrigger == null)
+            {
+                activeShelfTrigger = FindFallbackShelfTrigger();
+            }
+            
+            // 生成独立的GUID
+            string shelfGUID = GenerateShelfContainerGUID(activeShelfTrigger);
+            
+            if (showDebugLog)
+                Debug.Log($"BackpackPanelController: Container网格使用GUID: {shelfGUID}");
+            
+            // 立即设置自定义GUID，确保它被正确应用
+            SetupGridWithCustomGUID(GridType.Container, shelfGUID);
+            
+            // 额外验证：确保网格确实使用了正确的GUID
+            if (currentGrid != null)
+            {
+                ItemGrid itemGrid = currentGrid.GetComponent<ItemGrid>();
+                if (itemGrid != null && showDebugLog)
+                {
+                    Debug.Log($"BackpackPanelController: 验证网格GUID设置 - 网格名称: {itemGrid.name}");
+                }
+            }
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"BackpackPanelController: 设置货架Container网格时发生错误: {ex.Message}");
+            // 发生错误时回退到默认设置
+            SetupGridSaveLoad(GridType.Container);
+        }
+    }
+    
+    /// <summary>
+    /// 使用自定义GUID设置网格
+    /// </summary>
+    /// <param name="gridType">网格类型</param>
+    /// <param name="customGUID">自定义GUID</param>
+    private void SetupGridWithCustomGUID(GridType gridType, string customGUID)
+    {
+        try
+        {
+            // 直接设置自定义GUID，而不是使用默认的
+            string gridGUID = customGUID;
+            
+            if (showDebugLog)
+                Debug.Log($"BackpackPanelController: 设置{gridType}网格使用自定义GUID: {gridGUID}");
+            
+            // 获取网格组件
+            ItemGrid itemGrid = currentGrid?.GetComponent<ItemGrid>();
+            if (itemGrid != null)
+            {
+                // 直接设置网格的GUID和属性
+                itemGrid.GridGUID = gridGUID;
+                itemGrid.GridName = $"地面网格 ({gridGUID})";
+                itemGrid.GridType = GridType.Ground; // Container网格在保存系统中作为Ground处理
+                
+                // 使用GridSaveManager设置
+                if (gridSaveManager != null)
+                {
+                    gridSaveManager.SetCurrentGrid(itemGrid, gridGUID);
+                    if (showDebugLog)
+                        Debug.Log($"BackpackPanelController: 已设置GridSaveManager当前网格: {gridGUID}");
+                }
+                
+                // 注册到InventorySaveManager（使用正确的方法签名）
+                if (InventorySaveManager.Instance != null)
+                {
+                    InventorySaveManager.Instance.RegisterGrid(itemGrid, itemGrid.GridName);
+                    if (showDebugLog)
+                        Debug.Log($"BackpackPanelController: 已向InventorySaveManager注册网格: {gridGUID}");
+                }
+                
+                // 使用GridSaveManager加载数据
+                if (gridSaveManager != null)
+                {
+                    // 根据gridType判断是否为仓库模式
+                    bool isWarehouse = (gridType == GridType.Storage);
+                    gridSaveManager.RegisterAndLoadGridWithGUID(gridGUID, isWarehouse);
+                    if (showDebugLog)
+                        Debug.Log($"BackpackPanelController: 已尝试加载网格数据: {gridGUID}");
+                }
+            }
+            else
+            {
+                if (showDebugLog)
+                    Debug.LogWarning($"BackpackPanelController: 无法获取ItemGrid组件，无法设置自定义GUID: {gridGUID}");
+            }
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"BackpackPanelController: 设置自定义GUID时发生错误: {ex.Message}");
+            // 回退到默认设置
+            SetupGridSaveLoad(gridType);
+        }
+    }
+    
+    /// <summary>
+    /// 获取当前活跃的货架触发器
+    /// </summary>
+    /// <returns>活跃的货架触发器，如果没有则返回null</returns>
+    private ShelfTrigger GetActiveShelfTrigger()
+    {
+        if (showDebugLog)
+            Debug.Log($"BackpackPanelController: 检查活跃货架触发器 - isInShelf: {ShelfTrigger.isInShelf}");
+            
+        if (!ShelfTrigger.isInShelf)
+        {
+            if (showDebugLog)
+                Debug.Log("BackpackPanelController: 玩家不在货架范围内");
+            return null;
+        }
+            
+        // 查找所有ShelfTrigger，找到玩家当前所在的货架
+        var allShelfTriggers = FindObjectsOfType<ShelfTrigger>();
+        if (showDebugLog)
+            Debug.Log($"BackpackPanelController: 找到 {allShelfTriggers.Length} 个货架触发器");
+            
+        foreach (var trigger in allShelfTriggers)
+        {
+            if (showDebugLog)
+                Debug.Log($"BackpackPanelController: 检查货架触发器 {trigger.name}");
+                
+            // 检查触发器范围内是否有玩家
+            if (IsPlayerInTrigger(trigger))
+            {
+                if (showDebugLog)
+                    Debug.Log($"BackpackPanelController: 找到活跃货架触发器: {trigger.name}");
+                return trigger;
+            }
+            else
+            {
+                if (showDebugLog)
+                    Debug.Log($"BackpackPanelController: 货架触发器 {trigger.name} 中没有玩家");
+            }
+        }
+        
+        if (showDebugLog)
+            Debug.Log("BackpackPanelController: 未找到任何活跃的货架触发器");
+        return null;
     }
     
     /// <summary>

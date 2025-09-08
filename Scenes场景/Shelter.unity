@@ -6359,7 +6359,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 725efa91da0919444849f17371a5e474, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isInitialized: 0
+  isInitialized: 1
   totalItemCount: 0
   loadTimeMs: 0
   mappingTableSize: 0
@@ -17444,9 +17444,6 @@ GameObject:
   - component: {fileID: 1766941364}
   - component: {fileID: 1766941365}
   - component: {fileID: 1766941366}
-  - component: {fileID: 1766941371}
-  - component: {fileID: 1766941368}
-  - component: {fileID: 1766941367}
   m_Layer: 0
   m_Name: ContainerSystemManager
   m_TagString: Untagged
@@ -17500,57 +17497,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   enableCrossSessionPersistence: 1
-  equipmentRestoreDelay: 1
+  equipmentRestoreDelay: 0.5
   forceQuitSaveDelay: 0.5
   showDebugLogs: 1
   verboseLogging: 1
---- !u!114 &1766941367
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1766941363}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ad63d94bc2e60714c8cd0554be2980ee, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  verboseLogging: 1
-  testDelay: 2
---- !u!114 &1766941368
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1766941363}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7bc0de53bde7cd04eb9d2977bad3d75c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  enableCrossSessionPersistence: 1
-  equipmentRestoreDelay: 2
-  forceQuitSaveDelay: 0.5
-  showDebugLogs: 1
-  verboseLogging: 1
---- !u!114 &1766941371
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1766941363}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: df858dead8c51c9418283fc97b3fea21, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  autoRunTests: 1
-  verboseLogging: 1
-  lastTestResult: 1
-  testStatusInfo: "\u6240\u6709\u6D4B\u8BD5\u901A\u8FC7"
 --- !u!1 &1778054756
 GameObject:
   m_ObjectHideFlags: 0
