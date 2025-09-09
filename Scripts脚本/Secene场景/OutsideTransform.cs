@@ -129,26 +129,48 @@ public class OutsideTransform : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D collision)
     {
-        // 检查碰撞对象是否带有"Player"标签
-        if (collision.CompareTag("Player"))
+        // 仅检测玩家的 BoxCollider2D
+        if (!(collision is BoxCollider2D))
         {
-            playerInRange = true;
-            playerInTrigger = collision.gameObject;
-            ShowPromptUI(); // 显示UI
-            BindOperateEvent(); // 绑定F键事件
-            Debug.Log("玩家进入外部传送区域，按F键进入内部");
+            return;
         }
+
+        // 通过父级查找玩家组件，确保命中的是玩家的 BoxCollider2D
+        Player playerComponent = collision.GetComponentInParent<Player>();
+        if (playerComponent == null)
+        {
+            return;
+        }
+
+        playerInRange = true;
+        playerInTrigger = playerComponent.gameObject;
+        ShowPromptUI(); // 显示UI
+        BindOperateEvent(); // 绑定F键事件
+        Debug.Log("玩家进入外部传送区域，按F键进入内部（BoxCollider2D）");
     }
 
     void OnTriggerExit2D(Collider2D collision)
     {
-        if (collision.CompareTag("Player"))
+        // 仅处理玩家的 BoxCollider2D 离开
+        if (!(collision is BoxCollider2D))
+        {
+            return;
+        }
+
+        Player playerComponent = collision.GetComponentInParent<Player>();
+        if (playerComponent == null)
+        {
+            return;
+        }
+
+        // 仅当当前记录的玩家离开时才重置
+        if (playerInTrigger != null && playerInTrigger == playerComponent.gameObject)
         {
             playerInRange = false;
             playerInTrigger = null;
             HidePromptUI(); // 隐藏UI
             UnbindOperateEvent(); // 解绑F键事件
-            Debug.Log("玩家离开外部传送区域");
+            Debug.Log("玩家离开外部传送区域（BoxCollider2D）");
         }
     }
 
@@ -174,3 +196,4 @@ public class OutsideTransform : MonoBehaviour
         }
     }
 }
+

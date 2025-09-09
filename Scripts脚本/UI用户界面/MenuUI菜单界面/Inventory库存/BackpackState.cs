@@ -155,9 +155,8 @@ public class BackpackState : MonoBehaviour
         // 激活面板控制器
         if (backpackPanelController != null)
         {
-            // 检查是否在仓库范围内
+            // ✨ 简化：直接使用静态标志检测，模仿WarehouseTrigger的简单逻辑
             bool isInWarehouse = WarehouseTrigger.isInWarehouse;
-            // 检查是否在货架范围内
             bool isInShelf = ShelfTrigger.isInShelf;
             
             if (isInShelf)
@@ -281,6 +280,7 @@ public class BackpackState : MonoBehaviour
         isInitialized = false;
         InitializeBackpack();
     }
+
 
 
 }

@@ -10,6 +10,9 @@ public class ShelfTrigger : BaseContainerTrigger
     [Header("背包设置")]
     [SerializeField] private BackpackState backpackState;
     
+    [Header("跨场景调试")]
+    [SerializeField] private bool debugCrossScene = true;
+    
     [Header("随机物品生成设置")]
     [SerializeField] private bool enableRandomGeneration = true;
     [SerializeField] private RandomItemSpawnConfig randomConfig;
@@ -39,7 +42,7 @@ public class ShelfTrigger : BaseContainerTrigger
             // 注意：货架触发器不需要主动处理Tab键切换
             // Tab键由正常输入系统处理，货架只负责设置isInShelf状态标志
             // 这个方法仅在需要程序化切换时调用（如F键，但已被移除）
-            Debug.Log("ShelfTrigger: 程序化切换货架状态，isInShelf = " + isInShelf);
+            if (debugCrossScene) Debug.Log($"<color=#AB47BC>[ShelfTrigger]</color> <color=#E0E0E0>程序化切换货架状态，isInShelf={isInShelf}</color>");
             
             if (backpackState.IsBackpackOpen())
             {
@@ -76,6 +79,10 @@ public class ShelfTrigger : BaseContainerTrigger
     protected override void OnPlayerEnterTrigger(Collider2D playerCollider)
     {
         base.OnPlayerEnterTrigger(playerCollider);
+        
+        // ✨ 跨场景保险：再次确保BackpackState引用有效
+        EnsureBackpackStateReference();
+        
         isInShelf = true;
         
         // 分配货架编号（如果还没有分配）
@@ -88,16 +95,27 @@ public class ShelfTrigger : BaseContainerTrigger
             }
         }
         
-        // 不再在进入触发器时生成物品，改为在打开背包时生成
-        if (debugRandomGeneration)
-        {
-            Debug.Log($"[ShelfTrigger] {assignedShelfId}: 玩家进入触发器，等待Tab键打开网格后生成物品");
-        }
-        
         // 更新UI文本为货架专用文本
         if (tmpText != null)
         {
             tmpText.text = "[Tab] Search";
+        }
+        
+        // 跨场景验证：确认BackpackState连接状态
+        if (debugCrossScene)
+        {
+            bool hasValidBackpackState = (backpackState != null && backpackState.gameObject != null);
+            var tag = "<color=#AB47BC>[ShelfTrigger]</color>"; // 紫色标签
+            Debug.Log($"{tag} <color=#9FA8DA>进入触发器</color> <color=#90CAF9>AssignedShelfId={assignedShelfId}</color> <color=#80CBC4>BackpackState有效={hasValidBackpackState}</color>");
+            
+            if (hasValidBackpackState)
+            {
+                Debug.Log($"{tag} <color=#81C784>连接到</color> <color=#FFF176>{backpackState.gameObject.name}</color> <color=#B39DDB>Tab应正常工作</color>");
+            }
+            else
+            {
+                Debug.LogError($"{tag} <color=#EF9A9A>BackpackState连接失败</color> <color=#FFCDD2>Tab可能异常</color>");
+            }
         }
     }
 
@@ -106,6 +124,7 @@ public class ShelfTrigger : BaseContainerTrigger
         base.OnPlayerExitTrigger(playerCollider);
         isInShelf = false;
     }
+    
     
     #region 随机物品生成
     
@@ -322,6 +341,9 @@ public class ShelfTrigger : BaseContainerTrigger
         // 调用基类的Start方法
         base.Start();
         
+        // ✨ 跨场景修复：动态查找BackpackState，解决场景切换后引用失效问题
+        EnsureBackpackStateReference();
+        
         // 验证配置
         ValidateConfiguration();
         
@@ -344,6 +366,76 @@ public class ShelfTrigger : BaseContainerTrigger
     {
         // 编辑器中验证配置
         ValidateConfiguration();
+    }
+    
+    /// <summary>
+    /// 确保BackpackState引用有效（跨场景修复）
+    /// 这解决了从Shelter场景切换到Mall场景后，ShelfTrigger的backpackState引用失效的问题
+    /// </summary>
+    private void EnsureBackpackStateReference()
+    {
+        // 检查当前引用是否有效
+        if (backpackState != null && backpackState.gameObject != null)
+        {
+            if (debugCrossScene)
+            {
+                Debug.Log($"[ShelfTrigger] {assignedShelfId}: BackpackState引用有效: {backpackState.gameObject.name}");
+            }
+            return; // 引用有效，无需重新查找
+        }
+        
+        if (debugCrossScene)
+        {
+            Debug.LogWarning($"[ShelfTrigger] {assignedShelfId}: BackpackState引用无效，开始跨场景动态查找");
+        }
+        
+        // 方法1：通过BackpackSystemManager获取
+        var systemManager = BackpackSystemManager.Instance;
+        if (systemManager != null)
+        {
+            var foundBackpackState = systemManager.GetBackpackState();
+            if (foundBackpackState != null)
+            {
+                backpackState = foundBackpackState;
+                if (debugCrossScene)
+                {
+                    Debug.Log($"[ShelfTrigger] {assignedShelfId}: 通过BackpackSystemManager找到BackpackState: {backpackState.gameObject.name}");
+                }
+                return;
+            }
+        }
+        
+        // 方法2：直接在场景中查找（DontDestroyOnLoad对象）
+        var foundStates = FindObjectsOfType<BackpackState>(true); // 包括非激活对象
+        if (foundStates != null && foundStates.Length > 0)
+        {
+            // 优先选择DontDestroyOnLoad的对象
+            foreach (var state in foundStates)
+            {
+                if (state.gameObject.scene.name == "DontDestroyOnLoad" || 
+                    state.transform.root.gameObject.scene.name == "DontDestroyOnLoad")
+                {
+                    backpackState = state;
+                    if (debugCrossScene)
+                    {
+                        Debug.Log($"[ShelfTrigger] {assignedShelfId}: 找到DontDestroyOnLoad的BackpackState: {backpackState.gameObject.name}");
+                    }
+                    return;
+                }
+            }
+            
+            // 如果没有DontDestroyOnLoad的，使用第一个找到的
+            backpackState = foundStates[0];
+            if (debugCrossScene)
+            {
+                Debug.Log($"[ShelfTrigger] {assignedShelfId}: 使用第一个找到的BackpackState: {backpackState.gameObject.name}");
+            }
+            return;
+        }
+        
+        // 都找不到，记录错误
+        Debug.LogError($"[ShelfTrigger] {assignedShelfId}: 无法在场景中找到任何BackpackState！这将导致背包功能无法正常工作。");
+        Debug.LogError($"[ShelfTrigger] 请检查BackpackSystemManager是否正确初始化，或在Inspector中手动设置backpackState字段。");
     }
     
     /// <summary>

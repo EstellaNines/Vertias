@@ -497,10 +497,11 @@ public class BackpackPanelController : MonoBehaviour
         if (showDebugLog)
             Debug.Log($"BackpackPanelController: 已创建{gridType}网格 - {currentGrid.name}");
             
-        // 如果是Container网格且在货架中，通知ShelfTrigger开始生成随机物品
+        // ✨ 优化：延迟随机物品生成，避免阻塞Tab键响应
         if (gridType == GridType.Container && ShelfTrigger.isInShelf)
         {
-            TriggerShelfRandomGeneration();
+            // 延迟到下一帧执行，确保界面先显示再生成物品
+            StartCoroutine(DelayedTriggerShelfRandomGeneration());
         }
     }
     
@@ -741,6 +742,23 @@ public class BackpackPanelController : MonoBehaviour
     }
     
     /// <summary>
+    /// 延迟触发货架随机物品生成（协程版本）
+    /// 确保界面先显示，再生成物品，避免阻塞Tab键响应
+    /// </summary>
+    private System.Collections.IEnumerator DelayedTriggerShelfRandomGeneration()
+    {
+        // 等待几帧，确保界面完全显示
+        yield return null;
+        yield return null;
+        
+        if (showDebugLog)
+            Debug.Log("BackpackPanelController: 开始延迟执行货架随机物品生成");
+            
+        // 执行原有的生成逻辑
+        TriggerShelfRandomGeneration();
+    }
+    
+    /// <summary>
     /// 触发货架随机物品生成
     /// </summary>
     private void TriggerShelfRandomGeneration()
@@ -909,6 +927,14 @@ public class BackpackPanelController : MonoBehaviour
             if (showDebugLog)
                 Debug.Log($"BackpackPanelController: Container网格使用GUID: {shelfGUID}");
             
+            // 会话重置（仅一次）：首次使用该GUID时清理旧会话存档，后续同一会话内不再清理
+            if (gridSaveManager != null)
+            {
+                bool deleted = gridSaveManager.EnsureSessionClearOnce(shelfGUID);
+                if (showDebugLog)
+                    Debug.Log($"BackpackPanelController: 会话一次性清理旧Container存档 -> {(deleted ? "已删除" : "跳过/无旧档")}: {shelfGUID}");
+            }
+
             // 立即设置自定义GUID，确保它被正确应用
             SetupGridWithCustomGUID(GridType.Container, shelfGUID);
             

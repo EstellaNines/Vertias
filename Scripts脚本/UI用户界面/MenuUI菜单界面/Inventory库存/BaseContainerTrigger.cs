@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro; // 引入TextMeshPro命名空间
 using System; // 引入System命名空间以支持反射功能
+using InventorySystem; // 引入以访问 GridType 等类型
 
 /// <summary>
 /// 容器触发器基类 - 提供进入特定碰撞触发器时按F键打开容器UI的通用功能
@@ -16,6 +17,9 @@ public abstract class BaseContainerTrigger : MonoBehaviour
 
     [Header("输入控制")]
     public PlayerInputController playerInputController; // 玩家输入控制器引用
+
+    [Header("调试设置")]
+    [SerializeField] protected bool debugLog = false; // 调试日志开关
 
     // 受保护的属性，供子类访问
     protected bool playerInRange = false; // 玩家是否在范围内
@@ -81,16 +85,83 @@ public abstract class BaseContainerTrigger : MonoBehaviour
         // 默认为空，子类可以重写
     }
 
+    /// <summary>
+    /// 子类可重写：告知进入该触发器后希望右侧网格刷新为哪种类型
+    /// 默认 Ground，以保证向后兼容
+    /// </summary>
+    protected virtual GridType GetGridTypeForRefresh()
+    {
+        return GridType.Ground;
+    }
+
+    /// <summary>
+    /// 提供一个在基类中可复用的 BackPackState 引用获取逻辑
+    /// 子类可重写以优先使用自身字段
+    /// </summary>
+    protected virtual BackpackState GetBackpackStateReference()
+    {
+        // 优先通过单例管理器获取
+        var systemManager = BackpackSystemManager.Instance;
+        if (systemManager != null)
+        {
+            var state = systemManager.GetBackpackState();
+            if (state != null) return state;
+        }
+
+        // 回退：场景中直接查找（包含非激活对象）
+        var found = FindObjectOfType<BackpackState>(true);
+        return found;
+    }
+
+    /// <summary>
+    /// 当背包当前处于关闭状态时，强制将右侧网格预刷新为目标类型
+    /// 目的：解决跨场景后旧网格残留导致第一次 Tab 显示错误的问题
+    /// </summary>
+    protected void ForceRefreshGridIfBackpackClosed()
+    {
+        var backpackState = GetBackpackStateReference();
+        if (backpackState == null)
+        {
+            if (debugLog) Debug.LogWarning("[BaseContainer] 未找到 BackpackState，跳过预刷新");
+            return;
+        }
+
+        // 背包已打开则不打断当前逻辑
+        if (backpackState.IsBackpackOpen())
+        {
+            if (debugLog) Debug.Log("[BaseContainer] 背包已打开，跳过预刷新");
+            return;
+        }
+
+        var panelController = FindObjectOfType<BackpackPanelController>();
+        if (panelController == null)
+        {
+            if (debugLog) Debug.LogWarning("[BaseContainer] 未找到 BackpackPanelController，跳过预刷新");
+            return;
+        }
+
+        var targetType = GetGridTypeForRefresh();
+        if (panelController.GetCurrentGridType() != targetType)
+        {
+            panelController.ActivatePanel(targetType);
+            if (debugLog) Debug.Log($"[BaseContainer] 强制预刷新网格 → {targetType}");
+        }
+        else
+        {
+            if (debugLog) Debug.Log($"[BaseContainer] 当前网格已是 {targetType}，无需预刷新");
+        }
+    }
+
     // 当其他碰撞体进入触发器时调用
     private void OnTriggerEnter2D(Collider2D other)
     {
-        Debug.Log($"触发器检测到对象: {other.name}, 标签: {other.tag}, 碰撞体类型: {other.GetType().Name}");
+        if (debugLog) LogInfo($"触发器检测到对象: {other.name}, 标签: {other.tag}, 碰撞体类型: {other.GetType().Name}");
 
         // 检查是否是玩家的BoxCollider2D进入
         if (other is BoxCollider2D && other.CompareTag("Player"))
         {
             playerInRange = true;
-            Debug.Log($"玩家进入{GetContainerTypeName()}触发器范围，可以使用Tab键打开{GetContainerTypeName()}");
+            if (debugLog) LogInfo($"玩家进入{GetContainerTypeName()}触发器范围，可以使用Tab键打开{GetContainerTypeName()}");
 
             // 记录玩家进入时容器的状态
             wasContainerOpenWhenEntered = IsContainerOpen();
@@ -116,7 +187,7 @@ public abstract class BaseContainerTrigger : MonoBehaviour
         if (other is BoxCollider2D && other.CompareTag("Player"))
         {
             playerInRange = false;
-            Debug.Log($"玩家离开{GetContainerTypeName()}触发器范围");
+            if (debugLog) LogInfo($"玩家离开{GetContainerTypeName()}触发器范围");
 
             // 隐藏TMP文本
             if (tmpText != null)
@@ -130,7 +201,7 @@ public abstract class BaseContainerTrigger : MonoBehaviour
             if (!wasContainerOpenWhenEntered && IsContainerOpen())
             {
                 ForceCloseContainer();
-                Debug.Log($"玩家离开{GetContainerTypeName()}范围，自动关闭{GetContainerTypeName()}界面");
+                if (debugLog) LogWarn($"玩家离开{GetContainerTypeName()}范围，自动关闭{GetContainerTypeName()}界面");
             }
 
             // 调用子类的离开处理方法
@@ -206,5 +277,27 @@ public abstract class BaseContainerTrigger : MonoBehaviour
     protected virtual void OnDestroy()
     {
         // F键功能已移除，无需清理事件绑定
+    }
+
+    // ========================= 调试输出辅助 =========================
+    protected string ScriptTag()
+    {
+        // 蓝色脚本标签
+        return $"<color=#4FC3F7>[{GetType().Name}]</color>";
+    }
+
+    protected void LogInfo(string message)
+    {
+        Debug.Log($"{ScriptTag()} <color=#E0E0E0>{message}</color>");
+    }
+
+    protected void LogWarn(string message)
+    {
+        Debug.LogWarning($"{ScriptTag()} <color=#FFC107>{message}</color>");
+    }
+
+    protected void LogError(string message)
+    {
+        Debug.LogError($"{ScriptTag()} <color=#FF5252>{message}</color>");
     }
 }

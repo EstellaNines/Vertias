@@ -1268,7 +1268,7 @@ public class InventorySaveManager : MonoBehaviour
             case ItemCategory.Currency:
                 return "Currency_货币";
             case ItemCategory.Special:
-                return "Special_特殊物品";
+                return "Special";
             default:
                 Debug.LogWarning($"[InventorySaveManager] 未知的物品类别: {category}");
                 return "Helmet_头盔"; // 默认文件夹
@@ -1354,7 +1354,9 @@ public class InventorySaveManager : MonoBehaviour
             "Hemostatic_止血剂",
             "Healing_治疗药物",
             "Intelligence_情报",
-            "Currency_货币"
+            "Currency_货币",
+            "Special",
+            "Special_特殊物品"
         };
 
         foreach (string folder in categoryFolders)

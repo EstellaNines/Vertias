@@ -9,6 +9,8 @@ public class GridSaveManager : MonoBehaviour
 {
     private ItemGrid currentItemGrid;
     private string currentGridGUID;
+    // 会话级：记录本次运行中已清理过的GUID，防止重复清理
+    private static System.Collections.Generic.HashSet<string> s_ClearedGuidsThisSession = new System.Collections.Generic.HashSet<string>();
 
     /// <summary>
     /// 设置当前管理的网格
@@ -278,5 +280,58 @@ public class GridSaveManager : MonoBehaviour
                 // 对于其他网格（如背包网格），使用GUID作为文件名
                 return $"{gridGUID}_inventory.es3";
         }
+    }
+
+    /// <summary>
+    /// 删除指定GUID网格的存档文件（用于会话重置等场景）
+    /// </summary>
+    /// <param name="gridGUID">网格GUID</param>
+    /// <returns>是否删除了文件（存在且删除成功返回true）</returns>
+    public bool DeleteGridSaveFile(string gridGUID)
+    {
+        if (string.IsNullOrEmpty(gridGUID))
+        {
+            Debug.LogWarning("GridSaveManager: DeleteGridSaveFile 失败 - gridGUID 为空");
+            return false;
+        }
+
+        string saveFileName = GetGridSaveFileName(gridGUID);
+        if (ES3.FileExists(saveFileName))
+        {
+            try
+            {
+                ES3.DeleteFile(saveFileName);
+                Debug.Log($"GridSaveManager: 已删除网格存档文件 - GUID: {gridGUID}, 文件: {saveFileName}");
+                return true;
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError($"GridSaveManager: 删除网格存档文件失败 - GUID: {gridGUID}, 错误: {e.Message}");
+                return false;
+            }
+        }
+        else
+        {
+            // 文件不存在也视为无需删除
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// 仅在本次运行中第一次为该GUID执行清理；后续调用将跳过，保证同一会话内数据保留
+    /// </summary>
+    /// <param name="gridGUID">网格GUID</param>
+    /// <returns>是否本次调用执行了删除操作</returns>
+    public bool EnsureSessionClearOnce(string gridGUID)
+    {
+        if (string.IsNullOrEmpty(gridGUID)) return false;
+        if (s_ClearedGuidsThisSession.Contains(gridGUID))
+        {
+            return false; // 本会话已清过
+        }
+
+        bool deleted = DeleteGridSaveFile(gridGUID);
+        s_ClearedGuidsThisSession.Add(gridGUID);
+        return deleted;
     }
 }
