@@ -57,6 +57,9 @@ namespace InventorySystem
         [FieldLabel("物品原始尺寸")]
         [SerializeField] private Vector2 originalItemSize;
 
+        [FieldLabel("物品背景原始颜色")]
+        [SerializeField] private Color originalBackgroundColor;
+
         // 装备槽事件
         public static event System.Action<EquipmentSlotType, ItemDataReader> OnItemEquipped;
         public static event System.Action<EquipmentSlotType, ItemDataReader> OnItemUnequipped;
@@ -427,6 +430,9 @@ namespace InventorySystem
 
             // 禁用物品的网格相关组件，避免边界检查冲突
             DisableGridRelatedComponents();
+            
+            // 设置装备栏物品的ItemBackground为透明
+            SetItemBackgroundTransparent();
         }
 
         /// <summary>
@@ -685,6 +691,9 @@ namespace InventorySystem
             }
 
             // 碰撞器一直保持启用状态，无需恢复
+            
+            // 恢复ItemBackground的原始颜色
+            RestoreItemBackgroundColor(itemInstance);
 
             Debug.Log($"[EquipmentSlot] 已恢复物品 {itemInstance.name} 的网格相关组件，包括子组件尺寸");
         }
@@ -812,6 +821,57 @@ namespace InventorySystem
             {
                 UpdateSlotDisplay(); // 恢复正常显示
             }
+        }
+
+        /// <summary>
+        /// 设置装备栏物品的ItemBackground为透明
+        /// </summary>
+        private void SetItemBackgroundTransparent()
+        {
+            if (currentItemInstance == null) return;
+
+            // 查找ItemBackground子对象
+            Transform backgroundTransform = currentItemInstance.transform.Find(ItemPrefabConstants.ChildNames.ItemBackground);
+            if (backgroundTransform == null) return;
+
+            // 获取Image组件
+            var backgroundImage = backgroundTransform.GetComponent<UnityEngine.UI.Image>();
+            if (backgroundImage == null) return;
+
+            // 保存原始颜色
+            originalBackgroundColor = backgroundImage.color;
+            
+            // 设置为透明（保持RGB值，只改变Alpha）
+            Color transparentColor = originalBackgroundColor;
+            transparentColor.a = 0f;
+            backgroundImage.color = transparentColor;
+
+            LogDebugInfo($"设置物品 {currentItemInstance.name} 的ItemBackground为透明，原始颜色: {originalBackgroundColor}");
+        }
+
+        /// <summary>
+        /// 恢复装备栏物品的ItemBackground原始透明度
+        /// </summary>
+        /// <param name="itemInstance">物品实例</param>
+        private void RestoreItemBackgroundColor(GameObject itemInstance)
+        {
+            if (itemInstance == null || originalBackgroundColor == default(Color)) return;
+
+            // 查找ItemBackground子对象
+            Transform backgroundTransform = itemInstance.transform.Find(ItemPrefabConstants.ChildNames.ItemBackground);
+            if (backgroundTransform == null) return;
+
+            // 获取Image组件
+            var backgroundImage = backgroundTransform.GetComponent<UnityEngine.UI.Image>();
+            if (backgroundImage == null) return;
+
+            // 恢复原始颜色
+            backgroundImage.color = originalBackgroundColor;
+
+            LogDebugInfo($"恢复物品 {itemInstance.name} 的ItemBackground原始颜色: {originalBackgroundColor}");
+            
+            // 清除记录的原始颜色
+            originalBackgroundColor = default(Color);
         }
 
         #endregion

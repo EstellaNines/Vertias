@@ -9,6 +9,11 @@ public class ShelfTrigger : BaseContainerTrigger
     
     [Header("背包设置")]
     [SerializeField] private BackpackState backpackState;
+    [SerializeField] private float delayDuration = 3f; // 延迟时长（秒）
+    
+    [Header("世界空间延迟UI设置")]
+    [SerializeField][FieldLabel("使用世界空间延迟UI")] private bool useWorldSpaceDelayUI = true;
+    [SerializeField] private DelayMagnifierUIController legacyDelayUI; // 兼容旧的延迟显示UI
     
     [Header("跨场景调试")]
     [SerializeField] private bool debugCrossScene = true;
@@ -24,6 +29,7 @@ public class ShelfTrigger : BaseContainerTrigger
     // 运行时状态
     private string assignedShelfId;
     private bool hasTriggeredGeneration = false;
+    private bool playerInTrigger = false; // 玩家是否在触发器内
     
     /// <summary>
     /// 获取分配的货架编号（用于外部访问）
@@ -84,6 +90,7 @@ public class ShelfTrigger : BaseContainerTrigger
         EnsureBackpackStateReference();
         
         isInShelf = true;
+        playerInTrigger = true;
         
         // 分配货架编号（如果还没有分配）
         if (string.IsNullOrEmpty(assignedShelfId))
@@ -123,6 +130,20 @@ public class ShelfTrigger : BaseContainerTrigger
     {
         base.OnPlayerExitTrigger(playerCollider);
         isInShelf = false;
+        playerInTrigger = false;
+        
+        // 离开触发器时取消延迟UI
+        if (useWorldSpaceDelayUI && WorldSpaceDelayUIManager.Instance != null)
+        {
+            Debug.Log("[ShelfTrigger] 玩家离开触发器，取消世界空间延迟UI");
+            WorldSpaceDelayUIManager.Instance.CancelDelayDisplay(gameObject);
+            WorldSpaceDelayUIManager.Instance.ReleaseDelayUIForShelf(gameObject);
+        }
+        else if (legacyDelayUI != null && legacyDelayUI.IsDelaying())
+        {
+            Debug.Log("[ShelfTrigger] 玩家离开触发器，取消传统延迟UI");
+            legacyDelayUI.Cancel();
+        }
     }
     
     
@@ -330,6 +351,169 @@ public class ShelfTrigger : BaseContainerTrigger
     {
         hasTriggeredGeneration = false;
         Debug.Log($"[ShelfTrigger] {assignedShelfId}: 触发状态已重置");
+    }
+    
+    #endregion
+    
+    #region 延迟UI访问接口
+    
+    /// <summary>
+    /// 获取当前货架的延迟UI（静态方法供BackpackState调用）
+    /// </summary>
+    /// <returns>当前货架的DelayUI，如果不在货架内则返回null</returns>
+    public static DelayMagnifierUIController GetCurrentShelfDelayUI()
+    {
+        if (!isInShelf) return null;
+        
+        // 优先使用世界空间延迟UI管理器
+        if (WorldSpaceDelayUIManager.Instance != null)
+        {
+            return WorldSpaceDelayUIManager.Instance.GetCurrentActiveDelayUI();
+        }
+        
+        // 回退到传统方式
+        ShelfTrigger[] allShelfTriggers = FindObjectsOfType<ShelfTrigger>();
+        foreach (ShelfTrigger trigger in allShelfTriggers)
+        {
+            if (trigger.playerInTrigger && trigger.legacyDelayUI != null)
+            {
+                return trigger.legacyDelayUI;
+            }
+        }
+        
+        return null;
+    }
+    
+    /// <summary>
+    /// 获取当前货架的延迟时长
+    /// </summary>
+    /// <returns>延迟时长，如果不在货架内则返回0</returns>
+    public static float GetCurrentShelfDelayDuration()
+    {
+        if (!isInShelf) return 0f;
+        
+        // 查找当前激活的货架触发器
+        ShelfTrigger[] allShelfTriggers = FindObjectsOfType<ShelfTrigger>();
+        foreach (ShelfTrigger trigger in allShelfTriggers)
+        {
+            if (trigger.playerInTrigger)
+            {
+                return trigger.delayDuration;
+            }
+        }
+        
+        return 3f; // 默认3秒
+    }
+    
+    /// <summary>
+    /// 开始当前货架的延迟显示（静态方法供BackpackState调用）
+    /// </summary>
+    /// <param name="delayDuration">延迟时长</param>
+    /// <param name="onComplete">完成回调</param>
+    /// <param name="onCancel">取消回调</param>
+    /// <returns>是否成功开始延迟</returns>
+    public static bool StartCurrentShelfDelayDisplay(float delayDuration, System.Action onComplete = null, System.Action onCancel = null)
+    {
+        if (!isInShelf) return false;
+        
+        // 查找当前激活的货架触发器
+        ShelfTrigger[] allShelfTriggers = FindObjectsOfType<ShelfTrigger>();
+        foreach (ShelfTrigger trigger in allShelfTriggers)
+        {
+            if (trigger.playerInTrigger)
+            {
+                return trigger.StartDelayDisplay(delayDuration, onComplete, onCancel);
+            }
+        }
+        
+        return false;
+    }
+    
+    /// <summary>
+    /// 取消当前货架的延迟显示（静态方法供BackpackState调用）
+    /// </summary>
+    /// <returns>是否成功取消</returns>
+    public static bool CancelCurrentShelfDelayDisplay()
+    {
+        if (!isInShelf) return false;
+        
+        // 查找当前激活的货架触发器
+        ShelfTrigger[] allShelfTriggers = FindObjectsOfType<ShelfTrigger>();
+        foreach (ShelfTrigger trigger in allShelfTriggers)
+        {
+            if (trigger.playerInTrigger)
+            {
+                return trigger.CancelDelayDisplay();
+            }
+        }
+        
+        return false;
+    }
+    
+    /// <summary>
+    /// 开始延迟显示
+    /// </summary>
+    /// <param name="delayDuration">延迟时长</param>
+    /// <param name="onComplete">完成回调</param>
+    /// <param name="onCancel">取消回调</param>
+    /// <returns>是否成功开始延迟</returns>
+    public bool StartDelayDisplay(float delayDuration, System.Action onComplete = null, System.Action onCancel = null)
+    {
+        if (!playerInTrigger) return false;
+        
+        if (useWorldSpaceDelayUI && WorldSpaceDelayUIManager.Instance != null)
+        {
+            WorldSpaceDelayUIManager.Instance.StartDelayDisplay(gameObject, delayDuration, onComplete, onCancel);
+            return true;
+        }
+        else if (legacyDelayUI != null)
+        {
+            legacyDelayUI.StartDelay(delayDuration, onComplete, onCancel);
+            return true;
+        }
+        
+        return false;
+    }
+    
+    /// <summary>
+    /// 取消延迟显示
+    /// </summary>
+    /// <returns>是否成功取消</returns>
+    public bool CancelDelayDisplay()
+    {
+        if (!playerInTrigger) return false;
+        
+        if (useWorldSpaceDelayUI && WorldSpaceDelayUIManager.Instance != null)
+        {
+            WorldSpaceDelayUIManager.Instance.CancelDelayDisplay(gameObject);
+            return true;
+        }
+        else if (legacyDelayUI != null && legacyDelayUI.IsDelaying())
+        {
+            legacyDelayUI.Cancel();
+            return true;
+        }
+        
+        return false;
+    }
+    
+    /// <summary>
+    /// 检查延迟UI是否正在显示
+    /// </summary>
+    /// <returns>是否在延迟中</returns>
+    public bool IsDelayUIActive()
+    {
+        if (useWorldSpaceDelayUI && WorldSpaceDelayUIManager.Instance != null)
+        {
+            DelayMagnifierUIController currentUI = WorldSpaceDelayUIManager.Instance.GetCurrentActiveDelayUI();
+            return currentUI != null && currentUI.IsDelaying();
+        }
+        else if (legacyDelayUI != null)
+        {
+            return legacyDelayUI.IsDelaying();
+        }
+        
+        return false;
     }
     
     #endregion

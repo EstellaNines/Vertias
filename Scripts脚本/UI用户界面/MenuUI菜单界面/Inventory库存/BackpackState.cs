@@ -14,6 +14,8 @@ public class BackpackState : MonoBehaviour
     // 公共属性，供外部脚本访问TopNavigationTransform
     public TopNavigationTransform topNavigationTransform => topNav;
 
+    // 延迟UI功能已移动到ShelfTrigger中处理
+
     [Header("状态变量")]
     private bool isBackpackOpen = false; // 背包是否打开
     private bool isInitialized = false; // 是否已初始化
@@ -122,9 +124,53 @@ public class BackpackState : MonoBehaviour
     // 切换背包开关状态（Tab键）
     private void ToggleBackpack()
     {
+        Debug.Log($"[BackpackState] ToggleBackpack被调用 - 在货架内:{ShelfTrigger.isInShelf}, 背包已开:{isBackpackOpen}");
+        
+        // 如果在货架范围内，且背包未打开，尝试使用延迟方案
+        if (ShelfTrigger.isInShelf && !isBackpackOpen)
+        {
+            // 检查是否有延迟正在进行
+            DelayMagnifierUIController delayUI = ShelfTrigger.GetCurrentShelfDelayUI();
+            
+            if (delayUI != null && delayUI.IsDelaying())
+            {
+                // 再次按下Tab取消延迟
+                Debug.Log("[BackpackState] 延迟进行中，取消延迟");
+                ShelfTrigger.CancelCurrentShelfDelayDisplay();
+                return;
+            }
+            
+            // 开始延迟显示
+            float delayDuration = ShelfTrigger.GetCurrentShelfDelayDuration();
+            Debug.Log($"[BackpackState] 开始延迟 {delayDuration:F1} 秒后打开背包");
+            
+            bool delayStarted = ShelfTrigger.StartCurrentShelfDelayDisplay(
+                delayDuration,
+                // 完成回调：打开背包
+                () => {
+                    Debug.Log("[BackpackState] 延迟完成，打开背包");
+                    if (!isBackpackOpen && topNav != null)
+                    {
+                        topNav.ToggleBackpack();
+                    }
+                },
+                // 取消回调：输出日志
+                () => {
+                    Debug.Log("[BackpackState] 延迟被用户取消");
+                }
+            );
+            
+            if (delayStarted)
+            {
+                return; // 成功开始延迟，不执行后续逻辑
+            }
+        }
+        
+        // 常规切换逻辑（不在货架内，或背包已开，或没有延迟UI）
+        Debug.Log("[BackpackState] 使用常规背包切换");
         if (topNav != null)
         {
-            topNav.ToggleBackpack(); // 委托给TopNavigationTransform处理
+            topNav.ToggleBackpack();
         }
     }
 
@@ -136,6 +182,13 @@ public class BackpackState : MonoBehaviour
         if (isBackpackOpen) return;
         
         isBackpackOpen = true;
+        
+        // 背包打开时隐藏所有延迟UI
+        if (WorldSpaceDelayUIManager.Instance != null)
+        {
+            WorldSpaceDelayUIManager.Instance.HideAllDelayUIs();
+            Debug.Log("BackpackState: 背包打开，延迟UI已隐藏");
+        }
         
         // 打开背包UI时，禁用游戏玩法输入，启用UI输入
         if (playerInputController != null)
