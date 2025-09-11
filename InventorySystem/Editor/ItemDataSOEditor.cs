@@ -13,6 +13,7 @@ namespace InventorySystem.Editor
         private bool showSpecialInfo = true;
         private bool showRuntimeInfo = true;
         private bool showGridPreview = true;
+        private bool showWeaponSpec = true;
 
         private void OnEnable()
         {
@@ -289,6 +290,38 @@ namespace InventorySystem.Editor
                     EditorGUILayout.LabelField("武器属性", EditorStyles.boldLabel);
                     EditorGUILayout.PropertyField(serializedObject.FindProperty("durability"), new GUIContent("耐久度"));
                     EditorGUILayout.PropertyField(serializedObject.FindProperty("ammunitionType"), new GUIContent("弹药类型"));
+
+                    // 武器数据驱动参数（来自 JSON -> SO 的 weapon 节点）
+                    EditorGUILayout.Space(5);
+                    showWeaponSpec = EditorGUILayout.Foldout(showWeaponSpec, "武器扩展（数据驱动）", true);
+                    if (showWeaponSpec)
+                    {
+                        EditorGUI.indentLevel++;
+                        var weaponProp = serializedObject.FindProperty("weapon");
+                        if (weaponProp == null || itemData.weapon == null)
+                        {
+                            EditorGUILayout.HelpBox("当前物品没有武器扩展数据（weapon）。请确认 JSON 中该武器条目包含 weapon 节点并重新生成。", MessageType.Info);
+                        }
+                        else
+                        {
+                            EditorGUILayout.LabelField("资源地址", EditorStyles.boldLabel);
+                            EditorGUILayout.PropertyField(weaponProp.FindPropertyRelative("weaponPrefabAddress"), new GUIContent("武器预制体地址"));
+                            EditorGUILayout.PropertyField(weaponProp.FindPropertyRelative("playerBulletPrefabAddress"), new GUIContent("玩家子弹预制体地址"));
+                            EditorGUILayout.PropertyField(weaponProp.FindPropertyRelative("enemyBulletPrefabAddress"), new GUIContent("敌人子弹预制体地址"));
+
+                            EditorGUILayout.Space(3);
+                            EditorGUILayout.LabelField("射击配置", EditorStyles.boldLabel);
+                            EditorGUILayout.PropertyField(weaponProp.FindPropertyRelative("fireMode"), new GUIContent("开火方式 (FullAuto/SemiAuto)"));
+                            EditorGUILayout.PropertyField(weaponProp.FindPropertyRelative("fireRate"), new GUIContent("射击间隔"));
+                            EditorGUILayout.PropertyField(weaponProp.FindPropertyRelative("spreadAngle"), new GUIContent("散射角度"));
+                            EditorGUILayout.PropertyField(weaponProp.FindPropertyRelative("bulletSpeed"), new GUIContent("子弹速度"));
+                            EditorGUILayout.PropertyField(weaponProp.FindPropertyRelative("range"), new GUIContent("射程"));
+                            EditorGUILayout.PropertyField(weaponProp.FindPropertyRelative("damage"), new GUIContent("伤害"));
+                            EditorGUILayout.PropertyField(weaponProp.FindPropertyRelative("magazineCapacity"), new GUIContent("弹夹容量"));
+                            EditorGUILayout.PropertyField(weaponProp.FindPropertyRelative("reloadTime"), new GUIContent("换弹时间"));
+                        }
+                        EditorGUI.indentLevel--;
+                    }
                     break;
 
                 case ItemCategory.Ammunition:

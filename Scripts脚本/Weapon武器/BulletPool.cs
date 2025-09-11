@@ -64,6 +64,16 @@ public class BulletPool : MonoBehaviour
         Debug.Log($"为预制体 {prefab.name} 初始化了子弹池，初始大小: {initialPoolSize}");
     }
 
+    // 预热：确保某个预制体在池中至少存在指定数量
+    public void Prewarm(GameObject prefab, int minCount)
+    {
+        if (prefab == null) return;
+        if (!bulletPools.ContainsKey(prefab)) InitializePoolForPrefab(prefab);
+        Queue<GameObject> pool = bulletPools[prefab];
+        int need = Mathf.Max(0, minCount - pool.Count);
+        for (int i = 0; i < need; i++) CreateBulletForPrefab(prefab);
+    }
+
     // 为特定预制体创建子弹实例
     private void CreateBulletForPrefab(GameObject prefab)
     {
@@ -115,6 +125,9 @@ public class BulletPool : MonoBehaviour
         {
             GameObject bullet = pool.Dequeue();
             bullet.SetActive(true);
+            // 写入回收回调
+            var b = bullet.GetComponent<Bullet>();
+            if (b != null) b.ReturnToPool = ReturnBullet;
             return bullet;
         }
 
@@ -125,6 +138,8 @@ public class BulletPool : MonoBehaviour
         {
             GameObject bullet = pool.Dequeue();
             bullet.SetActive(true);
+            var b = bullet.GetComponent<Bullet>();
+            if (b != null) b.ReturnToPool = ReturnBullet;
             return bullet;
         }
         

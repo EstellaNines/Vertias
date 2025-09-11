@@ -5,6 +5,32 @@ namespace InventorySystem
     [CreateAssetMenu(fileName = "New Item", menuName = "Inventory System/Item Data")]
     public class ItemDataSO : ScriptableObject
     {
+        [System.Serializable]
+        public class WeaponSpec
+        {
+            [Header("资源地址（推荐 Addressables/Resources 路径）")]
+            [FieldLabel("武器预制体地址")] public string weaponPrefabAddress;
+            [FieldLabel("玩家子弹预制体地址")] public string playerBulletPrefabAddress;
+            [FieldLabel("敌人子弹预制体地址")] public string enemyBulletPrefabAddress;
+
+            [Header("射击配置")]
+            [FieldLabel("开火方式")] public string fireMode; // FullAuto / SemiAuto
+            [FieldLabel("射击间隔")] public float fireRate;
+            [FieldLabel("散射角度")] public float spreadAngle;
+            [FieldLabel("子弹速度")] public float bulletSpeed;
+            [FieldLabel("射程")] public float range;
+            [FieldLabel("伤害")] public float damage;
+            [FieldLabel("弹夹容量")] public int magazineCapacity;
+            [FieldLabel("换弹时间")] public float reloadTime;
+
+            /// <summary>
+            /// 资源地址是否为 Resources 路径（不含扩展名）
+            /// </summary>
+            public bool IsResourcesPathValid()
+            {
+                return !string.IsNullOrEmpty(weaponPrefabAddress);
+            }
+        }
         [Header("基础信息")]
         [FieldLabel("物品ID")]
         public int id;                          // 物品原始ID
@@ -54,6 +80,9 @@ namespace InventorySystem
         [Header("情报属性")]
         [FieldLabel("情报值")]
         public int intelligenceValue = 0;       // 情报值（情报物品）
+
+        [Header("武器扩展（仅武器类使用）")]
+        public WeaponSpec weapon;               // 可为空；当为武器类目时由生成器填充
 
         [Header("运行时数据")]
         [FieldLabel("全局唯一ID")]
@@ -159,6 +188,34 @@ namespace InventorySystem
         public bool HasDurability()
         {
             return durability > 0;
+        }
+
+        // -------------------- Resources 加载便捷方法（仅在使用 Resources 工作流时调用） --------------------
+        /// <summary>
+        /// 从 Resources 加载武器预制体（无扩展名路径）。返回 null 表示未配置或未找到。
+        /// </summary>
+        public GameObject LoadWeaponPrefabFromResources()
+        {
+            if (weapon == null || string.IsNullOrEmpty(weapon.weaponPrefabAddress)) return null;
+            return Resources.Load<GameObject>(weapon.weaponPrefabAddress);
+        }
+
+        /// <summary>
+        /// 从 Resources 加载玩家子弹预制体（无扩展名路径）。返回 null 表示未配置或未找到。
+        /// </summary>
+        public GameObject LoadPlayerBulletPrefabFromResources()
+        {
+            if (weapon == null || string.IsNullOrEmpty(weapon.playerBulletPrefabAddress)) return null;
+            return Resources.Load<GameObject>(weapon.playerBulletPrefabAddress);
+        }
+
+        /// <summary>
+        /// 从 Resources 加载敌人子弹预制体（无扩展名路径）。返回 null 表示未配置或未找到。
+        /// </summary>
+        public GameObject LoadEnemyBulletPrefabFromResources()
+        {
+            if (weapon == null || string.IsNullOrEmpty(weapon.enemyBulletPrefabAddress)) return null;
+            return Resources.Load<GameObject>(weapon.enemyBulletPrefabAddress);
         }
     }
 }

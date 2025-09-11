@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.InputSystem;
+using GlobalMessaging;
 
 [CreateAssetMenu(fileName = "PlayerInputController")]
 public class PlayerInputController : ScriptableObject, PlayerInputAction.IGamePlayActions, PlayerInputAction.IUIActions
@@ -15,6 +16,8 @@ public class PlayerInputController : ScriptableObject, PlayerInputAction.IGamePl
     public UnityAction<bool> onFire; // 统一的开火事件（true=按下，false=释放）
     public UnityAction onDodge; // 闪避事件
     public UnityAction onReload; // 重新装弹事件
+    // 武器切换（滚轮/按钮）回调，可选供外部订阅
+    public UnityAction<float> onWeaponScroll;
     public UnityAction<bool> onRun; // 奔跑事件
     public UnityAction<bool> onCrouch; // 蹲下事件
     public UnityAction onCrawl; // 爬行事件
@@ -118,6 +121,7 @@ public class PlayerInputController : ScriptableObject, PlayerInputAction.IGamePl
             // 按键开始按下
             isFirePressed = true;
             onFire?.Invoke(true);
+            MessagingCenter.Instance.Send(new WeaponMessageBus.SetFiringInput{ isPressed = true });
             Debug.Log("开火按键按下");
         }
         else if (context.canceled)
@@ -125,6 +129,7 @@ public class PlayerInputController : ScriptableObject, PlayerInputAction.IGamePl
             // 按键释放
             isFirePressed = false;
             onFire?.Invoke(false);
+            MessagingCenter.Instance.Send(new WeaponMessageBus.SetFiringInput{ isPressed = false });
             Debug.Log("开火按键释放");
         }
     }
@@ -145,8 +150,37 @@ public class PlayerInputController : ScriptableObject, PlayerInputAction.IGamePl
         if (context.performed)
         {
             onReload?.Invoke();
+            MessagingCenter.Instance.Send(new WeaponMessageBus.ReloadCommand{});
             Debug.Log("重新装弹触发");
         }
+    }
+
+    // 新增：切换武器（滚轮/按钮均可映射到此 Action）
+    public void OnChangeWeapon(InputAction.CallbackContext context)
+    {
+        if (!context.performed) return;
+
+        int delta = 0;
+        if (context.valueType == typeof(Vector2))
+        {
+            float y = context.ReadValue<Vector2>().y;
+            if (Mathf.Approximately(y, 0f)) return;
+            delta = y > 0 ? 1 : -1;
+        }
+        else if (context.valueType == typeof(float))
+        {
+            float v = context.ReadValue<float>();
+            if (Mathf.Approximately(v, 0f)) v = 1f; // 某些按钮型绑定读到0/1
+            delta = v > 0 ? 1 : -1;
+        }
+        else
+        {
+            // 按钮型（如中键）默认切到下一个
+            delta = 1;
+        }
+
+        onWeaponScroll?.Invoke(delta);
+        MessagingCenter.Instance.Send(new WeaponMessageBus.ScrollSwitchWeapon{ delta = delta });
     }
 
     // 奔跑输入

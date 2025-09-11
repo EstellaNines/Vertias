@@ -295,6 +295,8 @@ GameObject:
   m_Component:
   - component: {fileID: 1196909955360361039}
   - component: {fileID: 2591543552299249652}
+  - component: {fileID: 5603751829145394038}
+  - component: {fileID: 3836007865044041037}
   m_Layer: 5
   m_Name: SecondaryWeaponEquipmentSlot
   m_TagString: Untagged
@@ -347,3 +349,31 @@ MonoBehaviour:
   originalItemPosition: {x: 0, y: 0}
   originalItemGrid: {fileID: 0}
   originalItemSize: {x: 0, y: 0}
+  originalBackgroundColor: {r: 0, g: 0, b: 0, a: 0}
+--- !u!114 &5603751829145394038
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6622177911230198353}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9e784d0f2f9c9a14aac27b289751dbed, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  slotIndex: 1
+  switchActiveOnEquip: 1
+--- !u!114 &3836007865044041037
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6622177911230198353}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b3dd4541750d892449ab968d5702bb7e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  switchActiveOnEquip: 1

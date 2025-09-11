@@ -40,6 +40,12 @@ namespace InventorySystem.Editor
             { "Intelligence", "Intelligence_情报" }
         };
 
+        // UI 状态
+        private Dictionary<string, bool> categorySelection = new Dictionary<string, bool>();
+        private Dictionary<string, (int jsonCount, int generatedCount)> categoryOverview = new Dictionary<string, (int, int)>();
+        private string lastOperationSummary = string.Empty;
+        private Vector2 scrollPosition = Vector2.zero;
+
         [MenuItem("Inventory System/Item Data SO Generator")]
         public static void ShowWindow()
         {
@@ -51,12 +57,26 @@ namespace InventorySystem.Editor
             // 从EditorPrefs中恢复保存的路径设置
             jsonPath = EditorPrefs.GetString("ItemDataSOGenerator_JsonPath", DEFAULT_JSON_PATH);
             outputPath = EditorPrefs.GetString("ItemDataSOGenerator_OutputPath", DEFAULT_OUTPUT_PATH);
+
+            // 初始化类别选择
+            foreach (var kv in CategoryFolderNames)
+            {
+                if (!categorySelection.ContainsKey(kv.Key))
+                {
+                    categorySelection[kv.Key] = false;
+                }
+            }
+
+            RefreshOverview();
         }
 
         private void OnGUI()
         {
             GUILayout.Label("ScriptableObject 物品数据生成器", EditorStyles.boldLabel);
             GUILayout.Space(10);
+
+            // 垂直滚动区域开始
+            scrollPosition = EditorGUILayout.BeginScrollView(scrollPosition, false, true);
 
             // JSON路径设置
             GUILayout.Label("路径设置:", EditorStyles.boldLabel);
@@ -157,6 +177,38 @@ namespace InventorySystem.Editor
             }
 
             GUILayout.Space(20);
+            GUILayout.Label("类别选择（可按类别生成/删除）", EditorStyles.boldLabel);
+            DrawCategorySelectionUI();
+
+            EditorGUI.BeginDisabledGroup(!jsonExists);
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button("仅生成选中类别", GUILayout.Height(24)))
+            {
+                GenerateSelectedCategories();
+            }
+            if (GUILayout.Button("仅删除选中类别", GUILayout.Height(24)))
+            {
+                DeleteSelectedCategories();
+            }
+            GUILayout.EndHorizontal();
+            EditorGUI.EndDisabledGroup();
+
+            GUILayout.Space(10);
+            if (!string.IsNullOrEmpty(lastOperationSummary))
+            {
+                EditorGUILayout.HelpBox(lastOperationSummary, MessageType.Info);
+            }
+
+            GUILayout.Space(10);
+            if (GUILayout.Button("刷新概况", GUILayout.Height(20)))
+            {
+                RefreshOverview();
+            }
+
+            // 概况表
+            DrawOverviewTable();
+
+            GUILayout.Space(20);
             GUILayout.Label("说明:", EditorStyles.boldLabel);
             GUILayout.Label("• 从JSON数据库为每个物品生成对应的ScriptableObject资产");
             GUILayout.Label("• 按分类文件夹存储");
@@ -165,6 +217,7 @@ namespace InventorySystem.Editor
             GUILayout.Label("• 支持自定义JSON路径和输出路径");
             GUILayout.Label("• 路径设置会自动保存");
             GUILayout.Label("• 根据珍贵等级自动设置背景颜色");
+            EditorGUILayout.EndScrollView();
         }
 
         private void GenerateAllItemDataSO()
@@ -243,6 +296,69 @@ namespace InventorySystem.Editor
                     "确定");
 
                 Debug.Log($"[ItemDataSOGenerator] 生成完成: {generatedItems}/{totalItems} 个物品");
+
+                lastOperationSummary = $"全量生成完成：成功 {generatedItems}/{totalItems}";
+                RefreshOverview();
+            }
+            catch (Exception e)
+            {
+                EditorUtility.DisplayDialog("错误", $"生成过程中发生错误: {e.Message}", "确定");
+                Debug.LogError($"[ItemDataSOGenerator] 生成错误: {e}");
+            }
+        }
+
+        private void GenerateSelectedCategories()
+        {
+            try
+            {
+                if (!File.Exists(jsonPath))
+                {
+                    EditorUtility.DisplayDialog("错误", $"无法找到JSON文件: {jsonPath}", "确定");
+                    return;
+                }
+
+                string jsonContent = File.ReadAllText(jsonPath);
+                JObject jsonData = JObject.Parse(jsonContent);
+                JObject categories = jsonData["category"] as JObject;
+                if (categories == null)
+                {
+                    EditorUtility.DisplayDialog("错误", "JSON数据格式错误，找不到category节点", "确定");
+                    return;
+                }
+
+                if (!Directory.Exists(outputPath))
+                {
+                    Directory.CreateDirectory(outputPath);
+                }
+
+                int total = 0; int done = 0;
+
+                foreach (var categoryPair in categories)
+                {
+                    string categoryName = categoryPair.Key;
+                    if (!categorySelection.ContainsKey(categoryName) || !categorySelection[categoryName]) continue;
+
+                    JObject categoryData = categoryPair.Value as JObject;
+                    if (categoryData == null) continue;
+                    int categoryId = categoryData["id"]?.Value<int>() ?? 0;
+                    JArray items = categoryData["items"] as JArray;
+                    if (items == null) continue;
+
+                    string folderName = CategoryFolderNames.ContainsKey(categoryName) ? CategoryFolderNames[categoryName] : categoryName;
+                    string categoryPath = Path.Combine(outputPath, folderName);
+                    if (!Directory.Exists(categoryPath)) Directory.CreateDirectory(categoryPath);
+
+                    foreach (JObject item in items)
+                    {
+                        total++;
+                        if (GenerateItemDataSO(item, categoryName, (ItemCategory)categoryId, categoryPath)) done++;
+                    }
+                }
+
+                AssetDatabase.Refresh();
+                lastOperationSummary = $"按类别生成完成：成功 {done}/{total}";
+                EditorUtility.DisplayDialog("完成", lastOperationSummary, "确定");
+                RefreshOverview();
             }
             catch (Exception e)
             {
@@ -300,6 +416,29 @@ namespace InventorySystem.Editor
                 
                 // 根据珍贵等级自动设置背景颜色
                 itemData.SetBackgroundColorByRarity();
+
+                // 读取武器扩展（weapon 节点）
+                if (category == ItemCategory.Weapon)
+                {
+                    JObject weaponNode = itemJson["weapon"] as JObject;
+                    if (weaponNode != null)
+                    {
+                        if (itemData.weapon == null) itemData.weapon = new ItemDataSO.WeaponSpec();
+
+                        itemData.weapon.weaponPrefabAddress = weaponNode["weaponPrefabAddress"]?.Value<string>() ?? string.Empty;
+                        itemData.weapon.playerBulletPrefabAddress = weaponNode["playerBulletPrefabAddress"]?.Value<string>() ?? string.Empty;
+                        itemData.weapon.enemyBulletPrefabAddress = weaponNode["enemyBulletPrefabAddress"]?.Value<string>() ?? string.Empty;
+
+                        itemData.weapon.fireMode = weaponNode["fireMode"]?.Value<string>() ?? string.Empty;
+                        itemData.weapon.fireRate = weaponNode["fireRate"]?.Value<float>() ?? 0f;
+                        itemData.weapon.spreadAngle = weaponNode["spreadAngle"]?.Value<float>() ?? 0f;
+                        itemData.weapon.bulletSpeed = weaponNode["bulletSpeed"]?.Value<float>() ?? 0f;
+                        itemData.weapon.range = weaponNode["range"]?.Value<float>() ?? 0f;
+                        itemData.weapon.damage = weaponNode["damage"]?.Value<float>() ?? 0f;
+                        itemData.weapon.magazineCapacity = weaponNode["magazineCapacity"]?.Value<int>() ?? 0;
+                        itemData.weapon.reloadTime = weaponNode["reloadTime"]?.Value<float>() ?? 0f;
+                    }
+                }
 
                 // 生成文件名（ID_物品名称格式）
                 string fileName = $"{itemData.id}_{SanitizeFileName(itemData.itemName)}.asset";
@@ -388,6 +527,112 @@ namespace InventorySystem.Editor
                     Debug.LogError($"[ItemDataSOGenerator] 删除错误: {e}");
                 }
             }
+        }
+
+        private void DeleteSelectedCategories()
+        {
+            if (!Directory.Exists(outputPath))
+            {
+                EditorUtility.DisplayDialog("提示", "输出路径不存在，无需删除", "确定");
+                return;
+            }
+
+            int deletedFiles = 0;
+            foreach (var kv in categorySelection)
+            {
+                if (!kv.Value) continue;
+                string folderName = CategoryFolderNames.ContainsKey(kv.Key) ? CategoryFolderNames[kv.Key] : kv.Key;
+                string categoryPath = Path.Combine(outputPath, folderName);
+                DeleteAssetFilesRecursively(categoryPath, ref deletedFiles);
+            }
+
+            AssetDatabase.Refresh();
+            lastOperationSummary = $"按类别删除完成：删除 {deletedFiles} 个资产";
+            EditorUtility.DisplayDialog("完成", lastOperationSummary, "确定");
+            RefreshOverview();
+        }
+
+        private void DrawCategorySelectionUI()
+        {
+            EditorGUILayout.BeginVertical("box");
+            foreach (var kv in CategoryFolderNames)
+            {
+                bool selected = categorySelection.ContainsKey(kv.Key) && categorySelection[kv.Key];
+                bool newSelected = EditorGUILayout.ToggleLeft($"{kv.Key}", selected);
+                if (newSelected != selected)
+                {
+                    categorySelection[kv.Key] = newSelected;
+                }
+            }
+            EditorGUILayout.EndVertical();
+        }
+
+        private void RefreshOverview()
+        {
+            categoryOverview.Clear();
+
+            // JSON 统计
+            try
+            {
+                if (File.Exists(jsonPath))
+                {
+                    string jsonContent = File.ReadAllText(jsonPath);
+                    JObject jsonData = JObject.Parse(jsonContent);
+                    JObject categories = jsonData["category"] as JObject;
+                    if (categories != null)
+                    {
+                        foreach (var pair in categories)
+                        {
+                            string name = pair.Key;
+                            JArray items = (pair.Value as JObject)?["items"] as JArray;
+                            int jsonCount = items?.Count ?? 0;
+                            categoryOverview[name] = (jsonCount, 0);
+                        }
+                    }
+                }
+            }
+            catch { }
+
+            // 已生成统计
+            foreach (var kv in CategoryFolderNames)
+            {
+                string folderName = kv.Value;
+                string categoryPath = Path.Combine(outputPath, folderName);
+                int generated = CountAssetsRecursively(categoryPath);
+                if (categoryOverview.ContainsKey(kv.Key))
+                {
+                    var t = categoryOverview[kv.Key];
+                    categoryOverview[kv.Key] = (t.jsonCount, generated);
+                }
+                else
+                {
+                    categoryOverview[kv.Key] = (0, generated);
+                }
+            }
+        }
+
+        private int CountAssetsRecursively(string directoryPath)
+        {
+            if (!Directory.Exists(directoryPath)) return 0;
+            int count = Directory.GetFiles(directoryPath, "*.asset").Length;
+            foreach (var subDir in Directory.GetDirectories(directoryPath))
+            {
+                count += CountAssetsRecursively(subDir);
+            }
+            return count;
+        }
+
+        private void DrawOverviewTable()
+        {
+            GUILayout.Label("类别概况（JSON数量 / 已生成数量）", EditorStyles.boldLabel);
+            EditorGUILayout.BeginVertical("box");
+            foreach (var kv in CategoryFolderNames)
+            {
+                (int jsonCount, int genCount) info = (0, 0);
+                if (categoryOverview.ContainsKey(kv.Key)) info = categoryOverview[kv.Key];
+                EditorGUILayout.LabelField($"{kv.Key}", $"{info.jsonCount} / {info.genCount}");
+            }
+            EditorGUILayout.EndVertical();
         }
 
         /// <summary>

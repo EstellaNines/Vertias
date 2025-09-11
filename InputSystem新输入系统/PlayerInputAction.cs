@@ -107,6 +107,15 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""ChangeWeapon"",
+                    ""type"": ""PassThrough"",
+                    ""id"": ""dcff43b9-7750-4ce4-baef-2210122a0c00"",
+                    ""expectedControlType"": ""Vector2"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -263,6 +272,17 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
                     ""action"": ""Crawl"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""4c10df60-b908-4e7f-a32a-0982af2b986f"",
+                    ""path"": ""<Mouse>/scroll"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""ChangeWeapon"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         },
@@ -293,6 +313,15 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
                     ""type"": ""Button"",
                     ""id"": ""3aa3b05a-d2b3-4cc4-95f3-3dfe928f7a4c"",
                     ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""ChangeWeapon"",
+                    ""type"": ""PassThrough"",
+                    ""id"": ""d13b64ec-ffe9-432a-81a7-e427aca4e2c5"",
+                    ""expectedControlType"": ""Vector2"",
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
@@ -331,6 +360,17 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
                     ""action"": ""BackPack"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""0af54f17-03ac-471e-95f9-eb0bd63d3f77"",
+                    ""path"": ""<Mouse>/scroll"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""ChangeWeapon"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -354,11 +394,13 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
         m_GamePlay_Dodge = m_GamePlay.FindAction("Dodge", throwIfNotFound: true);
         m_GamePlay_Crouch = m_GamePlay.FindAction("Crouch", throwIfNotFound: true);
         m_GamePlay_Crawl = m_GamePlay.FindAction("Crawl", throwIfNotFound: true);
+        m_GamePlay_ChangeWeapon = m_GamePlay.FindAction("ChangeWeapon", throwIfNotFound: true);
         // UI
         m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
         m_UI_Operate = m_UI.FindAction("Operate", throwIfNotFound: true);
         m_UI_WeaponInspection = m_UI.FindAction("WeaponInspection", throwIfNotFound: true);
         m_UI_BackPack = m_UI.FindAction("BackPack", throwIfNotFound: true);
+        m_UI_ChangeWeapon = m_UI.FindAction("ChangeWeapon", throwIfNotFound: true);
     }
 
     ~@PlayerInputAction()
@@ -435,6 +477,7 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
     private readonly InputAction m_GamePlay_Dodge;
     private readonly InputAction m_GamePlay_Crouch;
     private readonly InputAction m_GamePlay_Crawl;
+    private readonly InputAction m_GamePlay_ChangeWeapon;
     public struct GamePlayActions
     {
         private @PlayerInputAction m_Wrapper;
@@ -448,6 +491,7 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
         public InputAction @Dodge => m_Wrapper.m_GamePlay_Dodge;
         public InputAction @Crouch => m_Wrapper.m_GamePlay_Crouch;
         public InputAction @Crawl => m_Wrapper.m_GamePlay_Crawl;
+        public InputAction @ChangeWeapon => m_Wrapper.m_GamePlay_ChangeWeapon;
         public InputActionMap Get() { return m_Wrapper.m_GamePlay; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -484,6 +528,9 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
             @Crawl.started += instance.OnCrawl;
             @Crawl.performed += instance.OnCrawl;
             @Crawl.canceled += instance.OnCrawl;
+            @ChangeWeapon.started += instance.OnChangeWeapon;
+            @ChangeWeapon.performed += instance.OnChangeWeapon;
+            @ChangeWeapon.canceled += instance.OnChangeWeapon;
         }
 
         private void UnregisterCallbacks(IGamePlayActions instance)
@@ -515,6 +562,9 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
             @Crawl.started -= instance.OnCrawl;
             @Crawl.performed -= instance.OnCrawl;
             @Crawl.canceled -= instance.OnCrawl;
+            @ChangeWeapon.started -= instance.OnChangeWeapon;
+            @ChangeWeapon.performed -= instance.OnChangeWeapon;
+            @ChangeWeapon.canceled -= instance.OnChangeWeapon;
         }
 
         public void RemoveCallbacks(IGamePlayActions instance)
@@ -539,6 +589,7 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
     private readonly InputAction m_UI_Operate;
     private readonly InputAction m_UI_WeaponInspection;
     private readonly InputAction m_UI_BackPack;
+    private readonly InputAction m_UI_ChangeWeapon;
     public struct UIActions
     {
         private @PlayerInputAction m_Wrapper;
@@ -546,6 +597,7 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
         public InputAction @Operate => m_Wrapper.m_UI_Operate;
         public InputAction @WeaponInspection => m_Wrapper.m_UI_WeaponInspection;
         public InputAction @BackPack => m_Wrapper.m_UI_BackPack;
+        public InputAction @ChangeWeapon => m_Wrapper.m_UI_ChangeWeapon;
         public InputActionMap Get() { return m_Wrapper.m_UI; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -564,6 +616,9 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
             @BackPack.started += instance.OnBackPack;
             @BackPack.performed += instance.OnBackPack;
             @BackPack.canceled += instance.OnBackPack;
+            @ChangeWeapon.started += instance.OnChangeWeapon;
+            @ChangeWeapon.performed += instance.OnChangeWeapon;
+            @ChangeWeapon.canceled += instance.OnChangeWeapon;
         }
 
         private void UnregisterCallbacks(IUIActions instance)
@@ -577,6 +632,9 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
             @BackPack.started -= instance.OnBackPack;
             @BackPack.performed -= instance.OnBackPack;
             @BackPack.canceled -= instance.OnBackPack;
+            @ChangeWeapon.started -= instance.OnChangeWeapon;
+            @ChangeWeapon.performed -= instance.OnChangeWeapon;
+            @ChangeWeapon.canceled -= instance.OnChangeWeapon;
         }
 
         public void RemoveCallbacks(IUIActions instance)
@@ -614,11 +672,13 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
         void OnDodge(InputAction.CallbackContext context);
         void OnCrouch(InputAction.CallbackContext context);
         void OnCrawl(InputAction.CallbackContext context);
+        void OnChangeWeapon(InputAction.CallbackContext context);
     }
     public interface IUIActions
     {
         void OnOperate(InputAction.CallbackContext context);
         void OnWeaponInspection(InputAction.CallbackContext context);
         void OnBackPack(InputAction.CallbackContext context);
+        void OnChangeWeapon(InputAction.CallbackContext context);
     }
 }

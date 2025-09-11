@@ -295,6 +295,8 @@ GameObject:
   m_Component:
   - component: {fileID: 6536725666988058159}
   - component: {fileID: 3704593556965745018}
+  - component: {fileID: 7142543626756832164}
+  - component: {fileID: 4587283337711042481}
   m_Layer: 5
   m_Name: PrimaryWeaponEquipmentSlot
   m_TagString: Untagged
@@ -347,3 +349,31 @@ MonoBehaviour:
   originalItemPosition: {x: 0, y: 0}
   originalItemGrid: {fileID: 0}
   originalItemSize: {x: 0, y: 0}
+  originalBackgroundColor: {r: 0, g: 0, b: 0, a: 0}
+--- !u!114 &7142543626756832164
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7955145278553550124}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9e784d0f2f9c9a14aac27b289751dbed, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  slotIndex: 0
+  switchActiveOnEquip: 1
+--- !u!114 &4587283337711042481
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7955145278553550124}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b3dd4541750d892449ab968d5702bb7e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  switchActiveOnEquip: 1

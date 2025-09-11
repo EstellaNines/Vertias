@@ -10,6 +10,8 @@ public class Bullet : MonoBehaviour
 
     public Transform shooter; // 发射者
     private Rigidbody2D RB2D;
+    // 从对象池取出时由发射端写入，用于快速回收归还，避免运行时查找
+    public System.Action<GameObject> ReturnToPool;
     
     // 添加属性以兼容WeaponManager
     public float Range 
@@ -58,10 +60,21 @@ public class Bullet : MonoBehaviour
         // 如果距离超过射程，返回对象池
         if (distance > BulletDistance * BulletDistance)
         {
-            BulletPool bulletPool = FindObjectOfType<BulletPool>();
-            if (bulletPool != null)
+            if (ReturnToPool != null)
             {
-                bulletPool.ReturnBullet(gameObject);
+                ReturnToPool(gameObject);
+            }
+            else
+            {
+                // 回退逻辑：根据标签选择回收池，避免Find代价
+                if (CompareTag("EnemyBullets"))
+                {
+                    if (EnemyBulletPool.Instance != null) EnemyBulletPool.Instance.ReturnBullet(gameObject);
+                }
+                else
+                {
+                    if (BulletPool.Instance != null) BulletPool.Instance.ReturnBullet(gameObject);
+                }
             }
         }
     }
@@ -71,7 +84,13 @@ public class Bullet : MonoBehaviour
         // 修改碰撞体检测条件：排除所有触发器（isTrigger = true 的碰撞体）
         if (!collision.isTrigger)
         {
-            BulletPool bulletPool = FindObjectOfType<BulletPool>(); // 在方法开始时声明一次
+            // 优先使用回调归还
+            if (ReturnToPool != null)
+            {
+                ReturnToPool(gameObject);
+                return;
+            }
+            BulletPool bulletPool = BulletPool.Instance;
             
             // 检查是否击中玩家
             Player player = collision.GetComponent<Player>();
@@ -82,10 +101,7 @@ public class Bullet : MonoBehaviour
                 // 调用玩家的受伤处理方法
                 player.TakeDamage(BulletDamage);
                 
-                if (bulletPool != null)
-                {
-                    bulletPool.ReturnBullet(gameObject);
-                }
+                if (bulletPool != null) bulletPool.ReturnBullet(gameObject);
                 return;
             }
             
@@ -98,10 +114,7 @@ public class Bullet : MonoBehaviour
                 // 调用Enemy的受伤处理方法（不带击退参数）
                 enemy.TakeDamage(BulletDamage);
                 
-                if (bulletPool != null)
-                {
-                    bulletPool.ReturnBullet(gameObject);
-                }
+                if (bulletPool != null) bulletPool.ReturnBullet(gameObject);
                 return;
             }
             
@@ -126,10 +139,8 @@ public class Bullet : MonoBehaviour
             // 如果都没有命中，记录警告
             Debug.LogWarning($"[无命中] 碰撞到非目标对象: {collision.name}", this);
     
-            if (bulletPool != null)
-            {
-                bulletPool.ReturnBullet(gameObject);
-            }
+            if (ReturnToPool != null) ReturnToPool(gameObject);
+            else if (bulletPool != null) bulletPool.ReturnBullet(gameObject);
         }
     }
 }
