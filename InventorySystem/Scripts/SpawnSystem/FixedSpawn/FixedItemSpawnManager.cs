@@ -372,6 +372,8 @@ namespace InventorySystem.SpawnSystem
                 templateId = instanceId,
                 itemData = original.itemData,
                 quantity = quantity, // 单个实例的数量为1
+                // 关键：拷贝堆叠数量，避免被重置为默认1
+                stackAmount = original.stackAmount,
                 placementType = original.placementType,
                 exactPosition = original.exactPosition,
                 constrainedArea = original.constrainedArea,
@@ -386,6 +388,7 @@ namespace InventorySystem.SpawnSystem
                 enableDebugLog = original.enableDebugLog
             };
             
+            LogDebug($"CreateInstanceTemplate: from {original.templateId} copy stackAmount={original.stackAmount}, effective={instanceTemplate.GetEffectiveStackAmount()}");
             return instanceTemplate;
         }
         
@@ -636,6 +639,11 @@ namespace InventorySystem.SpawnSystem
             var startTime = Time.realtimeSinceStartup;
             
             LogDebug($"开始生成物品: {template.templateId}");
+            // 打印堆叠配置以验证是否从配置正确传递
+            if (template.itemData != null && template.itemData.IsStackable())
+            {
+                LogDebug($"模板堆叠检查: stackAmount={template.stackAmount}, effective={template.GetEffectiveStackAmount()}, item={template.itemData.itemName}");
+            }
             
             // 验证模板配置
             if (!template.IsValid(out string errorMessage))
@@ -772,6 +780,38 @@ namespace InventorySystem.SpawnSystem
                     itemRect.localPosition = worldPosition;
                 }
                 
+                // 确保ItemDataReader有正确的数据（在任何其他操作之前）
+                ItemDataReader itemDataReader = itemInstance.GetComponent<ItemDataReader>();
+                if (itemDataReader != null)
+                {
+                    // 无论是否已经设置，都重新设置确保数据正确
+                    itemDataReader.SetItemData(template.itemData);
+                    LogDebug($"[堆叠修复] 设置物品数据后，当前堆叠数量: {itemDataReader.CurrentStack}");
+                    
+                    // 🔧 修复：设置物品的堆叠数量 - 必须在SetItemData之后立即调用
+                    if (template.itemData.IsStackable())
+                    {
+                        int effectiveStackAmount = template.GetEffectiveStackAmount();
+                        LogDebug($"[堆叠修复] 物品 {template.templateId} 是可堆叠的，准备设置堆叠数量: {effectiveStackAmount}");
+                        LogDebug($"[堆叠修复] 设置前 - currentStack: {itemDataReader.CurrentStack}, maxStack: {template.itemData.maxStack}");
+                        
+                        // 直接设置堆叠数量，带详细日志
+                        itemDataReader.SetStack(effectiveStackAmount);
+                        LogDebug($"[堆叠修复] SetStack调用后，当前堆叠数量: {itemDataReader.CurrentStack}");
+                        
+                        // 启动延迟验证协程
+                        StartCoroutine(DelayedStackVerification(itemDataReader, effectiveStackAmount, template.templateId));
+                    }
+                    else
+                    {
+                        LogDebug($"[堆叠修复] 物品 {template.templateId} 不可堆叠，跳过堆叠设置");
+                    }
+                }
+                else
+                {
+                    LogError($"[堆叠修复] 物品实例 {template.templateId} 没有 ItemDataReader 组件！");
+                }
+                
                 // 将物品放置到网格中
                 Item itemComponent = itemInstance.GetComponent<Item>();
                 if (itemComponent != null)
@@ -783,17 +823,22 @@ namespace InventorySystem.SpawnSystem
                         Destroy(itemInstance);
                         return null;
                     }
-                    
-                    // 确保ItemDataReader有正确的数据
-                    ItemDataReader itemDataReader = itemInstance.GetComponent<ItemDataReader>();
-                    if (itemDataReader != null && itemDataReader.ItemData == null)
-                    {
-                        itemDataReader.SetItemData(template.itemData);
-                    }
                 }
                 
                 // 添加生成标记组件
                 AddSpawnTag(itemInstance, template, position, targetGrid.name);
+                
+                // 最终验证：确保堆叠数量设置正确
+                if (itemDataReader != null && template.itemData.IsStackable())
+                {
+                    LogDebug($"最终验证 - 物品 {template.templateId} 当前堆叠数量: {itemDataReader.CurrentStack}, 期望: {template.GetEffectiveStackAmount()}");
+                    if (itemDataReader.CurrentStack != template.GetEffectiveStackAmount())
+                    {
+                        LogWarning($"堆叠数量不匹配！重新设置堆叠数量");
+                        itemDataReader.SetStack(template.GetEffectiveStackAmount());
+                        itemDataReader.UpdateUI();
+                    }
+                }
                 
                 LogDebug($"成功创建物品实例: {template.templateId}");
                 return itemInstance;
@@ -983,7 +1028,15 @@ namespace InventorySystem.SpawnSystem
                 textRect.anchoredPosition = new Vector2(itemWidth * 0.5f - 3f, -itemHeight * 0.5f + 3f);
                 
                 TMPro.TextMeshProUGUI itemText = textObject.AddComponent<TMPro.TextMeshProUGUI>();
-                itemText.text = "1/1"; // 默认数量显示
+                // 🔧 修复：根据物品是否可堆叠设置默认文本
+                if (itemData.IsStackable())
+                {
+                    itemText.text = $"1/{itemData.maxStack}"; // 可堆叠物品显示当前/最大
+                }
+                else
+                {
+                    itemText.text = ""; // 不可堆叠物品不显示文本
+                }
                 itemText.fontSize = 28f;
                 itemText.color = Color.white;
                 itemText.alignment = TMPro.TextAlignmentOptions.BottomRight;
@@ -1039,8 +1092,8 @@ namespace InventorySystem.SpawnSystem
                 // 设置ItemHighlight组件的引用
                 SetItemHighlightReferences(itemHighlightComponent, highlightImage);
                 
-                // 设置物品数据
-                itemDataReader.SetItemData(itemData);
+                // 设置物品数据（不要在这里设置，让CreateItemInstance统一处理）
+                // itemDataReader.SetItemData(itemData);
                 
                 LogDebug($"运行时创建预制件成功: {itemData.itemName}");
                 return rootObject;
@@ -1537,6 +1590,34 @@ namespace InventorySystem.SpawnSystem
             LogWarning($"队列中的请求: {spawnQueue?.Count ?? 0}");
             LogWarning($"已加载配置: {loadedConfigs?.Count ?? 0}");
             LogWarning("=====================================");
+        }
+        
+        /// <summary>
+        /// 延迟验证堆叠数量设置
+        /// </summary>
+        private System.Collections.IEnumerator DelayedStackVerification(ItemDataReader itemDataReader, int expectedStack, string templateId)
+        {
+            yield return new WaitForSeconds(0.2f);
+            
+            if (itemDataReader != null)
+            {
+                LogDebug($"[堆叠修复-延迟验证] 物品 {templateId} - 期望堆叠: {expectedStack}, 实际堆叠: {itemDataReader.CurrentStack}");
+                
+                if (itemDataReader.CurrentStack != expectedStack)
+                {
+                    LogWarning($"[堆叠修复-延迟验证] 堆叠数量不正确！重新设置");
+                    itemDataReader.SetStack(expectedStack);
+                    itemDataReader.UpdateUI();
+                    
+                    // 再次验证
+                    yield return new WaitForSeconds(0.1f);
+                    LogDebug($"[堆叠修复-最终验证] 物品 {templateId} - 最终堆叠数量: {itemDataReader.CurrentStack}");
+                }
+                else
+                {
+                    LogDebug($"[堆叠修复-延迟验证] 物品 {templateId} 堆叠数量正确");
+                }
+            }
         }
         
         #endregion

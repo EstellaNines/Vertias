@@ -21,12 +21,25 @@ MonoBehaviour:
   minTotalItems: 3
   maxTotalItems: 10
   quantityMode: 0
+  enableFixedItemGeneration: 0
+  fixedItemData: {fileID: 0}
+  fixedItemStackAmount: 1
   itemCategories:
   - category: 7
     categoryName: "\u98DF\u7269"
     description: 1
     minSpawnCount: 1
     maxSpawnCount: 4
+    autoLoadItems: 1
+    rarityWeights:
+    - rarity: 0
+      weight: 0.7
+    - rarity: 0
+      weight: 0.15
+    - rarity: 0
+      weight: 0.1
+    - rarity: 0
+      weight: 0.05
     rarityGroups:
     - rarity: 0
       weight: 0.6
@@ -44,6 +57,9 @@ MonoBehaviour:
       weight: 0.05
       items:
       - {fileID: 11400000, guid: be8f5ec5337f0bf429863e73ba1fff1e, type: 2}
+    enableStackRandomization: 0
+    minStackAmount: 1
+    maxStackAmount: 50
     isEnabled: 1
     priority: 5
     enableDebugLog: 0
@@ -52,6 +68,16 @@ MonoBehaviour:
     description: 2
     minSpawnCount: 1
     maxSpawnCount: 3
+    autoLoadItems: 1
+    rarityWeights:
+    - rarity: 0
+      weight: 0.7
+    - rarity: 0
+      weight: 0.15
+    - rarity: 0
+      weight: 0.1
+    - rarity: 0
+      weight: 0.05
     rarityGroups:
     - rarity: 0
       weight: 0.6
@@ -69,6 +95,9 @@ MonoBehaviour:
       weight: 0.05
       items:
       - {fileID: 11400000, guid: a9269c2741b0c164795f06af7ed6465c, type: 2}
+    enableStackRandomization: 0
+    minStackAmount: 1
+    maxStackAmount: 50
     isEnabled: 1
     priority: 5
     enableDebugLog: 0
@@ -77,6 +106,16 @@ MonoBehaviour:
     description: 3
     minSpawnCount: 1
     maxSpawnCount: 3
+    autoLoadItems: 1
+    rarityWeights:
+    - rarity: 0
+      weight: 0
+    - rarity: 0
+      weight: 0
+    - rarity: 0
+      weight: 0
+    - rarity: 0
+      weight: 1
     rarityGroups:
     - rarity: 0
       weight: 0
@@ -95,6 +134,9 @@ MonoBehaviour:
       items:
       - {fileID: 11400000, guid: dd469595d87d41b49946a93f8cf6ef0b, type: 2}
       - {fileID: 11400000, guid: d8fba5b70fc1f6b44935f51bbc1d803e, type: 2}
+    enableStackRandomization: 1
+    minStackAmount: 241
+    maxStackAmount: 1000
     isEnabled: 1
     priority: 5
     enableDebugLog: 0
@@ -103,7 +145,7 @@ MonoBehaviour:
   avoidDuplicateItems: 1
   maxRetryAttempts: 10
   enablePreview: 1
-  previewSeed: 750549
+  previewSeed: 859191
   previewGridSize: {x: 10, y: 6}
   enableDetailedLogging: 0
   generationTimeout: 10

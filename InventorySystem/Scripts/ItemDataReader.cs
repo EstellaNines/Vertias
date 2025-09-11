@@ -118,7 +118,13 @@ public class ItemDataReader : MonoBehaviour
     /// </summary>
     public void UpdateUI()
     {
-        if (itemData == null) return;
+        if (itemData == null) 
+        {
+            Debug.LogWarning("[ItemDataReader.UpdateUI] itemData为空，跳过UI更新");
+            return;
+        }
+
+        Debug.Log($"[ItemDataReader.UpdateUI] 开始更新UI - 物品: {itemData.itemName}, currentStack: {currentStack}");
 
         // 更新背景颜色，保持0.8的透明度
         if (backgroundImage != null)
@@ -137,7 +143,13 @@ public class ItemDataReader : MonoBehaviour
         // 更新文本显示
         if (displayText != null)
         {
-            displayText.text = GetDisplayText();
+            string newText = GetDisplayText();
+            displayText.text = newText;
+            Debug.Log($"[ItemDataReader.UpdateUI] 更新文本显示: '{newText}' (类别: {itemData.category}, 是否可堆叠: {itemData.IsStackable()})");
+        }
+        else
+        {
+            Debug.LogWarning($"[ItemDataReader.UpdateUI] displayText组件为空！物品: {itemData.itemName}");
         }
     }
 
@@ -197,10 +209,20 @@ public class ItemDataReader : MonoBehaviour
     /// <param name="stack">堆叠数量</param>
     public void SetStack(int stack)
     {
-        if (itemData == null) return;
+        if (itemData == null) 
+        {
+            Debug.LogError("[ItemDataReader.SetStack] itemData为空，无法设置堆叠数量");
+            return;
+        }
 
+        int oldStack = currentStack;
         currentStack = Mathf.Clamp(stack, 1, itemData.maxStack);
+        
+        Debug.Log($"[ItemDataReader.SetStack] 物品 {itemData.itemName} - 设置堆叠数量: {oldStack} -> {currentStack} (请求: {stack}, 最大: {itemData.maxStack})");
+        
         UpdateUI();
+        
+        Debug.Log($"[ItemDataReader.SetStack] UpdateUI完成后，currentStack = {currentStack}");
     }
 
     /// <summary>

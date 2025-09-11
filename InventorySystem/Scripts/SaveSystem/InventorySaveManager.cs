@@ -443,7 +443,7 @@ public class InventorySaveManager : MonoBehaviour
                                     processedItems.Add(item); // 标记已处理
 
                                     if (showSaveLog)
-                                        Debug.Log($"[InventorySaveManager] 保存物品 {itemReader.ItemData.id} 位置: {actualPosition} 到网格 {gridData.gridGUID}");
+                                        Debug.Log($"[InventorySaveManager] 保存物品 {itemReader.ItemData.id} 位置: {actualPosition} 到网格 {gridData.gridGUID}，stack={itemSaveData.stackCount}");
                                 }
                                 else
                                 {
@@ -794,6 +794,38 @@ public class InventorySaveManager : MonoBehaviour
 
         if (showSaveLog)
             Debug.Log($"[InventorySaveManager] 恢复单个网格完成: {gridData.GetStatistics()}");
+
+        // 延迟一帧进行堆叠校验，防止其他初始化流程覆盖堆叠显示
+        StartCoroutine(DelayedStackReapply(targetGrid, gridData));
+    }
+
+    /// <summary>
+    /// 延迟重新应用存档中的堆叠（加载后一帧，避免初始化覆盖）
+    /// </summary>
+    private System.Collections.IEnumerator DelayedStackReapply(ItemGrid grid, GridSaveData gridData)
+    {
+        yield return null; // 等待一帧
+
+        if (grid == null || gridData == null || gridData.items == null) yield break;
+
+        foreach (var itemData in gridData.items)
+        {
+            Item item = grid.GetItemAt(itemData.gridPosition.x, itemData.gridPosition.y);
+            if (item == null) continue;
+            var reader = item.GetComponent<ItemDataReader>();
+            if (reader == null || reader.ItemData == null) continue;
+
+            if (reader.ItemData.IsStackable())
+            {
+                int expected = Mathf.Clamp(itemData.stackCount, 1, reader.ItemData.maxStack);
+                if (reader.CurrentStack != expected)
+                {
+                    reader.SetStack(expected);
+                    if (showSaveLog)
+                        Debug.Log($"[InventorySaveManager] 加载后校准堆叠: {reader.ItemData.itemName} at {itemData.gridPosition} -> {expected}");
+                }
+            }
+        }
     }
 
     #endregion

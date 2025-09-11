@@ -141,6 +141,23 @@ namespace InventorySystem.SpawnSystem.Editor
                         MessageType.Info);
                 }
                 
+                EditorGUILayout.Space();
+                EditorGUILayout.LabelField("固定物品优先生成", EditorStyles.boldLabel);
+                config.enableFixedItemGeneration = EditorGUILayout.Toggle("启用固定物品", config.enableFixedItemGeneration);
+                EditorGUI.BeginDisabledGroup(!config.enableFixedItemGeneration);
+                config.fixedItemData = EditorGUILayout.ObjectField("固定物品", config.fixedItemData, typeof(ItemDataSO), false) as ItemDataSO;
+                config.fixedItemStackAmount = EditorGUILayout.IntSlider("固定物品堆叠数量", Mathf.Max(1, config.fixedItemStackAmount), 1, 1000);
+                if (config.fixedItemData != null && !config.fixedItemData.IsStackable())
+                {
+                    EditorGUILayout.HelpBox("所选固定物品不可堆叠，将按 1 计数生成。", MessageType.Info);
+                }
+                if (config.enableFixedItemGeneration && config.fixedItemData == null)
+                {
+                    EditorGUILayout.HelpBox("已启用固定物品，但未指定物品。", MessageType.Warning);
+                }
+                EditorGUI.EndDisabledGroup();
+                EditorGUILayout.HelpBox("固定物品会在随机生成前优先放入，并计入总数（总数至少为1时有效）", MessageType.None);
+
                 EditorGUI.indentLevel--;
             }
             
@@ -389,103 +406,145 @@ namespace InventorySystem.SpawnSystem.Editor
             
             // 珍稀度分布
             EditorGUILayout.LabelField("珍稀度分布", EditorStyles.boldLabel);
-            
-            if (category.rarityGroups == null)
+            category.autoLoadItems = EditorGUILayout.Toggle("自动获取物品", category.autoLoadItems);
+
+            float totalWeight = 0f;
+            if (category.autoLoadItems)
             {
-                category.rarityGroups = new RarityItemGroup[4];
-            }
-            
-            // 确保有四个珍稀度组
-            if (category.rarityGroups.Length != 4)
-            {
-                var newGroups = new RarityItemGroup[4];
+                // 仅显示权重（无需维护物品数组）
+                if (category.rarityWeights == null || category.rarityWeights.Length != 4)
+                {
+                    category.GetType().GetMethod("InitializeDefaultRarityWeights", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+                        ?.Invoke(category, null);
+                }
                 for (int i = 0; i < 4; i++)
                 {
-                    if (i < category.rarityGroups.Length && category.rarityGroups[i] != null)
-                    {
-                        newGroups[i] = category.rarityGroups[i];
-                    }
-                    else
-                    {
-                        newGroups[i] = new RarityItemGroup 
-                        { 
-                            rarity = (ItemRarity)i,
-                            weight = 0.25f,
-                            items = new ItemDataSO[0]
-                        };
-                    }
-                }
-                category.rarityGroups = newGroups;
-            }
-            
-            // 绘制每个珍稀度组
-            float totalWeight = 0f;
-            for (int i = 0; i < category.rarityGroups.Length && i < 4; i++)
-            {
-                var rarityGroup = category.rarityGroups[i];
-                
-                EditorGUILayout.BeginVertical("helpbox");
-                EditorGUILayout.LabelField($"{rarityGroup.rarity} 珍稀度", EditorStyles.boldLabel);
-                
-                // 权重滑块
-                rarityGroup.weight = EditorGUILayout.Slider(
-                    "生成权重", rarityGroup.weight, 0f, 1f);
-                totalWeight += rarityGroup.weight;
-                
-                // 物品列表
-                EditorGUILayout.LabelField($"物品列表 (数量: {(rarityGroup.items?.Length ?? 0)})");
-                
-                // 简化的物品数组绘制
-                if (rarityGroup.items == null) rarityGroup.items = new ItemDataSO[0];
-                
-                EditorGUILayout.BeginHorizontal();
-                EditorGUILayout.LabelField($"数组大小: {rarityGroup.items.Length}");
-                if (GUILayout.Button("+", GUILayout.Width(25)))
-                {
-                    var newArray = new ItemDataSO[rarityGroup.items.Length + 1];
-                    System.Array.Copy(rarityGroup.items, newArray, rarityGroup.items.Length);
-                    rarityGroup.items = newArray;
-                }
-                if (rarityGroup.items.Length > 0 && GUILayout.Button("-", GUILayout.Width(25)))
-                {
-                    var newArray = new ItemDataSO[rarityGroup.items.Length - 1];
-                    System.Array.Copy(rarityGroup.items, newArray, newArray.Length);
-                    rarityGroup.items = newArray;
-                }
-                EditorGUILayout.EndHorizontal();
-                
-                // 显示前几个物品
-                int displayCount = Mathf.Min(3, rarityGroup.items.Length);
-                for (int j = 0; j < displayCount; j++)
-                {
-                    rarityGroup.items[j] = EditorGUILayout.ObjectField(
-                        $"物品 {j}", rarityGroup.items[j], typeof(ItemDataSO), false) as ItemDataSO;
-                }
-                
-                if (rarityGroup.items.Length > 3)
-                {
-                    EditorGUILayout.LabelField($"... 还有 {rarityGroup.items.Length - 3} 个物品");
-                }
-                
-                EditorGUILayout.EndVertical();
-                EditorGUILayout.Space(3);
-            }
-            
-            // 权重总和提示
-            if (Mathf.Abs(totalWeight - 1f) > 0.01f)
-            {
-                EditorGUILayout.HelpBox(
-                    $"权重总和: {totalWeight:F3} (建议为 1.0)", 
-                    MessageType.Warning);
-                
-                if (GUILayout.Button("标准化权重"))
-                {
-                    NormalizeWeights(category.rarityGroups);
+                    var cfg = category.rarityWeights[i];
+                    EditorGUILayout.BeginVertical("helpbox");
+                    EditorGUILayout.LabelField($"{cfg.rarity} 珍稀度", EditorStyles.boldLabel);
+                    cfg.weight = EditorGUILayout.Slider("生成权重", cfg.weight, 0f, 1f);
+                    totalWeight += cfg.weight;
+                    category.rarityWeights[i] = cfg;
+                    EditorGUILayout.EndVertical();
+                    EditorGUILayout.Space(3);
                 }
             }
             else
             {
-                EditorGUILayout.HelpBox($"权重总和: {totalWeight:F3} ?", MessageType.Info);
+                // 兼容旧模式：显示物品数组
+                if (category.rarityGroups == null || category.rarityGroups.Length != 4)
+                {
+                    var newGroups = new RarityItemGroup[4];
+                    for (int i = 0; i < 4; i++)
+                    {
+                        newGroups[i] = (category.rarityGroups != null && i < category.rarityGroups.Length && category.rarityGroups[i] != null)
+                            ? category.rarityGroups[i]
+                            : new RarityItemGroup { rarity = (ItemRarity)i, weight = 0.25f, items = new ItemDataSO[0] };
+                    }
+                    category.rarityGroups = newGroups;
+                }
+                for (int i = 0; i < category.rarityGroups.Length && i < 4; i++)
+                {
+                    var rarityGroup = category.rarityGroups[i];
+                    EditorGUILayout.BeginVertical("helpbox");
+                    EditorGUILayout.LabelField($"{rarityGroup.rarity} 珍稀度", EditorStyles.boldLabel);
+                    rarityGroup.weight = EditorGUILayout.Slider("生成权重", rarityGroup.weight, 0f, 1f);
+                    totalWeight += rarityGroup.weight;
+
+                    EditorGUILayout.LabelField($"物品列表 (数量: {(rarityGroup.items?.Length ?? 0)})");
+                    if (rarityGroup.items == null) rarityGroup.items = new ItemDataSO[0];
+                    EditorGUILayout.BeginHorizontal();
+                    EditorGUILayout.LabelField($"数组大小: {rarityGroup.items.Length}");
+                    if (GUILayout.Button("+", GUILayout.Width(25)))
+                    {
+                        var newArray = new ItemDataSO[rarityGroup.items.Length + 1];
+                        System.Array.Copy(rarityGroup.items, newArray, rarityGroup.items.Length);
+                        rarityGroup.items = newArray;
+                    }
+                    if (rarityGroup.items.Length > 0 && GUILayout.Button("-", GUILayout.Width(25)))
+                    {
+                        var newArray = new ItemDataSO[rarityGroup.items.Length - 1];
+                        System.Array.Copy(rarityGroup.items, newArray, newArray.Length);
+                        rarityGroup.items = newArray;
+                    }
+                    EditorGUILayout.EndHorizontal();
+                    int displayCount = Mathf.Min(3, rarityGroup.items.Length);
+                    for (int j = 0; j < displayCount; j++)
+                    {
+                        rarityGroup.items[j] = EditorGUILayout.ObjectField($"物品 {j}", rarityGroup.items[j], typeof(ItemDataSO), false) as ItemDataSO;
+                    }
+                    if (rarityGroup.items.Length > 3)
+                    {
+                        EditorGUILayout.LabelField($"... 还有 {rarityGroup.items.Length - 3} 个物品");
+                    }
+                    category.rarityGroups[i] = rarityGroup;
+                    EditorGUILayout.EndVertical();
+                    EditorGUILayout.Space(3);
+                }
+            }
+
+            // 权重总和提示
+            if (Mathf.Abs(totalWeight - 1f) > 0.01f)
+            {
+                EditorGUILayout.HelpBox($"权重总和: {totalWeight:F3} (建议为 1.0)", MessageType.Warning);
+            }
+            else
+            {
+                EditorGUILayout.HelpBox($"权重总和: {totalWeight:F3}", MessageType.Info);
+            }
+
+            EditorGUILayout.Space();
+
+            // 堆叠数量配置（当类别内无可堆叠物品时自动禁用）
+            EditorGUILayout.LabelField("堆叠数量配置", EditorStyles.boldLabel);
+
+            bool hasStackables = false;
+            // 检测该类别下是否存在任一可堆叠物品（支持自动加载或手动分组两种模式）
+            for (int iR = 0; iR < 4 && !hasStackables; iR++)
+            {
+                var rarity = (ItemRarity)iR;
+                var items = category.GetItemsByRarity(rarity);
+                if (items != null)
+                {
+                    for (int k = 0; k < items.Length; k++)
+                    {
+                        var it = items[k];
+                        if (it != null && it.IsStackable()) { hasStackables = true; break; }
+                    }
+                }
+            }
+
+            if (!hasStackables)
+            {
+                // 没有可堆叠物品：禁用相关控件并强制关闭开关
+                category.enableStackRandomization = false;
+                EditorGUI.BeginDisabledGroup(true);
+                EditorGUILayout.Toggle("启用堆叠随机化", false);
+                EditorGUILayout.IntSlider("最小堆叠数量", Mathf.Max(1, category.minStackAmount), 1, 1000);
+                EditorGUILayout.IntSlider("最大堆叠数量", Mathf.Max(1, category.maxStackAmount), 1, 1000);
+                EditorGUI.EndDisabledGroup();
+                EditorGUILayout.HelpBox("该类别当前无可堆叠物品（如子弹、货币）。已禁用堆叠随机化与最小/最大选项。", MessageType.Info);
+            }
+            else
+            {
+                category.enableStackRandomization = EditorGUILayout.Toggle("启用堆叠随机化", category.enableStackRandomization);
+                if (category.enableStackRandomization)
+                {
+                    int minVal = EditorGUILayout.IntSlider("最小堆叠数量", Mathf.Max(1, category.minStackAmount), 1, 1000);
+                    int maxVal = EditorGUILayout.IntSlider("最大堆叠数量", Mathf.Max(1, category.maxStackAmount), 1, 1000);
+                    if (maxVal < minVal) maxVal = minVal;
+                    category.minStackAmount = minVal;
+                    category.maxStackAmount = maxVal;
+                    EditorGUILayout.HelpBox("实际生成时会再与物品的 maxStack 取最小值进行截断", MessageType.Info);
+                }
+                else
+                {
+                    EditorGUI.BeginDisabledGroup(true);
+                    EditorGUILayout.IntSlider("最小堆叠数量", Mathf.Max(1, category.minStackAmount), 1, 1000);
+                    EditorGUILayout.IntSlider("最大堆叠数量", Mathf.Max(1, category.maxStackAmount), 1, 1000);
+                    EditorGUI.EndDisabledGroup();
+                    EditorGUILayout.HelpBox("未启用堆叠随机化时，可堆叠物品将以 1 的堆叠生成", MessageType.None);
+                }
             }
             
             EditorGUI.indentLevel--;

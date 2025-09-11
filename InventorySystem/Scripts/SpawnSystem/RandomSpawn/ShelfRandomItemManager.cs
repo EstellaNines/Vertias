@@ -357,9 +357,13 @@ namespace InventorySystem.SpawnSystem
             {
                 LogDebug($"货架 '{shelfId}' 目标生成数量: {targetQuantity}");
                 
-                // 选择随机物品 - 安全调用
+                // 计算固定物品占位并调整随机目标数量
+                int fixedItemReserve = (config.enableFixedItemGeneration && config.fixedItemData != null) ? 1 : 0;
+                int randomTarget = Mathf.Max(0, targetQuantity - fixedItemReserve);
+
+                // 选择随机物品 - 安全调用（使用调整后的数量）
                 RandomItemSelector.SelectionResult selectionResult = default;
-                if (!TrySelectRandomItems(config, targetQuantity, out selectionResult, out errorMsg))
+                if (!TrySelectRandomItems(config, randomTarget, out selectionResult, out errorMsg))
                 {
                     LogWarning($"货架 '{shelfId}': {errorMsg}");
                     OnGenerationFailed?.Invoke(shelfId, errorMsg);
@@ -368,14 +372,35 @@ namespace InventorySystem.SpawnSystem
                 
                 if (!hasError)
                 {
-                    LogDebug($"货架 '{shelfId}' 成功选择 {selectionResult.selectedItems.Count} 个物品");
+                    // 组合固定物品 + 随机物品，固定物品优先
+                    var combinedItems = new List<RandomItemSelector.SelectedItemInfo>();
+                    if (fixedItemReserve == 1)
+                    {
+                        var fixedInfo = new RandomItemSelector.SelectedItemInfo
+                        {
+                            itemData = config.fixedItemData,
+                            rarity = ItemRarity.Common,
+                            category = config.fixedItemData.category,
+                            categoryName = "固定物品",
+                            quantity = 1,
+                            selectionWeight = 1f,
+                            selectionOrder = -1 // 确保排序时固定物品最先
+                        };
+                        combinedItems.Add(fixedInfo);
+                    }
+                    if (selectionResult.selectedItems != null && selectionResult.selectedItems.Count > 0)
+                    {
+                        combinedItems.AddRange(selectionResult.selectedItems);
+                    }
+
+                    LogDebug($"货架 '{shelfId}' 成功选择 {combinedItems.Count} 个物品（含固定物品: {fixedItemReserve == 1}）");
                     
                     // 等待一帧，避免阻塞
                     yield return null;
                     
                     // 使用FixedItemSpawnManager进行实际生成
                     bool spawnSuccess = false;
-                    yield return StartCoroutine(SpawnItemsToGrid(targetGrid, selectionResult.selectedItems, config, (success) => {
+                    yield return StartCoroutine(SpawnItemsToGrid(targetGrid, combinedItems, config, (success) => {
                         spawnSuccess = success;
                     }));
                     
@@ -392,9 +417,9 @@ namespace InventorySystem.SpawnSystem
                         var generationInfo = new ShelfGenerationInfo
                         {
                             shelfId = shelfId,
-                            itemCount = selectionResult.selectedItems.Count,
+                            itemCount = combinedItems.Count,
                             configName = config.configName,
-                            generatedItems = selectionResult.selectedItems.Select(item => item.itemData.name).ToList()
+                            generatedItems = combinedItems.Select(item => item.itemData.name).ToList()
                         };
                         
                         // 标记为已生成
@@ -666,8 +691,42 @@ namespace InventorySystem.SpawnSystem
                 enableDebugLog = sourceConfig.enableDetailedLogging
             };
             
+            // 固定物品：提升到最高优先级，并应用固定堆叠数
+            if (sourceConfig.enableFixedItemGeneration && sourceConfig.fixedItemData != null 
+                && selectedItem.itemData == sourceConfig.fixedItemData)
+            {
+                template.priority = SpawnPriority.Critical;
+                if (selectedItem.itemData.IsStackable())
+                {
+                    template.stackAmount = Mathf.Clamp(sourceConfig.fixedItemStackAmount, 1, selectedItem.itemData.maxStack);
+                }
+                else
+                {
+                    template.stackAmount = 1;
+                }
+            }
+
             // 根据珍稀度调整生成参数
             AdjustTemplateByRarity(template, selectedItem.rarity);
+
+            // 可堆叠物品：按类别配置的随机堆叠范围生成 stackAmount
+            var categoryCfg = sourceConfig.GetCategoryConfig(selectedItem.category);
+            if (categoryCfg != null && selectedItem.itemData.IsStackable())
+            {
+                // 若为固定物品，已在上方设置；否则按类别随机
+                if (!(sourceConfig.enableFixedItemGeneration && sourceConfig.fixedItemData != null 
+                      && selectedItem.itemData == sourceConfig.fixedItemData))
+                {
+                    int stack = categoryCfg.enableStackRandomization 
+                        ? categoryCfg.GetRandomStackAmount(selectedItem.itemData)
+                        : 1;
+                    template.stackAmount = Mathf.Clamp(stack, 1, selectedItem.itemData.maxStack);
+                }
+            }
+            else
+            {
+                template.stackAmount = 1; // 非堆叠或无配置时固定为1
+            }
             
             return template;
         }

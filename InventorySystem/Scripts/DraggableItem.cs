@@ -17,6 +17,8 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     private RectTransform rectTransform;
     private Vector2 originalPosition;
     private Transform originalParent;
+    private ItemGrid originalGridRef; // 原始所在网格
+    private Vector2Int originalGridPos; // 原始网格坐标
     private ItemDataReader itemDataReader; // 物品数据读取器
     private Item item; // Item 组件
     private InventoryController inventoryController; // 背包控制器
@@ -186,9 +188,16 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
 
 
 
-        // 记录原始位置和父级
+        // 记录原始位置、父级、网格与网格坐标
         originalPosition = rectTransform.anchoredPosition;
         originalParent = transform.parent;
+        originalGridRef = null;
+        originalGridPos = Vector2Int.zero;
+        if (item != null && item.IsOnGrid())
+        {
+            originalGridRef = item.OnGridReference;
+            originalGridPos = item.OnGridPosition;
+        }
         
         // 记录原始状态
         originalSize = rectTransform.sizeDelta;
@@ -364,8 +373,67 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
             ItemGrid targetGrid = inventoryController.selectedItemGrid;
             Vector2Int gridPosition = targetGrid.GetTileGridPosition(Input.mousePosition);
 
-            // 使用新的命中检测方法验证放置位置
-            if (targetGrid.CanPlaceItemAtPosition(gridPosition.x, gridPosition.y, item.GetWidth(), item.GetHeight(), item))
+            // 先处理“堆叠合并”场景：命中格子已有同类未满堆叠的物品
+            Item targetAtCell = targetGrid.GetItemAt(gridPosition.x, gridPosition.y);
+            bool handledByStackMerge = false;
+            if (targetAtCell != null && targetAtCell != item)
+            {
+                var dragReader = GetComponent<ItemDataReader>();
+                var targetReader = targetAtCell.GetComponent<ItemDataReader>();
+                if (dragReader != null && targetReader != null &&
+                    dragReader.ItemData != null && targetReader.ItemData != null)
+                {
+                    bool sameId = dragReader.ItemData.id == targetReader.ItemData.id;
+                    bool stackable = targetReader.ItemData.IsStackable();
+                    bool targetNotFull = targetReader.CurrentStack < targetReader.ItemData.maxStack;
+                    if (sameId && stackable && targetNotFull)
+                    {
+                        int max = targetReader.ItemData.maxStack;
+                        int sum = targetReader.CurrentStack + dragReader.CurrentStack;
+                        if (sum <= max)
+                        {
+                            targetReader.SetStack(sum);
+                            // 成功合并且用尽，销毁拖拽物
+                            validDrop = true;
+                            handledByStackMerge = true;
+                            Destroy(gameObject);
+                        }
+                        else
+                        {
+                            int overflow = sum - max;
+                            targetReader.SetStack(max);
+                            dragReader.SetStack(overflow);
+                            // 回到原网格格子（使用拖拽开始时记录的网格与坐标）
+                            if (originalGridRef != null)
+                            {
+                                // 先尝试直接放回记录的格子
+                                if (originalGridRef.PlaceItem(item, originalGridPos.x, originalGridPos.y))
+                                {
+                                    item.SetGridState(originalGridRef, originalGridPos);
+                                    transform.SetParent(originalGridRef.transform);
+                                    rectTransform.localPosition = originalGridRef.CalculatePositionOnGrid(item, originalGridPos.x, originalGridPos.y);
+                                }
+                                else
+                                {
+                                    // 如果原格子暂不可用，退化到返回原父级与相对位置
+                                    transform.SetParent(originalParent);
+                                    rectTransform.anchoredPosition = originalPosition;
+                                }
+                            }
+                            else
+                            {
+                                // 无原网格信息，退化到返回原父级与相对位置
+                                transform.SetParent(originalParent);
+                                rectTransform.anchoredPosition = originalPosition;
+                            }
+                            validDrop = true;
+                            handledByStackMerge = true;
+                        }
+                    }
+                }
+            }
+
+            if (!handledByStackMerge && targetGrid.CanPlaceItemAtPosition(gridPosition.x, gridPosition.y, item.GetWidth(), item.GetHeight(), item))
             {
                 // 在目标网格中放置物品
                 if (targetGrid.PlaceItem(item, gridPosition.x, gridPosition.y))
@@ -415,16 +483,15 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
             rectTransform.anchoredPosition = originalPosition;
 
             // 如果原父级是网格，还原网格状态
-            if (item != null && originalParent != null)
+            if (item != null)
             {
-                ItemGrid originalGrid = originalParent.GetComponent<ItemGrid>();
-                if (originalGrid != null)
+                if (originalGridRef != null)
                 {
-                    // 重新计算原始网格位置
-                    Vector2Int originalGridPos = originalGrid.GetTileGridPosition(originalPosition);
-                    if (originalGrid.PlaceItem(item, originalGridPos.x, originalGridPos.y))
+                    if (originalGridRef.PlaceItem(item, originalGridPos.x, originalGridPos.y))
                     {
-                        item.SetGridState(originalGrid, originalGridPos);
+                        item.SetGridState(originalGridRef, originalGridPos);
+                        transform.SetParent(originalGridRef.transform);
+                        rectTransform.localPosition = originalGridRef.CalculatePositionOnGrid(item, originalGridPos.x, originalGridPos.y);
                     }
                 }
             }
@@ -436,7 +503,7 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
             inventoryController.SetSelectedItem(null);
         }
 
-        // 拖拽完成后触发自动保存（仅在成功放置物品时）
+        // 拖拽完成后触发自动保存（在成功放置或堆叠合并时）
         if (validDrop)
         {
             InventorySaveManager saveManager = InventorySaveManager.Instance;

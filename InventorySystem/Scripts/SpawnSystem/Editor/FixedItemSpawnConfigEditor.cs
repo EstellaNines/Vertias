@@ -209,6 +209,49 @@ namespace InventorySystem.SpawnSystem.Editor
             
             EditorGUILayout.Space();
             
+            // 堆叠配置
+            EditorGUILayout.LabelField("堆叠配置", EditorStyles.boldLabel);
+            
+            // 显示物品是否可堆叠的信息
+            if (template.itemData != null)
+            {
+                bool isStackable = template.itemData.IsStackable();
+                string stackableInfo = isStackable ? 
+                    $"可堆叠物品 (最大堆叠: {template.itemData.maxStack})" : 
+                    "不可堆叠物品";
+                EditorGUILayout.HelpBox(stackableInfo, isStackable ? MessageType.Info : MessageType.None);
+                
+                if (isStackable)
+                {
+                    // 只有可堆叠物品才显示堆叠数量设置
+                    template.stackAmount = EditorGUILayout.IntSlider("每个实例堆叠数量", template.stackAmount, 1, template.itemData.maxStack);
+                    
+                    // 显示有效堆叠数量
+                    int effectiveStack = template.GetEffectiveStackAmount();
+                    if (effectiveStack != template.stackAmount)
+                    {
+                        EditorGUILayout.HelpBox($"实际堆叠数量: {effectiveStack} (受物品最大堆叠限制)", MessageType.Warning);
+                    }
+                }
+                else
+                {
+                    // 不可堆叠物品显示灰色的堆叠数量字段
+                    EditorGUI.BeginDisabledGroup(true);
+                    EditorGUILayout.IntSlider("每个实例堆叠数量", 1, 1, 1);
+                    EditorGUI.EndDisabledGroup();
+                    EditorGUILayout.HelpBox("此物品不支持堆叠", MessageType.Info);
+                }
+            }
+            else
+            {
+                EditorGUI.BeginDisabledGroup(true);
+                EditorGUILayout.IntSlider("每个实例堆叠数量", template.stackAmount, 1, 1000);
+                EditorGUI.EndDisabledGroup();
+                EditorGUILayout.HelpBox("请先选择物品数据", MessageType.Warning);
+            }
+            
+            EditorGUILayout.Space();
+            
             // 位置配置
             EditorGUILayout.LabelField("位置配置", EditorStyles.boldLabel);
             template.placementType = (PlacementType)EditorGUILayout.EnumPopup("放置类型", template.placementType);
@@ -295,6 +338,7 @@ namespace InventorySystem.SpawnSystem.Editor
             newTemplate.placementType = PlacementType.Smart;
             newTemplate.priority = SpawnPriority.Medium;
             newTemplate.quantity = 1;
+            newTemplate.stackAmount = 1; // 默认堆叠数量为1
             newTemplate.allowRotation = true;
             newTemplate.conflictResolution = ConflictResolutionType.Relocate;
             newTemplate.isUniqueSpawn = true;

@@ -43,7 +43,7 @@ GameObject:
   - component: {fileID: 6469914782708333246}
   - component: {fileID: 7714472828201179951}
   - component: {fileID: 2126300642267799343}
-  - component: {fileID: 3859890014791630074}
+  - component: {fileID: 6850389794536165211}
   - component: {fileID: 2246327397471981040}
   - component: {fileID: 8217834225770914471}
   m_Layer: 13
@@ -193,7 +193,7 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 1.5416666, y: 0.5833333}
   m_EdgeRadius: 0
---- !u!114 &3859890014791630074
+--- !u!114 &6850389794536165211
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -202,17 +202,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 6582943844767927886}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a41b22309fdf5584f9a7e5571d7d385c, type: 3}
+  m_Script: {fileID: 11500000, guid: 372863fe4494e0848b00d06a74790757, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  weaponName: AK74N
-  fireRate: 0.13
-  spreadAngle: 12
-  bulletSpeed: 50
-  range: 50
-  damage: 18
+  weaponName: AK74
+  fireRate: 0.12
+  spreadAngle: 15
+  bulletSpeed: 30
+  range: 40
+  damage: 20
   magazineCapacity: 30
-  reloadTime: 0.8
+  reloadTime: 3
   currentAmmo: 0
   isReloading: 0
   reloadStartTime: 0
@@ -221,6 +221,10 @@ MonoBehaviour:
   bulletPrefab: {fileID: 0}
   muzzle: {fileID: 8937763311924154140}
   weaponTrigger: {fileID: 2246327397471981040}
+  defaultFireMode: 1
+  allowModeSwitch: 1
+  fireModeToggleKey: 98
+  singleFireCooldown: 0.2
 --- !u!114 &2246327397471981040
 MonoBehaviour:
   m_ObjectHideFlags: 0

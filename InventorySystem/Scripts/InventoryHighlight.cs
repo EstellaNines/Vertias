@@ -16,6 +16,7 @@ public class InventoryHighlight : MonoBehaviour
     [Header("颜色设置")]
     [SerializeField] private Color canPlaceColor = new Color(0f, 1f, 0f, 0.5f); // 可放置颜色（绿色）
     [SerializeField] private Color cannotPlaceColor = new Color(1f, 0f, 0f, 0.5f); // 不可放置颜色（红色）
+    [SerializeField] private Color stackableColor = new Color(1f, 1f, 0f, 0.5f); // 可堆叠合并（黄色）
 
     [Header("自动保护设置")]
     [SerializeField] private bool enableAutoProtection = true; // 启用自动保护机制
@@ -149,6 +150,13 @@ public class InventoryHighlight : MonoBehaviour
     {
         if (highlightImage == null) return;
         highlightImage.color = canPlace ? canPlaceColor : cannotPlaceColor;
+    }
+
+    /// <summary>设置为“可堆叠合并”黄色态</summary>
+    public void SetStackableHighlight()
+    {
+        if (highlightImage == null) return;
+        highlightImage.color = stackableColor;
     }
 
     /// <summary>设置自定义颜色</summary>

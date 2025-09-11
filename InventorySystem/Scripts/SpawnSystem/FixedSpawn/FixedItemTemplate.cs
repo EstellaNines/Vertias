@@ -69,6 +69,11 @@ namespace InventorySystem.SpawnSystem
         [Tooltip("生成此物品的数量")]
         public int quantity = 1;
         
+        [Header("堆叠配置")]
+        [Range(1, 1000)]
+        [Tooltip("每个物品实例的堆叠数量（仅对可堆叠物品有效）")]
+        public int stackAmount = 1;
+        
         [Header("位置配置")]
         [Tooltip("决定物品如何被放置")]
         public PlacementType placementType = PlacementType.Smart;
@@ -186,6 +191,19 @@ namespace InventorySystem.SpawnSystem
                 return false;
             }
             
+            if (stackAmount <= 0)
+            {
+                errorMessage = "堆叠数量必须大于0";
+                return false;
+            }
+            
+            // 验证堆叠数量不超过物品的最大堆叠限制
+            if (itemData != null && itemData.IsStackable() && stackAmount > itemData.maxStack)
+            {
+                errorMessage = $"堆叠数量 {stackAmount} 不能超过物品最大堆叠限制 {itemData.maxStack}";
+                return false;
+            }
+            
             if (placementType == PlacementType.AreaConstrained && 
                 (constrainedArea.width <= 0 || constrainedArea.height <= 0))
             {
@@ -197,11 +215,37 @@ namespace InventorySystem.SpawnSystem
         }
         
         /// <summary>
+        /// 获取有效的堆叠数量（考虑物品是否可堆叠）
+        /// </summary>
+        public int GetEffectiveStackAmount()
+        {
+            if (itemData == null || !itemData.IsStackable())
+            {
+                return 1; // 不可堆叠物品始终返回1
+            }
+            
+            return Mathf.Min(stackAmount, itemData.maxStack);
+        }
+        
+        /// <summary>
+        /// 检查物品是否配置了有效的堆叠数量
+        /// </summary>
+        public bool HasValidStackAmount()
+        {
+            if (itemData == null) return false;
+            
+            if (!itemData.IsStackable()) return true; // 不可堆叠物品不需要验证堆叠数量
+            
+            return stackAmount > 0 && stackAmount <= itemData.maxStack;
+        }
+        
+        /// <summary>
         /// 获取模板的调试信息字符串
         /// </summary>
         public string GetDebugInfo()
         {
-            return $"Template[{templateId}]: {itemData?.name} x{quantity}, " +
+            string stackInfo = itemData?.IsStackable() == true ? $", Stack={GetEffectiveStackAmount()}" : "";
+            return $"Template[{templateId}]: {itemData?.name} x{quantity}{stackInfo}, " +
                    $"Type={placementType}, Priority={priority}, " +
                    $"Size={GetItemSize()}, Unique={isUniqueSpawn}";
         }

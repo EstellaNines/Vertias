@@ -39,9 +39,32 @@ namespace InventorySystem.SpawnSystem
         public int maxSpawnCount = 5;
         
         [Header("珍稀度配置")]
+        [FieldLabel("自动获取物品")]
+        [Tooltip("是否自动从Resources中获取指定类别的物品")]
+        public bool autoLoadItems = true;
+        
+        [FieldLabel("珍稀度权重配置")]
+        [Tooltip("各珍稀度的生成权重，会自动标准化为总和1.0")]
+        public RarityWeightConfig[] rarityWeights = new RarityWeightConfig[4];
+        
         [FieldLabel("珍稀度物品组")]
-        [Tooltip("按珍稀度分组的物品配置，权重总和应为1.0")]
+        [Tooltip("按珍稀度分组的物品配置（当autoLoadItems为false时使用）")]
         public RarityItemGroup[] rarityGroups = new RarityItemGroup[4];
+        
+        [Header("堆叠数量配置")]
+        [FieldLabel("启用堆叠随机化")]
+        [Tooltip("是否为可堆叠物品随机化堆叠数量")]
+        public bool enableStackRandomization = true;
+        
+        [FieldLabel("最小堆叠数量")]
+        [Range(1, 1000)]
+        [Tooltip("可堆叠物品的最小堆叠数量")]
+        public int minStackAmount = 1;
+        
+        [FieldLabel("最大堆叠数量")]
+        [Range(1, 1000)]
+        [Tooltip("可堆叠物品的最大堆叠数量")]
+        public int maxStackAmount = 50;
         
         [Header("高级设置")]
         [FieldLabel("启用此类别")]
@@ -63,6 +86,7 @@ namespace InventorySystem.SpawnSystem
         public RandomItemCategory()
         {
             InitializeDefaultRarityGroups();
+            InitializeDefaultRarityWeights();
         }
         
         /// <summary>
@@ -90,16 +114,89 @@ namespace InventorySystem.SpawnSystem
         }
         
         /// <summary>
+        /// 初始化默认的珍稀度权重配置
+        /// </summary>
+        private void InitializeDefaultRarityWeights()
+        {
+            if (rarityWeights == null || rarityWeights.Length != 4)
+            {
+                rarityWeights = new RarityWeightConfig[4];
+                
+                // 获取默认权重
+                float[] defaultWeights = RarityWeightValidator.GetDefaultWeights();
+                
+                for (int i = 0; i < 4; i++)
+                {
+                    rarityWeights[i] = new RarityWeightConfig
+                    {
+                        rarity = (ItemRarity)i,
+                        weight = defaultWeights[i]
+                    };
+                }
+            }
+        }
+        
+        /// <summary>
         /// 获取指定珍稀度的物品列表
         /// </summary>
         /// <param name="rarity">目标珍稀度</param>
         /// <returns>指定珍稀度的物品数组，如果没有找到则返回空数组</returns>
         public ItemDataSO[] GetItemsByRarity(ItemRarity rarity)
         {
-            if (rarityGroups == null) return new ItemDataSO[0];
-            
-            var group = rarityGroups.FirstOrDefault(g => g != null && g.rarity == rarity);
-            return group?.items ?? new ItemDataSO[0];
+            if (autoLoadItems)
+            {
+                return GetItemsByRarityFromResources(rarity);
+            }
+            else
+            {
+                if (rarityGroups == null) return new ItemDataSO[0];
+                
+                var group = rarityGroups.FirstOrDefault(g => g != null && g.rarity == rarity);
+                return group?.items ?? new ItemDataSO[0];
+            }
+        }
+        
+        /// <summary>
+        /// 从Resources中自动获取指定类别和珍稀度的物品
+        /// </summary>
+        /// <param name="rarity">目标珍稀度</param>
+        /// <returns>匹配的物品数组</returns>
+        private ItemDataSO[] GetItemsByRarityFromResources(ItemRarity rarity)
+        {
+            try
+            {
+                // 从Resources/InventorySystemResources/ItemScriptableObject路径加载所有物品
+                var allItems = Resources.LoadAll<ItemDataSO>("InventorySystemResources/ItemScriptableObject");
+                
+                if (allItems == null || allItems.Length == 0)
+                {
+                    if (enableDebugLog)
+                        Debug.LogWarning($"[RandomItemCategory] 未找到任何物品数据在 Resources/InventorySystemResources/ItemScriptableObject 路径下");
+                    return new ItemDataSO[0];
+                }
+                
+                // 将ItemRarity枚举转换为字符串（1-4）
+                string rarityString = ((int)rarity + 1).ToString();
+                
+                // 过滤指定类别和珍稀度的物品
+                var filteredItems = allItems.Where(item => 
+                    item != null && 
+                    item.category == category && 
+                    item.rarity == rarityString
+                ).ToArray();
+                
+                if (enableDebugLog)
+                {
+                    Debug.Log($"[RandomItemCategory] 类别 {category} 珍稀度 {rarity} 找到 {filteredItems.Length} 个物品");
+                }
+                
+                return filteredItems;
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogError($"[RandomItemCategory] 自动获取物品时发生错误: {ex.Message}");
+                return new ItemDataSO[0];
+            }
         }
         
         /// <summary>
@@ -109,6 +206,14 @@ namespace InventorySystem.SpawnSystem
         /// <returns>指定珍稀度的权重值</returns>
         public float GetWeightByRarity(ItemRarity rarity)
         {
+            // 优先使用新的权重配置
+            if (rarityWeights != null)
+            {
+                var weightConfig = rarityWeights.FirstOrDefault(w => w.rarity == rarity);
+                if (!weightConfig.Equals(default(RarityWeightConfig))) return weightConfig.weight;
+            }
+            
+            // 回退到旧的珍稀度组配置
             if (rarityGroups == null) return 0f;
             
             var group = rarityGroups.FirstOrDefault(g => g != null && g.rarity == rarity);
@@ -121,15 +226,13 @@ namespace InventorySystem.SpawnSystem
         /// <returns>按珍稀度顺序排列的权重数组</returns>
         public float[] GetAllWeights()
         {
-            if (rarityGroups == null) return new float[0];
-            
+            // 不再依赖 rarityGroups 是否存在；统一通过 GetWeightByRarity 读取（优先 rarityWeights）
             float[] weights = new float[4];
             for (int i = 0; i < 4; i++)
             {
                 ItemRarity rarity = (ItemRarity)i;
                 weights[i] = GetWeightByRarity(rarity);
             }
-            
             return weights;
         }
         
@@ -145,6 +248,54 @@ namespace InventorySystem.SpawnSystem
             
             int randomIndex = UnityEngine.Random.Range(0, items.Length);
             return items[randomIndex];
+        }
+        
+        /// <summary>
+        /// 获取随机堆叠数量
+        /// </summary>
+        /// <param name="itemData">物品数据</param>
+        /// <returns>随机的堆叠数量</returns>
+        public int GetRandomStackAmount(ItemDataSO itemData)
+        {
+            if (itemData == null || !itemData.IsStackable() || !enableStackRandomization)
+            {
+                return 1;
+            }
+            
+            // 确保堆叠数量范围在物品的最大堆叠限制内
+            int effectiveMinStack = Mathf.Max(1, minStackAmount);
+            int effectiveMaxStack = Mathf.Min(maxStackAmount, itemData.maxStack);
+            
+            // 确保最小值不大于最大值
+            if (effectiveMinStack > effectiveMaxStack)
+            {
+                effectiveMinStack = effectiveMaxStack;
+            }
+            
+            return UnityEngine.Random.Range(effectiveMinStack, effectiveMaxStack + 1);
+        }
+        
+        /// <summary>
+        /// 获取有效的堆叠数量范围
+        /// </summary>
+        /// <param name="itemData">物品数据</param>
+        /// <returns>有效的最小和最大堆叠数量</returns>
+        public (int min, int max) GetEffectiveStackRange(ItemDataSO itemData)
+        {
+            if (itemData == null || !itemData.IsStackable())
+            {
+                return (1, 1);
+            }
+            
+            int effectiveMin = Mathf.Max(1, minStackAmount);
+            int effectiveMax = Mathf.Min(maxStackAmount, itemData.maxStack);
+            
+            if (effectiveMin > effectiveMax)
+            {
+                effectiveMin = effectiveMax;
+            }
+            
+            return (effectiveMin, effectiveMax);
         }
         
         /// <summary>
@@ -207,21 +358,45 @@ namespace InventorySystem.SpawnSystem
                 return false;
             }
             
-            // 检查珍稀度组配置
+            // 当启用自动获取物品时，只校验权重有效性即可（无需挂物品列表）
+            if (autoLoadItems)
+            {
+                var weights = GetAllWeights();
+                if (weights == null || weights.Length != 4)
+                {
+                    errorMessage = "珍稀度权重长度无效";
+                    return false;
+                }
+                // 简单校验：权重非负且至少一个大于0
+                float total = 0f;
+                for (int i = 0; i < weights.Length; i++)
+                {
+                    if (weights[i] < 0f)
+                    {
+                        errorMessage = $"权重[{(ItemRarity)i}] 不能为负";
+                        return false;
+                    }
+                    total += weights[i];
+                }
+                if (total <= 0f)
+                {
+                    errorMessage = "所有权重为0，无法进行随机选择";
+                    return false;
+                }
+                return true;
+            }
+
+            // 兼容旧模式：需要在每个珍稀度组中维护物品数组
             if (rarityGroups == null || rarityGroups.Length == 0)
             {
                 errorMessage = "珍稀度组配置为空";
                 return false;
             }
-            
-            // 验证珍稀度组
             if (!RarityWeightValidator.ValidateRarityGroups(rarityGroups, out string groupError))
             {
                 errorMessage = $"珍稀度组配置无效: {groupError}";
                 return false;
             }
-            
-            // 检查是否至少有一个珍稀度组有物品
             bool hasAnyItems = false;
             foreach (var group in rarityGroups)
             {
@@ -231,13 +406,11 @@ namespace InventorySystem.SpawnSystem
                     break;
                 }
             }
-            
             if (!hasAnyItems)
             {
                 errorMessage = "至少需要在一个珍稀度组中配置物品";
                 return false;
             }
-            
             return true;
         }
         
@@ -381,5 +554,21 @@ namespace InventorySystem.SpawnSystem
         public float rareWeight;
         public float epicWeight;
         public float legendaryWeight;
+    }
+    
+    /// <summary>
+    /// 珍稀度权重配置
+    /// </summary>
+    [System.Serializable]
+    public struct RarityWeightConfig
+    {
+        [FieldLabel("珍稀度")]
+        [Tooltip("珍稀度类型")]
+        public ItemRarity rarity;
+        
+        [FieldLabel("权重")]
+        [Range(0f, 1f)]
+        [Tooltip("此珍稀度的生成权重")]
+        public float weight;
     }
 }

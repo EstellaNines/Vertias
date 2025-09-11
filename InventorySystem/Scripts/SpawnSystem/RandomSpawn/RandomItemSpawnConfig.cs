@@ -56,6 +56,20 @@ namespace InventorySystem.SpawnSystem
         [Tooltip("如何确定最终生成的物品数量")]
         public RandomQuantityMode quantityMode = RandomQuantityMode.UniformRandom;
         
+        [Header("固定物品优先生成")]
+        [FieldLabel("启用固定物品")]
+        [Tooltip("是否在随机生成前先生成一个固定物品（计入总数，优先级最高）")]
+        public bool enableFixedItemGeneration = false;
+        
+        [FieldLabel("固定物品")]
+        [Tooltip("将优先生成的固定物品（仅支持一个）")]
+        public ItemDataSO fixedItemData;
+        
+        [FieldLabel("固定物品堆叠数量")]
+        [Range(1, 1000)]
+        [Tooltip("固定物品的堆叠数量（若物品不可堆叠，将按1处理）")]
+        public int fixedItemStackAmount = 1;
+        
         [Header("物品类别配置")]
         [FieldLabel("随机物品类别")]
         [Tooltip("配置的物品类别列表，每个类别定义不同的珍稀度分布")]
@@ -198,6 +212,19 @@ namespace InventorySystem.SpawnSystem
                 
                 // 获取目标数量
                 int targetQuantity = GetRandomTotalQuantity(previewSeed);
+                
+                // 优先添加固定物品（计入总量，仅预览用途）
+                if (enablePreview && enableFixedItemGeneration && fixedItemData != null)
+                {
+                    previewItems.Add(new PreviewItemData
+                    {
+                        itemData = fixedItemData,
+                        rarity = ItemRarity.Common,
+                        category = fixedItemData.category,
+                        categoryName = "固定物品"
+                    });
+                    targetQuantity = Mathf.Max(0, targetQuantity - 1);
+                }
                 var enabledCategories = GetEnabledCategories();
                 
                 if (enabledCategories.Length == 0) return previewItems;
@@ -325,6 +352,19 @@ namespace InventorySystem.SpawnSystem
                 }
             }
             
+            // 固定物品优先生成验证
+            if (enableFixedItemGeneration)
+            {
+                if (fixedItemData == null)
+                {
+                    errors.Add("已启用固定物品优先生成，但未指定固定物品");
+                }
+                if (fixedItemStackAmount <= 0)
+                {
+                    errors.Add($"固定物品堆叠数量 {fixedItemStackAmount} 必须大于0");
+                }
+            }
+            
             // 高级设置验证
             if (generationTimeout <= 0)
             {
@@ -405,6 +445,13 @@ namespace InventorySystem.SpawnSystem
                         hasFixed = true;
                     }
                 }
+            }
+            
+            // 修复固定物品配置
+            if (fixedItemStackAmount <= 0)
+            {
+                fixedItemStackAmount = 1;
+                hasFixed = true;
             }
             
             return hasFixed;

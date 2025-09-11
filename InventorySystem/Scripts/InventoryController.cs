@@ -166,7 +166,36 @@ public class InventoryController : MonoBehaviour
         // 检查是否可以放置
         bool canPlace = CanPlaceItemAt(targetGrid, gridPosition.x, gridPosition.y, selectedItem);
 
-        // 显示高亮并设置颜色
+        // 额外：检测是否为可堆叠合并场景
+        bool canStackMerge = false;
+        Item targetAtCell = targetGrid.GetItemAt(gridPosition.x, gridPosition.y);
+        if (targetAtCell != null && targetAtCell != selectedItem)
+        {
+            var dragReader = selectedItem.GetComponent<ItemDataReader>();
+            var targetReader = targetAtCell.GetComponent<ItemDataReader>();
+            if (dragReader != null && targetReader != null &&
+                dragReader.ItemData != null && targetReader.ItemData != null)
+            {
+                bool sameId = dragReader.ItemData.id == targetReader.ItemData.id;
+                bool stackable = targetReader.ItemData.IsStackable();
+                bool targetNotFull = targetReader.CurrentStack < targetReader.ItemData.maxStack;
+                canStackMerge = sameId && stackable && targetNotFull;
+            }
+        }
+
+        // 优先显示“可堆叠合并”黄色态
+        if (canStackMerge)
+        {
+            inventoryHighlight.SetParent(targetGrid);
+            inventoryHighlight.SetPositionSimple(targetGrid, gridPosition.x, gridPosition.y);
+            inventoryHighlight.SetSize(selectedItem.GetWidth(), selectedItem.GetHeight());
+            inventoryHighlight.SetStackableHighlight();
+            inventoryHighlight.Show(true);
+            isHighlightActive = true;
+            return;
+        }
+
+        // 默认绿/红态
         ShowHighlight(targetGrid, gridPosition.x, gridPosition.y, selectedItem.GetWidth(), selectedItem.GetHeight(), canPlace);
     }
 
@@ -490,7 +519,37 @@ public class InventoryController : MonoBehaviour
             draggingItem
         );
 
-        // 显示高亮并设置颜色（绿色表示可放置，红色表示有重叠冲突）
+        // 额外检测：可堆叠合并（同类且未满）
+        bool canStackMerge = false;
+        Item targetAtCell = targetGrid.GetItemAt(gridPosition.x, gridPosition.y);
+        if (targetAtCell != null && targetAtCell != draggingItem)
+        {
+            var dragReader = draggingItem.GetComponent<ItemDataReader>();
+            var targetReader = targetAtCell.GetComponent<ItemDataReader>();
+            if (dragReader != null && targetReader != null &&
+                dragReader.ItemData != null && targetReader.ItemData != null)
+            {
+                bool sameId = dragReader.ItemData.id == targetReader.ItemData.id;
+                bool stackable = targetReader.ItemData.IsStackable();
+                bool targetNotFull = targetReader.CurrentStack < targetReader.ItemData.maxStack;
+                canStackMerge = sameId && stackable && targetNotFull;
+            }
+        }
+
+        // 显示高亮
+        if (canStackMerge && inventoryHighlight != null)
+        {
+            // 使用黄色态表示可堆叠合并
+            inventoryHighlight.SetParent(targetGrid);
+            inventoryHighlight.SetPositionSimple(targetGrid, gridPosition.x, gridPosition.y);
+            inventoryHighlight.SetSize(draggingItem.GetWidth(), draggingItem.GetHeight());
+            inventoryHighlight.SetStackableHighlight();
+            inventoryHighlight.Show(true);
+            isHighlightActive = true;
+            return;
+        }
+
+        // 常规绿/红态
         ShowDragHighlight(targetGrid, gridPosition.x, gridPosition.y,
                          draggingItem.GetWidth(), draggingItem.GetHeight(), canPlace);
     }

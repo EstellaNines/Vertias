@@ -21,39 +21,25 @@ MonoBehaviour:
   minTotalItems: 3
   maxTotalItems: 10
   quantityMode: 0
+  enableFixedItemGeneration: 0
+  fixedItemData: {fileID: 0}
+  fixedItemStackAmount: 1
   itemCategories:
-  - category: 14
-    categoryName: "\u65B0\u7269\u54C1\u7C7B\u522B"
-    description: "\u63CF\u8FF0\u6B64\u7C7B\u522B\u7684\u7269\u54C1"
-    minSpawnCount: 1
-    maxSpawnCount: 1
-    rarityGroups:
-    - rarity: 0
-      weight: 0
-      items:
-      - {fileID: 11400000, guid: be5285f70c2e4c449ab348cb166d8c4b, type: 2}
-    - rarity: 1
-      weight: 0.5
-      items:
-      - {fileID: 11400000, guid: fa5faaa0c534d054886743b88e1d4198, type: 2}
-    - rarity: 2
-      weight: 0.25
-      items:
-      - {fileID: 11400000, guid: 3f7c6c7e014d5b24fbbc93abd4dcfcd6, type: 2}
-      - {fileID: 11400000, guid: be5285f70c2e4c449ab348cb166d8c4b, type: 2}
-    - rarity: 3
-      weight: 0.25
-      items:
-      - {fileID: 11400000, guid: 67dada7c7878e5e4f9a473be7af220b3, type: 2}
-      - {fileID: 11400000, guid: 646b0f62f60970f48a2a43c054be085d, type: 2}
-    isEnabled: 1
-    priority: 5
-    enableDebugLog: 0
   - category: 9
     categoryName: "\u65B0\u7269\u54C1\u7C7B\u522B"
     description: "\u63CF\u8FF0\u6B64\u7C7B\u522B\u7684\u7269\u54C1"
     minSpawnCount: 1
     maxSpawnCount: 5
+    autoLoadItems: 1
+    rarityWeights:
+    - rarity: 0
+      weight: 0.6
+    - rarity: 0
+      weight: 0.2
+    - rarity: 0
+      weight: 0.15
+    - rarity: 0
+      weight: 0.05
     rarityGroups:
     - rarity: 0
       weight: 0.6
@@ -71,6 +57,9 @@ MonoBehaviour:
       weight: 0.05
       items:
       - {fileID: 11400000, guid: 1dd0a8459faabdf43bc8421686a20792, type: 2}
+    enableStackRandomization: 0
+    minStackAmount: 1
+    maxStackAmount: 1
     isEnabled: 1
     priority: 5
     enableDebugLog: 0
@@ -79,6 +68,16 @@ MonoBehaviour:
     description: "\u63CF\u8FF0\u6B64\u7C7B\u522B\u7684\u7269\u54C1"
     minSpawnCount: 1
     maxSpawnCount: 4
+    autoLoadItems: 1
+    rarityWeights:
+    - rarity: 0
+      weight: 0.6
+    - rarity: 0
+      weight: 0.2
+    - rarity: 0
+      weight: 0.15
+    - rarity: 0
+      weight: 0.05
     rarityGroups:
     - rarity: 0
       weight: 0.25
@@ -96,6 +95,43 @@ MonoBehaviour:
       weight: 0.25
       items:
       - {fileID: 11400000, guid: 22888f7c3ff17094385ccb6f25565db0, type: 2}
+    enableStackRandomization: 0
+    minStackAmount: 1
+    maxStackAmount: 50
+    isEnabled: 1
+    priority: 5
+    enableDebugLog: 0
+  - category: 11
+    categoryName: "\u65B0\u7269\u54C1\u7C7B\u522B"
+    description: "\u63CF\u8FF0\u6B64\u7C7B\u522B\u7684\u7269\u54C1"
+    minSpawnCount: 1
+    maxSpawnCount: 1
+    autoLoadItems: 1
+    rarityWeights:
+    - rarity: 0
+      weight: 0.6
+    - rarity: 0
+      weight: 0.2
+    - rarity: 0
+      weight: 0.1
+    - rarity: 0
+      weight: 0.1
+    rarityGroups:
+    - rarity: 0
+      weight: 0.25
+      items: []
+    - rarity: 1
+      weight: 0.25
+      items: []
+    - rarity: 2
+      weight: 0.25
+      items: []
+    - rarity: 3
+      weight: 0.25
+      items: []
+    enableStackRandomization: 0
+    minStackAmount: 1
+    maxStackAmount: 50
     isEnabled: 1
     priority: 5
     enableDebugLog: 0
@@ -104,7 +140,7 @@ MonoBehaviour:
   avoidDuplicateItems: 1
   maxRetryAttempts: 3
   enablePreview: 1
-  previewSeed: 982065
+  previewSeed: 412089
   previewGridSize: {x: 10, y: 6}
   enableDetailedLogging: 0
   generationTimeout: 10
