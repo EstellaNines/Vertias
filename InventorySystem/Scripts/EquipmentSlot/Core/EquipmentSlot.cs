@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using TMPro;
+using GlobalMessaging;
 
 namespace InventorySystem
 {
@@ -25,6 +26,11 @@ namespace InventorySystem
         [FieldLabel("槽位标题")]
         [Tooltip("槽位标题文本组件")]
         public TextMeshProUGUI equipmentSlotTitle;
+
+        [Header("武器弹药显示")]
+        [FieldLabel("弹药文本（主/副武器槽使用）")]
+        [Tooltip("用于显示当前武器弹药数量（当前/总数），非武器槽可留空")]
+        public TextMeshProUGUI weaponAmmoText;
 
         [FieldLabel("物品显示区域")]
         [Tooltip("装备物品的显示区域，默认为根节点")]
@@ -74,6 +80,10 @@ namespace InventorySystem
         // 🔧 容器内容加载标志
         private bool needsContainerContentLoad = false;
 
+        // 武器弹药显示相关
+        [SerializeField] private WeaponManager observedWeaponManager;
+        private int? weaponSlotIndexCache; // 0=主武器, 1=副武器, 其他为null
+
         #region Unity生命周期
 
         private void Awake()
@@ -105,6 +115,15 @@ namespace InventorySystem
                     Debug.LogError($"[EquipmentSlot] OnEnable中加载容器内容失败: {e.Message}");
                 }
             }
+
+            // 订阅武器相关消息（仅主/副武器槽）
+            if (IsWeaponSlot() && MessagingCenter.Instance != null)
+            {
+                MessagingCenter.Instance.Register<WeaponMessageBus.WeaponEquippedEvent>(OnWeaponEquipped);
+                MessagingCenter.Instance.Register<WeaponMessageBus.WeaponUnequippedEvent>(OnWeaponUnequipped);
+                // 重新绑定当前槽位的武器（若已装备），并立即刷新显示
+                TryRebindWeaponOnEnable();
+            }
         }
 
         private void OnValidate()
@@ -129,6 +148,19 @@ namespace InventorySystem
                 }
 #endif
             }
+        }
+
+        private void OnDisable()
+        {
+            // 取消消息订阅与事件绑定（仅主/副武器槽）
+            if (IsWeaponSlot() && MessagingCenter.Instance != null)
+            {
+                MessagingCenter.Instance.Unregister<WeaponMessageBus.WeaponEquippedEvent>(OnWeaponEquipped);
+                MessagingCenter.Instance.Unregister<WeaponMessageBus.WeaponUnequippedEvent>(OnWeaponUnequipped);
+            }
+            UnbindObservedWeaponEvents();
+
+            // 不主动清空文本，避免频繁开关UI导致闪烁；仅在卸下或无装备时清空
         }
 
         #endregion
@@ -332,6 +364,13 @@ namespace InventorySystem
             isItemEquipped = true;
             UpdateSlotDisplay();
 
+            // 若为武器槽，尝试绑定武器并更新弹药文本
+            if (IsWeaponSlot())
+            {
+                BindWeaponIfPresent(currentItemInstance);
+                UpdateWeaponAmmoText();
+            }
+
             // 延迟一帧再次确保尺寸设置正确（防止其他系统覆盖）
             StartCoroutine(EnsureItemSizeAfterFrame());
 
@@ -390,6 +429,13 @@ namespace InventorySystem
 
             UpdateSlotDisplay();
 
+            // 若为武器槽，取消绑定并清空文本
+            if (IsWeaponSlot())
+            {
+                UnbindObservedWeaponEvents();
+                if (weaponAmmoText != null) weaponAmmoText.text = string.Empty;
+            }
+
             // 触发卸装事件
             OnItemUnequipped?.Invoke(config.slotType, unequippedItem);
 
@@ -433,6 +479,13 @@ namespace InventorySystem
             
             // 设置装备栏物品的ItemBackground为透明
             SetItemBackgroundTransparent();
+
+            // 若为武器槽，尝试绑定武器组件
+            if (IsWeaponSlot())
+            {
+                BindWeaponIfPresent(currentItemInstance);
+                UpdateWeaponAmmoText();
+            }
         }
 
         /// <summary>
@@ -794,12 +847,25 @@ namespace InventorySystem
             if (isItemEquipped)
             {
                 // 有装备时的显示状态
-                equipmentSlotBackground.color = config.equippedSlotColor;
+                equipmentSlotBackground.color = Color.gray;
             }
             else
             {
                 // 空槽时的显示状态
-                equipmentSlotBackground.color = config.emptySlotColor;
+                equipmentSlotBackground.color = Color.white;
+            }
+
+            // 同步武器弹药文本的可见性（若引用存在且本槽是武器槽）
+            if (weaponAmmoText != null && IsWeaponSlot())
+            {
+                if (isItemEquipped)
+                {
+                    UpdateWeaponAmmoText();
+                }
+                else
+                {
+                    weaponAmmoText.text = string.Empty;
+                }
             }
         }
 
@@ -1387,6 +1453,12 @@ namespace InventorySystem
             // 如果完全无法放置，销毁物品（或可以实现其他逻辑，如掉落到地面）
             Debug.LogWarning($"[EquipmentSlot] 无法将 {item.ItemData.itemName} 返回背包，已销毁");
             Destroy(item.gameObject);
+
+            // 若为武器槽，清空显示
+            if (IsWeaponSlot() && weaponAmmoText != null)
+            {
+                weaponAmmoText.text = string.Empty;
+            }
         }
 
         /// <summary>
@@ -1587,5 +1659,156 @@ namespace InventorySystem
 
         #endregion
 
+        #region 武器弹药显示集成
+
+        private bool IsWeaponSlot()
+        {
+            return config != null && (config.slotType == EquipmentSlotType.PrimaryWeapon || config.slotType == EquipmentSlotType.SecondaryWeapon);
+        }
+
+        private void BindWeaponIfPresent(GameObject itemGO)
+        {
+            UnbindObservedWeaponEvents();
+            observedWeaponManager = null;
+            weaponSlotIndexCache = MapWeaponSlotIndex();
+
+            if (itemGO == null || weaponSlotIndexCache == null) return;
+
+            // 物品实例本身可能不是武器Prefab，需要在其子层级中寻找 WeaponManager
+            var wm = itemGO.GetComponentInChildren<WeaponManager>();
+            if (wm == null)
+            {
+                // 通过玩家武器控制器（若存在）定位当前槽位的武器实例
+                var player = FindObjectOfType<PlayerWeaponEquipController>();
+                if (player != null && weaponSlotIndexCache.Value >= 0 && weaponSlotIndexCache.Value < player.equipped.Length)
+                {
+                    var equippedGO = player.equipped[weaponSlotIndexCache.Value];
+                    wm = equippedGO != null ? equippedGO.GetComponent<WeaponManager>() : null;
+                }
+            }
+
+            if (wm != null)
+            {
+                observedWeaponManager = wm;
+                // 绑定事件以在开火与换弹时更新
+                observedWeaponManager.OnFired += OnObservedWeaponFired;
+                observedWeaponManager.OnReloadEnd += OnObservedWeaponReloadEnd;
+                UpdateWeaponAmmoText();
+            }
+        }
+
+        private void UnbindObservedWeaponEvents()
+        {
+            if (observedWeaponManager != null)
+            {
+                observedWeaponManager.OnFired -= OnObservedWeaponFired;
+                observedWeaponManager.OnReloadEnd -= OnObservedWeaponReloadEnd;
+                observedWeaponManager = null;
+            }
+        }
+
+        private int? MapWeaponSlotIndex()
+        {
+            if (config == null) return null;
+            switch (config.slotType)
+            {
+                case EquipmentSlotType.PrimaryWeapon: return 0;
+                case EquipmentSlotType.SecondaryWeapon: return 1;
+                default: return null;
+            }
+        }
+
+        private void OnWeaponEquipped(WeaponMessageBus.WeaponEquippedEvent msg)
+        {
+            if (weaponSlotIndexCache == null) weaponSlotIndexCache = MapWeaponSlotIndex();
+            if (weaponSlotIndexCache == null) return;
+            if (msg.slotIndex != weaponSlotIndexCache.Value) return;
+
+            // 绑定新武器
+            BindWeaponIfPresent(msg.instance);
+            UpdateWeaponAmmoText();
+        }
+
+        private void OnWeaponUnequipped(WeaponMessageBus.WeaponUnequippedEvent msg)
+        {
+            if (weaponSlotIndexCache == null) weaponSlotIndexCache = MapWeaponSlotIndex();
+            if (weaponSlotIndexCache == null) return;
+            if (msg.slotIndex != weaponSlotIndexCache.Value) return;
+
+            UnbindObservedWeaponEvents();
+            if (weaponAmmoText != null) weaponAmmoText.text = string.Empty;
+        }
+
+        private void OnObservedWeaponFired(WeaponManager _)
+        {
+            UpdateWeaponAmmoText();
+        }
+
+        private void OnObservedWeaponReloadEnd(WeaponManager _)
+        {
+            UpdateWeaponAmmoText();
+        }
+
+        private void UpdateWeaponAmmoText()
+        {
+            if (weaponAmmoText == null) return;
+            if (!IsWeaponSlot()) { weaponAmmoText.text = string.Empty; return; }
+
+            if (!isItemEquipped || currentEquippedItem == null)
+            {
+                weaponAmmoText.text = string.Empty;
+                return;
+            }
+
+            // 优先从已绑定的 WeaponManager 获取
+            if (observedWeaponManager != null)
+            {
+                int current = observedWeaponManager.GetCurrentAmmo();
+                int total = observedWeaponManager.GetMagazineCapacity();
+                weaponAmmoText.text = $"{current}/{total}";
+                return;
+            }
+
+            // 备用：尝试在当前实例查找
+            var wm = currentItemInstance != null ? currentItemInstance.GetComponentInChildren<WeaponManager>() : null;
+            if (wm != null)
+            {
+                int current = wm.GetCurrentAmmo();
+                int total = wm.GetMagazineCapacity();
+                weaponAmmoText.text = $"{current}/{total}";
+            }
+        }
+
+        private void TryRebindWeaponOnEnable()
+        {
+            weaponSlotIndexCache = MapWeaponSlotIndex();
+            if (weaponSlotIndexCache == null) return;
+
+            // 优先使用当前已缓存的实例
+            if (currentItemInstance != null)
+            {
+                BindWeaponIfPresent(currentItemInstance);
+                UpdateWeaponAmmoText();
+                return;
+            }
+
+            // 若当前实例不可用，尝试从玩家控制器读取当前槽位武器
+            var player = FindObjectOfType<PlayerWeaponEquipController>();
+            if (player != null && weaponSlotIndexCache.Value >= 0 && weaponSlotIndexCache.Value < player.equipped.Length)
+            {
+                var equippedGO = player.equipped[weaponSlotIndexCache.Value];
+                if (equippedGO != null)
+                {
+                    BindWeaponIfPresent(equippedGO);
+                    UpdateWeaponAmmoText();
+                }
+                else
+                {
+                    if (weaponAmmoText != null) weaponAmmoText.text = string.Empty;
+                }
+            }
+        }
+
+        #endregion
     }
 }

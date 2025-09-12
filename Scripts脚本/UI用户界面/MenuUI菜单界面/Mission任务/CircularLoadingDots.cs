@@ -21,14 +21,14 @@ public class CircularLoadingDots : MonoBehaviour
     [SerializeField] private float dotSize = 10f; // 圆点大小
     
     [Header("=== 动画设置 ===")]
-    [FieldLabel("动画间隔速度")]
-    [Tooltip("每个圆点激活的间隔时间 - 数值越大动画越慢，数值越小动画越快")]
-    [SerializeField] private float animationSpeed = 0.1f; // 每个圆点动画间隔
+    [FieldLabel("总持续时间")]
+    [Tooltip("完整动画周期的总时长（秒）")]
+    [SerializeField] private float totalDuration = 5f; // 总动画时长
     [FieldLabel("放大倍数")]
-    [SerializeField] private float scaleMultiplier = 1.5f; // 放大倍数
-    [FieldLabel("缩放持续时间")]
-    [Tooltip("单个圆点缩放动画的持续时间 - 数值越大缩放越慢，数值越小缩放越快")]
-    [SerializeField] private float scaleDuration = 0.3f; // 单个圆点缩放时长
+    [SerializeField] private float scaleMultiplier = 3f; // 放大倍数
+    [FieldLabel("单点缩放时长")]
+    [Tooltip("单个圆点的缩放动画持续时间")]
+    [SerializeField] private float singleDotScaleDuration = 0.3f; // 单个圆点缩放时长
     [FieldLabel("缩放缓动类型")]
     [SerializeField] private Ease scaleEase = Ease.OutBack; // 缩放缓动类型
     [FieldLabel("自动开始")]
@@ -54,6 +54,10 @@ public class CircularLoadingDots : MonoBehaviour
     private Sequence loadingSequence;
     private bool isLoading = false;
     private int currentDotIndex = 0;
+    
+    // 动画计算属性
+    private float DotInterval => totalDuration / dotCount; // 每个圆点的间隔时间
+    private float EffectiveDotDuration => Mathf.Min(singleDotScaleDuration, DotInterval * 0.8f); // 有效的单点动画时长
     
     // 事件
     public System.Action OnLoadingStart;
@@ -305,32 +309,34 @@ public class CircularLoadingDots : MonoBehaviour
     {
         loadingSequence = DOTween.Sequence();
         
-        // 为每个圆点添加动画
+        float currentTime = 0f;
+        
+        // 为每个圆点添加动画，确保总时长为totalDuration
         for (int i = 0; i < dots.Count; i++)
         {
             int dotIndex = i; // 闭包变量
+            float dotStartTime = i * DotInterval;
             
-            // 添加延迟
-            if (i > 0)
+            // 添加到指定时间点的延迟
+            if (dotStartTime > currentTime)
             {
-                loadingSequence.AppendInterval(animationSpeed);
+                loadingSequence.AppendInterval(dotStartTime - currentTime);
+                currentTime = dotStartTime;
             }
             
-            // 添加圆点激活回调
+            // 添加圆点激活回调（瞬间执行）
             loadingSequence.AppendCallback(() => {
                 ActivateDot(dotIndex);
             });
             
-            // 添加缩放动画
-            loadingSequence.Append(
-                dots[i].DOScale(scaleMultiplier, scaleDuration * 0.5f)
-                    .SetEase(scaleEase)
-                    .OnComplete(() => {
-                        // 缩放回原始大小
-                        dots[dotIndex].DOScale(1f, scaleDuration * 0.5f)
-                            .SetEase(Ease.InBack);
-                    })
-            );
+            // 添加缩放动画（并行执行，不占用序列时间）
+            loadingSequence.Insert(dotStartTime, CreateDotScaleAnimation(dotIndex));
+        }
+        
+        // 确保序列总长度为totalDuration
+        if (currentTime < totalDuration)
+        {
+            loadingSequence.AppendInterval(totalDuration - currentTime);
         }
         
         // 添加完成回调
@@ -341,7 +347,7 @@ public class CircularLoadingDots : MonoBehaviour
             if (loop && isLoading)
             {
                 // 短暂延迟后重新开始
-                DOVirtual.DelayedCall(0.5f, () => {
+                DOVirtual.DelayedCall(0.3f, () => {
                     if (isLoading) // 再次检查状态
                     {
                         ResetAllDots();
@@ -357,6 +363,36 @@ public class CircularLoadingDots : MonoBehaviour
         
         // 开始播放序列
         loadingSequence.Play();
+        
+        if (showDebugInfo)
+        {
+            Debug.Log($"CircularLoadingDots: 创建动画序列，总时长={totalDuration}s，圆点间隔={DotInterval:F2}s");
+        }
+    }
+    
+    /// <summary>
+    /// 创建单个圆点的缩放动画
+    /// </summary>
+    private Tween CreateDotScaleAnimation(int dotIndex)
+    {
+        if (dotIndex < 0 || dotIndex >= dots.Count) return null;
+        
+        Transform dot = dots[dotIndex];
+        Sequence dotSequence = DOTween.Sequence();
+        
+        // 放大动画
+        dotSequence.Append(
+            dot.DOScale(scaleMultiplier, EffectiveDotDuration * 0.5f)
+                .SetEase(scaleEase)
+        );
+        
+        // 缩小动画
+        dotSequence.Append(
+            dot.DOScale(1f, EffectiveDotDuration * 0.5f)
+                .SetEase(Ease.InBack)
+        );
+        
+        return dotSequence;
     }
     
     /// <summary>
@@ -373,7 +409,7 @@ public class CircularLoadingDots : MonoBehaviour
         {
             dotImages[index].DOColor(activeColor, 0.1f).OnComplete(() => {
                 // 延迟后恢复原色
-                DOVirtual.DelayedCall(scaleDuration, () => {
+                DOVirtual.DelayedCall(EffectiveDotDuration, () => {
                     if (dotImages[index] != null)
                     {
                         dotImages[index].DOColor(normalColor, 0.2f);
@@ -410,11 +446,24 @@ public class CircularLoadingDots : MonoBehaviour
     }
     
     /// <summary>
-    /// 设置动画速度
+    /// 设置总动画时长
     /// </summary>
-    public void SetAnimationSpeed(float speed)
+    public void SetTotalDuration(float duration)
     {
-        animationSpeed = Mathf.Max(0.01f, speed);
+        totalDuration = Mathf.Max(0.5f, duration);
+        
+        if (showDebugInfo)
+        {
+            Debug.Log($"设置总动画时长为: {totalDuration}s，圆点间隔: {DotInterval:F2}s");
+        }
+    }
+    
+    /// <summary>
+    /// 设置单个圆点缩放时长
+    /// </summary>
+    public void SetSingleDotScaleDuration(float duration)
+    {
+        singleDotScaleDuration = Mathf.Max(0.1f, duration);
     }
     
     /// <summary>
@@ -456,6 +505,28 @@ public class CircularLoadingDots : MonoBehaviour
     /// 获取圆点总数
     /// </summary>
     public int DotCount => dots.Count;
+    
+    /// <summary>
+    /// 获取总动画时长
+    /// </summary>
+    public float TotalDuration => totalDuration;
+    
+    /// <summary>
+    /// 获取当前动画进度（0-1）
+    /// </summary>
+    public float Progress
+    {
+        get
+        {
+            if (!isLoading || loadingSequence == null) return 0f;
+            return Mathf.Clamp01(loadingSequence.position / totalDuration);
+        }
+    }
+    
+    /// <summary>
+    /// 获取圆点间隔时间
+    /// </summary>
+    public float GetDotInterval() => DotInterval;
     
     // 编辑器辅助方法
     #if UNITY_EDITOR
