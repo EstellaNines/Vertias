@@ -81,66 +81,88 @@ public class Bullet : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D collision)
     {
-        // 修改碰撞体检测条件：排除所有触发器（isTrigger = true 的碰撞体）
-        if (!collision.isTrigger)
+        // 忽略与发射者自身或其子对象的碰撞
+        if (shooter != null)
         {
-            // 优先使用回调归还
-            if (ReturnToPool != null)
+            if (collision.transform == shooter || collision.transform.IsChildOf(shooter)) return;
+        }
+
+        BulletPool bulletPool = BulletPool.Instance;
+        EnemyBulletPool enemyBulletPool = EnemyBulletPool.Instance;
+
+        bool isPlayerBullet = CompareTag("PlayerBullets") || (shooter != null && shooter.GetComponentInParent<Player>() != null);
+        bool isEnemyBullet = CompareTag("EnemyBullets") || (shooter != null && (shooter.GetComponentInParent<Enemy>() != null || shooter.GetComponentInParent<Zombie>() != null));
+
+        // 敌人子弹命中玩家
+        if (isEnemyBullet)
+        {
+            Player player = collision.GetComponentInParent<Player>();
+            if (player != null)
             {
-                ReturnToPool(gameObject);
-                return;
-            }
-            BulletPool bulletPool = BulletPool.Instance;
-            
-            // 检查是否击中玩家
-            Player player = collision.GetComponent<Player>();
-            if (player != null && shooter != player.transform) // 确保不是自己的子弹
-            {
-                Debug.Log($"[子弹命中] 玩家受到伤害: {BulletDamage}", this);
-                
-                // 调用玩家的受伤处理方法
                 player.TakeDamage(BulletDamage);
-                
-                if (bulletPool != null) bulletPool.ReturnBullet(gameObject);
-                return;
-            }
-            
-            // 检查是否击中Enemy（不需要击退）
-            Enemy enemy = collision.GetComponent<Enemy>();
-            if (enemy != null)
-            {
-                Debug.Log($"[子弹命中] 敌人: {collision.name} | 伤害: {BulletDamage} | 来源: 玩家", this);
-                
-                // 调用Enemy的受伤处理方法（不带击退参数）
-                enemy.TakeDamage(BulletDamage);
-                
-                if (bulletPool != null) bulletPool.ReturnBullet(gameObject);
-                return;
-            }
-            
-            // 检查是否击中Zombie（需要击退）
-            Zombie zombie = collision.GetComponent<Zombie>();
-            if (zombie != null)
-            {
-                Debug.Log($"[子弹命中] 僵尸: {collision.name} | 伤害: {BulletDamage} | 来源: 玩家", this);
-    
-                // 获取子弹当前运动方向作为击退方向
-                Vector2 hitDirection = RB2D.velocity.normalized;
-                // 调用Zombie的受伤处理方法（带击退参数）
-                zombie.TakeDamage(BulletDamage, hitDirection);
-                
-                if (bulletPool != null)
+                if (ReturnToPool != null)
                 {
-                    bulletPool.ReturnBullet(gameObject);
+                    ReturnToPool(gameObject);
+                }
+                else
+                {
+                    if (enemyBulletPool != null) enemyBulletPool.ReturnBullet(gameObject);
+                    else if (bulletPool != null) bulletPool.ReturnBullet(gameObject);
                 }
                 return;
             }
-            
-            // 如果都没有命中，记录警告
-            Debug.LogWarning($"[无命中] 碰撞到非目标对象: {collision.name}", this);
-    
-            if (ReturnToPool != null) ReturnToPool(gameObject);
-            else if (bulletPool != null) bulletPool.ReturnBullet(gameObject);
+        }
+
+        // 玩家子弹命中敌人/僵尸
+        if (isPlayerBullet)
+        {
+            Enemy enemy = collision.GetComponentInParent<Enemy>();
+            if (enemy != null)
+            {
+                enemy.TakeDamage(BulletDamage);
+                if (ReturnToPool != null)
+                {
+                    ReturnToPool(gameObject);
+                }
+                else
+                {
+                    if (bulletPool != null) bulletPool.ReturnBullet(gameObject);
+                }
+                return;
+            }
+
+            Zombie zombie = collision.GetComponentInParent<Zombie>();
+            if (zombie != null)
+            {
+                Vector2 hitDirection = (RB2D != null && RB2D.velocity.sqrMagnitude > 0.0001f) ? RB2D.velocity.normalized : (Vector2)transform.right;
+                zombie.TakeDamage(BulletDamage, hitDirection);
+                if (ReturnToPool != null)
+                {
+                    ReturnToPool(gameObject);
+                }
+                else
+                {
+                    if (bulletPool != null) bulletPool.ReturnBullet(gameObject);
+                }
+                return;
+            }
+        }
+
+        // 非目标命中：直接回收
+        if (ReturnToPool != null)
+        {
+            ReturnToPool(gameObject);
+        }
+        else
+        {
+            if (CompareTag("EnemyBullets"))
+            {
+                if (enemyBulletPool != null) enemyBulletPool.ReturnBullet(gameObject);
+            }
+            else
+            {
+                if (bulletPool != null) bulletPool.ReturnBullet(gameObject);
+            }
         }
     }
 }

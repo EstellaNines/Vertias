@@ -64,6 +64,7 @@ public class ProgressBarController : MonoBehaviour
     // 私有变量
     private Coroutine loadingCoroutine;
     private Tween progressTween;
+    private Sequence progressSequence;
     private bool isLoading = false;
     private float currentProgress = 0f;
     private Coroutine textUpdateCoroutine;
@@ -237,7 +238,7 @@ public class ProgressBarController : MonoBehaviour
         isLoading = true;
         
         // 创建DOTween序列
-        Sequence sequence = DOTween.Sequence();
+        progressSequence = DOTween.Sequence().SetTarget(this);
         
         // 进度条填充动画
         if (progressBarImage != null)
@@ -252,12 +253,12 @@ public class ProgressBarController : MonoBehaviour
                     OnProgressUpdate?.Invoke(currentProgress);
                 });
             
-            sequence.Append(progressTween);
+            progressSequence.Append(progressTween);
         }
         
         // 完成后的处理
-        sequence.OnComplete(() => {
-            StartCoroutine(OnProgressCompleteCoroutine());
+        progressSequence.OnComplete(() => {
+            if (this != null && isActiveAndEnabled) StartCoroutine(OnProgressCompleteCoroutine());
         });
         
         // 开始文本更新协程
@@ -369,6 +370,12 @@ public class ProgressBarController : MonoBehaviour
             progressTween = null;
         }
         DOTween.Kill(progressBarImage, complete: false);
+        if (progressSequence != null)
+        {
+            progressSequence.Kill();
+            progressSequence = null;
+        }
+        DOTween.Kill(this);
     }
     
     private void StopAllRunningCoroutines()

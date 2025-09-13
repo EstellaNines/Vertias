@@ -204,7 +204,7 @@ public class MagnifierCircleAnimation : MonoBehaviour
         float totalAngle = 360f * rotationCount * (isClockwise ? 1f : -1f);
         
         // 创建DOTween动画序列
-        Sequence animSequence = DOTween.Sequence();
+        Sequence animSequence = DOTween.Sequence().SetTarget(this);
         
         // 添加旋转动画，包含进度更新
         animSequence.Append(DOTween.To(
@@ -597,6 +597,7 @@ public class MagnifierCircleAnimation : MonoBehaviour
     private void OnDestroy()
     {
         StopCircleAnimation();
+        DOTween.Kill(this);
     }
     
     // 编辑器中实时预览

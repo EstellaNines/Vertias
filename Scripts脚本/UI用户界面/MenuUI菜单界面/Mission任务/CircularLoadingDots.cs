@@ -54,6 +54,7 @@ public class CircularLoadingDots : MonoBehaviour
     private Sequence loadingSequence;
     private bool isLoading = false;
     private int currentDotIndex = 0;
+    private readonly List<Tween> pendingDelayedCalls = new List<Tween>();
     
     // 动画计算属性
     private float DotInterval => totalDuration / dotCount; // 每个圆点的间隔时间
@@ -80,6 +81,15 @@ public class CircularLoadingDots : MonoBehaviour
         if (loadingSequence != null)
         {
             loadingSequence.Kill();
+        }
+        DOTween.Kill(this);
+        if (pendingDelayedCalls.Count > 0)
+        {
+            foreach (var t in pendingDelayedCalls)
+            {
+                if (t != null && t.IsActive()) t.Kill();
+            }
+            pendingDelayedCalls.Clear();
         }
     }
     
@@ -307,7 +317,7 @@ public class CircularLoadingDots : MonoBehaviour
     /// </summary>
     private void CreateLoadingSequence()
     {
-        loadingSequence = DOTween.Sequence();
+        loadingSequence = DOTween.Sequence().SetTarget(this);
         
         float currentTime = 0f;
         
@@ -384,12 +394,14 @@ public class CircularLoadingDots : MonoBehaviour
         dotSequence.Append(
             dot.DOScale(scaleMultiplier, EffectiveDotDuration * 0.5f)
                 .SetEase(scaleEase)
+                .SetTarget(this)
         );
         
         // 缩小动画
         dotSequence.Append(
             dot.DOScale(1f, EffectiveDotDuration * 0.5f)
                 .SetEase(Ease.InBack)
+                .SetTarget(this)
         );
         
         return dotSequence;
@@ -407,15 +419,21 @@ public class CircularLoadingDots : MonoBehaviour
         // 改变颜色
         if (useColorChange && index < dotImages.Count && dotImages[index] != null)
         {
-            dotImages[index].DOColor(activeColor, 0.1f).OnComplete(() => {
-                // 延迟后恢复原色
-                DOVirtual.DelayedCall(EffectiveDotDuration, () => {
-                    if (dotImages[index] != null)
-                    {
-                        dotImages[index].DOColor(normalColor, 0.2f);
-                    }
+            dotImages[index]
+                .DOColor(activeColor, 0.1f)
+                .SetTarget(this)
+                .OnComplete(() => {
+                    // 延迟后恢复原色
+                    var delayTween = DOVirtual.DelayedCall(EffectiveDotDuration, () => {
+                        if (this == null || !isActiveAndEnabled) return;
+                        if (index < dotImages.Count && dotImages[index] != null)
+                        {
+                            dotImages[index].DOColor(normalColor, 0.2f).SetTarget(this);
+                        }
+                    });
+                    delayTween.SetTarget(this);
+                    pendingDelayedCalls.Add(delayTween);
                 });
-            });
         }
         
         OnDotActivated?.Invoke(index);

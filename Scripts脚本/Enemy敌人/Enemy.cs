@@ -51,6 +51,9 @@ public class Enemy : MonoBehaviour
     [FieldLabel("障碍物层")] public LayerMask obstacleLayer; // 障碍物层
     [FieldLabel("视野起点")] public GameObject eyePoint; // 视野起点
     [FieldLabel("玩家检测半径")] public float playerDetectionRadius = 10f; // 玩家检测范围
+    [FieldLabel("固定视野朝向")] public bool useFixedViewDirection = false; // 是否固定视野朝向
+    public enum ViewFacing { Right, Left, Up, Down }
+    [FieldLabel("视野朝向")] public ViewFacing fixedViewDirection = ViewFacing.Right; // 固定视野朝向选择
     [FieldLabel("射线检测颜色")] public Color RayDetectionColor = Color.red; // 自定义可视化颜色
     [HideInInspector] public bool playerDetected = false; // 是否检测到玩家
     [HideInInspector] public GameObject player; // 玩家引用
@@ -250,16 +253,8 @@ public class Enemy : MonoBehaviour
     {
         if (weaponController != null)
         {
-            // 使用武器控制器的射击间隔
-            if (Time.time >= nextFireTime)
-            {
-                nextFireTime = Time.time + weaponController.GetFireRate();
-                
-                // 触发单次射击
-                weaponController.SetFiring(true);
-                // 立即停止，让武器控制器处理射击逻辑
-                StartCoroutine(StopFiringAfterFrame());
-            }
+            // 直接使用武器控制器的单发逻辑，内部自带射速节流
+            weaponController.FireSingle();
         }
         else
         {
@@ -267,15 +262,7 @@ public class Enemy : MonoBehaviour
         }
     }
     
-    // 协程：在下一帧停止射击
-    private System.Collections.IEnumerator StopFiringAfterFrame()
-    {
-        yield return null; // 等待一帧
-        if (weaponController != null)
-        {
-            weaponController.SetFiring(false);
-        }
-    }
+    // 旧逻辑已移除：不再通过短暂 SetFiring 控制连发，由 FireSingle 负责节流
     #endregion
     #region 检测玩家
     // 检查玩家是否被检测到
@@ -431,7 +418,7 @@ public class Enemy : MonoBehaviour
         if (distanceToPlayer <= playerDetectionRadius)
         {
             Vector2 directionToPlayer = (playerPosition - rayOrigin).normalized;
-            float angleToPlayer = Vector2.Angle(GetCurrentDirection(), directionToPlayer);
+            float angleToPlayer = Vector2.Angle(GetViewForward(), directionToPlayer);
 
             // 检查玩家是否在视野角度内
             if (angleToPlayer <= viewHalfAngle)
@@ -507,11 +494,12 @@ public class Enemy : MonoBehaviour
             return;
         }
         
-        // 绘制方向箭头
+        // 绘制方向箭头（使用视野前向）
         Gizmos.color = Color.cyan;
+        Vector2 gizmoForward = GetViewForward();
         Gizmos.DrawLine(
             transform.position,
-            transform.position + (Vector3)currentDirection * 0.5f
+            transform.position + (Vector3)gizmoForward * 0.5f
         );
 
         // 绘制视野范围
@@ -605,11 +593,32 @@ public class Enemy : MonoBehaviour
         if (!angleIsGlobal)
         {
             // 基于当前朝向计算角度
-            float currentAngle = Mathf.Atan2(currentDirection.y, currentDirection.x) * Mathf.Rad2Deg;
+            Vector2 forward = GetViewForward();
+            float currentAngle = Mathf.Atan2(forward.y, forward.x) * Mathf.Rad2Deg;
             angleInDegrees += currentAngle;
         }
 
         return new Vector3(Mathf.Cos(angleInDegrees * Mathf.Deg2Rad), Mathf.Sin(angleInDegrees * Mathf.Deg2Rad), 0);
+    }
+    
+    // 获取用于视野与Gizmos的前向
+    private Vector2 GetViewForward()
+    {
+        if (useFixedViewDirection)
+        {
+            switch (fixedViewDirection)
+            {
+                case ViewFacing.Left:
+                    return Vector2.left;
+                case ViewFacing.Up:
+                    return Vector2.up;
+                case ViewFacing.Down:
+                    return Vector2.down;
+                default:
+                    return Vector2.right;
+            }
+        }
+        return currentDirection;
     }
     #endregion
     #region 受伤

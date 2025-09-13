@@ -173,16 +173,30 @@ public class FOV : MonoBehaviour
         mesh.RecalculateNormals(); // 重新计算法线
     }
     
-    // 新增方法：获取考虑Enemy方向的射线方向
+    // 新增方法：获取考虑Enemy方向/固定视野朝向的射线方向
     private Vector3 GetDirectionFromAngle(float angleInDegrees)
     {
         if (enemyComponent != null)
         {
-            // 获取Enemy的当前方向
-            Vector2 enemyDirection = enemyComponent.GetCurrentDirection();
-            
-            // 计算Enemy当前朝向的角度
-            float currentAngle = Mathf.Atan2(enemyDirection.y, enemyDirection.x) * Mathf.Rad2Deg;
+            // 依据 Enemy 的固定朝向设置或当前朝向来计算基准角
+            Vector2 baseDir;
+            if (enemyComponent.useFixedViewDirection)
+            {
+                switch (enemyComponent.fixedViewDirection)
+                {
+                    case Enemy.ViewFacing.Left:  baseDir = Vector2.left;  break;
+                    case Enemy.ViewFacing.Up:    baseDir = Vector2.up;    break;
+                    case Enemy.ViewFacing.Down:  baseDir = Vector2.down;  break;
+                    default:                     baseDir = Vector2.right; break;
+                }
+            }
+            else
+            {
+                baseDir = enemyComponent.GetCurrentDirection();
+            }
+
+            // 计算基准角度
+            float currentAngle = Mathf.Atan2(baseDir.y, baseDir.x) * Mathf.Rad2Deg;
             
             // 将相对角度转换为绝对角度
             angleInDegrees += currentAngle;

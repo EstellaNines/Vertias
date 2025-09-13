@@ -12,6 +12,7 @@ public class EnemyAttackState : IState
     private bool isReloading = false;
     private float reloadStartTime = 0f;
     private float reloadDuration = 1.5f; // 敌人固定换弹时间
+    private bool firedThisFrame = false; // 本帧是否实际开火
 
     // --- 构造函数 --- 
     public EnemyAttackState(Enemy enemy)
@@ -41,6 +42,8 @@ public class EnemyAttackState : IState
         if (enemy.weaponController != null)
         {
             maxShots = enemy.weaponController.GetMagazineCapacity();
+            // 订阅开火事件以确认是否真的发射
+            enemy.weaponController.OnFired += OnWeaponFired;
         }
     }
 
@@ -48,6 +51,10 @@ public class EnemyAttackState : IState
     {
         // 退出攻击状态
         isReloading = false;
+        if (enemy.weaponController != null)
+        {
+            enemy.weaponController.OnFired -= OnWeaponFired;
+        }
     }
 
     public void OnFixedUpdate()
@@ -130,12 +137,16 @@ public class EnemyAttackState : IState
             return;
         }
 
-        // 射击，并计数
-        if (Time.time >= enemy.nextFireTime && shotsFired < maxShots && !isReloading)
+        // 请求射击（由武器内部节流控制实际是否发射）
+        if (shotsFired < maxShots && !isReloading)
         {
+            firedThisFrame = false;
             enemy.Shoot();
-            shotsFired++;
-            lastShotTime = Time.time;
+            if (firedThisFrame)
+            {
+                shotsFired++;
+                lastShotTime = Time.time;
+            }
         }
 
         // 攻击一段时间后切换回瞄准状态
@@ -175,5 +186,10 @@ public class EnemyAttackState : IState
         // 检查距离是否在检测范围内
         return distanceToPlayer <= enemy.playerDetectionRadius;
     }
-}
 
+    // 事件回调：记录实际发射
+    private void OnWeaponFired(WeaponManager wm)
+    {
+        firedThisFrame = true;
+    }
+}

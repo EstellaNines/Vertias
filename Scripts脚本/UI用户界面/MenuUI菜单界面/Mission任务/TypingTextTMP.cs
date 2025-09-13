@@ -66,6 +66,7 @@ public class TypingTextTMP : MonoBehaviour
         typingTween = DOTween
             .To(() => 0, v => targetText.maxVisibleCharacters = v, totalChars, Mathf.Max(0.01f, duration))
             .SetEase(Ease.Linear)
+            .SetTarget(this)
             .OnComplete(() =>
             {
                 onTypingComplete?.Invoke();
