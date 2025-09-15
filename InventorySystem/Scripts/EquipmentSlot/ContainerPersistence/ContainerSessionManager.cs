@@ -313,6 +313,8 @@ namespace InventorySystem
             LogDebug("🔄 装备恢复完成，等待 1 秒后开始恢复容器内容");
             yield return new WaitForSeconds(1f); // 确保装备完全初始化
 
+            // 额外安全：若槽位未激活，不强制激活；容器实际加载逻辑在槽位OnEnable里处理
+
             if (isContainerRestored)
             {
                 LogDebug("容器已恢复，跳过");

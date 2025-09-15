@@ -101,12 +101,29 @@ public class ItemDataReader : MonoBehaviour
         gridSizeDisplay = $"{itemData.width} × {itemData.height}";
 
         // 根据物品类型初始化运行时数据
-        currentStack = 1;
+        // 🔧 修复：对于可堆叠物品，使用合适的初始值
+        if (itemData.IsStackable())
+        {
+            // 对于货币类物品，使用特殊的默认值
+            if (itemData.category == ItemCategory.Currency)
+            {
+                currentStack = 50000; // 货币默认数量
+                currencyAmount = 50000;
+            }
+            else
+            {
+                currentStack = 1; // 其他可堆叠物品默认为1
+            }
+        }
+        else
+        {
+            currentStack = 1; // 不可堆叠物品固定为1
+        }
+        
         currentDurability = itemData.durability;
         currentUsageCount = itemData.usageCount;
         currentHealAmount = itemData.maxHealAmount;
         intelligenceValue = itemData.intelligenceValue;
-        currencyAmount = 50000; // 货币默认数量为50000
         maxStackAmount = itemData.maxStack;
         maxDurability = itemData.durability;
         maxUsageCount = itemData.usageCount;

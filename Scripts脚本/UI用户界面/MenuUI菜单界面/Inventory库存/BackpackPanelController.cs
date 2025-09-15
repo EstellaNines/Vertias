@@ -1473,8 +1473,16 @@ public class BackpackPanelController : MonoBehaviour
             }
             
             // 🔧 装备保存现在由EquipmentPersistenceManager统一处理
-            // 不再需要手动调用保存，避免与新系统冲突
-            Debug.Log("BackpackPanelController: 装备保存已委托给EquipmentPersistenceManager");
+            var equipmentPersistenceManager = EquipmentPersistenceManager.Instance;
+            if (equipmentPersistenceManager != null)
+            {
+                equipmentPersistenceManager.SaveEquipmentData();
+                Debug.Log("BackpackPanelController: 已通过EquipmentPersistenceManager强制保存装备数据");
+            }
+            else
+            {
+                Debug.LogWarning("BackpackPanelController: 无法找到EquipmentPersistenceManager，装备数据可能未保存");
+            }
             
             if (showDebugLog)
                 Debug.Log($"BackpackPanelController: 已强制保存 {equipmentSlots.Length} 个装备栏数据");

@@ -54,7 +54,7 @@ namespace InventorySystem
                 
                 // 获取物品配置的GUID (如果可能的话)
                 itemConfigGUID = GetItemConfigGUID(item.ItemData);
-                itemID = item.ItemData.id.ToString();
+                itemID = item.ItemData.GlobalId.ToString();
                 itemName = item.ItemData.itemName;
                 
                 // 创建运行时数据
@@ -79,8 +79,8 @@ namespace InventorySystem
                 return UnityEditor.AssetDatabase.AssetPathToGUID(assetPath);
             }
 #endif
-            // 运行时使用物品ID作为备用标识
-            return itemData.id.ToString();
+            // 运行时使用物品GlobalId作为备用标识
+            return itemData.GlobalId.ToString();
         }
         
         /// <summary>

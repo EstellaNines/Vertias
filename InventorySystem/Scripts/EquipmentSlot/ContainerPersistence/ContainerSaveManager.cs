@@ -86,6 +86,12 @@ namespace InventorySystem
                                 gridPosition = itemPosition  // 使用物品的实际起始位置
                             };
 
+                            // 🔧 增强调试：记录保存的堆叠数量
+                            if (itemReader.ItemData.IsStackable())
+                            {
+                                Debug.Log($"[ContainerSaveData] 📦 保存可堆叠物品: {itemReader.ItemData.itemName}, currentStack={itemReader.currentStack}, maxStack={itemReader.ItemData.maxStack}");
+                            }
+
                             containerItems.Add(itemSaveData);
                         }
                         else
@@ -97,6 +103,16 @@ namespace InventorySystem
             }
 
             Debug.Log($"[ContainerSaveData] 收集到 {containerItems.Count} 个容器物品");
+            
+            // 🔧 增强调试信息：显示收集到的物品详情
+            if (containerItems.Count > 0)
+            {
+                for (int i = 0; i < containerItems.Count; i++)
+                {
+                    var item = containerItems[i];
+                    Debug.Log($"[ContainerSaveData] 物品 {i+1}: ID={item.itemID}, 堆叠={item.stackCount}, 位置=({item.gridPosition.x},{item.gridPosition.y})");
+                }
+            }
             
             // 🛡️ 防护机制：如果收集到0个物品，检查网格状态
             if (containerItems.Count == 0 && containerGrid != null)
@@ -185,6 +201,10 @@ namespace InventorySystem
         [Tooltip("跨会话数据在ES3中的键名")]
         public string crossSessionDataKey = "CrossSessionContainerData";
         
+        [FieldLabel("跨会话备份数据键")]
+        [Tooltip("跨会话备份数据在ES3中的键名")]
+        public string crossSessionBackupKey = "CrossSessionContainerData_backup";
+        
         [FieldLabel("容器变化自动保存")]
         [Tooltip("容器内容变化时自动保存")]
         public bool autoSaveOnChange = true;
@@ -227,7 +247,7 @@ namespace InventorySystem
             }
         }
 
-        private const string CONTAINER_DATA_KEY = "ContainerDataCollection";
+        private const string CONTAINER_DATA_KEY = "ContainerSaveDataCollection";
         private Dictionary<string, ContainerSaveData> _containerDataCache = new Dictionary<string, ContainerSaveData>();
         private bool _isRestoring = false; // 恢复过程标志，防止恢复时触发自动保存
         
@@ -312,8 +332,8 @@ namespace InventorySystem
             }
 
             string containerKey = GetContainerKey(containerItem, slotType);
-            Debug.Log($"[ContainerSaveManager] 保存容器键值: {containerKey}");
-            Debug.Log($"[ContainerSaveManager] 保存物品信息: ID={containerItem.ItemData.id}, GlobalId={containerItem.ItemData.GlobalId}, 名称={containerItem.ItemData.itemName}");
+            if (showDebugLog) Debug.Log($"[ContainerSaveManager] 保存容器键值: {containerKey}");
+            if (showDebugLog) Debug.Log($"[ContainerSaveManager] 保存物品信息: ID={containerItem.ItemData.id}, GlobalId={containerItem.ItemData.GlobalId}, 名称={containerItem.ItemData.itemName}");
             
             ContainerSaveData saveData = new ContainerSaveData(
                 containerItem.ItemData.id.ToString(),
@@ -347,14 +367,84 @@ namespace InventorySystem
                 
                 // 触发容器变化事件
                 OnContainerContentChanged(containerKey);
-
-                if (showDebugLog)
-                    Debug.Log($"[ContainerSaveManager] 保存容器内容: {containerKey}, 物品数量: {saveData.containerItems.Count}");
             }
-            else
+        }
+
+        /// <summary>
+        /// 立即保存指定容器的内容（绕过节流机制，用于实时保存）
+        /// </summary>
+        public void SaveContainerContentImmediate(ItemDataReader containerItem, EquipmentSlotType slotType, ItemGrid containerGrid)
+        {
+            if (containerItem?.ItemData == null || containerGrid == null)
             {
-                if (showDebugLog)
-                    Debug.Log($"[ContainerSaveManager] 🛡️ 跳过保存以保护现有数据: {containerKey}");
+                Debug.LogWarning("[ContainerSaveManager] 立即保存容器内容失败：容器物品或网格为空");
+                return;
+            }
+
+            string containerKey = GetContainerKey(containerItem, slotType);
+            if (showDebugLog) Debug.Log($"[ContainerSaveManager] 💾 立即保存容器键值: {containerKey}");
+            
+            ContainerSaveData saveData = new ContainerSaveData(
+                containerItem.ItemData.id.ToString(),
+                containerItem.ItemData.GlobalId.ToString(),
+                slotType,
+                containerGrid
+            );
+
+            // 🔧 强化：立即保存，绕过防护机制和节流
+            _containerDataCache[containerKey] = saveData;
+            
+            // 立即保存到ES3，不使用节流
+            SaveAllContainerDataToES3();
+            
+            // 立即执行跨会话保存，绕过节流机制
+            if (enableCrossSessionSave)
+            {
+                ExecuteCrossSessionSave();
+            }
+            
+            // 触发容器变化事件
+            OnContainerContentChanged(containerKey);
+            
+            if (showDebugLog) Debug.Log($"[ContainerSaveManager] ✅ 立即保存完成 - 容器: {containerKey}, 物品数量: {saveData.containerItems.Count}");
+        }
+
+        /// <summary>
+        /// 立即执行跨会话保存（绕过节流机制）
+        /// </summary>
+        private void ExecuteCrossSessionSave()
+        {
+            if (!enableCrossSessionSave) return;
+            
+            try
+            {
+                // 立即执行跨会话保存，绕过节流
+                var crossSessionData = new CrossSessionContainerData
+                {
+                    sessionId = System.Guid.NewGuid().ToString(),
+                    timestamp = System.DateTime.Now.Ticks,
+                    version = "1.0",
+                    containerData = new ContainerSaveDataCollection { containers = new List<ContainerSaveData>(_containerDataCache.Values) }
+                };
+                
+                // 生成校验码
+                crossSessionData.checksum = GenerateCrossSessionChecksum(crossSessionData);
+                
+                // 创建备份
+                if (ES3.KeyExists(crossSessionDataKey, containerSaveFileName))
+                {
+                    ES3.Save(crossSessionBackupKey, ES3.Load<CrossSessionContainerData>(crossSessionDataKey, containerSaveFileName), containerSaveFileName);
+                    if (showDebugLog) Debug.Log("[ContainerSaveManager] 创建备份文件: ContainerData_backup.es3");
+                }
+                
+                // 保存新数据
+                ES3.Save(crossSessionDataKey, crossSessionData, containerSaveFileName);
+                
+                if (showDebugLog) Debug.Log($"[ContainerSaveManager] 跨会话数据保存成功，容器数量: {_containerDataCache.Count}，会话ID: {crossSessionData.sessionId}");
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError($"[ContainerSaveManager] 立即跨会话保存失败: {e.Message}");
             }
         }
 
@@ -369,10 +459,9 @@ namespace InventorySystem
                 return;
             }
 
-            // 首先强制清理容器网格，确保没有残留物品
+            // 说明：清理容器网格改由实际恢复阶段执行，避免在未初始化/未激活时触发异常
             if (showDebugLog)
-                Debug.Log($"[ContainerSaveManager] 预清理容器网格: {containerGrid.name}");
-            ClearContainerGrid(containerGrid);
+                Debug.Log($"[ContainerSaveManager] 准备加载容器网格: {containerGrid.name}");
 
             string containerKey = GetContainerKey(containerItem, slotType);
             
@@ -402,7 +491,10 @@ namespace InventorySystem
         private bool IsContainerGridReady(ItemGrid containerGrid)
         {
             if (containerGrid == null) return false;
-            if (!containerGrid.gameObject.activeInHierarchy) return false;
+            
+            // 🔧 修复：不强制要求父对象激活，只要容器网格本身存在即可
+            // 原因：装备槽可能在背包未打开时处于非激活状态，但容器网格仍可初始化
+            if (!containerGrid.gameObject.activeSelf) return false;
             
             try
             {
@@ -410,13 +502,18 @@ namespace InventorySystem
                 int width = containerGrid.CurrentWidth;
                 int height = containerGrid.CurrentHeight;
                 
-                // 尝试访问网格的基本功能
-                containerGrid.GetItemAt(0, 0);
+                // 🔧 更宽松的检查：只验证尺寸，不调用可能失败的GetItemAt
+                if (width <= 0 || height <= 0) return false;
                 
-                return width > 0 && height > 0;
+                // 🔧 确保网格组件存在且已初始化
+                if (containerGrid.transform == null) return false;
+                
+                if (showDebugLog) Debug.Log($"[ContainerSaveManager] 容器网格就绪检查通过: {containerGrid.name} ({width}x{height})");
+                return true;
             }
-            catch
+            catch (System.Exception e)
             {
+                if (showDebugLog) Debug.Log($"[ContainerSaveManager] 容器网格就绪检查失败: {containerGrid?.name} - {e.Message}");
                 return false;
             }
         }
@@ -437,6 +534,14 @@ namespace InventorySystem
             {
                 Debug.LogWarning($"[ContainerSaveManager] 容器网格未就绪，延迟恢复: {containerGrid.name}");
                 StartCoroutine(DelayedRestoreContainerItems(saveData, containerGrid));
+                return;
+            }
+
+            // 🔧 修复：防止重复加载同一个容器
+            string containerKey = saveData.containerKey;
+            if (_isRestoring)
+            {
+                if (showDebugLog) Debug.Log($"[ContainerSaveManager] 🔒 容器正在恢复中，跳过重复加载: {containerKey}");
                 return;
             }
 
@@ -523,6 +628,9 @@ namespace InventorySystem
             // 等待一帧确保所有物品已完全放置
             yield return null;
             
+            // 在最终化保存前，延迟一帧重载堆叠数量，避免物品初始化覆盖
+            yield return StartCoroutine(ReapplyStacksAfterRestore(containerGrid, saveData));
+            
             if (showDebugLog)
                 Debug.Log("[ContainerSaveManager] 🔧 开始最终化容器恢复，重新收集正确的物品数据");
             
@@ -544,6 +652,43 @@ namespace InventorySystem
             catch (System.Exception ex)
             {
                 Debug.LogError($"[ContainerSaveManager] 最终化容器恢复失败: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// 延迟重载堆叠数量：在物品放置并经历其Start/初始化后，按保存数据强制校准堆叠
+        /// </summary>
+        private IEnumerator ReapplyStacksAfterRestore(ItemGrid grid, ContainerSaveData saveData)
+        {
+            if (grid == null || saveData == null || saveData.containerItems == null)
+            {
+                yield break;
+            }
+
+            // 再等待一帧，确保ItemDataReader.Start已执行完毕
+            yield return null;
+
+            foreach (var itemData in saveData.containerItems)
+            {
+                Item item = grid.GetItemAt(itemData.gridPosition.x, itemData.gridPosition.y);
+                if (item == null) continue;
+
+                var reader = item.GetComponent<ItemDataReader>();
+                if (reader == null || reader.ItemData == null) continue;
+
+                // 仅对可堆叠物品进行校准
+                if (reader.ItemData.IsStackable())
+                {
+                    int expected = Mathf.Clamp(itemData.stackCount, 1, reader.ItemData.maxStack);
+                    if (reader.CurrentStack != expected)
+                    {
+                        reader.SetStack(expected);
+                        if (showDebugLog)
+                        {
+                            Debug.Log($"[ContainerSaveManager] [堆叠重载] 校准 {reader.ItemData.itemName} at {itemData.gridPosition} -> {expected}");
+                        }
+                    }
+                }
             }
         }
 
@@ -847,9 +992,37 @@ namespace InventorySystem
                 ItemDataReader itemReader = itemInstance.GetComponent<ItemDataReader>();
                 if (itemReader != null)
                 {
+                    // 🔧 修复：直接设置堆叠数量，避免SetStack的限制
+                    // 因为SetStack会限制在maxStack范围内，但保存的数量可能超过这个限制
                     itemReader.currentStack = itemData.stackCount;
+                    if (showDebugLog)
+                        Debug.Log($"[ContainerSaveManager] 📦 直接设置堆叠数量: {itemData.stackCount} (避免maxStack限制)");
+                    
+                    // 🔧 对于可堆叠物品，确保maxStack值足够大
+                    if (itemReader.ItemData != null && itemReader.ItemData.IsStackable())
+                    {
+                        // 如果保存的数量大于maxStack，临时调整maxStack
+                        if (itemData.stackCount > itemReader.ItemData.maxStack)
+                        {
+                            if (showDebugLog)
+                                Debug.LogWarning($"[ContainerSaveManager] ⚠️ 保存的堆叠数量 {itemData.stackCount} 超过maxStack {itemReader.ItemData.maxStack}，这可能表明数据不一致");
+                        }
+                    }
+                    
                     itemReader.currentDurability = (int)itemData.durability;
                     itemReader.currentUsageCount = itemData.usageCount;
+                    
+                    // 🔧 强制触发UI更新
+                    try
+                    {
+                        itemReader.UpdateUI();
+                        if (showDebugLog)
+                            Debug.Log($"[ContainerSaveManager] ✅ 强制更新UI完成");
+                    }
+                    catch (System.Exception e)
+                    {
+                        Debug.LogWarning($"[ContainerSaveManager] UI更新失败: {e.Message}");
+                    }
                     
                     if (showDebugLog)
                         Debug.Log($"[ContainerSaveManager] 恢复物品运行时数据: 堆叠={itemData.stackCount}, 耐久={itemData.durability}, 使用次数={itemData.usageCount}");

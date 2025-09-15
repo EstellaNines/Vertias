@@ -546,6 +546,9 @@ namespace InventorySystem
             // 触发装备变化事件
             OnEquipmentChanged?.Invoke(slotType, item);
             OnEquipmentSetChanged?.Invoke(GetAllEquippedItems());
+            
+            // 触发装备持久化保存
+            TriggerEquipmentSave();
         }
         
         /// <summary>
@@ -563,6 +566,35 @@ namespace InventorySystem
             // 触发装备变化事件
             OnEquipmentChanged?.Invoke(slotType, null);
             OnEquipmentSetChanged?.Invoke(GetAllEquippedItems());
+            
+            // 触发装备持久化保存
+            TriggerEquipmentSave();
+        }
+        
+        /// <summary>
+        /// 触发装备数据保存
+        /// </summary>
+        private void TriggerEquipmentSave()
+        {
+            // 获取装备持久化管理器并触发保存
+            var persistenceManager = EquipmentPersistenceManager.Instance;
+            if (persistenceManager != null)
+            {
+                // 🔧 关键修复：确保在有装备时重置启动期保存抑制
+                // 这个备用机制解决BackpackEquipmentEventHandler初始化失败时suppressSavesUntilFirstLoad永久为true的问题
+                persistenceManager.EnsureSaveNotSuppressed();
+                
+                persistenceManager.SaveEquipmentData();
+                
+                if (showDebugInfo)
+                {
+                    Debug.Log("[EquipmentSlotManager] 已触发装备数据保存");
+                }
+            }
+            else
+            {
+                Debug.LogWarning("[EquipmentSlotManager] 无法找到装备持久化管理器，跳过自动保存");
+            }
         }
         
         #endregion
@@ -601,6 +633,7 @@ namespace InventorySystem
         }
         
         #endregion
+        
     }
     
     /// <summary>

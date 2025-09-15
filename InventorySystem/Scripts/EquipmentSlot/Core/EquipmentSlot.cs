@@ -4,6 +4,7 @@ using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using TMPro;
 using GlobalMessaging;
+using System.Collections.Generic;
 
 namespace InventorySystem
 {
@@ -76,9 +77,11 @@ namespace InventorySystem
         private InventoryController inventoryController;
         private Canvas canvas;
         private bool isDragHovering = false;
-        
+
         // 🔧 容器内容加载标志
         private bool needsContainerContentLoad = false;
+        // 当槽位在未激活状态被装备时，延迟在启用后校准尺寸
+        private bool needsSizeEnsureOnEnable = false;
 
         // 武器弹药显示相关
         [SerializeField] private WeaponManager observedWeaponManager;
@@ -100,12 +103,43 @@ namespace InventorySystem
 
         private void OnEnable()
         {
+            // 🔧 检查是否有装备但UI未显示的情况（跨会话恢复后的显示修复）
+            if (currentEquippedItem != null && (currentItemInstance == null || !currentItemInstance.activeInHierarchy))
+            {
+                LogDebugInfo($"装备槽激活时发现已装备物品 {currentEquippedItem.ItemData.itemName} 但UI未显示，开始修复显示");
+
+                // 查找场景中对应的装备实例
+                var foundInstance = FindEquippedItemInstance();
+                if (foundInstance != null)
+                {
+                    LogDebugInfo($"找到装备实例 {foundInstance.name}，重新建立连接并显示");
+
+                    // 重新建立连接
+                    currentItemInstance = foundInstance.gameObject;
+
+                    // 确保装备显示在正确位置
+                    if (currentItemInstance.transform.parent != itemDisplayArea)
+                    {
+                        currentItemInstance.transform.SetParent(itemDisplayArea, false);
+                    }
+
+                    // 确保激活状态
+                    if (!currentItemInstance.activeInHierarchy)
+                    {
+                        currentItemInstance.SetActive(true);
+                    }
+
+                    // 触发UI更新
+                    StartCoroutine(RefreshEquipmentDisplay());
+                }
+            }
+
             // 🔧 检查是否需要加载容器内容
             if (needsContainerContentLoad && containerGrid != null && currentEquippedItem != null)
             {
                 needsContainerContentLoad = false; // 重置标志
                 LogDebugInfo($"装备槽激活，开始加载容器内容");
-                
+
                 try
                 {
                     StartCoroutine(DelayedLoadContainerContent());
@@ -113,6 +147,16 @@ namespace InventorySystem
                 catch (System.Exception e)
                 {
                     Debug.LogError($"[EquipmentSlot] OnEnable中加载容器内容失败: {e.Message}");
+                }
+            }
+
+            // 若之前因未激活而跳过了尺寸校准，这里补做一次
+            if (needsSizeEnsureOnEnable && isItemEquipped && currentItemInstance != null)
+            {
+                needsSizeEnsureOnEnable = false;
+                if (isActiveAndEnabled)
+                {
+                    StartCoroutine(EnsureItemSizeAfterFrame());
                 }
             }
 
@@ -245,6 +289,7 @@ namespace InventorySystem
 
         #endregion
 
+
         #region 装备槽核心逻辑
 
         /// <summary>
@@ -371,8 +416,15 @@ namespace InventorySystem
                 UpdateWeaponAmmoText();
             }
 
-            // 延迟一帧再次确保尺寸设置正确（防止其他系统覆盖）
-            StartCoroutine(EnsureItemSizeAfterFrame());
+            // 延迟一帧再次确保尺寸设置正确（防止其他系统覆盖）。若未激活则在OnEnable补做
+            if (isActiveAndEnabled)
+            {
+                StartCoroutine(EnsureItemSizeAfterFrame());
+            }
+            else
+            {
+                needsSizeEnsureOnEnable = true;
+            }
 
             // 触发装备事件
             OnItemEquipped?.Invoke(config.slotType, currentEquippedItem);
@@ -476,7 +528,7 @@ namespace InventorySystem
 
             // 禁用物品的网格相关组件，避免边界检查冲突
             DisableGridRelatedComponents();
-            
+
             // 设置装备栏物品的ItemBackground为透明
             SetItemBackgroundTransparent();
 
@@ -744,7 +796,7 @@ namespace InventorySystem
             }
 
             // 碰撞器一直保持启用状态，无需恢复
-            
+
             // 恢复ItemBackground的原始颜色
             RestoreItemBackgroundColor(itemInstance);
 
@@ -906,7 +958,7 @@ namespace InventorySystem
 
             // 保存原始颜色
             originalBackgroundColor = backgroundImage.color;
-            
+
             // 设置为透明（保持RGB值，只改变Alpha）
             Color transparentColor = originalBackgroundColor;
             transparentColor.a = 0f;
@@ -935,7 +987,7 @@ namespace InventorySystem
             backgroundImage.color = originalBackgroundColor;
 
             LogDebugInfo($"恢复物品 {itemInstance.name} 的ItemBackground原始颜色: {originalBackgroundColor}");
-            
+
             // 清除记录的原始颜色
             originalBackgroundColor = default(Color);
         }
@@ -945,25 +997,53 @@ namespace InventorySystem
         #region 容器功能
 
         /// <summary>
+        /// 强制激活容器网格（用于装备恢复时槽位未激活的情况）
+        /// </summary>
+        public void ForceActivateContainerGrid()
+        {
+            if (!config.isContainerSlot || currentEquippedItem == null) return;
+
+            LogDebugInfo($"强制激活容器网格: {config.slotName}");
+            ActivateContainerGrid();
+        }
+
+        /// <summary>
         /// 激活容器网格（重构版本，集成新系统）
         /// </summary>
         private void ActivateContainerGrid()
         {
             if (!config.isContainerSlot || currentEquippedItem == null) return;
 
+            LogDebugInfo($"🔄 开始激活容器网格");
+
+            // 🔧 修复：确保旧的容器网格完全清理
+            if (containerGrid != null)
+            {
+                LogDebugInfo($"⚠️ 发现现有容器网格，先进行清理: {containerGrid.name}");
+                DeactivateContainerGrid();
+            }
+
             // 获取容器尺寸
             Vector2Int containerSize = GetContainerSize();
 
             // 创建容器网格
             CreateContainerGrid(containerSize);
-            
-            // 加载容器内容
-            LoadContainerContent();
 
-            // 触发容器激活事件
-            OnContainerSlotActivated?.Invoke(config.slotType, containerGrid);
+            // 🔧 修复：添加重复加载保护，只有在网格创建成功后才加载内容
+            if (containerGrid != null)
+            {
+                // 加载容器内容
+                LoadContainerContent();
 
-            Debug.Log($"[EquipmentSlot] 激活容器网格: {containerSize.x}x{containerSize.y}");
+                // 触发容器激活事件
+                OnContainerSlotActivated?.Invoke(config.slotType, containerGrid);
+
+                LogDebugInfo($"✅ 容器网格激活完成: {containerSize.x}x{containerSize.y}");
+            }
+            else
+            {
+                Debug.LogError($"[EquipmentSlot] 容器网格创建失败，无法激活容器功能");
+            }
         }
 
         /// <summary>
@@ -972,6 +1052,8 @@ namespace InventorySystem
         private void DeactivateContainerGrid()
         {
             if (containerGrid == null) return;
+
+            LogDebugInfo($"🗑️ 开始停用并销毁容器网格: {containerGrid.name}");
 
             // 立即保存容器内容（网格销毁前）
             SaveContainerImmediate();
@@ -982,32 +1064,89 @@ namespace InventorySystem
             // 触发容器停用事件
             OnContainerSlotDeactivated?.Invoke(config.slotType, containerGrid);
 
-            // 延迟销毁容器网格，确保保存操作完成
+            // 🔧 修复：立即且彻底销毁容器网格，避免残留
             var gridToDestroy = containerGrid.gameObject;
             containerGrid = null; // 先清空引用
-            
+
             if (gridToDestroy != null)
             {
-                // 使用延迟销毁而不是立即销毁
-                StartCoroutine(DelayedDestroyGrid(gridToDestroy));
+                // 先强制清理网格中的所有物品
+                var itemGrid = gridToDestroy.GetComponent<ItemGrid>();
+                if (itemGrid != null)
+                {
+                    ForceCleanupContainerItems(itemGrid);
+                }
+
+                // 立即销毁，不再延迟
+                Destroy(gridToDestroy);
+                LogDebugInfo($"🗑️ 立即销毁容器网格完成");
             }
 
             // 通知InventoryController刷新网格列表，清除已销毁的网格引用
             RefreshInventoryControllerGrids();
 
-            Debug.Log($"[EquipmentSlot] 停用容器网格");
+            LogDebugInfo($"✅ 容器网格停用完成");
         }
 
         /// <summary>
-        /// 延迟销毁网格GameObject
+        /// 强制清理容器网格中的所有物品
+        /// </summary>
+        /// <param name="itemGrid">要清理的容器网格</param>
+        private void ForceCleanupContainerItems(ItemGrid itemGrid)
+        {
+            if (itemGrid == null) return;
+
+            LogDebugInfo($"🧹 开始强制清理容器网格物品: {itemGrid.name}");
+
+            var itemsToDestroy = new List<GameObject>();
+
+            try
+            {
+                // 收集所有子对象中的物品
+                for (int i = itemGrid.transform.childCount - 1; i >= 0; i--)
+                {
+                    var child = itemGrid.transform.GetChild(i);
+                    if (child != null)
+                    {
+                        var item = child.GetComponent<Item>();
+                        var draggableItem = child.GetComponent<DraggableItem>();
+
+                        // 如果是物品对象，添加到销毁列表
+                        if (item != null || draggableItem != null)
+                        {
+                            itemsToDestroy.Add(child.gameObject);
+                        }
+                    }
+                }
+
+                // 立即销毁所有物品
+                foreach (var itemObj in itemsToDestroy)
+                {
+                    if (itemObj != null)
+                    {
+                        DestroyImmediate(itemObj);
+                    }
+                }
+
+                LogDebugInfo($"🧹 强制清理完成，销毁了 {itemsToDestroy.Count} 个物品");
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError($"[EquipmentSlot] 强制清理容器物品时发生错误: {e.Message}");
+            }
+        }
+
+        /// <summary>
+        /// 延迟销毁网格GameObject（已弃用，改为立即销毁）
         /// </summary>
         /// <param name="gridToDestroy">要销毁的网格GameObject</param>
+        [System.Obsolete("已改为立即销毁，此方法保留用于兼容性")]
         private System.Collections.IEnumerator DelayedDestroyGrid(GameObject gridToDestroy)
         {
             // 等待几帧确保保存操作完全完成
             yield return null;
             yield return null;
-            
+
             if (gridToDestroy != null)
             {
                 Destroy(gridToDestroy);
@@ -1206,10 +1345,13 @@ namespace InventorySystem
         /// <param name="position">放置位置</param>
         private void OnContainerItemPlaced(Item item, Vector2Int position)
         {
-            LogDebugInfo($"容器中放置物品: {item.name} 到位置 {position}");
+            LogDebugInfo($"📦 容器中放置物品: {item.name} 到位置 {position}");
+
+            // 🔧 强化：立即保存容器内容，确保状态同步
+            // 防止在背包重复装备时丢失新放入的物品
+            SaveContainerContentImmediate();
             
-            // 即时保存容器内容
-            SaveContainerContent();
+            LogDebugInfo($"💾 物品放置后立即保存完成，确保状态同步");
         }
 
         /// <summary>
@@ -1219,10 +1361,52 @@ namespace InventorySystem
         /// <param name="position">移除位置</param>
         private void OnContainerItemRemoved(Item item, Vector2Int position)
         {
-            LogDebugInfo($"从容器中移除物品: {item.name} 从位置 {position}");
+            LogDebugInfo($"🔄 从容器中移除物品: {item.name} 从位置 {position}");
+
+            // 🔧 修复：延迟保存确保物品已从网格中完全移除
+            // 这是防止保存时序问题的关键修复
+            StartCoroutine(DelayedSaveAfterItemRemoval(item, position));
             
-            // 即时保存容器内容
-            SaveContainerContent();
+            LogDebugInfo($"⏰ 物品移除后启动延迟保存，确保时序正确");
+        }
+
+        /// <summary>
+        /// 延迟保存协程，确保物品已从网格中完全移除后再保存
+        /// </summary>
+        private System.Collections.IEnumerator DelayedSaveAfterItemRemoval(Item item, Vector2Int position)
+        {
+            // 等待当前帧结束，确保物品已从网格中移除
+            yield return null;
+            
+            // 再等待一帧，确保所有相关的清理操作都完成
+            yield return null;
+            
+            // 验证物品确实已从网格中移除
+            bool itemStillExists = false;
+            if (containerGrid != null)
+            {
+                try
+                {
+                    Item gridItem = containerGrid.GetItemAt(position.x, position.y);
+                    itemStillExists = (gridItem != null && gridItem == item);
+                }
+                catch
+                {
+                    // 如果访问失败，认为物品已被移除
+                    itemStillExists = false;
+                }
+            }
+            
+            if (itemStillExists)
+            {
+                LogDebugInfo($"⚠️ 物品 {item.name} 仍在网格中，再等待一帧");
+                yield return null;
+            }
+            
+            // 现在执行保存
+            LogDebugInfo($"💾 延迟保存开始 - 物品 {item.name} 已从位置 {position} 移除");
+            SaveContainerContentImmediate();
+            LogDebugInfo($"✅ 延迟保存完成，防止物品复制");
         }
 
         /// <summary>
@@ -1657,6 +1841,62 @@ namespace InventorySystem
             }
         }
 
+        /// <summary>
+        /// 立即保存容器内容（强化版本，用于物品变化时的实时保存）
+        /// </summary>
+        private void SaveContainerContentImmediate()
+        {
+            if (containerGrid == null || currentEquippedItem == null) return;
+
+            try
+            {
+                // 确保网格初始化完成再保存
+                if (!containerGrid.IsGridInitialized)
+                {
+                    LogDebugInfo($"⚠️ 网格未初始化，延迟保存");
+                    // 如果网格未初始化，尝试延迟保存
+                    StartCoroutine(DelayedSaveContainer());
+                    return;
+                }
+
+                // 🔧 强化：绕过所有节流机制，立即保存
+                LogDebugInfo($"💾 强制立即保存容器内容...");
+                
+                ContainerSaveManager.Instance.SaveContainerContentImmediate(
+                    currentEquippedItem,
+                    config.slotType,
+                    containerGrid
+                );
+                
+                LogDebugInfo($"✅ 强制立即保存容器内容完成");
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError($"[EquipmentSlot] 强制立即保存容器内容失败: {e.Message}");
+            }
+        }
+
+        /// <summary>
+        /// 延迟保存容器内容（当网格未初始化时使用）
+        /// </summary>
+        private System.Collections.IEnumerator DelayedSaveContainer()
+        {
+            // 等待网格初始化
+            int maxRetries = 10;
+            for (int i = 0; i < maxRetries; i++)
+            {
+                yield return null;
+                
+                if (containerGrid != null && containerGrid.IsGridInitialized)
+                {
+                    SaveContainerImmediate();
+                    yield break;
+                }
+            }
+            
+            Debug.LogWarning($"[EquipmentSlot] 网格初始化超时，无法保存容器内容");
+        }
+
         #endregion
 
         #region 武器弹药显示集成
@@ -1807,6 +2047,73 @@ namespace InventorySystem
                     if (weaponAmmoText != null) weaponAmmoText.text = string.Empty;
                 }
             }
+        }
+
+        /// <summary>
+        /// 查找场景中对应的装备实例
+        /// </summary>
+        private ItemDataReader FindEquippedItemInstance()
+        {
+            if (currentEquippedItem == null) return null;
+
+            // 根据装备信息查找对应的装备实例
+            var allItemReaders = FindObjectsOfType<ItemDataReader>(true);
+            foreach (var reader in allItemReaders)
+            {
+                if (reader.ItemData != null &&
+                    reader.ItemData.GlobalId == currentEquippedItem.ItemData.GlobalId &&
+                    reader.ItemData.itemName == currentEquippedItem.ItemData.itemName)
+                {
+                    return reader;
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// 刷新装备显示
+        /// </summary>
+        private System.Collections.IEnumerator RefreshEquipmentDisplay()
+        {
+            yield return new WaitForEndOfFrame();
+
+            if (currentItemInstance != null && currentEquippedItem != null)
+            {
+                LogDebugInfo($"刷新装备 {currentEquippedItem.ItemData.itemName} 的显示");
+
+                // 确保装备尺寸正确
+                if (isActiveAndEnabled)
+                {
+                    yield return StartCoroutine(EnsureItemSizeAfterFrame());
+                }
+
+                // 如果是容器类装备，触发容器网格显示
+                if (IsContainerType(currentEquippedItem.ItemData))
+                {
+                    if (containerGrid != null)
+                    {
+                        LogDebugInfo($"刷新容器 {currentEquippedItem.ItemData.itemName} 的网格显示");
+                        containerGrid.gameObject.SetActive(true);
+
+                        // 触发容器内容加载
+                        LoadContainerContent();
+                    }
+                }
+
+                LogDebugInfo($"装备 {currentEquippedItem.ItemData.itemName} 显示刷新完成");
+            }
+        }
+
+        /// <summary>
+        /// 检查是否为容器类装备
+        /// </summary>
+        private bool IsContainerType(ItemDataSO itemData)
+        {
+            if (itemData == null) return false;
+
+            return itemData.category == ItemCategory.Backpack ||
+                   itemData.category == ItemCategory.TacticalRig;
         }
 
         #endregion

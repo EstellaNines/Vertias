@@ -7967,6 +7967,100 @@ PolygonCollider2D:
       - {x: 14.001324, y: -10.001157}
       - {x: 13.999535, y: -9.934747}
   m_UseDelaunayMesh: 0
+--- !u!1 &319225311
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 319225312}
+  - component: {fileID: 319225315}
+  - component: {fileID: 319225314}
+  - component: {fileID: 319225313}
+  m_Layer: 0
+  m_Name: EquipmentPersistenceManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &319225312
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 319225311}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &319225313
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 319225311}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cd1d721f43bb4a34ea328e86ed2656d6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  enableAutoSave: 1
+  enableAutoLoad: 1
+  loadDelay: 0.1
+  runtimeModeOnly: 1
+  showDebugLogs: 1
+  verboseEventLogs: 1
+--- !u!114 &319225314
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 319225311}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 05dfd6f2dd2fe964fb35ea2896699f00, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  autoInitialize: 1
+  initializationDelay: 0.1
+  autoFindBackpackController: 1
+  manualBackpackController: {fileID: 125148776}
+  showDebugLogs: 1
+  enableStatusMonitoring: 1
+  statusMonitoringInterval: 10
+--- !u!114 &319225315
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 319225311}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 33e6bbe822e19b446b06903ba62f6290, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  autoSave: 1
+  autoLoad: 1
+  useES3Storage: 1
+  saveFilePath: EquipmentSave.es3
+  enableBackup: 1
+  enableCompression: 0
+  showDebugLogs: 1
+  hasPendingEquipmentData: 1
+  saveCooldown: 2
+  verboseLogging: 1
+  startupEmptySaveBlockSeconds: 10
 --- !u!1 &323576818
 GameObject:
   m_ObjectHideFlags: 0
@@ -8229,7 +8323,7 @@ MonoBehaviour:
   loadDelay: 0.01
   runtimeModeOnly: 1
   showDebugLogs: 1
-  verboseEventLogs: 0
+  verboseEventLogs: 1
 --- !u!114 &350028213
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8243,7 +8337,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   autoInitialize: 1
-  initializationDelay: 0.5
+  initializationDelay: 0.1
   autoFindBackpackController: 1
   manualBackpackController: {fileID: 125148776}
   showDebugLogs: 1
@@ -8268,7 +8362,10 @@ MonoBehaviour:
   enableBackup: 1
   enableCompression: 0
   showDebugLogs: 1
-  verboseLogging: 0
+  hasPendingEquipmentData: 0
+  saveCooldown: 2
+  verboseLogging: 1
+  startupEmptySaveBlockSeconds: 10
 --- !u!1 &362181730
 GameObject:
   m_ObjectHideFlags: 0
@@ -10570,6 +10667,18 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2624923991869903710, guid: 97d4a363a6e67be4496e03b5597d8c2a, type: 3}
       propertyPath: m_AnchorMin.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3385679061048488329, guid: 97d4a363a6e67be4496e03b5597d8c2a, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3385679061048488329, guid: 97d4a363a6e67be4496e03b5597d8c2a, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3385679061048488329, guid: 97d4a363a6e67be4496e03b5597d8c2a, type: 3}
+      propertyPath: m_SizeDelta.x
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3459629847658095491, guid: 97d4a363a6e67be4496e03b5597d8c2a, type: 3}
@@ -19389,3 +19498,4 @@ SceneRoots:
   - {fileID: 350028211}
   - {fileID: 1766941364}
   - {fileID: 58683987}
+  - {fileID: 319225312}

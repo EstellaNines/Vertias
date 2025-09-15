@@ -67,9 +67,24 @@ namespace InventorySystem
         [FieldLabel("显示调试日志")]
         public bool showDebugLogs = true;
         
+        [Header("运行时状态")]
+        [FieldLabel("有待加载的装备数据")]
+        [Tooltip("标记是否有保存的装备数据等待加载")]
+        [SerializeField] private bool hasPendingEquipmentData = false;
+        
+        [FieldLabel("保存冷却时间")]
+        [Tooltip("防止频繁保存的冷却时间(秒)")]
+        [Range(0.5f, 5.0f)]
+        public float saveCooldown = 2.0f;
+        
+        // 保存冷却相关
+        private float lastSaveTime = 0f;
+        private bool hasPendingSave = false;
+        private Coroutine delaySaveCoroutine;
+        
         [FieldLabel("详细日志")]
         [Tooltip("显示更详细的调试信息")]
-        public bool verboseLogging = false;
+        public bool verboseLogging = true;
         
         // 单例实例
         private static EquipmentPersistenceManager instance;
@@ -120,9 +135,19 @@ namespace InventorySystem
         private bool isSaving = false;
         private bool isLoading = false;
         
+        // 启动期保存抑制与空保存拦截
+        private bool suppressSavesUntilFirstLoad = true;
+        private float startupRealtime;
+        [SerializeField] private float startupEmptySaveBlockSeconds = 10f;
+        
         // 协程结果存储
         private bool lastRestoreResult = false;
         private GameObject lastCreatedItem = null;
+        
+        // 基于全局ID的物品与预制体索引（使用 long 以匹配 ItemDataSO.GlobalId 类型）
+        private readonly Dictionary<long, ItemDataSO> globalIdToItemData = new Dictionary<long, ItemDataSO>();
+        private readonly Dictionary<long, GameObject> globalIdToPrefab = new Dictionary<long, GameObject>();
+        private bool itemDatabasesBuilt = false;
         
         #region Unity生命周期
         
@@ -149,6 +174,9 @@ namespace InventorySystem
         {
             // 🔧 强制确保使用ES3存储，解决跨会话持久化问题
             ForceES3Storage();
+            
+            // 记录启动时间，用于空保存保护窗口
+            startupRealtime = Time.realtimeSinceStartup;
             
             // 延迟查找装备槽管理器，确保其他系统已初始化
             StartCoroutine(DelayedInitialization());
@@ -185,7 +213,13 @@ namespace InventorySystem
             // 应用暂停时保存数据
             if (pauseStatus && autoSave)
             {
-                SaveEquipmentData();
+                // 启动阶段抑制保存，避免用空数据覆盖
+                if (suppressSavesUntilFirstLoad)
+                {
+                    LogWarning("启动阶段抑制保存（Pause），跳过以避免空数据覆盖");
+                    return;
+                }
+                SaveEquipmentDataImmediate(); // 🔧 应用暂停/失焦时立即保存
             }
         }
         
@@ -194,7 +228,13 @@ namespace InventorySystem
             // 应用失去焦点时保存数据
             if (!hasFocus && autoSave)
             {
-                SaveEquipmentData();
+                // 启动阶段抑制保存，避免用空数据覆盖
+                if (suppressSavesUntilFirstLoad)
+                {
+                    LogWarning("启动阶段抑制保存（FocusLost），跳过以避免空数据覆盖");
+                    return;
+                }
+                SaveEquipmentDataImmediate(); // 🔧 应用暂停/失焦时立即保存
             }
         }
         
@@ -390,16 +430,16 @@ namespace InventorySystem
                 isInitialized = true;
                 LogDebug("找到装备槽管理器，持久化系统准备就绪");
                 
-                // 检查是否需要在启动时自动加载装备
-                if (autoLoad && HasSavedData())
+                // 🔧 修改为按需加载：不在启动时自动加载，而是在玩家打开背包时加载
+                if (HasSavedData())
                 {
-                    LogDebug("检测到保存的装备数据，将在游戏启动时自动加载");
-                    yield return new WaitForSeconds(1.0f); // 等待装备槽完全初始化
-                    
-                    if (Application.isPlaying) // 确保仍在运行状态
-                    {
-                        StartCoroutine(LoadEquipmentDataCoroutine());
-                    }
+                    LogDebug("检测到保存的装备数据，将在玩家首次打开背包时加载");
+                    hasPendingEquipmentData = true; // 标记有待加载的数据
+                }
+                else
+                {
+                    LogDebug("没有检测到保存的装备数据");
+                    hasPendingEquipmentData = false;
                 }
             }
             else
@@ -429,6 +469,9 @@ namespace InventorySystem
         {
             LogDebug("开始场景切换后的重新初始化...");
             
+            // 🔧 在重新初始化期间延长保存抑制，避免空数据覆盖
+            suppressSavesUntilFirstLoad = true;
+            
             // 等待新场景完全加载
             yield return new WaitForSeconds(0.5f);
             
@@ -443,21 +486,24 @@ namespace InventorySystem
                 isInitialized = true;
                 LogDebug("场景切换后重新找到装备槽管理器");
                 
-                // 检查是否需要自动加载装备（跨会话恢复）
-                if (autoLoad && HasSavedData())
+                // 🔧 场景切换后也改为按需加载
+                if (HasSavedData())
                 {
-                    LogDebug("场景切换后检测到保存的装备数据，开始自动加载");
-                    yield return new WaitForSeconds(1.0f); // 等待装备槽完全初始化
-                    
-                    if (Application.isPlaying)
-                    {
-                        StartCoroutine(LoadEquipmentDataCoroutine());
-                    }
+                    LogDebug("场景切换后检测到保存的装备数据，将在玩家首次打开背包时加载");
+                    hasPendingEquipmentData = true; // 标记有待加载的数据
                 }
+                
+                // 🔧 等待一段时间后再允许保存，确保场景中所有装备槽完全初始化
+                yield return new WaitForSeconds(2.0f);
+                suppressSavesUntilFirstLoad = false;
+                LogDebug("场景初始化完成，恢复装备数据保存功能");
             }
             else
             {
                 LogWarning("场景切换后仍未找到装备槽管理器，将在下次场景加载时重试");
+                // 🔧 即使失败也要恢复保存功能
+                yield return new WaitForSeconds(3.0f);
+                suppressSavesUntilFirstLoad = false;
             }
         }
         
@@ -471,6 +517,12 @@ namespace InventorySystem
         /// </summary>
         public void SaveEquipmentData()
         {
+            // 屏蔽加载阶段的任何保存触发，避免“中途快照”覆盖最终结果
+            if (isLoading)
+            {
+                LogWarning("正在加载装备数据，屏蔽本次保存触发（中途保存已禁用）");
+                return;
+            }
             if (!isInitialized)
             {
                 LogWarning("持久化管理器未初始化，尝试立即初始化");
@@ -489,6 +541,72 @@ namespace InventorySystem
                 LogWarning("正在保存中，跳过保存操作");
                 return;
             }
+            
+            // 🔧 实现延迟保存机制，避免频繁保存
+            float timeSinceLastSave = Time.time - lastSaveTime;
+            if (timeSinceLastSave < saveCooldown)
+            {
+                // 如果在冷却期内，取消之前的延迟保存，重新开始延迟
+                if (delaySaveCoroutine != null)
+                {
+                    StopCoroutine(delaySaveCoroutine);
+                }
+                
+                float delayTime = saveCooldown - timeSinceLastSave;
+                LogDebug($"保存冷却中，延迟 {delayTime:F1} 秒后保存");
+                delaySaveCoroutine = StartCoroutine(DelaySave(delayTime));
+                hasPendingSave = true;
+            }
+            else
+            {
+                // 立即保存
+                StartCoroutine(SaveEquipmentDataCoroutine());
+            }
+        }
+        
+        /// <summary>
+        /// 延迟保存协程
+        /// </summary>
+        private IEnumerator DelaySave(float delay)
+        {
+            yield return new WaitForSeconds(delay);
+            
+            if (hasPendingSave && Application.isPlaying)
+            {
+                hasPendingSave = false;
+                StartCoroutine(SaveEquipmentDataCoroutine());
+            }
+        }
+        
+        /// <summary>
+        /// 立即保存装备数据（跳过冷却机制，用于重要时刻如应用退出）
+        /// </summary>
+        public void SaveEquipmentDataImmediate()
+        {
+            if (isLoading)
+            {
+                LogWarning("正在加载装备数据，但强制保存");
+            }
+            
+            if (!isInitialized)
+            {
+                LogWarning("持久化管理器未初始化，尝试立即初始化");
+                InitializeManager();
+                
+                if (!isInitialized)
+                {
+                    LogError("无法初始化持久化管理器，跳过保存");
+                    return;
+                }
+            }
+            
+            // 取消任何延迟保存
+            if (delaySaveCoroutine != null)
+            {
+                StopCoroutine(delaySaveCoroutine);
+                delaySaveCoroutine = null;
+            }
+            hasPendingSave = false;
             
             StartCoroutine(SaveEquipmentDataCoroutine());
         }
@@ -586,6 +704,12 @@ namespace InventorySystem
         /// </summary>
         private IEnumerator SaveEquipmentDataCoroutine()
         {
+            // 再次防御：如果在协程启动时进入加载阶段，直接跳过
+            if (isLoading)
+            {
+                LogWarning("保存协程启动时检测到加载中，跳过本次保存");
+                yield break;
+            }
             isSaving = true;
             LogDebug("开始保存装备数据...");
             
@@ -597,6 +721,23 @@ namespace InventorySystem
                 LogError("收集装备数据失败");
                 isSaving = false;
                 yield break;
+            }
+            
+            // 启动空保存保护：
+            if (suppressSavesUntilFirstLoad)
+            {
+                if (persistenceData.equippedSlots == 0 && HasSavedData() && (Time.realtimeSinceStartup - startupRealtime) < startupEmptySaveBlockSeconds)
+                {
+                    LogWarning($"检测到启动期空保存（{persistenceData.totalSlots} 槽位, 0 装备），且已有历史存档，跳过本次保存（保护窗口 {startupEmptySaveBlockSeconds:F1}s 内）");
+                    isSaving = false;
+                    yield break;
+                }
+                // 如果此时已经有装备，则解除抑制并继续保存
+                if (persistenceData.equippedSlots > 0)
+                {
+                    LogDebug("首次检测到已有装备，解除启动期保存抑制");
+                    suppressSavesUntilFirstLoad = false;
+                }
             }
             
             // 验证数据完整性
@@ -628,6 +769,9 @@ namespace InventorySystem
             
             if (saveSuccess)
             {
+                // 🔧 更新最后保存时间
+                lastSaveTime = Time.time;
+                
                 LogDebug($"装备数据保存成功，共保存 {persistenceData.totalSlots} 个槽位，{persistenceData.equippedSlots} 个装备");
                 
                 if (verboseLogging)
@@ -656,31 +800,110 @@ namespace InventorySystem
                 return null;
             }
             
+            // 🔧 检查是否正在装备恢复过程中
+            if (isLoading)
+            {
+                LogWarning("正在加载装备数据，跳过收集操作（避免收集到不完整状态）");
+                return null;
+            }
+            
+            // 🔧 修改启动期保护逻辑 - 只在特定情况下阻止保存
+            if (suppressSavesUntilFirstLoad && HasSavedData() && Time.realtimeSinceStartup < startupEmptySaveBlockSeconds)
+            {
+                // 检查当前是否有装备 - 如果有装备就不阻止保存
+                var quickEquipmentCheck = false;
+                var equipmentSlots = GameObject.FindObjectsOfType<InventorySystem.EquipmentSlot>(true);
+                foreach (var slot in equipmentSlots)
+                {
+                    if (slot != null && slot.HasEquippedItem)
+                    {
+                        quickEquipmentCheck = true;
+                        LogDebug("检测到有装备存在，允许保存以记录新装备状态");
+                        break;
+                    }
+                }
+                
+                if (!quickEquipmentCheck)
+                {
+                    LogWarning("启动期间存在保存数据但装备槽可能未完全初始化，延迟收集直到初始化完成");
+                    return null;
+                }
+            }
+            
             var persistenceData = new EquipmentSystemPersistenceData
             {
                 version = DATA_VERSION
             };
             
-            // 获取所有装备槽
-            var allSlots = equipmentSlotManager.GetAllEquipmentSlots();
-            LogDebug($"收集到 {allSlots.Count} 个装备槽");
-            
-            foreach (var kvp in allSlots)
+            // 新策略：遍历场景所有EquipmentSlot（包含非激活），按槽位类型优先选择"已装备"的那个，避免空实例覆盖
+            var allSceneSlots = GameObject.FindObjectsOfType<InventorySystem.EquipmentSlot>(true);
+            LogDebug($"收集到场景中 {allSceneSlots.Length} 个EquipmentSlot组件（包含非激活）");
+
+            var slotTypeToBestSlot = new System.Collections.Generic.Dictionary<EquipmentSlotType, InventorySystem.EquipmentSlot>();
+
+            foreach (var slot in allSceneSlots)
+            {
+                if (slot == null || slot.config == null) continue;
+                var type = slot.config.slotType;
+
+                if (!slotTypeToBestSlot.TryGetValue(type, out var existing))
+                {
+                    slotTypeToBestSlot[type] = slot;
+                    continue;
+                }
+
+                bool existingEquipped = false;
+                bool currentEquipped = false;
+                try { existingEquipped = existing.HasEquippedItem; } catch { existingEquipped = false; }
+                try { currentEquipped = slot.HasEquippedItem; } catch { currentEquipped = false; }
+
+                if (!existingEquipped && currentEquipped)
+                {
+                    slotTypeToBestSlot[type] = slot;
+                }
+            }
+
+            LogDebug($"归并后共覆盖 {slotTypeToBestSlot.Count} 种槽位类型");
+
+            int equippedCount = 0;
+            foreach (var kvp in slotTypeToBestSlot)
             {
                 var slot = kvp.Value;
                 if (slot == null) continue;
-                
+
                 try
                 {
+                    bool hasEquipped = false;
+                    ItemDataReader currentItem = null;
+                    try { hasEquipped = slot.HasEquippedItem; currentItem = slot.CurrentEquippedItem; } catch { }
+
+                    if (verboseLogging)
+                    {
+                        Debug.Log($"[EquipmentPersistenceManager] 🔍 最终槽 {kvp.Key}:");
+                        Debug.Log($"  - HasEquippedItem: {hasEquipped}");
+                        Debug.Log($"  - CurrentEquippedItem: {(currentItem != null ? currentItem.ItemData.itemName : "null")} ");
+                        Debug.Log($"  - 槽位GameObject: {slot.gameObject.name}");
+                        Debug.Log($"  - 槽位激活状态: {slot.gameObject.activeInHierarchy}");
+                    }
+
                     var slotData = new EquipmentSlotPersistenceData(slot);
                     persistenceData.AddSlotData(slotData);
-                    
+
+                    if (slotData.hasEquipment) equippedCount++;
+
                     LogDebug($"收集槽位数据: {kvp.Key} - {(slotData.hasEquipment ? $"装备: {slotData.itemName}" : "空")}");
                 }
                 catch (System.Exception e)
                 {
                     LogError($"收集槽位 {kvp.Key} 数据时出错: {e.Message}");
                 }
+            }
+            
+            // 🔧 额外验证：如果已知有存档数据但收集到0装备，且在启动期间，则暂停收集
+            if (HasSavedData() && equippedCount == 0 && Time.realtimeSinceStartup < startupEmptySaveBlockSeconds * 2)
+            {
+                LogWarning($"检测到异常：已知存在装备存档但收集到0个装备（启动时间: {Time.realtimeSinceStartup:F1}s），可能处于装备恢复过程中，取消本次收集");
+                return null;
             }
             
             return persistenceData;
@@ -763,6 +986,8 @@ namespace InventorySystem
             {
                 LogWarning("没有找到保存的装备数据");
                 isLoading = false;
+                // 即便无存档，也解除启动期抑制，允许后续保存
+                suppressSavesUntilFirstLoad = false;
                 yield break;
             }
             
@@ -772,6 +997,8 @@ namespace InventorySystem
             {
                 LogError($"装备数据验证失败: {errorMessage}");
                 isLoading = false;
+                // 避免卡死抑制，解除抑制但提示
+                suppressSavesUntilFirstLoad = false;
                 yield break;
             }
             
@@ -784,6 +1011,9 @@ namespace InventorySystem
             
             // 应用装备数据
             yield return StartCoroutine(ApplyEquipmentData(persistenceData));
+            
+            // 首次加载流程结束，解除保存抑制
+            suppressSavesUntilFirstLoad = false;
             
             isLoading = false;
         }
@@ -875,7 +1105,7 @@ namespace InventorySystem
                 }
                 else
                 {
-                    LogError($"�7�4 装备恢复失败: {slotData.slotType}");
+                    LogError($" 装备恢复失败: {slotData.slotType}");
                 }
                 
                 yield return null; // 每个装备恢复后等待一帧
@@ -1013,7 +1243,57 @@ namespace InventorySystem
                 yield break;
             }
             
+            // 🔧 修复：确保容器类装备在槽位未激活时也能创建容器网格
+            yield return StartCoroutine(EnsureContainerGridCreated(slot, slotData));
+            
             lastRestoreResult = true;
+        }
+        
+        /// <summary>
+        /// 确保容器网格被正确创建（即使装备槽未激活）
+        /// </summary>
+        /// <param name="slot">装备槽</param>
+        /// <param name="slotData">槽位数据</param>
+        private IEnumerator EnsureContainerGridCreated(EquipmentSlot slot, EquipmentSlotPersistenceData slotData)
+        {
+            // 只处理容器类装备槽
+            if (slotData.slotType != EquipmentSlotType.Backpack && slotData.slotType != EquipmentSlotType.TacticalRig)
+            {
+                yield break;
+            }
+            
+            // 等待一帧确保装备完全设置
+            yield return null;
+            
+            // 检查是否需要强制创建容器网格
+            if (slot.HasEquippedItem && slot.CurrentEquippedItem != null)
+            {
+                var itemData = slot.CurrentEquippedItem.ItemData;
+                if (itemData != null && (itemData.category == ItemCategory.Backpack || itemData.category == ItemCategory.TacticalRig))
+                {
+                    LogDebug($"🔧 强制为装备槽 {slotData.slotType} 创建容器网格以启用内容恢复");
+                    
+                    // 🔧 修复：不能在try-catch中使用yield，分开处理
+                    bool forceCreateSuccess = false;
+                    try
+                    {
+                        // 使用新添加的公共方法强制激活容器网格
+                        slot.ForceActivateContainerGrid();
+                        forceCreateSuccess = true;
+                    }
+                    catch (System.Exception e)
+                    {
+                        LogError($"强制创建容器网格失败: {slotData.slotType} - {e.Message}");
+                    }
+                    
+                    if (forceCreateSuccess)
+                    {
+                        // 等待一帧确保容器网格完全创建
+                        yield return null;
+                        LogDebug($"✅ 容器网格强制创建完成: {slotData.slotType}");
+                    }
+                }
+            }
         }
         
         /// <summary>
@@ -1027,25 +1307,30 @@ namespace InventorySystem
             
             lastCreatedItem = null; // 先重置结果
             
-            // 获取物品类别
-            var category = GetCategoryByID(slotData.itemID);
-            LogDebug($"物品类别: {category}");
+            // 构建全局索引（GlobalId → ItemDataSO / Prefab）
+            EnsureItemDatabasesBuilt();
             
-            // 加载物品预制体
-            GameObject prefab = null;
-            try
+            // 解析GlobalId
+            if (!long.TryParse(slotData.itemID, out long globalId))
             {
-                prefab = LoadItemPrefabByCategory(category, slotData.itemID);
-            }
-            catch (System.Exception e)
-            {
-                LogError($"加载预制体时发生异常: {e.Message}");
-                prefab = null;
+                LogError($"无效的GlobalId: {slotData.itemID}");
+                yield return null;
+                yield break;
             }
             
+            // 定位ItemDataSO（考虑重复GlobalId：优先匹配名称，其次匹配槽位类别）
+            if (!TryGetCorrectItemData(globalId, slotData.itemName, slotData.slotType, out var itemDataSo) || itemDataSo == null)
+            {
+                LogError($"未能通过GlobalId精确定位到ItemDataSO: {globalId} (期望名称: {slotData.itemName})");
+                yield return null;
+                yield break;
+            }
+            
+            // 精确定位Prefab（按ItemDataReader.itemData == itemDataSo）
+            GameObject prefab = ResolvePrefabByItemData(globalId, itemDataSo);
             if (prefab == null)
             {
-                LogError($"无法找到物品预制体: {slotData.itemID}, 类别: {category}");
+                LogError($"未能定位到与ItemDataSO匹配的Prefab: {itemDataSo.name} (GlobalId={globalId})");
                 yield return null;
                 yield break;
             }
@@ -1103,6 +1388,217 @@ namespace InventorySystem
             lastCreatedItem = itemInstance;
             
             yield return null;
+        }
+
+        /// <summary>
+        /// 确保物品与预制体索引已构建
+        /// </summary>
+        private void EnsureItemDatabasesBuilt()
+        {
+            if (itemDatabasesBuilt) return;
+            try
+            {
+                // 1) 构建 GlobalId → ItemDataSO 映射
+                var allItemData = Resources.LoadAll<ItemDataSO>("InventorySystemResources/ItemScriptableObject");
+                int soCount = 0;
+                foreach (var so in allItemData)
+                {
+                    if (so == null) continue;
+                    long gid = so.GlobalId;
+                    globalIdToItemData[gid] = so;
+                    soCount++;
+                }
+                LogDebug($"索引到 {soCount} 个ItemDataSO");
+
+                // 2) 预先索引常用类别下的 Prefab（按ItemDataReader.itemData直连）
+                string[] categoryFolders = {
+                    "Helmet_头盔", "Armor_护甲", "TacticalRig_战术背心", "Backpack_背包", "Weapon_武器",
+                    "Ammunition_弹药", "Food_食物", "Drink_饮料", "Sedative_镇静剂", "Hemostatic_止血剂",
+                    "Healing_治疗药物", "Intelligence_情报", "Currency_货币", "Special_特殊物品"
+                };
+
+                int prefabIndexed = 0;
+                foreach (var folder in categoryFolders)
+                {
+                    var prefabs = Resources.LoadAll<GameObject>($"InventorySystemResources/Prefabs/{folder}");
+                    foreach (var prefab in prefabs)
+                    {
+                        if (prefab == null) continue;
+                        var reader = prefab.GetComponent<ItemDataReader>();
+                        if (reader == null || reader.ItemData == null) continue;
+                        long gid = reader.ItemData.GlobalId;
+                        if (!globalIdToPrefab.ContainsKey(gid))
+                        {
+                            globalIdToPrefab[gid] = prefab;
+                            prefabIndexed++;
+                        }
+                    }
+                }
+                LogDebug($"索引到 {prefabIndexed} 个物品Prefab");
+
+                itemDatabasesBuilt = true;
+            }
+            catch (System.Exception e)
+            {
+                LogError($"构建物品索引时发生异常: {e.Message}");
+                itemDatabasesBuilt = true; // 避免重复尝试
+            }
+        }
+
+        /// <summary>
+        /// 在可能存在重复 GlobalId 的情况下，按名称与槽位类型选出最匹配的 ItemDataSO
+        /// </summary>
+        private bool TryGetCorrectItemData(long globalId, string expectedItemName, EquipmentSlotType slotType, out ItemDataSO result)
+        {
+            result = null;
+            if (globalIdToItemData.TryGetValue(globalId, out var single))
+            {
+                // 如果只有一个映射或名称即匹配，直接返回
+                if (single != null && (string.IsNullOrEmpty(expectedItemName) || string.Equals(single.itemName, expectedItemName, System.StringComparison.Ordinal)))
+                {
+                    result = single;
+                    return true;
+                }
+            }
+
+            // 若存在重复 GlobalId（或名称不匹配），在全部 SO 中筛选符合 globalId 的候选
+            var allItemData = Resources.LoadAll<ItemDataSO>("InventorySystemResources/ItemScriptableObject");
+            var candidates = new List<ItemDataSO>();
+            foreach (var so in allItemData)
+            {
+                if (so != null && so.GlobalId == globalId)
+                {
+                    candidates.Add(so);
+                }
+            }
+
+            if (candidates.Count == 0)
+            {
+                // 兼容旧存档（可能保存了错误/截断的ID）：改用名称+槽位类别全库检索
+                if (!string.IsNullOrEmpty(expectedItemName))
+                {
+                    var allByName = allItemData.Where(so => so != null && string.Equals(so.itemName, expectedItemName, System.StringComparison.Ordinal)).ToList();
+                    if (allByName.Count > 0)
+                    {
+                        // 若提供槽位类别，则优先取类别匹配者
+                        ItemCategory? expectedCat = null;
+                        switch (slotType)
+                        {
+                            case EquipmentSlotType.Helmet: expectedCat = ItemCategory.Helmet; break;
+                            case EquipmentSlotType.Armor: expectedCat = ItemCategory.Armor; break;
+                            case EquipmentSlotType.TacticalRig: expectedCat = ItemCategory.TacticalRig; break;
+                            case EquipmentSlotType.Backpack: expectedCat = ItemCategory.Backpack; break;
+                            case EquipmentSlotType.PrimaryWeapon:
+                            case EquipmentSlotType.SecondaryWeapon: expectedCat = ItemCategory.Weapon; break;
+                        }
+
+                        if (expectedCat.HasValue)
+                        {
+                            var catAndName = allByName.FirstOrDefault(c => c.category == expectedCat.Value);
+                            if (catAndName != null)
+                            {
+                                result = catAndName;
+                                return true;
+                            }
+                        }
+
+                        // 回退：仅按名称匹配
+                        result = allByName[0];
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+
+            // 1) 先按名称精确匹配
+            if (!string.IsNullOrEmpty(expectedItemName))
+            {
+                var nameMatch = candidates.FirstOrDefault(c => string.Equals(c.itemName, expectedItemName, System.StringComparison.Ordinal));
+                if (nameMatch != null)
+                {
+                    result = nameMatch;
+                    return true;
+                }
+            }
+
+            // 2) 再按槽位类别推断（头盔→Helmet、护甲→Armor、战术背心→TacticalRig、背包→Backpack、主/副武器→Weapon）
+            ItemCategory? expectedCategory = null;
+            switch (slotType)
+            {
+                case EquipmentSlotType.Helmet: expectedCategory = ItemCategory.Helmet; break;
+                case EquipmentSlotType.Armor: expectedCategory = ItemCategory.Armor; break;
+                case EquipmentSlotType.TacticalRig: expectedCategory = ItemCategory.TacticalRig; break;
+                case EquipmentSlotType.Backpack: expectedCategory = ItemCategory.Backpack; break;
+                case EquipmentSlotType.PrimaryWeapon:
+                case EquipmentSlotType.SecondaryWeapon: expectedCategory = ItemCategory.Weapon; break;
+            }
+
+            if (expectedCategory.HasValue)
+            {
+                var catMatch = candidates.FirstOrDefault(c => c.category == expectedCategory.Value);
+                if (catMatch != null)
+                {
+                    result = catMatch;
+                    return true;
+                }
+            }
+
+            // 3) 最后返回第一个候选作为回退，以保证不阻塞恢复流程
+            result = candidates[0];
+            return result != null;
+        }
+
+        /// <summary>
+        /// 通过 ItemDataSO 精确解析对应Prefab（优先缓存，其次按类别再扫描一次）
+        /// </summary>
+        private GameObject ResolvePrefabByItemData(long globalId, ItemDataSO itemDataSo)
+        {
+            if (globalIdToPrefab.TryGetValue(globalId, out var cached) && cached != null)
+            {
+                // 再校验一次绑定是否一致
+                var r = cached.GetComponent<ItemDataReader>();
+                if (r != null && r.ItemData == itemDataSo)
+                {
+                    return cached;
+                }
+            }
+
+            // 按类别目标文件夹精准再扫一遍
+            ItemCategory categoryEnum = (ItemCategory)itemDataSo.category;
+            string folder = GetCategoryFolderName(categoryEnum);
+            var prefabs = Resources.LoadAll<GameObject>($"InventorySystemResources/Prefabs/{folder}");
+            foreach (var prefab in prefabs)
+            {
+                var reader = prefab.GetComponent<ItemDataReader>();
+                if (reader != null && reader.ItemData == itemDataSo)
+                {
+                    globalIdToPrefab[globalId] = prefab;
+                    return prefab;
+                }
+            }
+
+            // 最后再在所有类别里全面扫描一次（仅此一次调用路径）
+            string[] categoryFolders = {
+                "Helmet_头盔", "Armor_护甲", "TacticalRig_战术背心", "Backpack_背包", "Weapon_武器",
+                "Ammunition_弹药", "Food_食物", "Drink_饮料", "Sedative_镇静剂", "Hemostatic_止血剂",
+                "Healing_治疗药物", "Intelligence_情报", "Currency_货币", "Special_特殊物品"
+            };
+            foreach (var f in categoryFolders)
+            {
+                var all = Resources.LoadAll<GameObject>($"InventorySystemResources/Prefabs/{f}");
+                foreach (var prefab in all)
+                {
+                    var reader = prefab.GetComponent<ItemDataReader>();
+                    if (reader != null && reader.ItemData == itemDataSo)
+                    {
+                        globalIdToPrefab[globalId] = prefab;
+                        return prefab;
+                    }
+                }
+            }
+
+            return null;
         }
         
         /// <summary>
@@ -1293,28 +1789,82 @@ namespace InventorySystem
         
         #endregion
         
+        #region 保存抑制控制
+        
+        /// <summary>
+        /// 确保保存不被抑制 - 备用机制
+        /// 当BackpackEquipmentEventHandler初始化失败时，通过这个方法重置suppressSavesUntilFirstLoad
+        /// </summary>
+        public void EnsureSaveNotSuppressed()
+        {
+            // 如果当前存在装备且仍在抑制期，强制解除抑制
+            if (suppressSavesUntilFirstLoad)
+            {
+                // 检查是否有任何装备存在
+                bool hasAnyEquipment = false;
+                if (equipmentSlotManager != null)
+                {
+                    var equippedItems = equipmentSlotManager.GetAllEquippedItems();
+                    hasAnyEquipment = equippedItems != null && equippedItems.Count > 0;
+                }
+                
+                if (hasAnyEquipment)
+                {
+                    LogDebug("🔧 检测到装备存在，通过备用机制重置启动期保存抑制");
+                    suppressSavesUntilFirstLoad = false;
+                }
+                else
+                {
+                    // 即使没有装备，如果启动时间超过保护窗口，也解除抑制
+                    if (Time.realtimeSinceStartup > startupEmptySaveBlockSeconds)
+                    {
+                        LogDebug("🔧 启动保护窗口已过期，通过备用机制重置启动期保存抑制");
+                        suppressSavesUntilFirstLoad = false;
+                    }
+                }
+            }
+        }
+        
+        #endregion
+        
         #region 背包事件集成
         
         /// <summary>
-        /// 背包打开事件处理
+        /// 背包打开事件处理 - 按需加载装备数据
         /// </summary>
         public void OnBackpackOpened()
         {
             if (!autoLoad) return;
             
-            LogDebug("背包打开，准备加载装备数据");
-            LoadEquipmentData();
+            // 🔧 背包打开时重置启动期保存抑制，允许正常保存
+            if (suppressSavesUntilFirstLoad)
+            {
+                LogDebug("背包打开，重置启动期保存抑制标志");
+                suppressSavesUntilFirstLoad = false;
+            }
+            
+            // 🔧 只在有待加载的数据时才加载，避免重复加载
+            if (hasPendingEquipmentData)
+            {
+                LogDebug("背包首次打开，开始加载装备数据");
+                LoadEquipmentData();
+                hasPendingEquipmentData = false; // 加载后重置标志
+            }
+            else
+            {
+                LogDebug("背包打开，但没有待加载的装备数据或已经加载过");
+            }
         }
         
         /// <summary>
-        /// 背包关闭事件处理
+        /// 背包关闭事件处理 - 立即保存装备数据
         /// </summary>
         public void OnBackpackClosed()
         {
             if (!autoSave) return;
             
-            LogDebug("背包关闭，准备保存装备数据");
-            SaveEquipmentData();
+            LogDebug("背包关闭，立即保存装备数据");
+            SaveEquipmentDataImmediate(); // 🔧 背包关闭时使用立即保存，跳过冷却
         }
         
         /// <summary>

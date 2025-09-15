@@ -74,8 +74,8 @@ namespace InventorySystem
         
         private void Awake()
         {
-            // 确保跨场景持久化
-            DontDestroyOnLoad(gameObject);
+            // 🔧 移除跨场景持久化 - 让组件随背包面板一起创建和销毁
+            // DontDestroyOnLoad(gameObject);
             
             // 重置首次打开标志（每次场景加载时重置）
             hasTriggeredFirstOpen = false;
@@ -84,21 +84,14 @@ namespace InventorySystem
             // 监听场景加载事件以重置首次打开标志
             SceneManager.sceneLoaded += OnSceneLoaded;
             
-            InitializeComponents();
+            // 🔧 延迟初始化组件，等待背包面板完全准备好
+            // InitializeComponents();
         }
         
         private void Start()
         {
-            // 延迟初始化以确保BackpackPanelController完全初始化
-            if (gameObject.activeInHierarchy)
-            {
-                StartCoroutine(DelayedInitialization());
-            }
-            else
-            {
-                // 如果GameObject未激活，等待激活后再初始化
-                StartCoroutine(WaitForActiveAndInitialize());
-            }
+            // 🔧 修改：只在背包面板激活时初始化
+            LogDebug("BackpackEquipmentEventHandler Start - 等待背包面板激活");
         }
         
         /// <summary>
@@ -162,6 +155,14 @@ namespace InventorySystem
         
         private void OnEnable()
         {
+            // 🔧 背包面板激活时先初始化，然后处理打开事件
+            if (!isInitialized)
+            {
+                LogDebug("背包面板激活，开始初始化事件处理器");
+                InitializeComponents();
+                InitializeEventHandler();
+            }
+            
             // 背包面板激活时处理
             HandleBackpackOpened();
         }
@@ -231,6 +232,8 @@ namespace InventorySystem
             if (backpackController == null)
             {
                 LogError("BackpackPanelController为null，无法初始化事件处理器");
+                // 🔧 启动持续重试机制，而不是直接返回
+                StartCoroutine(RetryInitialization());
                 return;
             }
             
@@ -247,6 +250,61 @@ namespace InventorySystem
             
             isInitialized = true;
             LogDebug("背包装备事件处理器初始化完成");
+        }
+        
+        /// <summary>
+        /// 重试初始化协程 - 解决BackpackPanelController延迟创建的问题
+        /// </summary>
+        private IEnumerator RetryInitialization()
+        {
+            int retryCount = 0;
+            const int maxRetries = 10;
+            const float retryInterval = 1.0f;
+            
+            while (retryCount < maxRetries && !isInitialized)
+            {
+                yield return new WaitForSeconds(retryInterval);
+                retryCount++;
+                
+                LogDebug($"重试初始化 BackpackEquipmentEventHandler ({retryCount}/{maxRetries})");
+                
+                // 重新尝试查找BackpackPanelController
+                InitializeComponents();
+                
+                if (backpackController != null)
+                {
+                    LogDebug($"重试成功！找到BackpackPanelController: {backpackController.name}");
+                    
+                    // 确保EquipmentPersistenceManager存在
+                    if (persistenceManager == null)
+                    {
+                        persistenceManager = EquipmentPersistenceManager.Instance;
+                    }
+                    
+                    isInitialized = true;
+                    LogDebug("背包装备事件处理器延迟初始化完成");
+                    
+                    // 🔧 成功初始化后，确保保存不被抑制
+                    if (persistenceManager != null)
+                    {
+                        persistenceManager.EnsureSaveNotSuppressed();
+                    }
+                    
+                    yield break;
+                }
+            }
+            
+            if (!isInitialized)
+            {
+                LogError($"BackpackEquipmentEventHandler初始化失败，已重试{maxRetries}次");
+                
+                // 🔧 即使BackpackPanelController找不到，也要确保不阻止保存
+                if (persistenceManager != null)
+                {
+                    LogWarning("虽然BackpackPanelController初始化失败，但仍确保装备保存功能正常");
+                    persistenceManager.EnsureSaveNotSuppressed();
+                }
+            }
         }
         
         /// <summary>
@@ -416,7 +474,8 @@ namespace InventorySystem
             
             try
             {
-                persistenceManager.LoadEquipmentData();
+                // 🔧 调用 OnBackpackOpened 而不是直接调用 LoadEquipmentData
+                persistenceManager.OnBackpackOpened();
                 
                 if (verboseEventLogs)
                 {
@@ -495,7 +554,8 @@ namespace InventorySystem
             
             try
             {
-                persistenceManager.SaveEquipmentData();
+                // 🔧 调用 OnBackpackClosed 而不是直接调用 SaveEquipmentData
+                persistenceManager.OnBackpackClosed();
                 
                 if (verboseEventLogs)
                 {
