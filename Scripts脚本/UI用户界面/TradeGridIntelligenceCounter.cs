@@ -31,6 +31,8 @@ namespace Game.UI
 		[Header("随机奖励配置 (完成任务后生成)")]
 		[SerializeField] private RandomItemSpawnConfig rewardRandomConfig;
 		[SerializeField] private bool spawnRewardOnSuccess = true;
+		[SerializeField] private bool enforceCurrencyStack = true;
+		[SerializeField] private int currencyStackAmount = 1000;
 
 		[Header("提交与领取 UI")]
 		[SerializeField] private Button submitButton; // Handout 按钮
@@ -170,6 +172,52 @@ namespace Game.UI
 			if (tradeGrid == null || rewardRandomConfig == null) return;
 			// 使用随机生成管理器：强制在 tradeGrid 上以随机配置生成
 			ShelfRandomItemManager.Instance.ForceRegenerateItems(tradeGrid.gameObject, tradeGrid, rewardRandomConfig);
+			if (enforceCurrencyStack)
+			{
+				StartCoroutine(AdjustCurrencyStacksAfterSpawn());
+			}
+		}
+
+		private System.Collections.IEnumerator AdjustCurrencyStacksAfterSpawn()
+		{
+			// 使用真实时间等待，避免 Time.timeScale == 0 时协程停滞
+			float wait = 0f;
+			while (tradeGrid != null && wait < 1.5f)
+			{
+				var itemsProbe = tradeGrid.GetItemsInArea(0, 0, tradeGrid.CurrentWidth, tradeGrid.CurrentHeight);
+				if (itemsProbe != null && itemsProbe.Count > 0) break;
+				yield return new WaitForSecondsRealtime(0.1f);
+				wait += 0.1f;
+			}
+
+			if (tradeGrid == null) yield break;
+			// 第一次修正（生成完成立即）
+			yield return StartCoroutine(AdjustCurrencyStacksPass());
+			// 等待 FixedItemSpawnManager 的延迟校验(≈0.2s)结束后再修正一次，防止被回写
+			yield return new WaitForSecondsRealtime(0.35f);
+			yield return StartCoroutine(AdjustCurrencyStacksPass());
+		}
+
+		private System.Collections.IEnumerator AdjustCurrencyStacksPass()
+		{
+			if (tradeGrid == null || !tradeGrid.IsGridInitialized) yield break;
+			List<Item> items = tradeGrid.GetItemsInArea(0, 0, tradeGrid.CurrentWidth, tradeGrid.CurrentHeight);
+			for (int i = 0; i < items.Count; i++)
+			{
+				var reader = items[i]?.ItemDataReader;
+				var data = reader?.ItemData;
+				if (reader == null || data == null) continue;
+				if (data.category != ItemCategory.Currency) continue;
+
+				int target = Mathf.Clamp(currencyStackAmount, 1, data.maxStack);
+				for (int attempt = 0; attempt < 2; attempt++)
+				{
+					reader.SetStack(target);
+					reader.currencyAmount = target;
+					yield return null; // 让 UI 刷新
+					if (reader.CurrentStack == target) break;
+				}
+			}
 		}
 
 		/// <summary>
