@@ -79,6 +79,12 @@ namespace InventorySystem
         [FieldLabel("单次治疗量")]
         public int healPerUse = 0;              // 每次使用的治疗量（治疗药物）
 
+        [Header("生存恢复属性")]
+        [FieldLabel("恢复饱食度")]
+        public int hungerRestore = 0;           // 食物/饮料使用时回复的饱食度
+        [FieldLabel("恢复精神值")]
+        public int mentalRestore = 0;           // 镇静类药品使用时回复的精神值
+
         [Header("情报属性")]
         [FieldLabel("情报值")]
         public int intelligenceValue = 0;       // 情报值（情报物品）

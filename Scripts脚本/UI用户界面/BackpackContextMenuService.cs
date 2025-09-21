@@ -64,12 +64,11 @@ public class BackpackContextMenuService : MonoBehaviour
 
         EnsureInstances();
 
-        // 先规范菜单 Rect 的锚点：锚定到父容器中心，使 anchoredPosition 与父中心坐标一致
+        // 规范菜单 Rect 的锚点：锚定到父容器中心，使 anchoredPosition 与父中心坐标一致
         if (_menuRect != null)
         {
             _menuRect.anchorMin = new Vector2(0.5f, 0.5f);
             _menuRect.anchorMax = new Vector2(0.5f, 0.5f);
-            // 维持 pivot=0.5,0.5（默认即为0.5）
         }
 
         // 定位：物品中心 → 屏幕点 → 背包面板本地坐标（以父 pivot 为原点）
@@ -80,11 +79,10 @@ public class BackpackContextMenuService : MonoBehaviour
         // 先打开并刷新（以便获得正确尺寸）
         _menuInstance.OpenAt(localPoint, actions);
 
-        // 根据尺寸进行 clamp
+        // 根据边界决定 pivot：默认(0,1)，若越界则切换为(1,1)，并夹取位置
         _menuRect = _menuInstance.GetMenuRect();
         Vector2 menuSize = _menuInstance.GetCurrentSize();
-        Vector2 clamped = ClampToBounds(localPoint, menuSize, backpackPanelRect.rect);
-        _menuRect.anchoredPosition = clamped;
+        PositionMenuWithPivotAndClamp(localPoint, menuSize, backpackPanelRect.rect);
 
         // 非阻塞模式：不激活 Blocker；阻塞模式：激活 Blocker 用于点击空白处关闭
         if (_blockerInstance != null)
@@ -167,20 +165,43 @@ public class BackpackContextMenuService : MonoBehaviour
         }
     }
 
-    private static Vector2 ClampToBounds(Vector2 localPoint, Vector2 size, Rect bounds)
+    private void PositionMenuWithPivotAndClamp(Vector2 localPoint, Vector2 size, Rect bounds)
     {
-        // 将菜单中心放置在 localPoint 处（菜单 pivot=0.5, anchor=0.5）
-        float halfW = size.x * 0.5f;
-        float halfH = size.y * 0.5f;
+        if (_menuRect == null)
+            return;
 
-        float minX = bounds.xMin + halfW - (0.5f - 0.5f) * bounds.width; // 表达清晰，保持通用形式
-        float maxX = bounds.xMax - halfW - (0.5f - 0.5f) * bounds.width;
-        float minY = bounds.yMin + halfH - (0.5f - 0.5f) * bounds.height;
-        float maxY = bounds.yMax - halfH - (0.5f - 0.5f) * bounds.height;
+        // 默认使用左上角 pivot (0,1)
+        Vector2 desiredPivot = new Vector2(0f, 1f);
 
-        float x = Mathf.Clamp(localPoint.x, minX, maxX);
-        float y = Mathf.Clamp(localPoint.y, minY, maxY);
-        return new Vector2(x, y);
+        // 预测使用(0,1)时的右侧边界
+        float predictedRight = localPoint.x + size.x;
+        bool overflowRight = predictedRight > bounds.xMax;
+
+        if (overflowRight)
+        {
+            // 右侧越界则改用右上角 pivot (1,1)
+            desiredPivot = new Vector2(1f, 1f);
+        }
+
+        _menuRect.pivot = desiredPivot;
+
+        // 基于所选 pivot 对 anchoredPosition 做边界夹取
+        float clampedX;
+        if (Mathf.Approximately(desiredPivot.x, 0f))
+        {
+            // 左上角：X 需在 [min, max - width]
+            clampedX = Mathf.Clamp(localPoint.x, bounds.xMin, bounds.xMax - size.x);
+        }
+        else
+        {
+            // 右上角：X 需在 [min + width, max]
+            clampedX = Mathf.Clamp(localPoint.x, bounds.xMin + size.x, bounds.xMax);
+        }
+
+        // Y 统一使用上沿对齐，Y 需在 [min + height, max]
+        float clampedY = Mathf.Clamp(localPoint.y, bounds.yMin + size.y, bounds.yMax);
+
+        _menuRect.anchoredPosition = new Vector2(clampedX, clampedY);
     }
 
     private void OnDisable()

@@ -3,11 +3,11 @@ using UnityEngine;
 namespace InventorySystem
 {
 	/// <summary>
-	/// ±ê¼Ç×é¼ş£ºÊ¹µ±Ç° <see cref="EquipmentSlot"/> ÅÅ³ıÔÚÈ«¾Ö×°±¸ÏµÍ³Ö®Íâ¡£
-	/// - ²»±» EquipmentSlotManager ×¢²á
-	/// - ²»²ÎÓë EquipmentPersistenceManager µÄ±£´æ/ÊÕ¼¯
-	/// - ²»´¥·¢×°±¸/Ğ¶×°ÊÂ¼ş£¬Ò²²»Ğ´ÈëÈİÆ÷´æµµ
-	/// µäĞÍÓÃÀı£ºÈÎÎñÃæ°åµÄ¡°¾µÏñ×°±¸²Û¡±¡£
+	/// æ ‡è®°ç»„ä»¶ï¼šä½¿å½“å‰ <see cref="EquipmentSlot"/> æ’é™¤åœ¨å…¨å±€è£…å¤‡ç³»ç»Ÿä¹‹å¤–ã€‚
+	/// - ä¸è¢« EquipmentSlotManager æ³¨å†Œ
+	/// - ä¸å‚ä¸ EquipmentPersistenceManager çš„ä¿å­˜/æ”¶é›†
+	/// - ä¸è§¦å‘è£…å¤‡/å¸è£…äº‹ä»¶ï¼Œä¹Ÿä¸å†™å…¥å®¹å™¨å­˜æ¡£
+	/// å…¸å‹ç”¨ä¾‹ï¼šä»»åŠ¡é¢æ¿çš„â€œé•œåƒè£…å¤‡æ§½â€ã€‚
 	/// </summary>
 	[DisallowMultipleComponent]
 	public sealed class ExcludeFromEquipmentSystem : MonoBehaviour {}

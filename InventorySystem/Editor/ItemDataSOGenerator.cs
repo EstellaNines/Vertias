@@ -412,6 +412,10 @@ namespace InventorySystem.Editor
                 itemData.maxHealAmount = itemJson["maxHealAmount"]?.Value<int>() ?? 0;
                 itemData.healPerUse = itemJson["healPerUse"]?.Value<int>() ?? 0;
 
+                // 生存恢复属性（食物/饮品/药品等）
+                itemData.hungerRestore = itemJson["hungerRestore"]?.Value<int>() ?? 0;
+                itemData.mentalRestore = itemJson["mentalRestore"]?.Value<int>() ?? 0;
+
                 // 设置情报属性
                 itemData.intelligenceValue = itemJson["intelligenceValue"]?.Value<int>() ?? 0;
 

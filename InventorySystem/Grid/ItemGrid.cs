@@ -19,6 +19,7 @@ public enum GridType
     [InspectorName("其他")] Other = 5,        // 其他类型容器 | Other container types
     [InspectorName("自定义")] Custom = 6,     // 自定义容器 | Custom containers
     [InspectorName("交易")] Trading = 7,      // 交易界面容器 | Trading interface container
+    [InspectorName("玩家")] Player = 8,       // 玩家自带网格 | Player-owned grid
     [InspectorName("测试")] Test = 99,        // 测试专用 | Testing purposes only
 }
 

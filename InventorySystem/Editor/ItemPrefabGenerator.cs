@@ -437,6 +437,8 @@ namespace InventorySystem.Editor
                 itemDataReader.currentDurability = itemData.durability;
                 itemDataReader.currentUsageCount = itemData.usageCount;
                 itemDataReader.currentHealAmount = itemData.maxHealAmount;
+                itemDataReader.hungerRestore = itemData.hungerRestore;
+                itemDataReader.mentalRestore = itemData.mentalRestore;
                 itemDataReader.intelligenceValue = itemData.intelligenceValue;
                 itemDataReader.currencyAmount = 1;
                 itemDataReader.maxStackAmount = itemData.maxStack;

@@ -12,9 +12,11 @@ public class BackpackPanelController : MonoBehaviour
     [SerializeField] private GameObject warehouseGridPrefab;
     [SerializeField] private GameObject groundGridPrefab;
     [SerializeField] private GameObject shelfGridPrefab; // 货架网格预制件
+    [SerializeField] private GameObject playerGridPrefab; // 玩家自带网格预制件（PlayerItemGrid）
     
     [Header("面板引用")]
-    [SerializeField] private RectTransform rightPanelTransform; // 网格的父容器
+    [SerializeField] private RectTransform rightPanelTransform; // 右侧网格父容器（Ground/Storage/Container）
+    [SerializeField] private RectTransform midPanelTransform;   // 中部父容器（BackpackMid，用于Player网格）
     [SerializeField] private TextMeshProUGUI rightTitleText; // 右侧标题文本组件
     
     [Header("标题文本设置")]
@@ -86,6 +88,9 @@ public class BackpackPanelController : MonoBehaviour
             ForceInitialize();
         }
         
+        // 确保玩家网格在BackpackMid中生成并对齐
+        EnsurePlayerGridCreatedAndAligned();
+
         if (showDebugLog) Debug.Log("BackpackPanelController: Start验证完成");
     }
     
@@ -307,6 +312,9 @@ public class BackpackPanelController : MonoBehaviour
             ForceInitialize();
         }
         
+        // 打开面板时确保玩家网格存在于 BackpackMid
+        EnsurePlayerGridCreatedAndAligned();
+
         if (showDebugLog)
             Debug.Log($"BackpackPanelController: 激活面板 - 网格类型: {gridType}");
         
@@ -519,6 +527,59 @@ public class BackpackPanelController : MonoBehaviour
             GridType.Container => shelfGridPrefab,
             _ => groundGridPrefab
         };
+    }
+
+    /// <summary>
+    /// 确保玩家网格在 BackpackMid 中创建并且位置与预期一致
+    /// </summary>
+    private void EnsurePlayerGridCreatedAndAligned()
+    {
+        if (playerGridPrefab == null || midPanelTransform == null) return;
+
+        // 查找已存在的 Player 网格
+        Transform existing = midPanelTransform.Find("PlayerItemGrid");
+        RectTransform gridRT;
+        if (existing == null)
+        {
+            var go = Instantiate(playerGridPrefab, midPanelTransform);
+            go.name = "PlayerItemGrid";
+            gridRT = go.GetComponent<RectTransform>();
+        }
+        else
+        {
+            gridRT = existing.GetComponent<RectTransform>();
+        }
+
+        if (gridRT != null)
+        {
+            // 位置：BackpackMid中心向上偏移10
+            ApplyPlayerGridAlignment(gridRT);
+            // 保险：下一帧再次对齐，避免被其他初始化流程覆盖
+            StartCoroutine(AlignPlayerGridDeferred(gridRT));
+
+            // 若存在 ItemGrid，确保类型为 Player
+            var ig = gridRT.GetComponent<ItemGrid>();
+            if (ig != null)
+            {
+                ig.GridType = GridType.Player;
+                ig.GridName = string.IsNullOrEmpty(ig.GridName) ? "PlayerGrid" : ig.GridName;
+            }
+        }
+    }
+
+    private void ApplyPlayerGridAlignment(RectTransform gridRT)
+    {
+        if (gridRT == null) return;
+        gridRT.anchorMin = new Vector2(0.5f, 0.5f);
+        gridRT.anchorMax = new Vector2(0.5f, 0.5f);
+        gridRT.pivot = new Vector2(0.5f, 0.5f);
+        gridRT.anchoredPosition = new Vector2(-105f, 56f);
+    }
+
+    private IEnumerator AlignPlayerGridDeferred(RectTransform gridRT)
+    {
+        yield return null; // 下一帧
+        ApplyPlayerGridAlignment(gridRT);
     }
     
     /// <summary>

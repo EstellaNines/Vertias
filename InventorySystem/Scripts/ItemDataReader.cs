@@ -37,6 +37,15 @@ public class ItemDataReader : MonoBehaviour
     [SerializeField, FieldLabel("最大耐久度")] public int maxDurability;
     [SerializeField, FieldLabel("最大使用次数")] public int maxUsageCount;
     [SerializeField, FieldLabel("最大治疗量")] public int maxHealAmount;
+    [SerializeField, FieldLabel("恢复饱食度")] public int hungerRestore;
+    [SerializeField, FieldLabel("恢复精神值")] public int mentalRestore;
+
+    [Header("ES3 持久化（可选）")]
+    [SerializeField, FieldLabel("启用ES3持久化")] private bool enableES3Persistence = true;
+    [SerializeField, FieldLabel("ES3文件名")] private string es3File = "InventoryItems.es3";
+    [SerializeField, FieldLabel("变更时自动保存")] private bool autoSaveOnChange = true;
+    [SerializeField, FieldLabel("自动保存最小间隔(秒)")] private float autoSaveMinInterval = 1.0f;
+    private float lastAutoSaveTime = 0f;
 
     /// <summary>
     /// 获取物品数据
@@ -58,6 +67,9 @@ public class ItemDataReader : MonoBehaviour
     /// </summary>
     public int CurrentUsageCount => currentUsageCount;
 
+    // 运行时初始化标志，避免重复初始化覆盖动态数值（如治疗剩余量）
+    private bool runtimeInitialized = false;
+
     private void Awake()
     {
         // 自动查找UI组件
@@ -71,8 +83,11 @@ public class ItemDataReader : MonoBehaviour
 
     private void Start()
     {
-        // 初始化运行时数据
-        InitializeRuntimeData();
+        // 初始化运行时数据（首次，不保留运行时数值）
+        InitializeRuntimeData(false);
+
+        // 若启用ES3，尝试从存储恢复（基于当前位置/网格/物品ID）
+        TryLoadRuntimeFromES3();
 
         // 更新UI显示
         UpdateUI();
@@ -84,15 +99,22 @@ public class ItemDataReader : MonoBehaviour
     /// <param name="data">物品数据SO</param>
     public void SetItemData(ItemDataSO data)
     {
+        int previousId = itemData != null ? itemData.id : -1;
         itemData = data;
-        InitializeRuntimeData();
+        bool preserveRuntime = runtimeInitialized && previousId == data.id;
+        InitializeRuntimeData(preserveRuntime);
+
+        if (!preserveRuntime)
+        {
+            TryLoadRuntimeFromES3();
+        }
         UpdateUI();
     }
 
     /// <summary>
     /// 初始化运行时数据
     /// </summary>
-    private void InitializeRuntimeData()
+    private void InitializeRuntimeData(bool preserveRuntimeValues)
     {
         if (itemData == null) return;
 
@@ -101,35 +123,104 @@ public class ItemDataReader : MonoBehaviour
         gridHeight = itemData.height;
         gridSizeDisplay = $"{itemData.width} × {itemData.height}";
 
-        // 根据物品类型初始化运行时数据
-        // 🔧 修复：对于可堆叠物品，使用合适的初始值
-        if (itemData.IsStackable())
+        if (!preserveRuntimeValues)
         {
-            // 对于货币类物品，使用特殊的默认值
-            if (itemData.category == ItemCategory.Currency)
+            // 根据物品类型初始化运行时数据
+            // 🔧 修复：对于可堆叠物品，使用合适的初始值
+            if (itemData.IsStackable())
             {
-                currentStack = 50000; // 货币默认数量
-                currencyAmount = 50000;
+                // 对于货币类物品，使用特殊的默认值
+                if (itemData.category == ItemCategory.Currency)
+                {
+                    currentStack = 50000; // 货币默认数量
+                    currencyAmount = 50000;
+                }
+                else
+                {
+                    currentStack = 1; // 其他可堆叠物品默认为1
+                }
             }
             else
             {
-                currentStack = 1; // 其他可堆叠物品默认为1
+                currentStack = 1; // 不可堆叠物品固定为1
             }
+
+            currentDurability = itemData.durability;
+            currentUsageCount = itemData.usageCount;
+            currentHealAmount = itemData.maxHealAmount;
+            healPerUse = itemData.healPerUse;
+            hungerRestore = itemData.hungerRestore;
+            mentalRestore = itemData.mentalRestore;
         }
-        else
-        {
-            currentStack = 1; // 不可堆叠物品固定为1
-        }
-        
-        currentDurability = itemData.durability;
-        currentUsageCount = itemData.usageCount;
-        currentHealAmount = itemData.maxHealAmount;
-        healPerUse = itemData.healPerUse;
+
+        // 始终刷新只读/上限类字段
         intelligenceValue = itemData.intelligenceValue;
         maxStackAmount = itemData.maxStack;
         maxDurability = itemData.durability;
         maxUsageCount = itemData.usageCount;
         maxHealAmount = itemData.maxHealAmount;
+
+        runtimeInitialized = true;
+    }
+
+    private string GetES3KeyPrefix()
+    {
+        var item = GetComponent<Item>();
+        if (item == null || item.ItemDataReader == null || item.ItemDataReader.ItemData == null)
+            return null;
+
+        string gridGuid = item.OnGridReference != null ? item.OnGridReference.GridGUID : "nogrid";
+        Vector2Int pos = item.OnGridPosition;
+        int id = item.ItemDataReader.ItemData.id;
+        return $"grid/{gridGuid}/pos/{pos.x}_{pos.y}/id/{id}";
+    }
+
+    private void TryLoadRuntimeFromES3()
+    {
+        if (!enableES3Persistence) return;
+        string prefix = GetES3KeyPrefix();
+        if (string.IsNullOrEmpty(prefix)) return;
+
+        // 仅在存在数据时才加载，避免覆盖
+        if (ES3.KeyExists(prefix + ".currentHealAmount", es3File))
+        {
+            currentHealAmount = ES3.Load(prefix + ".currentHealAmount", es3File, currentHealAmount);
+        }
+        if (ES3.KeyExists(prefix + ".currentUsageCount", es3File))
+        {
+            currentUsageCount = ES3.Load(prefix + ".currentUsageCount", es3File, currentUsageCount);
+        }
+        if (ES3.KeyExists(prefix + ".currentDurability", es3File))
+        {
+            currentDurability = ES3.Load(prefix + ".currentDurability", es3File, currentDurability);
+        }
+        if (ES3.KeyExists(prefix + ".currentStack", es3File))
+        {
+            currentStack = ES3.Load(prefix + ".currentStack", es3File, currentStack);
+        }
+    }
+
+    private void MaybeAutoSaveRuntime()
+    {
+        if (!enableES3Persistence) return;
+        if (!autoSaveOnChange) return;
+        float t = Time.unscaledTime;
+        if (t - lastAutoSaveTime >= Mathf.Max(0.1f, autoSaveMinInterval))
+        {
+            SaveRuntimeToES3();
+            lastAutoSaveTime = t;
+        }
+    }
+
+    public void SaveRuntimeToES3()
+    {
+        if (!enableES3Persistence) return;
+        string prefix = GetES3KeyPrefix();
+        if (string.IsNullOrEmpty(prefix)) return;
+        ES3.Save(prefix + ".currentHealAmount", currentHealAmount, es3File);
+        ES3.Save(prefix + ".currentUsageCount", currentUsageCount, es3File);
+        ES3.Save(prefix + ".currentDurability", currentDurability, es3File);
+        ES3.Save(prefix + ".currentStack", currentStack, es3File);
     }
 
     /// <summary>

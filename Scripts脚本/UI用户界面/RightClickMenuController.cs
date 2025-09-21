@@ -23,6 +23,8 @@ public class RightClickMenuController : MonoBehaviour
 
     [Header("Behavior")]
     [SerializeField] private bool closeOnActionClick = true;
+    [Tooltip("为第三个按钮应用危险样式：红底白字，文本固定为 Discard")] 
+    [SerializeField] private bool styleThirdButtonAsDiscard = true;
 
     public System.Action RequestClose; // 对外暴露的关闭请求（由服务监听并实际关闭）
 
@@ -108,6 +110,12 @@ public class RightClickMenuController : MonoBehaviour
             var btn = _buttonPool[index];
             SetupButton(btn, actions[index]);
             btn.gameObject.SetActive(actions[index].Visible);
+
+            // 第三个按钮（索引2）设置红底白字，并将文本固定为 "Discard"
+            if (styleThirdButtonAsDiscard && index == 2)
+            {
+                ApplyDiscardStyle(btn);
+            }
         }
 
         for (; index < _buttonPool.Count; index++)
@@ -177,6 +185,27 @@ public class RightClickMenuController : MonoBehaviour
                 RequestClose?.Invoke();
             }
         });
+    }
+
+    private void ApplyDiscardStyle(Button btn)
+    {
+        var label = btn.GetComponentInChildren<TMP_Text>(true);
+        if (label != null)
+        {
+            label.text = "Discard";
+            label.color = Color.white;
+        }
+        var img = btn.GetComponent<Image>();
+        if (img != null)
+        {
+            img.color = new Color(0.8f, 0.1f, 0.1f, 1f); // 红色
+        }
+        var bgImg = btn.GetComponentInChildren<Image>(true);
+        if (bgImg != null && bgImg.gameObject != btn.gameObject)
+        {
+            // 如果背景在子级，亦设置为红色
+            bgImg.color = new Color(0.8f, 0.1f, 0.1f, 1f);
+        }
     }
 
     private void SetAnchoredPosition(Vector2 anchoredPosition)

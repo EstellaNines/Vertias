@@ -336,6 +336,14 @@ namespace InventorySystem.Editor
                 case ItemCategory.Hemostatic:
                     EditorGUILayout.LabelField("消耗品属性", EditorStyles.boldLabel);
                     EditorGUILayout.PropertyField(serializedObject.FindProperty("usageCount"), new GUIContent("使用次数"));
+                    if (itemData.category == ItemCategory.Food || itemData.category == ItemCategory.Drink)
+                    {
+                        EditorGUILayout.PropertyField(serializedObject.FindProperty("hungerRestore"), new GUIContent("恢复饱食度"));
+                    }
+                    if (itemData.category == ItemCategory.Sedative)
+                    {
+                        EditorGUILayout.PropertyField(serializedObject.FindProperty("mentalRestore"), new GUIContent("恢复精神值"));
+                    }
                     EditorGUILayout.PropertyField(serializedObject.FindProperty("maxStack"), new GUIContent("最大堆叠数量"));
                     break;
 
@@ -348,6 +356,8 @@ namespace InventorySystem.Editor
                     EditorGUILayout.LabelField("治疗属性", EditorStyles.boldLabel);
                     EditorGUILayout.PropertyField(serializedObject.FindProperty("maxHealAmount"), new GUIContent("最大治疗量"));
                     EditorGUILayout.PropertyField(serializedObject.FindProperty("healPerUse"), new GUIContent("单次治疗量"));
+                    EditorGUILayout.PropertyField(serializedObject.FindProperty("hungerRestore"), new GUIContent("恢复饱食度"));
+                    EditorGUILayout.PropertyField(serializedObject.FindProperty("mentalRestore"), new GUIContent("恢复精神值"));
                     EditorGUILayout.PropertyField(serializedObject.FindProperty("usageCount"), new GUIContent("使用次数"));
                     EditorGUILayout.PropertyField(serializedObject.FindProperty("maxStack"), new GUIContent("最大堆叠数量"));
                     break;

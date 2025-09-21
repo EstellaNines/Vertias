@@ -76,6 +76,8 @@ public class ItemDataMonitor : MonoBehaviour
         [FieldLabel("当前治疗量")] public int currentHealAmount;
         [FieldLabel("最大治疗量")] public int maxHealAmount;
         [FieldLabel("单次治疗量")] public int healPerUse;
+        [FieldLabel("恢复饱食度")] public int hungerRestore;
+        [FieldLabel("恢复精神值")] public int mentalRestore;
         [FieldLabel("情报值")] public int intelligenceValue;
         [FieldLabel("货币数量")] public int currencyAmount;
         
@@ -125,6 +127,8 @@ public class ItemDataMonitor : MonoBehaviour
                 currentHealAmount = reader.currentHealAmount;
                 maxHealAmount = reader.ItemData.maxHealAmount;
                 healPerUse = reader.ItemData.healPerUse;
+                hungerRestore = reader.ItemData.hungerRestore;
+                mentalRestore = reader.ItemData.mentalRestore;
                 intelligenceValue = reader.ItemData.intelligenceValue;
                 currencyAmount = reader.currencyAmount;
                 
