@@ -48,9 +48,22 @@ namespace InventorySystem.Mission
 				AutoFindMirrorSlotsIfNeeded();
 			}
 
+			// 给镜像槽添加排除标记，避免被真实系统注册/保存
+			AddExcludeFlag(backpackMirrorSlot);
+			AddExcludeFlag(rigMirrorSlot);
+
 			// 背包与挂具
 			MirrorOneSlot(EquipmentSlotType.Backpack, backpackMirrorSlot);
 			MirrorOneSlot(EquipmentSlotType.TacticalRig, rigMirrorSlot);
+		}
+
+		private void AddExcludeFlag(EquipmentSlot slot)
+		{
+			if (slot == null) return;
+			if (slot.GetComponent<ExcludeFromEquipmentSystem>() == null)
+			{
+				slot.gameObject.AddComponent<ExcludeFromEquipmentSystem>();
+			}
 		}
 
 		private void AutoFindMirrorSlotsIfNeeded()

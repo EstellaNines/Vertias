@@ -844,6 +844,8 @@ namespace InventorySystem
             foreach (var slot in allSceneSlots)
             {
                 if (slot == null || slot.config == null) continue;
+                // 跳过被标记为排除的镜像/临时槽
+                if (slot.GetComponent<ExcludeFromEquipmentSystem>() != null) continue;
                 var type = slot.config.slotType;
 
                 if (!slotTypeToBestSlot.TryGetValue(type, out var existing))

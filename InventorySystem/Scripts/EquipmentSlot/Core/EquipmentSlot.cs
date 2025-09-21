@@ -343,6 +343,8 @@ namespace InventorySystem
         /// <returns>是否装备成功</returns>
         public bool EquipItem(ItemDataReader item)
         {
+            // 被排除的槽（如任务镜像槽）仅用于显示，不参与全局事件/持久化
+            bool excluded = GetComponent<ExcludeFromEquipmentSystem>() != null;
             if (!CanAcceptItem(item))
             {
                 Debug.LogWarning($"[EquipmentSlot] 物品 {item.ItemData.itemName} 无法装备到 {config.slotName}");
@@ -426,8 +428,11 @@ namespace InventorySystem
                 needsSizeEnsureOnEnable = true;
             }
 
-            // 触发装备事件
-            OnItemEquipped?.Invoke(config.slotType, currentEquippedItem);
+            // 触发装备事件（跳过被排除的槽）
+            if (!excluded)
+            {
+                OnItemEquipped?.Invoke(config.slotType, currentEquippedItem);
+            }
 
             // 如果是容器类装备，激活容器功能
             if (config.isContainerSlot && currentEquippedItem.ItemData.IsContainer())
@@ -445,13 +450,14 @@ namespace InventorySystem
         /// <returns>卸下的物品</returns>
         public ItemDataReader UnequipItem()
         {
+            bool excluded = GetComponent<ExcludeFromEquipmentSystem>() != null;
             if (!isItemEquipped || currentEquippedItem == null) return null;
 
             var unequippedItem = currentEquippedItem;
             var unequippedItemInstance = currentItemInstance;
 
-            // 如果是容器类装备，先处理容器
-            if (config.isContainerSlot && containerGrid != null)
+            // 如果是容器类装备，先处理容器（排除镜像槽）
+            if (!excluded && config.isContainerSlot && containerGrid != null)
             {
                 DeactivateContainerGrid();
             }
@@ -488,8 +494,11 @@ namespace InventorySystem
                 if (weaponAmmoText != null) weaponAmmoText.text = string.Empty;
             }
 
-            // 触发卸装事件
-            OnItemUnequipped?.Invoke(config.slotType, unequippedItem);
+            // 触发卸装事件（跳过被排除的槽）
+            if (!excluded)
+            {
+                OnItemUnequipped?.Invoke(config.slotType, unequippedItem);
+            }
 
             Debug.Log($"[EquipmentSlot] 成功卸下 {unequippedItem?.ItemData?.itemName} 从 {config.slotName}");
             return unequippedItem;

@@ -263,6 +263,31 @@ namespace InventorySystem
                 return;
             }
             
+            // 排除带有 ExcludeFromEquipmentSystem 标记的槽（例如任务面板镜像槽）
+            if (slot.GetComponent<ExcludeFromEquipmentSystem>() != null)
+            {
+                if (showDebugInfo)
+                {
+                    Debug.Log($"[EquipmentSlotManager] 跳过注册被排除的槽: {slot.name}");
+                }
+                return;
+            }
+
+            // 如果该槽位处于任务镜像面板层级下，也跳过注册（即便镜像面板未激活）
+            try
+            {
+                var mirrorParent = slot.GetComponentInParent<InventorySystem.Mission.MissionAcceptEquipmentMirror>(true);
+                if (mirrorParent != null)
+                {
+                    if (showDebugInfo)
+                    {
+                        Debug.Log($"[EquipmentSlotManager] 跳过注册镜像面板下的槽: {slot.name}");
+                    }
+                    return;
+                }
+            }
+            catch { }
+
             if (slot.config == null)
             {
                 Debug.LogWarning($"[EquipmentSlotManager] 装备槽 '{slot.name}' 缺少配置数据，跳过注册");
