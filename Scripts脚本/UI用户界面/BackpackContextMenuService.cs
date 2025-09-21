@@ -25,11 +25,16 @@ public class BackpackContextMenuService : MonoBehaviour
 
     [Header("Options")]
     [SerializeField] private bool reuseMenuInstance = true;
+    [Tooltip("开启后，右键菜单打开时不使用全屏Blocker，从而不阻塞其他物品交互")] 
+    [SerializeField] private bool allowInteractionWhileMenuOpen = true;
+    [Tooltip("检测到菜单外部的交互后，延迟多少秒自动关闭菜单")] 
+    [SerializeField] private float autoHideDelayOnExternalInteraction = 0.5f;
 
     private Camera _uiCamera;
     private RightClickMenuController _menuInstance;
     private UIClickBlocker _blockerInstance;
     private RectTransform _menuRect;
+    private Coroutine _pendingHideRoutine;
 
     private void Awake()
     {
@@ -81,16 +86,23 @@ public class BackpackContextMenuService : MonoBehaviour
         Vector2 clamped = ClampToBounds(localPoint, menuSize, backpackPanelRect.rect);
         _menuRect.anchoredPosition = clamped;
 
-        // 显示 Blocker
+        // 非阻塞模式：不激活 Blocker；阻塞模式：激活 Blocker 用于点击空白处关闭
         if (_blockerInstance != null)
         {
             var go = _blockerInstance.gameObject;
-            go.SetActive(true);
-            go.transform.SetAsLastSibling();
+            bool useBlocker = !allowInteractionWhileMenuOpen;
+            go.SetActive(useBlocker);
+            if (useBlocker)
+            {
+                go.transform.SetAsLastSibling();
+            }
         }
 
         // 将菜单放到最前
         _menuRect.SetAsLastSibling();
+
+        // 打开新菜单时，取消任何待关闭协程
+        CancelPendingHide();
     }
 
     /// <summary>
@@ -106,6 +118,7 @@ public class BackpackContextMenuService : MonoBehaviour
         {
             _blockerInstance.gameObject.SetActive(false);
         }
+        CancelPendingHide();
     }
 
     private void EnsureInstances()
@@ -173,5 +186,71 @@ public class BackpackContextMenuService : MonoBehaviour
     private void OnDisable()
     {
         Hide();
+    }
+
+    private void Update()
+    {
+        if (!IsMenuVisible()) return;
+
+        // 仅在非阻塞模式下进行外部交互检测
+        if (!allowInteractionWhileMenuOpen) return;
+
+        // 鼠标按下或触摸开始即视为一次可能的外部交互
+        bool mouseDown = Input.GetMouseButtonDown(0) || Input.GetMouseButtonDown(1) || Input.GetMouseButtonDown(2);
+        bool touchBegan = false;
+        for (int i = 0; i < Input.touchCount; i++)
+        {
+            if (Input.GetTouch(i).phase == TouchPhase.Began)
+            {
+                touchBegan = true; break;
+            }
+        }
+
+        if (mouseDown || touchBegan)
+        {
+            // 若点击/触摸发生在菜单内部，则认为是菜单自身交互，忽略
+            if (IsPointerOverMenuRect()) return;
+
+            // 发生在菜单外部：允许其他交互正常进行，并在一段时间后自动关闭菜单
+            ScheduleHideDelayed(autoHideDelayOnExternalInteraction);
+        }
+    }
+
+    private bool IsMenuVisible()
+    {
+        return _menuInstance != null && _menuInstance.gameObject.activeSelf;
+    }
+
+    private bool IsPointerOverMenuRect()
+    {
+        if (_menuRect == null) return false;
+        Vector2 screenPos = Input.mousePosition;
+        return RectTransformUtility.RectangleContainsScreenPoint(_menuRect, screenPos, _uiCamera);
+    }
+
+    private void ScheduleHideDelayed(float delaySeconds)
+    {
+        if (delaySeconds <= 0f)
+        {
+            Hide();
+            return;
+        }
+        CancelPendingHide();
+        _pendingHideRoutine = StartCoroutine(HideAfterDelay(delaySeconds));
+    }
+
+    private System.Collections.IEnumerator HideAfterDelay(float delaySeconds)
+    {
+        yield return new WaitForSecondsRealtime(delaySeconds);
+        Hide();
+    }
+
+    private void CancelPendingHide()
+    {
+        if (_pendingHideRoutine != null)
+        {
+            StopCoroutine(_pendingHideRoutine);
+            _pendingHideRoutine = null;
+        }
     }
 }

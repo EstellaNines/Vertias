@@ -76,6 +76,8 @@ namespace InventorySystem
         [Header("治疗属性")]
         [FieldLabel("治疗量")]
         public int maxHealAmount = 0;           // 治疗量（治疗药物）
+        [FieldLabel("单次治疗量")]
+        public int healPerUse = 0;              // 每次使用的治疗量（治疗药物）
 
         [Header("情报属性")]
         [FieldLabel("情报值")]

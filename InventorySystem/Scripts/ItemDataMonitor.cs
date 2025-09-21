@@ -75,6 +75,7 @@ public class ItemDataMonitor : MonoBehaviour
         [FieldLabel("最大使用次数")] public int maxUsageCount;
         [FieldLabel("当前治疗量")] public int currentHealAmount;
         [FieldLabel("最大治疗量")] public int maxHealAmount;
+        [FieldLabel("单次治疗量")] public int healPerUse;
         [FieldLabel("情报值")] public int intelligenceValue;
         [FieldLabel("货币数量")] public int currencyAmount;
         
@@ -123,6 +124,7 @@ public class ItemDataMonitor : MonoBehaviour
                 maxUsageCount = reader.ItemData.usageCount;
                 currentHealAmount = reader.currentHealAmount;
                 maxHealAmount = reader.ItemData.maxHealAmount;
+                healPerUse = reader.ItemData.healPerUse;
                 intelligenceValue = reader.ItemData.intelligenceValue;
                 currencyAmount = reader.currencyAmount;
                 

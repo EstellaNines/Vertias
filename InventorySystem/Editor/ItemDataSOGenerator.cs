@@ -241,8 +241,8 @@ namespace InventorySystem.Editor
                     return;
                 }
 
-                // 重置计数器
-                globalIdCounter = 1L;
+                // 按现有资产初始化全局ID计数器（避免与已存在资产ID重叠）
+                InitializeGlobalIdCounterFromExisting();
 
                 // 确保输出目录存在
                 if (!Directory.Exists(outputPath))
@@ -331,6 +331,9 @@ namespace InventorySystem.Editor
                     Directory.CreateDirectory(outputPath);
                 }
 
+                // 按现有资产初始化全局ID计数器（避免与已存在资产ID重叠）
+                InitializeGlobalIdCounterFromExisting();
+
                 int total = 0; int done = 0;
 
                 foreach (var categoryPair in categories)
@@ -407,6 +410,7 @@ namespace InventorySystem.Editor
 
                 // 设置治疗属性
                 itemData.maxHealAmount = itemJson["maxHealAmount"]?.Value<int>() ?? 0;
+                itemData.healPerUse = itemJson["healPerUse"]?.Value<int>() ?? 0;
 
                 // 设置情报属性
                 itemData.intelligenceValue = itemJson["intelligenceValue"]?.Value<int>() ?? 0;
@@ -688,6 +692,57 @@ namespace InventorySystem.Editor
                               .Replace("）", "");
 
             return fileName;
+        }
+
+        /// <summary>
+        /// 初始化全局ID计数器为当前输出目录下已存在资产的最大GlobalId+1
+        /// </summary>
+        private void InitializeGlobalIdCounterFromExisting()
+        {
+            try
+            {
+                if (!Directory.Exists(outputPath))
+                {
+                    globalIdCounter = 1L;
+                    return;
+                }
+
+                long maxExisting = GetMaxExistingGlobalIdUnderPath(outputPath);
+                globalIdCounter = Math.Max(maxExisting + 1, 1L);
+                Debug.Log($"[ItemDataSOGenerator] GlobalId 初始化为 {globalIdCounter} (maxExisting={maxExisting})");
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"[ItemDataSOGenerator] 初始化 GlobalId 失败，回退为1: {e.Message}");
+                globalIdCounter = 1L;
+            }
+        }
+
+        /// <summary>
+        /// 扫描指定路径（含子目录）下的所有 ItemDataSO 资产，返回最大 GlobalId
+        /// </summary>
+        private long GetMaxExistingGlobalIdUnderPath(string rootPath)
+        {
+            long maxId = 0L;
+            try
+            {
+                string[] searchPaths = new[] { rootPath };
+                string[] guids = AssetDatabase.FindAssets($"t:{nameof(ItemDataSO)}", searchPaths);
+                foreach (string guid in guids)
+                {
+                    string assetPath = AssetDatabase.GUIDToAssetPath(guid);
+                    var data = AssetDatabase.LoadAssetAtPath<ItemDataSO>(assetPath);
+                    if (data != null && data.GlobalId > maxId)
+                    {
+                        maxId = data.GlobalId;
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"[ItemDataSOGenerator] 扫描最大 GlobalId 出错: {e.Message}");
+            }
+            return maxId;
         }
     }
 }

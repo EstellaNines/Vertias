@@ -30,6 +30,7 @@ public class ItemDataReader : MonoBehaviour
     [SerializeField, FieldLabel("当前耐久度")] public int currentDurability;
     [SerializeField, FieldLabel("当前使用次数")] public int currentUsageCount;
     [SerializeField, FieldLabel("当前治疗量")] public int currentHealAmount;
+    [SerializeField, FieldLabel("单次治疗量")] public int healPerUse;
     [SerializeField, FieldLabel("情报值")] public int intelligenceValue;
     [SerializeField, FieldLabel("货币数量")] public int currencyAmount;
     [SerializeField, FieldLabel("最大堆叠数")] public int maxStackAmount;
@@ -123,6 +124,7 @@ public class ItemDataReader : MonoBehaviour
         currentDurability = itemData.durability;
         currentUsageCount = itemData.usageCount;
         currentHealAmount = itemData.maxHealAmount;
+        healPerUse = itemData.healPerUse;
         intelligenceValue = itemData.intelligenceValue;
         maxStackAmount = itemData.maxStack;
         maxDurability = itemData.durability;
@@ -205,7 +207,7 @@ public class ItemDataReader : MonoBehaviour
 
             case ItemCategory.Healing:
                 // 治疗药物显示当前治疗量/最大治疗量
-                return itemData.maxHealAmount > 0 ? $"{itemData.maxHealAmount}/{itemData.maxHealAmount}" : "";
+                return itemData.maxHealAmount > 0 ? $"{currentHealAmount}/{itemData.maxHealAmount}" : "";
 
             case ItemCategory.Intelligence:
                 // 情报物品显示情报值
@@ -313,6 +315,26 @@ public class ItemDataReader : MonoBehaviour
         UpdateUI();
     
         return currentUsageCount <= 0;
+    }
+
+    /// <summary>
+    /// 使用一次治疗物品：按单次治疗量扣减当前治疗量
+    /// </summary>
+    /// <returns>是否已耗尽治疗量</returns>
+    public bool UseHealingOnce()
+    {
+        if (itemData == null || itemData.category != ItemCategory.Healing)
+            return false;
+
+        int amountPerUse = Mathf.Max(0, healPerUse);
+        if (amountPerUse <= 0)
+            return false;
+
+        int oldAmount = currentHealAmount;
+        currentHealAmount = Mathf.Max(0, currentHealAmount - amountPerUse);
+        UpdateUI();
+
+        return currentHealAmount <= 0 && oldAmount > 0;
     }
 
     /// <summary>

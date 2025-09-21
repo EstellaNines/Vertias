@@ -347,6 +347,7 @@ namespace InventorySystem.Editor
                 case ItemCategory.Healing:
                     EditorGUILayout.LabelField("治疗属性", EditorStyles.boldLabel);
                     EditorGUILayout.PropertyField(serializedObject.FindProperty("maxHealAmount"), new GUIContent("最大治疗量"));
+                    EditorGUILayout.PropertyField(serializedObject.FindProperty("healPerUse"), new GUIContent("单次治疗量"));
                     EditorGUILayout.PropertyField(serializedObject.FindProperty("usageCount"), new GUIContent("使用次数"));
                     EditorGUILayout.PropertyField(serializedObject.FindProperty("maxStack"), new GUIContent("最大堆叠数量"));
                     break;
