@@ -27,6 +27,10 @@ public class Player : MonoBehaviour
     [HideInInspector] public bool isHurt = false; // 是否受伤
     [HideInInspector] public bool isDead = false; // 是否死亡
 
+    // --- 数值组件 ---
+    [Header("数值组件")]
+    public PlayerVitalStats vitalStats; // 集中管理生命/饱食/精神
+
     // --- 输入系统 ---
     [Header("获取玩家输入系统")]
     [FieldLabel("输入系统获取")] public PlayerInputController playerInputController; // 获取玩家输入系统
@@ -120,10 +124,21 @@ public class Player : MonoBehaviour
         screenCenterX = Screen.width / 2f;
         CurrentSpeed = WalkSpeed; // 设置初始速度为行走速度
 
-        // 初始化生命值系统
-        CurrentHealth = MaxHealth;
-        CurrentHunger = MaxHunger;
-        CurrentMental = MaxMental;
+        // 数值组件初始化与同步（保持旧字段兼容 FillLine.cs）
+        if (vitalStats == null)
+        {
+            vitalStats = GetComponent<PlayerVitalStats>();
+            if (vitalStats == null) vitalStats = gameObject.AddComponent<PlayerVitalStats>();
+        }
+        vitalStats.InitializeFromDefaults(MaxHealth, MaxHunger, MaxMental);
+        // 订阅事件以同步旧字段与最大值
+        vitalStats.OnHealthChanged += (value, max) => { MaxHealth = max; CurrentHealth = value; isDead = (CurrentHealth <= 0f); };
+        vitalStats.OnHungerChanged += (value, max) => { MaxHunger = max; CurrentHunger = value; };
+        vitalStats.OnMentalChanged += (value, max) => { MaxMental = max; CurrentMental = value; };
+        // 初次同步到旧字段
+        MaxHealth = vitalStats.maxHealth; CurrentHealth = vitalStats.currentHealth;
+        MaxHunger = vitalStats.maxHunger; CurrentHunger = vitalStats.currentHunger;
+        MaxMental = vitalStats.maxMental; CurrentMental = vitalStats.currentMental;
 
         // 获取状态机
         InitializeStateMachine();
@@ -236,9 +251,15 @@ public class Player : MonoBehaviour
     {
         if (isDead) return; // 如果已死亡，不再受伤
 
-        // 扣除生命值
-        CurrentHealth -= damage;
-        CurrentHealth = Mathf.Max(0, CurrentHealth); // 确保生命值不低于0
+        // 通过数值组件结算伤害，事件会同步旧字段
+        if (vitalStats != null)
+        {
+            vitalStats.ApplyDamage(damage);
+        }
+        else
+        {
+            CurrentHealth = Mathf.Max(0, CurrentHealth - damage);
+        }
 
         // 设置受伤状态
         isHurt = true;
@@ -246,7 +267,7 @@ public class Player : MonoBehaviour
         hurtTimer = 0f; // 重置受伤计时器
 
         // 检查是否死亡
-        if (CurrentHealth <= 0)
+        if ((vitalStats != null && vitalStats.IsDead) || CurrentHealth <= 0)
         {
             isDead = true;
             transitionState(PlayerStateType.Die);

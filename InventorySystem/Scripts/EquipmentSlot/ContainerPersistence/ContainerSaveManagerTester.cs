@@ -4,159 +4,159 @@ using InventorySystem.Database;
 namespace InventorySystem
 {
     /// <summary>
-    /// ContainerSaveManager ²âÊÔÆ÷
-    /// ÓÃÓÚÑéÖ¤ÈİÆ÷³Ö¾Ã»¯¹¦ÄÜÊÇ·ñÕı³£¹¤×÷
+    /// ContainerSaveManager æµ‹è¯•å™¨
+    /// ç”¨äºéªŒè¯å®¹å™¨æŒä¹…åŒ–åŠŸèƒ½æ˜¯å¦æ­£å¸¸å·¥ä½œ
     /// </summary>
     public class ContainerSaveManagerTester : MonoBehaviour
     {
-        [Header("²âÊÔÉèÖÃ")]
-        [FieldLabel("×Ô¶¯ÔËĞĞ²âÊÔ")]
-        [Tooltip("³¡¾°Æô¶¯Ê±×Ô¶¯ÔËĞĞ»ù´¡¹¦ÄÜ²âÊÔ")]
+        [Header("æµ‹è¯•è®¾ç½®")]
+        [FieldLabel("è‡ªåŠ¨è¿è¡Œæµ‹è¯•")]
+        [Tooltip("åœºæ™¯å¯åŠ¨æ—¶è‡ªåŠ¨è¿è¡ŒåŸºç¡€åŠŸèƒ½æµ‹è¯•")]
         public bool autoRunTests = true;
         
-        [FieldLabel("ÏÔÊ¾ÏêÏ¸ÈÕÖ¾")]
-        [Tooltip("ÏÔÊ¾ÏêÏ¸µÄ²âÊÔ¹ı³ÌÈÕÖ¾")]
+        [FieldLabel("æ˜¾ç¤ºè¯¦ç»†æ—¥å¿—")]
+        [Tooltip("æ˜¾ç¤ºè¯¦ç»†çš„æµ‹è¯•è¿‡ç¨‹æ—¥å¿—")]
         public bool verboseLogging = true;
         
-        [Header("²âÊÔ½á¹û")]
-        [FieldLabel("×îºó²âÊÔ½á¹û")]
+        [Header("æµ‹è¯•ç»“æœ")]
+        [FieldLabel("æœ€åæµ‹è¯•ç»“æœ")]
         [SerializeField] private bool lastTestResult = false;
         
-        [FieldLabel("²âÊÔ×´Ì¬ĞÅÏ¢")]
-        [SerializeField] private string testStatusInfo = "Î´ÔËĞĞ²âÊÔ";
+        [FieldLabel("æµ‹è¯•çŠ¶æ€ä¿¡æ¯")]
+        [SerializeField] private string testStatusInfo = "æœªè¿è¡Œæµ‹è¯•";
         
         private void Start()
         {
             if (autoRunTests)
             {
-                // ÑÓ³ÙÖ´ĞĞ²âÊÔ£¬È·±£ËùÓĞÏµÍ³³õÊ¼»¯Íê³É
+                // å»¶è¿Ÿæ‰§è¡Œæµ‹è¯•ï¼Œç¡®ä¿æ‰€æœ‰ç³»ç»Ÿåˆå§‹åŒ–å®Œæˆ
                 Invoke(nameof(RunBasicTests), 1f);
             }
         }
         
         /// <summary>
-        /// ÔËĞĞ»ù´¡¹¦ÄÜ²âÊÔ
+        /// è¿è¡ŒåŸºç¡€åŠŸèƒ½æµ‹è¯•
         /// </summary>
-        [ContextMenu("ÔËĞĞ»ù´¡²âÊÔ")]
+        [ContextMenu("è¿è¡ŒåŸºç¡€æµ‹è¯•")]
         public void RunBasicTests()
         {
             StartCoroutine(RunBasicTestsCoroutine());
         }
         
         /// <summary>
-        /// ÔËĞĞ»ù´¡¹¦ÄÜ²âÊÔĞ­³Ì
+        /// è¿è¡ŒåŸºç¡€åŠŸèƒ½æµ‹è¯•åç¨‹
         /// </summary>
         private System.Collections.IEnumerator RunBasicTestsCoroutine()
         {
-            LogTest("=== ContainerSaveManager »ù´¡¹¦ÄÜ²âÊÔ¿ªÊ¼ ===");
+            LogTest("=== ContainerSaveManager åŸºç¡€åŠŸèƒ½æµ‹è¯•å¼€å§‹ ===");
             
             bool allTestsPassed = true;
             
-            // ²âÊÔ1: ¼ì²éµ¥ÀıÊµÀı
+            // æµ‹è¯•1: æ£€æŸ¥å•ä¾‹å®ä¾‹
             allTestsPassed &= TestSingletonInstance();
             
-            // ²âÊÔ2: ¼ì²éÊı¾İ½á¹¹
+            // æµ‹è¯•2: æ£€æŸ¥æ•°æ®ç»“æ„
             allTestsPassed &= TestDataStructures();
             
-            // ²âÊÔ3: ¼ì²éEquipmentSlot¼¯³É
+            // æµ‹è¯•3: æ£€æŸ¥EquipmentSloté›†æˆ
             allTestsPassed &= TestEquipmentSlotIntegration();
             
-            // ²âÊÔ4: ¼ì²éPlayerPrefs²Ù×÷
+            // æµ‹è¯•4: æ£€æŸ¥PlayerPrefsæ“ä½œ
             allTestsPassed &= TestES3Operations();
             
-            // ²âÊÔ5: ¼ì²éItemDatabaseºÍItemDataSOÏµÍ³
+            // æµ‹è¯•5: æ£€æŸ¥ItemDatabaseå’ŒItemDataSOç³»ç»Ÿ
             yield return StartCoroutine(TestItemDatabaseSystemCoroutine());
             
-            // ¸üĞÂ²âÊÔ½á¹û
+            // æ›´æ–°æµ‹è¯•ç»“æœ
             lastTestResult = allTestsPassed;
-            testStatusInfo = allTestsPassed ? "ËùÓĞ²âÊÔÍ¨¹ı" : "²¿·Ö²âÊÔÊ§°Ü";
+            testStatusInfo = allTestsPassed ? "æ‰€æœ‰æµ‹è¯•é€šè¿‡" : "éƒ¨åˆ†æµ‹è¯•å¤±è´¥";
             
-            LogTest($"=== ²âÊÔÍê³É£¬×ÜÌå½á¹û: {(allTestsPassed ? "7¼3 Í¨¹ı" : "7Ã4 Ê§°Ü")} ===");
+            LogTest($"=== æµ‹è¯•å®Œæˆï¼Œæ€»ä½“ç»“æœ: {(allTestsPassed ? "ï¿½7ï¿½3 é€šè¿‡" : "ï¿½7ï¿½4 å¤±è´¥")} ===");
         }
         
         /// <summary>
-        /// ²âÊÔµ¥ÀıÊµÀı´´½¨
+        /// æµ‹è¯•å•ä¾‹å®ä¾‹åˆ›å»º
         /// </summary>
         private bool TestSingletonInstance()
         {
-            LogTest("--- ²âÊÔ1: µ¥ÀıÊµÀı´´½¨ ---");
+            LogTest("--- æµ‹è¯•1: å•ä¾‹å®ä¾‹åˆ›å»º ---");
             
             try
             {
                 var instance = ContainerSaveManager.Instance;
                 if (instance != null)
                 {
-                    LogTest("7¼3 ContainerSaveManager µ¥ÀıÊµÀı´´½¨³É¹¦");
+                    LogTest("ï¿½7ï¿½3 ContainerSaveManager å•ä¾‹å®ä¾‹åˆ›å»ºæˆåŠŸ");
                     return true;
                 }
                 else
                 {
-                    LogTest("7Ã4 ContainerSaveManager µ¥ÀıÊµÀı´´½¨Ê§°Ü");
+                    LogTest("ï¿½7ï¿½4 ContainerSaveManager å•ä¾‹å®ä¾‹åˆ›å»ºå¤±è´¥");
                     return false;
                 }
             }
             catch (System.Exception e)
             {
-                LogTest($"7Ã4 µ¥ÀıÊµÀı²âÊÔÒì³£: {e.Message}");
+                LogTest($"ï¿½7ï¿½4 å•ä¾‹å®ä¾‹æµ‹è¯•å¼‚å¸¸: {e.Message}");
                 return false;
             }
         }
         
         /// <summary>
-        /// ²âÊÔÊı¾İ½á¹¹
+        /// æµ‹è¯•æ•°æ®ç»“æ„
         /// </summary>
         private bool TestDataStructures()
         {
-            LogTest("--- ²âÊÔ2: Êı¾İ½á¹¹ÑéÖ¤ ---");
+            LogTest("--- æµ‹è¯•2: æ•°æ®ç»“æ„éªŒè¯ ---");
             
             try
             {
-                // ²âÊÔContainerSaveData¹¹Ôì
+                // æµ‹è¯•ContainerSaveDataæ„é€ 
                 var saveData = new ContainerSaveData();
                 if (saveData.containerItems != null)
                 {
-                    LogTest("7¼3 ContainerSaveData ¹¹Ôì³É¹¦");
+                    LogTest("ï¿½7ï¿½3 ContainerSaveData æ„é€ æˆåŠŸ");
                 }
                 else
                 {
-                    LogTest("7Ã4 ContainerSaveData ¹¹ÔìÊ§°Ü");
+                    LogTest("ï¿½7ï¿½4 ContainerSaveData æ„é€ å¤±è´¥");
                     return false;
                 }
                 
-                // ²âÊÔContainerSaveDataCollection¹¹Ôì
+                // æµ‹è¯•ContainerSaveDataCollectionæ„é€ 
                 var collection = new ContainerSaveDataCollection();
                 if (collection.containers != null)
                 {
-                    LogTest("7¼3 ContainerSaveDataCollection ¹¹Ôì³É¹¦");
+                    LogTest("ï¿½7ï¿½3 ContainerSaveDataCollection æ„é€ æˆåŠŸ");
                     return true;
                 }
                 else
                 {
-                    LogTest("7Ã4 ContainerSaveDataCollection ¹¹ÔìÊ§°Ü");
+                    LogTest("ï¿½7ï¿½4 ContainerSaveDataCollection æ„é€ å¤±è´¥");
                     return false;
                 }
             }
             catch (System.Exception e)
             {
-                LogTest($"7Ã4 Êı¾İ½á¹¹²âÊÔÒì³£: {e.Message}");
+                LogTest($"ï¿½7ï¿½4 æ•°æ®ç»“æ„æµ‹è¯•å¼‚å¸¸: {e.Message}");
                 return false;
             }
         }
         
         /// <summary>
-        /// ²âÊÔÓëEquipmentSlotµÄ¼¯³É
+        /// æµ‹è¯•ä¸EquipmentSlotçš„é›†æˆ
         /// </summary>
         private bool TestEquipmentSlotIntegration()
         {
-            LogTest("--- ²âÊÔ3: EquipmentSlot¼¯³É¼ì²é ---");
+            LogTest("--- æµ‹è¯•3: EquipmentSloté›†æˆæ£€æŸ¥ ---");
             
             var equipmentSlots = FindObjectsOfType<EquipmentSlot>();
-            LogTest($"ÕÒµ½ {equipmentSlots.Length} ¸ö×°±¸²Û");
+            LogTest($"æ‰¾åˆ° {equipmentSlots.Length} ä¸ªè£…å¤‡æ§½");
             
             if (equipmentSlots.Length == 0)
             {
-                LogTest("7²2„1‚5 ³¡¾°ÖĞÃ»ÓĞEquipmentSlot£¬Ìø¹ı¼¯³É²âÊÔ");
-                return true; // ²»ËãÊ§°Ü£¬Ö»ÊÇÃ»ÓĞ²âÊÔ¶ÔÏó
+                LogTest("ï¿½7ï¿½2ï¿½1ï¿½5 åœºæ™¯ä¸­æ²¡æœ‰EquipmentSlotï¼Œè·³è¿‡é›†æˆæµ‹è¯•");
+                return true; // ä¸ç®—å¤±è´¥ï¼Œåªæ˜¯æ²¡æœ‰æµ‹è¯•å¯¹è±¡
             }
             
             int containerSlotCount = 0;
@@ -166,81 +166,81 @@ namespace InventorySystem
                     slot.SlotType == EquipmentSlotType.TacticalRig)
                 {
                     containerSlotCount++;
-                    LogTest($"ÕÒµ½ÈİÆ÷ÀàĞÍ×°±¸²Û: {slot.SlotName} ({slot.SlotType})");
+                    LogTest($"æ‰¾åˆ°å®¹å™¨ç±»å‹è£…å¤‡æ§½: {slot.SlotName} ({slot.SlotType})");
                 }
             }
             
-            LogTest($"7¼3 ÕÒµ½ {containerSlotCount} ¸öÈİÆ÷ÀàĞÍ×°±¸²Û");
+            LogTest($"ï¿½7ï¿½3 æ‰¾åˆ° {containerSlotCount} ä¸ªå®¹å™¨ç±»å‹è£…å¤‡æ§½");
             return true;
         }
         
         /// <summary>
-        /// ²âÊÔPlayerPrefs²Ù×÷
+        /// æµ‹è¯•PlayerPrefsæ“ä½œ
         /// </summary>
         private bool TestES3Operations()
         {
-            LogTest("--- ²âÊÔ4: ES3±£´æÏµÍ³²Ù×÷²âÊÔ ---");
+            LogTest("--- æµ‹è¯•4: ES3ä¿å­˜ç³»ç»Ÿæ“ä½œæµ‹è¯• ---");
             
             try
             {
                 var manager = ContainerSaveManager.Instance;
                 
-                // ²âÊÔÍ³¼ÆĞÅÏ¢»ñÈ¡
+                // æµ‹è¯•ç»Ÿè®¡ä¿¡æ¯è·å–
                 string stats = manager.GetContainerStats();
-                LogTest($"”9İ6 ÈİÆ÷Í³¼ÆĞÅÏ¢: {stats}");
+                LogTest($"ï¿½9ï¿½6 å®¹å™¨ç»Ÿè®¡ä¿¡æ¯: {stats}");
                 
-                // ²âÊÔÊÖ¶¯±£´æ¹¦ÄÜ
+                // æµ‹è¯•æ‰‹åŠ¨ä¿å­˜åŠŸèƒ½
                 manager.ManualSave();
-                LogTest("7¼3 ÊÖ¶¯±£´æ¹¦ÄÜ²âÊÔ³É¹¦");
+                LogTest("ï¿½7ï¿½3 æ‰‹åŠ¨ä¿å­˜åŠŸèƒ½æµ‹è¯•æˆåŠŸ");
                 
-                // ²âÊÔÊÖ¶¯¼ÓÔØ¹¦ÄÜ
+                // æµ‹è¯•æ‰‹åŠ¨åŠ è½½åŠŸèƒ½
                 manager.ManualLoad();
-                LogTest("7¼3 ÊÖ¶¯¼ÓÔØ¹¦ÄÜ²âÊÔ³É¹¦");
+                LogTest("ï¿½7ï¿½3 æ‰‹åŠ¨åŠ è½½åŠŸèƒ½æµ‹è¯•æˆåŠŸ");
                 
-                // ×¢Òâ£º²»ÔÚÔËĞĞÊ±ÇåÀíÊı¾İ£¬ÒÔÃâÓ°ÏìÓÃ»§±£´æµÄÈİÆ÷ÄÚÈİ
+                // æ³¨æ„ï¼šä¸åœ¨è¿è¡Œæ—¶æ¸…ç†æ•°æ®ï¼Œä»¥å…å½±å“ç”¨æˆ·ä¿å­˜çš„å®¹å™¨å†…å®¹
                 if (Application.isEditor && !Application.isPlaying)
                 {
-                    // Ö»ÔÚ±à¼­Æ÷·ÇÔËĞĞÄ£Ê½ÏÂ²âÊÔÇåÀí¹¦ÄÜ
+                    // åªåœ¨ç¼–è¾‘å™¨éè¿è¡Œæ¨¡å¼ä¸‹æµ‹è¯•æ¸…ç†åŠŸèƒ½
                     manager.ClearAllContainerData();
-                    LogTest("7¼3 ClearAllContainerData Ö´ĞĞ³É¹¦£¨½öÏŞ±à¼­Æ÷Ä£Ê½£©");
+                    LogTest("ï¿½7ï¿½3 ClearAllContainerData æ‰§è¡ŒæˆåŠŸï¼ˆä»…é™ç¼–è¾‘å™¨æ¨¡å¼ï¼‰");
                 }
                 else
                 {
-                    LogTest("7²2„1‚5 Ìø¹ıÊı¾İÇåÀí²âÊÔ£¨±£»¤ÔËĞĞÊ±ÈİÆ÷Êı¾İ£©");
+                    LogTest("ï¿½7ï¿½2ï¿½1ï¿½5 è·³è¿‡æ•°æ®æ¸…ç†æµ‹è¯•ï¼ˆä¿æŠ¤è¿è¡Œæ—¶å®¹å™¨æ•°æ®ï¼‰");
                 }
                 
                 return true;
             }
             catch (System.Exception e)
             {
-                LogTest($"7Ã4 ES3²Ù×÷²âÊÔÒì³£: {e.Message}");
+                LogTest($"ï¿½7ï¿½4 ES3æ“ä½œæµ‹è¯•å¼‚å¸¸: {e.Message}");
                 return false;
             }
         }
         
         /// <summary>
-        /// »ñÈ¡ÏµÍ³×´Ì¬ĞÅÏ¢
+        /// è·å–ç³»ç»ŸçŠ¶æ€ä¿¡æ¯
         /// </summary>
-        [ContextMenu("ÏÔÊ¾ÏµÍ³×´Ì¬")]
+        [ContextMenu("æ˜¾ç¤ºç³»ç»ŸçŠ¶æ€")]
         public void ShowSystemStatus()
         {
-            LogTest("=== ContainerSaveManager ÏµÍ³×´Ì¬ ===");
+            LogTest("=== ContainerSaveManager ç³»ç»ŸçŠ¶æ€ ===");
             
             var manager = ContainerSaveManager.Instance;
             if (manager != null)
             {
-                LogTest("7¼3 ContainerSaveManager ÊµÀı´æÔÚ");
-                LogTest($"ÊµÀı¶ÔÏóÃû³Æ: {manager.gameObject.name}");
-                LogTest($"ÊµÀıÊÇ·ñ¼¤»î: {manager.gameObject.activeInHierarchy}");
+                LogTest("ï¿½7ï¿½3 ContainerSaveManager å®ä¾‹å­˜åœ¨");
+                LogTest($"å®ä¾‹å¯¹è±¡åç§°: {manager.gameObject.name}");
+                LogTest($"å®ä¾‹æ˜¯å¦æ¿€æ´»: {manager.gameObject.activeInHierarchy}");
             }
             else
             {
-                LogTest("7Ã4 ContainerSaveManager ÊµÀı²»´æÔÚ");
+                LogTest("ï¿½7ï¿½4 ContainerSaveManager å®ä¾‹ä¸å­˜åœ¨");
             }
             
-            // ¼ì²é×°±¸²Û×´Ì¬
+            // æ£€æŸ¥è£…å¤‡æ§½çŠ¶æ€
             var equipmentSlots = FindObjectsOfType<EquipmentSlot>();
-            LogTest($"µ±Ç°³¡¾°×°±¸²ÛÊıÁ¿: {equipmentSlots.Length}");
+            LogTest($"å½“å‰åœºæ™¯è£…å¤‡æ§½æ•°é‡: {equipmentSlots.Length}");
             
             foreach (var slot in equipmentSlots)
             {
@@ -249,27 +249,27 @@ namespace InventorySystem
         }
         
         /// <summary>
-        /// ÇåÀí²âÊÔÊı¾İ
+        /// æ¸…ç†æµ‹è¯•æ•°æ®
         /// </summary>
-        [ContextMenu("ÇåÀí²âÊÔÊı¾İ")]
+        [ContextMenu("æ¸…ç†æµ‹è¯•æ•°æ®")]
         public void ClearTestData()
         {
-            LogTest("ÇåÀíËùÓĞÈİÆ÷²âÊÔÊı¾İ...");
+            LogTest("æ¸…ç†æ‰€æœ‰å®¹å™¨æµ‹è¯•æ•°æ®...");
             
             try
             {
                 var manager = ContainerSaveManager.Instance;
                 manager.ClearAllContainerData();
-                LogTest("7¼3 ²âÊÔÊı¾İÇåÀíÍê³É");
+                LogTest("ï¿½7ï¿½3 æµ‹è¯•æ•°æ®æ¸…ç†å®Œæˆ");
             }
             catch (System.Exception e)
             {
-                LogTest($"7Ã4 ÇåÀí²âÊÔÊı¾İÊ§°Ü: {e.Message}");
+                LogTest($"ï¿½7ï¿½4 æ¸…ç†æµ‹è¯•æ•°æ®å¤±è´¥: {e.Message}");
             }
         }
         
         /// <summary>
-        /// ¼ÇÂ¼²âÊÔÈÕÖ¾
+        /// è®°å½•æµ‹è¯•æ—¥å¿—
         /// </summary>
         private void LogTest(string message)
         {
@@ -279,7 +279,7 @@ namespace InventorySystem
             }
         }
         
-        #region ±à¼­Æ÷¹¤¾ß
+        #region ç¼–è¾‘å™¨å·¥å…·
         
 #if UNITY_EDITOR
         [UnityEditor.MenuItem("Tools/Inventory System/Container Save Manager/Run Tests", false, 500)]
@@ -288,7 +288,7 @@ namespace InventorySystem
             var tester = FindObjectOfType<ContainerSaveManagerTester>();
             if (tester == null)
             {
-                Debug.LogWarning("³¡¾°ÖĞÎ´ÕÒµ½ ContainerSaveManagerTester ×é¼ş");
+                Debug.LogWarning("åœºæ™¯ä¸­æœªæ‰¾åˆ° ContainerSaveManagerTester ç»„ä»¶");
                 return;
             }
             
@@ -301,7 +301,7 @@ namespace InventorySystem
             var tester = FindObjectOfType<ContainerSaveManagerTester>();
             if (tester == null)
             {
-                Debug.LogWarning("³¡¾°ÖĞÎ´ÕÒµ½ ContainerSaveManagerTester ×é¼ş");
+                Debug.LogWarning("åœºæ™¯ä¸­æœªæ‰¾åˆ° ContainerSaveManagerTester ç»„ä»¶");
                 return;
             }
             
@@ -314,7 +314,7 @@ namespace InventorySystem
             var tester = FindObjectOfType<ContainerSaveManagerTester>();
             if (tester == null)
             {
-                Debug.LogWarning("³¡¾°ÖĞÎ´ÕÒµ½ ContainerSaveManagerTester ×é¼ş");
+                Debug.LogWarning("åœºæ™¯ä¸­æœªæ‰¾åˆ° ContainerSaveManagerTester ç»„ä»¶");
                 return;
             }
             
@@ -323,57 +323,57 @@ namespace InventorySystem
 #endif
         
         /// <summary>
-        /// ²âÊÔItemDatabaseºÍItemDataSOÏµÍ³
+        /// æµ‹è¯•ItemDatabaseå’ŒItemDataSOç³»ç»Ÿ
         /// </summary>
         private System.Collections.IEnumerator TestItemDatabaseSystemCoroutine()
         {
-            LogTest("--- ²âÊÔ5: ItemDatabaseºÍItemDataSOÏµÍ³²âÊÔ ---");
+            LogTest("--- æµ‹è¯•5: ItemDatabaseå’ŒItemDataSOç³»ç»Ÿæµ‹è¯• ---");
             
-            // Ê¹ÓÃÊµÀı±äÁ¿¶ø²»ÊÇ¾Ö²¿±äÁ¿
+            // ä½¿ç”¨å®ä¾‹å˜é‡è€Œä¸æ˜¯å±€éƒ¨å˜é‡
             bool databaseTestPassed = true;
             
-            // »ù´¡²âÊÔ²¿·Ö£¨ÔÚtry-catchÖĞ£¬²»º¬yield£©
+            // åŸºç¡€æµ‹è¯•éƒ¨åˆ†ï¼ˆåœ¨try-catchä¸­ï¼Œä¸å«yieldï¼‰
             ItemDataSO item1402 = null;
             bool basicTestsPassed = true;
             
             try
             {
-                // ²âÊÔItemDatabase³õÊ¼»¯
+                // æµ‹è¯•ItemDatabaseåˆå§‹åŒ–
                 if (!ItemDatabase.Instance.IsInitialized)
                 {
-                    LogTest("ItemDatabaseÎ´³õÊ¼»¯£¬³¢ÊÔ³õÊ¼»¯...");
+                    LogTest("ItemDatabaseæœªåˆå§‹åŒ–ï¼Œå°è¯•åˆå§‹åŒ–...");
                     ItemDatabase.Instance.InitializeDatabase();
                 }
                 
                 if (ItemDatabase.Instance.IsInitialized)
                 {
-                    LogTest($"7¼3 ItemDatabaseÒÑ³õÊ¼»¯£¬°üº¬ {ItemDatabase.Instance.TotalItemCount} ¸öÎïÆ·");
+                    LogTest($"ï¿½7ï¿½3 ItemDatabaseå·²åˆå§‹åŒ–ï¼ŒåŒ…å« {ItemDatabase.Instance.TotalItemCount} ä¸ªç‰©å“");
                 }
                 else
                 {
-                    LogTest("7Ã4 ItemDatabase³õÊ¼»¯Ê§°Ü");
+                    LogTest("ï¿½7ï¿½4 ItemDatabaseåˆå§‹åŒ–å¤±è´¥");
                     databaseTestPassed = false;
-                    LogTest($"7¼3 ItemDatabaseÏµÍ³²âÊÔÍê³É");
-                    LogTest($"=== ²âÊÔÍê³É£¬×ÜÌå½á¹û: {(databaseTestPassed ? "7¼3 Í¨¹ı" : "7Ã4 Ê§°Ü")} ===");
+                    LogTest($"ï¿½7ï¿½3 ItemDatabaseç³»ç»Ÿæµ‹è¯•å®Œæˆ");
+                    LogTest($"=== æµ‹è¯•å®Œæˆï¼Œæ€»ä½“ç»“æœ: {(databaseTestPassed ? "ï¿½7ï¿½3 é€šè¿‡" : "ï¿½7ï¿½4 å¤±è´¥")} ===");
                     yield break;
                 }
                 
-                // ²âÊÔÒÑÖªÎïÆ·µÄ²éÕÒ (ID=1402)
-                LogTest("²âÊÔÌØÊâÎïÆ·²éÕÒ (ID=1402)...");
+                // æµ‹è¯•å·²çŸ¥ç‰©å“çš„æŸ¥æ‰¾ (ID=1402)
+                LogTest("æµ‹è¯•ç‰¹æ®Šç‰©å“æŸ¥æ‰¾ (ID=1402)...");
                 item1402 = FindItemByID(1402);
                 if (item1402 != null)
                 {
-                    LogTest($"7¼3 ÕÒµ½ID=1402µÄÎïÆ·: {item1402.itemName} (Àà±ğ: {item1402.category}, GlobalId: {item1402.GlobalId})");
+                    LogTest($"ï¿½7ï¿½3 æ‰¾åˆ°ID=1402çš„ç‰©å“: {item1402.itemName} (ç±»åˆ«: {item1402.category}, GlobalId: {item1402.GlobalId})");
                 }
                 else
                 {
-                    LogTest("7Ã4 Î´ÕÒµ½ID=1402µÄÎïÆ·");
+                    LogTest("ï¿½7ï¿½4 æœªæ‰¾åˆ°ID=1402çš„ç‰©å“");
                     databaseTestPassed = false;
                 }
                 
-                // ²âÊÔ¼¸¸ö²»Í¬Àà±ğµÄÎïÆ·
-                int[] testIds = { 101, 401, 1401, 1402, 601 }; // Í·¿ø¡¢±³°ü¡¢ÌØÊâÎïÆ·¡¢µ¯Ò©
-                LogTest("²âÊÔ¶à¸öÎïÆ·Àà±ğ...");
+                // æµ‹è¯•å‡ ä¸ªä¸åŒç±»åˆ«çš„ç‰©å“
+                int[] testIds = { 101, 401, 1401, 1402, 601 }; // å¤´ç›”ã€èƒŒåŒ…ã€ç‰¹æ®Šç‰©å“ã€å¼¹è¯
+                LogTest("æµ‹è¯•å¤šä¸ªç‰©å“ç±»åˆ«...");
                 
                 foreach (int testId in testIds)
                 {
@@ -384,48 +384,48 @@ namespace InventorySystem
                     }
                     else
                     {
-                        LogTest($"  ID={testId}: Î´ÕÒµ½");
+                        LogTest($"  ID={testId}: æœªæ‰¾åˆ°");
                     }
                 }
                 
-                // ¶îÍâ²âÊÔ£ºÏÔÊ¾Êı¾İ¿âÖĞÇ°¼¸¸öÎïÆ·µÄID¶ÔÓ¦¹ØÏµ
-                LogTest("Êı¾İ¿âÎïÆ·ID¶ÔÓ¦¹ØÏµÊ¾Àı:");
+                // é¢å¤–æµ‹è¯•ï¼šæ˜¾ç¤ºæ•°æ®åº“ä¸­å‰å‡ ä¸ªç‰©å“çš„IDå¯¹åº”å…³ç³»
+                LogTest("æ•°æ®åº“ç‰©å“IDå¯¹åº”å…³ç³»ç¤ºä¾‹:");
                 var allItems = ItemDatabase.Instance.GetAllItems();
                 for (int i = 0; i < Mathf.Min(5, allItems.Count); i++)
                 {
                     var item = allItems[i];
-                    LogTest($"  Ê¾Àı{i+1}: ID={item.id}, GlobalId={item.GlobalId}, Ãû³Æ={item.itemName}");
+                    LogTest($"  ç¤ºä¾‹{i+1}: ID={item.id}, GlobalId={item.GlobalId}, åç§°={item.itemName}");
                 }
                 
-                // ²âÊÔÎïÆ·´´½¨ÄÜÁ¦£¨Ä£Äâ´´½¨£©
-                LogTest("²âÊÔÎïÆ·´´½¨ÏµÍ³¼æÈİĞÔ...");
+                // æµ‹è¯•ç‰©å“åˆ›å»ºèƒ½åŠ›ï¼ˆæ¨¡æ‹Ÿåˆ›å»ºï¼‰
+                LogTest("æµ‹è¯•ç‰©å“åˆ›å»ºç³»ç»Ÿå…¼å®¹æ€§...");
                 if (item1402 != null)
                 {
-                    // ²âÊÔÄÜ·ñ»ñÈ¡µ½´´½¨ÎïÆ·ËùĞèµÄ»ù±¾ĞÅÏ¢
+                    // æµ‹è¯•èƒ½å¦è·å–åˆ°åˆ›å»ºç‰©å“æ‰€éœ€çš„åŸºæœ¬ä¿¡æ¯
                     bool hasValidData = !string.IsNullOrEmpty(item1402.itemName) && 
                                        item1402.width > 0 && 
                                        item1402.height > 0;
                     
                     if (hasValidData)
                     {
-                        LogTest($"7¼3 ÎïÆ·Êı¾İÍêÕû£¬¿ÉÓÃÓÚ´´½¨ÊµÀı");
-                        LogTest($"  ³ß´ç: {item1402.width}x{item1402.height}");
-                        LogTest($"  ×î´ó¶Ñµş: {item1402.maxStack}");
+                        LogTest($"ï¿½7ï¿½3 ç‰©å“æ•°æ®å®Œæ•´ï¼Œå¯ç”¨äºåˆ›å»ºå®ä¾‹");
+                        LogTest($"  å°ºå¯¸: {item1402.width}x{item1402.height}");
+                        LogTest($"  æœ€å¤§å †å : {item1402.maxStack}");
                         LogTest($"  GlobalId: {item1402.GlobalId}");
                         
-                        // ²âÊÔ±³¾°ÑÕÉ«ºÍÍ¼±êÊÇ·ñ´æÔÚ
+                        // æµ‹è¯•èƒŒæ™¯é¢œè‰²å’Œå›¾æ ‡æ˜¯å¦å­˜åœ¨
                         if (item1402.itemIcon != null)
                         {
-                            LogTest($"  Í¼±ê: 7¼3 ÒÑÉèÖÃ");
+                            LogTest($"  å›¾æ ‡: ï¿½7ï¿½3 å·²è®¾ç½®");
                         }
                         else
                         {
-                            LogTest($"  Í¼±ê: 7Ã4 Î´ÉèÖÃ");
+                            LogTest($"  å›¾æ ‡: ï¿½7ï¿½4 æœªè®¾ç½®");
                         }
                     }
                     else
                     {
-                        LogTest("7Ã4 ÎïÆ·Êı¾İ²»ÍêÕû");
+                        LogTest("ï¿½7ï¿½4 ç‰©å“æ•°æ®ä¸å®Œæ•´");
                         databaseTestPassed = false;
                         basicTestsPassed = false;
                     }
@@ -435,21 +435,21 @@ namespace InventorySystem
                     basicTestsPassed = false;
                 }
                 
-                LogTest($"7¼3 ItemDatabase»ù´¡²âÊÔÍê³É");
+                LogTest($"ï¿½7ï¿½3 ItemDatabaseåŸºç¡€æµ‹è¯•å®Œæˆ");
             }
             catch (System.Exception e)
             {
-                LogTest($"7Ã4 ItemDatabaseÏµÍ³²âÊÔÊ§°Ü: {e.Message}");
+                LogTest($"ï¿½7ï¿½4 ItemDatabaseç³»ç»Ÿæµ‹è¯•å¤±è´¥: {e.Message}");
                 databaseTestPassed = false;
                 basicTestsPassed = false;
             }
             
-            // Ğ­³Ì²âÊÔ²¿·Ö£¨ÒÆ³ötry-catch¿é£©
+            // åç¨‹æµ‹è¯•éƒ¨åˆ†ï¼ˆç§»å‡ºtry-catchå—ï¼‰
             if (basicTestsPassed && item1402 != null && ContainerSaveManager.Instance != null)
             {
-                LogTest("²âÊÔÊµ¼ÊÎïÆ·´´½¨...");
+                LogTest("æµ‹è¯•å®é™…ç‰©å“åˆ›å»º...");
                 
-                // ½«ÎïÆ·´´½¨²âÊÔÒÆµ½Ğ­³ÌÖĞ
+                // å°†ç‰©å“åˆ›å»ºæµ‹è¯•ç§»åˆ°åç¨‹ä¸­
                 bool itemCreationResult = false;
                 yield return StartCoroutine(TestItemCreation(item1402, result => itemCreationResult = result));
                 if (!itemCreationResult)
@@ -458,21 +458,21 @@ namespace InventorySystem
                 }
             }
             
-            LogTest($"=== ²âÊÔÍê³É£¬×ÜÌå½á¹û: {(databaseTestPassed ? "7¼3 Í¨¹ı" : "7Ã4 Ê§°Ü")} ===");
+            LogTest($"=== æµ‹è¯•å®Œæˆï¼Œæ€»ä½“ç»“æœ: {(databaseTestPassed ? "ï¿½7ï¿½3 é€šè¿‡" : "ï¿½7ï¿½4 å¤±è´¥")} ===");
             yield break;
         }
 
         /// <summary>
-        /// ²âÊÔÎïÆ·´´½¨Ğ­³Ì£¨±ÜÃâÔÚtry-catchÖĞÊ¹ÓÃyield£©
+        /// æµ‹è¯•ç‰©å“åˆ›å»ºåç¨‹ï¼ˆé¿å…åœ¨try-catchä¸­ä½¿ç”¨yieldï¼‰
         /// </summary>
         private System.Collections.IEnumerator TestItemCreation(ItemDataSO itemDataSO, System.Action<bool> onComplete)
         {
             GameObject testItem = null;
-            bool testPassed = true; // ¾Ö²¿±äÁ¿¼ÇÂ¼²âÊÔ½á¹û
+            bool testPassed = true; // å±€éƒ¨å˜é‡è®°å½•æµ‹è¯•ç»“æœ
             
             try
             {
-                // ´´½¨Ä£ÄâµÄ±£´æÊı¾İ
+                // åˆ›å»ºæ¨¡æ‹Ÿçš„ä¿å­˜æ•°æ®
                 var testSaveData = new ItemSaveData
                 {
                     itemID = itemDataSO.id.ToString(),
@@ -483,7 +483,7 @@ namespace InventorySystem
                     gridPosition = new Vector2Int(0, 0)
                 };
                 
-                // Ê¹ÓÃ·´Éäµ÷ÓÃË½ÓĞ·½·¨LoadItemPrefab
+                // ä½¿ç”¨åå°„è°ƒç”¨ç§æœ‰æ–¹æ³•LoadItemPrefab
                 var createMethod = typeof(ContainerSaveManager).GetMethod("LoadItemPrefab", 
                     System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
                 
@@ -493,24 +493,24 @@ namespace InventorySystem
                 }
                 else
                 {
-                    LogTest($"7²2„1‚5 ÎŞ·¨·ÃÎÊLoadItemPrefab·½·¨");
+                    LogTest($"ï¿½7ï¿½2ï¿½1ï¿½5 æ— æ³•è®¿é—®LoadItemPrefabæ–¹æ³•");
                     onComplete?.Invoke(false);
                     yield break;
                 }
             }
             catch (System.Exception e)
             {
-                LogTest($"7Ã4 ÎïÆ·´´½¨²âÊÔÒì³£: {e.Message}");
+                LogTest($"ï¿½7ï¿½4 ç‰©å“åˆ›å»ºæµ‹è¯•å¼‚å¸¸: {e.Message}");
                 onComplete?.Invoke(false);
                 yield break;
             }
             
-            // ¼ì²é´´½¨½á¹û£¨²»ÔÚtry-catchÖĞ£©
+            // æ£€æŸ¥åˆ›å»ºç»“æœï¼ˆä¸åœ¨try-catchä¸­ï¼‰
             if (testItem != null)
             {
-                LogTest($"7¼3 ³É¹¦´´½¨²âÊÔÎïÆ·: {testItem.name}");
+                LogTest($"ï¿½7ï¿½3 æˆåŠŸåˆ›å»ºæµ‹è¯•ç‰©å“: {testItem.name}");
                 
-                // ÑéÖ¤×é¼ş£¨µÈ´ıÒ»Ö¡ÈÃAwakeÍê³É£©
+                // éªŒè¯ç»„ä»¶ï¼ˆç­‰å¾…ä¸€å¸§è®©Awakeå®Œæˆï¼‰
                 yield return null;
                 
                 ItemDataReader reader = testItem.GetComponent<ItemDataReader>();
@@ -520,12 +520,12 @@ namespace InventorySystem
                 
                 if (reader != null && itemComponent != null && draggableComponent != null && canvasGroup != null)
                 {
-                    LogTest($"7¼3 ÎïÆ·×é¼şÍêÕû: ItemDataReader + Item + DraggableItem + CanvasGroup");
-                    LogTest($"  ÎïÆ·Ãû³Æ: {reader.ItemData?.itemName}");
-                    LogTest($"  ¿É½»»¥: {canvasGroup.interactable}");
-                    LogTest($"  ×èÖ¹ÉäÏß: {canvasGroup.blocksRaycasts}");
+                    LogTest($"ï¿½7ï¿½3 ç‰©å“ç»„ä»¶å®Œæ•´: ItemDataReader + Item + DraggableItem + CanvasGroup");
+                    LogTest($"  ç‰©å“åç§°: {reader.ItemData?.itemName}");
+                    LogTest($"  å¯äº¤äº’: {canvasGroup.interactable}");
+                    LogTest($"  é˜»æ­¢å°„çº¿: {canvasGroup.blocksRaycasts}");
                     
-                    // ¼ì²é×Ó×é¼ş
+                    // æ£€æŸ¥å­ç»„ä»¶
                     Transform background = testItem.transform.Find("ItemBackground");
                     Transform icon = testItem.transform.Find("ItemIcon");
                     Transform text = testItem.transform.Find("ItemText");
@@ -533,18 +533,18 @@ namespace InventorySystem
                     
                     if (background != null && icon != null && text != null && highlight != null)
                     {
-                        LogTest($"7¼3 ÊÓ¾õ×é¼şÍêÕû: ±³¾°¡¢Í¼±ê¡¢ÎÄ×Ö¡¢¸ßÁÁ");
+                        LogTest($"ï¿½7ï¿½3 è§†è§‰ç»„ä»¶å®Œæ•´: èƒŒæ™¯ã€å›¾æ ‡ã€æ–‡å­—ã€é«˜äº®");
                     }
                     else
                     {
-                        LogTest($"7Ã4 ²¿·ÖÊÓ¾õ×é¼şÈ±Ê§");
-                        LogTest($"  ±³¾°: {background != null}, Í¼±ê: {icon != null}, ÎÄ×Ö: {text != null}, ¸ßÁÁ: {highlight != null}");
+                        LogTest($"ï¿½7ï¿½4 éƒ¨åˆ†è§†è§‰ç»„ä»¶ç¼ºå¤±");
+                        LogTest($"  èƒŒæ™¯: {background != null}, å›¾æ ‡: {icon != null}, æ–‡å­—: {text != null}, é«˜äº®: {highlight != null}");
                         testPassed = false;
                     }
                 }
                 else
                 {
-                    LogTest($"7Ã4 ÎïÆ·½»»¥×é¼ş²»ÍêÕû");
+                    LogTest($"ï¿½7ï¿½4 ç‰©å“äº¤äº’ç»„ä»¶ä¸å®Œæ•´");
                     LogTest($"  ItemDataReader: {reader != null}");
                     LogTest($"  Item: {itemComponent != null}");
                     LogTest($"  DraggableItem: {draggableComponent != null}");
@@ -552,7 +552,7 @@ namespace InventorySystem
                     testPassed = false;
                 }
                 
-                // ÇåÀí²âÊÔÎïÆ·
+                // æ¸…ç†æµ‹è¯•ç‰©å“
                 if (Application.isPlaying)
                 {
                     Destroy(testItem);
@@ -564,16 +564,16 @@ namespace InventorySystem
             }
             else
             {
-                LogTest($"7Ã4 ÎïÆ·´´½¨Ê§°Ü");
+                LogTest($"ï¿½7ï¿½4 ç‰©å“åˆ›å»ºå¤±è´¥");
                 testPassed = false;
             }
             
-            // µ÷ÓÃ»Øµ÷·µ»Ø½á¹û
+            // è°ƒç”¨å›è°ƒè¿”å›ç»“æœ
             onComplete?.Invoke(testPassed);
         }
         
         /// <summary>
-        /// Í¨¹ıÎïÆ·ID²éÕÒItemDataSO£¨±éÀúËùÓĞÎïÆ·£©
+        /// é€šè¿‡ç‰©å“IDæŸ¥æ‰¾ItemDataSOï¼ˆéå†æ‰€æœ‰ç‰©å“ï¼‰
         /// </summary>
         private ItemDataSO FindItemByID(int itemId)
         {

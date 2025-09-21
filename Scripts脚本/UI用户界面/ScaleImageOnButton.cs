@@ -5,25 +5,25 @@ using DG.Tweening;
 namespace Game.UI
 {
 	/// <summary>
-	/// Í¨¹ı Button µã»÷£¬ÈÃÄ¿±ê Image µÄ RectTransform ÔÚ Y Öá´Ó 0 Ëõ·Åµ½ 1
-	/// Ê¹ÓÃ DOTween ¿ØÖÆ¶¯Ğ§¡£
-	/// ½«±¾½Å±¾¹ÒÔÚº¬ÓĞ Button µÄÎïÌåÉÏ£¬»òÊÖ¶¯Ö¸¶¨ <see cref="triggerButton"/>¡£
+	/// é€šè¿‡ Button ç‚¹å‡»ï¼Œè®©ç›®æ ‡ Image çš„ RectTransform åœ¨ Y è½´ä» 0 ç¼©æ”¾åˆ° 1
+	/// ä½¿ç”¨ DOTween æ§åˆ¶åŠ¨æ•ˆã€‚
+	/// å°†æœ¬è„šæœ¬æŒ‚åœ¨å«æœ‰ Button çš„ç‰©ä½“ä¸Šï¼Œæˆ–æ‰‹åŠ¨æŒ‡å®š <see cref="triggerButton"/>ã€‚
 	/// </summary>
 	[DisallowMultipleComponent]
 	public sealed class ScaleImageOnButton : MonoBehaviour
 	{
-		[Header("Trigger °´Å¥ (¿É²»Ìî, Ä¬ÈÏÈ¡±¾ÎïÌåÉÏµÄ Button)")]
+		[Header("Trigger æŒ‰é’® (å¯ä¸å¡«, é»˜è®¤å–æœ¬ç‰©ä½“ä¸Šçš„ Button)")]
 		[SerializeField] private Button triggerButton;
 
-		[Header("ĞèÒªËõ·ÅµÄÄ¿±ê Image")]
+		[Header("éœ€è¦ç¼©æ”¾çš„ç›®æ ‡ Image")]
 		[SerializeField] private Image targetImage;
 
-		[Header("¶¯Ğ§²ÎÊı")]
+		[Header("åŠ¨æ•ˆå‚æ•°")]
 		[SerializeField, Min(0f)] private float durationSeconds = 0.35f;
 		[SerializeField] private Ease ease = Ease.OutBack;
 		[SerializeField] private bool ignoreTimeScale = false;
 		[SerializeField] private bool setYZeroOnEnable = true;
-		[Tooltip("ÆôÓÃÊ±ÊÇ·ñÎª´ò¿ª×´Ì¬ (ÓÅÏÈ¼¶µÍÓÚ setYZeroOnEnable)")]
+		[Tooltip("å¯ç”¨æ—¶æ˜¯å¦ä¸ºæ‰“å¼€çŠ¶æ€ (ä¼˜å…ˆçº§ä½äº setYZeroOnEnable)")]
 		[SerializeField] private bool startOpened = false;
 
 		private Tween activeTween;
@@ -34,7 +34,7 @@ namespace Game.UI
 			triggerButton = GetComponent<Button>();
 			if (targetImage == null)
 			{
-				// ÓÅÏÈ³¢ÊÔ´Ó×ÓÎïÌåÖĞÕÒµ½Ò»¸ö Image
+				// ä¼˜å…ˆå°è¯•ä»å­ç‰©ä½“ä¸­æ‰¾åˆ°ä¸€ä¸ª Image
 				targetImage = GetComponentInChildren<Image>();
 			}
 		}
@@ -72,7 +72,7 @@ namespace Game.UI
 				}
 				else
 				{
-					// ¼Ğ½ô³õÊ¼Öµ£¬·ÀÖ¹³öÏÖ <0 »ò >1 µÄÔà×´Ì¬
+					// å¤¹ç´§åˆå§‹å€¼ï¼Œé˜²æ­¢å‡ºç° <0 æˆ– >1 çš„è„çŠ¶æ€
 					s.y = Mathf.Clamp01(s.y);
 					rt.localScale = s;
 					isOpen = s.y > 0.5f;
@@ -91,12 +91,12 @@ namespace Game.UI
 		}
 
 		/// <summary>
-		/// Íâ²¿Ò²¿ÉÒÔÖ±½Óµ÷ÓÃ£ºÇĞ»»´ò¿ª/¹Ø±Õ
+		/// å¤–éƒ¨ä¹Ÿå¯ä»¥ç›´æ¥è°ƒç”¨ï¼šåˆ‡æ¢æ‰“å¼€/å…³é—­
 		/// </summary>
 		public void Play() => Toggle();
 
 		/// <summary>
-		/// ÇĞ»»´ò¿ª/¹Ø±Õ
+		/// åˆ‡æ¢æ‰“å¼€/å…³é—­
 		/// </summary>
 		public void Toggle()
 		{
@@ -104,7 +104,7 @@ namespace Game.UI
 		}
 
 		/// <summary>
-		/// ´ò¿ª£¨Y¡ú1£©
+		/// æ‰“å¼€ï¼ˆYâ†’1ï¼‰
 		/// </summary>
 		public void Open()
 		{
@@ -112,7 +112,7 @@ namespace Game.UI
 		}
 
 		/// <summary>
-		/// ¹Ø±Õ£¨Y¡ú0£©
+		/// å…³é—­ï¼ˆYâ†’0ï¼‰
 		/// </summary>
 		public void Close()
 		{
@@ -128,7 +128,7 @@ namespace Game.UI
 		{
 			if (targetImage == null)
 			{
-				Debug.LogWarning("ScaleImageOnButton: Î´ÉèÖÃ targetImage¡£");
+				Debug.LogWarning("ScaleImageOnButton: æœªè®¾ç½® targetImageã€‚");
 				return;
 			}
 

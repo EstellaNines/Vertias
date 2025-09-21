@@ -3,15 +3,15 @@ using UnityEngine;
 
 public class DelayMagnifierUIController : MonoBehaviour
 {
-	[Header("×é¼şÒıÓÃ")]
-	[SerializeField][FieldLabel("·Å´ó¾µÔ²»·¶¯»­")] private MagnifierCircleAnimation magnifierAnimation;
-	[SerializeField][FieldLabel("½ø¶È¿ØÖÆÆ÷(¿ÉÑ¡)")] private MagnifierProgressController progressController;
-	[SerializeField][FieldLabel("¸ù¶ÔÏó(ÏÔÊ¾/Òş²Ø)")] private GameObject rootObject;
-	[SerializeField][FieldLabel("¿ÉÑ¡CanvasGroupÓÃÓÚµ­Èëµ­³ö")] private CanvasGroup canvasGroup;
+	[Header("ç»„ä»¶å¼•ç”¨")]
+	[SerializeField][FieldLabel("æ”¾å¤§é•œåœ†ç¯åŠ¨ç”»")] private MagnifierCircleAnimation magnifierAnimation;
+	[SerializeField][FieldLabel("è¿›åº¦æ§åˆ¶å™¨(å¯é€‰)")] private MagnifierProgressController progressController;
+	[SerializeField][FieldLabel("æ ¹å¯¹è±¡(æ˜¾ç¤º/éšè—)")] private GameObject rootObject;
+	[SerializeField][FieldLabel("å¯é€‰CanvasGroupç”¨äºæ·¡å…¥æ·¡å‡º")] private CanvasGroup canvasGroup;
 
-	[Header("²ÎÊı")]
-	[SerializeField][FieldLabel("Ä¬ÈÏÑÓ³ÙÃëÊı")] private float defaultDelaySeconds = 1.5f;
-	[SerializeField][FieldLabel("Íê³Éºó×Ô¶¯Òş²Ø")] private bool autoHideOnComplete = true;
+	[Header("å‚æ•°")]
+	[SerializeField][FieldLabel("é»˜è®¤å»¶è¿Ÿç§’æ•°")] private float defaultDelaySeconds = 1.5f;
+	[SerializeField][FieldLabel("å®Œæˆåè‡ªåŠ¨éšè—")] private bool autoHideOnComplete = true;
 
 	private bool isRunning;
 	private Action onCompleted;
@@ -26,7 +26,7 @@ public class DelayMagnifierUIController : MonoBehaviour
 	public bool IsRunning => isRunning;
 	
 	/// <summary>
-	/// ¼ì²éÊÇ·ñÕıÔÚÑÓ³ÙÖĞ£¨ÓëIsRunningÏàÍ¬£¬µ«ÓïÒå¸üÇåÎú£©
+	/// æ£€æŸ¥æ˜¯å¦æ­£åœ¨å»¶è¿Ÿä¸­ï¼ˆä¸IsRunningç›¸åŒï¼Œä½†è¯­ä¹‰æ›´æ¸…æ™°ï¼‰
 	/// </summary>
 	public bool IsDelaying() => isRunning;
 
@@ -41,11 +41,11 @@ public class DelayMagnifierUIController : MonoBehaviour
 	}
 	
 	/// <summary>
-	/// ¿ªÊ¼ÑÓ³Ù£¬Ö§³ÖÍê³ÉºÍÈ¡Ïû»Øµ÷
+	/// å¼€å§‹å»¶è¿Ÿï¼Œæ”¯æŒå®Œæˆå’Œå–æ¶ˆå›è°ƒ
 	/// </summary>
-	/// <param name="durationSeconds">ÑÓ³Ù³ÖĞøÊ±¼ä</param>
-	/// <param name="onComplete">Íê³ÉÊ±µÄ»Øµ÷</param>
-	/// <param name="onCancel">È¡ÏûÊ±µÄ»Øµ÷</param>
+	/// <param name="durationSeconds">å»¶è¿ŸæŒç»­æ—¶é—´</param>
+	/// <param name="onComplete">å®Œæˆæ—¶çš„å›è°ƒ</param>
+	/// <param name="onCancel">å–æ¶ˆæ—¶çš„å›è°ƒ</param>
 	public void StartDelay(float durationSeconds, Action onComplete = null, Action onCancel = null)
 	{
 		if (isRunning) return;
@@ -55,7 +55,7 @@ public class DelayMagnifierUIController : MonoBehaviour
 
 		gameObject.SetActive(true);
 
-		Debug.Log($"[DelayMagnifierUI] ¿ªÊ¼ÑÓ³Ù {durationSeconds:F1} Ãë");
+		Debug.Log($"[DelayMagnifierUI] å¼€å§‹å»¶è¿Ÿ {durationSeconds:F1} ç§’");
 		ShowImmediate();
 		if (magnifierAnimation != null)
 		{
@@ -67,7 +67,7 @@ public class DelayMagnifierUIController : MonoBehaviour
 		}
 		else
 		{
-			// ÈôÎ´ÅäÖÃ¶¯»­£¬Ö±½Ó¼ÆÊ±Íê³É
+			// è‹¥æœªé…ç½®åŠ¨ç”»ï¼Œç›´æ¥è®¡æ—¶å®Œæˆ
 			Invoke(nameof(HandleCompleted), Mathf.Max(0.01f, durationSeconds));
 		}
 	}
@@ -76,7 +76,7 @@ public class DelayMagnifierUIController : MonoBehaviour
 	{
 		if (!isRunning) return;
 		
-		Debug.Log("[DelayMagnifierUI] ÑÓ³Ù±»È¡Ïû");
+		Debug.Log("[DelayMagnifierUI] å»¶è¿Ÿè¢«å–æ¶ˆ");
 		
 		if (magnifierAnimation != null)
 		{
@@ -84,7 +84,7 @@ public class DelayMagnifierUIController : MonoBehaviour
 			magnifierAnimation.OnAnimationComplete -= HandleCompleted;
 		}
 		
-		// È¡ÏûInvokeµ÷ÓÃ£¨Èç¹ûÓĞ£©
+		// å–æ¶ˆInvokeè°ƒç”¨ï¼ˆå¦‚æœæœ‰ï¼‰
 		CancelInvoke(nameof(HandleCompleted));
 		
 		isRunning = false;
@@ -92,10 +92,10 @@ public class DelayMagnifierUIController : MonoBehaviour
 
 		gameObject.SetActive(false);
 
-		// µ÷ÓÃÈ¡Ïû»Øµ÷
+		// è°ƒç”¨å–æ¶ˆå›è°ƒ
 		onCancelled?.Invoke();
 		
-		// ÇåÀí»Øµ÷ÒıÓÃ
+		// æ¸…ç†å›è°ƒå¼•ç”¨
 		onCompleted = null;
 		onCancelled = null;
 	}
@@ -104,7 +104,7 @@ public class DelayMagnifierUIController : MonoBehaviour
 	{
 		if (!isRunning) return;
 		
-		Debug.Log("[DelayMagnifierUI] ÑÓ³ÙÍê³É");
+		Debug.Log("[DelayMagnifierUI] å»¶è¿Ÿå®Œæˆ");
 		
 		isRunning = false;
 		if (magnifierAnimation != null)
@@ -114,26 +114,26 @@ public class DelayMagnifierUIController : MonoBehaviour
 		
 		if (autoHideOnComplete) HideImmediate();
 		
-		// µ÷ÓÃÍê³É»Øµ÷
+		// è°ƒç”¨å®Œæˆå›è°ƒ
 		onCompleted?.Invoke();
 		
-		// ÇåÀí»Øµ÷ÒıÓÃ
+		// æ¸…ç†å›è°ƒå¼•ç”¨
 		onCompleted = null;
 		onCancelled = null;
 	}
 
 	public void ShowImmediate()
 	{
-		Debug.Log($"[DelayMagnifierUI] ShowImmediate±»µ÷ÓÃ");
+		Debug.Log($"[DelayMagnifierUI] ShowImmediateè¢«è°ƒç”¨");
 		
 		if (rootObject != null) 
 		{
 			rootObject.SetActive(true);
-			Debug.Log($"[DelayMagnifierUI] RootObject¼¤»î×´Ì¬: {rootObject.activeInHierarchy}, Ãû³Æ: {rootObject.name}");
+			Debug.Log($"[DelayMagnifierUI] RootObjectæ¿€æ´»çŠ¶æ€: {rootObject.activeInHierarchy}, åç§°: {rootObject.name}");
 		}
 		else
 		{
-			Debug.LogWarning("[DelayMagnifierUI] RootObjectÎªnull!");
+			Debug.LogWarning("[DelayMagnifierUI] RootObjectä¸ºnull!");
 		}
 		
 		if (canvasGroup != null)
@@ -141,14 +141,14 @@ public class DelayMagnifierUIController : MonoBehaviour
 			canvasGroup.alpha = 1f;
 			canvasGroup.interactable = true;
 			canvasGroup.blocksRaycasts = true;
-			Debug.Log($"[DelayMagnifierUI] CanvasGroupÉèÖÃ - Alpha: {canvasGroup.alpha}, Interactable: {canvasGroup.interactable}, BlocksRaycasts: {canvasGroup.blocksRaycasts}");
+			Debug.Log($"[DelayMagnifierUI] CanvasGroupè®¾ç½® - Alpha: {canvasGroup.alpha}, Interactable: {canvasGroup.interactable}, BlocksRaycasts: {canvasGroup.blocksRaycasts}");
 		}
 		else
 		{
-			Debug.LogWarning("[DelayMagnifierUI] CanvasGroupÎªnull!");
+			Debug.LogWarning("[DelayMagnifierUI] CanvasGroupä¸ºnull!");
 		}
 		
-		// Êä³öRectTransformĞÅÏ¢ÓÃÓÚµ÷ÊÔ
+		// è¾“å‡ºRectTransformä¿¡æ¯ç”¨äºè°ƒè¯•
 		if (rootObject != null)
 		{
 			RectTransform rectTransform = rootObject.GetComponent<RectTransform>();

@@ -7,20 +7,20 @@ using TMPro;
 namespace Game.UI
 {
 	/// <summary>
-	/// Email ÈÎÎñÕ¹Ê¾¹ÜÀíÆ÷£º¶ÁÈ¡ Resources/MissionData.json£¬²¢½«Êı¾İäÖÈ¾µ½ Email Ô¤ÖÆÌå UI¡£
-	/// ½«±¾½Å±¾¹ÒÔØµ½ Email Ô¤ÖÆÌåµÄ¸ù GameObject¡£
+	/// Email ä»»åŠ¡å±•ç¤ºç®¡ç†å™¨ï¼šè¯»å– Resources/MissionData.jsonï¼Œå¹¶å°†æ•°æ®æ¸²æŸ“åˆ° Email é¢„åˆ¶ä½“ UIã€‚
+	/// å°†æœ¬è„šæœ¬æŒ‚è½½åˆ° Email é¢„åˆ¶ä½“çš„æ ¹ GameObjectã€‚
 	/// </summary>
 	[DisallowMultipleComponent]
 	[ExecuteAlways]
 	public sealed class EmailMissionUIManager : MonoBehaviour
 	{
-		[Header("ÒªÏÔÊ¾µÄÈÎÎñ ID (¶ÔÓ¦ MissionData.json ÖĞµÄ mission.id)")]
+		[Header("è¦æ˜¾ç¤ºçš„ä»»åŠ¡ ID (å¯¹åº” MissionData.json ä¸­çš„ mission.id)")]
 		[SerializeField] private int selectedMissionId = 0;
 
-		[Header("ÒıÓÃ - ±êÌâÇø (°´Å¥ÄÚµÄ TMP ÏÔÊ¾ name)")]
+		[Header("å¼•ç”¨ - æ ‡é¢˜åŒº (æŒ‰é’®å†…çš„ TMP æ˜¾ç¤º name)")]
 		[SerializeField] private TextMeshProUGUI headerNameTMP;
 
-		[Header("ÒıÓÃ - ÄÚÈİÇø (Image ÏÂµÄ TMP ÏÔÊ¾ description)")]
+		[Header("å¼•ç”¨ - å†…å®¹åŒº (Image ä¸‹çš„ TMP æ˜¾ç¤º description)")]
 		[SerializeField] private TextMeshProUGUI descriptionTMP;
 
 		[Serializable]
@@ -31,16 +31,16 @@ namespace Game.UI
 			public TextMeshProUGUI valueTMP;
 		}
 
-		[Header("ÒıÓÃ - ½±ÀøÇø (Image/Prize ÏÂµÄËÄ¸ö½±Àø)")]
+		[Header("å¼•ç”¨ - å¥–åŠ±åŒº (Image/Prize ä¸‹çš„å››ä¸ªå¥–åŠ±)")]
 		[SerializeField] private PrizeRefs prizeMoney;
 		[SerializeField] private PrizeRefs prizeWeapon;
 		[SerializeField] private PrizeRefs prizeFood;
 		[SerializeField] private PrizeRefs prizeIntelligence;
 
-		[Header("¿ÉÑ¡ - ±êÌâÍ¼±ê (ÈôĞèÒªÓÃ mission.iconPath)")]
+		[Header("å¯é€‰ - æ ‡é¢˜å›¾æ ‡ (è‹¥éœ€è¦ç”¨ mission.iconPath)")]
 		[SerializeField] private Image headerIconImage;
 
-		[Header("ÒıÓÃ - Requirements ÎÄ±¾")]
+		[Header("å¼•ç”¨ - Requirements æ–‡æœ¬")]
 		[SerializeField] private TextMeshProUGUI requirementsValueTMP;
 
 		[Serializable]
@@ -50,22 +50,22 @@ namespace Game.UI
 			public TextMeshProUGUI valueTMP;
 		}
 
-		[Header("ÒıÓÃ - Requirements ĞĞ (Intelligence / Item)")]
+		[Header("å¼•ç”¨ - Requirements è¡Œ (Intelligence / Item)")]
 		[SerializeField] private RequirementRowRefs requirementsIntelligence;
 		[SerializeField] private RequirementRowRefs requirementsItem;
 
 		private MissionDataRoot cachedData;
-		[Header("Íê³É×´Ì¬&Í¼±êÏÔÊ¾")]
+		[Header("å®ŒæˆçŠ¶æ€&å›¾æ ‡æ˜¾ç¤º")]
 		[SerializeField] private bool isCompleted = false;
-		[SerializeField] private Image completeImage; // Email/MissionEmail/Complete ÉÏµÄ Image
-		[SerializeField] private Sprite completeSuccessSprite; // ³É¹¦ÓÃ£¨ÈçÎ´Ö¸¶¨£¬½«³¢ÊÔ°´Ãû³Æ´Ó Resources ¶ÁÈ¡£©
-		[SerializeField] private Sprite completeFailSprite;    // Ê§°ÜÓÃ£¨ÈçÎ´Ö¸¶¨£¬½«³¢ÊÔ°´Ãû³Æ´Ó Resources ¶ÁÈ¡£©
+		[SerializeField] private Image completeImage; // Email/MissionEmail/Complete ä¸Šçš„ Image
+		[SerializeField] private Sprite completeSuccessSprite; // æˆåŠŸç”¨ï¼ˆå¦‚æœªæŒ‡å®šï¼Œå°†å°è¯•æŒ‰åç§°ä» Resources è¯»å–ï¼‰
+		[SerializeField] private Sprite completeFailSprite;    // å¤±è´¥ç”¨ï¼ˆå¦‚æœªæŒ‡å®šï¼Œå°†å°è¯•æŒ‰åç§°ä» Resources è¯»å–ï¼‰
 		[SerializeField] private string successSpriteResourceName = "complete_0";
 		[SerializeField] private string failSpriteResourceName = "complete_1";
 
-		public bool IsCompleted => isCompleted; // Ìá¹©Ö»¶Á·ÃÎÊ²¢Ê¹×Ö¶Î±»¶ÁÈ¡
+		public bool IsCompleted => isCompleted; // æä¾›åªè¯»è®¿é—®å¹¶ä½¿å­—æ®µè¢«è¯»å–
 
-		#region JSON Êı¾İ½á¹¹
+		#region JSON æ•°æ®ç»“æ„
 		[Serializable]
 		private sealed class MissionDataRoot
 		{
@@ -128,10 +128,10 @@ namespace Game.UI
 
 		private void OnValidate()
 		{
-			// ÔÚ±à¼­Æ÷ÖĞĞŞ¸Ä ID »òÒıÓÃÊ±×Ô¶¯Ô¤ÀÀ
+			// åœ¨ç¼–è¾‘å™¨ä¸­ä¿®æ”¹ ID æˆ–å¼•ç”¨æ—¶è‡ªåŠ¨é¢„è§ˆ
 			#if UNITY_EDITOR
 			AutoBindReferences();
-			cachedData = null; // Ç¿ÖÆÖØĞÂ¼ÓÔØ£¬È·±£ JSON ¸üĞÂÄÜ·´Ó³µ½±à¼­Æ÷
+			cachedData = null; // å¼ºåˆ¶é‡æ–°åŠ è½½ï¼Œç¡®ä¿ JSON æ›´æ–°èƒ½åæ˜ åˆ°ç¼–è¾‘å™¨
 			LoadDataIfNeeded();
 			ApplySelectedMission();
 			#endif
@@ -143,7 +143,7 @@ namespace Game.UI
 			TextAsset json = Resources.Load<TextAsset>("MissionData");
 			if (json == null)
 			{
-				Debug.LogError("EmailMissionUIManager: ÎŞ·¨ÔÚ Resources ÖĞ¼ÓÔØ MissionData.json (Ó¦ÃüÃûÎª MissionData ÎŞÀ©Õ¹Ãû)");
+				Debug.LogError("EmailMissionUIManager: æ— æ³•åœ¨ Resources ä¸­åŠ è½½ MissionData.json (åº”å‘½åä¸º MissionData æ— æ‰©å±•å)");
 				cachedData = new MissionDataRoot { missions = new List<Mission>() };
 				return;
 			}
@@ -157,7 +157,7 @@ namespace Game.UI
 			}
 			catch (Exception ex)
 			{
-				Debug.LogError($"EmailMissionUIManager: ½âÎö MissionData.json Ê§°Ü: {ex.Message}");
+				Debug.LogError($"EmailMissionUIManager: è§£æ MissionData.json å¤±è´¥: {ex.Message}");
 				cachedData = new MissionDataRoot { missions = new List<Mission>() };
 			}
 		}
@@ -174,25 +174,25 @@ namespace Game.UI
 			Mission mission = cachedData.missions.Find(m => m.id == selectedMissionId);
 			if (mission == null)
 			{
-				// ÈôÕÒ²»µ½ ID£¬ÔòÍË»Øµ½ÁĞ±íµÚÒ»¸ö£¨±ÜÃâ¿Õ°×£©
+				// è‹¥æ‰¾ä¸åˆ° IDï¼Œåˆ™é€€å›åˆ°åˆ—è¡¨ç¬¬ä¸€ä¸ªï¼ˆé¿å…ç©ºç™½ï¼‰
 				mission = cachedData.missions[0];
 			}
 
-			// ±êÌâ name
+			// æ ‡é¢˜ name
 			if (headerNameTMP != null)
 			{
 				headerNameTMP.text = mission.name ?? string.Empty;
 			}
 
-			// ÃèÊö description
+			// æè¿° description
 			if (descriptionTMP != null)
 			{
 				descriptionTMP.text = mission.description ?? string.Empty;
 			}
 
-			// ±êÌâÍ¼±ê±£³Ö Email Ô¤ÖÆÌåÉÏµÄÔ­Ê¼ÉèÖÃ£¬²»ÔÚ´Ë´¦¸²¸Ç
+			// æ ‡é¢˜å›¾æ ‡ä¿æŒ Email é¢„åˆ¶ä½“ä¸Šçš„åŸå§‹è®¾ç½®ï¼Œä¸åœ¨æ­¤å¤„è¦†ç›–
 
-			// ½±ÀøÇø
+			// å¥–åŠ±åŒº
 			if (mission.reward != null)
 			{
 				ApplyPrize(prizeMoney, mission.reward.money, mission.reward.moneyIconPath);
@@ -201,19 +201,19 @@ namespace Game.UI
 				ApplyPrize(prizeIntelligence, mission.reward.intelligence, mission.reward.intelligenceIconPath);
 			}
 
-			// Requirements ĞĞ£º
+			// Requirements è¡Œï¼š
 			int reqInt = mission.requirements != null ? mission.requirements.intelligence : 0;
 			int reqItem = mission.requirements != null ? mission.requirements.itemCount : 0;
 			ApplyRequirementRow(requirementsIntelligence, reqInt, "intelligence");
 			ApplyRequirementRow(requirementsItem, reqItem, "item");
 
-			// ¼æÈİ£ºÈôÈÔÉèÖÃÁË¾ÉµÄ requirementsValueTMP£¬Ôò¸´ÓÃ intelligence ÏÔÊ¾
+			// å…¼å®¹ï¼šè‹¥ä»è®¾ç½®äº†æ—§çš„ requirementsValueTMPï¼Œåˆ™å¤ç”¨ intelligence æ˜¾ç¤º
 			if (requirementsValueTMP != null)
 			{
 				requirementsValueTMP.text = reqInt > 0 ? $"intelligence {reqInt}/{reqInt}" : string.Empty;
 			}
 
-			// Ê¹ÓÃ isCompleted ¸üĞÂÍê³ÉÍ¼±êµÄ¿É¼ûĞÔ£¬È·±£ÆäÖµ±»¶ÁÈ¡£¨Ïû³ı CS0414£©
+			// ä½¿ç”¨ isCompleted æ›´æ–°å®Œæˆå›¾æ ‡çš„å¯è§æ€§ï¼Œç¡®ä¿å…¶å€¼è¢«è¯»å–ï¼ˆæ¶ˆé™¤ CS0414ï¼‰
 			if (completeImage != null)
 			{
 				completeImage.enabled = isCompleted && completeImage.sprite != null;
@@ -247,7 +247,7 @@ namespace Game.UI
 
 		private void AutoBindReferences()
 		{
-			// »ùÓÚ Email.prefab µÄµ±Ç°½á¹¹°´Ãû³Æ×Ô¶¯²éÕÒ£¬¼õÉÙÊÖ¶¯½ÓÏß
+			// åŸºäº Email.prefab çš„å½“å‰ç»“æ„æŒ‰åç§°è‡ªåŠ¨æŸ¥æ‰¾ï¼Œå‡å°‘æ‰‹åŠ¨æ¥çº¿
 			Transform t = transform;
 			if (headerNameTMP == null)
 			{
@@ -270,16 +270,16 @@ namespace Game.UI
 			BindPrize(ref prizeFood, "Image/Prize/food");
 			BindPrize(ref prizeIntelligence, "Image/Prize/intelligence");
 
-			// Requirements ĞĞ×Ô¶¯°ó¶¨
+			// Requirements è¡Œè‡ªåŠ¨ç»‘å®š
 			BindRequirementRow(ref requirementsIntelligence, "Image/Requirements/Intelligence");
 			BindRequirementRow(ref requirementsItem, "Image/Requirements/Item");
-			// ¼æÈİ¾É×Ö¶Î
+			// å…¼å®¹æ—§å­—æ®µ
 			if (requirementsValueTMP == null && requirementsIntelligence != null)
 			{
 				requirementsValueTMP = requirementsIntelligence.valueTMP;
 			}
 
-			// Íê³ÉÍ¼±ê×Ô¶¯°ó¶¨
+			// å®Œæˆå›¾æ ‡è‡ªåŠ¨ç»‘å®š
 			if (completeImage == null)
 			{
 				var complete = t.Find("MissionEmail/Complete");
@@ -288,16 +288,16 @@ namespace Game.UI
 		}
 
 		/// <summary>
-		/// ½«µ±Ç° Email ÈÎÎñ±ê¼ÇÎªÒÑÍê³É£¨¹©Íâ²¿µ÷ÓÃ£¬ÈçÌá½»°´Å¥£©¡£
+		/// å°†å½“å‰ Email ä»»åŠ¡æ ‡è®°ä¸ºå·²å®Œæˆï¼ˆä¾›å¤–éƒ¨è°ƒç”¨ï¼Œå¦‚æäº¤æŒ‰é’®ï¼‰ã€‚
 		/// </summary>
 		public void MarkCompleted()
 		{
 			isCompleted = true;
-			// ÈçĞè¿ÉÊÓ»¯Íê³É×´Ì¬£¬¿ÉÔÚ´Ë´¦¸üĞÂÑùÊ½»ò´¥·¢ÊÂ¼ş
+			// å¦‚éœ€å¯è§†åŒ–å®ŒæˆçŠ¶æ€ï¼Œå¯åœ¨æ­¤å¤„æ›´æ–°æ ·å¼æˆ–è§¦å‘äº‹ä»¶
 		}
 
 		/// <summary>
-		/// ¸ù¾İÌá½»½á¹ûÏÔÊ¾Íê³É/Ê§°ÜÍ¼±ê
+		/// æ ¹æ®æäº¤ç»“æœæ˜¾ç¤ºå®Œæˆ/å¤±è´¥å›¾æ ‡
 		/// </summary>
 		public void ShowCompletionResult(bool success)
 		{

@@ -10,46 +10,46 @@ using InventorySystem.SpawnSystem;
 namespace Game.UI
 {
 	/// <summary>
-	/// Í³¼ÆÍæ¼Ò·ÅÈë TradeGrid ÖĞµÄÇé±¨ÎïÆ·×ÜÇé±¨Öµ£¬²¢ÏÔÊ¾Îª µ±Ç°/ÒªÇó¡£
-	/// - ÒªÇóÖµÀ´×Ô Resources/MissionData.json µÄ requirements.intelligence£¨Í¨¹ı selectedMissionId Ñ¡Ôñ£©
-	/// - µ±µ±Ç°Öµ >= ÒªÇóÖµÊ±£¬TMP ÎÄ±¾ÏÔÊ¾ÎªÂÌÉ«£¬·ñÔòÎªÄ¬ÈÏÑÕÉ«
-	/// ½«±¾½Å±¾¹Òµ½ MissionReceiveSystem ÖĞºÏÊÊµÄ¶ÔÏóÉÏ£¬²¢ÔÚ Inspector Àï½ÓÏß¡£
+	/// ç»Ÿè®¡ç©å®¶æ”¾å…¥ TradeGrid ä¸­çš„æƒ…æŠ¥ç‰©å“æ€»æƒ…æŠ¥å€¼ï¼Œå¹¶æ˜¾ç¤ºä¸º å½“å‰/è¦æ±‚ã€‚
+	/// - è¦æ±‚å€¼æ¥è‡ª Resources/MissionData.json çš„ requirements.intelligenceï¼ˆé€šè¿‡ selectedMissionId é€‰æ‹©ï¼‰
+	/// - å½“å½“å‰å€¼ >= è¦æ±‚å€¼æ—¶ï¼ŒTMP æ–‡æœ¬æ˜¾ç¤ºä¸ºç»¿è‰²ï¼Œå¦åˆ™ä¸ºé»˜è®¤é¢œè‰²
+	/// å°†æœ¬è„šæœ¬æŒ‚åˆ° MissionReceiveSystem ä¸­åˆé€‚çš„å¯¹è±¡ä¸Šï¼Œå¹¶åœ¨ Inspector é‡Œæ¥çº¿ã€‚
 	/// </summary>
 	[DisallowMultipleComponent]
 	[ExecuteAlways]
 	public sealed class TradeGridIntelligenceCounter : MonoBehaviour
 	{
-		[Header("ÒıÓÃ - ½»Ò×Íø¸ñ (TradeGrid)")]
+		[Header("å¼•ç”¨ - äº¤æ˜“ç½‘æ ¼ (TradeGrid)")]
 		[SerializeField] private ItemGrid tradeGrid;
 
-		[Header("ÒıÓÃ - ÏÔÊ¾ÎÄ±¾µÄ TMP (RawImage ÏÂµÄ Text (TMP))")]
+		[Header("å¼•ç”¨ - æ˜¾ç¤ºæ–‡æœ¬çš„ TMP (RawImage ä¸‹çš„ Text (TMP))")]
 		[SerializeField] private TextMeshProUGUI progressTMP;
 
-		[Header("ÒıÓÃ - Email ¹ÜÀíÆ÷ (Í¬ÈÎÎñID)")]
+		[Header("å¼•ç”¨ - Email ç®¡ç†å™¨ (åŒä»»åŠ¡ID)")]
 		[SerializeField] private EmailMissionUIManager emailManager;
 
-		[Header("Ëæ»ú½±ÀøÅäÖÃ (Íê³ÉÈÎÎñºóÉú³É)")]
+		[Header("éšæœºå¥–åŠ±é…ç½® (å®Œæˆä»»åŠ¡åç”Ÿæˆ)")]
 		[SerializeField] private RandomItemSpawnConfig rewardRandomConfig;
 		[SerializeField] private bool spawnRewardOnSuccess = true;
 		[SerializeField] private bool enforceCurrencyStack = true;
 		[SerializeField] private int currencyStackAmount = 1000;
 
-		[Header("Ìá½»ÓëÁìÈ¡ UI")]
-		[SerializeField] private Button submitButton; // Handout °´Å¥
-		[SerializeField] private Button claimButton;  // Claim °´Å¥
-		[SerializeField] private ItemGrid warehouseGrid; // ²Ö¿âÍø¸ñ
-		[SerializeField] private bool hasSubmitted = false; // ±¾ÈÎÎñÊÇ·ñÒÑÌá½»³É¹¦
+		[Header("æäº¤ä¸é¢†å– UI")]
+		[SerializeField] private Button submitButton; // Handout æŒ‰é’®
+		[SerializeField] private Button claimButton;  // Claim æŒ‰é’®
+		[SerializeField] private ItemGrid warehouseGrid; // ä»“åº“ç½‘æ ¼
+		[SerializeField] private bool hasSubmitted = false; // æœ¬ä»»åŠ¡æ˜¯å¦å·²æäº¤æˆåŠŸ
 
-		[Header("ÈÎÎñÑ¡Ôñ")]
+		[Header("ä»»åŠ¡é€‰æ‹©")]
 		[SerializeField] private int selectedMissionId = 1;
 
-		[Header("ÏÔÊ¾ÑùÊ½")]
+		[Header("æ˜¾ç¤ºæ ·å¼")]
 		[SerializeField] private Color meetRequirementColor = Color.green;
 		[SerializeField] private Color defaultColor = Color.white;
 
 		private MissionDataRoot cachedData;
 
-		#region JSON Êı¾İ½á¹¹
+		#region JSON æ•°æ®ç»“æ„
 		[Serializable]
 		private sealed class MissionDataRoot
 		{
@@ -75,7 +75,7 @@ namespace Game.UI
 
 		private void Reset()
 		{
-			// ³¢ÊÔÔÚ²ã¼¶ÖĞ×Ô¶¯Ñ°ÕÒ TradeGrid£¨¿É¸ù¾İÏîÄ¿ÃüÃûÎ¢µ÷£©
+			// å°è¯•åœ¨å±‚çº§ä¸­è‡ªåŠ¨å¯»æ‰¾ TradeGridï¼ˆå¯æ ¹æ®é¡¹ç›®å‘½åå¾®è°ƒï¼‰
 			if (tradeGrid == null)
 			{
 				var t = transform.parent != null ? transform.parent : transform;
@@ -115,7 +115,7 @@ namespace Game.UI
 		}
 
 		/// <summary>
-		/// ÓÉ Handout °´Å¥µ÷ÓÃ£ºÈôµ±Ç°Çé±¨Öµ´ï±êÔò±ê¼Ç Email ÈÎÎñÍê³É£¬·µ»ØÊÇ·ñ³É¹¦¡£
+		/// ç”± Handout æŒ‰é’®è°ƒç”¨ï¼šè‹¥å½“å‰æƒ…æŠ¥å€¼è¾¾æ ‡åˆ™æ ‡è®° Email ä»»åŠ¡å®Œæˆï¼Œè¿”å›æ˜¯å¦æˆåŠŸã€‚
 		/// </summary>
 		public bool TrySubmit()
 		{
@@ -135,11 +135,11 @@ namespace Game.UI
 		}
 
 		/// <summary>
-		/// ¹© Unity °´Å¥ OnClick °ó¶¨µÄÎŞ·µ»ØÖµ·½·¨¡£
+		/// ä¾› Unity æŒ‰é’® OnClick ç»‘å®šçš„æ— è¿”å›å€¼æ–¹æ³•ã€‚
 		/// </summary>
 		public void Submit()
 		{
-			// ÒÑÌá½»ÔòÖ±½Ó·µ»Ø£¬·ÀÖØ¸´
+			// å·²æäº¤åˆ™ç›´æ¥è¿”å›ï¼Œé˜²é‡å¤
 			if (hasSubmitted) return;
 			bool success = TrySubmit();
 			ConsumeAllItemsInTradeGrid();
@@ -170,7 +170,7 @@ namespace Game.UI
 		private void SpawnRewardItems()
 		{
 			if (tradeGrid == null || rewardRandomConfig == null) return;
-			// Ê¹ÓÃËæ»úÉú³É¹ÜÀíÆ÷£ºÇ¿ÖÆÔÚ tradeGrid ÉÏÒÔËæ»úÅäÖÃÉú³É
+			// ä½¿ç”¨éšæœºç”Ÿæˆç®¡ç†å™¨ï¼šå¼ºåˆ¶åœ¨ tradeGrid ä¸Šä»¥éšæœºé…ç½®ç”Ÿæˆ
 			ShelfRandomItemManager.Instance.ForceRegenerateItems(tradeGrid.gameObject, tradeGrid, rewardRandomConfig);
 			if (enforceCurrencyStack)
 			{
@@ -180,7 +180,7 @@ namespace Game.UI
 
 		private System.Collections.IEnumerator AdjustCurrencyStacksAfterSpawn()
 		{
-			// Ê¹ÓÃÕæÊµÊ±¼äµÈ´ı£¬±ÜÃâ Time.timeScale == 0 Ê±Ğ­³ÌÍ£ÖÍ
+			// ä½¿ç”¨çœŸå®æ—¶é—´ç­‰å¾…ï¼Œé¿å… Time.timeScale == 0 æ—¶åç¨‹åœæ»
 			float wait = 0f;
 			while (tradeGrid != null && wait < 1.5f)
 			{
@@ -191,9 +191,9 @@ namespace Game.UI
 			}
 
 			if (tradeGrid == null) yield break;
-			// µÚÒ»´ÎĞŞÕı£¨Éú³ÉÍê³ÉÁ¢¼´£©
+			// ç¬¬ä¸€æ¬¡ä¿®æ­£ï¼ˆç”Ÿæˆå®Œæˆç«‹å³ï¼‰
 			yield return StartCoroutine(AdjustCurrencyStacksPass());
-			// µÈ´ı FixedItemSpawnManager µÄÑÓ³ÙĞ£Ñé(¡Ö0.2s)½áÊøºóÔÙĞŞÕıÒ»´Î£¬·ÀÖ¹±»»ØĞ´
+			// ç­‰å¾… FixedItemSpawnManager çš„å»¶è¿Ÿæ ¡éªŒ(â‰ˆ0.2s)ç»“æŸåå†ä¿®æ­£ä¸€æ¬¡ï¼Œé˜²æ­¢è¢«å›å†™
 			yield return new WaitForSecondsRealtime(0.35f);
 			yield return StartCoroutine(AdjustCurrencyStacksPass());
 		}
@@ -214,14 +214,14 @@ namespace Game.UI
 				{
 					reader.SetStack(target);
 					reader.currencyAmount = target;
-					yield return null; // ÈÃ UI Ë¢ĞÂ
+					yield return null; // è®© UI åˆ·æ–°
 					if (reader.CurrentStack == target) break;
 				}
 			}
 		}
 
 		/// <summary>
-		/// ÁìÈ¡½±Àø£º½« TradeGrid ÖĞ½±ÀøÇ¨ÒÆµ½²Ö¿âÍø¸ñ¡£
+		/// é¢†å–å¥–åŠ±ï¼šå°† TradeGrid ä¸­å¥–åŠ±è¿ç§»åˆ°ä»“åº“ç½‘æ ¼ã€‚
 		/// </summary>
 		public void Claim()
 		{
@@ -235,7 +235,7 @@ namespace Game.UI
 				if (item == null) continue;
 				if (TryFindPlacement(warehouseGrid, item, out var pos))
 				{
-					// ´Ó½»Ò×Íø¸ñÈ¡³ö²¢·ÅÈë²Ö¿â
+					// ä»äº¤æ˜“ç½‘æ ¼å–å‡ºå¹¶æ”¾å…¥ä»“åº“
 					var origin = item.OnGridPosition;
 					tradeGrid.PickUpItem(origin.x, origin.y);
 					warehouseGrid.PlaceItem(item, pos.x, pos.y);
@@ -292,7 +292,7 @@ namespace Game.UI
 				if (byNameWarehouseItemGrid == null && n.IndexOf("WarehouseItemGrid", System.StringComparison.OrdinalIgnoreCase) >= 0) byNameWarehouseItemGrid = g;
 				if (byNameWarehouse == null && n.IndexOf("Warehouse", System.StringComparison.OrdinalIgnoreCase) >= 0) byNameWarehouse = g;
 				if (byNameStorage == null && n.IndexOf("Storage", System.StringComparison.OrdinalIgnoreCase) >= 0) byNameStorage = g;
-				if (byNameCN == null && n.IndexOf("²Ö¿â", System.StringComparison.OrdinalIgnoreCase) >= 0) byNameCN = g;
+				if (byNameCN == null && n.IndexOf("ä»“åº“", System.StringComparison.OrdinalIgnoreCase) >= 0) byNameCN = g;
 			}
 			warehouseGrid = exact ?? byType ?? byNameWarehouseItemGrid ?? byNameWarehouse ?? byNameStorage ?? byNameCN ?? warehouseGrid;
 		}
@@ -375,7 +375,7 @@ namespace Game.UI
 				if (data.category == ItemCategory.Intelligence)
 				{
 					int value = Mathf.Max(0, data.intelligenceValue);
-					// Èô´ËÀàÎïÆ·¿É¶Ñµş£¬Ôò³ËÒÔµ±Ç°¶ÑµşÊı
+					// è‹¥æ­¤ç±»ç‰©å“å¯å †å ï¼Œåˆ™ä¹˜ä»¥å½“å‰å †å æ•°
 					int stack = Mathf.Max(1, reader.CurrentStack);
 					sum += value * stack;
 				}

@@ -7,7 +7,7 @@ namespace Persistence
 {
 	public class PlayerWeaponPersistenceAdapter : MonoBehaviour
 	{
-		[Header("±£´æÅäÖÃ")]
+		[Header("ä¿å­˜é…ç½®")]
 		public bool enablePersistence = true;
 		public bool enableAutosave = true;
 		public float autosaveIntervalSec = 5f;
@@ -15,8 +15,8 @@ namespace Persistence
 		public bool forceSaveOnSceneUnload = true;
 		public int saveDebounceMs = 300;
 
-		[Header("¶ÔÏóÒıÓÃ")]
-		public Transform hand; // PlayerWeaponEquipController Ê¹ÓÃµÄ Hand£»¿ÉÑ¡£¬½öÓÃÓÚĞı×ª¶ÁÈ¡
+		[Header("å¯¹è±¡å¼•ç”¨")]
+		public Transform hand; // PlayerWeaponEquipController ä½¿ç”¨çš„ Handï¼›å¯é€‰ï¼Œä»…ç”¨äºæ—‹è½¬è¯»å–
 
 		private WeaponPersistenceService _service;
 		private float _nextAutosaveTime;
@@ -36,9 +36,9 @@ namespace Persistence
 			MessagingCenter.Instance.Register<WeaponMessageBus.WeaponEquippedEvent>(OnEquipped);
 			MessagingCenter.Instance.Register<WeaponMessageBus.WeaponUnequippedEvent>(OnUnequipped);
 			MessagingCenter.Instance.Register<WeaponMessageBus.WeaponSwitchedEvent>(OnSwitched);
-			// ÑÓºóÒ»Ö¡ÔÙ»Ö¸´£¬È·±£¶©ÔÄÕß£¨Èç PlayerWeaponEquipController£©ÒÑÍê³É×¢²á
+			// å»¶åä¸€å¸§å†æ¢å¤ï¼Œç¡®ä¿è®¢é˜…è€…ï¼ˆå¦‚ PlayerWeaponEquipControllerï¼‰å·²å®Œæˆæ³¨å†Œ
 			StartCoroutine(RestoreAfterOneFrame());
-			// ÖÜÆÚ±£´æ¼ÆÊ±
+			// å‘¨æœŸä¿å­˜è®¡æ—¶
 			_nextAutosaveTime = Time.unscaledTime + autosaveIntervalSec;
 		}
 
@@ -54,14 +54,14 @@ namespace Persistence
 			MessagingCenter.Instance.Unregister<WeaponMessageBus.WeaponEquippedEvent>(OnEquipped);
 			MessagingCenter.Instance.Unregister<WeaponMessageBus.WeaponUnequippedEvent>(OnUnequipped);
 			MessagingCenter.Instance.Unregister<WeaponMessageBus.WeaponSwitchedEvent>(OnSwitched);
-			// ×é¼ş½ûÓÃÊ±¾¡Á¿±£´æÒ»´Î£¨·ÇÇ¿ÖÆ£©
+			// ç»„ä»¶ç¦ç”¨æ—¶å°½é‡ä¿å­˜ä¸€æ¬¡ï¼ˆéå¼ºåˆ¶ï¼‰
 			ScheduleSave();
 		}
 
 		private void Update()
 		{
 			if (!enablePersistence) return;
-			// ÖÜÆÚ×Ô¶¯±£´æ£¨½áºÏÔà¼ì²éÓë½ÚÁ÷£©
+			// å‘¨æœŸè‡ªåŠ¨ä¿å­˜ï¼ˆç»“åˆè„æ£€æŸ¥ä¸èŠ‚æµï¼‰
 			if (enableAutosave && Time.unscaledTime >= _nextAutosaveTime)
 			{
 				_nextAutosaveTime = Time.unscaledTime + Mathf.Max(0.2f, autosaveIntervalSec);
@@ -71,18 +71,18 @@ namespace Persistence
 					_dirty = false;
 				}
 			}
-			// ½ÚÁ÷¶ÓÁĞÂäÅÌ
+			// èŠ‚æµé˜Ÿåˆ—è½ç›˜
 			_service.FlushIfPending(CreateSnapshot);
 		}
 
 		private void OnApplicationQuit()
 		{
 			if (!enablePersistence || !forceSaveOnQuit) return;
-			// ÍË³öÇ°Ç¿ÖÆ±£´æ
+			// é€€å‡ºå‰å¼ºåˆ¶ä¿å­˜
 			_service.SaveSafe(CreateSnapshot);
 		}
 
-		// ÊÂ¼ş´¦Àí
+		// äº‹ä»¶å¤„ç†
 		private void OnEquipped(WeaponMessageBus.WeaponEquippedEvent e)
 		{
 			if (!enablePersistence) return;
@@ -114,7 +114,7 @@ namespace Persistence
 			_service.ScheduleSave(CreateSnapshot);
 		}
 
-		// ¹¹Ôì±£´æ¾µÏñ
+		// æ„é€ ä¿å­˜é•œåƒ
 		private WeaponPersistStateDTO CreateSnapshot()
 		{
 			var dto = new WeaponPersistStateDTO();
@@ -153,40 +153,40 @@ namespace Persistence
 			return dto;
 		}
 
-		// »Ö¸´Á÷³Ì
+		// æ¢å¤æµç¨‹
 		private void TryRestore()
 		{
 			if (!_service.Load(out var state))
 			{
-				// ÎŞ´æµµ£¬ºöÂÔ
+				// æ— å­˜æ¡£ï¼Œå¿½ç•¥
 				return;
 			}
 			_restoredActiveSlot = (state.activeSlot == 0 || state.activeSlot == 1) ? state.activeSlot : -1;
-			// Öğ²Û»Ö¸´£ºÍ¨¹ıÏûÏ¢Çı¶¯ÊµÀı»¯
+			// é€æ§½æ¢å¤ï¼šé€šè¿‡æ¶ˆæ¯é©±åŠ¨å®ä¾‹åŒ–
 			for (int i = 0; i < 2; i++)
 			{
 				var slot = state.slots[i];
 				if (!slot.hasWeapon) continue;
 				if (!ItemDataRepository.TryGetById(slot.itemId, out ItemDataSO so))
 				{
-					// id Ê§°Ü£¬³¢ÊÔ gid
+					// id å¤±è´¥ï¼Œå°è¯• gid
 					if (!ItemDataRepository.TryGetByGlobalId(slot.itemGlobalId, out so))
 					{
 						Debug.LogWarning($"[WeaponPersist] Restore fail: slot {i} item not found");
 						continue;
 					}
 				}
-				// ×°±¸²¢ÊµÀı»¯
+				// è£…å¤‡å¹¶å®ä¾‹åŒ–
 				MessagingCenter.Instance.Send(new WeaponMessageBus.EquipWeaponCommand { slotIndex = i, itemSO = so });
 			}
-			// Ê×´Î³¢ÊÔ»Ö¸´¼¤»î²Û£¨¿ÉÄÜÒòÊµÀı»¯Î´Íê³É±»ºöÂÔ£¬ÏÂÒ»Ö¡»áÔÙ·¢Ò»´Î£©
+			// é¦–æ¬¡å°è¯•æ¢å¤æ¿€æ´»æ§½ï¼ˆå¯èƒ½å› å®ä¾‹åŒ–æœªå®Œæˆè¢«å¿½ç•¥ï¼Œä¸‹ä¸€å¸§ä¼šå†å‘ä¸€æ¬¡ï¼‰
 			if (_restoredActiveSlot != -1)
 			{
 				MessagingCenter.Instance.Send(new WeaponMessageBus.SetActiveWeaponSlot { slotIndex = _restoredActiveSlot });
 				_activeSlotIndex = _restoredActiveSlot;
 			}
 
-			// ÑÓºóÒ»Ö¡Ğ´ÈëÔËĞĞÌ¬£¨µÈ´ıÊµÀı»¯Íê³É£©
+			// å»¶åä¸€å¸§å†™å…¥è¿è¡Œæ€ï¼ˆç­‰å¾…å®ä¾‹åŒ–å®Œæˆï¼‰
 			StartCoroutine(ApplyRuntimeStateNextFrame(state));
 		}
 
@@ -202,15 +202,15 @@ namespace Persistence
 				var wm = go.GetComponent<WeaponManager>();
 				if (wm == null) continue;
 
-				// »Ö¸´µ¯Ò©
+				// æ¢å¤å¼¹è¯
 				wm.currentAmmo = Mathf.Clamp(slot.ammo, 0, wm.GetMagazineCapacity());
-				// »Ö¸´¿ª»ğ·½Ê½£¨Èô±£´æÖµÓëSO²»Í¬£¬ÒÔ±£´æÖµÎª×¼£©
+				// æ¢å¤å¼€ç«æ–¹å¼ï¼ˆè‹¥ä¿å­˜å€¼ä¸SOä¸åŒï¼Œä»¥ä¿å­˜å€¼ä¸ºå‡†ï¼‰
 				if (!string.IsNullOrEmpty(slot.fireMode))
 				{
 					if (string.Equals(slot.fireMode, "FullAuto", StringComparison.OrdinalIgnoreCase)) wm.fireMode = WeaponManager.FireMode.FullAuto;
 					else if (string.Equals(slot.fireMode, "SemiAuto", StringComparison.OrdinalIgnoreCase)) wm.fireMode = WeaponManager.FireMode.SemiAuto;
 				}
-				// »ùÓÚ±£´æ½Ç¶ÈµÄË®Æ½³¯ÏòÀ´ÉèÖÃÒ»´ÎY·­×ª£¨Ê¹ÓÃ DeltaAngle µÃµ½ÓĞ·ûºÅ½Ç¶È£©
+				// åŸºäºä¿å­˜è§’åº¦çš„æ°´å¹³æœå‘æ¥è®¾ç½®ä¸€æ¬¡Yç¿»è½¬ï¼ˆä½¿ç”¨ DeltaAngle å¾—åˆ°æœ‰ç¬¦å·è§’åº¦ï¼‰
 				float signedZ = Mathf.DeltaAngle(0f, slot.rotationZ);
 				bool left = signedZ > 90f || signedZ < -90f;
 				var t = go.transform;
@@ -218,7 +218,7 @@ namespace Persistence
 				ls.y = left ? -Mathf.Abs(ls.y) : Mathf.Abs(ls.y);
 				t.localScale = ls;
 			}
-			// ÔÙ´ÎÉèÖÃ¼¤»î²Û£¬È·±£Ö®Ç°Î´ÉúĞ§Ê±ÄÜÇĞ»»
+			// å†æ¬¡è®¾ç½®æ¿€æ´»æ§½ï¼Œç¡®ä¿ä¹‹å‰æœªç”Ÿæ•ˆæ—¶èƒ½åˆ‡æ¢
 			if (_restoredActiveSlot != -1)
 			{
 				MessagingCenter.Instance.Send(new WeaponMessageBus.SetActiveWeaponSlot { slotIndex = _restoredActiveSlot });

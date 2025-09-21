@@ -3,44 +3,44 @@ using System.Collections.Generic;
 using System.Linq;
 
 /// <summary>
-/// ÊÀ½ç¿Õ¼äÑÓ³ÙUI¹ÜÀíÆ÷
-/// ¸ºÔğÍ³Ò»¹ÜÀíËùÓĞ»õ¼ÜµÄÑÓ³ÙÏÔÊ¾UI£¬È·±£Ò»ÖÂµÄÏÔÊ¾»úÖÆ
+/// ä¸–ç•Œç©ºé—´å»¶è¿ŸUIç®¡ç†å™¨
+/// è´Ÿè´£ç»Ÿä¸€ç®¡ç†æ‰€æœ‰è´§æ¶çš„å»¶è¿Ÿæ˜¾ç¤ºUIï¼Œç¡®ä¿ä¸€è‡´çš„æ˜¾ç¤ºæœºåˆ¶
 /// </summary>
 public class WorldSpaceDelayUIManager : MonoBehaviour
 {
-    [Header("ÊÀ½ç¿Õ¼äCanvasÉèÖÃ")]
-    [SerializeField][FieldLabel("ÊÀ½ç¿Õ¼äCanvas")] private Canvas worldSpaceCanvas;
-    [SerializeField][FieldLabel("ÑÓ³ÙUIÔ¤ÖÆÌå")] private GameObject delayUIPrefab;
-    [SerializeField][FieldLabel("¸úËæÍæ¼ÒÍ·¶¥¾àÀë")] private float offsetAbovePlayer = 2f;
-    [SerializeField][FieldLabel("UIµ½Íæ¼ÒµÄË®Æ½¾àÀë")] private float horizontalDistanceFromPlayer = 0f;
-    [SerializeField][FieldLabel("UIËõ·ÅÒò×Ó")] private float uiScale = 0.01f;
+    [Header("ä¸–ç•Œç©ºé—´Canvasè®¾ç½®")]
+    [SerializeField][FieldLabel("ä¸–ç•Œç©ºé—´Canvas")] private Canvas worldSpaceCanvas;
+    [SerializeField][FieldLabel("å»¶è¿ŸUIé¢„åˆ¶ä½“")] private GameObject delayUIPrefab;
+    [SerializeField][FieldLabel("è·Ÿéšç©å®¶å¤´é¡¶è·ç¦»")] private float offsetAbovePlayer = 2f;
+    [SerializeField][FieldLabel("UIåˆ°ç©å®¶çš„æ°´å¹³è·ç¦»")] private float horizontalDistanceFromPlayer = 0f;
+    [SerializeField][FieldLabel("UIç¼©æ”¾å› å­")] private float uiScale = 0.01f;
     
-    [Header("UI³ØÉèÖÃ")]
-    [SerializeField][FieldLabel("Ô¤´´½¨UIÊıÁ¿")] private int preCreateCount = 5;
-    [SerializeField][FieldLabel("×î´óUIÊıÁ¿")] private int maxUICount = 10;
+    [Header("UIæ± è®¾ç½®")]
+    [SerializeField][FieldLabel("é¢„åˆ›å»ºUIæ•°é‡")] private int preCreateCount = 5;
+    [SerializeField][FieldLabel("æœ€å¤§UIæ•°é‡")] private int maxUICount = 10;
     
-    [Header("µ÷ÊÔÉèÖÃ")]
-    [SerializeField][FieldLabel("ÆôÓÃµ÷ÊÔÈÕÖ¾")] private bool enableDebugLogs = true;
-    [SerializeField][FieldLabel("ÏÔÊ¾UI±ß½ç")] private bool showUIBounds = false;
+    [Header("è°ƒè¯•è®¾ç½®")]
+    [SerializeField][FieldLabel("å¯ç”¨è°ƒè¯•æ—¥å¿—")] private bool enableDebugLogs = true;
+    [SerializeField][FieldLabel("æ˜¾ç¤ºUIè¾¹ç•Œ")] private bool showUIBounds = false;
     
-    // µ¥ÀıÊµÀı
+    // å•ä¾‹å®ä¾‹
     public static WorldSpaceDelayUIManager Instance { get; private set; }
     
-    // Ë½ÓĞ±äÁ¿
+    // ç§æœ‰å˜é‡
     private Transform playerTransform;
     private Camera playerCamera;
     private List<DelayMagnifierUIController> delayUIPool = new List<DelayMagnifierUIController>();
     private Dictionary<GameObject, DelayMagnifierUIController> activeDelayUIs = new Dictionary<GameObject, DelayMagnifierUIController>();
     
-    // µ±Ç°¼¤»îµÄÑÓ³ÙUI
+    // å½“å‰æ¿€æ´»çš„å»¶è¿ŸUI
     private DelayMagnifierUIController currentActiveDelayUI;
     private GameObject currentTriggerObject;
     
-    #region UnityÉúÃüÖÜÆÚ
+    #region Unityç”Ÿå‘½å‘¨æœŸ
     
     private void Awake()
     {
-        // ÊµÏÖµ¥ÀıÄ£Ê½
+        // å®ç°å•ä¾‹æ¨¡å¼
         if (Instance == null)
         {
             Instance = this;
@@ -73,67 +73,67 @@ public class WorldSpaceDelayUIManager : MonoBehaviour
     
     #endregion
     
-    #region ³õÊ¼»¯
+    #region åˆå§‹åŒ–
     
     /// <summary>
-    /// ³õÊ¼»¯¹ÜÀíÆ÷
+    /// åˆå§‹åŒ–ç®¡ç†å™¨
     /// </summary>
     private void InitializeManager()
     {
-        LogDebug("³õÊ¼»¯ÊÀ½ç¿Õ¼äÑÓ³ÙUI¹ÜÀíÆ÷");
+        LogDebug("åˆå§‹åŒ–ä¸–ç•Œç©ºé—´å»¶è¿ŸUIç®¡ç†å™¨");
         
-        // ÑéÖ¤ÊÀ½ç¿Õ¼äCanvasÉèÖÃ
+        // éªŒè¯ä¸–ç•Œç©ºé—´Canvasè®¾ç½®
         ValidateWorldSpaceCanvas();
         
-        // ²éÕÒÍæ¼Ò¶ÔÏó
+        // æŸ¥æ‰¾ç©å®¶å¯¹è±¡
         FindPlayerReferences();
         
-        // ´´½¨UI³Ø
+        // åˆ›å»ºUIæ± 
         CreateDelayUIPool();
     }
     
     /// <summary>
-    /// ÑÓ³Ù³õÊ¼»¯£¨È·±£ËùÓĞ¶ÔÏó¶¼ÒÑ¼ÓÔØ£©
+    /// å»¶è¿Ÿåˆå§‹åŒ–ï¼ˆç¡®ä¿æ‰€æœ‰å¯¹è±¡éƒ½å·²åŠ è½½ï¼‰
     /// </summary>
     private System.Collections.IEnumerator DelayedInitialization()
     {
         yield return new WaitForSeconds(0.5f);
         
-        // ÖØĞÂ²éÕÒÍæ¼ÒÒıÓÃ
+        // é‡æ–°æŸ¥æ‰¾ç©å®¶å¼•ç”¨
         if (playerTransform == null || playerCamera == null)
         {
             FindPlayerReferences();
         }
         
-        LogDebug($"ÑÓ³Ù³õÊ¼»¯Íê³É - Íæ¼Ò: {(playerTransform != null ? "ÕÒµ½" : "Î´ÕÒµ½")}, Ïà»ú: {(playerCamera != null ? "ÕÒµ½" : "Î´ÕÒµ½")}");
+        LogDebug($"å»¶è¿Ÿåˆå§‹åŒ–å®Œæˆ - ç©å®¶: {(playerTransform != null ? "æ‰¾åˆ°" : "æœªæ‰¾åˆ°")}, ç›¸æœº: {(playerCamera != null ? "æ‰¾åˆ°" : "æœªæ‰¾åˆ°")}");
     }
     
     /// <summary>
-    /// ÑéÖ¤ÊÀ½ç¿Õ¼äCanvasÉèÖÃ
+    /// éªŒè¯ä¸–ç•Œç©ºé—´Canvasè®¾ç½®
     /// </summary>
     private void ValidateWorldSpaceCanvas()
     {
         if (worldSpaceCanvas == null)
         {
-            LogError("ÊÀ½ç¿Õ¼äCanvasÎ´ÉèÖÃ£¡ÕıÔÚ×Ô¶¯´´½¨...");
+            LogError("ä¸–ç•Œç©ºé—´Canvasæœªè®¾ç½®ï¼æ­£åœ¨è‡ªåŠ¨åˆ›å»º...");
             CreateWorldSpaceCanvas();
         }
         else
         {
-            // È·±£CanvasÉèÖÃÎªÊÀ½ç¿Õ¼äÄ£Ê½
+            // ç¡®ä¿Canvasè®¾ç½®ä¸ºä¸–ç•Œç©ºé—´æ¨¡å¼
             if (worldSpaceCanvas.renderMode != RenderMode.WorldSpace)
             {
-                LogWarning("Canvas²»ÊÇÊÀ½ç¿Õ¼äÄ£Ê½£¬ÕıÔÚĞŞÕı...");
+                LogWarning("Canvasä¸æ˜¯ä¸–ç•Œç©ºé—´æ¨¡å¼ï¼Œæ­£åœ¨ä¿®æ­£...");
                 worldSpaceCanvas.renderMode = RenderMode.WorldSpace;
                 worldSpaceCanvas.worldCamera = Camera.main;
             }
             
-            LogDebug($"ÊÀ½ç¿Õ¼äCanvasÑéÖ¤Íê³É: {worldSpaceCanvas.name}");
+            LogDebug($"ä¸–ç•Œç©ºé—´CanvaséªŒè¯å®Œæˆ: {worldSpaceCanvas.name}");
         }
     }
     
     /// <summary>
-    /// ´´½¨ÊÀ½ç¿Õ¼äCanvas
+    /// åˆ›å»ºä¸–ç•Œç©ºé—´Canvas
     /// </summary>
     private void CreateWorldSpaceCanvas()
     {
@@ -145,44 +145,44 @@ public class WorldSpaceDelayUIManager : MonoBehaviour
         worldSpaceCanvas.worldCamera = Camera.main;
         worldSpaceCanvas.sortingOrder = 100;
         
-        // Ìí¼ÓCanvasScaler - ¶ÔÓÚÊÀ½ç¿Õ¼ä£¬Ê¹ÓÃConstant Pixel SizeÄ£Ê½
+        // æ·»åŠ CanvasScaler - å¯¹äºä¸–ç•Œç©ºé—´ï¼Œä½¿ç”¨Constant Pixel Sizeæ¨¡å¼
         var scaler = canvasGO.AddComponent<UnityEngine.UI.CanvasScaler>();
         scaler.uiScaleMode = UnityEngine.UI.CanvasScaler.ScaleMode.ConstantPixelSize;
         scaler.scaleFactor = 1f;
         scaler.referencePixelsPerUnit = 100f;
         
-        // Ìí¼ÓGraphicRaycaster
+        // æ·»åŠ GraphicRaycaster
         canvasGO.AddComponent<UnityEngine.UI.GraphicRaycaster>();
         
-        // ÉèÖÃCanvas´óĞ¡ºÍÎ»ÖÃ - Ê¹ÓÃ¸üĞ¡µÄ³ß´çÒÔÌá¸ß¾«¶È
+        // è®¾ç½®Canvaså¤§å°å’Œä½ç½® - ä½¿ç”¨æ›´å°çš„å°ºå¯¸ä»¥æé«˜ç²¾åº¦
         RectTransform rectTransform = canvasGO.GetComponent<RectTransform>();
-        rectTransform.sizeDelta = new Vector2(1000, 1000); // ÏñËØµ¥Î»£¬µ«»á±»Ëõ·Å
-        rectTransform.localScale = Vector3.one * uiScale; // Í¨¹ıËõ·Å¿ØÖÆÊµ¼Ê´óĞ¡
+        rectTransform.sizeDelta = new Vector2(1000, 1000); // åƒç´ å•ä½ï¼Œä½†ä¼šè¢«ç¼©æ”¾
+        rectTransform.localScale = Vector3.one * uiScale; // é€šè¿‡ç¼©æ”¾æ§åˆ¶å®é™…å¤§å°
         
-        LogDebug("×Ô¶¯´´½¨ÊÀ½ç¿Õ¼äCanvasÍê³É");
+        LogDebug("è‡ªåŠ¨åˆ›å»ºä¸–ç•Œç©ºé—´Canvaså®Œæˆ");
     }
     
     /// <summary>
-    /// ²éÕÒÍæ¼ÒÒıÓÃ
+    /// æŸ¥æ‰¾ç©å®¶å¼•ç”¨
     /// </summary>
     private void FindPlayerReferences()
     {
-        // ²éÕÒÍæ¼Ò¶ÔÏó
+        // æŸ¥æ‰¾ç©å®¶å¯¹è±¡
         if (playerTransform == null)
         {
             GameObject playerGO = GameObject.FindGameObjectWithTag("Player");
             if (playerGO != null)
             {
                 playerTransform = playerGO.transform;
-                LogDebug($"ÕÒµ½Íæ¼Ò¶ÔÏó: {playerGO.name}");
+                LogDebug($"æ‰¾åˆ°ç©å®¶å¯¹è±¡: {playerGO.name}");
             }
             else
             {
-                LogWarning("Î´ÕÒµ½´øÓĞ'Player'±êÇ©µÄÓÎÏ·¶ÔÏó");
+                LogWarning("æœªæ‰¾åˆ°å¸¦æœ‰'Player'æ ‡ç­¾çš„æ¸¸æˆå¯¹è±¡");
             }
         }
         
-        // ²éÕÒÍæ¼ÒÏà»ú
+        // æŸ¥æ‰¾ç©å®¶ç›¸æœº
         if (playerCamera == null)
         {
             playerCamera = Camera.main;
@@ -193,9 +193,9 @@ public class WorldSpaceDelayUIManager : MonoBehaviour
             
             if (playerCamera != null)
             {
-                LogDebug($"ÕÒµ½Íæ¼ÒÏà»ú: {playerCamera.name}");
+                LogDebug($"æ‰¾åˆ°ç©å®¶ç›¸æœº: {playerCamera.name}");
                 
-                // ÉèÖÃÊÀ½ç¿Õ¼äCanvasµÄÏà»úÒıÓÃ
+                // è®¾ç½®ä¸–ç•Œç©ºé—´Canvasçš„ç›¸æœºå¼•ç”¨
                 if (worldSpaceCanvas != null)
                 {
                     worldSpaceCanvas.worldCamera = playerCamera;
@@ -203,19 +203,19 @@ public class WorldSpaceDelayUIManager : MonoBehaviour
             }
             else
             {
-                LogWarning("Î´ÕÒµ½Íæ¼ÒÏà»ú");
+                LogWarning("æœªæ‰¾åˆ°ç©å®¶ç›¸æœº");
             }
         }
     }
     
     /// <summary>
-    /// ´´½¨ÑÓ³ÙUI³Ø
+    /// åˆ›å»ºå»¶è¿ŸUIæ± 
     /// </summary>
     private void CreateDelayUIPool()
     {
         if (delayUIPrefab == null)
         {
-            LogError("ÑÓ³ÙUIÔ¤ÖÆÌåÎ´ÉèÖÃ£¡");
+            LogError("å»¶è¿ŸUIé¢„åˆ¶ä½“æœªè®¾ç½®ï¼");
             return;
         }
         
@@ -224,11 +224,11 @@ public class WorldSpaceDelayUIManager : MonoBehaviour
             CreateDelayUIInstance();
         }
         
-        LogDebug($"ÑÓ³ÙUI³Ø´´½¨Íê³É£¬Ô¤´´½¨ÊıÁ¿: {delayUIPool.Count}");
+        LogDebug($"å»¶è¿ŸUIæ± åˆ›å»ºå®Œæˆï¼Œé¢„åˆ›å»ºæ•°é‡: {delayUIPool.Count}");
     }
     
     /// <summary>
-    /// ´´½¨ÑÓ³ÙUIÊµÀı
+    /// åˆ›å»ºå»¶è¿ŸUIå®ä¾‹
     /// </summary>
     private DelayMagnifierUIController CreateDelayUIInstance()
     {
@@ -237,12 +237,12 @@ public class WorldSpaceDelayUIManager : MonoBehaviour
         
         if (delayUI == null)
         {
-            LogError("ÑÓ³ÙUIÔ¤ÖÆÌåÈ±ÉÙDelayMagnifierUIController×é¼ş£¡");
+            LogError("å»¶è¿ŸUIé¢„åˆ¶ä½“ç¼ºå°‘DelayMagnifierUIControllerç»„ä»¶ï¼");
             Destroy(uiGO);
             return null;
         }
         
-        // ³õÊ¼»¯ÎªÒş²Ø×´Ì¬
+        // åˆå§‹åŒ–ä¸ºéšè—çŠ¶æ€
         delayUI.HideImmediate();
         uiGO.SetActive(false);
         
@@ -252,103 +252,103 @@ public class WorldSpaceDelayUIManager : MonoBehaviour
     
     #endregion
     
-    #region ¹«¹²API
+    #region å…¬å…±API
     
     /// <summary>
-    /// Îª»õ¼Ü´¥·¢Æ÷»ñÈ¡ÑÓ³ÙUI
+    /// ä¸ºè´§æ¶è§¦å‘å™¨è·å–å»¶è¿ŸUI
     /// </summary>
-    /// <param name="triggerObject">»õ¼Ü´¥·¢Æ÷¶ÔÏó</param>
-    /// <returns>ÑÓ³ÙUI¿ØÖÆÆ÷</returns>
+    /// <param name="triggerObject">è´§æ¶è§¦å‘å™¨å¯¹è±¡</param>
+    /// <returns>å»¶è¿ŸUIæ§åˆ¶å™¨</returns>
     public DelayMagnifierUIController GetDelayUIForShelf(GameObject triggerObject)
     {
         if (triggerObject == null) return null;
         
-        // ¼ì²éÊÇ·ñÒÑÓĞ¼¤»îµÄUI
+        // æ£€æŸ¥æ˜¯å¦å·²æœ‰æ¿€æ´»çš„UI
         if (activeDelayUIs.ContainsKey(triggerObject))
         {
             return activeDelayUIs[triggerObject];
         }
         
-        // ´Ó³ØÖĞ»ñÈ¡¿ÉÓÃµÄUI
+        // ä»æ± ä¸­è·å–å¯ç”¨çš„UI
         DelayMagnifierUIController availableUI = GetAvailableUIFromPool();
         if (availableUI == null) return null;
         
-        // ÅäÖÃUI
+        // é…ç½®UI
         ConfigureDelayUIForShelf(availableUI, triggerObject);
         
-        // Ìí¼Óµ½¼¤»îÁĞ±í
+        // æ·»åŠ åˆ°æ¿€æ´»åˆ—è¡¨
         activeDelayUIs[triggerObject] = availableUI;
         
-        LogDebug($"Îª»õ¼Ü {triggerObject.name} ·ÖÅäÑÓ³ÙUI");
+        LogDebug($"ä¸ºè´§æ¶ {triggerObject.name} åˆ†é…å»¶è¿ŸUI");
         return availableUI;
     }
     
     /// <summary>
-    /// ÊÍ·Å»õ¼ÜµÄÑÓ³ÙUI
+    /// é‡Šæ”¾è´§æ¶çš„å»¶è¿ŸUI
     /// </summary>
-    /// <param name="triggerObject">»õ¼Ü´¥·¢Æ÷¶ÔÏó</param>
+    /// <param name="triggerObject">è´§æ¶è§¦å‘å™¨å¯¹è±¡</param>
     public void ReleaseDelayUIForShelf(GameObject triggerObject)
     {
         if (triggerObject == null || !activeDelayUIs.ContainsKey(triggerObject)) return;
         
         DelayMagnifierUIController delayUI = activeDelayUIs[triggerObject];
         
-        // Í£Ö¹ºÍÒş²ØUI
+        // åœæ­¢å’Œéšè—UI
         delayUI.Cancel();
         delayUI.HideImmediate();
         delayUI.gameObject.SetActive(false);
         
-        // ´Ó¼¤»îÁĞ±íÒÆ³ı
+        // ä»æ¿€æ´»åˆ—è¡¨ç§»é™¤
         activeDelayUIs.Remove(triggerObject);
         
-        // Èç¹ûÊÇµ±Ç°¼¤»îµÄUI£¬Çå³ıÒıÓÃ
+        // å¦‚æœæ˜¯å½“å‰æ¿€æ´»çš„UIï¼Œæ¸…é™¤å¼•ç”¨
         if (currentActiveDelayUI == delayUI)
         {
             currentActiveDelayUI = null;
             currentTriggerObject = null;
         }
         
-        LogDebug($"ÊÍ·Å»õ¼Ü {triggerObject.name} µÄÑÓ³ÙUI");
+        LogDebug($"é‡Šæ”¾è´§æ¶ {triggerObject.name} çš„å»¶è¿ŸUI");
     }
     
     /// <summary>
-    /// ¿ªÊ¼ÑÓ³ÙÏÔÊ¾
+    /// å¼€å§‹å»¶è¿Ÿæ˜¾ç¤º
     /// </summary>
-    /// <param name="triggerObject">»õ¼Ü´¥·¢Æ÷¶ÔÏó</param>
-    /// <param name="delayDuration">ÑÓ³ÙÊ±³¤</param>
-    /// <param name="onComplete">Íê³É»Øµ÷</param>
-    /// <param name="onCancel">È¡Ïû»Øµ÷</param>
+    /// <param name="triggerObject">è´§æ¶è§¦å‘å™¨å¯¹è±¡</param>
+    /// <param name="delayDuration">å»¶è¿Ÿæ—¶é•¿</param>
+    /// <param name="onComplete">å®Œæˆå›è°ƒ</param>
+    /// <param name="onCancel">å–æ¶ˆå›è°ƒ</param>
     public void StartDelayDisplay(GameObject triggerObject, float delayDuration, System.Action onComplete = null, System.Action onCancel = null)
     {
         DelayMagnifierUIController delayUI = GetDelayUIForShelf(triggerObject);
         if (delayUI == null) return;
         
-        // ÉèÖÃµ±Ç°¼¤»îµÄUI
+        // è®¾ç½®å½“å‰æ¿€æ´»çš„UI
         currentActiveDelayUI = delayUI;
         currentTriggerObject = triggerObject;
         
-        // ¸üĞÂUIÎ»ÖÃ
+        // æ›´æ–°UIä½ç½®
         UpdateDelayUIPosition(delayUI, triggerObject);
         
-        // ¿ªÊ¼ÑÓ³ÙÏÔÊ¾
+        // å¼€å§‹å»¶è¿Ÿæ˜¾ç¤º
         delayUI.StartDelay(delayDuration, 
             () => {
-                LogDebug($"»õ¼Ü {triggerObject.name} ÑÓ³ÙÍê³É");
+                LogDebug($"è´§æ¶ {triggerObject.name} å»¶è¿Ÿå®Œæˆ");
                 onComplete?.Invoke();
             }, 
             () => {
-                LogDebug($"»õ¼Ü {triggerObject.name} ÑÓ³Ù±»È¡Ïû");
+                LogDebug($"è´§æ¶ {triggerObject.name} å»¶è¿Ÿè¢«å–æ¶ˆ");
                 onCancel?.Invoke();
             }
         );
         
-        LogDebug($"¿ªÊ¼»õ¼Ü {triggerObject.name} µÄÑÓ³ÙÏÔÊ¾£¬Ê±³¤: {delayDuration:F1}Ãë");
+        LogDebug($"å¼€å§‹è´§æ¶ {triggerObject.name} çš„å»¶è¿Ÿæ˜¾ç¤ºï¼Œæ—¶é•¿: {delayDuration:F1}ç§’");
     }
     
     /// <summary>
-    /// È¡ÏûÑÓ³ÙÏÔÊ¾
+    /// å–æ¶ˆå»¶è¿Ÿæ˜¾ç¤º
     /// </summary>
-    /// <param name="triggerObject">»õ¼Ü´¥·¢Æ÷¶ÔÏó</param>
+    /// <param name="triggerObject">è´§æ¶è§¦å‘å™¨å¯¹è±¡</param>
     public void CancelDelayDisplay(GameObject triggerObject)
     {
         if (!activeDelayUIs.ContainsKey(triggerObject)) return;
@@ -356,11 +356,11 @@ public class WorldSpaceDelayUIManager : MonoBehaviour
         DelayMagnifierUIController delayUI = activeDelayUIs[triggerObject];
         delayUI.Cancel();
         
-        LogDebug($"È¡Ïû»õ¼Ü {triggerObject.name} µÄÑÓ³ÙÏÔÊ¾");
+        LogDebug($"å–æ¶ˆè´§æ¶ {triggerObject.name} çš„å»¶è¿Ÿæ˜¾ç¤º");
     }
     
     /// <summary>
-    /// Òş²ØËùÓĞÑÓ³ÙUI£¨±³°ü´ò¿ªÊ±µ÷ÓÃ£©
+    /// éšè—æ‰€æœ‰å»¶è¿ŸUIï¼ˆèƒŒåŒ…æ‰“å¼€æ—¶è°ƒç”¨ï¼‰
     /// </summary>
     public void HideAllDelayUIs()
     {
@@ -373,22 +373,22 @@ public class WorldSpaceDelayUIManager : MonoBehaviour
         currentActiveDelayUI = null;
         currentTriggerObject = null;
         
-        LogDebug("Òş²ØËùÓĞÑÓ³ÙUI");
+        LogDebug("éšè—æ‰€æœ‰å»¶è¿ŸUI");
     }
     
     /// <summary>
-    /// ¼ì²éÊÇ·ñÓĞÑÓ³ÙUIÕıÔÚÏÔÊ¾
+    /// æ£€æŸ¥æ˜¯å¦æœ‰å»¶è¿ŸUIæ­£åœ¨æ˜¾ç¤º
     /// </summary>
-    /// <returns>ÊÇ·ñÓĞUIÔÚÑÓ³ÙÖĞ</returns>
+    /// <returns>æ˜¯å¦æœ‰UIåœ¨å»¶è¿Ÿä¸­</returns>
     public bool IsAnyDelayUIActive()
     {
         return activeDelayUIs.Values.Any(ui => ui.IsDelaying());
     }
     
     /// <summary>
-    /// »ñÈ¡µ±Ç°¼¤»îµÄÑÓ³ÙUI
+    /// è·å–å½“å‰æ¿€æ´»çš„å»¶è¿ŸUI
     /// </summary>
-    /// <returns>µ±Ç°¼¤»îµÄÑÓ³ÙUI</returns>
+    /// <returns>å½“å‰æ¿€æ´»çš„å»¶è¿ŸUI</returns>
     public DelayMagnifierUIController GetCurrentActiveDelayUI()
     {
         return currentActiveDelayUI;
@@ -396,20 +396,20 @@ public class WorldSpaceDelayUIManager : MonoBehaviour
     
     #endregion
     
-    #region Ë½ÓĞ·½·¨
+    #region ç§æœ‰æ–¹æ³•
     
     /// <summary>
-    /// ´Ó³ØÖĞ»ñÈ¡¿ÉÓÃµÄUI
+    /// ä»æ± ä¸­è·å–å¯ç”¨çš„UI
     /// </summary>
-    /// <returns>¿ÉÓÃµÄÑÓ³ÙUI</returns>
+    /// <returns>å¯ç”¨çš„å»¶è¿ŸUI</returns>
     private DelayMagnifierUIController GetAvailableUIFromPool()
     {
-        // ²éÕÒÎ´Ê¹ÓÃµÄUI
+        // æŸ¥æ‰¾æœªä½¿ç”¨çš„UI
         DelayMagnifierUIController availableUI = delayUIPool.FirstOrDefault(ui => !ui.gameObject.activeInHierarchy);
         
         if (availableUI == null && delayUIPool.Count < maxUICount)
         {
-            // ³ØÖĞÃ»ÓĞ¿ÉÓÃµÄ£¬ÇÒÎ´´ïµ½×î´óÊıÁ¿£¬´´½¨ĞÂµÄ
+            // æ± ä¸­æ²¡æœ‰å¯ç”¨çš„ï¼Œä¸”æœªè¾¾åˆ°æœ€å¤§æ•°é‡ï¼Œåˆ›å»ºæ–°çš„
             availableUI = CreateDelayUIInstance();
         }
         
@@ -417,83 +417,83 @@ public class WorldSpaceDelayUIManager : MonoBehaviour
     }
     
     /// <summary>
-    /// Îª»õ¼ÜÅäÖÃÑÓ³ÙUI
+    /// ä¸ºè´§æ¶é…ç½®å»¶è¿ŸUI
     /// </summary>
-    /// <param name="delayUI">ÑÓ³ÙUI</param>
-    /// <param name="triggerObject">»õ¼Ü´¥·¢Æ÷¶ÔÏó</param>
+    /// <param name="delayUI">å»¶è¿ŸUI</param>
+    /// <param name="triggerObject">è´§æ¶è§¦å‘å™¨å¯¹è±¡</param>
     private void ConfigureDelayUIForShelf(DelayMagnifierUIController delayUI, GameObject triggerObject)
     {
         if (delayUI == null || triggerObject == null) return;
         
-        // ¼¤»îUI
+        // æ¿€æ´»UI
         delayUI.gameObject.SetActive(true);
         
-        // ¸üĞÂÎ»ÖÃ
+        // æ›´æ–°ä½ç½®
         UpdateDelayUIPosition(delayUI, triggerObject);
         
-        LogDebug($"Îª»õ¼Ü {triggerObject.name} ÅäÖÃÑÓ³ÙUIÍê³É");
+        LogDebug($"ä¸ºè´§æ¶ {triggerObject.name} é…ç½®å»¶è¿ŸUIå®Œæˆ");
     }
     
     /// <summary>
-    /// ¸üĞÂÑÓ³ÙUIÎ»ÖÃ
+    /// æ›´æ–°å»¶è¿ŸUIä½ç½®
     /// </summary>
-    /// <param name="delayUI">ÑÓ³ÙUI</param>
-    /// <param name="triggerObject">»õ¼Ü´¥·¢Æ÷¶ÔÏó</param>
+    /// <param name="delayUI">å»¶è¿ŸUI</param>
+    /// <param name="triggerObject">è´§æ¶è§¦å‘å™¨å¯¹è±¡</param>
     private void UpdateDelayUIPosition(DelayMagnifierUIController delayUI, GameObject triggerObject)
     {
         if (delayUI == null || triggerObject == null || playerTransform == null || playerCamera == null) return;
         
-        // Ê×ÏÈ¸üĞÂCanvasÎ»ÖÃÒÔ¸úËæÍæ¼Ò
+        // é¦–å…ˆæ›´æ–°Canvasä½ç½®ä»¥è·Ÿéšç©å®¶
         UpdateCanvasPosition();
         
-        // ¼ÆËãÄ¿±êÎ»ÖÃ£ºÍæ¼ÒÍ·¶¥Æ«ÉÏ
+        // è®¡ç®—ç›®æ ‡ä½ç½®ï¼šç©å®¶å¤´é¡¶åä¸Š
         Vector3 playerHeadPosition = playerTransform.position + Vector3.up * offsetAbovePlayer;
         
-        // Ìí¼ÓË®Æ½Æ«ÒÆ£¨Èç¹ûĞèÒªµÄ»°£©
+        // æ·»åŠ æ°´å¹³åç§»ï¼ˆå¦‚æœéœ€è¦çš„è¯ï¼‰
         if (horizontalDistanceFromPlayer > 0)
         {
             Vector3 cameraToPlayer = (playerTransform.position - playerCamera.transform.position).normalized;
-            cameraToPlayer.y = 0; // ±£³ÖË®Æ½
+            cameraToPlayer.y = 0; // ä¿æŒæ°´å¹³
             playerHeadPosition += cameraToPlayer * horizontalDistanceFromPlayer;
         }
         
-        // ½«ÊÀ½ç×ø±ê×ª»»ÎªCanvas±¾µØ×ø±ê
+        // å°†ä¸–ç•Œåæ ‡è½¬æ¢ä¸ºCanvasæœ¬åœ°åæ ‡
         Vector3 canvasLocalPosition = worldSpaceCanvas.transform.InverseTransformPoint(playerHeadPosition);
         
-        // ÉèÖÃUIµÄ±¾µØÎ»ÖÃ
+        // è®¾ç½®UIçš„æœ¬åœ°ä½ç½®
         RectTransform uiRect = delayUI.GetComponent<RectTransform>();
         uiRect.localPosition = canvasLocalPosition;
         
-        // ÈÃUI³¯ÏòÏà»ú£¨Ê¹ÓÃÊÀ½ç×ø±êÏµ£©
+        // è®©UIæœå‘ç›¸æœºï¼ˆä½¿ç”¨ä¸–ç•Œåæ ‡ç³»ï¼‰
         Vector3 lookDirection = (playerCamera.transform.position - playerHeadPosition).normalized;
-        uiRect.rotation = Quaternion.LookRotation(-lookDirection); // ¸ººÅÊÇÎªÁËÃæÏòÏà»ú
+        uiRect.rotation = Quaternion.LookRotation(-lookDirection); // è´Ÿå·æ˜¯ä¸ºäº†é¢å‘ç›¸æœº
         
-        // µ÷ÊÔĞÅÏ¢
+        // è°ƒè¯•ä¿¡æ¯
         if (enableDebugLogs)
         {
-            LogDebug($"Íæ¼ÒÎ»ÖÃ: {playerTransform.position}");
-            LogDebug($"Ä¿±êÊÀ½çÎ»ÖÃ: {playerHeadPosition}");
-            LogDebug($"Canvas±¾µØÎ»ÖÃ: {canvasLocalPosition}");
-            LogDebug($"UI×îÖÕÎ»ÖÃ: {uiRect.position}");
+            LogDebug($"ç©å®¶ä½ç½®: {playerTransform.position}");
+            LogDebug($"ç›®æ ‡ä¸–ç•Œä½ç½®: {playerHeadPosition}");
+            LogDebug($"Canvasæœ¬åœ°ä½ç½®: {canvasLocalPosition}");
+            LogDebug($"UIæœ€ç»ˆä½ç½®: {uiRect.position}");
         }
     }
     
     /// <summary>
-    /// ¸üĞÂCanvasÎ»ÖÃÒÔ¸úËæÍæ¼ÒÇøÓò
+    /// æ›´æ–°Canvasä½ç½®ä»¥è·Ÿéšç©å®¶åŒºåŸŸ
     /// </summary>
     private void UpdateCanvasPosition()
     {
         if (worldSpaceCanvas == null || playerTransform == null) return;
         
-        // Canvas¸úËæÍæ¼Ò£¬µ«±£³ÖÒ»¶¨¾àÀëÒÔ±ÜÃâÕÚµ²ÊÓÒ°
+        // Canvasè·Ÿéšç©å®¶ï¼Œä½†ä¿æŒä¸€å®šè·ç¦»ä»¥é¿å…é®æŒ¡è§†é‡
         Vector3 canvasPosition = playerTransform.position;
         
-        // CanvasÉÔÎ¢ÏòÉÏÆ«ÒÆ£¬ÒÔÈ·±£UIÏÔÊ¾ÔÚºÏÊÊµÄ¸ß¶È
+        // Canvasç¨å¾®å‘ä¸Šåç§»ï¼Œä»¥ç¡®ä¿UIæ˜¾ç¤ºåœ¨åˆé€‚çš„é«˜åº¦
         canvasPosition.y += offsetAbovePlayer * 0.5f;
         
         worldSpaceCanvas.transform.position = canvasPosition;
         
-        // È·±£CanvasÃæÏòÏà»ú
+        // ç¡®ä¿Canvasé¢å‘ç›¸æœº
         if (playerCamera != null)
         {
             Vector3 lookDirection = (playerCamera.transform.position - canvasPosition).normalized;
@@ -502,13 +502,13 @@ public class WorldSpaceDelayUIManager : MonoBehaviour
     }
     
     /// <summary>
-    /// ¸üĞÂËùÓĞÊÀ½ç¿Õ¼äUIµÄÎ»ÖÃ
+    /// æ›´æ–°æ‰€æœ‰ä¸–ç•Œç©ºé—´UIçš„ä½ç½®
     /// </summary>
     private void UpdateWorldSpaceUIPositions()
     {
         if (playerTransform == null || playerCamera == null) return;
         
-        // ¸üĞÂµ±Ç°¼¤»îµÄÑÓ³ÙUIÎ»ÖÃ
+        // æ›´æ–°å½“å‰æ¿€æ´»çš„å»¶è¿ŸUIä½ç½®
         if (currentActiveDelayUI != null && currentTriggerObject != null)
         {
             UpdateDelayUIPosition(currentActiveDelayUI, currentTriggerObject);
@@ -517,12 +517,12 @@ public class WorldSpaceDelayUIManager : MonoBehaviour
     
     #endregion
     
-    #region µ÷ÊÔ·½·¨
+    #region è°ƒè¯•æ–¹æ³•
     
     /// <summary>
-    /// µ÷ÊÔÈÕÖ¾
+    /// è°ƒè¯•æ—¥å¿—
     /// </summary>
-    /// <param name="message">ÈÕÖ¾ÏûÏ¢</param>
+    /// <param name="message">æ—¥å¿—æ¶ˆæ¯</param>
     private void LogDebug(string message)
     {
         if (enableDebugLogs)
@@ -532,149 +532,149 @@ public class WorldSpaceDelayUIManager : MonoBehaviour
     }
     
     /// <summary>
-    /// ¾¯¸æÈÕÖ¾
+    /// è­¦å‘Šæ—¥å¿—
     /// </summary>
-    /// <param name="message">¾¯¸æÏûÏ¢</param>
+    /// <param name="message">è­¦å‘Šæ¶ˆæ¯</param>
     private void LogWarning(string message)
     {
         Debug.LogWarning($"<color=#FF9800>[WorldSpaceDelayUIManager]</color> {message}");
     }
     
     /// <summary>
-    /// ´íÎóÈÕÖ¾
+    /// é”™è¯¯æ—¥å¿—
     /// </summary>
-    /// <param name="message">´íÎóÏûÏ¢</param>
+    /// <param name="message">é”™è¯¯æ¶ˆæ¯</param>
     private void LogError(string message)
     {
         Debug.LogError($"<color=#F44336>[WorldSpaceDelayUIManager]</color> {message}");
     }
     
     /// <summary>
-    /// »ñÈ¡¹ÜÀíÆ÷×´Ì¬ĞÅÏ¢
+    /// è·å–ç®¡ç†å™¨çŠ¶æ€ä¿¡æ¯
     /// </summary>
-    /// <returns>×´Ì¬ĞÅÏ¢</returns>
-    [ContextMenu("ÏÔÊ¾¹ÜÀíÆ÷×´Ì¬")]
+    /// <returns>çŠ¶æ€ä¿¡æ¯</returns>
+    [ContextMenu("æ˜¾ç¤ºç®¡ç†å™¨çŠ¶æ€")]
     public string GetManagerStatus()
     {
-        string status = $"=== ÊÀ½ç¿Õ¼äÑÓ³ÙUI¹ÜÀíÆ÷×´Ì¬ ===\n" +
-                       $"Canvas: {(worldSpaceCanvas != null ? worldSpaceCanvas.name : "Î´ÉèÖÃ")}\n" +
-                       $"Íæ¼Ò: {(playerTransform != null ? playerTransform.name : "Î´ÕÒµ½")}\n" +
-                       $"Ïà»ú: {(playerCamera != null ? playerCamera.name : "Î´ÕÒµ½")}\n" +
-                       $"UI³ØÊıÁ¿: {delayUIPool.Count}\n" +
-                       $"¼¤»îUIÊıÁ¿: {activeDelayUIs.Count}\n" +
-                       $"µ±Ç°¼¤»îÑÓ³Ù: {(currentActiveDelayUI != null ? "ÊÇ" : "·ñ")}";
+        string status = $"=== ä¸–ç•Œç©ºé—´å»¶è¿ŸUIç®¡ç†å™¨çŠ¶æ€ ===\n" +
+                       $"Canvas: {(worldSpaceCanvas != null ? worldSpaceCanvas.name : "æœªè®¾ç½®")}\n" +
+                       $"ç©å®¶: {(playerTransform != null ? playerTransform.name : "æœªæ‰¾åˆ°")}\n" +
+                       $"ç›¸æœº: {(playerCamera != null ? playerCamera.name : "æœªæ‰¾åˆ°")}\n" +
+                       $"UIæ± æ•°é‡: {delayUIPool.Count}\n" +
+                       $"æ¿€æ´»UIæ•°é‡: {activeDelayUIs.Count}\n" +
+                       $"å½“å‰æ¿€æ´»å»¶è¿Ÿ: {(currentActiveDelayUI != null ? "æ˜¯" : "å¦")}";
         
         LogDebug(status);
         return status;
     }
     
     /// <summary>
-    /// ²âÊÔÑÓ³ÙUI´´½¨
+    /// æµ‹è¯•å»¶è¿ŸUIåˆ›å»º
     /// </summary>
-    [ContextMenu("²âÊÔ´´½¨ÑÓ³ÙUI")]
+    [ContextMenu("æµ‹è¯•åˆ›å»ºå»¶è¿ŸUI")]
     public void TestCreateDelayUI()
     {
         if (playerTransform == null)
         {
-            LogWarning("ÎŞ·¨²âÊÔ£ºÍæ¼Ò¶ÔÏóÎ´ÕÒµ½");
+            LogWarning("æ— æ³•æµ‹è¯•ï¼šç©å®¶å¯¹è±¡æœªæ‰¾åˆ°");
             return;
         }
         
-        // ´´½¨ÁÙÊ±²âÊÔ¶ÔÏó
+        // åˆ›å»ºä¸´æ—¶æµ‹è¯•å¯¹è±¡
         GameObject testShelf = new GameObject("TestShelf");
         testShelf.transform.position = playerTransform.position + Vector3.forward * 2f;
         
-        // ¿ªÊ¼3ÃëÑÓ³Ù²âÊÔ
+        // å¼€å§‹3ç§’å»¶è¿Ÿæµ‹è¯•
         StartDelayDisplay(testShelf, 3f, 
-            () => LogDebug("²âÊÔÑÓ³ÙÍê³É£¡"),
-            () => LogDebug("²âÊÔÑÓ³Ù±»È¡Ïû£¡")
+            () => LogDebug("æµ‹è¯•å»¶è¿Ÿå®Œæˆï¼"),
+            () => LogDebug("æµ‹è¯•å»¶è¿Ÿè¢«å–æ¶ˆï¼")
         );
         
-        // 5ÃëºóÇåÀí²âÊÔ¶ÔÏó
+        // 5ç§’åæ¸…ç†æµ‹è¯•å¯¹è±¡
         Destroy(testShelf, 5f);
     }
     
     /// <summary>
-    /// ²âÊÔUI¶¨Î»¾«¶È
+    /// æµ‹è¯•UIå®šä½ç²¾åº¦
     /// </summary>
-    [ContextMenu("²âÊÔUI¶¨Î»¾«¶È")]
+    [ContextMenu("æµ‹è¯•UIå®šä½ç²¾åº¦")]
     public void TestUIPositionAccuracy()
     {
         if (playerTransform == null || playerCamera == null)
         {
-            LogWarning("ÎŞ·¨²âÊÔ£ºÍæ¼Ò»òÏà»úÎ´ÕÒµ½");
+            LogWarning("æ— æ³•æµ‹è¯•ï¼šç©å®¶æˆ–ç›¸æœºæœªæ‰¾åˆ°");
             return;
         }
         
-        LogDebug("=== UI¶¨Î»¾«¶È²âÊÔ ===");
+        LogDebug("=== UIå®šä½ç²¾åº¦æµ‹è¯• ===");
         
-        // ²âÊÔ¸÷ÖÖÎ»ÖÃ
+        // æµ‹è¯•å„ç§ä½ç½®
         Vector3[] testPositions = {
-            playerTransform.position + Vector3.forward * 5f,   // Ç°·½
-            playerTransform.position + Vector3.back * 5f,      // ºó·½
-            playerTransform.position + Vector3.left * 5f,      // ×ó²à
-            playerTransform.position + Vector3.right * 5f,     // ÓÒ²à
-            playerTransform.position + Vector3.forward * 10f + Vector3.right * 10f // ±ß½çÎ»ÖÃ
+            playerTransform.position + Vector3.forward * 5f,   // å‰æ–¹
+            playerTransform.position + Vector3.back * 5f,      // åæ–¹
+            playerTransform.position + Vector3.left * 5f,      // å·¦ä¾§
+            playerTransform.position + Vector3.right * 5f,     // å³ä¾§
+            playerTransform.position + Vector3.forward * 10f + Vector3.right * 10f // è¾¹ç•Œä½ç½®
         };
         
-        string[] positionNames = { "Ç°·½", "ºó·½", "×ó²à", "ÓÒ²à", "±ß½ç" };
+        string[] positionNames = { "å‰æ–¹", "åæ–¹", "å·¦ä¾§", "å³ä¾§", "è¾¹ç•Œ" };
         
         for (int i = 0; i < testPositions.Length; i++)
         {
-            // ÁÙÊ±ÒÆ¶¯Íæ¼Òµ½²âÊÔÎ»ÖÃ
+            // ä¸´æ—¶ç§»åŠ¨ç©å®¶åˆ°æµ‹è¯•ä½ç½®
             Vector3 originalPosition = playerTransform.position;
             playerTransform.position = testPositions[i];
             
-            // ¼ÆËãÔ¤ÆÚµÄUIÎ»ÖÃ
+            // è®¡ç®—é¢„æœŸçš„UIä½ç½®
             Vector3 expectedUIPosition = testPositions[i] + Vector3.up * offsetAbovePlayer;
             
-            // ¸üĞÂCanvasÎ»ÖÃ
+            // æ›´æ–°Canvasä½ç½®
             UpdateCanvasPosition();
             
-            // ¼ÆËãCanvas±¾µØ×ø±ê
+            // è®¡ç®—Canvasæœ¬åœ°åæ ‡
             Vector3 canvasLocalPosition = worldSpaceCanvas.transform.InverseTransformPoint(expectedUIPosition);
             
-            LogDebug($"Î»ÖÃ²âÊÔ [{positionNames[i]}]:");
-            LogDebug($"  Íæ¼ÒÎ»ÖÃ: {testPositions[i]}");
-            LogDebug($"  Ô¤ÆÚUIÊÀ½çÎ»ÖÃ: {expectedUIPosition}");
-            LogDebug($"  CanvasÎ»ÖÃ: {worldSpaceCanvas.transform.position}");
-            LogDebug($"  Canvas±¾µØ×ø±ê: {canvasLocalPosition}");
+            LogDebug($"ä½ç½®æµ‹è¯• [{positionNames[i]}]:");
+            LogDebug($"  ç©å®¶ä½ç½®: {testPositions[i]}");
+            LogDebug($"  é¢„æœŸUIä¸–ç•Œä½ç½®: {expectedUIPosition}");
+            LogDebug($"  Canvasä½ç½®: {worldSpaceCanvas.transform.position}");
+            LogDebug($"  Canvasæœ¬åœ°åæ ‡: {canvasLocalPosition}");
             
-            // »¹Ô­Íæ¼ÒÎ»ÖÃ
+            // è¿˜åŸç©å®¶ä½ç½®
             playerTransform.position = originalPosition;
         }
         
-        // ¸üĞÂCanvasÎ»ÖÃµ½Ô­Ê¼×´Ì¬
+        // æ›´æ–°Canvasä½ç½®åˆ°åŸå§‹çŠ¶æ€
         UpdateCanvasPosition();
         
-        LogDebug("=== ²âÊÔÍê³É ===");
+        LogDebug("=== æµ‹è¯•å®Œæˆ ===");
     }
     
     #endregion
     
-    #region Gizmos»æÖÆ
+    #region Gizmosç»˜åˆ¶
     
     private void OnDrawGizmos()
     {
         if (!showUIBounds || playerTransform == null) return;
         
-        // »æÖÆÍæ¼ÒÍ·¶¥UIÄ¿±êÎ»ÖÃ
+        // ç»˜åˆ¶ç©å®¶å¤´é¡¶UIç›®æ ‡ä½ç½®
         Gizmos.color = Color.green;
         Vector3 playerHeadPosition = playerTransform.position + Vector3.up * offsetAbovePlayer;
         Gizmos.DrawWireSphere(playerHeadPosition, 0.3f);
         
-        // »æÖÆCanvasÎ»ÖÃ
+        // ç»˜åˆ¶Canvasä½ç½®
         if (worldSpaceCanvas != null)
         {
             Gizmos.color = Color.cyan;
             Gizmos.DrawWireCube(worldSpaceCanvas.transform.position, Vector3.one * 0.5f);
             
-            // »æÖÆ´ÓCanvasµ½Ä¿±êÎ»ÖÃµÄÁ¬Ïß
+            // ç»˜åˆ¶ä»Canvasåˆ°ç›®æ ‡ä½ç½®çš„è¿çº¿
             Gizmos.color = Color.blue;
             Gizmos.DrawLine(worldSpaceCanvas.transform.position, playerHeadPosition);
         }
         
-        // »æÖÆË®Æ½Æ«ÒÆ£¨Èç¹ûÓĞ£©
+        // ç»˜åˆ¶æ°´å¹³åç§»ï¼ˆå¦‚æœæœ‰ï¼‰
         if (horizontalDistanceFromPlayer > 0 && playerCamera != null)
         {
             Vector3 cameraToPlayer = (playerTransform.position - playerCamera.transform.position).normalized;
@@ -686,7 +686,7 @@ public class WorldSpaceDelayUIManager : MonoBehaviour
             Gizmos.DrawLine(playerHeadPosition, offsetPosition);
         }
         
-        // »æÖÆÏà»úµ½Íæ¼ÒµÄÊÓÏß
+        // ç»˜åˆ¶ç›¸æœºåˆ°ç©å®¶çš„è§†çº¿
         if (playerCamera != null)
         {
             Gizmos.color = Color.yellow;

@@ -6,13 +6,13 @@ namespace Persistence
 	public class WeaponSlotStateDTO
 	{
 		public bool hasWeapon;
-		public int itemId;           // ÎïÆ·Êı¾İ¿âID£¨¿ÉÑ¡£©
-		public long itemGlobalId;    // SO ÔËĞĞÊ±È«¾ÖID£¨¿ÉÑ¡£©
-		public int ammo;             // µ±Ç°µ¯Ò©
+		public int itemId;           // ç‰©å“æ•°æ®åº“IDï¼ˆå¯é€‰ï¼‰
+		public long itemGlobalId;    // SO è¿è¡Œæ—¶å…¨å±€IDï¼ˆå¯é€‰ï¼‰
+		public int ammo;             // å½“å‰å¼¹è¯
 		public string fireMode;      // FullAuto / SemiAuto
-		public bool isActive;        // ÊÇ·ñµ±Ç°¼¤»î²Û
-		public float rotationZ;      // ÎäÆ÷±¾µØZÖáĞı×ª
-		public long savedAt;         // Ê±¼ä´Á£¨ticks£©
+		public bool isActive;        // æ˜¯å¦å½“å‰æ¿€æ´»æ§½
+		public float rotationZ;      // æ­¦å™¨æœ¬åœ°Zè½´æ—‹è½¬
+		public long savedAt;         // æ—¶é—´æˆ³ï¼ˆticksï¼‰
 	}
 
 	[Serializable]

@@ -1173,6 +1173,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 378311484874398131}
+  - component: {fileID: 4083812062867677655}
   m_Layer: 5
   m_Name: StateLine
   m_TagString: Untagged
@@ -1205,6 +1206,20 @@ RectTransform:
   m_AnchoredPosition: {x: 0.0000075998, y: 405}
   m_SizeDelta: {x: 577.3, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &4083812062867677655
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2740740905254004098}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4f2dbf22b6a1fe447a3b8e832a79c653, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  player: {fileID: 0}
+  vitalStats: {fileID: 0}
 --- !u!1 &2761940838809500422
 GameObject:
   m_ObjectHideFlags: 0
@@ -1367,6 +1382,7 @@ GameObject:
   - component: {fileID: 522488737655637240}
   - component: {fileID: 9064825676183779600}
   - component: {fileID: 5925094143909278359}
+  - component: {fileID: 3146275162263507047}
   m_Layer: 5
   m_Name: BackpackPanel
   m_TagString: Untagged
@@ -1458,6 +1474,23 @@ MonoBehaviour:
   shelfTitleText: Shelf
   showDebugLog: 0
   backpackUniqueId: 
+--- !u!114 &3146275162263507047
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4344323909427941234}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 353a13800abfa9b41ad10ccbb5ed7d53, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  backpackPanelRect: {fileID: 5310994341252794597}
+  rightClickMenuPrefab: {fileID: 1396340560338461085, guid: 87b37df385a751d42b55a09eee98c961, type: 3}
+  menuHost: {fileID: 0}
+  blockerPrefab: {fileID: 8652881879660770769, guid: af96c9797a24a4c41a01e25385282533, type: 3}
+  reuseMenuInstance: 1
 --- !u!1 &4907720578683278178
 GameObject:
   m_ObjectHideFlags: 0

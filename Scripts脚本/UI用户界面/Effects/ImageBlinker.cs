@@ -3,91 +3,91 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// UGUI Image×é¼şÉÁË¸¿ØÖÆÆ÷
-/// Ö§³Ö¶àÖÖÉÁË¸Ä£Ê½ºÍ×Ô¶¨Òå²ÎÊı
+/// UGUI Imageç»„ä»¶é—ªçƒæ§åˆ¶å™¨
+/// æ”¯æŒå¤šç§é—ªçƒæ¨¡å¼å’Œè‡ªå®šä¹‰å‚æ•°
 /// </summary>
 [RequireComponent(typeof(Image))]
 public class ImageBlinker : MonoBehaviour
 {
-    [Header("ÉÁË¸ÉèÖÃ")]
-    [FieldLabel("ÉÁË¸Ä£Ê½")]
+    [Header("é—ªçƒè®¾ç½®")]
+    [FieldLabel("é—ªçƒæ¨¡å¼")]
     [SerializeField] private BlinkMode blinkMode = BlinkMode.Alpha;
     
-    [FieldLabel("ÉÁË¸¼ä¸ô(Ãë)")]
+    [FieldLabel("é—ªçƒé—´éš”(ç§’)")]
     [SerializeField] private float blinkInterval = 0.5f;
     
-    [FieldLabel("ÉÁË¸³ÖĞøÊ±¼ä(Ãë)")]
-    [SerializeField] private float blinkDuration = -1f; // -1±íÊ¾ÎŞÏŞÑ­»·
+    [FieldLabel("é—ªçƒæŒç»­æ—¶é—´(ç§’)")]
+    [SerializeField] private float blinkDuration = -1f; // -1è¡¨ç¤ºæ— é™å¾ªç¯
     
-    [FieldLabel("×Ô¶¯¿ªÊ¼")]
+    [FieldLabel("è‡ªåŠ¨å¼€å§‹")]
     [SerializeField] private bool autoStart = false;
     
-    [Header("Í¸Ã÷¶ÈÉÁË¸")]
-    [FieldLabel("×îĞ¡Í¸Ã÷¶È")]
+    [Header("é€æ˜åº¦é—ªçƒ")]
+    [FieldLabel("æœ€å°é€æ˜åº¦")]
     [Range(0f, 1f)]
     [SerializeField] private float minAlpha = 0f;
     
-    [FieldLabel("×î´óÍ¸Ã÷¶È")]
+    [FieldLabel("æœ€å¤§é€æ˜åº¦")]
     [Range(0f, 1f)]
     [SerializeField] private float maxAlpha = 1f;
     
-    [FieldLabel("½¥±äËÙ¶È")]
+    [FieldLabel("æ¸å˜é€Ÿåº¦")]
     [SerializeField] private float fadeSpeed = 2f;
     
-    [Header("ÑÕÉ«ÉÁË¸")]
-    [FieldLabel("Ô­Ê¼ÑÕÉ«")]
+    [Header("é¢œè‰²é—ªçƒ")]
+    [FieldLabel("åŸå§‹é¢œè‰²")]
     [SerializeField] private Color originalColor = Color.white;
     
-    [FieldLabel("ÉÁË¸ÑÕÉ«")]
+    [FieldLabel("é—ªçƒé¢œè‰²")]
     [SerializeField] private Color blinkColor = Color.red;
     
-    [Header("³ß´çÉÁË¸")]
-    [FieldLabel("×îĞ¡Ëõ·Å")]
+    [Header("å°ºå¯¸é—ªçƒ")]
+    [FieldLabel("æœ€å°ç¼©æ”¾")]
     [Range(0.1f, 2f)]
     [SerializeField] private float minScale = 0.8f;
     
-    [FieldLabel("×î´óËõ·Å")]
+    [FieldLabel("æœ€å¤§ç¼©æ”¾")]
     [Range(0.1f, 2f)]
     [SerializeField] private float maxScale = 1.2f;
     
-    [Header("µ÷ÊÔÉèÖÃ")]
-    [FieldLabel("ÆôÓÃµ÷ÊÔÈÕÖ¾")]
+    [Header("è°ƒè¯•è®¾ç½®")]
+    [FieldLabel("å¯ç”¨è°ƒè¯•æ—¥å¿—")]
     [SerializeField] private bool enableDebugLog = false;
     
-    // ×é¼şÒıÓÃ
+    // ç»„ä»¶å¼•ç”¨
     private Image targetImage;
     private RectTransform targetRectTransform;
     
-    // ÔËĞĞÊ±×´Ì¬
+    // è¿è¡Œæ—¶çŠ¶æ€
     private bool isBlinking = false;
     private Coroutine blinkCoroutine;
     private Color initialColor;
     private Vector3 initialScale;
     private float blinkStartTime;
     
-    // ÉÁË¸Ä£Ê½Ã¶¾Ù
+    // é—ªçƒæ¨¡å¼æšä¸¾
     public enum BlinkMode
     {
-        [InspectorName("Í¸Ã÷¶ÈÉÁË¸")] Alpha = 0,
-        [InspectorName("ÑÕÉ«ÉÁË¸")] Color = 1,
-        [InspectorName("³ß´çÉÁË¸")] Scale = 2,
-        [InspectorName("¿ª¹ØÉÁË¸")] Toggle = 3,
-        [InspectorName("×éºÏÉÁË¸")] Combined = 4
+        [InspectorName("é€æ˜åº¦é—ªçƒ")] Alpha = 0,
+        [InspectorName("é¢œè‰²é—ªçƒ")] Color = 1,
+        [InspectorName("å°ºå¯¸é—ªçƒ")] Scale = 2,
+        [InspectorName("å¼€å…³é—ªçƒ")] Toggle = 3,
+        [InspectorName("ç»„åˆé—ªçƒ")] Combined = 4
     }
     
-    #region UnityÉúÃüÖÜÆÚ
+    #region Unityç”Ÿå‘½å‘¨æœŸ
     
     private void Awake()
     {
-        // »ñÈ¡×é¼şÒıÓÃ
+        // è·å–ç»„ä»¶å¼•ç”¨
         targetImage = GetComponent<Image>();
         targetRectTransform = GetComponent<RectTransform>();
         
-        // ¼ÇÂ¼³õÊ¼×´Ì¬
+        // è®°å½•åˆå§‹çŠ¶æ€
         if (targetImage != null)
         {
             initialColor = targetImage.color;
-            originalColor = initialColor; // ×Ô¶¯ÉèÖÃÔ­Ê¼ÑÕÉ«
+            originalColor = initialColor; // è‡ªåŠ¨è®¾ç½®åŸå§‹é¢œè‰²
         }
         
         if (targetRectTransform != null)
@@ -95,7 +95,7 @@ public class ImageBlinker : MonoBehaviour
             initialScale = targetRectTransform.localScale;
         }
         
-        LogDebug("ImageBlinker³õÊ¼»¯Íê³É");
+        LogDebug("ImageBlinkeråˆå§‹åŒ–å®Œæˆ");
     }
     
     private void Start()
@@ -108,7 +108,7 @@ public class ImageBlinker : MonoBehaviour
     
     private void OnValidate()
     {
-        // È·±£²ÎÊıºÏÀíĞÔ
+        // ç¡®ä¿å‚æ•°åˆç†æ€§
         blinkInterval = Mathf.Max(0.01f, blinkInterval);
         minAlpha = Mathf.Clamp01(minAlpha);
         maxAlpha = Mathf.Clamp01(maxAlpha);
@@ -116,7 +116,7 @@ public class ImageBlinker : MonoBehaviour
         minScale = Mathf.Max(0.1f, minScale);
         maxScale = Mathf.Max(0.1f, maxScale);
         
-        // È·±£×îĞ¡Öµ²»´óÓÚ×î´óÖµ
+        // ç¡®ä¿æœ€å°å€¼ä¸å¤§äºæœ€å¤§å€¼
         if (minAlpha > maxAlpha)
         {
             float temp = minAlpha;
@@ -134,31 +134,31 @@ public class ImageBlinker : MonoBehaviour
     
     #endregion
     
-    #region ¹«¹²½Ó¿Ú
+    #region å…¬å…±æ¥å£
     
     /// <summary>
-    /// ¿ªÊ¼ÉÁË¸
+    /// å¼€å§‹é—ªçƒ
     /// </summary>
     public void StartBlinking()
     {
         if (isBlinking)
         {
-            LogDebug("ÒÑ¾­ÔÚÉÁË¸ÖĞ£¬Ìø¹ıÖØ¸´Æô¶¯");
+            LogDebug("å·²ç»åœ¨é—ªçƒä¸­ï¼Œè·³è¿‡é‡å¤å¯åŠ¨");
             return;
         }
         
         if (targetImage == null)
         {
-            LogError("Ä¿±êImage×é¼ş²»´æÔÚ£¬ÎŞ·¨¿ªÊ¼ÉÁË¸");
+            LogError("ç›®æ ‡Imageç»„ä»¶ä¸å­˜åœ¨ï¼Œæ— æ³•å¼€å§‹é—ªçƒ");
             return;
         }
         
         isBlinking = true;
         blinkStartTime = Time.time;
         
-        LogDebug($"¿ªÊ¼ÉÁË¸ - Ä£Ê½: {blinkMode}, ¼ä¸ô: {blinkInterval}s, ³ÖĞøÊ±¼ä: {(blinkDuration > 0 ? blinkDuration + "s" : "ÎŞÏŞ")}");
+        LogDebug($"å¼€å§‹é—ªçƒ - æ¨¡å¼: {blinkMode}, é—´éš”: {blinkInterval}s, æŒç»­æ—¶é—´: {(blinkDuration > 0 ? blinkDuration + "s" : "æ— é™")}");
         
-        // ¸ù¾İÉÁË¸Ä£Ê½Ñ¡Ôñ¶ÔÓ¦µÄĞ­³Ì
+        // æ ¹æ®é—ªçƒæ¨¡å¼é€‰æ‹©å¯¹åº”çš„åç¨‹
         switch (blinkMode)
         {
             case BlinkMode.Alpha:
@@ -180,13 +180,13 @@ public class ImageBlinker : MonoBehaviour
     }
     
     /// <summary>
-    /// Í£Ö¹ÉÁË¸
+    /// åœæ­¢é—ªçƒ
     /// </summary>
     public void StopBlinking()
     {
         if (!isBlinking)
         {
-            LogDebug("µ±Ç°Ã»ÓĞÔÚÉÁË¸£¬Ìø¹ıÍ£Ö¹²Ù×÷");
+            LogDebug("å½“å‰æ²¡æœ‰åœ¨é—ªçƒï¼Œè·³è¿‡åœæ­¢æ“ä½œ");
             return;
         }
         
@@ -198,14 +198,14 @@ public class ImageBlinker : MonoBehaviour
             blinkCoroutine = null;
         }
         
-        // »Ö¸´³õÊ¼×´Ì¬
+        // æ¢å¤åˆå§‹çŠ¶æ€
         RestoreInitialState();
         
-        LogDebug("ÉÁË¸ÒÑÍ£Ö¹²¢»Ö¸´³õÊ¼×´Ì¬");
+        LogDebug("é—ªçƒå·²åœæ­¢å¹¶æ¢å¤åˆå§‹çŠ¶æ€");
     }
     
     /// <summary>
-    /// ÇĞ»»ÉÁË¸×´Ì¬
+    /// åˆ‡æ¢é—ªçƒçŠ¶æ€
     /// </summary>
     public void ToggleBlinking()
     {
@@ -220,9 +220,9 @@ public class ImageBlinker : MonoBehaviour
     }
     
     /// <summary>
-    /// ÉèÖÃÉÁË¸Ä£Ê½
+    /// è®¾ç½®é—ªçƒæ¨¡å¼
     /// </summary>
-    /// <param name="mode">ĞÂµÄÉÁË¸Ä£Ê½</param>
+    /// <param name="mode">æ–°çš„é—ªçƒæ¨¡å¼</param>
     public void SetBlinkMode(BlinkMode mode)
     {
         bool wasBlinking = isBlinking;
@@ -233,7 +233,7 @@ public class ImageBlinker : MonoBehaviour
         }
         
         blinkMode = mode;
-        LogDebug($"ÉÁË¸Ä£Ê½ÒÑÉèÖÃÎª: {blinkMode}");
+        LogDebug($"é—ªçƒæ¨¡å¼å·²è®¾ç½®ä¸º: {blinkMode}");
         
         if (wasBlinking)
         {
@@ -242,38 +242,38 @@ public class ImageBlinker : MonoBehaviour
     }
     
     /// <summary>
-    /// ÉèÖÃÉÁË¸¼ä¸ô
+    /// è®¾ç½®é—ªçƒé—´éš”
     /// </summary>
-    /// <param name="interval">ĞÂµÄÉÁË¸¼ä¸ô£¨Ãë£©</param>
+    /// <param name="interval">æ–°çš„é—ªçƒé—´éš”ï¼ˆç§’ï¼‰</param>
     public void SetBlinkInterval(float interval)
     {
         blinkInterval = Mathf.Max(0.01f, interval);
-        LogDebug($"ÉÁË¸¼ä¸ôÒÑÉèÖÃÎª: {blinkInterval}s");
+        LogDebug($"é—ªçƒé—´éš”å·²è®¾ç½®ä¸º: {blinkInterval}s");
     }
     
     /// <summary>
-    /// ÉèÖÃÉÁË¸ÑÕÉ«
+    /// è®¾ç½®é—ªçƒé¢œè‰²
     /// </summary>
-    /// <param name="color">ĞÂµÄÉÁË¸ÑÕÉ«</param>
+    /// <param name="color">æ–°çš„é—ªçƒé¢œè‰²</param>
     public void SetBlinkColor(Color color)
     {
         blinkColor = color;
-        LogDebug($"ÉÁË¸ÑÕÉ«ÒÑÉèÖÃÎª: {blinkColor}");
+        LogDebug($"é—ªçƒé¢œè‰²å·²è®¾ç½®ä¸º: {blinkColor}");
     }
     
     /// <summary>
-    /// »ñÈ¡µ±Ç°ÊÇ·ñÕıÔÚÉÁË¸
+    /// è·å–å½“å‰æ˜¯å¦æ­£åœ¨é—ªçƒ
     /// </summary>
-    /// <returns>ÊÇ·ñÕıÔÚÉÁË¸</returns>
+    /// <returns>æ˜¯å¦æ­£åœ¨é—ªçƒ</returns>
     public bool IsBlinking()
     {
         return isBlinking;
     }
     
     /// <summary>
-    /// »ñÈ¡ÉÁË¸Ê£ÓàÊ±¼ä
+    /// è·å–é—ªçƒå‰©ä½™æ—¶é—´
     /// </summary>
-    /// <returns>Ê£ÓàÊ±¼ä£¨Ãë£©£¬-1±íÊ¾ÎŞÏŞ</returns>
+    /// <returns>å‰©ä½™æ—¶é—´ï¼ˆç§’ï¼‰ï¼Œ-1è¡¨ç¤ºæ— é™</returns>
     public float GetRemainingTime()
     {
         if (!isBlinking || blinkDuration <= 0)
@@ -287,10 +287,10 @@ public class ImageBlinker : MonoBehaviour
     
     #endregion
     
-    #region ÉÁË¸Ğ­³Ì
+    #region é—ªçƒåç¨‹
     
     /// <summary>
-    /// Í¸Ã÷¶ÈÉÁË¸Ğ­³Ì
+    /// é€æ˜åº¦é—ªçƒåç¨‹
     /// </summary>
     private IEnumerator AlphaBlinkCoroutine()
     {
@@ -299,24 +299,24 @@ public class ImageBlinker : MonoBehaviour
         
         while (isBlinking)
         {
-            // ¼ì²é³ÖĞøÊ±¼ä
+            // æ£€æŸ¥æŒç»­æ—¶é—´
             if (blinkDuration > 0 && elapsedTime >= blinkDuration)
             {
                 break;
             }
             
-            // ¼ÆËãµ±Ç°Í¸Ã÷¶È
+            // è®¡ç®—å½“å‰é€æ˜åº¦
             float currentAlpha = targetImage.color.a;
             float targetAlpha = increasing ? maxAlpha : minAlpha;
             
-            // Æ½»¬¹ı¶Éµ½Ä¿±êÍ¸Ã÷¶È
+            // å¹³æ»‘è¿‡æ¸¡åˆ°ç›®æ ‡é€æ˜åº¦
             float newAlpha = Mathf.MoveTowards(currentAlpha, targetAlpha, fadeSpeed * Time.deltaTime);
             
             Color newColor = targetImage.color;
             newColor.a = newAlpha;
             targetImage.color = newColor;
             
-            // ¼ì²éÊÇ·ñµ½´ïÄ¿±êÖµ
+            // æ£€æŸ¥æ˜¯å¦åˆ°è¾¾ç›®æ ‡å€¼
             if (Mathf.Approximately(newAlpha, targetAlpha))
             {
                 increasing = !increasing;
@@ -331,7 +331,7 @@ public class ImageBlinker : MonoBehaviour
     }
     
     /// <summary>
-    /// ÑÕÉ«ÉÁË¸Ğ­³Ì
+    /// é¢œè‰²é—ªçƒåç¨‹
     /// </summary>
     private IEnumerator ColorBlinkCoroutine()
     {
@@ -340,13 +340,13 @@ public class ImageBlinker : MonoBehaviour
         
         while (isBlinking)
         {
-            // ¼ì²é³ÖĞøÊ±¼ä
+            // æ£€æŸ¥æŒç»­æ—¶é—´
             if (blinkDuration > 0 && elapsedTime >= blinkDuration)
             {
                 break;
             }
             
-            // ÇĞ»»ÑÕÉ«
+            // åˆ‡æ¢é¢œè‰²
             targetImage.color = useBlinkColor ? blinkColor : originalColor;
             useBlinkColor = !useBlinkColor;
             
@@ -358,7 +358,7 @@ public class ImageBlinker : MonoBehaviour
     }
     
     /// <summary>
-    /// ³ß´çÉÁË¸Ğ­³Ì
+    /// å°ºå¯¸é—ªçƒåç¨‹
     /// </summary>
     private IEnumerator ScaleBlinkCoroutine()
     {
@@ -367,21 +367,21 @@ public class ImageBlinker : MonoBehaviour
         
         while (isBlinking)
         {
-            // ¼ì²é³ÖĞøÊ±¼ä
+            // æ£€æŸ¥æŒç»­æ—¶é—´
             if (blinkDuration > 0 && elapsedTime >= blinkDuration)
             {
                 break;
             }
             
-            // ¼ÆËãµ±Ç°Ëõ·Å
+            // è®¡ç®—å½“å‰ç¼©æ”¾
             float currentScale = targetRectTransform.localScale.x;
             float targetScale = increasing ? maxScale : minScale;
             
-            // Æ½»¬¹ı¶Éµ½Ä¿±êËõ·Å
+            // å¹³æ»‘è¿‡æ¸¡åˆ°ç›®æ ‡ç¼©æ”¾
             float newScale = Mathf.MoveTowards(currentScale, targetScale, fadeSpeed * Time.deltaTime);
             targetRectTransform.localScale = Vector3.one * newScale;
             
-            // ¼ì²éÊÇ·ñµ½´ïÄ¿±êÖµ
+            // æ£€æŸ¥æ˜¯å¦åˆ°è¾¾ç›®æ ‡å€¼
             if (Mathf.Approximately(newScale, targetScale))
             {
                 increasing = !increasing;
@@ -396,7 +396,7 @@ public class ImageBlinker : MonoBehaviour
     }
     
     /// <summary>
-    /// ¿ª¹ØÉÁË¸Ğ­³Ì
+    /// å¼€å…³é—ªçƒåç¨‹
     /// </summary>
     private IEnumerator ToggleBlinkCoroutine()
     {
@@ -405,13 +405,13 @@ public class ImageBlinker : MonoBehaviour
         
         while (isBlinking)
         {
-            // ¼ì²é³ÖĞøÊ±¼ä
+            // æ£€æŸ¥æŒç»­æ—¶é—´
             if (blinkDuration > 0 && elapsedTime >= blinkDuration)
             {
                 break;
             }
             
-            // ÇĞ»»¿É¼ûĞÔ
+            // åˆ‡æ¢å¯è§æ€§
             targetImage.enabled = visible;
             visible = !visible;
             
@@ -423,16 +423,16 @@ public class ImageBlinker : MonoBehaviour
     }
     
     /// <summary>
-    /// ×éºÏÉÁË¸Ğ­³Ì£¨Í¬Ê±¸Ä±äÍ¸Ã÷¶È¡¢ÑÕÉ«ºÍ³ß´ç£©
+    /// ç»„åˆé—ªçƒåç¨‹ï¼ˆåŒæ—¶æ”¹å˜é€æ˜åº¦ã€é¢œè‰²å’Œå°ºå¯¸ï¼‰
     /// </summary>
     private IEnumerator CombinedBlinkCoroutine()
     {
         float elapsedTime = 0f;
-        bool phase1 = true; // trueÎªµÚÒ»½×¶Î£¬falseÎªµÚ¶ş½×¶Î
+        bool phase1 = true; // trueä¸ºç¬¬ä¸€é˜¶æ®µï¼Œfalseä¸ºç¬¬äºŒé˜¶æ®µ
         
         while (isBlinking)
         {
-            // ¼ì²é³ÖĞøÊ±¼ä
+            // æ£€æŸ¥æŒç»­æ—¶é—´
             if (blinkDuration > 0 && elapsedTime >= blinkDuration)
             {
                 break;
@@ -440,7 +440,7 @@ public class ImageBlinker : MonoBehaviour
             
             if (phase1)
             {
-                // µÚÒ»½×¶Î£º×î´óÍ¸Ã÷¶È£¬ÉÁË¸ÑÕÉ«£¬×î´ó³ß´ç
+                // ç¬¬ä¸€é˜¶æ®µï¼šæœ€å¤§é€æ˜åº¦ï¼Œé—ªçƒé¢œè‰²ï¼Œæœ€å¤§å°ºå¯¸
                 Color newColor = blinkColor;
                 newColor.a = maxAlpha;
                 targetImage.color = newColor;
@@ -448,7 +448,7 @@ public class ImageBlinker : MonoBehaviour
             }
             else
             {
-                // µÚ¶ş½×¶Î£º×îĞ¡Í¸Ã÷¶È£¬Ô­Ê¼ÑÕÉ«£¬×îĞ¡³ß´ç
+                // ç¬¬äºŒé˜¶æ®µï¼šæœ€å°é€æ˜åº¦ï¼ŒåŸå§‹é¢œè‰²ï¼Œæœ€å°å°ºå¯¸
                 Color newColor = originalColor;
                 newColor.a = minAlpha;
                 targetImage.color = newColor;
@@ -466,10 +466,10 @@ public class ImageBlinker : MonoBehaviour
     
     #endregion
     
-    #region ¸¨Öú·½·¨
+    #region è¾…åŠ©æ–¹æ³•
     
     /// <summary>
-    /// »Ö¸´³õÊ¼×´Ì¬
+    /// æ¢å¤åˆå§‹çŠ¶æ€
     /// </summary>
     private void RestoreInitialState()
     {
@@ -486,7 +486,7 @@ public class ImageBlinker : MonoBehaviour
     }
     
     /// <summary>
-    /// µ÷ÊÔÈÕÖ¾
+    /// è°ƒè¯•æ—¥å¿—
     /// </summary>
     private void LogDebug(string message)
     {
@@ -497,7 +497,7 @@ public class ImageBlinker : MonoBehaviour
     }
     
     /// <summary>
-    /// ´íÎóÈÕÖ¾
+    /// é”™è¯¯æ—¥å¿—
     /// </summary>
     private void LogError(string message)
     {
@@ -506,27 +506,27 @@ public class ImageBlinker : MonoBehaviour
     
     #endregion
     
-    #region ÉÏÏÂÎÄ²Ëµ¥
+    #region ä¸Šä¸‹æ–‡èœå•
     
-    [ContextMenu("¿ªÊ¼ÉÁË¸")]
+    [ContextMenu("å¼€å§‹é—ªçƒ")]
     private void ContextMenuStartBlinking()
     {
         StartBlinking();
     }
     
-    [ContextMenu("Í£Ö¹ÉÁË¸")]
+    [ContextMenu("åœæ­¢é—ªçƒ")]
     private void ContextMenuStopBlinking()
     {
         StopBlinking();
     }
     
-    [ContextMenu("ÇĞ»»ÉÁË¸×´Ì¬")]
+    [ContextMenu("åˆ‡æ¢é—ªçƒçŠ¶æ€")]
     private void ContextMenuToggleBlinking()
     {
         ToggleBlinking();
     }
     
-    [ContextMenu("»Ö¸´³õÊ¼×´Ì¬")]
+    [ContextMenu("æ¢å¤åˆå§‹çŠ¶æ€")]
     private void ContextMenuRestoreInitialState()
     {
         RestoreInitialState();

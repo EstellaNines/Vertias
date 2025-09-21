@@ -2,29 +2,29 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// ÊÀ½ç¿Õ¼äÑÓ³ÙUIÉèÖÃ¸¨ÖúÆ÷
-/// ÓÃÓÚÔÚ±à¼­Æ÷ÖĞ¿ìËÙ´´½¨ºÍÅäÖÃÊÀ½ç¿Õ¼äÑÓ³ÙUI
+/// ä¸–ç•Œç©ºé—´å»¶è¿ŸUIè®¾ç½®è¾…åŠ©å™¨
+/// ç”¨äºåœ¨ç¼–è¾‘å™¨ä¸­å¿«é€Ÿåˆ›å»ºå’Œé…ç½®ä¸–ç•Œç©ºé—´å»¶è¿ŸUI
 /// </summary>
 public class WorldSpaceDelayUISetup : MonoBehaviour
 {
-    [Header("×Ô¶¯´´½¨ÉèÖÃ")]
-    [SerializeField][FieldLabel("×Ô¶¯´´½¨ÊÀ½ç¿Õ¼äCanvas")] private bool autoCreateCanvas = true;
-    [SerializeField][FieldLabel("×Ô¶¯´´½¨ÑÓ³ÙUIÔ¤ÖÆÌå")] private bool autoCreateDelayUIPrefab = true;
+    [Header("è‡ªåŠ¨åˆ›å»ºè®¾ç½®")]
+    [SerializeField][FieldLabel("è‡ªåŠ¨åˆ›å»ºä¸–ç•Œç©ºé—´Canvas")] private bool autoCreateCanvas = true;
+    [SerializeField][FieldLabel("è‡ªåŠ¨åˆ›å»ºå»¶è¿ŸUIé¢„åˆ¶ä½“")] private bool autoCreateDelayUIPrefab = true;
     
-    [Header("CanvasÅäÖÃ")]
-    [SerializeField][FieldLabel("Canvas´óĞ¡")] private Vector2 canvasSize = new Vector2(1000, 1000);
-    [SerializeField][FieldLabel("CanvasÅÅĞò²ã")] private int sortingOrder = 100;
-    [SerializeField][FieldLabel("CanvasËõ·ÅÒò×Ó")] private float canvasScale = 0.01f;
+    [Header("Canvasé…ç½®")]
+    [SerializeField][FieldLabel("Canvaså¤§å°")] private Vector2 canvasSize = new Vector2(1000, 1000);
+    [SerializeField][FieldLabel("Canvasæ’åºå±‚")] private int sortingOrder = 100;
+    [SerializeField][FieldLabel("Canvasç¼©æ”¾å› å­")] private float canvasScale = 0.01f;
     
-    [Header("ÑÓ³ÙUIÅäÖÃ")]
-    [SerializeField][FieldLabel("UI´óĞ¡")] private Vector2 uiSize = new Vector2(300, 300);
-    [SerializeField][FieldLabel("Ô²»·°ë¾¶")] private float circleRadius = 80f;
-    [SerializeField][FieldLabel("UI±³¾°É«")] private Color backgroundColor = new Color(0, 0, 0, 0.5f);
+    [Header("å»¶è¿ŸUIé…ç½®")]
+    [SerializeField][FieldLabel("UIå¤§å°")] private Vector2 uiSize = new Vector2(300, 300);
+    [SerializeField][FieldLabel("åœ†ç¯åŠå¾„")] private float circleRadius = 80f;
+    [SerializeField][FieldLabel("UIèƒŒæ™¯è‰²")] private Color backgroundColor = new Color(0, 0, 0, 0.5f);
     
     /// <summary>
-    /// ´´½¨ÊÀ½ç¿Õ¼äÑÓ³ÙUIÏµÍ³
+    /// åˆ›å»ºä¸–ç•Œç©ºé—´å»¶è¿ŸUIç³»ç»Ÿ
     /// </summary>
-    [ContextMenu("´´½¨ÊÀ½ç¿Õ¼äÑÓ³ÙUIÏµÍ³")]
+    [ContextMenu("åˆ›å»ºä¸–ç•Œç©ºé—´å»¶è¿ŸUIç³»ç»Ÿ")]
     public void CreateWorldSpaceDelayUISystem()
     {
         if (autoCreateCanvas)
@@ -37,63 +37,63 @@ public class WorldSpaceDelayUISetup : MonoBehaviour
             CreateDelayUIPrefab();
         }
         
-        // ´´½¨¹ÜÀíÆ÷
+        // åˆ›å»ºç®¡ç†å™¨
         CreateDelayUIManager();
         
-        Debug.Log("<color=#4CAF50>[WorldSpaceDelayUISetup]</color> ÊÀ½ç¿Õ¼äÑÓ³ÙUIÏµÍ³´´½¨Íê³É£¡");
+        Debug.Log("<color=#4CAF50>[WorldSpaceDelayUISetup]</color> ä¸–ç•Œç©ºé—´å»¶è¿ŸUIç³»ç»Ÿåˆ›å»ºå®Œæˆï¼");
     }
     
     /// <summary>
-    /// ´´½¨ÊÀ½ç¿Õ¼äCanvas
+    /// åˆ›å»ºä¸–ç•Œç©ºé—´Canvas
     /// </summary>
     private GameObject CreateWorldSpaceCanvas()
     {
         GameObject canvasGO = new GameObject("WorldSpaceDelayUICanvas");
         
-        // ÉèÖÃCanvas×é¼ş
+        // è®¾ç½®Canvasç»„ä»¶
         Canvas canvas = canvasGO.AddComponent<Canvas>();
         canvas.renderMode = RenderMode.WorldSpace;
         canvas.worldCamera = Camera.main;
         canvas.sortingOrder = sortingOrder;
         
-        // ÉèÖÃCanvasScaler - ¶ÔÓÚÊÀ½ç¿Õ¼ä£¬Ê¹ÓÃConstant Pixel SizeÄ£Ê½
+        // è®¾ç½®CanvasScaler - å¯¹äºä¸–ç•Œç©ºé—´ï¼Œä½¿ç”¨Constant Pixel Sizeæ¨¡å¼
         CanvasScaler scaler = canvasGO.AddComponent<CanvasScaler>();
         scaler.uiScaleMode = CanvasScaler.ScaleMode.ConstantPixelSize;
         scaler.scaleFactor = 1f;
         scaler.referencePixelsPerUnit = 100f;
         
-        // Ìí¼ÓGraphicRaycaster
+        // æ·»åŠ GraphicRaycaster
         canvasGO.AddComponent<GraphicRaycaster>();
         
-        // ÉèÖÃRectTransform
+        // è®¾ç½®RectTransform
         RectTransform rectTransform = canvasGO.GetComponent<RectTransform>();
-        rectTransform.sizeDelta = canvasSize; // ÏñËØµ¥Î»£¬µ«»á±»Ëõ·Å
-        rectTransform.localScale = Vector3.one * canvasScale; // Í¨¹ıËõ·Å¿ØÖÆÊµ¼Ê´óĞ¡
+        rectTransform.sizeDelta = canvasSize; // åƒç´ å•ä½ï¼Œä½†ä¼šè¢«ç¼©æ”¾
+        rectTransform.localScale = Vector3.one * canvasScale; // é€šè¿‡ç¼©æ”¾æ§åˆ¶å®é™…å¤§å°
         
-        Debug.Log($"<color=#4CAF50>[WorldSpaceDelayUISetup]</color> ´´½¨ÊÀ½ç¿Õ¼äCanvas: {canvasGO.name}");
-        Debug.Log($"<color=#4CAF50>[WorldSpaceDelayUISetup]</color> Canvas´óĞ¡: {canvasSize}, Ëõ·Å: {canvasScale}");
+        Debug.Log($"<color=#4CAF50>[WorldSpaceDelayUISetup]</color> åˆ›å»ºä¸–ç•Œç©ºé—´Canvas: {canvasGO.name}");
+        Debug.Log($"<color=#4CAF50>[WorldSpaceDelayUISetup]</color> Canvaså¤§å°: {canvasSize}, ç¼©æ”¾: {canvasScale}");
         return canvasGO;
     }
     
     /// <summary>
-    /// ´´½¨ÑÓ³ÙUIÔ¤ÖÆÌå
+    /// åˆ›å»ºå»¶è¿ŸUIé¢„åˆ¶ä½“
     /// </summary>
     private GameObject CreateDelayUIPrefab()
     {
-        // ´´½¨¸ù¶ÔÏó
+        // åˆ›å»ºæ ¹å¯¹è±¡
         GameObject delayUIGO = new GameObject("DelayMagnifierUI");
         
-        // Ìí¼ÓRectTransform
+        // æ·»åŠ RectTransform
         RectTransform rootRect = delayUIGO.AddComponent<RectTransform>();
         rootRect.sizeDelta = uiSize;
         
-        // Ìí¼ÓCanvasGroupÓÃÓÚµ­Èëµ­³ö
+        // æ·»åŠ CanvasGroupç”¨äºæ·¡å…¥æ·¡å‡º
         CanvasGroup canvasGroup = delayUIGO.AddComponent<CanvasGroup>();
         canvasGroup.alpha = 1f;
         canvasGroup.interactable = false;
         canvasGroup.blocksRaycasts = false;
         
-        // ´´½¨±³¾°
+        // åˆ›å»ºèƒŒæ™¯
         GameObject backgroundGO = new GameObject("Background");
         backgroundGO.transform.SetParent(delayUIGO.transform, false);
         
@@ -108,7 +108,7 @@ public class WorldSpaceDelayUISetup : MonoBehaviour
         bgImage.color = backgroundColor;
         bgImage.raycastTarget = false;
         
-        // ´´½¨Ô²»·ÖĞĞÄµã
+        // åˆ›å»ºåœ†ç¯ä¸­å¿ƒç‚¹
         GameObject centerGO = new GameObject("CircleCenter");
         centerGO.transform.SetParent(delayUIGO.transform, false);
         
@@ -116,19 +116,19 @@ public class WorldSpaceDelayUISetup : MonoBehaviour
         centerRect.anchoredPosition = Vector2.zero;
         centerRect.sizeDelta = Vector2.zero;
         
-        // ´´½¨·Å´ó¾µÍ¼±ê
+        // åˆ›å»ºæ”¾å¤§é•œå›¾æ ‡
         GameObject magnifierGO = new GameObject("MagnifierIcon");
         magnifierGO.transform.SetParent(delayUIGO.transform, false);
         
         RectTransform magnifierRect = magnifierGO.AddComponent<RectTransform>();
         magnifierRect.sizeDelta = new Vector2(40, 40);
-        magnifierRect.anchoredPosition = new Vector2(circleRadius, 0); // ÆğÊ¼Î»ÖÃÔÚÓÒ²à
+        magnifierRect.anchoredPosition = new Vector2(circleRadius, 0); // èµ·å§‹ä½ç½®åœ¨å³ä¾§
         
         Image magnifierImage = magnifierGO.AddComponent<Image>();
         magnifierImage.color = Color.white;
         magnifierImage.raycastTarget = false;
         
-        // ³¢ÊÔ¼ÓÔØ·Å´ó¾µÍ¼±ê
+        // å°è¯•åŠ è½½æ”¾å¤§é•œå›¾æ ‡
         Sprite magnifierSprite = Resources.Load<Sprite>("UI/MagnifierIcon");
         if (magnifierSprite != null)
         {
@@ -136,15 +136,15 @@ public class WorldSpaceDelayUISetup : MonoBehaviour
         }
         else
         {
-            // Èç¹ûÃ»ÓĞÍ¼±ê£¬´´½¨Ò»¸ö¼òµ¥µÄÔ²ĞÎ
+            // å¦‚æœæ²¡æœ‰å›¾æ ‡ï¼Œåˆ›å»ºä¸€ä¸ªç®€å•çš„åœ†å½¢
             magnifierImage.color = new Color(1, 1, 1, 0.8f);
-            Debug.LogWarning("Î´ÕÒµ½·Å´ó¾µÍ¼±ê£¬Ê¹ÓÃÄ¬ÈÏ°×É«Ô²ĞÎ");
+            Debug.LogWarning("æœªæ‰¾åˆ°æ”¾å¤§é•œå›¾æ ‡ï¼Œä½¿ç”¨é»˜è®¤ç™½è‰²åœ†å½¢");
         }
         
-        // Ìí¼ÓÔ²»·¶¯»­×é¼ş
+        // æ·»åŠ åœ†ç¯åŠ¨ç”»ç»„ä»¶
         MagnifierCircleAnimation circleAnimation = delayUIGO.AddComponent<MagnifierCircleAnimation>();
         
-        // Í¨¹ı·´ÉäÉèÖÃË½ÓĞ×Ö¶Î£¨ÒòÎªËüÃÇÊÇSerializeField£©
+        // é€šè¿‡åå°„è®¾ç½®ç§æœ‰å­—æ®µï¼ˆå› ä¸ºå®ƒä»¬æ˜¯SerializeFieldï¼‰
         var magnifierIconField = typeof(MagnifierCircleAnimation).GetField("magnifierIcon", 
             System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
         var circleCenterField = typeof(MagnifierCircleAnimation).GetField("circleCenter", 
@@ -156,10 +156,10 @@ public class WorldSpaceDelayUISetup : MonoBehaviour
         if (circleCenterField != null) circleCenterField.SetValue(circleAnimation, centerRect);
         if (circleRadiusField != null) circleRadiusField.SetValue(circleAnimation, circleRadius);
         
-        // Ìí¼ÓÑÓ³ÙUI¿ØÖÆÆ÷
+        // æ·»åŠ å»¶è¿ŸUIæ§åˆ¶å™¨
         DelayMagnifierUIController delayController = delayUIGO.AddComponent<DelayMagnifierUIController>();
         
-        // Í¨¹ı·´ÉäÉèÖÃË½ÓĞ×Ö¶Î
+        // é€šè¿‡åå°„è®¾ç½®ç§æœ‰å­—æ®µ
         var magnifierAnimationField = typeof(DelayMagnifierUIController).GetField("magnifierAnimation", 
             System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
         var rootObjectField = typeof(DelayMagnifierUIController).GetField("rootObject", 
@@ -171,26 +171,26 @@ public class WorldSpaceDelayUISetup : MonoBehaviour
         if (rootObjectField != null) rootObjectField.SetValue(delayController, delayUIGO);
         if (canvasGroupField != null) canvasGroupField.SetValue(delayController, canvasGroup);
         
-        Debug.Log($"<color=#4CAF50>[WorldSpaceDelayUISetup]</color> ´´½¨ÑÓ³ÙUIÔ¤ÖÆÌå: {delayUIGO.name}");
+        Debug.Log($"<color=#4CAF50>[WorldSpaceDelayUISetup]</color> åˆ›å»ºå»¶è¿ŸUIé¢„åˆ¶ä½“: {delayUIGO.name}");
         return delayUIGO;
     }
     
     /// <summary>
-    /// ´´½¨ÑÓ³ÙUI¹ÜÀíÆ÷
+    /// åˆ›å»ºå»¶è¿ŸUIç®¡ç†å™¨
     /// </summary>
     private void CreateDelayUIManager()
     {
         GameObject managerGO = new GameObject("WorldSpaceDelayUIManager");
         WorldSpaceDelayUIManager manager = managerGO.AddComponent<WorldSpaceDelayUIManager>();
         
-        Debug.Log($"<color=#4CAF50>[WorldSpaceDelayUISetup]</color> ´´½¨ÑÓ³ÙUI¹ÜÀíÆ÷: {managerGO.name}");
-        Debug.Log($"<color=#FF9800>[WorldSpaceDelayUISetup]</color> ÇëÔÚInspectorÖĞÅäÖÃÊÀ½ç¿Õ¼äCanvasºÍÑÓ³ÙUIÔ¤ÖÆÌåÒıÓÃ£¡");
+        Debug.Log($"<color=#4CAF50>[WorldSpaceDelayUISetup]</color> åˆ›å»ºå»¶è¿ŸUIç®¡ç†å™¨: {managerGO.name}");
+        Debug.Log($"<color=#FF9800>[WorldSpaceDelayUISetup]</color> è¯·åœ¨Inspectorä¸­é…ç½®ä¸–ç•Œç©ºé—´Canvaså’Œå»¶è¿ŸUIé¢„åˆ¶ä½“å¼•ç”¨ï¼");
     }
     
     /// <summary>
-    /// ÎªÏÖÓĞ»õ¼ÜÌí¼ÓÊÀ½ç¿Õ¼äÑÓ³ÙUIÖ§³Ö
+    /// ä¸ºç°æœ‰è´§æ¶æ·»åŠ ä¸–ç•Œç©ºé—´å»¶è¿ŸUIæ”¯æŒ
     /// </summary>
-    [ContextMenu("ÎªÏÖÓĞ»õ¼ÜÌí¼ÓÊÀ½ç¿Õ¼äÑÓ³ÙUIÖ§³Ö")]
+    [ContextMenu("ä¸ºç°æœ‰è´§æ¶æ·»åŠ ä¸–ç•Œç©ºé—´å»¶è¿ŸUIæ”¯æŒ")]
     public void AddWorldSpaceDelayUIToExistingShelves()
     {
         ShelfTrigger[] shelves = FindObjectsOfType<ShelfTrigger>();
@@ -198,7 +198,7 @@ public class WorldSpaceDelayUISetup : MonoBehaviour
         int updatedCount = 0;
         foreach (ShelfTrigger shelf in shelves)
         {
-            // Í¨¹ı·´ÉäÉèÖÃuseWorldSpaceDelayUI×Ö¶Î
+            // é€šè¿‡åå°„è®¾ç½®useWorldSpaceDelayUIå­—æ®µ
             var useWorldSpaceField = typeof(ShelfTrigger).GetField("useWorldSpaceDelayUI", 
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
             
@@ -209,30 +209,30 @@ public class WorldSpaceDelayUISetup : MonoBehaviour
             }
         }
         
-        Debug.Log($"<color=#4CAF50>[WorldSpaceDelayUISetup]</color> ÒÑÎª {updatedCount} ¸ö»õ¼ÜÆôÓÃÊÀ½ç¿Õ¼äÑÓ³ÙUI");
+        Debug.Log($"<color=#4CAF50>[WorldSpaceDelayUISetup]</color> å·²ä¸º {updatedCount} ä¸ªè´§æ¶å¯ç”¨ä¸–ç•Œç©ºé—´å»¶è¿ŸUI");
     }
     
     /// <summary>
-    /// ÑéÖ¤ÊÀ½ç¿Õ¼äÑÓ³ÙUIÏµÍ³ÉèÖÃ
+    /// éªŒè¯ä¸–ç•Œç©ºé—´å»¶è¿ŸUIç³»ç»Ÿè®¾ç½®
     /// </summary>
-    [ContextMenu("ÑéÖ¤ÊÀ½ç¿Õ¼äÑÓ³ÙUIÏµÍ³")]
+    [ContextMenu("éªŒè¯ä¸–ç•Œç©ºé—´å»¶è¿ŸUIç³»ç»Ÿ")]
     public void ValidateWorldSpaceDelayUISystem()
     {
-        Debug.Log("<color=#2196F3>[WorldSpaceDelayUISetup]</color> === ÊÀ½ç¿Õ¼äÑÓ³ÙUIÏµÍ³ÑéÖ¤ ===");
+        Debug.Log("<color=#2196F3>[WorldSpaceDelayUISetup]</color> === ä¸–ç•Œç©ºé—´å»¶è¿ŸUIç³»ç»ŸéªŒè¯ ===");
         
-        // ¼ì²é¹ÜÀíÆ÷
+        // æ£€æŸ¥ç®¡ç†å™¨
         WorldSpaceDelayUIManager manager = FindObjectOfType<WorldSpaceDelayUIManager>();
         if (manager != null)
         {
-            Debug.Log("<color=#4CAF50>[WorldSpaceDelayUISetup]</color> ?7?7 ÕÒµ½WorldSpaceDelayUIManager");
+            Debug.Log("<color=#4CAF50>[WorldSpaceDelayUISetup]</color> ?7?7 æ‰¾åˆ°WorldSpaceDelayUIManager");
             manager.GetManagerStatus();
         }
         else
         {
-            Debug.LogWarning("<color=#FF9800>[WorldSpaceDelayUISetup]</color> ?7?1 Î´ÕÒµ½WorldSpaceDelayUIManager");
+            Debug.LogWarning("<color=#FF9800>[WorldSpaceDelayUISetup]</color> ?7?1 æœªæ‰¾åˆ°WorldSpaceDelayUIManager");
         }
         
-        // ¼ì²éÊÀ½ç¿Õ¼äCanvas
+        // æ£€æŸ¥ä¸–ç•Œç©ºé—´Canvas
         Canvas[] canvases = FindObjectsOfType<Canvas>();
         Canvas worldSpaceCanvas = null;
         foreach (Canvas canvas in canvases)
@@ -246,14 +246,14 @@ public class WorldSpaceDelayUISetup : MonoBehaviour
         
         if (worldSpaceCanvas != null)
         {
-            Debug.Log($"<color=#4CAF50>[WorldSpaceDelayUISetup]</color> ?7?7 ÕÒµ½ÊÀ½ç¿Õ¼äCanvas: {worldSpaceCanvas.name}");
+            Debug.Log($"<color=#4CAF50>[WorldSpaceDelayUISetup]</color> ?7?7 æ‰¾åˆ°ä¸–ç•Œç©ºé—´Canvas: {worldSpaceCanvas.name}");
         }
         else
         {
-            Debug.LogWarning("<color=#FF9800>[WorldSpaceDelayUISetup]</color> ?7?1 Î´ÕÒµ½ÊÀ½ç¿Õ¼äCanvas");
+            Debug.LogWarning("<color=#FF9800>[WorldSpaceDelayUISetup]</color> ?7?1 æœªæ‰¾åˆ°ä¸–ç•Œç©ºé—´Canvas");
         }
         
-        // ¼ì²é»õ¼ÜÉèÖÃ
+        // æ£€æŸ¥è´§æ¶è®¾ç½®
         ShelfTrigger[] shelves = FindObjectsOfType<ShelfTrigger>();
         int worldSpaceEnabledCount = 0;
         
@@ -269,28 +269,28 @@ public class WorldSpaceDelayUISetup : MonoBehaviour
             }
         }
         
-        Debug.Log($"<color=#4CAF50>[WorldSpaceDelayUISetup]</color> »õ¼Ü×ÜÊı: {shelves.Length}, ÆôÓÃÊÀ½ç¿Õ¼äUI: {worldSpaceEnabledCount}");
+        Debug.Log($"<color=#4CAF50>[WorldSpaceDelayUISetup]</color> è´§æ¶æ€»æ•°: {shelves.Length}, å¯ç”¨ä¸–ç•Œç©ºé—´UI: {worldSpaceEnabledCount}");
         
         if (shelves.Length > 0 && worldSpaceEnabledCount == shelves.Length)
         {
-            Debug.Log("<color=#4CAF50>[WorldSpaceDelayUISetup]</color> ?7?7 ËùÓĞ»õ¼Ü¶¼ÒÑÆôÓÃÊÀ½ç¿Õ¼äÑÓ³ÙUI");
+            Debug.Log("<color=#4CAF50>[WorldSpaceDelayUISetup]</color> ?7?7 æ‰€æœ‰è´§æ¶éƒ½å·²å¯ç”¨ä¸–ç•Œç©ºé—´å»¶è¿ŸUI");
         }
         else if (worldSpaceEnabledCount > 0)
         {
-            Debug.LogWarning($"<color=#FF9800>[WorldSpaceDelayUISetup]</color> ?7?2 Ö»ÓĞ {worldSpaceEnabledCount}/{shelves.Length} ¸ö»õ¼ÜÆôÓÃÁËÊÀ½ç¿Õ¼äÑÓ³ÙUI");
+            Debug.LogWarning($"<color=#FF9800>[WorldSpaceDelayUISetup]</color> ?7?2 åªæœ‰ {worldSpaceEnabledCount}/{shelves.Length} ä¸ªè´§æ¶å¯ç”¨äº†ä¸–ç•Œç©ºé—´å»¶è¿ŸUI");
         }
         else
         {
-            Debug.LogWarning("<color=#FF9800>[WorldSpaceDelayUISetup]</color> ?7?1 Ã»ÓĞ»õ¼ÜÆôÓÃÊÀ½ç¿Õ¼äÑÓ³ÙUI");
+            Debug.LogWarning("<color=#FF9800>[WorldSpaceDelayUISetup]</color> ?7?1 æ²¡æœ‰è´§æ¶å¯ç”¨ä¸–ç•Œç©ºé—´å»¶è¿ŸUI");
         }
         
-        Debug.Log("<color=#2196F3>[WorldSpaceDelayUISetup]</color> === ÑéÖ¤Íê³É ===");
+        Debug.Log("<color=#2196F3>[WorldSpaceDelayUISetup]</color> === éªŒè¯å®Œæˆ ===");
     }
     
     /// <summary>
-    /// ¸üĞÂÏÖÓĞÊÀ½ç¿Õ¼äCanvasÉèÖÃÒÔĞŞ¸´¶¨Î»ÎÊÌâ
+    /// æ›´æ–°ç°æœ‰ä¸–ç•Œç©ºé—´Canvasè®¾ç½®ä»¥ä¿®å¤å®šä½é—®é¢˜
     /// </summary>
-    [ContextMenu("ĞŞ¸´ÏÖÓĞÊÀ½ç¿Õ¼äCanvasÉèÖÃ")]
+    [ContextMenu("ä¿®å¤ç°æœ‰ä¸–ç•Œç©ºé—´Canvasè®¾ç½®")]
     public void FixExistingWorldSpaceCanvas()
     {
         Canvas[] canvases = FindObjectsOfType<Canvas>();
@@ -307,54 +307,54 @@ public class WorldSpaceDelayUISetup : MonoBehaviour
         
         if (worldSpaceCanvas != null)
         {
-            Debug.Log($"<color=#4CAF50>[WorldSpaceDelayUISetup]</color> ÕÒµ½ÏÖÓĞÊÀ½ç¿Õ¼äCanvas: {worldSpaceCanvas.name}");
+            Debug.Log($"<color=#4CAF50>[WorldSpaceDelayUISetup]</color> æ‰¾åˆ°ç°æœ‰ä¸–ç•Œç©ºé—´Canvas: {worldSpaceCanvas.name}");
             
-            // ¸üĞÂCanvasScalerÉèÖÃ
+            // æ›´æ–°CanvasScalerè®¾ç½®
             CanvasScaler scaler = worldSpaceCanvas.GetComponent<CanvasScaler>();
             if (scaler != null)
             {
                 scaler.uiScaleMode = CanvasScaler.ScaleMode.ConstantPixelSize;
                 scaler.scaleFactor = 1f;
                 scaler.referencePixelsPerUnit = 100f;
-                Debug.Log("<color=#4CAF50>[WorldSpaceDelayUISetup]</color> ? ¸üĞÂCanvasScalerÉèÖÃ");
+                Debug.Log("<color=#4CAF50>[WorldSpaceDelayUISetup]</color> ? æ›´æ–°CanvasScalerè®¾ç½®");
             }
             
-            // ¸üĞÂCanvas´óĞ¡ºÍËõ·Å
+            // æ›´æ–°Canvaså¤§å°å’Œç¼©æ”¾
             RectTransform rectTransform = worldSpaceCanvas.GetComponent<RectTransform>();
             if (rectTransform != null)
             {
                 rectTransform.sizeDelta = canvasSize;
                 rectTransform.localScale = Vector3.one * canvasScale;
-                Debug.Log($"<color=#4CAF50>[WorldSpaceDelayUISetup]</color> ? ¸üĞÂCanvas´óĞ¡Îª: {canvasSize}, Ëõ·ÅÎª: {canvasScale}");
+                Debug.Log($"<color=#4CAF50>[WorldSpaceDelayUISetup]</color> ? æ›´æ–°Canvaså¤§å°ä¸º: {canvasSize}, ç¼©æ”¾ä¸º: {canvasScale}");
             }
             
-            // ¸üĞÂÅÅĞò²ã
+            // æ›´æ–°æ’åºå±‚
             worldSpaceCanvas.sortingOrder = sortingOrder;
-            Debug.Log($"<color=#4CAF50>[WorldSpaceDelayUISetup]</color> ? ¸üĞÂÅÅĞò²ãÎª: {sortingOrder}");
+            Debug.Log($"<color=#4CAF50>[WorldSpaceDelayUISetup]</color> ? æ›´æ–°æ’åºå±‚ä¸º: {sortingOrder}");
             
-            Debug.Log("<color=#4CAF50>[WorldSpaceDelayUISetup]</color> ÊÀ½ç¿Õ¼äCanvasÉèÖÃĞŞ¸´Íê³É£¡");
+            Debug.Log("<color=#4CAF50>[WorldSpaceDelayUISetup]</color> ä¸–ç•Œç©ºé—´Canvasè®¾ç½®ä¿®å¤å®Œæˆï¼");
         }
         else
         {
-            Debug.LogWarning("<color=#FF9800>[WorldSpaceDelayUISetup]</color> Î´ÕÒµ½ÏÖÓĞµÄÊÀ½ç¿Õ¼äCanvas");
+            Debug.LogWarning("<color=#FF9800>[WorldSpaceDelayUISetup]</color> æœªæ‰¾åˆ°ç°æœ‰çš„ä¸–ç•Œç©ºé—´Canvas");
         }
     }
     
     /// <summary>
-    /// ²âÊÔ±ß½çÎ»ÖÃUIÏÔÊ¾
+    /// æµ‹è¯•è¾¹ç•Œä½ç½®UIæ˜¾ç¤º
     /// </summary>
-    [ContextMenu("²âÊÔ±ß½çÎ»ÖÃUIÏÔÊ¾")]
+    [ContextMenu("æµ‹è¯•è¾¹ç•Œä½ç½®UIæ˜¾ç¤º")]
     public void TestBoundaryPositionUI()
     {
         WorldSpaceDelayUIManager manager = FindObjectOfType<WorldSpaceDelayUIManager>();
         if (manager != null)
         {
-            Debug.Log("<color=#4CAF50>[WorldSpaceDelayUISetup]</color> ¿ªÊ¼±ß½çÎ»ÖÃUI²âÊÔ");
+            Debug.Log("<color=#4CAF50>[WorldSpaceDelayUISetup]</color> å¼€å§‹è¾¹ç•Œä½ç½®UIæµ‹è¯•");
             manager.TestUIPositionAccuracy();
         }
         else
         {
-            Debug.LogWarning("<color=#FF9800>[WorldSpaceDelayUISetup]</color> Î´ÕÒµ½WorldSpaceDelayUIManager£¬ÎŞ·¨½øĞĞ²âÊÔ");
+            Debug.LogWarning("<color=#FF9800>[WorldSpaceDelayUISetup]</color> æœªæ‰¾åˆ°WorldSpaceDelayUIManagerï¼Œæ— æ³•è¿›è¡Œæµ‹è¯•");
         }
     }
 }
