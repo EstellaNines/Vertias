@@ -63,6 +63,8 @@ namespace Game.UI
 		[SerializeField] private string successSpriteResourceName = "complete_0";
 		[SerializeField] private string failSpriteResourceName = "complete_1";
 
+		public bool IsCompleted => isCompleted; // 提供只读访问并使字段被读取
+
 		#region JSON 数据结构
 		[Serializable]
 		private sealed class MissionDataRoot
@@ -209,6 +211,12 @@ namespace Game.UI
 			if (requirementsValueTMP != null)
 			{
 				requirementsValueTMP.text = reqInt > 0 ? $"intelligence {reqInt}/{reqInt}" : string.Empty;
+			}
+
+			// 使用 isCompleted 更新完成图标的可见性，确保其值被读取（消除 CS0414）
+			if (completeImage != null)
+			{
+				completeImage.enabled = isCompleted && completeImage.sprite != null;
 			}
 		}
 

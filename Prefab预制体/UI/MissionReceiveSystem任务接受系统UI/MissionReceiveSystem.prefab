@@ -2716,6 +2716,8 @@ MonoBehaviour:
   emailManager: {fileID: 2757273235831351325}
   rewardRandomConfig: {fileID: 11400000, guid: 8acd3175c953ce24f93d9895b8a3864c, type: 2}
   spawnRewardOnSuccess: 1
+  enforceCurrencyStack: 1
+  currencyStackAmount: 1000
   submitButton: {fileID: 8952001428554793640}
   claimButton: {fileID: 5866592390083412837}
   warehouseGrid: {fileID: 0}
@@ -3596,6 +3598,35 @@ PrefabInstance:
     - target: {fileID: 2917546529936624244, guid: f25b24673adbc484a83d2c599a18b7cc, type: 3}
       propertyPath: isCompleted
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6330054937923206185, guid: f25b24673adbc484a83d2c599a18b7cc, type: 3}
+      propertyPath: m_text
+      value: Your Mission imcompleted! - Investigate the harbor area to gather military
+        garrison situation for the ongoing operation.
+      objectReference: {fileID: 0}
+    - target: {fileID: 6480793826959841814, guid: f25b24673adbc484a83d2c599a18b7cc, type: 3}
+      propertyPath: m_text
+      value: Periodic Requirement
+      objectReference: {fileID: 0}
+    - target: {fileID: 6480793826959841814, guid: f25b24673adbc484a83d2c599a18b7cc, type: 3}
+      propertyPath: m_fontSize
+      value: 20
+      objectReference: {fileID: 0}
+    - target: {fileID: 7506936275539483913, guid: f25b24673adbc484a83d2c599a18b7cc, type: 3}
+      propertyPath: m_text
+      value: intelligence 15/15
+      objectReference: {fileID: 0}
+    - target: {fileID: 8432157187706522041, guid: f25b24673adbc484a83d2c599a18b7cc, type: 3}
+      propertyPath: m_Color.b
+      value: 0.6603774
+      objectReference: {fileID: 0}
+    - target: {fileID: 8432157187706522041, guid: f25b24673adbc484a83d2c599a18b7cc, type: 3}
+      propertyPath: m_Color.g
+      value: 0.6603774
+      objectReference: {fileID: 0}
+    - target: {fileID: 8432157187706522041, guid: f25b24673adbc484a83d2c599a18b7cc, type: 3}
+      propertyPath: m_Color.r
+      value: 0.6603774
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
