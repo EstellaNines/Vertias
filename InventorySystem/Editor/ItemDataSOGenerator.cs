@@ -446,6 +446,19 @@ namespace InventorySystem.Editor
                         itemData.weapon.magazineCapacity = weaponNode["magazineCapacity"]?.Value<int>() ?? 0;
                         itemData.weapon.reloadTime = weaponNode["reloadTime"]?.Value<float>() ?? 0f;
                     }
+
+                    // 读取武器可用弹药数组（Ammunition 为字符串数组）
+                    var ammoArray = itemJson["Ammunition"] as JArray;
+                    if (ammoArray != null)
+                    {
+                        var list = new List<string>();
+                        foreach (var a in ammoArray)
+                        {
+                            var s = a?.Value<string>();
+                            if (!string.IsNullOrEmpty(s)) list.Add(s);
+                        }
+                        itemData.ammunitionOptions = list.ToArray();
+                    }
                 }
 
                 // 生成文件名（ID_物品名称格式）

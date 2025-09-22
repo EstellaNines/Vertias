@@ -4,8 +4,8 @@ using UnityEditor;
 #endif
 
 /// <summary>
-/// Íæ¼Ò×´Ì¬£¨ÉúÃü/±¥Ê³¶È/¾«ÉñÖµ£©µ÷½Ú´°¿Ú¡£
-/// Tools/Player Vital Stats µ÷³ö£¬Ö§³Ö +1/+5/+10 Óë -1/-5/-10£¬²¢¶¯Ì¬ÏÔÊ¾½ø¶È¡£
+/// ç©å®¶çŠ¶æ€ï¼ˆç”Ÿå‘½/é¥±é£Ÿåº¦/ç²¾ç¥å€¼ï¼‰è°ƒèŠ‚çª—å£ã€‚
+/// Tools/Player Vital Stats è°ƒå‡ºï¼Œæ”¯æŒ +1/+5/+10 ä¸ -1/-5/-10ï¼Œå¹¶åŠ¨æ€æ˜¾ç¤ºè¿›åº¦ã€‚
 /// </summary>
 #if UNITY_EDITOR
 public class PlayerVitalStatsEditorWindow : EditorWindow
@@ -25,7 +25,7 @@ public class PlayerVitalStatsEditorWindow : EditorWindow
 
     private void OnEnable()
     {
-        // ×Ô¶¯Ñ°ÕÒÒ»¸ö PlayerVitalStats
+        // è‡ªåŠ¨å¯»æ‰¾ä¸€ä¸ª PlayerVitalStats
         if (targetStats == null)
         {
             targetStats = FindObjectOfType<PlayerVitalStats>();
@@ -45,8 +45,8 @@ public class PlayerVitalStatsEditorWindow : EditorWindow
 
         if (targetStats == null)
         {
-            EditorGUILayout.HelpBox("³¡¾°ÖĞÎ´ÕÒµ½ PlayerVitalStats£¬ÇëÖ¸¶¨Ä¿±ê¶ÔÏó¡£", MessageType.Warning);
-            if (GUILayout.Button("³¢ÊÔ²éÕÒ PlayerVitalStats"))
+            EditorGUILayout.HelpBox("åœºæ™¯ä¸­æœªæ‰¾åˆ° PlayerVitalStatsï¼Œè¯·æŒ‡å®šç›®æ ‡å¯¹è±¡ã€‚", MessageType.Warning);
+            if (GUILayout.Button("å°è¯•æŸ¥æ‰¾ PlayerVitalStats"))
             {
                 targetStats = FindObjectOfType<PlayerVitalStats>();
             }
@@ -71,7 +71,7 @@ public class PlayerVitalStatsEditorWindow : EditorWindow
         );
 
         EditorGUILayout.Space();
-        EditorGUILayout.HelpBox("ÌáÊ¾£º¸Ã´°¿ÚÖ»ÔÚ±à¼­Æ÷ÖĞ¿ÉÓÃ¡£¿ÉÔÚ²¥·ÅÄ£Ê½ÏÂÊµÊ±µ÷½ÚÍæ¼Ò×´Ì¬¡£", MessageType.Info);
+        EditorGUILayout.HelpBox("æç¤ºï¼šè¯¥çª—å£åªåœ¨ç¼–è¾‘å™¨ä¸­å¯ç”¨ã€‚å¯åœ¨æ’­æ”¾æ¨¡å¼ä¸‹å®æ—¶è°ƒèŠ‚ç©å®¶çŠ¶æ€ã€‚", MessageType.Info);
     }
 
     private void DrawHealthSection(string label, Color barColor)

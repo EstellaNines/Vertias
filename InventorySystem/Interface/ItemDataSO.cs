@@ -89,6 +89,10 @@ namespace InventorySystem
         [FieldLabel("情报值")]
         public int intelligenceValue = 0;       // 情报值（情报物品）
 
+		[Header("武器弹药（仅武器类使用）")]
+		[FieldLabel("可用弹药列表")]
+		public string[] ammunitionOptions;       // 武器可用的弹药名列表（来自 JSON 的 Ammunition 数组）
+
         [Header("武器扩展（仅武器类使用）")]
         public WeaponSpec weapon;               // 可为空；当为武器类目时由生成器填充
 

@@ -43,6 +43,22 @@ namespace InventorySystem
             }
         }
 
+        // 用于玩家口袋网格（无装备槽容器）
+        public ContainerSaveData(ItemGrid playerGrid, string key, string itemID = "PlayerItemGrid", string globalID = "", EquipmentSlotType pseudoType = EquipmentSlotType.Backpack)
+        {
+            containerKey = key;
+            containerItemID = itemID;
+            containerGlobalID = string.IsNullOrEmpty(globalID) ? (playerGrid != null ? playerGrid.GridGUID : "") : globalID;
+            slotType = pseudoType;
+            containerItems = new List<ItemSaveData>();
+            saveTime = System.DateTime.Now.ToBinary().ToString();
+
+            if (playerGrid != null)
+            {
+                CollectContainerItems(playerGrid);
+            }
+        }
+
         /// <summary>
         /// 收集容器网格中的所有物品（采用SpawnSystem的智能检测机制）
         /// </summary>
@@ -445,6 +461,50 @@ namespace InventorySystem
             catch (System.Exception e)
             {
                 Debug.LogError($"[ContainerSaveManager] 立即跨会话保存失败: {e.Message}");
+            }
+        }
+
+        // ========= 玩家口袋网格（PlayerItemGrid）持久化 =========
+        private string GetPlayerGridKey(ItemGrid pocketGrid)
+        {
+            if (pocketGrid == null) return "PlayerGrid_NULL";
+            return $"PlayerGrid_{pocketGrid.GridGUID}";
+        }
+
+        public void SavePlayerPocketGrid(ItemGrid pocketGrid)
+        {
+            if (pocketGrid == null) return;
+            string key = GetPlayerGridKey(pocketGrid);
+            if (showDebugLog) Debug.Log($"[ContainerSaveManager] 保存玩家口袋网格: {key}");
+            var saveData = new ContainerSaveData(pocketGrid, key, "PlayerItemGrid", pocketGrid.GridGUID);
+            _containerDataCache[key] = saveData;
+            SaveAllContainerDataToES3();
+            if (enableCrossSessionSave) SaveCrossSessionDataThrottled();
+        }
+
+        public void SavePlayerPocketGridImmediate(ItemGrid pocketGrid)
+        {
+            if (pocketGrid == null) return;
+            string key = GetPlayerGridKey(pocketGrid);
+            if (showDebugLog) Debug.Log($"[ContainerSaveManager] 💾 立即保存玩家口袋网格: {key}");
+            var saveData = new ContainerSaveData(pocketGrid, key, "PlayerItemGrid", pocketGrid.GridGUID);
+            _containerDataCache[key] = saveData;
+            SaveAllContainerDataToES3();
+            if (enableCrossSessionSave) ExecuteCrossSessionSave();
+        }
+
+        public void LoadPlayerPocketGrid(ItemGrid pocketGrid)
+        {
+            if (pocketGrid == null) return;
+            string key = GetPlayerGridKey(pocketGrid);
+            if (showDebugLog) Debug.Log($"[ContainerSaveManager] 加载玩家口袋网格: {key}");
+            if (_containerDataCache.TryGetValue(key, out var saveData))
+            {
+                RestoreContainerItems(saveData, pocketGrid);
+            }
+            else
+            {
+                if (showDebugLog) Debug.Log($"[ContainerSaveManager] 玩家口袋网格无保存数据: {key}");
             }
         }
 
@@ -1222,12 +1282,25 @@ namespace InventorySystem
                             
                             foreach (ContainerSaveData saveData in collection.containers)
                             {
-                                // 使用统一的键值格式：SlotType_GlobalId_ItemId
-                                string key = $"{saveData.slotType}_{saveData.containerGlobalID}_{saveData.containerItemID}";
-                                _containerDataCache[key] = saveData;
-                                
+                                // 优先使用保存数据中自带的 containerKey（支持玩家口袋网格 PlayerGrid_{GUID} 等）
+                                string primaryKey = !string.IsNullOrEmpty(saveData.containerKey)
+                                    ? saveData.containerKey
+                                    : $"{saveData.slotType}_{saveData.containerGlobalID}_{saveData.containerItemID}"; // 回退到统一格式
+
+                                // 写入主键
+                                _containerDataCache[primaryKey] = saveData;
+
+                                // 兼容别名：同时写入统一格式键，避免旧逻辑找不到
+                                string aliasKey = $"{saveData.slotType}_{saveData.containerGlobalID}_{saveData.containerItemID}";
+                                if (aliasKey != primaryKey)
+                                {
+                                    _containerDataCache[aliasKey] = saveData;
+                                }
+
                                 if (showDebugLog)
-                                    Debug.Log($"[ContainerSaveManager] 已加载容器数据到缓存: {key}, 物品数量: {saveData.containerItems?.Count ?? 0}");
+                                {
+                                    Debug.Log($"[ContainerSaveManager] 已加载容器数据到缓存: primary='{primaryKey}', alias='{aliasKey}', 物品数量: {saveData.containerItems?.Count ?? 0}");
+                                }
                             }
                         }
                         else

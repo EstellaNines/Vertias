@@ -38,6 +38,11 @@ public class BackpackPanelController : MonoBehaviour
     private GridSaveManager gridSaveManager;
     private bool isInitialized = false;
     
+    // 玩家口袋网格持久化引用
+    private ItemGrid playerGridRef;
+    private bool playerGridPersistenceWired = false;
+    private Coroutine playerGridLoadCoroutine;
+    
     // InventoryController引用（用于管理提示器）
     private InventoryController inventoryController;
     
@@ -112,6 +117,11 @@ public class BackpackPanelController : MonoBehaviour
         try
         {
             ForcesSaveAllData();
+            // 关闭面板时，立即保存玩家口袋网格
+            if (playerGridRef != null)
+            {
+                ContainerSaveManager.Instance.SavePlayerPocketGridImmediate(playerGridRef);
+            }
         }
         catch (System.Exception e)
         {
@@ -128,6 +138,10 @@ public class BackpackPanelController : MonoBehaviour
         try
         {
             ForcesSaveAllData();
+            if (playerGridRef != null)
+            {
+                ContainerSaveManager.Instance.SavePlayerPocketGridImmediate(playerGridRef);
+            }
         }
         catch (System.Exception e)
         {
@@ -534,53 +548,45 @@ public class BackpackPanelController : MonoBehaviour
     /// </summary>
     private void EnsurePlayerGridCreatedAndAligned()
     {
-        if (playerGridPrefab == null || midPanelTransform == null) return;
+        // 仅在存在手动放置的 PlayerItemGrid 时做轻量配置；不再由脚本实例化/对齐
+        if (midPanelTransform == null) return;
 
-        // 查找已存在的 Player 网格
+        // 优先按常用命名查找
         Transform existing = midPanelTransform.Find("PlayerItemGrid");
-        RectTransform gridRT;
-        if (existing == null)
+        ItemGrid ig = null;
+        if (existing != null)
         {
-            var go = Instantiate(playerGridPrefab, midPanelTransform);
-            go.name = "PlayerItemGrid";
-            gridRT = go.GetComponent<RectTransform>();
-        }
-        else
-        {
-            gridRT = existing.GetComponent<RectTransform>();
+            ig = existing.GetComponent<ItemGrid>();
         }
 
-        if (gridRT != null)
+        // 回退：在 BackpackMid 下扫描任意 ItemGrid，匹配 GridType==Player 或名称包含 "Player"
+        if (ig == null)
         {
-            // 位置：BackpackMid中心向上偏移10
-            ApplyPlayerGridAlignment(gridRT);
-            // 保险：下一帧再次对齐，避免被其他初始化流程覆盖
-            StartCoroutine(AlignPlayerGridDeferred(gridRT));
-
-            // 若存在 ItemGrid，确保类型为 Player
-            var ig = gridRT.GetComponent<ItemGrid>();
-            if (ig != null)
+            var grids = midPanelTransform.GetComponentsInChildren<ItemGrid>(true);
+            foreach (var g in grids)
             {
-                ig.GridType = GridType.Player;
-                ig.GridName = string.IsNullOrEmpty(ig.GridName) ? "PlayerGrid" : ig.GridName;
+                if (g == null) continue;
+                if (g.GridType == GridType.Player || g.name.Contains("Player"))
+                {
+                    ig = g;
+                    break;
+                }
             }
         }
+
+        if (ig == null) return; // 不创建，由用户手动放置
+
+        // 确保类型为 Player；不改动其 RectTransform，以保留手动摆放
+        ig.GridType = GridType.Player;
+        ig.GridName = string.IsNullOrEmpty(ig.GridName) ? "PlayerGrid" : ig.GridName;
+
+        // 连接持久化：订阅事件并加载数据
+        SetupPlayerPocketGridPersistence(ig);
     }
 
-    private void ApplyPlayerGridAlignment(RectTransform gridRT)
-    {
-        if (gridRT == null) return;
-        gridRT.anchorMin = new Vector2(0.5f, 0.5f);
-        gridRT.anchorMax = new Vector2(0.5f, 0.5f);
-        gridRT.pivot = new Vector2(0.5f, 0.5f);
-        gridRT.anchoredPosition = new Vector2(-105f, 56f);
-    }
-
-    private IEnumerator AlignPlayerGridDeferred(RectTransform gridRT)
-    {
-        yield return null; // 下一帧
-        ApplyPlayerGridAlignment(gridRT);
-    }
+    // 保留方法签名以兼容旧调用，但不再对齐或改动RectTransform（用户手动摆放）
+    private void ApplyPlayerGridAlignment(RectTransform gridRT) { }
+    private IEnumerator AlignPlayerGridDeferred(RectTransform gridRT) { yield break; }
     
     /// <summary>
     /// 设置网格的变换组件
@@ -629,6 +635,105 @@ public class BackpackPanelController : MonoBehaviour
                 gridRT.anchoredPosition = new Vector2(15, -42);
                 gridRT.sizeDelta = new Vector2(640, 512);
                 break;
+        }
+    }
+
+    /// <summary>
+    /// 为玩家口袋网格接入持久化（保存/加载）
+    /// </summary>
+    /// <param name="ig">玩家网格</param>
+    private void SetupPlayerPocketGridPersistence(ItemGrid ig)
+    {
+        if (ig == null) return;
+
+        if (playerGridRef != null && playerGridRef != ig)
+        {
+            // 解绑旧引用
+            UnwirePlayerGridEvents(playerGridRef);
+            playerGridPersistenceWired = false;
+        }
+
+        playerGridRef = ig;
+
+        // 确保使用跨会话稳定的 GridGUID（避免每次运行产生新的 GUID 导致找不到已保存数据）
+        const string StablePlayerPocketGuid = "player_pocket_grid";
+        if (string.IsNullOrEmpty(playerGridRef.GridGUID) || playerGridRef.GridGUID.Contains("-"))
+        {
+            playerGridRef.GridGUID = StablePlayerPocketGuid;
+        }
+
+        if (!playerGridPersistenceWired)
+        {
+            WirePlayerGridEvents(playerGridRef);
+            playerGridPersistenceWired = true;
+        }
+
+        // 延迟加载网格内容（确保网格和保存管理器都已就绪）
+        if (playerGridLoadCoroutine != null)
+        {
+            StopCoroutine(playerGridLoadCoroutine);
+        }
+        playerGridLoadCoroutine = StartCoroutine(LoadPlayerGridDelayed(playerGridRef));
+    }
+
+    private void WirePlayerGridEvents(ItemGrid grid)
+    {
+        if (grid == null) return;
+        grid.OnItemPlaced += HandlePlayerGridChanged;
+        grid.OnItemRemoved += HandlePlayerGridChanged;
+        grid.OnItemMoved += HandlePlayerGridMoved;
+        grid.OnGridCleared += HandlePlayerGridCleared;
+        grid.OnGridInitialized += HandlePlayerGridInitialized;
+    }
+
+    private void UnwirePlayerGridEvents(ItemGrid grid)
+    {
+        if (grid == null) return;
+        grid.OnItemPlaced -= HandlePlayerGridChanged;
+        grid.OnItemRemoved -= HandlePlayerGridChanged;
+        grid.OnItemMoved -= HandlePlayerGridMoved;
+        grid.OnGridCleared -= HandlePlayerGridCleared;
+        grid.OnGridInitialized -= HandlePlayerGridInitialized;
+    }
+
+    private void HandlePlayerGridChanged(Item item, Vector2Int _)
+    {
+        if (playerGridRef == null) return;
+        ContainerSaveManager.Instance.SavePlayerPocketGrid(playerGridRef);
+    }
+
+    private void HandlePlayerGridMoved(Item item, Vector2Int __, Vector2Int ___)
+    {
+        if (playerGridRef == null) return;
+        ContainerSaveManager.Instance.SavePlayerPocketGrid(playerGridRef);
+    }
+
+    private void HandlePlayerGridCleared(ItemGrid _)
+    {
+        if (playerGridRef == null) return;
+        ContainerSaveManager.Instance.SavePlayerPocketGridImmediate(playerGridRef);
+    }
+
+    private void HandlePlayerGridInitialized(ItemGrid grid)
+    {
+        // 网格初始化后再次尝试加载，确保第一次打开背包即可显示内容
+        if (grid == null) return;
+        if (playerGridLoadCoroutine != null)
+        {
+            StopCoroutine(playerGridLoadCoroutine);
+        }
+        playerGridLoadCoroutine = StartCoroutine(LoadPlayerGridDelayed(grid));
+    }
+
+    private IEnumerator LoadPlayerGridDelayed(ItemGrid grid)
+    {
+        // 等待几帧，确保 UI、网格、以及ContainerSaveManager 完全就绪
+        yield return null;
+        yield return null;
+
+        if (grid != null)
+        {
+            ContainerSaveManager.Instance.LoadPlayerPocketGrid(grid);
         }
     }
     

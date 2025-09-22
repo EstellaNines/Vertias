@@ -1,6 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
+using System.Collections.Generic;
+using InventorySystem;
 
 public class WeaponManager : MonoBehaviour
 {
@@ -554,6 +557,16 @@ public class WeaponManager : MonoBehaviour
         {
             return;
         }
+
+			// 玩家武器：仅当玩家背包/挂具/口袋中存在匹配弹药时才允许换弹
+			if (isPlayerWeapon)
+			{
+				if (!PlayerHasCompatibleAmmo())
+				{
+					Debug.LogWarning($"武器 {weaponName} 换弹被拒：未在玩家背包/挂具/口袋中找到匹配弹药");
+					return;
+				}
+			}
         // 如果物体未激活，不启动协程，直接忽略以防错误
         if (!isActiveAndEnabled || !gameObject.activeInHierarchy)
         {
@@ -564,6 +577,72 @@ public class WeaponManager : MonoBehaviour
         StartCoroutine(ReloadCoroutine());
     }
 
+	/// <summary>
+	/// 检查玩家装备网格（背包容器、挂具容器、口袋 PlayerItemGrid）中是否存在与本武器匹配的弹药
+	/// 规则：匹配 JSON 中武器的 ammunitionOptions（字符串数组，与弹药物品名称一致），且对应弹药 currentStack > 0
+	/// </summary>
+	private bool PlayerHasCompatibleAmmo()
+	{
+		// 若没有数据对象或无可用弹药列表，则认为不可换弹（防止误判）
+		var options = itemData != null ? itemData.ammunitionOptions : null;
+		if (options == null || options.Length == 0)
+		{
+			Debug.LogWarning($"[AmmoCheck] 武器 {weaponName} 缺少 ammunitionOptions 配置");
+			return false;
+		}
+
+		var optionSet = new HashSet<string>(options);
+		foreach (var grid in GetPlayerAmmoRelevantGrids())
+		{
+			if (grid == null) continue;
+			var readers = grid.GetComponentsInChildren<ItemDataReader>(true);
+			foreach (var r in readers)
+			{
+				if (r == null || r.ItemData == null) continue;
+				if (r.ItemData.category != ItemCategory.Ammunition) continue;
+				if (r.CurrentStack <= 0) continue;
+				// 名称匹配（与 JSON 中的 Ammunition 名称一致）
+				if (optionSet.Contains(r.ItemData.itemName))
+				{
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	/// <summary>
+	/// 获取玩家与弹药相关的所有网格：背包容器网格、挂具容器网格、口袋网格（GridType.Player）
+	/// </summary>
+	private IEnumerable<ItemGrid> GetPlayerAmmoRelevantGrids()
+	{
+		// 1) 装备槽中的容器：背包、挂具
+		var mgr = EquipmentSlotManager.Instance;
+		if (mgr != null)
+		{
+			var backpack = mgr.GetEquipmentSlot(EquipmentSlotType.Backpack);
+			if (backpack != null && backpack.ContainerGrid != null)
+				yield return backpack.ContainerGrid;
+			var rig = mgr.GetEquipmentSlot(EquipmentSlotType.TacticalRig);
+			if (rig != null && rig.ContainerGrid != null)
+				yield return rig.ContainerGrid;
+		}
+
+		// 2) 口袋网格：类型为 Player 的 ItemGrid
+		ItemGrid pocket = null;
+		try
+		{
+			pocket = GameObject.Find("PlayerItemGrid")?.GetComponent<ItemGrid>();
+		}
+		catch { }
+		if (pocket == null)
+		{
+			pocket = Object.FindObjectsOfType<ItemGrid>(true).FirstOrDefault(g => g.GridType == GridType.Player);
+		}
+		if (pocket != null)
+			yield return pocket;
+	}
+
     private System.Collections.IEnumerator ReloadCoroutine()
     {
         isReloading = true;
@@ -573,10 +652,104 @@ public class WeaponManager : MonoBehaviour
 
         yield return new WaitForSeconds(reloadTime);
 
-        currentAmmo = magazineCapacity;
+        // 计算实际可装填数量：受库存与缺弹差额限制
+        int needed = Mathf.Max(0, magazineCapacity - currentAmmo);
+        int available = GetTotalCompatibleAmmoCount();
+        int toLoad = Mathf.Min(needed, available);
+
+        if (toLoad <= 0)
+        {
+            isReloading = false;
+            Debug.LogWarning($"武器 {weaponName} 换弹结束但无可用弹药，当前弹药: {currentAmmo}/{magazineCapacity}");
+            OnReloadEnd?.Invoke(this);
+            yield break;
+        }
+
+        // 从玩家库存扣除弹药堆叠并装填
+        int deducted = DeductAmmoFromInventory(toLoad);
+        currentAmmo = Mathf.Clamp(currentAmmo + deducted, 0, magazineCapacity);
         isReloading = false;
-        Debug.Log($"武器 {weaponName} 换弹完成，当前弹药: {currentAmmo}");
+        Debug.Log($"武器 {weaponName} 换弹完成，装入: {deducted}，当前弹药: {currentAmmo}/{magazineCapacity}");
         OnReloadEnd?.Invoke(this);
+    }
+
+    /// <summary>
+    /// 统计玩家库存中与本武器匹配的弹药总数（所有堆叠求和）
+    /// </summary>
+    private int GetTotalCompatibleAmmoCount()
+    {
+        var readers = GetCompatibleAmmoReadersOrdered();
+        int sum = 0;
+        foreach (var r in readers)
+        {
+            if (r != null) sum += Mathf.Max(0, r.CurrentStack);
+        }
+        return sum;
+    }
+
+    /// <summary>
+    /// 扣除指定数量的弹药，按发现顺序从多个堆叠中扣除；返回实际扣除量
+    /// </summary>
+    private int DeductAmmoFromInventory(int amount)
+    {
+        int remaining = Mathf.Max(0, amount);
+        if (remaining == 0) return 0;
+
+        int removed = 0;
+        var readers = GetCompatibleAmmoReadersOrdered();
+        foreach (var r in readers)
+        {
+            if (r == null || r.ItemData == null || r.CurrentStack <= 0) continue;
+
+            int take = Mathf.Min(r.CurrentStack, remaining);
+            if (take > 0)
+            {
+                r.RemoveStack(take);
+                r.SaveRuntimeToES3();
+                removed += take;
+                remaining -= take;
+
+                // 若该堆叠耗尽，销毁物体
+                if (r.CurrentStack <= 0)
+                {
+                    try
+                    {
+                        var go = r.gameObject;
+                        if (go != null) Destroy(go);
+                    }
+                    catch { }
+                }
+
+                if (remaining <= 0) break;
+            }
+        }
+        return removed;
+    }
+
+    /// <summary>
+    /// 获取按优先顺序排列的匹配弹药读取器列表（背包容器→挂具容器→口袋）
+    /// </summary>
+    private List<ItemDataReader> GetCompatibleAmmoReadersOrdered()
+    {
+        var result = new List<ItemDataReader>();
+        var options = itemData != null ? itemData.ammunitionOptions : null;
+        if (options == null || options.Length == 0) return result;
+        var optionSet = new HashSet<string>(options);
+
+        foreach (var grid in GetPlayerAmmoRelevantGrids())
+        {
+            if (grid == null) continue;
+            var readers = grid.GetComponentsInChildren<ItemDataReader>(true);
+            foreach (var r in readers)
+            {
+                if (r == null || r.ItemData == null) continue;
+                if (r.ItemData.category != ItemCategory.Ammunition) continue;
+                if (r.CurrentStack <= 0) continue;
+                if (!optionSet.Contains(r.ItemData.itemName)) continue;
+                result.Add(r);
+            }
+        }
+        return result;
     }
 
     // 取消换弹（若在进行中）

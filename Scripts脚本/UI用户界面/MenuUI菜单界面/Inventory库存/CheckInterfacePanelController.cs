@@ -5,38 +5,38 @@ using InventorySystem;
 
 public class CheckInterfacePanelController : MonoBehaviour
 {
-	[Header("¸ù½ÚµãÒıÓÃ£¨¿ÉÁô¿Õ£¬°´Â·¾¶×Ô¶¯»ñÈ¡£©")]
+	[Header("æ ¹èŠ‚ç‚¹å¼•ç”¨ï¼ˆå¯ç•™ç©ºï¼ŒæŒ‰è·¯å¾„è‡ªåŠ¨è·å–ï¼‰")]
 	[SerializeField] private RectTransform headerRoot;               // Header
 	[SerializeField] private RectTransform itemIconRoot;            // ItemIcon
 	[SerializeField] private RectTransform descriptionRoot;         // Description
 
-	[Header("Header ×é¼ş")]
-	[SerializeField] private TextMeshProUGUI headerText;            // Header ÏÂµÄ TMP£¨ÏÔÊ¾£ºÓ¢ÎÄÀà±ğ + Ó¢ÎÄÈ«³Æ£©
-	[SerializeField] private Button closeButton;                    // Header ÓÒÉÏ½Ç¹Ø±Õ°´Å¥
-	[SerializeField] private bool destroyOnClose = false;           // ¹Ø±ÕÊ±Ïú»Ù»ò½öÒş²Ø
+	[Header("Header ç»„ä»¶")]
+	[SerializeField] private TextMeshProUGUI headerText;            // Header ä¸‹çš„ TMPï¼ˆæ˜¾ç¤ºï¼šè‹±æ–‡ç±»åˆ« + è‹±æ–‡å…¨ç§°ï¼‰
+	[SerializeField] private Button closeButton;                    // Header å³ä¸Šè§’å…³é—­æŒ‰é’®
+	[SerializeField] private bool destroyOnClose = false;           // å…³é—­æ—¶é”€æ¯æˆ–ä»…éšè—
 
-	[Header("ItemIcon ×é¼ş")]
-	[SerializeField] private Image itemIconImage;                   // ItemIcon µÄ Image
-	[SerializeField] private RectTransform itemIconRect;            // ItemIcon µÄ RectTransform
+	[Header("ItemIcon ç»„ä»¶")]
+	[SerializeField] private Image itemIconImage;                   // ItemIcon çš„ Image
+	[SerializeField] private RectTransform itemIconRect;            // ItemIcon çš„ RectTransform
 
-	[Header("LeftPattern ×é¼ş£¨±êÇ©ÓëÊı¾İ¸÷3ĞĞ£©")]
+	[Header("LeftPattern ç»„ä»¶ï¼ˆæ ‡ç­¾ä¸æ•°æ®å„3è¡Œï¼‰")]
 	[SerializeField] private TextMeshProUGUI[] leftFixedTexts = new TextMeshProUGUI[3];
 	[SerializeField] private TextMeshProUGUI[] leftDataTexts = new TextMeshProUGUI[3];
 
-	[Header("RightPattern ×é¼ş£¨±êÇ©ÓëÊı¾İ¸÷3ĞĞ£¬¿É°´ÎïÆ·Àà±ğÒş²ØĞĞ£©")]
+	[Header("RightPattern ç»„ä»¶ï¼ˆæ ‡ç­¾ä¸æ•°æ®å„3è¡Œï¼Œå¯æŒ‰ç‰©å“ç±»åˆ«éšè—è¡Œï¼‰")]
 	[SerializeField] private RectTransform rightFixedRoot;
 	[SerializeField] private RectTransform rightDataRoot;
 	[SerializeField] private TextMeshProUGUI[] rightFixedTexts = new TextMeshProUGUI[3];
 	[SerializeField] private TextMeshProUGUI[] rightDataTexts = new TextMeshProUGUI[3];
 
 #if UNITY_EDITOR
-	// ±à¼­Æ÷Ô¤ÀÀ£º»º´æÒ»¸öÁÙÊ±µÄ ItemDataReader ÒÔ±ãÔÚ±à¼­Ä£Ê½ÏÂÕ¹Ê¾
+	// ç¼–è¾‘å™¨é¢„è§ˆï¼šç¼“å­˜ä¸€ä¸ªä¸´æ—¶çš„ ItemDataReader ä»¥ä¾¿åœ¨ç¼–è¾‘æ¨¡å¼ä¸‹å±•ç¤º
 	private ItemDataReader editorPreviewReader;
 #endif
 
 	private void Awake()
 	{
-		// ×Ô¶¯²éÕÒ
+		// è‡ªåŠ¨æŸ¥æ‰¾
 		if (headerRoot == null) headerRoot = transform.Find("Header") as RectTransform;
 		if (itemIconRoot == null) itemIconRoot = transform.Find("ItemIcon") as RectTransform;
 		if (descriptionRoot == null) descriptionRoot = transform.Find("Description") as RectTransform;
@@ -47,7 +47,7 @@ public class CheckInterfacePanelController : MonoBehaviour
 			if (headerTMP != null) headerText = headerTMP;
 		}
 
-		// Header ¹Ø±Õ°´Å¥×Ô¶¯°ó¶¨
+		// Header å…³é—­æŒ‰é’®è‡ªåŠ¨ç»‘å®š
 		if (closeButton == null && headerRoot != null)
 		{
 			var btn = headerRoot.Find("Button");
@@ -117,20 +117,20 @@ public class CheckInterfacePanelController : MonoBehaviour
 	{
 		if (reader == null || reader.ItemData == null)
 		{
-			Debug.LogWarning("[CheckInterfacePanelController] ÎŞĞ§µÄ ItemDataReader");
+			Debug.LogWarning("[CheckInterfacePanelController] æ— æ•ˆçš„ ItemDataReader");
 			gameObject.SetActive(false);
 			return;
 		}
 
 		var data = reader.ItemData;
 
-		// Header: Ó¢ÎÄÀà±ğ + Ó¢ÎÄÈ«³Æ
+		// Header: è‹±æ–‡ç±»åˆ« + è‹±æ–‡å…¨ç§°
 		if (headerText != null)
 		{
 			headerText.text = $"{data.category}  {data.itemName}";
 		}
 
-		// Icon: ÏŞÖÆÔÚÃæ°å×î´ó³ß´çÄÚ£¬±£³ÖÖĞĞÄ£¬°´ÎïÆ·³ß´ç×öÊÊ¶ÈËõ·Å
+		// Icon: é™åˆ¶åœ¨é¢æ¿æœ€å¤§å°ºå¯¸å†…ï¼Œä¿æŒä¸­å¿ƒï¼ŒæŒ‰ç‰©å“å°ºå¯¸åšé€‚åº¦ç¼©æ”¾
 		if (itemIconImage != null)
 		{
 			itemIconImage.sprite = data.itemIcon;
@@ -138,16 +138,16 @@ public class CheckInterfacePanelController : MonoBehaviour
 		}
 		if (itemIconRect != null)
 		{
-			// ·Å´óÏÔÊ¾£¬µ«¿í¶È²»³¬¹ı800£¬¸ß¶È²»³¬¹ı500£¬±£³ÖÖĞĞÄÓëµÈ±È
+			// æ”¾å¤§æ˜¾ç¤ºï¼Œä½†å®½åº¦ä¸è¶…è¿‡800ï¼Œé«˜åº¦ä¸è¶…è¿‡500ï¼Œä¿æŒä¸­å¿ƒä¸ç­‰æ¯”
 			Vector2 target = new Vector2(800f, 500f);
 			itemIconRect.anchorMin = new Vector2(0.5f, 0.5f);
 			itemIconRect.anchorMax = new Vector2(0.5f, 0.5f);
 			itemIconRect.pivot = new Vector2(0.5f, 0.5f);
 			itemIconRect.anchoredPosition = new Vector2(0f, 100f);
-			itemIconRect.sizeDelta = target; // ²»³¬¹ı×î´ó£¬±£³ÖÖĞĞÄ
+			itemIconRect.sizeDelta = target; // ä¸è¶…è¿‡æœ€å¤§ï¼Œä¿æŒä¸­å¿ƒ
 		}
 
-		// LeftPattern: ±êÇ©¹Ì¶¨£¬Êı¾İÌî³ä£¨Category / Rarity / Size=W*H£©
+		// LeftPattern: æ ‡ç­¾å›ºå®šï¼Œæ•°æ®å¡«å……ï¼ˆCategory / Rarity / Size=W*Hï¼‰
 		SetTMP(leftFixedTexts, 0, "Category");
 		SetTMP(leftFixedTexts, 1, "Rarity");
 		SetTMP(leftFixedTexts, 2, "Size");
@@ -155,7 +155,7 @@ public class CheckInterfacePanelController : MonoBehaviour
 		SetTMP(leftDataTexts, 1, GetRarityEnglish(data.rarity));
 		SetTMP(leftDataTexts, 2, (data.width * data.height).ToString());
 
-		// RightPattern: ¸ù¾İÀà±ğÕ¹Ê¾/Òş²Ø 3 ĞĞ
+		// RightPattern: æ ¹æ®ç±»åˆ«å±•ç¤º/éšè— 3 è¡Œ
 		for (int i = 0; i < 3; i++)
 		{
 			SetActiveRightRow(i, false);
@@ -167,14 +167,14 @@ public class CheckInterfacePanelController : MonoBehaviour
 			case ItemCategory.Drink:
 			{
 				int row = 0;
-				// Ê¹ÓÃ´ÎÊı
+				// ä½¿ç”¨æ¬¡æ•°
 				SetRightRow(row++, "Uses", reader.currentUsageCount > 0 ? reader.currentUsageCount.ToString() + " uses" : "0 uses");
-				// ±¥Ê³¶È»Ö¸´
+				// é¥±é£Ÿåº¦æ¢å¤
 				if (reader.hungerRestore > 0)
 				{
 					SetRightRow(row++, "Hunger Restore", reader.hungerRestore + " hunger");
 				}
-				// Ê³Îï/ÒûË®Ã»ÓĞ×î´óÖÎÁÆÁ¿£¬Ìø¹ı
+				// é£Ÿç‰©/é¥®æ°´æ²¡æœ‰æœ€å¤§æ²»ç–—é‡ï¼Œè·³è¿‡
 				break;
 			}
 
@@ -186,24 +186,24 @@ public class CheckInterfacePanelController : MonoBehaviour
 				{
 					SetRightRow(row++, "Mental Restore", reader.mentalRestore + " mental");
 				}
-				// ÎŞ×î´óÖÎÁÆÁ¿
+				// æ— æœ€å¤§æ²»ç–—é‡
 				break;
 			}
 
 			case ItemCategory.Healing:
 			{
 				int row = 0;
-				// ÖÎÁÆÀàÍ¨³£²»Ê¹ÓÃÊ¹ÓÃ´ÎÊı£¬ÈôÓĞÔòÏÔÊ¾
+				// æ²»ç–—ç±»é€šå¸¸ä¸ä½¿ç”¨ä½¿ç”¨æ¬¡æ•°ï¼Œè‹¥æœ‰åˆ™æ˜¾ç¤º
 				if (reader.maxUsageCount > 0)
 				{
 					SetRightRow(row++, "Uses", reader.currentUsageCount + " uses");
 				}
-				// µ¥´ÎÖÎÁÆÁ¿
+				// å•æ¬¡æ²»ç–—é‡
 				if (reader.healPerUse > 0)
 				{
 					SetRightRow(row++, "Heal Per Use", reader.healPerUse + " HP");
 				}
-				// ×î´óÖÎÁÆÁ¿
+				// æœ€å¤§æ²»ç–—é‡
 				if (reader.maxHealAmount > 0)
 				{
 					SetRightRow(row++, "Max Heal", reader.maxHealAmount + " HP");
@@ -242,7 +242,7 @@ public class CheckInterfacePanelController : MonoBehaviour
 
 			default:
 			{
-				// ÆäËûÀà±ğ£ºÈôÎª¿É¶ÑµşÎïÆ·£¬ÏÔÊ¾¶ÑµşÊıÁ¿
+				// å…¶ä»–ç±»åˆ«ï¼šè‹¥ä¸ºå¯å †å ç‰©å“ï¼Œæ˜¾ç¤ºå †å æ•°é‡
 				if (data.IsStackable())
 				{
 					SetRightRow(0, "Max Stack", reader.maxStackAmount.ToString());
@@ -251,7 +251,7 @@ public class CheckInterfacePanelController : MonoBehaviour
 			}
 		}
 
-		// Left/Right ±êÇ©ÓëÊı¾İµÄ¿É¼ûĞÔÒÀ¾İÊÇ·ñÌî³ä½øĞĞÎ¬»¤
+		// Left/Right æ ‡ç­¾ä¸æ•°æ®çš„å¯è§æ€§ä¾æ®æ˜¯å¦å¡«å……è¿›è¡Œç»´æŠ¤
 		gameObject.SetActive(true);
 	}
 
@@ -274,13 +274,13 @@ public class CheckInterfacePanelController : MonoBehaviour
 
 #if UNITY_EDITOR
 	/// <summary>
-	/// ±à¼­Ä£Ê½ÏÂÖ±½ÓÓÃ ScriptableObject Êı¾İÇı¶¯ÏÔÊ¾
+	/// ç¼–è¾‘æ¨¡å¼ä¸‹ç›´æ¥ç”¨ ScriptableObject æ•°æ®é©±åŠ¨æ˜¾ç¤º
 	/// </summary>
 	public void ShowForItem(ItemDataSO data)
 	{
 		if (data == null)
 		{
-			Debug.LogWarning("[CheckInterfacePanelController] ItemDataSO Îª¿Õ");
+			Debug.LogWarning("[CheckInterfacePanelController] ItemDataSO ä¸ºç©º");
 			return;
 		}
 
@@ -291,7 +291,7 @@ public class CheckInterfacePanelController : MonoBehaviour
 			editorPreviewReader = go.AddComponent<ItemDataReader>();
 		}
 
-		// Ö±½ÓÉèÖÃÊı¾İ²¢Ë¢ĞÂ
+		// ç›´æ¥è®¾ç½®æ•°æ®å¹¶åˆ·æ–°
 		editorPreviewReader.SetItemData(data);
 		ShowForItem(editorPreviewReader);
 	}

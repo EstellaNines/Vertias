@@ -291,6 +291,27 @@ namespace InventorySystem.Editor
                     EditorGUILayout.PropertyField(serializedObject.FindProperty("durability"), new GUIContent("耐久度"));
                     EditorGUILayout.PropertyField(serializedObject.FindProperty("ammunitionType"), new GUIContent("弹药类型"));
 
+                    // 展示可用弹药列表
+                    var ammoOptionsProp = serializedObject.FindProperty("ammunitionOptions");
+                    if (ammoOptionsProp != null)
+                    {
+                        EditorGUILayout.LabelField("可用弹药（来自JSON/Ammunition）", EditorStyles.miniBoldLabel);
+                        EditorGUI.indentLevel++;
+                        if (ammoOptionsProp.isArray)
+                        {
+                            for (int i = 0; i < ammoOptionsProp.arraySize; i++)
+                            {
+                                var elem = ammoOptionsProp.GetArrayElementAtIndex(i);
+                                EditorGUILayout.LabelField($"- {elem.stringValue}");
+                            }
+                        }
+                        else
+                        {
+                            EditorGUILayout.HelpBox("未检测到可用弹药数组", MessageType.Info);
+                        }
+                        EditorGUI.indentLevel--;
+                    }
+
                     // 武器数据驱动参数（来自 JSON -> SO 的 weapon 节点）
                     EditorGUILayout.Space(5);
                     showWeaponSpec = EditorGUILayout.Foldout(showWeaponSpec, "武器扩展（数据驱动）", true);
