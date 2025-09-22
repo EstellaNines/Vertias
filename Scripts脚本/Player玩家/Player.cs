@@ -76,6 +76,9 @@ public class Player : MonoBehaviour
     [HideInInspector] public bool isCrouching = false; // 潜行状态标志位
     [HideInInspector] public SpriteRenderer spriteRenderer; // 精灵渲染器
     [HideInInspector] public Color originalColor; // 原始颜色
+    // 为了兼容多渲染器角色（身体由多个部位组成），在潜行时批量着色
+    [HideInInspector] public List<SpriteRenderer> bodySpriteRenderers = new List<SpriteRenderer>();
+    [HideInInspector] public List<Color> bodyOriginalColors = new List<Color>();
 
     // --- 拾取 ---
     [Header("拾取参数")]
@@ -112,11 +115,37 @@ public class Player : MonoBehaviour
         Hand = transform.Find("Hand"); // 查找手部位置
         playerCamera = Camera.main; // 获取主摄像机
 
-        // 获取SpriteRenderer组件并保存原始颜色
+        // 获取SpriteRenderer组件并保存原始颜色（兼容主渲染器 + 多子渲染器）
         spriteRenderer = GetComponent<SpriteRenderer>();
+        if (spriteRenderer == null)
+        {
+            // 若本体没有，则尝试在子物体查找
+            spriteRenderer = GetComponentInChildren<SpriteRenderer>();
+            if (spriteRenderer == null)
+            {
+                Debug.LogWarning("Player未找到SpriteRenderer组件，请检查玩家模型层级！");
+            }
+        }
         if (spriteRenderer != null)
         {
             originalColor = spriteRenderer.color;
+        }
+
+        // 收集身体相关的全部SpriteRenderer（排除武器/手部层级，避免误染武器）
+        var allRenderers = GetComponentsInChildren<SpriteRenderer>(true);
+        if (allRenderers != null)
+        {
+            foreach (var sr in allRenderers)
+            {
+                if (sr == null) continue;
+                // 若有手部节点，排除其子级（通常武器/手部会在此层级）
+                if (Hand != null && sr.transform.IsChildOf(Hand))
+                {
+                    continue;
+                }
+                bodySpriteRenderers.Add(sr);
+                bodyOriginalColors.Add(sr.color);
+            }
         }
 
 
@@ -663,25 +692,11 @@ public class Player : MonoBehaviour
         Debug.Log($"潜行状态: {(isCrouching ? "开启" : "关闭")}");
     }
 
-    // 应用潜行视觉效果
-    public void ApplyCrouchVisual()
-    {
-        if (spriteRenderer != null)
-        {
-            Color c = crouchColor;
-            c.a = crouchAlpha;
-            spriteRenderer.color = c;
-        }
-    }
+    // 已废弃：潜行视觉变色（保留空实现以兼容旧调用）
+    public void ApplyCrouchVisual() { }
 
-    // 恢复原始视觉效果
-    public void RestoreOriginalVisual()
-    {
-        if (spriteRenderer != null)
-        {
-            spriteRenderer.color = originalColor;
-        }
-    }
+    // 已废弃：恢复原始视觉效果（保留空实现以兼容旧调用）
+    public void RestoreOriginalVisual() { }
 
     // 外部访问潜行状态
     public bool IsCrouching()

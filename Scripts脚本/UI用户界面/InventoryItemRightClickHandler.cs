@@ -36,7 +36,14 @@ public class InventoryItemRightClickHandler : MonoBehaviour, IPointerClickHandle
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        if (eventData != null && eventData.button == PointerEventData.InputButton.Right)
+		// 左键双击：打开检查界面
+		if (eventData != null && eventData.button == PointerEventData.InputButton.Left && eventData.clickCount >= 2)
+		{
+			OpenInspectPanel();
+			return;
+		}
+
+		if (eventData != null && eventData.button == PointerEventData.InputButton.Right)
         {
             if (contextMenuService == null || itemRect == null)
             {
@@ -55,6 +62,8 @@ public class InventoryItemRightClickHandler : MonoBehaviour, IPointerClickHandle
         bool hasReader = targetItem != null && targetItem.ItemDataReader != null && targetItem.ItemDataReader.ItemData != null;
         bool isHealing = hasReader && targetItem.ItemDataReader.ItemData.category == ItemCategory.Healing;
         bool isFoodOrDrink = hasReader && (targetItem.ItemDataReader.ItemData.category == ItemCategory.Food || targetItem.ItemDataReader.ItemData.category == ItemCategory.Drink);
+        bool isSedative = hasReader && targetItem.ItemDataReader.ItemData.category == ItemCategory.Sedative;
+        bool isEquipCategory = hasReader && IsEquipCategory(targetItem.ItemDataReader.ItemData.category);
 
         // 使用：治疗类物品执行回血逻辑，其他物品仅占位（可按需扩展）
         if (isHealing)
@@ -67,11 +76,21 @@ public class InventoryItemRightClickHandler : MonoBehaviour, IPointerClickHandle
             bool canUse = CanUseFoodOrDrink();
             list.Add(new MenuAction("use", "Use", () => UseFoodOrDrink(), canUse));
         }
+        else if (isSedative)
+        {
+            bool canUse = CanUseSedative();
+            list.Add(new MenuAction("use", "Use", () => UseSedative(), canUse));
+        }
+        else if (isEquipCategory)
+        {
+            bool canUse = CanAutoEquipSelectedItem();
+            list.Add(new MenuAction("use", "Use", () => AutoEquipSelectedItem(), canUse));
+        }
         else
         {
             list.Add(new MenuAction("use", "Use", () => Debug.Log($"Use {GetDisplayName()}")));
         }
-        list.Add(new MenuAction("inspect", "Inspect", () => Debug.Log($"Inspect {GetDisplayName()}")));
+        list.Add(new MenuAction("inspect", "Inspect", () => OpenInspectPanel()));
         list.Add(new MenuAction("discard", "Discard", () => DiscardSelectedItem()));
         return list;
     }
@@ -105,6 +124,91 @@ public class InventoryItemRightClickHandler : MonoBehaviour, IPointerClickHandle
             }
         }
         Destroy(targetItem.gameObject);
+    }
+
+    [Header("检查面板预制体设置")]
+    [SerializeField] private CheckInterfacePanelController checkPanelPrefab;
+    [SerializeField] private RectTransform checkPanelParent; // 若为空，将放到当前 Canvas 根下
+
+    private void OpenInspectPanel()
+    {
+        if (targetItem == null || targetItem.ItemDataReader == null)
+        {
+            Debug.LogWarning("InventoryItemRightClickHandler: 无法检查，缺少 ItemDataReader。");
+            return;
+        }
+
+        CheckInterfacePanelController panel = null;
+
+        // 选择父节点：优先使用配置的父节点；其次使用最近的 BackpackPanelController；最后使用最近 Canvas
+        RectTransform parentForPanel = ResolvePanelParent();
+
+        // 1) 优先查找激活/未激活的已存在实例
+        panel = FindObjectOfType<CheckInterfacePanelController>(true);
+
+        // 2) 不存在则尝试通过预制体实例化
+        if (panel == null)
+        {
+            if (checkPanelPrefab != null)
+            {
+                var instance = Instantiate(checkPanelPrefab, parentForPanel);
+                panel = instance.GetComponent<CheckInterfacePanelController>();
+                if (panel == null)
+                {
+                    Debug.LogError("InventoryItemRightClickHandler: 预制体缺少 CheckInterfacePanelController 组件。");
+                    Destroy(instance.gameObject);
+                    return;
+                }
+                // 新实例默认只隐藏关闭
+                panel.SetDestroyOnClose(false);
+            }
+            else
+            {
+                Debug.LogWarning("InventoryItemRightClickHandler: 未配置检查面板预制体，且场景中也未找到实例。");
+                return;
+            }
+        }
+
+        // 若已有实例但父节点不匹配，则重设父节点
+        var panelRT = panel.GetComponent<RectTransform>();
+        if (panelRT != null && parentForPanel != null && panelRT.parent != parentForPanel)
+        {
+            panelRT.SetParent(parentForPanel, false);
+        }
+
+        // 居中到父容器中心
+        CenterPanel(panelRT);
+
+        panel.gameObject.SetActive(true);
+        panel.ShowForItem(targetItem.ItemDataReader);
+    }
+
+    private RectTransform ResolvePanelParent()
+    {
+        if (checkPanelParent != null) return checkPanelParent;
+
+        // 优先找背包面板控制器作为父节点（整个背包板块）
+        var backpack = GetComponentInParent<BackpackPanelController>(true);
+        if (backpack != null)
+        {
+            var rt = backpack.transform as RectTransform;
+            if (rt != null) return rt;
+        }
+
+        // 退化：最近 Canvas
+        var canvas = GetComponentInParent<Canvas>();
+        return canvas != null ? canvas.transform as RectTransform : null;
+    }
+
+    private void CenterPanel(RectTransform panelRT)
+    {
+        if (panelRT == null) return;
+        panelRT.anchorMin = new Vector2(0.5f, 0.5f);
+        panelRT.anchorMax = new Vector2(0.5f, 0.5f);
+        panelRT.pivot = new Vector2(0.5f, 0.5f);
+        panelRT.anchoredPosition = Vector2.zero;
+        panelRT.localScale = Vector3.one;
+        panelRT.SetAsLastSibling();
     }
 
     private bool CanUseHealing()
@@ -192,6 +296,143 @@ public class InventoryItemRightClickHandler : MonoBehaviour, IPointerClickHandle
                 }
             }
             Destroy(targetItem.gameObject);
+        }
+    }
+
+    private bool CanUseSedative()
+    {
+        if (playerStats == null || targetItem == null || targetItem.ItemDataReader == null || targetItem.ItemDataReader.ItemData == null)
+            return false;
+
+        var data = targetItem.ItemDataReader.ItemData;
+        if (data.category != ItemCategory.Sedative) return false;
+
+        bool hasUsage = targetItem.ItemDataReader.currentUsageCount > 0;
+        bool needMental = playerStats.currentMental < playerStats.maxMental;
+        bool hasRestore = targetItem.ItemDataReader.mentalRestore > 0;
+        return hasUsage && needMental && hasRestore;
+    }
+
+    private void UseSedative()
+    {
+        if (!CanUseSedative()) return;
+
+        var reader = targetItem.ItemDataReader;
+        float missing = Mathf.Max(0f, playerStats.maxMental - playerStats.currentMental);
+        if (missing <= 0f) return;
+
+        int perUse = Mathf.Max(0, reader.mentalRestore);
+        int uses = Mathf.Max(0, reader.currentUsageCount);
+        if (perUse <= 0 || uses <= 0) return;
+
+        float add = Mathf.Min(perUse, missing);
+        playerStats.SetMental(playerStats.currentMental + add);
+
+        reader.currentUsageCount = Mathf.Max(0, reader.currentUsageCount - 1);
+        reader.UpdateUI();
+        reader.SaveRuntimeToES3();
+
+        if (reader.currentUsageCount <= 0)
+        {
+            // 用尽后销毁
+            if (targetItem.OnGridReference != null)
+            {
+                Vector2Int pos = targetItem.OnGridPosition;
+                var removed = targetItem.OnGridReference.PickUpItem(pos.x, pos.y);
+                if (removed != null)
+                {
+                    Destroy(removed.gameObject);
+                    return;
+                }
+            }
+            Destroy(targetItem.gameObject);
+        }
+    }
+
+    private bool IsEquipCategory(ItemCategory category)
+    {
+        return category == ItemCategory.Helmet ||
+            category == ItemCategory.Armor ||
+            category == ItemCategory.TacticalRig ||
+            category == ItemCategory.Backpack ||
+            category == ItemCategory.Weapon;
+    }
+
+    private bool CanAutoEquipSelectedItem()
+    {
+        if (targetItem == null || targetItem.ItemDataReader == null || targetItem.ItemDataReader.ItemData == null) return false;
+        var reader = targetItem.ItemDataReader;
+        var slot = FindBestEquipmentSlotFor(reader);
+        return slot != null && slot.CanAcceptItem(reader);
+    }
+
+    private void AutoEquipSelectedItem()
+    {
+        if (targetItem == null || targetItem.ItemDataReader == null) return;
+        var reader = targetItem.ItemDataReader;
+        var slot = FindBestEquipmentSlotFor(reader);
+        if (slot == null)
+        {
+            Debug.LogWarning("InventoryItemRightClickHandler: 未找到可用的装备槽。");
+            return;
+        }
+        bool ok = slot.EquipItem(reader);
+        if (!ok)
+        {
+            Debug.LogWarning($"InventoryItemRightClickHandler: 装备 {reader.ItemData.itemName} 失败，槽位不兼容或不允许替换。");
+        }
+    }
+
+    private EquipmentSlot FindBestEquipmentSlotFor(ItemDataReader reader)
+    {
+        if (reader == null || reader.ItemData == null) return null;
+
+        var allSlots = FindObjectsOfType<EquipmentSlot>(true);
+        if (allSlots == null || allSlots.Length == 0) return null;
+
+        ItemCategory cat = reader.ItemData.category;
+
+        // 武器：优先主武器，其次副武器
+        if (cat == ItemCategory.Weapon)
+        {
+            EquipmentSlot primary = null;
+            EquipmentSlot secondary = null;
+            foreach (var s in allSlots)
+            {
+                if (s == null || s.config == null) continue;
+                if (s.config.slotType == EquipmentSlotType.PrimaryWeapon) primary = s;
+                else if (s.config.slotType == EquipmentSlotType.SecondaryWeapon) secondary = s;
+            }
+            if (primary != null && primary.CanAcceptItem(reader)) return primary;
+            if (secondary != null && secondary.CanAcceptItem(reader)) return secondary;
+            // 如果都不接受，尝试允许替换的优先（返回任一存在的槽）
+            return primary ?? secondary;
+        }
+
+        EquipmentSlotType targetType = MapCategoryToSlotType(cat);
+        if (targetType == 0) return null;
+
+        EquipmentSlot found = null;
+        foreach (var s in allSlots)
+        {
+            if (s == null || s.config == null) continue;
+            if (s.config.slotType != targetType) continue;
+            if (s.CanAcceptItem(reader)) return s;
+            // 记录一个候选（即使当前不接受，稍后可能用于替换失败提示）
+            found = s;
+        }
+        return found;
+    }
+
+    private EquipmentSlotType MapCategoryToSlotType(ItemCategory cat)
+    {
+        switch (cat)
+        {
+            case ItemCategory.Helmet: return EquipmentSlotType.Helmet;
+            case ItemCategory.Armor: return EquipmentSlotType.Armor;
+            case ItemCategory.TacticalRig: return EquipmentSlotType.TacticalRig;
+            case ItemCategory.Backpack: return EquipmentSlotType.Backpack;
+            default: return 0;
         }
     }
 }

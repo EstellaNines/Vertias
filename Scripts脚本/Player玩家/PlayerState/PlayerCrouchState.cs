@@ -15,23 +15,22 @@ public class PlayerCrouchState : IState
     
     public void OnEnter()
     {
-        
+        // 进入潜行时设置为对应的潜行动画
         if (player.isWeaponInHand)
         {
-            player.AIMTOR.Play("Shoot_Walk"); 
+            player.AIMTOR.Play("Shoot_Crouch");
         }
         else
         {
-            player.AIMTOR.Play("Walk"); 
+            player.AIMTOR.Play("Crouch");
         }
-        
+
         Debug.Log("进入潜行状态");
     }
 
     public void OnExit()
     {
-        // 恢复原始视觉效果
-        player.RestoreOriginalVisual();
+        // 不再处理颜色恢复，退出时仅记录日志
         Debug.Log("退出潜行状态");
     }
 
@@ -47,9 +46,20 @@ public class PlayerCrouchState : IState
     {
         // 基础瞄准功能（视角和瞄准方向更新）
         player.UpdateBasicAiming();
-        // 应用潜行视觉效果
-        player.ApplyCrouchVisual();
         
+        // 行走期间保持播放潜行动画（有武器播放Shoot_Crouch，否则播放Crouch）
+        if (player.InputDirection != Vector2.zero)
+        {
+            if (player.isWeaponInHand)
+            {
+                player.AIMTOR.Play("Shoot_Crouch");
+            }
+            else
+            {
+                player.AIMTOR.Play("Crouch");
+            }
+        }
+
         // 潜行状态下的特殊逻辑
         if (player.isCrouching)
         {
