@@ -9,8 +9,9 @@ using System; // 引入System命名空间以支持反射功能
 /// </summary>
 public class MapChangeTrigger : BaseContainerTrigger
 {
-    [Header("背包系统")]
-    public BackpackState backpackState; // 背包状态管理器引用
+    [Header("背包系统（自动查找，无需手动引用）")]
+    public BackpackState backpackState; // 可为空：优先通过管理器/场景自动查找
+    private TopNavigationTransform topNav; // 顶部导航（用于直接切换到地图面板）
 
     [Header("地图面板设置")]
     [SerializeField] private int mapPanelIndex = 2; // 地图面板索引2（BackpackPanel=0, MissionPanel=1, MapPanelUI=2）
@@ -28,13 +29,29 @@ public class MapChangeTrigger : BaseContainerTrigger
     /// </summary>
     protected override void OnChildStart()
     {
-        // 如果没有手动设置BackpackState，尝试自动查找
+        // 自动获取 BackpackState（如存在）
         if (backpackState == null)
         {
-            backpackState = FindObjectOfType<BackpackState>();
-            if (backpackState == null)
+            var systemMgr = BackpackSystemManager.Instance;
+            if (systemMgr != null) backpackState = systemMgr.GetBackpackState();
+            if (backpackState == null) backpackState = FindObjectOfType<BackpackState>(true);
+        }
+
+        // 自动获取 TopNavigationTransform（用于直接打开到指定面板）
+        if (topNav == null)
+        {
+            if (backpackState != null && backpackState.topNavigationTransform != null)
             {
-                Debug.LogWarning("MapChangeTrigger: 未找到BackpackState组件！请确保场景中存在BackpackState脚本。");
+                topNav = backpackState.topNavigationTransform;
+            }
+            else
+            {
+                topNav = FindObjectOfType<TopNavigationTransform>(true);
+            }
+
+            if (topNav == null && debugMode)
+            {
+                Debug.LogWarning("MapChangeTrigger: 未找到 TopNavigationTransform，无法直接切换地图面板。");
             }
         }
 
@@ -97,7 +114,7 @@ public class MapChangeTrigger : BaseContainerTrigger
             return false;
         }
 
-        bool isBackpackOpen = backpackState.IsBackpackOpen();
+        bool isBackpackOpen = IsBackpackUIOpen();
 
         if (debugMode)
         {
@@ -116,13 +133,13 @@ public class MapChangeTrigger : BaseContainerTrigger
     /// </summary>
     protected override void ToggleContainer()
     {
-        if (backpackState == null || backpackState.topNavigationTransform == null)
+        if (topNav == null)
         {
-            Debug.LogError("MapChangeTrigger: BackpackState或TopNavigationTransform组件为空，无法切换地图面板！");
+            Debug.LogError("MapChangeTrigger: 未找到 TopNavigationTransform，无法切换地图面板！");
             return;
         }
 
-        bool isBackpackOpen = backpackState.IsBackpackOpen();
+        bool isBackpackOpen = IsBackpackUIOpen();
 
         if (debugMode)
         {
@@ -132,7 +149,7 @@ public class MapChangeTrigger : BaseContainerTrigger
         if (!isBackpackOpen)
         {
             // 背包未打开，直接打开到地图面板
-            backpackState.topNavigationTransform.OpenToSpecificPanel(mapPanelIndex);
+            topNav.OpenToSpecificPanel(mapPanelIndex);
 
             if (debugMode)
             {
@@ -142,7 +159,7 @@ public class MapChangeTrigger : BaseContainerTrigger
         else
         {
             // 背包已打开，关闭背包
-            backpackState.ForceCloseBackpack();
+            ForceCloseBackpackUI();
 
             if (debugMode)
             {
@@ -156,15 +173,7 @@ public class MapChangeTrigger : BaseContainerTrigger
     /// </summary>
     protected override void ForceCloseContainer()
     {
-        if (backpackState != null)
-        {
-            backpackState.ForceCloseBackpack();
-
-            if (debugMode)
-            {
-                Debug.Log("MapChangeTrigger: 强制关闭背包");
-            }
-        }
+        ForceCloseBackpackUI();
     }
 
     /// <summary>
@@ -328,6 +337,14 @@ public class MapChangeTrigger : BaseContainerTrigger
 
         // 显示TMP文本
         ShowTMPText();
+
+		// 进入范围时订阅 Operate（F）并确保启用UI输入
+		if (playerInputController != null)
+		{
+			playerInputController.onOperate -= HandleOperate; // 先解绑再绑定，避免重复
+			playerInputController.onOperate += HandleOperate;
+			playerInputController.EnabledUIInput();
+		}
     }
 
     /// <summary>
@@ -340,6 +357,13 @@ public class MapChangeTrigger : BaseContainerTrigger
 
         // 隐藏TMP文本
         HideTMPText();
+
+		// 离开范围时解绑 Operate 并恢复输入映射
+		if (playerInputController != null)
+		{
+			playerInputController.onOperate -= HandleOperate;
+			playerInputController.EnableAllInput();
+		}
     }
 
     /// <summary>
@@ -378,27 +402,52 @@ public class MapChangeTrigger : BaseContainerTrigger
     /// <summary>
     /// Update方法，处理F键输入和更新TMP文本位置
     /// </summary>
-    private void Update()
+	private void Update()
     {
-        // 检查是否按下了F键
-        if (Input.GetKeyDown(KeyCode.F))
-        {
-            // 如果玩家在范围内，或者地图面板已经打开，都可以使用F键
-            if (playerInRange || IsContainerOpen())
-            {
-                ToggleContainer();
-                if (debugMode)
-                {
-                    Debug.Log("MapChangeTrigger: 通过F键切换地图面板");
-                }
-            }
-        }
-        
         // 如果TMP文本处于激活状态且玩家在触发器范围内，持续更新文本位置
         if (tmpText != null && tmpText.gameObject.activeInHierarchy && playerInRange)
         {
             UpdateTMPTextPosition();
         }
+    }
+
+	// Operate（F）事件处理：仅在玩家位于触发范围内时响应
+	private void HandleOperate()
+	{
+		if (!playerInRange) return;
+		ToggleContainer();
+		if (debugMode)
+		{
+			Debug.Log("MapChangeTrigger: 通过 Operate(F) 切换地图面板");
+		}
+	}
+
+    /// <summary>
+    /// 判断背包UI是否已打开（基于画布名称）
+    /// </summary>
+    private bool IsBackpackUIOpen()
+    {
+        // 优先使用 BackpackState
+        if (backpackState != null) return backpackState.IsBackpackOpen();
+
+        // 回退：通过场景中的名为 "BackpackCanvas" 的画布激活状态判断
+        var canvasGO = GameObject.Find("BackpackCanvas");
+        return canvasGO != null && canvasGO.activeInHierarchy;
+    }
+
+    /// <summary>
+    /// 强制关闭背包UI（兼容无BackpackState场景）
+    /// </summary>
+    private void ForceCloseBackpackUI()
+    {
+        if (backpackState != null)
+        {
+            backpackState.ForceCloseBackpack();
+            return;
+        }
+
+        var canvasGO = GameObject.Find("BackpackCanvas");
+        if (canvasGO != null) canvasGO.SetActive(false);
     }
 
     /// <summary>

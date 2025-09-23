@@ -63,15 +63,26 @@ public abstract class BaseContainerTrigger : MonoBehaviour
             tmpText.gameObject.SetActive(false);
         }
 
-        // 如果没有手动设置PlayerInputController，尝试自动查找
-        if (playerInputController == null)
-        {
-            playerInputController = FindObjectOfType<PlayerInputController>();
-            if (playerInputController == null)
-            {
-                Debug.LogWarning("未找到PlayerInputController组件！请确保场景中存在PlayerInputController脚本。");
-            }
-        }
+		// 如果没有手动设置PlayerInputController，尝试自动查找（兼容 ScriptableObject 实例）
+		if (playerInputController == null)
+		{
+			// 先尝试场景中的组件（极少数情况下可能挂在物体上）
+			playerInputController = FindObjectOfType<PlayerInputController>();
+			if (playerInputController == null)
+			{
+				// 回退：查找所有已加载的 ScriptableObject 实例
+				var all = Resources.FindObjectsOfTypeAll<PlayerInputController>();
+				if (all != null && all.Length > 0)
+				{
+					playerInputController = all[0];
+				}
+			}
+
+			if (playerInputController == null)
+			{
+				Debug.LogWarning("未找到 PlayerInputController 实例！请在任一资源中创建并在相关系统中引用。");
+			}
+		}
 
         // 调用子类的初始化方法
         OnChildStart();
