@@ -1,26 +1,26 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-// ½«ÆÁÄ»¿Õ¼ä UI ¸úËæµ½Ò»¸öÊÀ½ç×ø±ê£¨ÈçÍæ¼ÒÍ·¶¥£©
-// ÓÃ·¨£º¹ÒÔÚÆÁÄ»¿Õ¼ä Canvas ÏÂµÄÄ³¸ö UI ½Úµã£¨Èç PlayerUI/Reload£©£¬
-// ÔÚ Inspector °ó¶¨ target£¨Íæ¼Ò Transform£©Óë offset£¨Í·¶¥Æ«ÒÆ£©¡£
+// å°†å±å¹•ç©ºé—´ UI è·Ÿéšåˆ°ä¸€ä¸ªä¸–ç•Œåæ ‡ï¼ˆå¦‚ç©å®¶å¤´é¡¶ï¼‰
+// ç”¨æ³•ï¼šæŒ‚åœ¨å±å¹•ç©ºé—´ Canvas ä¸‹çš„æŸä¸ª UI èŠ‚ç‚¹ï¼ˆå¦‚ PlayerUI/Reloadï¼‰ï¼Œ
+// åœ¨ Inspector ç»‘å®š targetï¼ˆç©å®¶ Transformï¼‰ä¸ offsetï¼ˆå¤´é¡¶åç§»ï¼‰ã€‚
 public class UIFollowWorldTarget : MonoBehaviour
 {
-    [Header("×Ô¶¯°ó¶¨")]
+    [Header("è‡ªåŠ¨ç»‘å®š")]
     public bool autoFindTarget = true;
-    public string playerTag = "Player";   // ÓÅÏÈ°´Tag²éÕÒ
-    public string targetChildPath = "";    // ÀıÈç "HeadAnchor"£¬Áô¿ÕÊ¹ÓÃÍæ¼Ò¸ù
-    public bool rebindOnEnable = true;      // ÖØĞÂÆôÓÃÊ±ÖØÊÔ°ó¶¨
+    public string playerTag = "Player";   // ä¼˜å…ˆæŒ‰TagæŸ¥æ‰¾
+    public string targetChildPath = "";    // ä¾‹å¦‚ "HeadAnchor"ï¼Œç•™ç©ºä½¿ç”¨ç©å®¶æ ¹
+    public bool rebindOnEnable = true;      // é‡æ–°å¯ç”¨æ—¶é‡è¯•ç»‘å®š
 
-    [Header("¸úËæÄ¿±êÓëÆ«ÒÆ")]
+    [Header("è·Ÿéšç›®æ ‡ä¸åç§»")]
     public Transform target;
-    public Vector3 worldOffset = new Vector3(0f, 1.8f, 0f); // Í·¶¥Æ«ÒÆ
+    public Vector3 worldOffset = new Vector3(0f, 1.8f, 0f); // å¤´é¡¶åç§»
 
-    [Header("Ïà»úÓë Canvas£¨¿ÉÑ¡£©")]
-    public Camera targetCamera;       // Èô²»Éè£¬×Ô¶¯È¡ Camera.main
-    public Canvas rootCanvas;         // Èô²»Éè£¬×Ô¶¯ÏòÉÏ²éÕÒ
+    [Header("ç›¸æœºä¸ Canvasï¼ˆå¯é€‰ï¼‰")]
+    public Camera targetCamera;       // è‹¥ä¸è®¾ï¼Œè‡ªåŠ¨å– Camera.main
+    public Canvas rootCanvas;         // è‹¥ä¸è®¾ï¼Œè‡ªåŠ¨å‘ä¸ŠæŸ¥æ‰¾
 
-    [Header("ÆÁÄ»±ß½ç²Ã¼ô")]
+    [Header("å±å¹•è¾¹ç•Œè£å‰ª")]
     public bool clampToScreen = true;
     public Vector2 padding = new Vector2(10f, 10f);
 
@@ -63,14 +63,14 @@ public class UIFollowWorldTarget : MonoBehaviour
 
         if (rootCanvas == null || rootCanvas.renderMode == RenderMode.WorldSpace)
         {
-            // ¸Ã½Å±¾ÓÃÓÚ Screen Space Canvas£¬ÈôÎª WorldSpace ÔòÎŞĞè´Ë½Å±¾
+            // è¯¥è„šæœ¬ç”¨äº Screen Space Canvasï¼Œè‹¥ä¸º WorldSpace åˆ™æ— éœ€æ­¤è„šæœ¬
             return;
         }
 
         Vector3 worldPos = target.position + worldOffset;
         Vector3 screenPos = targetCamera.WorldToScreenPoint(worldPos);
 
-        // ²»¿É¼ûÊ±Òş²Ø£¨¿É°´Ğè¹Ø±Õ£©
+        // ä¸å¯è§æ—¶éšè—ï¼ˆå¯æŒ‰éœ€å…³é—­ï¼‰
         bool behindCamera = screenPos.z < 0f;
         if (behindCamera)
         {
@@ -114,7 +114,7 @@ public class UIFollowWorldTarget : MonoBehaviour
 
         GameObject go = null;
 
-        // 1) ÓÅÏÈ£º°´Tag²éÕÒ
+        // 1) ä¼˜å…ˆï¼šæŒ‰TagæŸ¥æ‰¾
         if (!string.IsNullOrEmpty(playerTag))
         {
             try
@@ -123,11 +123,11 @@ public class UIFollowWorldTarget : MonoBehaviour
             }
             catch
             {
-                // Èô¹¤³ÌÎ´¶¨Òå¸ÃTag£¬ºöÂÔÒì³£
+                // è‹¥å·¥ç¨‹æœªå®šä¹‰è¯¥Tagï¼Œå¿½ç•¥å¼‚å¸¸
             }
         }
 
-        // 2) ¶µµ×£º°´Ãû³Æ°üº¬"Player"²éÕÒ
+        // 2) å…œåº•ï¼šæŒ‰åç§°åŒ…å«"Player"æŸ¥æ‰¾
         if (go == null)
         {
             Transform[] all = GameObject.FindObjectsOfType<Transform>();

@@ -20,6 +20,11 @@ namespace InventorySystem.SpawnSystem.Editor
         private bool showBasicInfo = true;
         private bool showItemTemplates = true;
         private bool showAdvancedSettings = false;
+        private bool showVisualPreview = true;
+        private int previewMaxWidthPixels = 760; // 预览区域最大宽度（自适应Inspector宽度）
+        private float cellSize = 48f;            // 单格像素
+        private float itemMargin = 4f;           // 物品外边距
+        private Vector2 previewScroll;
         
         private void OnEnable()
         {
@@ -78,6 +83,21 @@ namespace InventorySystem.SpawnSystem.Editor
                 EditorGUI.indentLevel--;
             }
             
+            EditorGUILayout.Space();
+
+            // 可视化物品网格预览（与随机生成风格一致：网格 + 物品位置/尺寸）
+            showVisualPreview = EditorGUILayout.Foldout(showVisualPreview, "可视化网格预览", true);
+            if (showVisualPreview)
+            {
+                EditorGUI.indentLevel++;
+                Vector2Int gridSize = PreviewGridRenderer.DefaultGridSize;
+                Rect previewRect = GUILayoutUtility.GetRect(gridSize.x * 32f + 8f, gridSize.y * 32f + 8f);
+
+                var items = GenerateFixedPreviewItems(config, gridSize);
+                PreviewGridRenderer.RenderPreviewGrid(previewRect, gridSize, items, true, false);
+                EditorGUI.indentLevel--;
+            }
+
             EditorGUILayout.Space();
             
             // 高级设置
@@ -287,6 +307,261 @@ namespace InventorySystem.SpawnSystem.Editor
             template.enableDebugLog = EditorGUILayout.Toggle("启用调试日志", template.enableDebugLog);
             
             EditorGUI.indentLevel--;
+        }
+
+        /// <summary>
+        /// 可视化预览：将 fixedItems 以网格形式展示物品ICON与背景
+        /// </summary>
+        private void DrawVisualPreview(FixedItemSpawnConfig config)
+        {
+            if (config.fixedItems == null || config.fixedItems.Length == 0)
+            {
+                EditorGUILayout.HelpBox("无固定物品。请在上方添加。", MessageType.Info);
+                return;
+            }
+
+            // 1) 计算网格边界（根据精确位置或区域）以避免大面积空白
+            int minX = int.MaxValue, minY = int.MaxValue;
+            int maxX = int.MinValue, maxY = int.MinValue;
+
+            System.Action<int,int> expandByCell = (gx, gy) =>
+            {
+                if (gx < minX) minX = gx;
+                if (gy < minY) minY = gy;
+                if (gx > maxX) maxX = gx;
+                if (gy > maxY) maxY = gy;
+            };
+
+            foreach (var t in config.fixedItems)
+            {
+                if (t == null) continue;
+                int w = t.itemData != null ? Mathf.Max(1, t.itemData.width) : 1;
+                int h = t.itemData != null ? Mathf.Max(1, t.itemData.height) : 1;
+
+                switch (t.placementType)
+                {
+                    case PlacementType.Exact:
+                        {
+                            for (int x = 0; x < w; x++)
+                                for (int y = 0; y < h; y++)
+                                    expandByCell(t.exactPosition.x + x, t.exactPosition.y + y);
+                            break;
+                        }
+                    case PlacementType.AreaConstrained:
+                        {
+                            var r = t.constrainedArea;
+                            expandByCell(r.xMin, r.yMin);
+                            expandByCell(r.xMax, r.yMax);
+                            break;
+                        }
+                    case PlacementType.Priority:
+                        {
+                            var r = t.preferredArea;
+                            expandByCell(r.xMin, r.yMin);
+                            expandByCell(r.xMax, r.yMax);
+                            break;
+                        }
+                    default:
+                        {
+                            // 未指定位置的，先放入一个临时条带区域
+                            // 简单地按顺序水平排列占位
+                            int index = System.Array.IndexOf(config.fixedItems, t);
+                            int gx = index * (w + 1);
+                            int gy = 0;
+                            for (int x = 0; x < w; x++)
+                                for (int y = 0; y < h; y++)
+                                    expandByCell(gx + x, gy + y);
+                            break;
+                        }
+                }
+            }
+
+            if (minX == int.MaxValue)
+            {
+                minX = minY = 0; maxX = 10; maxY = 6; // 兜底
+            }
+
+            int gridCols = Mathf.Max(1, (maxX - minX + 1));
+            int gridRows = Mathf.Max(1, (maxY - minY + 1));
+
+            float gridWidth = gridCols * (cellSize + itemMargin) + itemMargin;
+            float gridHeight = gridRows * (cellSize + itemMargin) + itemMargin;
+
+            Rect outerRect = GUILayoutUtility.GetRect(gridWidth, gridHeight, GUILayout.ExpandWidth(false));
+            outerRect.width = gridWidth;
+            outerRect.height = gridHeight;
+
+            // 背景
+            Handles.DrawSolidRectangleWithOutline(outerRect, new Color(0,0,0,0.025f), new Color(0,0,0,0.15f));
+
+            // 2) 绘制网格
+            Handles.color = new Color(0,0,0,0.1f);
+            for (int cx = 0; cx <= gridCols; cx++)
+            {
+                float x = outerRect.x + itemMargin + cx*(cellSize+itemMargin) - itemMargin*0.5f;
+                Handles.DrawLine(new Vector3(x, outerRect.y + itemMargin - itemMargin*0.5f),
+                                 new Vector3(x, outerRect.y + gridHeight - itemMargin + itemMargin*0.5f));
+            }
+            for (int cy = 0; cy <= gridRows; cy++)
+            {
+                float y = outerRect.y + itemMargin + cy*(cellSize+itemMargin) - itemMargin*0.5f;
+                Handles.DrawLine(new Vector3(outerRect.x + itemMargin - itemMargin*0.5f, y),
+                                 new Vector3(outerRect.x + gridWidth - itemMargin + itemMargin*0.5f, y));
+            }
+
+            // 3) 先画区域，再画精确物品
+            foreach (var t in config.fixedItems)
+            {
+                if (t == null) continue;
+                // 区域显示
+                RectInt? area = null;
+                if (t.placementType == PlacementType.AreaConstrained) area = t.constrainedArea;
+                if (t.placementType == PlacementType.Priority) area = t.preferredArea;
+                if (area.HasValue)
+                {
+                    var ar = area.Value;
+                    Rect px = new Rect(
+                        outerRect.x + itemMargin + (ar.xMin - minX)*(cellSize+itemMargin),
+                        outerRect.y + itemMargin + (ar.yMin - minY)*(cellSize+itemMargin),
+                        ar.width*(cellSize+itemMargin) - itemMargin,
+                        ar.height*(cellSize+itemMargin) - itemMargin);
+                    EditorGUI.DrawRect(px, new Color(0.2f, 0.6f, 1f, 0.12f));
+                    Handles.color = new Color(0.2f, 0.6f, 1f, 0.8f);
+                    Handles.DrawAAPolyLine(2f,
+                        new Vector3(px.xMin, px.yMin), new Vector3(px.xMax, px.yMin),
+                        new Vector3(px.xMax, px.yMax), new Vector3(px.xMin, px.yMax), new Vector3(px.xMin, px.yMin));
+                }
+            }
+
+            foreach (var t in config.fixedItems)
+            {
+                if (t == null) continue;
+                if (t.placementType != PlacementType.Exact && t.placementType != PlacementType.Smart)
+                    continue;
+
+                int w = t.itemData != null ? Mathf.Max(1, t.itemData.width) : 1;
+                int h = t.itemData != null ? Mathf.Max(1, t.itemData.height) : 1;
+
+                Vector2Int pos;
+                if (t.placementType == PlacementType.Exact)
+                    pos = t.exactPosition;
+                else
+                {
+                    int index = System.Array.IndexOf(config.fixedItems, t);
+                    pos = new Vector2Int(index * (w + 1) + minX, minY); // 简单条带排布
+                }
+
+                Rect cellRect = new Rect(
+                    outerRect.x + itemMargin + (pos.x - minX)*(cellSize+itemMargin),
+                    outerRect.y + itemMargin + (pos.y - minY)*(cellSize+itemMargin),
+                    w*(cellSize+itemMargin) - itemMargin,
+                    h*(cellSize+itemMargin) - itemMargin);
+
+                // 背景
+                Color bg = t.itemData != null ? t.itemData.backgroundColor : new Color(0.15f, 0.15f, 0.15f, 1);
+                EditorGUI.DrawRect(cellRect, new Color(bg.r, bg.g, bg.b, 0.85f));
+
+                // 图标
+                if (t.itemData != null && t.itemData.itemIcon != null)
+                {
+                    Texture2D iconTex = AssetPreview.GetAssetPreview(t.itemData.itemIcon);
+                    if (iconTex == null) iconTex = AssetPreview.GetMiniThumbnail(t.itemData.itemIcon);
+                    if (iconTex != null)
+                    {
+                        GUI.DrawTexture(cellRect, iconTex, ScaleMode.ScaleToFit, true);
+                    }
+                }
+
+                // 轮廓
+                Handles.color = new Color(0, 0, 0, 0.45f);
+                Handles.DrawAAPolyLine(2f,
+                    new Vector3(cellRect.xMin, cellRect.yMin), new Vector3(cellRect.xMax, cellRect.yMin),
+                    new Vector3(cellRect.xMax, cellRect.yMax), new Vector3(cellRect.xMin, cellRect.yMax),
+                    new Vector3(cellRect.xMin, cellRect.yMin));
+            }
+        }
+
+        /// <summary>
+        /// 生成固定生成配置的预览项：按“完整数量”展开，自动避让叠放
+        /// </summary>
+        private System.Collections.Generic.List<PreviewGridRenderer.PreviewItemDisplay> GenerateFixedPreviewItems(FixedItemSpawnConfig config, Vector2Int gridSize)
+        {
+            var result = new System.Collections.Generic.List<PreviewGridRenderer.PreviewItemDisplay>();
+            if (config == null || config.fixedItems == null) return result;
+
+            // 网格占用表，避免重叠
+            bool[,] occupied = new bool[gridSize.x, gridSize.y];
+
+            // 尝试占用一块区域
+            System.Func<Vector2Int, Vector2Int, Vector2Int?> tryPlace = (pos, size) =>
+            {
+                // 越界修正
+                for (int y = Mathf.Clamp(pos.y, 0, gridSize.y - 1); y <= gridSize.y - size.y; y++)
+                {
+                    for (int x = Mathf.Clamp(pos.x, 0, gridSize.x - 1); x <= gridSize.x - size.x; x++)
+                    {
+                        bool ok = true;
+                        for (int yy = 0; yy < size.y && ok; yy++)
+                            for (int xx = 0; xx < size.x; xx++)
+                                if (occupied[x + xx, y + yy]) { ok = false; break; }
+                        if (!ok) continue;
+                        // 标记
+                        for (int yy = 0; yy < size.y; yy++)
+                            for (int xx = 0; xx < size.x; xx++)
+                                occupied[x + xx, y + yy] = true;
+                        return new Vector2Int(x, y);
+                    }
+                }
+                return null;
+            };
+
+            // 依序展开每个模板的数量
+            for (int i = 0; i < config.fixedItems.Length; i++)
+            {
+                var t = config.fixedItems[i];
+                if (t == null || t.itemData == null) continue;
+
+                var size = new Vector2Int(Mathf.Max(1, t.itemData.width), Mathf.Max(1, t.itemData.height));
+                int count = Mathf.Max(1, t.quantity);
+
+                for (int k = 0; k < count; k++)
+                {
+                    // 期望位置
+                    Vector2Int desired = Vector2Int.zero;
+                    switch (t.placementType)
+                    {
+                        case PlacementType.Exact:
+                            desired = t.exactPosition; break;
+                        case PlacementType.AreaConstrained:
+                            desired = new Vector2Int(t.constrainedArea.x, t.constrainedArea.y); break;
+                        case PlacementType.Priority:
+                            desired = new Vector2Int(t.preferredArea.x, t.preferredArea.y); break;
+                        default:
+                            desired = new Vector2Int((i + k) % gridSize.x, (i + k) / gridSize.x); break;
+                    }
+
+                    // 尝试从期望位置开始，向右下扫描寻找可放置区域
+                    var placed = tryPlace(desired, size);
+                    if (!placed.HasValue)
+                    {
+                        // 从(0,0)兜底扫描
+                        placed = tryPlace(Vector2Int.zero, size);
+                        if (!placed.HasValue) break; // 网格满了
+                    }
+
+                    result.Add(new PreviewGridRenderer.PreviewItemDisplay
+                    {
+                        position = placed.Value,
+                        size = size,
+                        itemData = t.itemData,
+                        rarity = ItemRarity.Common,
+                        backgroundColor = t.itemData.backgroundColor,
+                        displayText = t.itemData.itemName
+                    });
+                }
+            }
+
+            return result;
         }
         
         /// <summary>

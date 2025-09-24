@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using InventorySystem.SpawnSystem; // SessionStateManager, ShelfTrigger helpers
 
 public class BackpackState : MonoBehaviour
 {
@@ -126,9 +127,20 @@ public class BackpackState : MonoBehaviour
     {
         Debug.Log($"[BackpackState] ToggleBackpack被调用 - 在货架内:{ShelfTrigger.isInShelf}, 背包已开:{isBackpackOpen}");
         
-        // 如果在货架范围内，且背包未打开，尝试使用延迟方案
+        // 如果在货架范围内，且背包未打开，优先判断是否已搜索过本货架
         if (ShelfTrigger.isInShelf && !isBackpackOpen)
         {
+            string shelfId = ShelfTrigger.GetCurrentShelfId();
+            if (!string.IsNullOrEmpty(shelfId) && SessionStateManager.IsShelfGenerated(shelfId))
+            {
+                Debug.Log($"[BackpackState] 货架 {shelfId} 已在本会话生成/搜索过，直接打开背包");
+                if (topNav != null)
+                {
+                    topNav.ToggleBackpack();
+                    return;
+                }
+            }
+
             // 检查是否有延迟正在进行
             DelayMagnifierUIController delayUI = ShelfTrigger.GetCurrentShelfDelayUI();
             

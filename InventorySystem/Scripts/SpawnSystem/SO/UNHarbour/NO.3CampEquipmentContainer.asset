@@ -1,0 +1,105 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 99f7a18fba3c1fa418e78d8de718e4db, type: 3}
+  m_Name: NO.3CampEquipmentContainer
+  m_EditorClassIdentifier: 
+  configName: Random Items - NO.3CampEquipmentContainer
+  description: 
+  version: 1.0.0
+  targetContainerType: 999
+  containerIdentifier: ContainerItemGrid
+  minimumGridSize: {x: 10, y: 6}
+  minTotalItems: 3
+  maxTotalItems: 10
+  quantityMode: 0
+  enableFixedItemGeneration: 0
+  fixedItemData: {fileID: 0}
+  fixedItemStackAmount: 1
+  itemCategories:
+  - category: 1
+    categoryName: "\u65B0\u7269\u54C1\u7C7B\u522B"
+    description: "\u63CF\u8FF0\u6B64\u7C7B\u522B\u7684\u7269\u54C1"
+    minSpawnCount: 1
+    maxSpawnCount: 3
+    autoLoadItems: 1
+    rarityWeights:
+    - rarity: 0
+      weight: 0.796
+    - rarity: 0
+      weight: 0.116
+    - rarity: 0
+      weight: 0.078
+    - rarity: 0
+      weight: 0.01
+    rarityGroups:
+    - rarity: 0
+      weight: 0.25
+      items: []
+    - rarity: 1
+      weight: 0.25
+      items: []
+    - rarity: 2
+      weight: 0.25
+      items: []
+    - rarity: 3
+      weight: 0.25
+      items: []
+    enableStackRandomization: 0
+    minStackAmount: 1
+    maxStackAmount: 50
+    isEnabled: 1
+    priority: 5
+    enableDebugLog: 0
+  - category: 2
+    categoryName: "\u65B0\u7269\u54C1\u7C7B\u522B"
+    description: "\u63CF\u8FF0\u6B64\u7C7B\u522B\u7684\u7269\u54C1"
+    minSpawnCount: 1
+    maxSpawnCount: 3
+    autoLoadItems: 1
+    rarityWeights:
+    - rarity: 0
+      weight: 0.75
+    - rarity: 0
+      weight: 0.1
+    - rarity: 0
+      weight: 0.1
+    - rarity: 0
+      weight: 0.05
+    rarityGroups:
+    - rarity: 0
+      weight: 0.25
+      items: []
+    - rarity: 1
+      weight: 0.25
+      items: []
+    - rarity: 2
+      weight: 0.25
+      items: []
+    - rarity: 3
+      weight: 0.25
+      items: []
+    enableStackRandomization: 0
+    minStackAmount: 1
+    maxStackAmount: 50
+    isEnabled: 1
+    priority: 5
+    enableDebugLog: 0
+  categoryStrategy: 0
+  rarityBalance: 0
+  avoidDuplicateItems: 1
+  maxRetryAttempts: 3
+  enablePreview: 1
+  previewSeed: 10811
+  previewGridSize: {x: 10, y: 6}
+  enableDetailedLogging: 0
+  generationTimeout: 10
+  strictCompatibilityCheck: 1

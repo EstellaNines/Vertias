@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using InventorySystem;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 /// <summary>
 /// 示例：挂在物品 UI 上，右键时弹出背包右键菜单。
@@ -29,9 +30,64 @@ public class InventoryItemRightClickHandler : MonoBehaviour, IPointerClickHandle
         if (playerStats == null) playerStats = FindObjectOfType<PlayerVitalStats>();
         if (contextMenuService == null)
         {
-            // 尝试从父级中查找
-            contextMenuService = GetComponentInParent<BackpackContextMenuService>();
+            // 1) 先从父级中查找
+            contextMenuService = GetComponentInParent<BackpackContextMenuService>(true);
         }
+        if (contextMenuService == null)
+        {
+            // 2) 从场景中查找已存在的（包括未激活）
+            var all = Resources.FindObjectsOfTypeAll<BackpackContextMenuService>();
+            if (all != null && all.Length > 0)
+            {
+                // 优先选择在同一 Canvas 或最近的一个
+                contextMenuService = FindNearestService(all);
+            }
+        }
+        if (contextMenuService == null)
+        {
+            // 3) 运行时保障：自动创建服务 + Canvas + EventSystem
+            EnsureEventSystemExists();
+            var canvas = FindObjectOfType<Canvas>();
+            if (canvas == null)
+            {
+                canvas = CreateAutoCanvas();
+            }
+            var go = new GameObject("BackpackContextMenuService(Auto)");
+            var rt = go.AddComponent<RectTransform>();
+            rt.SetParent(canvas.transform, false);
+            contextMenuService = go.AddComponent<BackpackContextMenuService>();
+        }
+    }
+
+    private BackpackContextMenuService FindNearestService(BackpackContextMenuService[] services)
+    {
+        if (services == null || services.Length == 0) return null;
+        if (itemRect == null) return services[0];
+
+        BackpackContextMenuService best = null;
+        float bestDist = float.MaxValue;
+        foreach (var s in services)
+        {
+            if (s == null) continue;
+            // 过滤非场景对象（资源/未载入）
+            if (!s.gameObject.scene.IsValid() || !s.gameObject.scene.isLoaded) continue;
+            var rt = s.transform as RectTransform;
+            float d = 0f;
+            if (rt != null)
+            {
+                d = Vector3.SqrMagnitude(rt.transform.position - itemRect.transform.position);
+            }
+            else
+            {
+                d = 0f;
+            }
+            if (d < bestDist)
+            {
+                bestDist = d;
+                best = s;
+            }
+        }
+        return best;
     }
 
     public void OnPointerClick(PointerEventData eventData)
@@ -45,6 +101,21 @@ public class InventoryItemRightClickHandler : MonoBehaviour, IPointerClickHandle
 
 		if (eventData != null && eventData.button == PointerEventData.InputButton.Right)
         {
+            // 点击时再次保障：若服务缺失则尝试创建
+            if (contextMenuService == null)
+            {
+                EnsureEventSystemExists();
+                var canvas = FindObjectOfType<Canvas>();
+                if (canvas == null)
+                {
+                    canvas = CreateAutoCanvas();
+                }
+                var go = new GameObject("BackpackContextMenuService(Auto)");
+                var rt = go.AddComponent<RectTransform>();
+                rt.SetParent(canvas.transform, false);
+                contextMenuService = go.AddComponent<BackpackContextMenuService>();
+            }
+
             if (contextMenuService == null || itemRect == null)
             {
                 Debug.LogWarning("InventoryItemRightClickHandler: 缺少引用 contextMenuService 或 itemRect。");
@@ -54,6 +125,24 @@ public class InventoryItemRightClickHandler : MonoBehaviour, IPointerClickHandle
             var actions = BuildActions();
             contextMenuService.ShowForItem(itemRect, targetItem != null ? (object)targetItem : itemName, actions);
         }
+    }
+
+    private Canvas CreateAutoCanvas()
+    {
+        var canvasGO = new GameObject("UI Root (Auto)");
+        var canvas = canvasGO.AddComponent<Canvas>();
+        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        canvasGO.AddComponent<GraphicRaycaster>();
+        return canvas;
+    }
+
+    private void EnsureEventSystemExists()
+    {
+        var es = FindObjectOfType<EventSystem>();
+        if (es != null) return;
+        var esGO = new GameObject("EventSystem");
+        esGO.AddComponent<EventSystem>();
+        esGO.AddComponent<StandaloneInputModule>();
     }
 
     private IList<MenuAction> BuildActions()
@@ -219,9 +308,10 @@ public class InventoryItemRightClickHandler : MonoBehaviour, IPointerClickHandle
         if (targetItem.ItemDataReader.ItemData.category != ItemCategory.Healing)
             return false;
 
-        // 需要有可用治疗量，且玩家未满血
+        // 需要有可用治疗量，且玩家未满“基础血量上限”（不含护甲/头盔叠加）
         bool hasHealing = targetItem.ItemDataReader.currentHealAmount > 0 && targetItem.ItemDataReader.healPerUse > 0;
-        bool needHeal = playerStats.currentHealth < playerStats.maxHealth;
+        float baseCap = GetBaseHealthCap();
+        bool needHeal = playerStats.currentHealth < baseCap;
         return hasHealing && needHeal;
     }
 
@@ -230,7 +320,9 @@ public class InventoryItemRightClickHandler : MonoBehaviour, IPointerClickHandle
         if (!CanUseHealing()) return;
 
         var reader = targetItem.ItemDataReader;
-        float missing = Mathf.Max(0f, playerStats.maxHealth - playerStats.currentHealth);
+        // 仅治疗到基础生命上限（不含护甲/头盔叠加）
+        float baseCap = GetBaseHealthCap();
+        float missing = Mathf.Max(0f, baseCap - playerStats.currentHealth);
         if (missing <= 0f) return;
 
         int perUse = Mathf.Max(0, reader.healPerUse);
@@ -247,6 +339,17 @@ public class InventoryItemRightClickHandler : MonoBehaviour, IPointerClickHandle
         reader.currentHealAmount = Mathf.Max(0, reader.currentHealAmount - healAmount);
         reader.UpdateUI();
         reader.SaveRuntimeToES3();
+    }
+
+    /// <summary>
+    /// 基础生命上限（不包含护甲/头盔加成）。
+    /// 默认 100；若场景中存在 ProtectiveGearHealthIntegration，则读取其 baseHealth。
+    /// </summary>
+    private float GetBaseHealthCap()
+    {
+        var gear = FindObjectOfType<ProtectiveGearHealthIntegration>();
+        if (gear != null && gear.baseHealth > 0f) return gear.baseHealth;
+        return 100f;
     }
 
     private bool CanUseFoodOrDrink()

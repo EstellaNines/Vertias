@@ -30,6 +30,11 @@ public class ShelfTrigger : BaseContainerTrigger
     [SerializeField] private bool enableFixedGeneration = false;
     [SerializeField] private FixedItemSpawnConfig fixedConfig;
     [SerializeField] private bool debugFixedGeneration = false;
+
+    [Header("固定物品概率生成设置")]
+    [SerializeField] private bool enableProbabilityFixedGeneration = false;
+    [SerializeField] private FixedItemProbabilitySpawnConfig probabilityFixedConfig;
+    [SerializeField] private bool debugProbabilityFixedGeneration = false;
     
     // 运行时状态
     private string assignedShelfId;
@@ -266,11 +271,32 @@ public class ShelfTrigger : BaseContainerTrigger
             return;
         }
         
-        // 互斥：若两者皆启用，默认优先固定生成并关闭随机生成
-        if (enableFixedGeneration && enableRandomGeneration)
+        // 互斥：优先顺序 概率固定 > 固定 > 随机
+        if ((enableProbabilityFixedGeneration || enableFixedGeneration) && enableRandomGeneration)
         {
             enableRandomGeneration = false;
-            Debug.LogWarning($"[ShelfTrigger] {gameObject.name}: 同时启用了随机与固定生成，已自动禁用随机生成");
+            Debug.LogWarning($"[ShelfTrigger] {gameObject.name}: 启用了固定相关生成与随机生成，已自动禁用随机生成");
+        }
+
+        if (enableProbabilityFixedGeneration)
+        {
+            if (containerGrid == null)
+            {
+                Debug.LogWarning($"[ShelfTrigger] {gameObject.name}: 启用了概率固定生成但容器网格为空");
+                return;
+            }
+            if (probabilityFixedConfig == null)
+            {
+                Debug.LogWarning($"[ShelfTrigger] {gameObject.name}: 启用了概率固定生成但配置为空");
+                return;
+            }
+            if (debugProbabilityFixedGeneration)
+            {
+                Debug.Log($"[ShelfTrigger] {assignedShelfId}: Container网格已创建，开始概率固定生成");
+            }
+            GenerateProbabilityFixedItemsForGrid(containerGrid);
+            hasTriggeredGeneration = true;
+            return;
         }
 
         if (enableFixedGeneration)
@@ -376,6 +402,31 @@ public class ShelfTrigger : BaseContainerTrigger
         }
 
         spawnManager.SpawnFixedItems(itemGrid, fixedConfig, containerId);
+
+        // 标记本货架本会话已生成/已搜索，后续进入可直接打开无需重复搜索流程
+        SessionStateManager.MarkShelfGenerated(assignedShelfId);
+    }
+
+    /// <summary>
+    /// 为指定网格生成“概率固定物品”
+    /// </summary>
+    private void GenerateProbabilityFixedItemsForGrid(ItemGrid itemGrid)
+    {
+        var manager = FixedItemProbabilitySpawnManager.Instance;
+        if (manager == null)
+        {
+            Debug.LogError($"[ShelfTrigger] {assignedShelfId}: FixedItemProbabilitySpawnManager实例不存在");
+            return;
+        }
+        string containerId = GetUniqueContainerIdentifier();
+        if (debugProbabilityFixedGeneration)
+        {
+            Debug.Log($"[ShelfTrigger] {assignedShelfId}: 概率固定生成 -> ContainerId={containerId}");
+        }
+        manager.SpawnWithProbability(itemGrid, probabilityFixedConfig, containerId);
+
+        // 同样标记为已搜索/已生成
+        SessionStateManager.MarkShelfGenerated(assignedShelfId);
     }
     
     /// <summary>
@@ -461,6 +512,23 @@ public class ShelfTrigger : BaseContainerTrigger
         }
         
         return 3f; // 默认3秒
+    }
+
+    /// <summary>
+    /// 获取当前玩家所在触发器的ShelfId
+    /// </summary>
+    public static string GetCurrentShelfId()
+    {
+        if (!isInShelf) return null;
+        ShelfTrigger[] allShelfTriggers = FindObjectsOfType<ShelfTrigger>();
+        foreach (ShelfTrigger trigger in allShelfTriggers)
+        {
+            if (trigger.playerInTrigger)
+            {
+                return trigger.assignedShelfId;
+            }
+        }
+        return null;
     }
     
     /// <summary>
@@ -685,14 +753,21 @@ public class ShelfTrigger : BaseContainerTrigger
     /// </summary>
     private void ValidateConfiguration()
     {
-        // 互斥校验：若同时启用，默认禁用随机生成
-        if (enableFixedGeneration && enableRandomGeneration)
+        // 互斥校验：概率固定/固定 与 随机不可同时启用
+        if ((enableProbabilityFixedGeneration || enableFixedGeneration) && enableRandomGeneration)
         {
             enableRandomGeneration = false;
-            Debug.LogWarning($"[ShelfTrigger] {gameObject.name}: 同时启用了随机与固定生成，已自动禁用随机生成");
+            Debug.LogWarning($"[ShelfTrigger] {gameObject.name}: 同时启用了随机与(概率)固定生成，已自动禁用随机生成");
         }
 
-        if (enableFixedGeneration)
+        if (enableProbabilityFixedGeneration)
+        {
+            if (probabilityFixedConfig == null)
+            {
+                Debug.LogWarning($"[ShelfTrigger] {gameObject.name}: 启用了概率固定生成但未设置配置");
+            }
+        }
+        else if (enableFixedGeneration)
         {
             if (fixedConfig == null)
             {

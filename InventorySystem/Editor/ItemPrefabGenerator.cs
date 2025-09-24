@@ -446,6 +446,71 @@ namespace InventorySystem.Editor
                 itemDataReader.maxUsageCount = itemData.usageCount;
                 itemDataReader.maxHealAmount = itemData.maxHealAmount;
         
+                // Special 类目：附加边框和星标
+                if (itemData.category == ItemCategory.Special)
+                {
+                    // 生成 ItemBlock（与物品尺寸一致）
+                    GameObject blockObject = new GameObject("ItemBlock");
+                    blockObject.transform.SetParent(rootObject.transform);
+                    blockObject.layer = 5;
+
+                    RectTransform blockRect = blockObject.AddComponent<RectTransform>();
+                    blockRect.sizeDelta = itemSize;
+                    blockRect.anchorMin = new Vector2(0.5f, 0.5f);
+                    blockRect.anchorMax = new Vector2(0.5f, 0.5f);
+                    blockRect.pivot = new Vector2(0.5f, 0.5f);
+                    blockRect.anchoredPosition = Vector2.zero;
+
+                    Image blockImage = blockObject.AddComponent<Image>();
+                    string blockGuid = "d2e7936d4c43d7048b5fd050e2e99943"; // 与示例一致的边框图
+                    string blockPath = AssetDatabase.GUIDToAssetPath(blockGuid);
+                    if (!string.IsNullOrEmpty(blockPath))
+                    {
+                        var blockSprite = AssetDatabase.LoadAssetAtPath<Sprite>(blockPath);
+                        blockImage.sprite = blockSprite;
+                    }
+                    // 取背景色同色系的更鲜艳颜色
+                    Color bgCol = itemData.backgroundColor;
+                    float h, s, v; Color.RGBToHSV(bgCol, out h, out s, out v);
+                    s = Mathf.Clamp01(Mathf.Max(s, 0.65f) + 0.15f); // 增强饱和度
+                    v = Mathf.Clamp01(Mathf.Max(v, 0.55f) + 0.15f); // 提高明度
+                    Color borderCol = Color.HSVToRGB(h, s, v);
+                    borderCol.a = 1f;
+                    blockImage.color = borderCol;
+                    blockImage.raycastTarget = true;
+
+                    // 生成 ItemStar（左上角小星标，挂载 ImageBlinker）
+                    GameObject starObject = new GameObject("ItemStar");
+                    starObject.transform.SetParent(rootObject.transform);
+                    starObject.layer = 5;
+
+                    RectTransform starRect = starObject.AddComponent<RectTransform>();
+                    Vector2 starSize = new Vector2(16f, 16f);
+                    starRect.sizeDelta = starSize;
+                    starRect.anchorMin = new Vector2(0.5f, 0.5f);
+                    starRect.anchorMax = new Vector2(0.5f, 0.5f);
+                    starRect.pivot = new Vector2(0.5f, 0.5f);
+                    // 左上角：距离边缘固定 8px
+                    const float margin = 8f;
+                    starRect.anchoredPosition = new Vector2(-itemWidth / 2f + margin, itemHeight / 2f - margin);
+
+                    Image starImage = starObject.AddComponent<Image>();
+                    string starGuid = "2bf41814a909f87468ca1822f9fadc0d"; // 与示例一致的星星图
+                    string starPath = AssetDatabase.GUIDToAssetPath(starGuid);
+                    if (!string.IsNullOrEmpty(starPath))
+                    {
+                        var starSprite = AssetDatabase.LoadAssetAtPath<Sprite>(starPath);
+                        starImage.sprite = starSprite;
+                    }
+                    starImage.raycastTarget = true;
+
+                    // 挂载 ImageBlinker（使用组件默认参数；其字段为私有序列化，无法直接访问）
+                    starObject.AddComponent<ImageBlinker>();
+
+                    // 置顶渲染顺序：星标最后
+                    starObject.transform.SetAsLastSibling();
+                }
+
                 // 生成预制体文件名（使用单下划线，与ItemDataSO命名一致）
                 string fileName = $"{itemData.id}_{SanitizeFileName(itemData.itemName)}.prefab";
                 string prefabPath = Path.Combine(outputPath, fileName).Replace("\\", "/");

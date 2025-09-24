@@ -1,0 +1,78 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6e6fd214cb0bf094e92fde5cc85a036e, type: 3}
+  m_Name: NO.2WarehouseComputer
+  m_EditorClassIdentifier: 
+  configName: Probability Fixed Items - NO.2WarehouseComputer
+  description: 
+  version: 1.0.0
+  targetContainerType: 999
+  containerIdentifier: 
+  minimumGridSize: {x: 10, y: 10}
+  spawnTiming: 1
+  cooldownTime: 0
+  fixedItems:
+  - templateId: prob_item_638943495027984930
+    itemData: {fileID: 11400000, guid: cf812a1e0ec5dfe48a1e58276099a50a, type: 2}
+    quantity: 1
+    stackAmount: 1
+    placementType: 1
+    exactPosition: {x: 0, y: 0}
+    constrainedArea:
+      x: 0
+      y: 0
+      width: 10
+      height: 10
+    preferredArea:
+      x: 0
+      y: 0
+      width: 5
+      height: 5
+    priority: 2
+    scanPattern: 0
+    allowRotation: 1
+    conflictResolution: 2
+    isUniqueSpawn: 1
+    conditionTags: []
+    maxRetryAttempts: 10
+    enableDebugLog: 0
+    spawnChance: 0.4
+  - templateId: prob_item_638943495151436754
+    itemData: {fileID: 11400000, guid: b7da1351994c073429c9294964bf4b30, type: 2}
+    quantity: 1
+    stackAmount: 1
+    placementType: 1
+    exactPosition: {x: 0, y: 0}
+    constrainedArea:
+      x: 0
+      y: 0
+      width: 10
+      height: 10
+    preferredArea:
+      x: 0
+      y: 0
+      width: 5
+      height: 5
+    priority: 2
+    scanPattern: 0
+    allowRotation: 1
+    conflictResolution: 2
+    isUniqueSpawn: 1
+    conditionTags: []
+    maxRetryAttempts: 10
+    enableDebugLog: 0
+    spawnChance: 1
+  sortStrategy: 0
+  continueOnFailure: 1
+  maxGenerationTime: 10
+  enableDetailedLogging: 0
+  enablePreview: 1
