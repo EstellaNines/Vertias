@@ -418,7 +418,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &60445842
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3715,6 +3715,9 @@ MonoBehaviour:
   randomConfig: {fileID: 11400000, guid: 7d81c4b04984d804a930a66720250ff9, type: 2}
   targetItemGrid: {fileID: 1502888464209145963, guid: 24ab583ade1369a4bbcaaaaa39a96da8, type: 3}
   debugRandomGeneration: 1
+  enableFixedGeneration: 0
+  fixedConfig: {fileID: 0}
+  debugFixedGeneration: 0
 --- !u!61 &530481885
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -39521,6 +39524,9 @@ MonoBehaviour:
   randomConfig: {fileID: 11400000, guid: 83c76f026da1faf46b8e03a6e766b59f, type: 2}
   targetItemGrid: {fileID: 1502888464209145963, guid: 24ab583ade1369a4bbcaaaaa39a96da8, type: 3}
   debugRandomGeneration: 1
+  enableFixedGeneration: 0
+  fixedConfig: {fileID: 0}
+  debugFixedGeneration: 0
 --- !u!61 &865107460
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -40429,6 +40435,9 @@ MonoBehaviour:
   randomConfig: {fileID: 11400000, guid: c2972c4c7630c514b82a39eec925dfea, type: 2}
   targetItemGrid: {fileID: 1502888464209145963, guid: 24ab583ade1369a4bbcaaaaa39a96da8, type: 3}
   debugRandomGeneration: 0
+  enableFixedGeneration: 0
+  fixedConfig: {fileID: 0}
+  debugFixedGeneration: 0
 --- !u!61 &966653855
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -46093,6 +46102,9 @@ MonoBehaviour:
   randomConfig: {fileID: 11400000, guid: 40d9d134e804521409a549c6cbbb3614, type: 2}
   targetItemGrid: {fileID: 1502888464209145963, guid: 24ab583ade1369a4bbcaaaaa39a96da8, type: 3}
   debugRandomGeneration: 0
+  enableFixedGeneration: 0
+  fixedConfig: {fileID: 0}
+  debugFixedGeneration: 0
 --- !u!61 &1073031794
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -61639,6 +61651,8 @@ MonoBehaviour:
   outsideConfinerCollider: {fileID: 1441614457}
   virtualCamera: {fileID: 1787086111}
   playerInputController: {fileID: 11400000, guid: 3d954a4b456254d419ca2667d11f8389, type: 2}
+  adjustOrthoAfterTeleport: 0
+  targetOrthoSize: 5
   promptUI: {fileID: 1870163264}
   promptText: {fileID: 1870163266}
   promptMessage: "\xB7 Exit"
@@ -93564,6 +93578,8 @@ MonoBehaviour:
   insideConfinerCollider: {fileID: 608140264}
   virtualCamera: {fileID: 1787086111}
   playerInputController: {fileID: 11400000, guid: 3d954a4b456254d419ca2667d11f8389, type: 2}
+  adjustOrthoAfterTeleport: 0
+  targetOrthoSize: 5
   promptUI: {fileID: 1151828826}
   promptText: {fileID: 1151828828}
   promptMessage: "\xB7 Enter"

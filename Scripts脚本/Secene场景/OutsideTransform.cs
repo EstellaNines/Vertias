@@ -16,6 +16,10 @@ public class OutsideTransform : MonoBehaviour
     [FieldLabel("虚拟摄像机")] public CinemachineVirtualCamera virtualCamera; // 虚拟摄像机对象
     [FieldLabel("玩家输入控制器")] public PlayerInputController playerInputController; // 玩家输入控制器
 
+    [Header("镜头缩放设置")]
+    [FieldLabel("传送后调整镜头?")] public bool adjustOrthoAfterTeleport = false; // 是否在传送后调整相机正交尺寸
+    [FieldLabel("目标正交尺寸")] public float targetOrthoSize = 10f; // 传送后直接设定的 Ortho Size
+
     [Header("UI设置")]
     [FieldLabel("提示UI对象")] public GameObject promptUI; // 提示UI对象
     [FieldLabel("提示文本组件")] public TextMeshProUGUI promptText; // 提示文本组件（可选，如果UI中有文本）
@@ -102,9 +106,25 @@ public class OutsideTransform : MonoBehaviour
                 confiner.m_BoundingShape2D = insideConfinerCollider;
                 Debug.Log("摄像机已同步至内部位置并更新碰撞区域");
             }
+
+            // 传送后调整正交尺寸
+            ApplyOrthoSizeAdjustment();
         }
 
         Debug.Log("玩家已从外部传送至内部");
+    }
+
+    // 调整虚拟摄像机正交尺寸
+    private void ApplyOrthoSizeAdjustment()
+    {
+        if (virtualCamera == null || !adjustOrthoAfterTeleport)
+        {
+            return;
+        }
+
+        float current = virtualCamera.m_Lens.OrthographicSize;
+        virtualCamera.m_Lens.OrthographicSize = targetOrthoSize;
+        Debug.Log($"传送后已设置相机 Ortho Size: {current} -> {targetOrthoSize}");
     }
 
     // 显示提示UI

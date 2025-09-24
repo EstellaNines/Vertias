@@ -26,6 +26,11 @@ public class ShelfTrigger : BaseContainerTrigger
     // [SerializeField] private bool generateOnFirstOpen = true;
     [SerializeField] private bool debugRandomGeneration = false;
     
+    [Header("固定物品生成设置")]
+    [SerializeField] private bool enableFixedGeneration = false;
+    [SerializeField] private FixedItemSpawnConfig fixedConfig;
+    [SerializeField] private bool debugFixedGeneration = false;
+    
     // 运行时状态
     private string assignedShelfId;
     private bool hasTriggeredGeneration = false;
@@ -252,36 +257,63 @@ public class ShelfTrigger : BaseContainerTrigger
     /// <param name="containerGrid">创建的Container网格</param>
     public void OnContainerGridCreated(ItemGrid containerGrid)
     {
-        if (!enableRandomGeneration || hasTriggeredGeneration)
+        if (hasTriggeredGeneration)
         {
-            if (debugRandomGeneration)
+            if (debugRandomGeneration || debugFixedGeneration)
             {
-                Debug.Log($"[ShelfTrigger] {assignedShelfId}: 跳过生成 - 启用:{enableRandomGeneration}, 已触发:{hasTriggeredGeneration}");
+                Debug.Log($"[ShelfTrigger] {assignedShelfId}: 跳过生成 - 已触发:{hasTriggeredGeneration}");
             }
             return;
         }
         
-        if (randomConfig == null)
+        // 互斥：若两者皆启用，默认优先固定生成并关闭随机生成
+        if (enableFixedGeneration && enableRandomGeneration)
         {
-            Debug.LogWarning($"[ShelfTrigger] {gameObject.name}: 启用了随机生成但未设置配置");
+            enableRandomGeneration = false;
+            Debug.LogWarning($"[ShelfTrigger] {gameObject.name}: 同时启用了随机与固定生成，已自动禁用随机生成");
+        }
+
+        if (enableFixedGeneration)
+        {
+            if (containerGrid == null)
+            {
+                Debug.LogWarning($"[ShelfTrigger] {gameObject.name}: 启用了固定生成但容器网格为空");
+                return;
+            }
+            if (debugFixedGeneration)
+            {
+                Debug.Log($"[ShelfTrigger] {assignedShelfId}: Container网格已创建，开始生成固定物品");
+            }
+            GenerateFixedItemsForGrid(containerGrid);
+            hasTriggeredGeneration = true;
             return;
         }
-        
-        if (targetItemGrid == null)
+
+        if (enableRandomGeneration)
         {
-            Debug.LogWarning($"[ShelfTrigger] {gameObject.name}: 启用了随机生成但未设置目标ItemGrid");
+            if (randomConfig == null)
+            {
+                Debug.LogWarning($"[ShelfTrigger] {gameObject.name}: 启用了随机生成但未设置配置");
+                return;
+            }
+            if (containerGrid == null)
+            {
+                Debug.LogWarning($"[ShelfTrigger] {gameObject.name}: 启用了随机生成但容器网格为空");
+                return;
+            }
+            if (debugRandomGeneration)
+            {
+                Debug.Log($"[ShelfTrigger] {assignedShelfId}: Container网格已创建，开始生成随机物品");
+            }
+            GenerateRandomItemsForGrid(containerGrid);
+            hasTriggeredGeneration = true;
             return;
         }
-        
-        // 使用传入的containerGrid而不是targetItemGrid，因为targetItemGrid是预制体引用
-        if (debugRandomGeneration)
+
+        if (debugRandomGeneration || debugFixedGeneration)
         {
-            Debug.Log($"[ShelfTrigger] {assignedShelfId}: Container网格已创建，开始生成随机物品");
+            Debug.Log($"[ShelfTrigger] {assignedShelfId}: 未启用任何生成方式，跳过");
         }
-        
-        // 执行随机物品生成，使用实际创建的网格
-        GenerateRandomItemsForGrid(containerGrid);
-        hasTriggeredGeneration = true;
     }
     
     /// <summary>
@@ -318,6 +350,32 @@ public class ShelfTrigger : BaseContainerTrigger
                 Debug.LogWarning($"[ShelfTrigger] {assignedShelfId}: 随机生成请求失败");
             }
         }
+    }
+
+    /// <summary>
+    /// 为指定网格生成固定物品
+    /// </summary>
+    /// <param name="itemGrid">目标网格</param>
+    private void GenerateFixedItemsForGrid(ItemGrid itemGrid)
+    {
+        var spawnManager = FixedItemSpawnManager.Instance;
+        if (spawnManager == null)
+        {
+            spawnManager = UnityEngine.Object.FindObjectOfType<FixedItemSpawnManager>();
+            if (spawnManager == null)
+            {
+                Debug.LogError($"[ShelfTrigger] {assignedShelfId}: FixedItemSpawnManager实例不存在，无法生成固定物品");
+                return;
+            }
+        }
+
+        string containerId = GetUniqueContainerIdentifier();
+        if (debugFixedGeneration)
+        {
+            Debug.Log($"[ShelfTrigger] {assignedShelfId}: 开始生成固定物品 -> ContainerId={containerId}");
+        }
+
+        spawnManager.SpawnFixedItems(itemGrid, fixedConfig, containerId);
     }
     
     /// <summary>
@@ -627,6 +685,21 @@ public class ShelfTrigger : BaseContainerTrigger
     /// </summary>
     private void ValidateConfiguration()
     {
+        // 互斥校验：若同时启用，默认禁用随机生成
+        if (enableFixedGeneration && enableRandomGeneration)
+        {
+            enableRandomGeneration = false;
+            Debug.LogWarning($"[ShelfTrigger] {gameObject.name}: 同时启用了随机与固定生成，已自动禁用随机生成");
+        }
+
+        if (enableFixedGeneration)
+        {
+            if (fixedConfig == null)
+            {
+                Debug.LogWarning($"[ShelfTrigger] {gameObject.name}: 启用了固定生成但未设置固定配置");
+            }
+        }
+
         if (enableRandomGeneration)
         {
             if (randomConfig == null)
