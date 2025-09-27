@@ -119,19 +119,19 @@ namespace Game.UI
 		/// </summary>
 		public bool TrySubmit()
 		{
-			int required = GetRequiredIntelligence();
-			int current = ComputeCurrentIntelligenceSum();
-			bool ok = current >= required && required > 0;
-			if (ok && emailManager != null)
+			// 仅进行条件检查，不做UI失败提示，不消耗物品
+			int requiredIntel = GetRequiredIntelligence();
+			int currentIntel = ComputeCurrentIntelligenceSum();
+			bool intelOk = currentIntel >= requiredIntel && requiredIntel > 0;
+
+			bool itemsOk = true;
+			var requiredIds = GetRequiredItemIds();
+			if (requiredIds != null && requiredIds.Count > 0)
 			{
-				emailManager.MarkCompleted();
-				emailManager.ShowCompletionResult(true);
+				itemsOk = TradeGridHasAllRequiredItems(requiredIds);
 			}
-			else if (emailManager != null)
-			{
-				emailManager.ShowCompletionResult(false);
-			}
-			return ok;
+
+			return intelOk && itemsOk;
 		}
 
 		/// <summary>
@@ -142,12 +142,22 @@ namespace Game.UI
 			// 已提交则直接返回，防重复
 			if (hasSubmitted) return;
 			bool success = TrySubmit();
-			ConsumeAllItemsInTradeGrid();
-			if (success && spawnRewardOnSuccess)
+			if (success)
 			{
+				// 判定成功：标记完成、显示成功、消耗物品并发放奖励
+				if (emailManager != null)
+				{
+					emailManager.MarkCompleted();
+					emailManager.ShowCompletionResult(true);
+				}
+				ConsumeAllItemsInTradeGrid();
+				if (spawnRewardOnSuccess)
+				{
 				SpawnRewardItems();
+				}
 				hasSubmitted = true;
 			}
+			// 失败：不消耗物品，不显示失败状态，允许玩家继续补交
 			UpdateButtonsState();
 		}
 
@@ -164,6 +174,33 @@ namespace Game.UI
 					Destroy(it.gameObject);
 				}
 			}
+		}
+
+		// 读取 EmailMissionUIManager 中当前任务的所需物品ID
+		private System.Collections.Generic.IReadOnlyList<int> GetRequiredItemIds()
+		{
+			if (emailManager == null) return System.Array.Empty<int>();
+			return emailManager.GetRequiredItemIdsForSelectedMission();
+		}
+
+		// 检查 TradeGrid 中是否包含所有所需物品（每个至少1个）
+		private bool TradeGridHasAllRequiredItems(System.Collections.Generic.IReadOnlyList<int> requiredIds)
+		{
+			if (tradeGrid == null || !tradeGrid.IsGridInitialized) return false;
+			if (requiredIds == null || requiredIds.Count == 0) return true;
+			var items = tradeGrid.GetItemsInArea(0, 0, tradeGrid.CurrentWidth, tradeGrid.CurrentHeight);
+			var found = new System.Collections.Generic.HashSet<int>();
+			for (int i = 0; i < items.Count; i++)
+			{
+				var reader = items[i]?.ItemDataReader;
+				if (reader?.ItemData == null) continue;
+				found.Add(reader.ItemData.id);
+			}
+			for (int i = 0; i < requiredIds.Count; i++)
+			{
+				if (!found.Contains(requiredIds[i])) return false;
+			}
+			return true;
 		}
 
 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System.Text.RegularExpressions;
 
 namespace Game.UI
 {
@@ -54,7 +55,12 @@ namespace Game.UI
 		[SerializeField] private RequirementRowRefs requirementsIntelligence;
 		[SerializeField] private RequirementRowRefs requirementsItem;
 
+		[Header("提交判定服务 (可选: 提供智力总值与物品查询/消耗)")]
+		[SerializeField] private MonoBehaviour submissionServiceBehaviour; // 需实现 IMissionSubmissionService
+		private IMissionSubmissionService submissionService;
+
 		private MissionDataRoot cachedData;
+		private string rawJsonText; // 保存原始 JSON 文本，用于解析自定义 item 映射
 		[Header("完成状态&图标显示")]
 		[SerializeField] private bool isCompleted = false;
 		[SerializeField] private Image completeImage; // Email/MissionEmail/Complete 上的 Image
@@ -84,6 +90,9 @@ namespace Game.UI
 			public string description;
 			public Reward reward;
 			public Requirements requirements;
+			// 运行时填充：从原始 JSON 中解析出的物品需求
+			public List<int> requiredItemIds;
+			public List<string> requiredItemNames;
 		}
 
 		[Serializable]
@@ -103,7 +112,7 @@ namespace Game.UI
 		private sealed class Requirements
 		{
 			public int intelligence;
-			public int itemCount;
+			public int itemCount; // 兼容旧字段，不再使用
 		}
 		#endregion
 
@@ -115,6 +124,7 @@ namespace Game.UI
 		private void Awake()
 		{
 			LoadDataIfNeeded();
+			ResolveSubmissionService();
 			if (headerNameTMP == null || descriptionTMP == null || prizeMoney == null || prizeWeapon == null || prizeFood == null || prizeIntelligence == null)
 			{
 				AutoBindReferences();
@@ -149,10 +159,17 @@ namespace Game.UI
 			}
 			try
 			{
-				cachedData = JsonUtility.FromJson<MissionDataRoot>(json.text);
+				rawJsonText = json.text;
+				cachedData = JsonUtility.FromJson<MissionDataRoot>(rawJsonText);
 				if (cachedData == null || cachedData.missions == null)
 				{
 					cachedData = new MissionDataRoot { missions = new List<Mission>() };
+				}
+				// 尝试为每个 mission 解析 item 要求（支持 { "item": {"1405": "Name"} } 结构）
+				for (int i = 0; i < cachedData.missions.Count; i++)
+				{
+					var m = cachedData.missions[i];
+					ExtractItemRequirementsForMission(rawJsonText, m);
 				}
 			}
 			catch (Exception ex)
@@ -160,6 +177,79 @@ namespace Game.UI
 				Debug.LogError($"EmailMissionUIManager: 解析 MissionData.json 失败: {ex.Message}");
 				cachedData = new MissionDataRoot { missions = new List<Mission>() };
 			}
+		}
+
+		private void ResolveSubmissionService()
+		{
+			if (submissionService != null) return;
+			if (submissionServiceBehaviour != null)
+			{
+				submissionService = submissionServiceBehaviour as IMissionSubmissionService;
+			}
+			if (submissionService == null)
+			{
+				// 场景中查找任意实现该接口的组件
+				var behaviours = FindObjectsOfType<MonoBehaviour>(true);
+				foreach (var b in behaviours)
+				{
+					if (b is IMissionSubmissionService svc)
+					{
+						submissionService = svc;
+						break;
+					}
+				}
+			}
+		}
+
+		private static void ExtractItemRequirementsForMission(string rawJson, Mission mission)
+		{
+			if (mission == null || string.IsNullOrEmpty(rawJson)) return;
+			try
+			{
+				string idSearch = "\"id\": " + mission.id;
+				int idxId = rawJson.IndexOf(idSearch, StringComparison.Ordinal);
+				if (idxId < 0) return;
+				int idxReq = rawJson.IndexOf("\"requirements\"", idxId, StringComparison.Ordinal);
+				if (idxReq < 0) return;
+				int idxItemKey = rawJson.IndexOf("\"item\"", idxReq, StringComparison.Ordinal);
+				if (idxItemKey < 0) return; // 无 item 要求
+				int start = rawJson.IndexOf('{', idxItemKey);
+				if (start < 0) return;
+				int end = FindMatchingBrace(rawJson, start);
+				if (end <= start) return;
+				string obj = rawJson.Substring(start + 1, end - start - 1);
+				var ids = new List<int>();
+				var names = new List<string>();
+				var matches = Regex.Matches(obj, "\\\"(\\d+)\\\"\\s*:\\s*\\\"([^\\\"]+)\\\"");
+				foreach (Match match in matches)
+				{
+					if (!match.Success || match.Groups.Count < 3) continue;
+					if (int.TryParse(match.Groups[1].Value, out int id))
+					{
+						ids.Add(id);
+						names.Add(match.Groups[2].Value);
+					}
+				}
+				mission.requiredItemIds = ids;
+				mission.requiredItemNames = names;
+			}
+			catch { /* 忽略解析异常，保持兼容 */ }
+		}
+
+		private static int FindMatchingBrace(string text, int openIndex)
+		{
+			int depth = 0;
+			for (int i = openIndex; i < text.Length; i++)
+			{
+				char c = text[i];
+				if (c == '{') depth++;
+				else if (c == '}')
+				{
+					depth--;
+					if (depth == 0) return i;
+				}
+			}
+			return -1;
 		}
 
 		public void SetSelectedMissionId(int missionId)
@@ -176,6 +266,11 @@ namespace Game.UI
 			{
 				// 若找不到 ID，则退回到列表第一个（避免空白）
 				mission = cachedData.missions[0];
+			}
+			// 若 requiredItem 未解析，则尝试就地解析
+			if ((mission.requiredItemIds == null || mission.requiredItemIds.Count == 0) && !string.IsNullOrEmpty(rawJsonText))
+			{
+				ExtractItemRequirementsForMission(rawJsonText, mission);
 			}
 
 			// 标题 name
@@ -203,9 +298,17 @@ namespace Game.UI
 
 			// Requirements 行：
 			int reqInt = mission.requirements != null ? mission.requirements.intelligence : 0;
-			int reqItem = mission.requirements != null ? mission.requirements.itemCount : 0;
 			ApplyRequirementRow(requirementsIntelligence, reqInt, "intelligence");
-			ApplyRequirementRow(requirementsItem, reqItem, "item");
+			// item：展示名称列表
+			if (requirementsItem != null)
+			{
+				bool hasItems = mission.requiredItemNames != null && mission.requiredItemNames.Count > 0;
+				if (requirementsItem.rawRoot != null) requirementsItem.rawRoot.SetActive(hasItems);
+				if (hasItems && requirementsItem.valueTMP != null)
+				{
+					requirementsItem.valueTMP.text = "item: " + string.Join(", ", mission.requiredItemNames);
+				}
+			}
 
 			// 兼容：若仍设置了旧的 requirementsValueTMP，则复用 intelligence 显示
 			if (requirementsValueTMP != null)
@@ -332,6 +435,78 @@ namespace Game.UI
 			{
 				refs.valueTMP.text = $"{label} {value}/{value}";
 			}
+		}
+
+		/// <summary>
+		/// 当前所选任务是否满足提交条件（需要：情报值达到要求 且 所需物品全部具备）。
+		/// </summary>
+		public bool CanSubmitCurrentMission()
+		{
+			if (cachedData == null || cachedData.missions == null) return false;
+			var mission = cachedData.missions.Find(m => m.id == selectedMissionId);
+			if (mission == null) return false;
+			int reqInt = mission.requirements != null ? mission.requirements.intelligence : 0;
+			bool intelOk = submissionService != null ? submissionService.GetPlayerIntelligenceTotal() >= reqInt : true; // 若无服务，默认通过情报校验以便测试
+			bool itemsOk = true;
+			if (mission.requiredItemIds != null && mission.requiredItemIds.Count > 0)
+			{
+				if (submissionService == null) return false; // 有物品要求但无服务，视为不满足
+				foreach (var id in mission.requiredItemIds)
+				{
+					if (!submissionService.HasItem(id, 1)) { itemsOk = false; break; }
+				}
+			}
+			return intelOk && itemsOk;
+		}
+
+		/// <summary>
+		/// 尝试提交当前任务：若满足条件则消耗所需物品并显示完成图标。
+		/// </summary>
+		public bool TrySubmitCurrentMission()
+		{
+			bool can = CanSubmitCurrentMission();
+			if (!can)
+			{
+				ShowCompletionResult(false);
+				return false;
+			}
+			var mission = cachedData.missions.Find(m => m.id == selectedMissionId);
+			if (mission == null) return false;
+			// 消耗物品
+			if (mission.requiredItemIds != null && mission.requiredItemIds.Count > 0)
+			{
+				foreach (var id in mission.requiredItemIds)
+				{
+					if (!submissionService.TryConsumeItem(id, 1))
+					{
+						ShowCompletionResult(false);
+						return false;
+					}
+				}
+			}
+			ShowCompletionResult(true);
+			return true;
+		}
+
+		/// <summary>
+		/// 获取当前选中任务所需的物品ID列表（来自 MissionData.json 的 requirements.item）。
+		/// 若无则返回空列表。
+		/// </summary>
+		public System.Collections.Generic.IReadOnlyList<int> GetRequiredItemIdsForSelectedMission()
+		{
+			LoadDataIfNeeded();
+			var mission = cachedData != null && cachedData.missions != null
+				? cachedData.missions.Find(m => m.id == selectedMissionId)
+				: null;
+			if (mission == null)
+			{
+				return System.Array.Empty<int>();
+			}
+			if ((mission.requiredItemIds == null || mission.requiredItemIds.Count == 0) && !string.IsNullOrEmpty(rawJsonText))
+			{
+				ExtractItemRequirementsForMission(rawJsonText, mission);
+			}
+			return mission.requiredItemIds != null ? mission.requiredItemIds.AsReadOnly() : System.Array.Empty<int>();
 		}
 
 		private void BindRequirementRow(ref RequirementRowRefs refs, string rootPath)

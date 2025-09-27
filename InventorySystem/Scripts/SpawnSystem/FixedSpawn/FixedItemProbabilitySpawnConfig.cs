@@ -7,55 +7,55 @@ using InventorySystem;
 namespace InventorySystem.SpawnSystem
 {
 	/// <summary>
-	/// ´ø¸ÅÂÊµÄ¹Ì¶¨ÎïÆ·Ä£°å£ºÔÚ¹Ì¶¨Ä£°å»ù´¡ÉÏÔö¼ÓÉú³É¸ÅÂÊ
+	/// å¸¦æ¦‚ç‡çš„å›ºå®šç‰©å“æ¨¡æ¿ï¼šåœ¨å›ºå®šæ¨¡æ¿åŸºç¡€ä¸Šå¢åŠ ç”Ÿæˆæ¦‚ç‡
 	/// </summary>
 	[System.Serializable]
 	public class ProbabilityFixedItemTemplate : FixedItemTemplate
 	{
 		[Range(0f, 1f)]
-		[Tooltip("´ËÎïÆ·µÄµ¥¸öÊµÀıÉú³É¸ÅÂÊ£¨0-1£©\n×¢Òâ£º°´ÊµÀıÖÀµã£¬quantity Îª×î´óÊµÀıÊı")]
+		[Tooltip("æ­¤ç‰©å“çš„å•ä¸ªå®ä¾‹ç”Ÿæˆæ¦‚ç‡ï¼ˆ0-1ï¼‰\næ³¨æ„ï¼šæŒ‰å®ä¾‹æ·ç‚¹ï¼Œquantity ä¸ºæœ€å¤§å®ä¾‹æ•°")]
 		public float spawnChance = 1f;
 	}
 
 	/// <summary>
-	/// ¹Ì¶¨ÎïÆ·¸ÅÂÊÉú³ÉÅäÖÃ
-	/// Óë FixedItemSpawnConfig ½á¹¹Ò»ÖÂ£¬µ«Ã¿¸öÄ£°å´øÓĞÉú³É¸ÅÂÊ
+	/// å›ºå®šç‰©å“æ¦‚ç‡ç”Ÿæˆé…ç½®
+	/// ä¸ FixedItemSpawnConfig ç»“æ„ä¸€è‡´ï¼Œä½†æ¯ä¸ªæ¨¡æ¿å¸¦æœ‰ç”Ÿæˆæ¦‚ç‡
 	/// </summary>
 	[CreateAssetMenu(fileName = "New Fixed Item Probability Spawn Config",
 		menuName = "Inventory System/Spawn System/Fixed Item Probability Spawn Config")]
 	public class FixedItemProbabilitySpawnConfig : ScriptableObject
 	{
-		[Header("ÅäÖÃ»ù´¡ĞÅÏ¢")]
-		[FieldLabel("ÅäÖÃÃû³Æ")] public string configName;
-		[FieldLabel("ÅäÖÃÃèÊö")][TextArea(2,4)] public string description;
-		[FieldLabel("ÅäÖÃ°æ±¾")] public string version = "1.0.0";
+		[Header("é…ç½®åŸºç¡€ä¿¡æ¯")]
+		[FieldLabel("é…ç½®åç§°")] public string configName;
+		[FieldLabel("é…ç½®æè¿°")][TextArea(2,4)] public string description;
+		[FieldLabel("é…ç½®ç‰ˆæœ¬")] public string version = "1.0.0";
 
-		[Header("Ä¿±êÈİÆ÷ÅäÖÃ")]
-		[FieldLabel("ÊÊÓÃÈİÆ÷ÀàĞÍ")] public ContainerType targetContainerType = ContainerType.Warehouse;
-		[FieldLabel("ÈİÆ÷±êÊ¶·û")]
-		[Tooltip("Ä¿±êÈİÆ÷µÄÎ¨Ò»±êÊ¶·û£¬Áô¿ÕÔòÊÊÓÃÓÚËùÓĞÍ¬ÀàĞÍÈİÆ÷")]
+		[Header("ç›®æ ‡å®¹å™¨é…ç½®")]
+		[FieldLabel("é€‚ç”¨å®¹å™¨ç±»å‹")] public ContainerType targetContainerType = ContainerType.Warehouse;
+		[FieldLabel("å®¹å™¨æ ‡è¯†ç¬¦")]
+		[Tooltip("ç›®æ ‡å®¹å™¨çš„å”¯ä¸€æ ‡è¯†ç¬¦ï¼Œç•™ç©ºåˆ™é€‚ç”¨äºæ‰€æœ‰åŒç±»å‹å®¹å™¨")]
 		public string containerIdentifier;
-		[FieldLabel("Íø¸ñ³ß´çÑéÖ¤")] public Vector2Int minimumGridSize = new Vector2Int(10, 10);
+		[FieldLabel("ç½‘æ ¼å°ºå¯¸éªŒè¯")] public Vector2Int minimumGridSize = new Vector2Int(10, 10);
 
-		[Header("Éú³ÉÊ±»ú¿ØÖÆ")]
-		[FieldLabel("Éú³ÉÊ±»ú")] public SpawnTiming spawnTiming = SpawnTiming.ContainerFirstOpen;
-		[FieldLabel("ÀäÈ´Ê±¼ä")] public float cooldownTime = 0f;
+		[Header("ç”Ÿæˆæ—¶æœºæ§åˆ¶")]
+		[FieldLabel("ç”Ÿæˆæ—¶æœº")] public SpawnTiming spawnTiming = SpawnTiming.ContainerFirstOpen;
+		[FieldLabel("å†·å´æ—¶é—´")] public float cooldownTime = 0f;
 
-		[Header("ÎïÆ·Éú³ÉÄ£°å£¨´ø¸ÅÂÊ£©")]
-		[FieldLabel("¹Ì¶¨Éú³ÉÎïÆ·£¨¸ÅÂÊ£©")]
+		[Header("ç‰©å“ç”Ÿæˆæ¨¡æ¿ï¼ˆå¸¦æ¦‚ç‡ï¼‰")]
+		[FieldLabel("å›ºå®šç”Ÿæˆç‰©å“ï¼ˆæ¦‚ç‡ï¼‰")]
 		public ProbabilityFixedItemTemplate[] fixedItems;
 
-		[Header("Éú³É²ßÂÔ")]
-		[FieldLabel("Éú³ÉË³Ğò²ßÂÔ")] public FixedItemSpawnConfig.ItemSortStrategy sortStrategy = FixedItemSpawnConfig.ItemSortStrategy.PriorityThenSize;
-		[FieldLabel("Ê§°ÜÊ±¼ÌĞø")] public bool continueOnFailure = true;
-		[FieldLabel("×î´óÉú³ÉÊ±¼ä")] public float maxGenerationTime = 10f;
+		[Header("ç”Ÿæˆç­–ç•¥")]
+		[FieldLabel("ç”Ÿæˆé¡ºåºç­–ç•¥")] public FixedItemSpawnConfig.ItemSortStrategy sortStrategy = FixedItemSpawnConfig.ItemSortStrategy.PriorityThenSize;
+		[FieldLabel("å¤±è´¥æ—¶ç»§ç»­")] public bool continueOnFailure = true;
+		[FieldLabel("æœ€å¤§ç”Ÿæˆæ—¶é—´")] public float maxGenerationTime = 10f;
 
-		[Header("µ÷ÊÔÅäÖÃ")]
-		[FieldLabel("ÆôÓÃÏêÏ¸ÈÕÖ¾")] public bool enableDetailedLogging = false;
-		[FieldLabel("Éú³ÉÔ¤ÀÀ")] public bool enablePreview = false;
+		[Header("è°ƒè¯•é…ç½®")]
+		[FieldLabel("å¯ç”¨è¯¦ç»†æ—¥å¿—")] public bool enableDetailedLogging = false;
+		[FieldLabel("ç”Ÿæˆé¢„è§ˆ")] public bool enablePreview = false;
 
 		/// <summary>
-		/// Éú³ÉÒ»¸ö"ÒÑÖÀµã¹ıÂË"ºóµÄ FixedItemSpawnConfig£¨ÓÃÓÚ¸´ÓÃÏÖÓĞ¹Ì¶¨Éú³ÉÆ÷£©
+		/// ç”Ÿæˆä¸€ä¸ª"å·²æ·ç‚¹è¿‡æ»¤"åçš„ FixedItemSpawnConfigï¼ˆç”¨äºå¤ç”¨ç°æœ‰å›ºå®šç”Ÿæˆå™¨ï¼‰
 		/// </summary>
 		public FixedItemSpawnConfig ToFilteredFixedConfig(int randomSeed = -1)
 		{
@@ -88,7 +88,7 @@ namespace InventorySystem.SpawnSystem
 						}
 						if (accepted <= 0) continue;
 
-						// ¿½±´Îª¹Ì¶¨Ä£°å£¬ÊıÁ¿Îªaccepted
+						// æ‹·è´ä¸ºå›ºå®šæ¨¡æ¿ï¼Œæ•°é‡ä¸ºaccepted
 						var copy = new FixedItemTemplate
 						{
 							templateId = t.templateId,

@@ -6,35 +6,35 @@ using InventorySystem.SpawnSystem; // Spawn managers & integration
 namespace InventorySystem.EditorTools
 {
 	/// <summary>
-	/// Ò»¼üÉú³É³¡¾°±Ø±¸¹ÜÀíÆ÷µÄ±à¼­Æ÷¹¤¾ß£¨²»°üº¬ BackpackSystemManager£©
-	/// ²Ëµ¥Â·¾¶£ºTools/Inventory System/´´½¨³¡¾°ºËĞÄ¹ÜÀíÆ÷
+	/// ä¸€é”®ç”Ÿæˆåœºæ™¯å¿…å¤‡ç®¡ç†å™¨çš„ç¼–è¾‘å™¨å·¥å…·ï¼ˆä¸åŒ…å« BackpackSystemManagerï¼‰
+	/// èœå•è·¯å¾„ï¼šTools/Inventory System/åˆ›å»ºåœºæ™¯æ ¸å¿ƒç®¡ç†å™¨
 	/// </summary>
 	public static class CreateSceneManagersUtility
 	{
 		private const string RootName = "Systems";
 
-		[MenuItem("Tools/Inventory System/´´½¨³¡¾°ºËĞÄ¹ÜÀíÆ÷", priority = 10)]
+		[MenuItem("Tools/Inventory System/åˆ›å»ºåœºæ™¯æ ¸å¿ƒç®¡ç†å™¨", priority = 10)]
 		public static void CreateAllCoreManagers()
 		{
 			var root = EnsureRoot();
 
-			// Éú³ÉÏµÍ³
+			// ç”Ÿæˆç³»ç»Ÿ
 			EnsureManagerGameObject<FixedItemSpawnManager>(root, nameof(FixedItemSpawnManager));
 			EnsureManagerGameObject<ShelfRandomItemManager>(root, nameof(ShelfRandomItemManager));
 			EnsureManagerGameObject<FixedItemProbabilitySpawnManager>(root, nameof(FixedItemProbabilitySpawnManager));
 			EnsureManagerGameObject<SpawnSystemManager>(root, nameof(SpawnSystemManager));
-			// ¿ÉÑ¡£º²Ö¿â¹Ì¶¨Éú³É
+			// å¯é€‰ï¼šä»“åº“å›ºå®šç”Ÿæˆ
 			TryEnsureOptional<WarehouseFixedItemManager>(root, "WarehouseFixedItemManager");
 
-			// ³Ö¾Ã»¯/×°±¸
+			// æŒä¹…åŒ–/è£…å¤‡
 			EnsureManagerGameObject<ContainerSaveManager>(root, "ContainerSystemManager");
 			EnsureManagerGameObject<EquipmentPersistenceManager>(root, nameof(EquipmentPersistenceManager));
 			EnsureManagerGameObject<EquipmentSlotManager>(root, nameof(EquipmentSlotManager));
 
-			// UI£¨ÊÀ½ç¿Õ¼äÑÓ³ÙUI¹ÜÀíÆ÷£¬°´Ğè£©
+			// UIï¼ˆä¸–ç•Œç©ºé—´å»¶è¿ŸUIç®¡ç†å™¨ï¼ŒæŒ‰éœ€ï¼‰
 			TryEnsureOptional<UnityEngine.MonoBehaviour>(root, "WorldSpaceDelayUIManager");
 
-			EditorUtility.DisplayDialog("Íê³É", "³¡¾°ºËĞÄ¹ÜÀíÆ÷ÒÑ´´½¨/²¹Æë£¨ºöÂÔÒÑ´æÔÚµÄ£©¡£", "È·¶¨");
+			EditorUtility.DisplayDialog("å®Œæˆ", "åœºæ™¯æ ¸å¿ƒç®¡ç†å™¨å·²åˆ›å»º/è¡¥é½ï¼ˆå¿½ç•¥å·²å­˜åœ¨çš„ï¼‰ã€‚", "ç¡®å®š");
 		}
 
 		private static GameObject EnsureRoot()
@@ -66,16 +66,16 @@ namespace InventorySystem.EditorTools
 		}
 
 		/// <summary>
-		/// ³¢ÊÔ°´Ãû³Æ´´½¨¿ÉÑ¡¹ÜÀíÆ÷£¨ÓÃÓÚµÚÈı·½/¿ÉÈ±Ê¡½Å±¾£©
+		/// å°è¯•æŒ‰åç§°åˆ›å»ºå¯é€‰ç®¡ç†å™¨ï¼ˆç”¨äºç¬¬ä¸‰æ–¹/å¯ç¼ºçœè„šæœ¬ï¼‰
 		/// </summary>
 		private static void TryEnsureOptional<TBase>(GameObject root, string typeName) where TBase : Component
 		{
-			// Í¨¹ı·´ÉäÑ°ÕÒÀàĞÍ£¬Èô²»´æÔÚÔòÌø¹ı
+			// é€šè¿‡åå°„å¯»æ‰¾ç±»å‹ï¼Œè‹¥ä¸å­˜åœ¨åˆ™è·³è¿‡
 			var type = System.AppDomain.CurrentDomain.Load("Assembly-CSharp").GetType(typeName) ??
 			           System.Type.GetType(typeName);
 			if (type == null)
 			{
-				// ÔÙÊÔÃüÃû¿Õ¼ä³£¼ûÇ°×º
+				// å†è¯•å‘½åç©ºé—´å¸¸è§å‰ç¼€
 				type = System.Type.GetType($"InventorySystem.{typeName}") ?? System.Type.GetType($"InventorySystem.SpawnSystem.{typeName}");
 			}
 			if (type == null || !typeof(MonoBehaviour).IsAssignableFrom(type)) return;

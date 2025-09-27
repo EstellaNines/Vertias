@@ -3,7 +3,7 @@ using UnityEngine;
 namespace InventorySystem.SpawnSystem
 {
 	/// <summary>
-	/// ¹Ì¶¨ÎïÆ·¸ÅÂÊÉú³É¹ÜÀíÆ÷£ºÏÈ¸ù¾İ¸ÅÂÊ¹ıÂË£¬ÔÙ¸´ÓÃ FixedItemSpawnManager ½øĞĞÊµ¼Ê·ÅÖÃ
+	/// å›ºå®šç‰©å“æ¦‚ç‡ç”Ÿæˆç®¡ç†å™¨ï¼šå…ˆæ ¹æ®æ¦‚ç‡è¿‡æ»¤ï¼Œå†å¤ç”¨ FixedItemSpawnManager è¿›è¡Œå®é™…æ”¾ç½®
 	/// </summary>
 	[AddComponentMenu("Inventory System/Spawn System/Fixed Item Probability Spawn Manager")]
 	public class FixedItemProbabilitySpawnManager : MonoBehaviour
@@ -33,13 +33,13 @@ namespace InventorySystem.SpawnSystem
 		{
 			if (targetGrid == null || probConfig == null)
 			{
-				Debug.LogWarning("[FixedItemProbabilitySpawnManager] ²ÎÊıÎŞĞ§");
+				Debug.LogWarning("[FixedItemProbabilitySpawnManager] å‚æ•°æ— æ•ˆ");
 				return;
 			}
 			var filtered = probConfig.ToFilteredFixedConfig();
 			if (filtered.fixedItems == null || filtered.fixedItems.Length == 0)
 			{
-				if (enableDebugLog) Debug.Log("[FixedItemProbabilitySpawnManager] ÖÀµãºóÎŞ¿ÉÉú³ÉÎïÆ·£¬Ìø¹ı");
+				if (enableDebugLog) Debug.Log("[FixedItemProbabilitySpawnManager] æ·ç‚¹åæ— å¯ç”Ÿæˆç‰©å“ï¼Œè·³è¿‡");
 				return;
 			}
 			FixedItemSpawnManager.Instance.SpawnFixedItems(targetGrid, filtered, containerId);

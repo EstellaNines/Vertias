@@ -357,6 +357,12 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
 
     public void OnEndDrag(PointerEventData eventData)
     {
+        // 判断是否有有效的放置目标
+        bool validDrop = false;
+
+        // 在恢复自身射线拦截前，先通过独立射线检测锁定目标网格
+        ItemGrid targetGrid = ResolveGridUnderPointerSafely();
+
         // 恢复透明度和交互逻辑
         canvasGroup.alpha = originalAlpha; // 恢复原始透明度，通常为 1.0f
         canvasGroup.blocksRaycasts = true;
@@ -364,13 +370,9 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         // 恢复物品原始状态
         RestoreItemOriginalState();
 
-        // 判断是否有有效的放置目标
-        bool validDrop = false;
-
         // 优先检查背包网格
-        if (inventoryController != null && inventoryController.selectedItemGrid != null)
+        if (targetGrid != null)
         {
-            ItemGrid targetGrid = inventoryController.selectedItemGrid;
             Vector2Int gridPosition = targetGrid.GetTileGridPosition(Input.mousePosition);
 
             // 先处理“堆叠合并”场景：命中格子已有同类未满堆叠的物品
@@ -521,6 +523,53 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
                 Debug.LogWarning("[DraggableItem] 未找到 InventorySaveManager 实例，无法执行拖拽保存");
             }
         }
+    }
+
+    // 使用独立的 UI 射线检测查找鼠标下的 ItemGrid，忽略当前拖拽物品本身
+    private ItemGrid ResolveGridUnderPointerSafely()
+    {
+        // 若控制器已有选中的网格，优先使用
+        if (inventoryController != null && inventoryController.selectedItemGrid != null)
+        {
+            return inventoryController.selectedItemGrid;
+        }
+
+        if (EventSystem.current == null) return null;
+        var pointerData = new PointerEventData(EventSystem.current)
+        {
+            position = Input.mousePosition
+        };
+        var results = new System.Collections.Generic.List<RaycastResult>();
+        EventSystem.current.RaycastAll(pointerData, results);
+
+        // 1) 直接命中的 Grid 或其父级中的 Grid
+        for (int i = 0; i < results.Count; i++)
+        {
+            var go = results[i].gameObject;
+            if (go == null) continue;
+            // 忽略自己
+            if (go == gameObject) continue;
+            var di = go.GetComponent<DraggableItem>();
+            if (di != null && di == this) continue;
+
+            var grid = go.GetComponent<ItemGrid>();
+            if (grid != null) return grid;
+            grid = go.GetComponentInParent<ItemGrid>();
+            if (grid != null) return grid;
+        }
+
+        // 2) 退化：从其他可拖拽物品的父级推断 Grid
+        for (int i = 0; i < results.Count; i++)
+        {
+            var go = results[i].gameObject;
+            if (go == null) continue;
+            var di = go.GetComponent<DraggableItem>();
+            if (di == null || di == this) continue;
+            var grid = di.GetParentGrid();
+            if (grid != null) return grid;
+        }
+
+        return null;
     }
 
     // 应用拖拽时的物品设置

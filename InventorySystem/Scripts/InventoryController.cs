@@ -252,7 +252,7 @@ public class InventoryController : MonoBehaviour
         isHighlightActive = false;
     }
 
-    // 通过多种方式获取鼠标下的ItemGrid（重构版）
+    // 通过多种方式获取鼠标下的ItemGrid（改进：优先真实命中的Grid，忽略当前拖拽物体本身）
     private ItemGrid GetItemGridUnderMouse()
     {
         // 使用UI射线检测
@@ -264,39 +264,33 @@ public class InventoryController : MonoBehaviour
         List<RaycastResult> results = new List<RaycastResult>();
         EventSystem.current.RaycastAll(pointerData, results);
 
-        // 优先从检测结果中寻找DraggableItem，因为它在最上层
+        // 1) 优先直接命中的 Grid 或其父级中的 Grid
         foreach (RaycastResult result in results)
         {
-            DraggableItem draggableItem = result.gameObject.GetComponent<DraggableItem>();
-            if (draggableItem != null)
+            if (result.gameObject == null) continue;
+            // 跳过当前正在拖拽的物品本身
+            var di = result.gameObject.GetComponent<DraggableItem>();
+            if (di != null && selectedItem != null && di.GetItem() == selectedItem)
             {
-                // 如果找到了可拖拽物品，直接返回它所在的网格
-                ItemGrid grid = draggableItem.GetParentGrid();
-                if (grid != null)
-                {
-                    return grid;
-                }
+                continue;
             }
+
+            ItemGrid grid = result.gameObject.GetComponent<ItemGrid>();
+            if (grid != null && grid.gameObject != null) return grid;
+
+            grid = result.gameObject.GetComponentInParent<ItemGrid>();
+            if (grid != null && grid.gameObject != null) return grid;
         }
 
-        // 如果没有直接命中物品，再检查是否有网格背景
+        // 2) 退化：考虑命中的其他 DraggableItem 的父级 Grid（排除当前拖拽物）
         foreach (RaycastResult result in results)
         {
-            // 确保result.gameObject存在且未被销毁
             if (result.gameObject == null) continue;
-            
-            ItemGrid itemGrid = result.gameObject.GetComponent<ItemGrid>();
-            if (itemGrid != null && itemGrid.gameObject != null)
-            {
-                return itemGrid;
-            }
-
-            // 也检查父物体，以防点到网格的子元素
-            itemGrid = result.gameObject.GetComponentInParent<ItemGrid>();
-            if (itemGrid != null && itemGrid.gameObject != null)
-            {
-                return itemGrid;
-            }
+            DraggableItem draggableItem = result.gameObject.GetComponent<DraggableItem>();
+            if (draggableItem == null) continue;
+            if (selectedItem != null && draggableItem.GetItem() == selectedItem) continue;
+            ItemGrid grid = draggableItem.GetParentGrid();
+            if (grid != null) return grid;
         }
 
         return null;
