@@ -6,6 +6,8 @@ public class FOV : MonoBehaviour
 {
     [Header("敌人引用")]
     [FieldLabel("敌人组件")] public Enemy enemyComponent; // 敌人组件引用
+    [FieldLabel("中立敌人组件")] public NeutralEnemy neutralComponent; // 中立敌人组件引用（可选）
+    
     
     [Header("视野设置")]
     [FieldLabel("视野角度")] public float fov = 90f; // 视野角度
@@ -22,16 +24,17 @@ public class FOV : MonoBehaviour
     
     private void Start()
     {
-        // 自动获取Enemy组件（如果没有手动设置）
+        // 自动获取 Enemy/NeutralEnemy 组件（如果没有手动设置）
         if (enemyComponent == null)
         {
-            enemyComponent = GetComponent<Enemy>();
-            if (enemyComponent == null)
-            {
-                enemyComponent = GetComponentInParent<Enemy>();
-            }
+            enemyComponent = GetComponent<Enemy>() ?? GetComponentInParent<Enemy>();
+        }
+        if (neutralComponent == null)
+        {
+            neutralComponent = GetComponent<NeutralEnemy>() ?? GetComponentInParent<NeutralEnemy>();
         }
         
+
         // 从Enemy组件同步参数
         SyncParametersFromEnemy();
         
@@ -121,12 +124,17 @@ public class FOV : MonoBehaviour
         int vertexIndex = 1;
         int triangleIndex = 0;
         
-        // 获取射线起点（优先使用Enemy的eyePoint）
+        // 获取射线起点（优先使用持有者的 eyePoint / eye）
         Vector3 rayOrigin = origin;
         if (enemyComponent != null && enemyComponent.eyePoint != null)
         {
             rayOrigin = transform.InverseTransformPoint(enemyComponent.eyePoint.transform.position);
         }
+        else if (neutralComponent != null && neutralComponent.eye != null)
+        {
+            rayOrigin = transform.InverseTransformPoint(neutralComponent.eye.transform.position);
+        }
+        
         
         for (int i = 0; i <= rayCount; i++)
         {
@@ -173,7 +181,7 @@ public class FOV : MonoBehaviour
         mesh.RecalculateNormals(); // 重新计算法线
     }
     
-    // 新增方法：获取考虑Enemy方向/固定视野朝向的射线方向
+    // 新增方法：获取考虑持有者方向/固定视野朝向的射线方向
     private Vector3 GetDirectionFromAngle(float angleInDegrees)
     {
         if (enemyComponent != null)
@@ -201,6 +209,14 @@ public class FOV : MonoBehaviour
             // 将相对角度转换为绝对角度
             angleInDegrees += currentAngle;
         }
+        else if (neutralComponent != null)
+        {
+            // 使用 NeutralEnemy 的 fovForward 作为朝向基准
+            Vector2 baseDir = neutralComponent.fovForward.sqrMagnitude > 0.0001f ? neutralComponent.fovForward : Vector2.right;
+            float currentAngle = Mathf.Atan2(baseDir.y, baseDir.x) * Mathf.Rad2Deg;
+            angleInDegrees += currentAngle;
+        }
+        
         
         // 返回方向向量
         float radians = angleInDegrees * Mathf.Deg2Rad;
@@ -210,14 +226,15 @@ public class FOV : MonoBehaviour
     // 实时更新FOV（可选）
     private void Update()
     {
-        // 检查敌人是否死亡，如果死亡则禁用FOV显示
-        if (enemyComponent != null && enemyComponent.isDead)
+        // 检查持有者是否死亡，如果死亡则禁用FOV显示
+        bool ownerDead = (enemyComponent != null && enemyComponent.isDead) ||
+                         (neutralComponent != null && neutralComponent.isDead);
+        if (ownerDead)
         {
             // 禁用MeshRenderer来隐藏FOV显示
             if (meshRenderer != null && meshRenderer.enabled)
             {
                 meshRenderer.enabled = false;
-                Debug.Log($"敌人 {enemyComponent.gameObject.name} 已死亡，FOV显示已禁用");
             }
             return; // 敌人死亡后不再更新FOV网格
         }
@@ -241,10 +258,32 @@ public class FOV : MonoBehaviour
     // 可视化调试
     private void OnDrawGizmos()
     {
-        if (!Application.isPlaying) return;
+        // 在编辑器下也绘制，便于场景调试
+        // if (!Application.isPlaying) return;
         
         Gizmos.color = Color.white;
         Gizmos.DrawWireSphere(transform.position, viewDistance);
+
+        // 中立敌人听力圈
+        if (neutralComponent != null)
+        {
+            Gizmos.color = new Color(0.2f, 0.6f, 1f, 1f);
+            Vector3 center = neutralComponent.eye != null ? neutralComponent.eye.position : neutralComponent.transform.position;
+            DrawCircleGizmo(center, neutralComponent.hearingRadius, 64);
+        }
+    }
+
+    private void DrawCircleGizmo(Vector3 center, float radius, int segments)
+    {
+        if (radius <= 0f || segments < 3) return;
+        Vector3 prev = center + new Vector3(radius, 0f, 0f);
+        for (int i = 1; i <= segments; i++)
+        {
+            float a = (float)i / segments * Mathf.PI * 2f;
+            Vector3 next = center + new Vector3(Mathf.Cos(a) * radius, Mathf.Sin(a) * radius, 0f);
+            Gizmos.DrawLine(prev, next);
+            prev = next;
+        }
     }
     
     // 手动同步参数的公共方法

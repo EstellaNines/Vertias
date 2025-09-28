@@ -72,10 +72,9 @@ public class EnemyPatrolState : IState
             enemy.transitionState(EnemyState.Hurt); // 进入受伤状态
         }
 
-        // 检测玩家 - 提高优先级，放在路径更新前
+        // 检测玩家
         if (enemy.IsPlayerDetected() && !enemy.IsPlayerCrouching())
         {
-            // 如果检测到玩家且玩家不在潜行状态，立即切换到瞄准状态
             enemy.transitionState(EnemyState.Aim);
             return;
         }

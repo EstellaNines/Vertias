@@ -21,7 +21,6 @@ namespace InventorySystem.SpawnSystem.Editor
         private bool showItemTemplates = true;
         private bool showAdvancedSettings = false;
         private bool showVisualPreview = true;
-        private int previewMaxWidthPixels = 760; // 预览区域最大宽度（自适应Inspector宽度）
         private float cellSize = 48f;            // 单格像素
         private float itemMargin = 4f;           // 物品外边距
         private Vector2 previewScroll;

@@ -29,7 +29,7 @@ public class EnemyAttackState : IState
             enemy.RB.velocity = Vector2.zero;
         }
 
-        // 播放待机动画
+        // 攻击状态播放 Idle（原逻辑）
         if (enemy.animator != null)
         {
             enemy.animator.Play("Idle");

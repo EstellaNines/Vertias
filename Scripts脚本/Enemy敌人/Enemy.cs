@@ -208,7 +208,10 @@ public class Enemy : MonoBehaviour
         }
     }
 
-    private void Update()
+    // --- 动画名称（可被子类覆盖） ---
+    // 动画名直接在各状态内写死（恢复原逻辑）
+
+    protected virtual void Update()
     {
         // 更新方向
         UpdateDirection();
@@ -223,7 +226,7 @@ public class Enemy : MonoBehaviour
         }
     }
 
-    private void FixedUpdate()
+    protected virtual void FixedUpdate()
     {
         if (currentState != null)
         {

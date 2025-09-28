@@ -91,7 +91,10 @@ public class Bullet : MonoBehaviour
         EnemyBulletPool enemyBulletPool = EnemyBulletPool.Instance;
 
         bool isPlayerBullet = CompareTag("PlayerBullets") || (shooter != null && shooter.GetComponentInParent<Player>() != null);
-        bool isEnemyBullet = CompareTag("EnemyBullets") || (shooter != null && (shooter.GetComponentInParent<Enemy>() != null || shooter.GetComponentInParent<Zombie>() != null));
+        bool isEnemyBullet = CompareTag("EnemyBullets") || (shooter != null && (
+            shooter.GetComponentInParent<Enemy>() != null ||
+            shooter.GetComponentInParent<NeutralEnemy>() != null ||
+            shooter.GetComponentInParent<Zombie>() != null));
 
         // 敌人子弹命中玩家
         if (isEnemyBullet)
@@ -120,14 +123,19 @@ public class Bullet : MonoBehaviour
             if (enemy != null)
             {
                 enemy.TakeDamage(BulletDamage);
-                if (ReturnToPool != null)
-                {
-                    ReturnToPool(gameObject);
-                }
-                else
-                {
-                    if (bulletPool != null) bulletPool.ReturnBullet(gameObject);
-                }
+                if (ReturnToPool != null) { ReturnToPool(gameObject); }
+                else { if (bulletPool != null) bulletPool.ReturnBullet(gameObject); }
+                return;
+            }
+
+            // 玩家子弹命中中立敌人：先置敌对，再受伤
+            NeutralEnemy neutralEnemy = collision.GetComponentInParent<NeutralEnemy>();
+            if (neutralEnemy != null)
+            {
+                neutralEnemy.BecomeHostile();
+                neutralEnemy.TakeDamage(BulletDamage);
+                if (ReturnToPool != null) { ReturnToPool(gameObject); }
+                else { if (bulletPool != null) bulletPool.ReturnBullet(gameObject); }
                 return;
             }
 

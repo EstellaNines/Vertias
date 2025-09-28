@@ -19,10 +19,10 @@ public class EnemyMoveState : IState
     // --- 状态方法 ---
     public void OnEnter()
     {
-        // 播放移动动画（如果有）
+        // 播放移动动画
         if (enemy.animator != null)
         {
-            enemy.animator.Play("Move"); // 播放移动动画
+            enemy.animator.Play("Move");
         }
         
         // 设置目标位置为玩家位置
@@ -67,10 +67,9 @@ public class EnemyMoveState : IState
             enemy.transitionState(EnemyState.Hurt); // 进入受伤状态
         }
 
-        // 检测玩家 - 提高优先级
+        // 检测玩家
         if (enemy.IsPlayerDetected() && !enemy.IsPlayerCrouching())
         {
-            // 如果检测到玩家且玩家不在潜行状态，立即切换到瞄准状态
             enemy.transitionState(EnemyState.Aim);
             return;
         }

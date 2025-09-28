@@ -14,6 +14,7 @@ public class EnemyWeaponController : MonoBehaviour
     private bool isWeaponFlipped = false; // 武器是否已翻转
     // private RaycastFOV fov; // 视野检测组件引用
     private Enemy enemyComponent; // 敌人组件引用
+    private Transform ownerTransform; // 持有者Transform（Enemy）
     private EnemyState currentEnemyState; // 当前敌人状态
     private WeaponManager weaponManager; // 武器管理器引用
 
@@ -22,6 +23,7 @@ public class EnemyWeaponController : MonoBehaviour
         // 获取必要组件
         // fov = GetComponentInParent<RaycastFOV>();
         enemyComponent = GetComponentInParent<Enemy>();
+        if (enemyComponent != null) ownerTransform = enemyComponent.transform;
 
         // 自动查找敌人的子对象中的武器
         FindWeaponInEnemyChildren();
@@ -46,13 +48,13 @@ public class EnemyWeaponController : MonoBehaviour
     // 新增方法：在敌人的子对象中查找武器
     private void FindWeaponInEnemyChildren()
     {
-        if (enemyComponent == null) return;
+        if (ownerTransform == null) return;
 
         // 如果已经手动设置了武器Transform，则不自动查找
         if (weaponTransform != null) return;
 
         // 在敌人的所有子对象中查找包含WeaponManager组件的对象
-        WeaponManager[] weaponManagers = enemyComponent.GetComponentsInChildren<WeaponManager>();
+        WeaponManager[] weaponManagers = enemyComponent != null ? enemyComponent.GetComponentsInChildren<WeaponManager>() : new WeaponManager[0];
 
         if (weaponManagers.Length > 0)
         {
@@ -70,7 +72,7 @@ public class EnemyWeaponController : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning($"EnemyWeaponController: 在敌人 {enemyComponent.name} 的子对象中未找到武器（WeaponManager组件）");
+            Debug.LogWarning("EnemyWeaponController: 在持有者的子对象中未找到武器（WeaponManager组件）");
         }
     }
 
@@ -107,6 +109,7 @@ public class EnemyWeaponController : MonoBehaviour
         // 方法1：检查武器管理器的持有者
         if (weaponManager != null)
         {
+            if (enemyComponent == null) return false;
             return weaponManager.GetCurrentOwner() == enemyComponent.transform;
         }
 

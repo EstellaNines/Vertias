@@ -51,15 +51,10 @@ public class EnemyHurtState : IState
         // 如果受伤时间结束或动画播放完毕，退出受伤状态
         if (hurtTimer >= hurtDuration || animationFinished)
         {
-            // 根据是否检测到玩家决定下一个状态
             if (enemy.IsPlayerDetected() && !enemy.IsPlayerCrouching())
-            {
                 enemy.transitionState(EnemyState.Aim);
-            }
             else
-            {
                 enemy.transitionState(EnemyState.Patrol);
-            }
         }
     }
 
