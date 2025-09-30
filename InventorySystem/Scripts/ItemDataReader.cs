@@ -39,6 +39,7 @@ public class ItemDataReader : MonoBehaviour
     [SerializeField, FieldLabel("最大治疗量")] public int maxHealAmount;
     [SerializeField, FieldLabel("恢复饱食度")] public int hungerRestore;
     [SerializeField, FieldLabel("恢复精神值")] public int mentalRestore;
+    [SerializeField, FieldLabel("售价")] public int price;
 
     [Header("ES3 持久化（可选）")]
     [SerializeField, FieldLabel("启用ES3持久化")] private bool enableES3Persistence = true;
@@ -159,6 +160,7 @@ public class ItemDataReader : MonoBehaviour
         maxDurability = itemData.durability;
         maxUsageCount = itemData.usageCount;
         maxHealAmount = itemData.maxHealAmount;
+        price = itemData.price;
 
         runtimeInitialized = true;
     }

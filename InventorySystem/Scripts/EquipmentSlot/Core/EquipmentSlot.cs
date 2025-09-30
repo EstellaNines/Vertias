@@ -1025,10 +1025,19 @@ namespace InventorySystem
 
             LogDebugInfo($"🔄 开始激活容器网格");
 
-            // 🔧 修复：确保旧的容器网格完全清理
+            // 若已有容器网格且已初始化，则直接触发内容加载并复用，避免销毁导致已恢复内容丢失
+            if (containerGrid != null && containerGrid.IsGridInitialized)
+            {
+                LogDebugInfo($"复用已有容器网格: {containerGrid.name}");
+                LoadContainerContent();
+                OnContainerSlotActivated?.Invoke(config.slotType, containerGrid);
+                return;
+            }
+
+            // 如果有网格引用但未初始化，先清理再创建
             if (containerGrid != null)
             {
-                LogDebugInfo($"⚠️ 发现现有容器网格，先进行清理: {containerGrid.name}");
+                LogDebugInfo($"⚠️ 发现未初始化的容器网格，进行清理: {containerGrid.name}");
                 DeactivateContainerGrid();
             }
 

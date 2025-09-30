@@ -1273,6 +1273,13 @@ namespace InventorySystem
                 var itemData = slot.CurrentEquippedItem.ItemData;
                 if (itemData != null && (itemData.category == ItemCategory.Backpack || itemData.category == ItemCategory.TacticalRig))
                 {
+                    // 仅当槽位是容器槽且当前尚无容器网格实例时才强制创建，避免重复创建导致清空
+                    if (slot.ContainerGrid != null)
+                    {
+                        LogDebug($"跳过强制创建容器网格: {slotData.slotType} 已存在容器网格 {slot.ContainerGrid.name}");
+                    }
+                    else
+                    {
                     LogDebug($"🔧 强制为装备槽 {slotData.slotType} 创建容器网格以启用内容恢复");
                     
                     // 🔧 修复：不能在try-catch中使用yield，分开处理
@@ -1293,6 +1300,7 @@ namespace InventorySystem
                         // 等待一帧确保容器网格完全创建
                         yield return null;
                         LogDebug($"✅ 容器网格强制创建完成: {slotData.slotType}");
+                    }
                     }
                 }
             }

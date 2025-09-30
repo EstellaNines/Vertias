@@ -419,6 +419,12 @@ namespace InventorySystem.Editor
                 // 设置情报属性
                 itemData.intelligenceValue = itemJson["intelligenceValue"]?.Value<int>() ?? 0;
 
+                // 设置售价（Special和Intelligence类不设置）
+                if (category != ItemCategory.Special && category != ItemCategory.Intelligence)
+                {
+                    itemData.price = itemJson["price"]?.Value<int>() ?? 0;
+                }
+
                 // 设置唯一ID（现在是long类型）
                 itemData.SetGlobalId(globalIdCounter++);
                 

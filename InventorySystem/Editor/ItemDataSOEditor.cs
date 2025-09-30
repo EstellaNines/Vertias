@@ -388,11 +388,15 @@ namespace InventorySystem.Editor
                     EditorGUILayout.PropertyField(serializedObject.FindProperty("intelligenceValue"), new GUIContent("智力值"));
                     EditorGUILayout.PropertyField(serializedObject.FindProperty("usageCount"), new GUIContent("使用次数"));
                     EditorGUILayout.PropertyField(serializedObject.FindProperty("maxStack"), new GUIContent("最大堆叠数量"));
+                    EditorGUILayout.Space(5);
+                    EditorGUILayout.HelpBox("情报物品不参与交易系统", MessageType.Info);
                     break;
 
                 case ItemCategory.Special:
                     EditorGUILayout.LabelField("特殊物品属性", EditorStyles.boldLabel);
                     EditorGUILayout.PropertyField(serializedObject.FindProperty("maxStack"), new GUIContent("最大堆叠数量"));
+                    EditorGUILayout.Space(5);
+                    EditorGUILayout.HelpBox("特殊物品不参与交易系统", MessageType.Info);
                     break;
 
                 default:
@@ -406,6 +410,17 @@ namespace InventorySystem.Editor
             EditorGUI.BeginDisabledGroup(true);
             EditorGUILayout.LabelField("全局唯一ID", itemData.GlobalId.ToString());
             EditorGUI.EndDisabledGroup();
+
+            EditorGUILayout.Space(5);
+            EditorGUILayout.LabelField("交易信息", EditorStyles.boldLabel);
+            if (itemData.category == ItemCategory.Special || itemData.category == ItemCategory.Intelligence)
+            {
+                EditorGUILayout.LabelField($"售价: 不参与交易");
+            }
+            else
+            {
+                EditorGUILayout.PropertyField(serializedObject.FindProperty("price"), new GUIContent("售价"));
+            }
 
             EditorGUILayout.Space(5);
             EditorGUILayout.LabelField("物品状态检查", EditorStyles.boldLabel);

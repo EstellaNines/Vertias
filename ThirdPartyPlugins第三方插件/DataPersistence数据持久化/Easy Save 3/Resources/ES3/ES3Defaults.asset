@@ -15,8 +15,8 @@ MonoBehaviour:
   settings:
     _location: 0
     path: SaveFile.es3
-    encryptionType: 0
-    compressionType: 0
+    encryptionType: 1
+    compressionType: 1
     encryptionPassword: password
     directory: 0
     format: 0
@@ -40,6 +40,8 @@ MonoBehaviour:
     - BetterHierarchyDemoScripts
     - Cinemachine
     - DebugLogExtensions.Settings
+    - DOTween.Modules
+    - DOTweenPro.Scripts
     - UltimateEditorEnhancer
     - VInspector
     - VTabs
@@ -49,7 +51,7 @@ MonoBehaviour:
   autoUpdateReferences: 1
   addAllPrefabsToManager: 1
   collectDependenciesDepth: 4
-  collectDependenciesTimeout: 10
+  collectDependenciesTimeout: 30
   updateReferencesWhenSceneChanges: 1
   updateReferencesWhenSceneIsSaved: 1
   updateReferencesWhenSceneIsOpened: 1

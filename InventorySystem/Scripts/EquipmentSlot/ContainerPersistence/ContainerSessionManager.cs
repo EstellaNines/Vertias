@@ -572,6 +572,12 @@ namespace InventorySystem
             {
                 if (equippedItemReader.ItemData.IsContainer())
                 {
+                    // 若已有容器网格则复用，避免重复创建导致清空
+                    if (equipmentSlot.ContainerGrid == null)
+                    {
+                        try { equipmentSlot.ForceActivateContainerGrid(); } catch {}
+                    }
+
                     // 获取容器网格
                     var containerGrid = equipmentSlot.GetComponentInChildren<ItemGrid>();
                     if (containerGrid != null)

@@ -24,6 +24,7 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     private InventoryController inventoryController; // 背包控制器
     private float originalAlpha = 0.8f; // 用于记录原始透明度
     private ItemHighlight itemHighlightComponent; // 高亮组件
+    private ItemPriceTooltip itemPriceTooltip; // 价格提示组件
     
     // 拖拽时的状态记录
     private Vector2 originalSize; // 原始大小
@@ -72,6 +73,9 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
 
         // 获取高亮组件
         itemHighlightComponent = GetComponent<ItemHighlight>();
+        
+        // 获取价格提示组件
+        itemPriceTooltip = GetComponent<ItemPriceTooltip>();
         
         // 获取物品背景对象引用
         Transform backgroundTransform = transform.Find("ItemBackground");
@@ -125,6 +129,12 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         {
             itemHighlightComponent.ShowHighlight();
         }
+        
+        // 触发价格提示
+        if (itemPriceTooltip != null)
+        {
+            itemPriceTooltip.OnItemPointerEnter();
+        }
     }
 
     public void OnPointerExit(PointerEventData eventData)
@@ -132,6 +142,12 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         if (itemHighlightComponent != null)
         {
             itemHighlightComponent.HideHighlight();
+        }
+        
+        // 隐藏价格提示
+        if (itemPriceTooltip != null)
+        {
+            itemPriceTooltip.OnItemPointerExit();
         }
     }
 
@@ -437,7 +453,7 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
 
             if (!handledByStackMerge && targetGrid.CanPlaceItemAtPosition(gridPosition.x, gridPosition.y, item.GetWidth(), item.GetHeight(), item))
             {
-                // 在目标网格中放置物品
+                // 在目标网格中放置物品（移除交易/扣款逻辑）
                 if (targetGrid.PlaceItem(item, gridPosition.x, gridPosition.y))
                 {
                     validDrop = true;
@@ -454,8 +470,6 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
 
                     // 更新物品的网格状态
                     item.SetGridState(targetGrid, gridPosition);
-
-
                 }
             }
             else
@@ -524,6 +538,8 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
             }
         }
     }
+
+    // 移除：与金钱/购买相关的辅助函数（重构准备）
 
     // 使用独立的 UI 射线检测查找鼠标下的 ItemGrid，忽略当前拖拽物品本身
     private ItemGrid ResolveGridUnderPointerSafely()

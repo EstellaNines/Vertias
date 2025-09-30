@@ -89,7 +89,11 @@ namespace InventorySystem
         [FieldLabel("情报值")]
         public int intelligenceValue = 0;       // 情报值（情报物品）
 
-		[Header("武器弹药（仅武器类使用）")]
+        [Header("交易属性")]
+        [FieldLabel("售价")]
+        public int price = 0;                   // 物品售价（Special和Intelligence类不使用）
+
+	[Header("武器弹药（仅武器类使用）")]
 		[FieldLabel("可用弹药列表")]
 		public string[] ammunitionOptions;       // 武器可用的弹药名列表（来自 JSON 的 Ammunition 数组）
 

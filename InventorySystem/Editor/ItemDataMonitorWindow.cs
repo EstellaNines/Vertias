@@ -173,6 +173,7 @@ public class ItemDataMonitorWindow : EditorWindow
         EditorGUILayout.LabelField("治疗量", EditorStyles.toolbarButton, GUILayout.Width(50));
         EditorGUILayout.LabelField("情报值", EditorStyles.toolbarButton, GUILayout.Width(50));
         EditorGUILayout.LabelField("货币量", EditorStyles.toolbarButton, GUILayout.Width(50));
+        EditorGUILayout.LabelField("售价", EditorStyles.toolbarButton, GUILayout.Width(60));
         EditorGUILayout.LabelField("实例ID", EditorStyles.toolbarButton, GUILayout.Width(80));
         EditorGUILayout.LabelField("更新时间", EditorStyles.toolbarButton, GUILayout.Width(120));
         EditorGUILayout.EndHorizontal();
@@ -194,6 +195,7 @@ public class ItemDataMonitorWindow : EditorWindow
             EditorGUILayout.LabelField(item.currentHealAmount.ToString(), GUILayout.Width(50));
             EditorGUILayout.LabelField(item.intelligenceValue.ToString(), GUILayout.Width(50)); // 修正：使用intelligenceValue
             EditorGUILayout.LabelField(item.currencyAmount.ToString(), GUILayout.Width(50)); // 修正：使用currencyAmount
+            EditorGUILayout.LabelField(item.price > 0 ? item.price.ToString() : "-", GUILayout.Width(60));
             EditorGUILayout.LabelField(item.gameObjectInstanceId.ToString(), GUILayout.Width(80)); // 修正：使用gameObjectInstanceId
             EditorGUILayout.LabelField(System.DateTime.FromBinary((long)item.lastUpdateTime).ToString("HH:mm:ss"), GUILayout.Width(120));
             

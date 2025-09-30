@@ -395,6 +395,68 @@ namespace InventorySystem.Editor
 
                 // 右键菜单：为物品主对象添加右键菜单处理脚本，生成的预制体支持右键弹出菜单
                 rootObject.AddComponent<InventoryItemRightClickHandler>();
+
+                // 价格提示：为物品添加鼠标悬停显示价格功能
+                ItemPriceTooltip priceTooltip = rootObject.AddComponent<ItemPriceTooltip>();
+                
+                // 加载并绑定LootValve预制体
+                GameObject lootValvePrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefab预制体/UI/Backpack背包/LootValve.prefab");
+                if (lootValvePrefab != null)
+                {
+                    var priceTooltipPrefabField = typeof(ItemPriceTooltip).GetField("priceTooltipPrefab",
+                        System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                    if (priceTooltipPrefabField != null)
+                    {
+                        priceTooltipPrefabField.SetValue(priceTooltip, lootValvePrefab);
+                    }
+                    
+                    // 设置悬停触发时间为0.5秒
+                    var hoverDelayField = typeof(ItemPriceTooltip).GetField("hoverDelay",
+                        System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                    if (hoverDelayField != null)
+                    {
+                        hoverDelayField.SetValue(priceTooltip, 0.5f);
+                    }
+                    
+                    // 设置向上偏移2个单位
+                    var tooltipOffsetField = typeof(ItemPriceTooltip).GetField("tooltipOffset",
+                        System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                    if (tooltipOffsetField != null)
+                    {
+                        tooltipOffsetField.SetValue(priceTooltip, new Vector2(0, 2f));
+                    }
+                    
+                    // 设置稀有度颜色
+                    var normalColorField = typeof(ItemPriceTooltip).GetField("normalColor",
+                        System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                    var rareColorField = typeof(ItemPriceTooltip).GetField("rareColor",
+                        System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                    var epicColorField = typeof(ItemPriceTooltip).GetField("epicColor",
+                        System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                    var legendaryColorField = typeof(ItemPriceTooltip).GetField("legendaryColor",
+                        System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                    
+                    if (normalColorField != null)
+                        normalColorField.SetValue(priceTooltip, new Color(0f, 1f, 0f, 1f)); // 绿色
+                    if (rareColorField != null)
+                        rareColorField.SetValue(priceTooltip, new Color(1f, 1f, 0f, 1f)); // 黄色
+                    if (epicColorField != null)
+                        epicColorField.SetValue(priceTooltip, new Color(1f, 0.5f, 0f, 1f)); // 橙色
+                    if (legendaryColorField != null)
+                        legendaryColorField.SetValue(priceTooltip, new Color(1f, 0f, 0f, 1f)); // 红色
+                    
+                    // 设置从Resources加载为false
+                    var loadFromResourcesField = typeof(ItemPriceTooltip).GetField("loadFromResources",
+                        System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                    if (loadFromResourcesField != null)
+                    {
+                        loadFromResourcesField.SetValue(priceTooltip, false); // 直接使用预制体引用，不从Resources加载
+                    }
+                }
+                else
+                {
+                    Debug.LogWarning($"[ItemPrefabGenerator] 未找到LootValve预制体，路径: Assets/Prefab预制体/UI/Backpack背包/LootValve.prefab");
+                }
         
                 // 设置ItemHighlight组件的highlightImage引用
                 var highlightImageField = typeof(ItemHighlight).GetField("highlightImage",

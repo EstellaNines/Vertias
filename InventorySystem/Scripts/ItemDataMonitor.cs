@@ -80,6 +80,7 @@ public class ItemDataMonitor : MonoBehaviour
         [FieldLabel("恢复精神值")] public int mentalRestore;
         [FieldLabel("情报值")] public int intelligenceValue;
         [FieldLabel("货币数量")] public int currencyAmount;
+        [FieldLabel("售价")] public int price;
         
         // 装备属性
         [FieldLabel("弹药类型")] public string ammunitionType;
@@ -131,6 +132,7 @@ public class ItemDataMonitor : MonoBehaviour
                 mentalRestore = reader.ItemData.mentalRestore;
                 intelligenceValue = reader.ItemData.intelligenceValue;
                 currencyAmount = reader.currencyAmount;
+                price = reader.price;
                 
                 // 装备属性
                 ammunitionType = reader.ItemData.ammunitionType;

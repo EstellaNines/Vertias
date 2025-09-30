@@ -10,12 +10,13 @@ public class MissionData
 {
     public int id;                    // 任务唯一标识符
     public string name;               // 任务名称
-    public string type;               // 任务类型："explore"、"combat"、"talk" 等类型
+    public string type;               // 任务类型："explore"、"combat"、"talk"、"trade" 等类型
     public string category;           // 任务分类："main"（主线）、"side"（支线）、"daily"（日常）
     public string iconPath;           // 任务图标路径（相对于Resources文件夹的路径）
     public string legendPath;         // 任务图例路径（相对于Resources文件夹的路径）
     public string description;        // 任务描述信息
     public MissionReward reward;      // 任务奖励数据
+    public MissionRequirements requirements; // 任务需求数据
     public string publisher;          // 任务发布者（例如："政府"、"商人"等）
 }
 
@@ -26,6 +27,7 @@ public class MissionReward
     public int weapon;                // 武器奖励数量
     public int food;                  // 食物奖励数量
     public int intelligence;          // 情报奖励数量
+    public int discount;              // 商店折扣百分比（例如：20 表示 20%）
     public string moneyIconPath;      // 金钱图标路径
     public string weaponIconPath;     // 武器图标路径
     public string foodIconPath;       // 食物图标路径
@@ -33,9 +35,27 @@ public class MissionReward
 }
 
 [System.Serializable]
+public class MissionRequirements
+{
+    public int intelligence;          // 需求情报点数
+    public SerializableDictionary item; // 需求物品字典（Key: ItemID, Value: ItemName）
+}
+
+[System.Serializable]
+public class SerializableDictionary
+{
+    // Unity的JsonUtility不支持Dictionary，需要手动解析
+    // 这里使用自定义方式来存储字典数据
+    // 由于JSON格式为 {"1402": "LEDX", "1405": "Log"}
+    // 我们需要在运行时手动解析
+}
+
+[System.Serializable]
 public class MissionDataCollection
 {
-    public List<MissionData> missions; // 任务数据列表
+    public List<MissionData> missions; // 任务数据列表（旧格式兼容）
+    public List<MissionData> mainMissions; // 主线任务列表（新格式）
+    public List<MissionData> sideMissions; // 支线任务列表（新格式）
 }
 
 public class MissionManager : MonoBehaviour

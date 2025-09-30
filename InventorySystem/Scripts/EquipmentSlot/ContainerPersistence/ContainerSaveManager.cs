@@ -265,7 +265,8 @@ namespace InventorySystem
 
         private const string CONTAINER_DATA_KEY = "ContainerSaveDataCollection";
         private Dictionary<string, ContainerSaveData> _containerDataCache = new Dictionary<string, ContainerSaveData>();
-        private bool _isRestoring = false; // 恢复过程标志，防止恢复时触发自动保存
+        // 将“恢复中”从全局标志改为按容器键粒度的集合，避免不同容器之间互相阻塞
+        private HashSet<string> _restoringKeys = new HashSet<string>();
         
         // 保存节流机制
         private float _lastSaveTime = 0f;
@@ -467,8 +468,8 @@ namespace InventorySystem
         // ========= 玩家口袋网格（PlayerItemGrid）持久化 =========
         private string GetPlayerGridKey(ItemGrid pocketGrid)
         {
-            if (pocketGrid == null) return "PlayerGrid_NULL";
-            return $"PlayerGrid_{pocketGrid.GridGUID}";
+            // 使用稳定的跨场景键，避免每场景不同GUID导致无法匹配
+            return "PlayerGrid_player_pocket_grid";
         }
 
         public void SavePlayerPocketGrid(ItemGrid pocketGrid)
@@ -476,7 +477,24 @@ namespace InventorySystem
             if (pocketGrid == null) return;
             string key = GetPlayerGridKey(pocketGrid);
             if (showDebugLog) Debug.Log($"[ContainerSaveManager] 保存玩家口袋网格: {key}");
+
             var saveData = new ContainerSaveData(pocketGrid, key, "PlayerItemGrid", pocketGrid.GridGUID);
+
+            // 保护：当网格未激活或子物体为0且已有有效数据时，不用空数据覆盖
+            bool gridInactiveOrEmpty = !pocketGrid.gameObject.activeInHierarchy || pocketGrid.transform.childCount == 0;
+            if (gridInactiveOrEmpty && _containerDataCache.TryGetValue(key, out var existing) && existing != null && existing.containerItems != null && existing.containerItems.Count > 0)
+            {
+                if (showDebugLog) Debug.LogWarning($"[ContainerSaveManager] 🛡️ 跳过保存玩家口袋网格的空数据(未激活或无子物体)，保留已有 {existing.containerItems.Count} 个物品");
+                return;
+            }
+
+            // 若新采集的数据确实为0，但并非未激活/无子物体，也做一次覆盖保护
+            if (saveData.containerItems.Count == 0 && _containerDataCache.TryGetValue(key, out existing) && existing != null && existing.containerItems != null && existing.containerItems.Count > 0)
+            {
+                if (showDebugLog) Debug.LogWarning($"[ContainerSaveManager] 🛡️ 阻止用空的玩家口袋数据覆盖有效数据 - 现有: {existing.containerItems.Count}");
+                return;
+            }
+
             _containerDataCache[key] = saveData;
             SaveAllContainerDataToES3();
             if (enableCrossSessionSave) SaveCrossSessionDataThrottled();
@@ -488,6 +506,21 @@ namespace InventorySystem
             string key = GetPlayerGridKey(pocketGrid);
             if (showDebugLog) Debug.Log($"[ContainerSaveManager] 💾 立即保存玩家口袋网格: {key}");
             var saveData = new ContainerSaveData(pocketGrid, key, "PlayerItemGrid", pocketGrid.GridGUID);
+
+            // 保护：避免用空数据即时覆盖有效数据
+            bool gridInactiveOrEmpty = !pocketGrid.gameObject.activeInHierarchy || pocketGrid.transform.childCount == 0;
+            if (gridInactiveOrEmpty && _containerDataCache.TryGetValue(key, out var existing) && existing != null && existing.containerItems != null && existing.containerItems.Count > 0)
+            {
+                if (showDebugLog) Debug.LogWarning($"[ContainerSaveManager] 🛡️ 跳过立即保存玩家口袋网格的空数据(未激活或无子物体)，保留已有 {existing.containerItems.Count} 个物品");
+                return;
+            }
+
+            if (saveData.containerItems.Count == 0 && _containerDataCache.TryGetValue(key, out existing) && existing != null && existing.containerItems != null && existing.containerItems.Count > 0)
+            {
+                if (showDebugLog) Debug.LogWarning($"[ContainerSaveManager] 🛡️ 阻止用空的玩家口袋数据(立即保存)覆盖有效数据 - 现有: {existing.containerItems.Count}");
+                return;
+            }
+
             _containerDataCache[key] = saveData;
             SaveAllContainerDataToES3();
             if (enableCrossSessionSave) ExecuteCrossSessionSave();
@@ -552,20 +585,17 @@ namespace InventorySystem
         {
             if (containerGrid == null) return false;
             
-            // 🔧 修复：不强制要求父对象激活，只要容器网格本身存在即可
-            // 原因：装备槽可能在背包未打开时处于非激活状态，但容器网格仍可初始化
-            if (!containerGrid.gameObject.activeSelf) return false;
-            
+            // 允许未激活但已创建的网格，通过尺寸与组件检查来判断
             try
             {
                 // 验证网格的基本属性是否可访问
                 int width = containerGrid.CurrentWidth;
                 int height = containerGrid.CurrentHeight;
                 
-                // 🔧 更宽松的检查：只验证尺寸，不调用可能失败的GetItemAt
+                // 更宽松的检查：只验证尺寸，不调用可能失败的GetItemAt
                 if (width <= 0 || height <= 0) return false;
                 
-                // 🔧 确保网格组件存在且已初始化
+                // 确保网格组件存在且已初始化
                 if (containerGrid.transform == null) return false;
                 
                 if (showDebugLog) Debug.Log($"[ContainerSaveManager] 容器网格就绪检查通过: {containerGrid.name} ({width}x{height})");
@@ -597,11 +627,11 @@ namespace InventorySystem
                 return;
             }
 
-            // 🔧 修复：防止重复加载同一个容器
+            // 🔧 修复：防止同一容器重复加载（按键粒度锁，而不是全局锁）
             string containerKey = saveData.containerKey;
-            if (_isRestoring)
+            if (_restoringKeys.Contains(containerKey))
             {
-                if (showDebugLog) Debug.Log($"[ContainerSaveManager] 🔒 容器正在恢复中，跳过重复加载: {containerKey}");
+                if (showDebugLog) Debug.Log($"[ContainerSaveManager] 🔒 该容器正在恢复中，跳过重复加载: {containerKey}");
                 return;
             }
 
@@ -611,8 +641,7 @@ namespace InventorySystem
             Debug.Log($"[ContainerSaveManager] 开始恢复容器物品 - 容器: {saveData.containerItemID}_{saveData.containerGlobalID} ({saveData.slotType}), 物品数量: {saveData.containerItems.Count}");
 
             // 暂时禁用自动保存以防止恢复过程中的干扰
-            bool wasRestoring = _isRestoring;
-            _isRestoring = true;
+            _restoringKeys.Add(containerKey);
             
             if (showDebugLog)
                 Debug.Log("[ContainerSaveManager] 🔒 恢复过程中暂时禁用自动保存");
@@ -665,8 +694,8 @@ namespace InventorySystem
                 }
             }
 
-            // 恢复自动保存状态
-            _isRestoring = wasRestoring;
+            // 解除该容器的恢复锁
+            _restoringKeys.Remove(containerKey);
             
             if (showDebugLog)
                 Debug.Log("[ContainerSaveManager] 🔓 恢复完成，重新启用自动保存");
@@ -1479,10 +1508,12 @@ namespace InventorySystem
             if (!enableCrossSessionSave)
                 return;
                 
-            if (_isRestoring)
+            // 若任意容器正在恢复，节流保存仍可进行，但我们只在真正执行保存时检查具体容器；
+            // 这里保持原有语义：恢复过程中跳过一次节流保存，防止频繁冲突
+            if (_restoringKeys != null && _restoringKeys.Count > 0)
             {
                 if (showDebugLog)
-                    Debug.Log("[ContainerSaveManager] 🔒 恢复过程中跳过保存");
+                    Debug.Log("[ContainerSaveManager] 🔒 有容器正在恢复，跳过本次节流保存");
                 return;
             }
             
