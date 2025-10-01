@@ -2,12 +2,12 @@ using UnityEngine;
 using TMPro;
 
 /// <summary>
-/// ±³°üÃæ°å×ó²à StateLine ÊıÖµÕ¹Ê¾£ºÏÔÊ¾Íæ¼Ò ÉúÃü/±¥Ê³/¾«Éñ µÄ "µ±Ç°/×î´ó"¡£
-/// ½«´Ë½Å±¾¹Òµ½ BackpackPanel -> BackPackLeft -> StateLine ÉÏ£¬ÎŞĞèÊÖ¶¯ÍÏÒıÓÃ¡£
+/// èƒŒåŒ…é¢æ¿å·¦ä¾§ StateLine æ•°å€¼å±•ç¤ºï¼šæ˜¾ç¤ºç©å®¶ ç”Ÿå‘½/é¥±é£Ÿ/ç²¾ç¥ çš„ "å½“å‰/æœ€å¤§"ã€‚
+/// å°†æ­¤è„šæœ¬æŒ‚åˆ° BackpackPanel -> BackPackLeft -> StateLine ä¸Šï¼Œæ— éœ€æ‰‹åŠ¨æ‹–å¼•ç”¨ã€‚
 /// </summary>
 public class BackpackPlayerVitalsDisplay : MonoBehaviour
 {
-    [Header("¿ÉÑ¡£ºÊÖ¶¯Ö¸¶¨Íæ¼Ò/ÊıÖµ×é¼ş£¨Áô¿ÕÔò×Ô¶¯²éÕÒ£©")]
+    [Header("å¯é€‰ï¼šæ‰‹åŠ¨æŒ‡å®šç©å®¶/æ•°å€¼ç»„ä»¶ï¼ˆç•™ç©ºåˆ™è‡ªåŠ¨æŸ¥æ‰¾ï¼‰")]
     public Player player;
     public PlayerVitalStats vitalStats;
 
@@ -15,7 +15,7 @@ public class BackpackPlayerVitalsDisplay : MonoBehaviour
     private TextMeshProUGUI _hungerText;
     private TextMeshProUGUI _mentalText;
 
-    // »º´æÉÏ´ÎÏÔÊ¾µÄÖµ£¨ÓÃÓÚÎŞÊÂ¼şÀ´Ô´Ê±µÄ¶¯Ì¬Ë¢ĞÂ£©
+    // ç¼“å­˜ä¸Šæ¬¡æ˜¾ç¤ºçš„å€¼ï¼ˆç”¨äºæ— äº‹ä»¶æ¥æºæ—¶çš„åŠ¨æ€åˆ·æ–°ï¼‰
     private float _lastHealth = -1f, _lastMaxHealth = -1f;
     private float _lastHunger = -1f, _lastMaxHunger = -1f;
     private float _lastMental = -1f, _lastMaxMental = -1f;
@@ -23,7 +23,7 @@ public class BackpackPlayerVitalsDisplay : MonoBehaviour
 
     private void Awake()
     {
-        // ×Ô¶¯²éÕÒÎÄ±¾£ºÔÚ StateLine ÏÂ°´ÃüÃû²éÕÒ
+        // è‡ªåŠ¨æŸ¥æ‰¾æ–‡æœ¬ï¼šåœ¨ StateLine ä¸‹æŒ‰å‘½åæŸ¥æ‰¾
         _healthText = transform.Find("HealthValue")?.GetComponent<TextMeshProUGUI>();
         _hungerText = transform.Find("SatietyValue")?.GetComponent<TextMeshProUGUI>();
         _mentalText = transform.Find("MentalValue")?.GetComponent<TextMeshProUGUI>();
@@ -49,7 +49,7 @@ public class BackpackPlayerVitalsDisplay : MonoBehaviour
             vitalStats.OnMentalChanged += HandleMentalChanged;
         }
 
-        // ³õ´ÎË¢ĞÂ£¨¼æÈİÎŞÊÂ¼şÍÆËÍµÄ³¡¾°£©
+        // åˆæ¬¡åˆ·æ–°ï¼ˆå…¼å®¹æ— äº‹ä»¶æ¨é€çš„åœºæ™¯ï¼‰
         _lastHealth = _lastMaxHealth = _lastHunger = _lastMaxHunger = _lastMental = _lastMaxMental = -1f;
         RefreshAll();
     }
@@ -66,10 +66,10 @@ public class BackpackPlayerVitalsDisplay : MonoBehaviour
 
     private void Update()
     {
-        // ÂÖÑ¯Ë¢ĞÂ£ºµ±Íâ²¿Î´Í¨¹ı PlayerVitalStats ´¥·¢ÊÂ¼şÊ±£¬ÈÔ¿É¶¯Ì¬¸üĞÂ
+        // è½®è¯¢åˆ·æ–°ï¼šå½“å¤–éƒ¨æœªé€šè¿‡ PlayerVitalStats è§¦å‘äº‹ä»¶æ—¶ï¼Œä»å¯åŠ¨æ€æ›´æ–°
         PollAndRefreshIfChanged();
 
-        // ÔËĞĞÊ±¶ªÊ§»òÉĞÎ´ÕÒµ½Ê±£¬¶¨ÆÚÖØÊÔ°ó¶¨
+        // è¿è¡Œæ—¶ä¸¢å¤±æˆ–å°šæœªæ‰¾åˆ°æ—¶ï¼Œå®šæœŸé‡è¯•ç»‘å®š
         if ((player == null || vitalStats == null) && Time.unscaledTime >= _nextFindTime)
         {
             var newPlayer = player != null ? player : FindObjectOfType<Player>();
@@ -81,7 +81,7 @@ public class BackpackPlayerVitalsDisplay : MonoBehaviour
             if (boundChanged)
             {
                 RefreshAll();
-                // ÖØĞÂ¶©ÔÄÊÂ¼ş£¨±ÜÃâÖØ¸´¶©ÔÄ£ºÏÈÈ«²¿ÍË¶©ÔÙ¶©ÔÄÒ»´Î£©
+                // é‡æ–°è®¢é˜…äº‹ä»¶ï¼ˆé¿å…é‡å¤è®¢é˜…ï¼šå…ˆå…¨éƒ¨é€€è®¢å†è®¢é˜…ä¸€æ¬¡ï¼‰
                 if (vitalStats != null)
                 {
                     vitalStats.OnHealthChanged -= HandleHealthChanged;
@@ -105,7 +105,7 @@ public class BackpackPlayerVitalsDisplay : MonoBehaviour
         }
         else if (player != null)
         {
-            // ÍË»¯¼æÈİ£ºÖ±½Ó´Ó Player ¾É×Ö¶Î¶ÁÈ¡
+            // é€€åŒ–å…¼å®¹ï¼šç›´æ¥ä» Player æ—§å­—æ®µè¯»å–
             HandleHealthChanged(player.CurrentHealth, player.MaxHealth);
             HandleHungerChanged(player.CurrentHunger, player.MaxHunger);
             HandleMentalChanged(player.CurrentMental, player.MaxMental);
@@ -131,7 +131,7 @@ public class BackpackPlayerVitalsDisplay : MonoBehaviour
 
     private static string FormatPair(float current, float max)
     {
-        // ÏÔÊ¾ÎªÕûÊı±ÈÖµ£ºµ±Ç°/×î´ó
+        // æ˜¾ç¤ºä¸ºæ•´æ•°æ¯”å€¼ï¼šå½“å‰/æœ€å¤§
         int c = Mathf.RoundToInt(Mathf.Max(0f, current));
         int m = Mathf.RoundToInt(Mathf.Max(1f, max));
         return $"{c}/{m}";

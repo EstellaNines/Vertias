@@ -9,199 +9,213 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 99f7a18fba3c1fa418e78d8de718e4db, type: 3}
+  m_Script: {fileID: 11500000, guid: 669130a6c73d48241ada8486f859bde4, type: 3}
   m_Name: LoganStyrkeTradeItemConfig
   m_EditorClassIdentifier: 
-  configName: Random Items - LoganStyrkeTradeItemConfig
+  configName: CustomFixed Items
   description: 
   version: 1.0.0
   targetContainerType: 999
-  containerIdentifier: ContainerItemGrid
-  minimumGridSize: {x: 10, y: 6}
-  minTotalItems: 10
-  maxTotalItems: 20
-  quantityMode: 0
-  enableFixedItemGeneration: 0
-  fixedItemData: {fileID: 0}
-  fixedItemStackAmount: 1
-  itemCategories:
-  - category: 1
-    categoryName: "\u65B0\u7269\u54C1\u7C7B\u522B"
-    description: "\u63CF\u8FF0\u6B64\u7C7B\u522B\u7684\u7269\u54C1"
-    minSpawnCount: 1
-    maxSpawnCount: 4
-    autoLoadItems: 1
-    rarityWeights:
-    - rarity: 0
-      weight: 0.3
-    - rarity: 0
-      weight: 0.5
-    - rarity: 0
-      weight: 0.1
-    - rarity: 0
-      weight: 0.1
-    rarityGroups:
-    - rarity: 0
-      weight: 0.25
-      items: []
-    - rarity: 1
-      weight: 0.25
-      items: []
-    - rarity: 2
-      weight: 0.25
-      items: []
-    - rarity: 3
-      weight: 0.25
-      items: []
-    enableStackRandomization: 0
-    minStackAmount: 1
-    maxStackAmount: 50
-    isEnabled: 1
-    priority: 5
+  containerIdentifier: 
+  minimumGridSize: {x: 10, y: 10}
+  spawnTiming: 1
+  requiredConditionTags: []
+  cooldownTime: 0
+  fixedItems:
+  - templateId: item_template_638949256690886196
+    itemData: {fileID: 11400000, guid: d567f32b47da5a64bac90fe8ed3c77e0, type: 2}
+    quantity: 2
+    stackAmount: 1
+    placementType: 1
+    exactPosition: {x: 0, y: 0}
+    constrainedArea:
+      x: 0
+      y: 0
+      width: 10
+      height: 10
+    preferredArea:
+      x: 0
+      y: 0
+      width: 5
+      height: 5
+    priority: 2
+    scanPattern: 0
+    allowRotation: 1
+    conflictResolution: 2
+    isUniqueSpawn: 1
+    conditionTags: []
+    maxRetryAttempts: 3
     enableDebugLog: 0
-  - category: 2
-    categoryName: "\u65B0\u7269\u54C1\u7C7B\u522B"
-    description: "\u63CF\u8FF0\u6B64\u7C7B\u522B\u7684\u7269\u54C1"
-    minSpawnCount: 1
-    maxSpawnCount: 4
-    autoLoadItems: 1
-    rarityWeights:
-    - rarity: 0
-      weight: 0.3
-    - rarity: 0
-      weight: 0.5
-    - rarity: 0
-      weight: 0.1
-    - rarity: 0
-      weight: 0.1
-    rarityGroups:
-    - rarity: 0
-      weight: 0.25
-      items: []
-    - rarity: 1
-      weight: 0.25
-      items: []
-    - rarity: 2
-      weight: 0.25
-      items: []
-    - rarity: 3
-      weight: 0.25
-      items: []
-    enableStackRandomization: 0
-    minStackAmount: 1
-    maxStackAmount: 50
-    isEnabled: 1
-    priority: 5
+  - templateId: item_template_638949256698622736
+    itemData: {fileID: 11400000, guid: 6e8f8930e8bf01c4aa0426baa42a23b2, type: 2}
+    quantity: 1
+    stackAmount: 1
+    placementType: 1
+    exactPosition: {x: 0, y: 0}
+    constrainedArea:
+      x: 0
+      y: 0
+      width: 10
+      height: 10
+    preferredArea:
+      x: 0
+      y: 0
+      width: 5
+      height: 5
+    priority: 2
+    scanPattern: 0
+    allowRotation: 1
+    conflictResolution: 2
+    isUniqueSpawn: 1
+    conditionTags: []
+    maxRetryAttempts: 3
     enableDebugLog: 0
-  - category: 3
-    categoryName: "\u65B0\u7269\u54C1\u7C7B\u522B"
-    description: "\u63CF\u8FF0\u6B64\u7C7B\u522B\u7684\u7269\u54C1"
-    minSpawnCount: 1
-    maxSpawnCount: 4
-    autoLoadItems: 1
-    rarityWeights:
-    - rarity: 0
-      weight: 0.3
-    - rarity: 0
-      weight: 0.5
-    - rarity: 0
-      weight: 0.1
-    - rarity: 0
-      weight: 0.1
-    rarityGroups:
-    - rarity: 0
-      weight: 0.25
-      items: []
-    - rarity: 1
-      weight: 0.25
-      items: []
-    - rarity: 2
-      weight: 0.25
-      items: []
-    - rarity: 3
-      weight: 0.25
-      items: []
-    enableStackRandomization: 0
-    minStackAmount: 1
-    maxStackAmount: 50
-    isEnabled: 1
-    priority: 5
+  - templateId: item_template_638949256702354119
+    itemData: {fileID: 11400000, guid: 0dd69dcd3c52e474c9f554cd06e60ef0, type: 2}
+    quantity: 2
+    stackAmount: 1
+    placementType: 1
+    exactPosition: {x: 0, y: 0}
+    constrainedArea:
+      x: 0
+      y: 0
+      width: 10
+      height: 10
+    preferredArea:
+      x: 0
+      y: 0
+      width: 5
+      height: 5
+    priority: 2
+    scanPattern: 0
+    allowRotation: 1
+    conflictResolution: 2
+    isUniqueSpawn: 1
+    conditionTags: []
+    maxRetryAttempts: 3
     enableDebugLog: 0
-  - category: 6
-    categoryName: "\u65B0\u7269\u54C1\u7C7B\u522B"
-    description: "\u63CF\u8FF0\u6B64\u7C7B\u522B\u7684\u7269\u54C1"
-    minSpawnCount: 1
-    maxSpawnCount: 4
-    autoLoadItems: 1
-    rarityWeights:
-    - rarity: 0
-      weight: 0.3
-    - rarity: 0
-      weight: 0.4
-    - rarity: 0
-      weight: 0.2
-    - rarity: 0
-      weight: 0.1
-    rarityGroups:
-    - rarity: 0
-      weight: 0.25
-      items: []
-    - rarity: 1
-      weight: 0.25
-      items: []
-    - rarity: 2
-      weight: 0.25
-      items: []
-    - rarity: 3
-      weight: 0.25
-      items: []
-    enableStackRandomization: 1
-    minStackAmount: 20
-    maxStackAmount: 100
-    isEnabled: 1
-    priority: 5
+  - templateId: item_template_638949256705623713
+    itemData: {fileID: 11400000, guid: 9a30e6a2b6dcefa4c93f24b2951a4130, type: 2}
+    quantity: 2
+    stackAmount: 1
+    placementType: 1
+    exactPosition: {x: 0, y: 0}
+    constrainedArea:
+      x: 0
+      y: 0
+      width: 10
+      height: 10
+    preferredArea:
+      x: 0
+      y: 0
+      width: 5
+      height: 5
+    priority: 2
+    scanPattern: 0
+    allowRotation: 1
+    conflictResolution: 2
+    isUniqueSpawn: 1
+    conditionTags: []
+    maxRetryAttempts: 3
     enableDebugLog: 0
-  - category: 5
-    categoryName: "\u65B0\u7269\u54C1\u7C7B\u522B"
-    description: "\u63CF\u8FF0\u6B64\u7C7B\u522B\u7684\u7269\u54C1"
-    minSpawnCount: 1
-    maxSpawnCount: 4
-    autoLoadItems: 1
-    rarityWeights:
-    - rarity: 0
-      weight: 0
-    - rarity: 0
-      weight: 1
-    - rarity: 0
-      weight: 0
-    - rarity: 0
-      weight: 0
-    rarityGroups:
-    - rarity: 0
-      weight: 0.25
-      items: []
-    - rarity: 1
-      weight: 0.25
-      items: []
-    - rarity: 2
-      weight: 0.25
-      items: []
-    - rarity: 3
-      weight: 0.25
-      items: []
-    enableStackRandomization: 0
-    minStackAmount: 1
-    maxStackAmount: 50
-    isEnabled: 1
-    priority: 5
+  - templateId: item_template_638949256708723706
+    itemData: {fileID: 11400000, guid: cd0dd2a7d55f97549883fe00dad5dec5, type: 2}
+    quantity: 1
+    stackAmount: 1
+    placementType: 1
+    exactPosition: {x: 0, y: 0}
+    constrainedArea:
+      x: 0
+      y: 0
+      width: 10
+      height: 10
+    preferredArea:
+      x: 0
+      y: 0
+      width: 5
+      height: 5
+    priority: 2
+    scanPattern: 0
+    allowRotation: 1
+    conflictResolution: 2
+    isUniqueSpawn: 1
+    conditionTags: []
+    maxRetryAttempts: 3
     enableDebugLog: 0
-  categoryStrategy: 0
-  rarityBalance: 0
-  avoidDuplicateItems: 1
-  maxRetryAttempts: 3
-  enablePreview: 1
-  previewSeed: 6795
-  previewGridSize: {x: 10, y: 6}
+  - templateId: item_template_638949256711043841
+    itemData: {fileID: 11400000, guid: 58298f1308107454aaada46cf0c95f23, type: 2}
+    quantity: 1
+    stackAmount: 1
+    placementType: 1
+    exactPosition: {x: 0, y: 0}
+    constrainedArea:
+      x: 0
+      y: 0
+      width: 10
+      height: 10
+    preferredArea:
+      x: 0
+      y: 0
+      width: 5
+      height: 5
+    priority: 2
+    scanPattern: 0
+    allowRotation: 1
+    conflictResolution: 2
+    isUniqueSpawn: 1
+    conditionTags: []
+    maxRetryAttempts: 3
+    enableDebugLog: 0
+  - templateId: item_template_638949256714355466
+    itemData: {fileID: 11400000, guid: f9ea792fc2ce1f94c9dc7bc63062f96e, type: 2}
+    quantity: 4
+    stackAmount: 40
+    placementType: 1
+    exactPosition: {x: 0, y: 0}
+    constrainedArea:
+      x: 0
+      y: 0
+      width: 10
+      height: 10
+    preferredArea:
+      x: 0
+      y: 0
+      width: 5
+      height: 5
+    priority: 2
+    scanPattern: 0
+    allowRotation: 1
+    conflictResolution: 2
+    isUniqueSpawn: 1
+    conditionTags: []
+    maxRetryAttempts: 3
+    enableDebugLog: 0
+  - templateId: item_template_638949256716610056
+    itemData: {fileID: 11400000, guid: 9a7ea5070b02281478d9e5580c2a389a, type: 2}
+    quantity: 1
+    stackAmount: 1
+    placementType: 1
+    exactPosition: {x: 0, y: 0}
+    constrainedArea:
+      x: 0
+      y: 0
+      width: 10
+      height: 10
+    preferredArea:
+      x: 0
+      y: 0
+      width: 5
+      height: 5
+    priority: 2
+    scanPattern: 0
+    allowRotation: 1
+    conflictResolution: 2
+    isUniqueSpawn: 1
+    conditionTags: []
+    maxRetryAttempts: 3
+    enableDebugLog: 0
+  sortStrategy: 0
+  continueOnFailure: 1
+  maxGenerationTime: 10
   enableDetailedLogging: 0
-  generationTimeout: 10
-  strictCompatibilityCheck: 1
+  enablePreview: 0

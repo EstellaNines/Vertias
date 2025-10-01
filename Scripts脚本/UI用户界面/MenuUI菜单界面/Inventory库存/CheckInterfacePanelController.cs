@@ -29,6 +29,24 @@ public class CheckInterfacePanelController : MonoBehaviour
 	[SerializeField] private TextMeshProUGUI[] rightFixedTexts = new TextMeshProUGUI[3];
 	[SerializeField] private TextMeshProUGUI[] rightDataTexts = new TextMeshProUGUI[3];
 
+	[Header("价格显示（Price）")]
+	[SerializeField] private TextMeshProUGUI priceText;                // Description/Price 的TMP
+	[SerializeField] private bool showPrice = true;                    // 是否显示价格
+	[SerializeField] private Color priceLabelColor = Color.white;      // “Price:” 标签颜色
+	[SerializeField] private Color rarity1Color = new Color(0.2f, 0.85f, 0.2f); // 绿色（常见）
+	[SerializeField] private Color rarity2Color = new Color(1f, 0.85f, 0.2f);   // 黄色（稀有）
+	[SerializeField] private Color rarity3Color = new Color(1f, 0.55f, 0f);     // 橙色（史诗）
+	[SerializeField] private Color rarity4Color = new Color(1f, 0.2f, 0.2f);    // 红色（传说）
+	[SerializeField] private int rarity1Price = 100;                   // 各稀有度默认价格（可在Inspector配置）
+	[SerializeField] private int rarity2Price = 300;
+	[SerializeField] private int rarity3Price = 800;
+	[SerializeField] private int rarity4Price = 1500;
+
+	[Header("Owner 显示（玩家Money总额）")]
+	[SerializeField] private TextMeshProUGUI ownerText;                 // Description/Owner 的TMP
+	[SerializeField] private bool showOwnerMoney = true;                // 是否显示玩家Money
+	[SerializeField] private string ownerLabel = "Owner:";             // 左侧标签
+
 #if UNITY_EDITOR
 	// 编辑器预览：缓存一个临时的 ItemDataReader 以便在编辑模式下展示
 	private ItemDataReader editorPreviewReader;
@@ -107,6 +125,34 @@ public class CheckInterfacePanelController : MonoBehaviour
 					for (int i = 0; i < 3 && i < rightDataRoot.childCount; i++)
 					{
 						rightDataTexts[i] = rightDataRoot.GetChild(i).GetComponent<TextMeshProUGUI>();
+					}
+				}
+			}
+
+			// Price 文本自动查找
+			if (priceText == null)
+			{
+				var priceNode = descriptionRoot.Find("Price");
+				if (priceNode != null)
+				{
+					priceText = priceNode.GetComponent<TextMeshProUGUI>();
+					if (priceText == null)
+					{
+						priceText = priceNode.GetComponentInChildren<TextMeshProUGUI>(true);
+					}
+				}
+			}
+
+			// Owner 文本自动查找
+			if (ownerText == null)
+			{
+				var ownerNode = descriptionRoot.Find("Owner");
+				if (ownerNode != null)
+				{
+					ownerText = ownerNode.GetComponent<TextMeshProUGUI>();
+					if (ownerText == null)
+					{
+						ownerText = ownerNode.GetComponentInChildren<TextMeshProUGUI>(true);
 					}
 				}
 			}
@@ -251,6 +297,12 @@ public class CheckInterfacePanelController : MonoBehaviour
 			}
 		}
 
+		// 显示价格
+		UpdatePriceUI(reader);
+
+		// 显示玩家 Money 总额（每次打开都动态统计）
+		UpdateOwnerMoneyUI();
+
 		// Left/Right 标签与数据的可见性依据是否填充进行维护
 		gameObject.SetActive(true);
 	}
@@ -329,6 +381,112 @@ public class CheckInterfacePanelController : MonoBehaviour
 			case "4": return "Legendary";
 			default: return rarity;
 		}
+	}
+
+	private void UpdatePriceUI(ItemDataReader reader)
+	{
+		if (!showPrice || priceText == null || reader == null || reader.ItemData == null)
+		{
+			if (priceText != null) priceText.gameObject.SetActive(false);
+			return;
+		}
+
+		priceText.gameObject.SetActive(true);
+
+		// 依据稀有度选择颜色与价格
+		int rarityLevel = ParseRarityLevel(reader.ItemData.rarity);
+		Color priceColor = GetRarityColor(rarityLevel);
+		// 从物品数据对象读取真实售价（优先运行时reader.price，其次SO中的price）
+		int price = reader.price > 0 ? reader.price : (reader.ItemData != null ? reader.ItemData.price : 0);
+		if (price <= 0)
+		{
+			priceText.gameObject.SetActive(false);
+			return;
+		}
+
+		// 组合富文本：白色标签 + 彩色数字
+		string labelHex = ColorUtility.ToHtmlStringRGB(priceLabelColor);
+		string priceHex = ColorUtility.ToHtmlStringRGB(priceColor);
+		priceText.richText = true;
+		priceText.text = $"<color=#{labelHex}>Price: </color><color=#{priceHex}>{price}</color>";
+	}
+
+	private int ParseRarityLevel(string rarity)
+	{
+		// 稀有度通常为 "1"-"4"，非数字时按1处理
+		if (int.TryParse(rarity, out int lvl))
+		{
+			return Mathf.Clamp(lvl, 1, 4);
+		}
+		return 1;
+	}
+
+	private Color GetRarityColor(int level)
+	{
+		switch (level)
+		{
+			case 1: return rarity1Color;
+			case 2: return rarity2Color;
+			case 3: return rarity3Color;
+			case 4: return rarity4Color;
+			default: return rarity1Color;
+		}
+	}
+
+	private int GetRarityPrice(int level)
+	{
+		switch (level)
+		{
+			case 1: return rarity1Price;
+			case 2: return rarity2Price;
+			case 3: return rarity3Price;
+			case 4: return rarity4Price;
+			default: return rarity1Price;
+		}
+	}
+
+	private void UpdateOwnerMoneyUI()
+	{
+		if (!showOwnerMoney || ownerText == null)
+		{
+			if (ownerText != null) ownerText.gameObject.SetActive(false);
+			return;
+		}
+
+		int totalMoney = ComputeTotalPlayerMoney();
+		ownerText.gameObject.SetActive(true);
+		ownerText.richText = true;
+		string labelHex = ColorUtility.ToHtmlStringRGB(Color.white);
+		string valueHex = ColorUtility.ToHtmlStringRGB(new Color(0.2f, 0.85f, 0.2f));
+		ownerText.text = $"<color=#{labelHex}>{ownerLabel} </color><color=#{valueHex}>{totalMoney}</color>";
+	}
+
+	private int ComputeTotalPlayerMoney()
+	{
+		const int MONEY_ITEM_ID = 1301;
+		int total = 0;
+		var grids = FindObjectsOfType<ItemGrid>(true);
+		if (grids == null || grids.Length == 0) return 0;
+		for (int i = 0; i < grids.Length; i++)
+		{
+			var g = grids[i];
+			if (g == null) continue;
+			var type = g.GridType;
+			// 玩家所属网格：Backpack / Equipment / Player
+			if (!(type == GridType.Backpack || type == GridType.Equipment || type == GridType.Player))
+				continue;
+			for (int c = 0; c < g.transform.childCount; c++)
+			{
+				var child = g.transform.GetChild(c);
+				if (child == null) continue;
+				var rdr = child.GetComponent<ItemDataReader>();
+				if (rdr == null || rdr.ItemData == null) continue;
+				if (rdr.ItemData.id != MONEY_ITEM_ID) continue;
+				int amount = rdr.CurrentStack > 0 ? rdr.CurrentStack : rdr.currencyAmount;
+				if (amount > 0) total += amount;
+			}
+		}
+		return total;
 	}
 }
 

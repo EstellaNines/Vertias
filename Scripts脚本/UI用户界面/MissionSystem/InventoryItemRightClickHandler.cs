@@ -10,6 +10,7 @@ using UnityEngine.UI;
 /// </summary>
 public class InventoryItemRightClickHandler : MonoBehaviour, IPointerClickHandler
 {
+    private const int MONEY_ITEM_ID = 1301; // 1301_Money
     [SerializeField] private BackpackContextMenuService contextMenuService;
     [SerializeField] private RectTransform itemRect; // 如果为空则自动获取自身 RectTransform
     [SerializeField] private Item targetItem; // 右键菜单对应的实际物品
@@ -123,6 +124,8 @@ public class InventoryItemRightClickHandler : MonoBehaviour, IPointerClickHandle
             }
 
             var actions = BuildActions();
+            // 如果物品所在网格为交易类型，将第一个“Use”按钮替换为“购买”
+            TryRewriteUseToBuy(actions);
             contextMenuService.ShowForItem(itemRect, targetItem != null ? (object)targetItem : itemName, actions);
         }
     }
@@ -183,6 +186,271 @@ public class InventoryItemRightClickHandler : MonoBehaviour, IPointerClickHandle
         list.Add(new MenuAction("discard", "Discard", () => DiscardSelectedItem()));
         return list;
     }
+
+	private void TryRewriteUseToBuy(IList<MenuAction> actions)
+    {
+        if (actions == null || actions.Count == 0) return;
+        if (!IsOnTradingGrid()) return;
+		bool hasEnoughMoney = HasEnoughMoneyForCurrentItem();
+		bool hasSlot = HasPlacementSlotForCurrentItem();
+        // 查找第一个 id 为 "use" 的动作并改名为“购买”
+        for (int i = 0; i < actions.Count; i++)
+        {
+            var a = actions[i];
+            if (a != null && a.Id == "use")
+            {
+				a.Id = "buy";
+				a.DisplayName = "Buy";
+				a.Interactable = hasEnoughMoney && hasSlot;
+				a.Callback = () => BuySelectedItem();
+                // 现阶段仅更改展示名称；购买逻辑可在后续接入（扣款/入包等）
+                break;
+            }
+        }
+    }
+
+    private bool IsOnTradingGrid()
+    {
+        if (targetItem == null || targetItem.OnGridReference == null) return false;
+        return targetItem.OnGridReference.GridType == GridType.Trading;
+    }
+
+	private bool HasEnoughMoneyForCurrentItem()
+	{
+		int price = GetSelectedItemPrice();
+		if (price <= 0) return true; // 免费或未配置价格：允许购买
+		int totalMoney = GetTotalPlayerMoney();
+		return totalMoney >= price;
+	}
+
+	private int GetSelectedItemPrice()
+	{
+		if (targetItem != null && targetItem.ItemDataReader != null)
+		{
+			var rdr = targetItem.ItemDataReader;
+			int unitPrice = 0;
+			if (rdr.price > 0) unitPrice = rdr.price;
+			else if (rdr.ItemData != null && rdr.ItemData.price > 0) unitPrice = rdr.ItemData.price;
+			if (unitPrice <= 0) return 0;
+			// 子弹：售价为单发价格，总价=单价*总数
+			if (rdr.ItemData != null && rdr.ItemData.category == ItemCategory.Ammunition)
+			{
+				int count = Mathf.Max(1, rdr.CurrentStack);
+				return unitPrice * count;
+			}
+			return unitPrice;
+		}
+		return 0;
+	}
+
+    private bool HasPlacementSlotForCurrentItem()
+    {
+        // 使用与实际购买相同的寻位逻辑，避免判定不一致导致“有空位却被禁用”
+        return TryFindPlacementInPlayerGrids(targetItem, out _, out _);
+    }
+
+    private System.Collections.Generic.List<ItemGrid> GetPlacementGridsInPriority()
+	{
+		var all = FindObjectsOfType<ItemGrid>(true);
+		if (all == null || all.Length == 0) return null;
+		var result = new System.Collections.Generic.List<ItemGrid>();
+        // 按优先顺序：Container -> Equipment -> Backpack -> Player -> Custom
+        // 说明：某些运行期容器网格会将 GridType 从 Backpack 切换为 Equipment，这里一并纳入“容器优先”
+        GridType[] order = new GridType[] { GridType.Container, GridType.Equipment, GridType.Backpack, GridType.Player, GridType.Custom };
+		for (int o = 0; o < order.Length; o++)
+		{
+			for (int i = 0; i < all.Length; i++)
+			{
+				if (all[i] != null && all[i].GridType == order[o])
+				{
+					result.Add(all[i]);
+				}
+			}
+		}
+		return result;
+	}
+
+	private int GetTotalPlayerMoney()
+	{
+		int total = 0;
+		var grids = FindObjectsOfType<ItemGrid>(true);
+		if (grids == null || grids.Length == 0) return 0;
+		for (int i = 0; i < grids.Length; i++)
+		{
+			var g = grids[i];
+			if (g == null) continue;
+			var type = g.GridType;
+			if (!(type == GridType.Backpack || type == GridType.Equipment || type == GridType.Player))
+				continue;
+			for (int c = 0; c < g.transform.childCount; c++)
+			{
+				var child = g.transform.GetChild(c);
+				if (child == null) continue;
+				var rdr = child.GetComponent<ItemDataReader>();
+				if (rdr == null || rdr.ItemData == null) continue;
+				if (rdr.ItemData.id != MONEY_ITEM_ID) continue;
+				// 计算该堆的金额：优先用堆叠数（CurrentStack），若为0则用currencyAmount
+				int amount = rdr.CurrentStack > 0 ? rdr.CurrentStack : rdr.currencyAmount;
+				if (amount > 0) total += amount;
+			}
+		}
+		return total;
+	}
+
+	private void BuySelectedItem()
+	{
+		if (!IsOnTradingGrid()) return;
+		if (targetItem == null) return;
+		int price = GetSelectedItemPrice();
+		if (price < 0) price = 0;
+		int totalMoney = GetTotalPlayerMoney();
+		if (totalMoney < price)
+		{
+			Debug.LogWarning("Buy failed: not enough money.");
+			return;
+		}
+
+		// 先尝试为物品寻找目标网格与位置
+		ItemGrid dstGrid;
+		Vector2Int dstPos;
+		if (!TryFindPlacementInPlayerGrids(targetItem, out dstGrid, out dstPos))
+		{
+			Debug.LogWarning("Buy failed: no space in player grids.");
+			return;
+		}
+
+		// 扣费
+		if (!TryDeductMoney(price))
+		{
+			Debug.LogWarning("Buy failed: deduct money error.");
+			return;
+		}
+
+		// 从交易网格取下并放入玩家网格
+		var srcGrid = targetItem.OnGridReference;
+		Vector2Int srcPos = targetItem.OnGridPosition;
+		Item removed = null;
+		if (srcGrid != null)
+		{
+			removed = srcGrid.PickUpItem(srcPos.x, srcPos.y);
+		}
+		var itemToPlace = removed != null ? removed : targetItem;
+		bool placed = dstGrid.PlaceItem(itemToPlace, dstPos.x, dstPos.y);
+		if (!placed)
+		{
+			// 回滚：放回原网格
+			if (removed != null && srcGrid != null)
+			{
+				// 简化回滚：尝试原位放回
+				srcGrid.PlaceItem(removed, srcPos.x, srcPos.y);
+			}
+			Debug.LogWarning("Buy failed: could not place in destination grid.");
+			return;
+		}
+
+		Debug.Log("Buy succeeded.");
+	}
+
+	private bool TryFindPlacementInPlayerGrids(Item item, out ItemGrid dstGrid, out Vector2Int dstPos)
+	{
+		dstGrid = null;
+		dstPos = default;
+		if (item == null) return false;
+		int w = item.GetWidth();
+		int h = item.GetHeight();
+
+		var grids = FindObjectsOfType<ItemGrid>(true);
+		if (grids == null || grids.Length == 0) return false;
+
+        // 按优先顺序尝试：Container -> Equipment -> Backpack -> Player -> Custom
+        GridType[] prefs = new GridType[] { GridType.Container, GridType.Equipment, GridType.Backpack, GridType.Player, GridType.Custom };
+		for (int p = 0; p < prefs.Length; p++)
+		{
+			for (int i = 0; i < grids.Length; i++)
+			{
+				var g = grids[i];
+				if (g == null || g.GridType != prefs[p]) continue;
+				// 遍历可行位置
+				for (int x = 0; x <= g.CurrentWidth - w; x++)
+				{
+					for (int y = 0; y <= g.CurrentHeight - h; y++)
+					{
+						if (g.CanPlaceItemAtPosition(x, y, w, h, item))
+						{
+							dstGrid = g;
+							dstPos = new Vector2Int(x, y);
+							return true;
+						}
+					}
+				}
+			}
+		}
+		return false;
+	}
+
+	private bool TryDeductMoney(int price)
+	{
+		int remaining = Mathf.Max(0, price);
+		if (remaining == 0) return true;
+		var grids = FindObjectsOfType<ItemGrid>(true);
+		if (grids == null || grids.Length == 0) return false;
+
+		// 仅在玩家所属网格扣费
+		for (int i = 0; i < grids.Length && remaining > 0; i++)
+		{
+			var g = grids[i];
+			if (g == null) continue;
+			var type = g.GridType;
+			if (!(type == GridType.Backpack || type == GridType.Equipment || type == GridType.Player))
+				continue;
+
+			for (int c = 0; c < g.transform.childCount && remaining > 0; c++)
+			{
+				var child = g.transform.GetChild(c);
+				if (child == null) continue;
+				var rdr = child.GetComponent<ItemDataReader>();
+				if (rdr == null || rdr.ItemData == null) continue;
+				if (rdr.ItemData.id != MONEY_ITEM_ID) continue;
+				int amount = rdr.CurrentStack > 0 ? rdr.CurrentStack : rdr.currencyAmount;
+				if (amount <= 0) continue;
+
+				int take = Mathf.Min(amount, remaining);
+				if (rdr.CurrentStack > 0)
+				{
+					rdr.SetStack(rdr.CurrentStack - take);
+				}
+				else
+				{
+					rdr.currencyAmount = Mathf.Max(0, rdr.currencyAmount - take);
+					rdr.UpdateUI();
+					rdr.SaveRuntimeToES3();
+				}
+				remaining -= take;
+
+				// 若该堆已空，且其为非堆叠货币，考虑删除节点
+				int left = rdr.CurrentStack > 0 ? rdr.CurrentStack : rdr.currencyAmount;
+				if (left <= 0)
+				{
+					var moneyItem = child.GetComponent<Item>();
+					if (moneyItem != null && g != null)
+					{
+						Vector2Int pos = moneyItem.OnGridPosition;
+						var removed = g.PickUpItem(pos.x, pos.y);
+						if (removed != null)
+						{
+							Destroy(removed.gameObject);
+						}
+					}
+					else
+					{
+						Destroy(child.gameObject);
+					}
+				}
+			}
+		}
+
+		return remaining <= 0;
+	}
 
     private string GetDisplayName()
     {

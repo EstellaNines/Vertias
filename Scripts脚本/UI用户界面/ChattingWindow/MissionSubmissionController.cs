@@ -429,8 +429,24 @@ public class MissionSubmissionController : MonoBehaviour
 		if (mission.reward.discount > 0)
 		{
 			Debug.Log($"  + {mission.reward.discount}% 商店折扣");
-			// TODO: 调用商店管理器设置折扣
-			// ShopManager.Instance.SetDiscount(mission.publisher, mission.reward.discount);
+			// 将折扣应用到 AM(Asher Myles) 的交易网格
+			try
+			{
+				var shopGen = FindObjectOfType<DialogueShopGenerator>(true);
+				if (shopGen != null)
+				{
+					shopGen.ActivateAsherDiscount(mission.reward.discount);
+					Debug.Log("[MissionSubmission] 已激活 Asher 折扣，正在应用到交易物品...");
+				}
+				else
+				{
+					Debug.LogWarning("[MissionSubmission] 未找到 DialogueShopGenerator，无法应用 Asher 折扣");
+				}
+			}
+			catch (Exception e)
+			{
+				Debug.LogWarning($"[MissionSubmission] 应用 Asher 折扣时异常: {e.Message}");
+			}
 		}
 
 		if (mission.reward.weapon > 0)

@@ -119,6 +119,14 @@ public class ChatBubbleController : MonoBehaviour
 	[SerializeField] private float hoverDuration = 0.12f;
 	[SerializeField] private Ease hoverEase = Ease.OutQuad;
 
+	[Header("Save/Load - ES3")]
+	[FieldLabel("启用进度保存")]
+	[SerializeField] private bool enableProgressSave = true;
+	[FieldLabel("保存文件名(ES3)")]
+	[SerializeField] private string progressSaveFile = "DialogueProgress.es3";
+	[FieldLabel("保存键前缀")]
+	[SerializeField] private string progressKeyPrefix = "ChatProgress_";
+
 	private NpcTalkData loadedDialogue;
 	private Dictionary<string, DialogNode> idToNode = new Dictionary<string, DialogNode>(StringComparer.Ordinal);
 	private bool dialogueLoaded = false;
@@ -171,6 +179,13 @@ public class ChatBubbleController : MonoBehaviour
 
 	private void OnEnable()
 	{
+		// 先尝试加载进度（无需等待自动播放）
+		if (enableProgressSave)
+		{
+			// 确保已加载对话数据
+			EnsureDialogueLoaded();
+			LoadProgressIfAny();
+		}
 		if (autoPlayOnEnable)
 		{
 			StartAutoPlay();
@@ -179,6 +194,11 @@ public class ChatBubbleController : MonoBehaviour
 
 	private void OnDisable()
 	{
+		// 保存当前进度
+		if (enableProgressSave)
+		{
+			SaveProgress();
+		}
 		StopAutoPlay();
     if (delayedAnswerButtonsRoutine != null)
     {
@@ -451,6 +471,9 @@ public class ChatBubbleController : MonoBehaviour
 		ResetProgressToStart();
 		dialogueLoaded = true;
 
+		// 尝试应用已保存的进度
+		LoadProgressIfAny();
+
 		// 通知MissionSubmissionController对话已加载
 		NotifyMissionSubmissionController();
 	}
@@ -528,6 +551,134 @@ public class ChatBubbleController : MonoBehaviour
         delayedAnswerButtonsRoutine = StartCoroutine(DelayedSpawnAnswerButtons(messageIntervalSeconds));
     }
 		return node != null ? node.text : null;
+	}
+
+	// ==================== 进度保存/加载（ES3） ====================
+	private string GetProgressKey()
+	{
+		// 以NPC唯一ID作为键，避免不同UI激活/隐藏造成键冲突
+		string npcIdKey = loadedDialogue != null && !string.IsNullOrEmpty(loadedDialogue.npcId)
+			? loadedDialogue.npcId
+			: (!string.IsNullOrEmpty(dialogueResourceName) ? dialogueResourceName : "_unknown");
+		return progressKeyPrefix + npcIdKey;
+	}
+
+	private string GetCurrentStageKey()
+	{
+		if (loadedDialogue == null) return "dialogs";
+		if (ReferenceEquals(activeDialogList, loadedDialogue.dialogs)) return "dialogs";
+		if (loadedDialogue.stage2_1 != null && ReferenceEquals(activeDialogList, loadedDialogue.stage2_1)) return "stage2_1";
+		if (loadedDialogue.stage2_2 != null && ReferenceEquals(activeDialogList, loadedDialogue.stage2_2)) return "stage2_2";
+		if (loadedDialogue.stage3 != null && ReferenceEquals(activeDialogList, loadedDialogue.stage3)) return "stage3";
+		return "dialogs";
+	}
+
+	private void SaveProgress()
+	{
+		if (!enableProgressSave || !dialogueLoaded || loadedDialogue == null) return;
+		try
+		{
+			string keyBase = GetProgressKey();
+			string stageKey = GetCurrentStageKey();
+			// 保存阶段、索引、是否在等待选择
+			ES3.Save<string>($"{keyBase}.stage", stageKey, progressSaveFile);
+			ES3.Save<int>($"{keyBase}.index", Mathf.Max(0, currentDialogIndex), progressSaveFile);
+			ES3.Save<bool>($"{keyBase}.await", awaitingPlayerAnswer, progressSaveFile);
+		}
+		catch (Exception e)
+		{
+			Debug.LogWarning($"[ChatBubbleController] 保存进度失败: {e.Message}");
+		}
+	}
+
+	private void LoadProgressIfAny()
+	{
+		if (!enableProgressSave || loadedDialogue == null) return;
+		try
+		{
+			string keyBase = GetProgressKey();
+			if (!ES3.KeyExists($"{keyBase}.stage", progressSaveFile)) return;
+
+			string stageKey = ES3.Load<string>($"{keyBase}.stage", progressSaveFile, "dialogs");
+			int savedIndex = ES3.Load<int>($"{keyBase}.index", progressSaveFile, 0);
+			bool savedAwait = ES3.Load<bool>($"{keyBase}.await", progressSaveFile, false);
+
+			// 应用阶段
+			List<DialogNode> targetList = loadedDialogue.dialogs;
+			switch (stageKey)
+			{
+				case "stage2_1":
+					targetList = (loadedDialogue.stage2_1 != null && loadedDialogue.stage2_1.Count > 0) ? loadedDialogue.stage2_1 : loadedDialogue.dialogs;
+					break;
+				case "stage2_2":
+					targetList = (loadedDialogue.stage2_2 != null && loadedDialogue.stage2_2.Count > 0) ? loadedDialogue.stage2_2 : loadedDialogue.dialogs;
+					break;
+				case "stage3":
+					targetList = (loadedDialogue.stage3 != null && loadedDialogue.stage3.Count > 0) ? loadedDialogue.stage3 : loadedDialogue.dialogs;
+					break;
+				default:
+					targetList = loadedDialogue.dialogs;
+					break;
+			}
+
+			activeDialogList = targetList;
+			// 应用索引（指向下一句）
+			int maxCount = activeDialogList != null ? activeDialogList.Count : 0;
+			currentDialogIndex = Mathf.Clamp(savedIndex, 0, Mathf.Max(0, maxCount));
+
+			// 应用等待选择状态（仅对阶段1有效）
+			awaitingPlayerAnswer = savedAwait && ReferenceEquals(activeDialogList, loadedDialogue.dialogs);
+
+			// 若界面是空的，则重建已显示的历史内容
+			TryRebuildHistory(stageKey, savedIndex);
+			if (awaitingPlayerAnswer && (activeDialogList == null || currentDialogIndex >= (activeDialogList?.Count ?? 0)))
+			{
+				// 立即（轻微延迟）生成玩家回答按钮
+				if (delayedAnswerButtonsRoutine != null)
+				{
+					StopCoroutine(delayedAnswerButtonsRoutine);
+				}
+				delayedAnswerButtonsRoutine = StartCoroutine(DelayedSpawnAnswerButtons(0.1f));
+			}
+		}
+		catch (Exception e)
+		{
+			Debug.LogWarning($"[ChatBubbleController] 加载进度失败: {e.Message}");
+		}
+	}
+
+	/// <summary>
+	/// 在载入存档后，如果当前聊天区域没有内容，则重建至保存位置之前的消息。
+	/// 对于阶段2，会先回放一次玩家的选择气泡。
+	/// </summary>
+	private void TryRebuildHistory(string stageKey, int savedIndex)
+	{
+		if (chatRegion == null || activeDialogList == null) return;
+		if (chatRegion.childCount > 0) return; // 已有内容则不重建，避免重复
+
+		// 阶段2：先回放玩家选择（根据分支推断文案）
+		if (string.Equals(stageKey, "stage2_1", StringComparison.Ordinal) || string.Equals(stageKey, "stage2_2", StringComparison.Ordinal))
+		{
+			// 确保玩家选项已加载（用于头像与文案）
+			if (playerTalkData == null) LoadPlayerChoices();
+			string choiceId = string.Equals(stageKey, "stage2_1", StringComparison.Ordinal) ? "1" : "2";
+			string choiceText = GetPlayerChoiceText(choiceId);
+			if (!string.IsNullOrEmpty(choiceText))
+			{
+				SpawnPlayerTextBubble(choiceText);
+			}
+		}
+
+		// 回放本阶段已显示的NPC气泡
+		int limit = Mathf.Clamp(savedIndex, 0, activeDialogList.Count);
+		for (int i = 0; i < limit; i++)
+		{
+			var node = activeDialogList[i];
+			if (node != null && !string.IsNullOrEmpty(node.text))
+			{
+				SpawnBubble(node.text);
+			}
+		}
 	}
 
 	private bool HasStage2Content()

@@ -3,23 +3,23 @@ using UnityEngine;
 namespace Game.UI
 {
 	/// <summary>
-	/// Ìá½»ÈÎÎñÅĞ¶¨ÓëÏûºÄ·şÎñ½Ó¿Ú¡£
-	/// ÓÉ±³°ü/²Ö¿â/Íæ¼ÒÊı¾İÏµÍ³ÊµÏÖ£¬ÒÔ±ã EmailMissionUIManager ²éÑ¯Óë¿Û³ı¡£
+	/// æäº¤ä»»åŠ¡åˆ¤å®šä¸æ¶ˆè€—æœåŠ¡æ¥å£ã€‚
+	/// ç”±èƒŒåŒ…/ä»“åº“/ç©å®¶æ•°æ®ç³»ç»Ÿå®ç°ï¼Œä»¥ä¾¿ EmailMissionUIManager æŸ¥è¯¢ä¸æ‰£é™¤ã€‚
 	/// </summary>
 	public interface IMissionSubmissionService
 	{
 		/// <summary>
-		/// µ±Ç°Íæ¼ÒµÄÇé±¨×ÜÖµ£¨ÓÃÓÚÓë requirements.intelligence ±È½Ï£©¡£
+		/// å½“å‰ç©å®¶çš„æƒ…æŠ¥æ€»å€¼ï¼ˆç”¨äºä¸ requirements.intelligence æ¯”è¾ƒï¼‰ã€‚
 		/// </summary>
 		int GetPlayerIntelligenceTotal();
 
 		/// <summary>
-		/// ÊÇ·ñÓµÓĞÖ¸¶¨ÎïÆ·¼°ÊıÁ¿£¨°´ InventorySystemStaticDatabase.json µÄ item id£©¡£
+		/// æ˜¯å¦æ‹¥æœ‰æŒ‡å®šç‰©å“åŠæ•°é‡ï¼ˆæŒ‰ InventorySystemStaticDatabase.json çš„ item idï¼‰ã€‚
 		/// </summary>
 		bool HasItem(int itemId, int count);
 
 		/// <summary>
-		/// ³¢ÊÔÏûºÄÖ¸¶¨ÎïÆ·¼°ÊıÁ¿£¬·µ»ØÊÇ·ñ³É¹¦¡£
+		/// å°è¯•æ¶ˆè€—æŒ‡å®šç‰©å“åŠæ•°é‡ï¼Œè¿”å›æ˜¯å¦æˆåŠŸã€‚
 		/// </summary>
 		bool TryConsumeItem(int itemId, int count);
 	}

@@ -6,48 +6,48 @@ using InventorySystem;
 namespace DialogueSystem
 {
     /// <summary>
-    /// ¶Ô»°½çÃæÖĞ×°±¸À¸µÄ³Ö¾Ã»¯¹ÜÀíÆ÷
-    /// ¸ºÔğ¹ÜÀí±³°üºÍ¹Ò¾ß×°±¸²Û¼°ÆäÈİÆ÷Íø¸ñµÄ±£´æÓë¼ÓÔØ
+    /// å¯¹è¯ç•Œé¢ä¸­è£…å¤‡æ çš„æŒä¹…åŒ–ç®¡ç†å™¨
+    /// è´Ÿè´£ç®¡ç†èƒŒåŒ…å’ŒæŒ‚å…·è£…å¤‡æ§½åŠå…¶å®¹å™¨ç½‘æ ¼çš„ä¿å­˜ä¸åŠ è½½
     /// </summary>
     public class DialogueEquipmentPersistence : MonoBehaviour
     {
-        [Header("×°±¸À¸×é¼şÒıÓÃ")]
-        [FieldLabel("±³°ü×°±¸²Û")]
-        [Tooltip("±³°ü×°±¸²ÛÔ¤ÖÆ¼ş»ò³¡¾°ÖĞµÄÊµÀı")]
+        [Header("è£…å¤‡æ ç»„ä»¶å¼•ç”¨")]
+        [FieldLabel("èƒŒåŒ…è£…å¤‡æ§½")]
+        [Tooltip("èƒŒåŒ…è£…å¤‡æ§½é¢„åˆ¶ä»¶æˆ–åœºæ™¯ä¸­çš„å®ä¾‹")]
         [SerializeField] private EquipmentSlot backpackSlot;
 
-        [FieldLabel("¹Ò¾ß×°±¸²Û")]
-        [Tooltip("Õ½Êõ¹Ò¾ß×°±¸²ÛÔ¤ÖÆ¼ş»ò³¡¾°ÖĞµÄÊµÀı")]
+        [FieldLabel("æŒ‚å…·è£…å¤‡æ§½")]
+        [Tooltip("æˆ˜æœ¯æŒ‚å…·è£…å¤‡æ§½é¢„åˆ¶ä»¶æˆ–åœºæ™¯ä¸­çš„å®ä¾‹")]
         [SerializeField] private EquipmentSlot tacticalRigSlot;
 
-        [Header("Ô¤ÖÆ¼şÒıÓÃ£¨¿ÉÑ¡£©")]
-        [FieldLabel("±³°ü×°±¸²ÛÔ¤ÖÆ¼ş")]
-        [Tooltip("Èç¹ûĞèÒª¶¯Ì¬´´½¨×°±¸²Û£¬Ìá¹©Ô¤ÖÆ¼şÒıÓÃ")]
+        [Header("é¢„åˆ¶ä»¶å¼•ç”¨ï¼ˆå¯é€‰ï¼‰")]
+        [FieldLabel("èƒŒåŒ…è£…å¤‡æ§½é¢„åˆ¶ä»¶")]
+        [Tooltip("å¦‚æœéœ€è¦åŠ¨æ€åˆ›å»ºè£…å¤‡æ§½ï¼Œæä¾›é¢„åˆ¶ä»¶å¼•ç”¨")]
         [SerializeField] private GameObject backpackSlotPrefab;
 
-        [FieldLabel("¹Ò¾ß×°±¸²ÛÔ¤ÖÆ¼ş")]
-        [Tooltip("Èç¹ûĞèÒª¶¯Ì¬´´½¨×°±¸²Û£¬Ìá¹©Ô¤ÖÆ¼şÒıÓÃ")]
+        [FieldLabel("æŒ‚å…·è£…å¤‡æ§½é¢„åˆ¶ä»¶")]
+        [Tooltip("å¦‚æœéœ€è¦åŠ¨æ€åˆ›å»ºè£…å¤‡æ§½ï¼Œæä¾›é¢„åˆ¶ä»¶å¼•ç”¨")]
         [SerializeField] private GameObject tacticalRigSlotPrefab;
 
-        [Header("ÈİÆ÷¸¸¼¶")]
-        [FieldLabel("MidPattern¸¸¼¶")]
-        [Tooltip("×°±¸À¸ºÍÈİÆ÷Íø¸ñµÄ¸¸¼¶Transform")]
+        [Header("å®¹å™¨çˆ¶çº§")]
+        [FieldLabel("MidPatternçˆ¶çº§")]
+        [Tooltip("è£…å¤‡æ å’Œå®¹å™¨ç½‘æ ¼çš„çˆ¶çº§Transform")]
         [SerializeField] private Transform midPatternParent;
 
-        [Header("±£´æÉèÖÃ")]
-        [FieldLabel("×Ô¶¯±£´æ")]
-        [Tooltip("ÊÇ·ñÔÚ×°±¸±ä»¯Ê±×Ô¶¯±£´æ")]
+        [Header("ä¿å­˜è®¾ç½®")]
+        [FieldLabel("è‡ªåŠ¨ä¿å­˜")]
+        [Tooltip("æ˜¯å¦åœ¨è£…å¤‡å˜åŒ–æ—¶è‡ªåŠ¨ä¿å­˜")]
         [SerializeField] private bool enableAutoSave = true;
 
-        [Header("µ÷ÊÔ")]
-        [FieldLabel("ÏÔÊ¾ÈÕÖ¾")]
+        [Header("è°ƒè¯•")]
+        [FieldLabel("æ˜¾ç¤ºæ—¥å¿—")]
         [SerializeField] private bool showDebugLog = true;
 
 
-        // ×°±¸²Û¹ÜÀíÆ÷ÒıÓÃ
+        // è£…å¤‡æ§½ç®¡ç†å™¨å¼•ç”¨
         private EquipmentSlotManager equipmentManager;
 
-        #region UnityÉúÃüÖÜÆÚ
+        #region Unityç”Ÿå‘½å‘¨æœŸ
 
         private void Awake()
         {
@@ -57,13 +57,13 @@ namespace DialogueSystem
 
 		private void Start()
 		{
-			// ÑÓ³ÙÒ»Ö¡³õÊ¼»¯£¬È·±£ÆäËûÏµÍ³ÒÑ×¼±¸ºÃ
+			// å»¶è¿Ÿä¸€å¸§åˆå§‹åŒ–ï¼Œç¡®ä¿å…¶ä»–ç³»ç»Ÿå·²å‡†å¤‡å¥½
 			StartCoroutine(DelayedInitialization());
 		}
 
         private void OnEnable()
         {
-            // ¶©ÔÄ×°±¸±ä»¯ÊÂ¼ş
+            // è®¢é˜…è£…å¤‡å˜åŒ–äº‹ä»¶
             if (enableAutoSave)
             {
                 EquipmentSlot.OnItemEquipped += OnEquipmentChanged;
@@ -72,23 +72,23 @@ namespace DialogueSystem
                 EquipmentSlot.OnContainerSlotDeactivated += OnContainerDeactivated;
             }
 
-			// ¶Ô»°ÏµÍ³¼¤»îÊ±£º¼ÓÔØ×°±¸²¢¿ªÆô³ÖĞø±£´æ
+			// å¯¹è¯ç³»ç»Ÿæ¿€æ´»æ—¶ï¼šåŠ è½½è£…å¤‡å¹¶å¼€å¯æŒç»­ä¿å­˜
 			StartCoroutine(LoadEquipmentWithRetry());
 			StartActiveAutoSave();
         }
 
         private void OnDisable()
         {
-            // ±£´æµ±Ç°×´Ì¬
+            // ä¿å­˜å½“å‰çŠ¶æ€
             if (enableAutoSave)
             {
                 SaveAllEquipment();
             }
 
-			// Í£Ö¹³ÖĞø±£´æ
+			// åœæ­¢æŒç»­ä¿å­˜
 			StopActiveAutoSave();
 
-            // È¡ÏûÊÂ¼ş¶©ÔÄ
+            // å–æ¶ˆäº‹ä»¶è®¢é˜…
             EquipmentSlot.OnItemEquipped -= OnEquipmentChanged;
             EquipmentSlot.OnItemUnequipped -= OnEquipmentChanged;
             EquipmentSlot.OnContainerSlotActivated -= OnContainerActivated;
@@ -97,22 +97,22 @@ namespace DialogueSystem
 
         #endregion
 
-        #region ³õÊ¼»¯
+        #region åˆå§‹åŒ–
 
         /// <summary>
-        /// ³õÊ¼»¯×°±¸¹ÜÀíÆ÷
+        /// åˆå§‹åŒ–è£…å¤‡ç®¡ç†å™¨
         /// </summary>
         private void InitializeEquipmentManager()
         {
             equipmentManager = EquipmentSlotManager.Instance;
             if (equipmentManager == null)
             {
-                Debug.LogWarning("[DialogueEquipmentPersistence] Î´ÕÒµ½×°±¸²Û¹ÜÀíÆ÷");
+                Debug.LogWarning("[DialogueEquipmentPersistence] æœªæ‰¾åˆ°è£…å¤‡æ§½ç®¡ç†å™¨");
             }
         }
 
         /// <summary>
-        /// ÑéÖ¤×é¼şÒıÓÃ
+        /// éªŒè¯ç»„ä»¶å¼•ç”¨
         /// </summary>
         private void ValidateReferences()
         {
@@ -120,19 +120,19 @@ namespace DialogueSystem
 
             if (midPatternParent == null)
             {
-                Debug.LogError("[DialogueEquipmentPersistence] Î´ÉèÖÃMidPattern¸¸¼¶£¡", this);
+                Debug.LogError("[DialogueEquipmentPersistence] æœªè®¾ç½®MidPatternçˆ¶çº§ï¼", this);
                 hasErrors = true;
             }
 
-            // ¼ì²é×°±¸²ÛÒıÓÃ
+            // æ£€æŸ¥è£…å¤‡æ§½å¼•ç”¨
             if (backpackSlot == null && backpackSlotPrefab == null)
             {
-                Debug.LogWarning("[DialogueEquipmentPersistence] ±³°ü×°±¸²ÛºÍÔ¤ÖÆ¼ş¶¼Î´ÉèÖÃ");
+                Debug.LogWarning("[DialogueEquipmentPersistence] èƒŒåŒ…è£…å¤‡æ§½å’Œé¢„åˆ¶ä»¶éƒ½æœªè®¾ç½®");
             }
 
             if (tacticalRigSlot == null && tacticalRigSlotPrefab == null)
             {
-                Debug.LogWarning("[DialogueEquipmentPersistence] ¹Ò¾ß×°±¸²ÛºÍÔ¤ÖÆ¼ş¶¼Î´ÉèÖÃ");
+                Debug.LogWarning("[DialogueEquipmentPersistence] æŒ‚å…·è£…å¤‡æ§½å’Œé¢„åˆ¶ä»¶éƒ½æœªè®¾ç½®");
             }
 
             if (hasErrors)
@@ -142,26 +142,26 @@ namespace DialogueSystem
         }
 
         /// <summary>
-        /// ÑÓ³Ù³õÊ¼»¯
+        /// å»¶è¿Ÿåˆå§‹åŒ–
         /// </summary>
         private IEnumerator DelayedInitialization()
         {
             yield return new WaitForEndOfFrame();
 
-            // Èç¹ûĞèÒª£¬¶¯Ì¬´´½¨×°±¸²Û
+            // å¦‚æœéœ€è¦ï¼ŒåŠ¨æ€åˆ›å»ºè£…å¤‡æ§½
             CreateEquipmentSlotsIfNeeded();
 
-            // ×¢²á×°±¸²Ûµ½¹ÜÀíÆ÷
+            // æ³¨å†Œè£…å¤‡æ§½åˆ°ç®¡ç†å™¨
             RegisterEquipmentSlots();
 
-			// ¼ÓÔØ±£´æµÄ×°±¸£¨´ø³õÊ¼»¯ÓëÖØÊÔ£©
+			// åŠ è½½ä¿å­˜çš„è£…å¤‡ï¼ˆå¸¦åˆå§‹åŒ–ä¸é‡è¯•ï¼‰
 			StartCoroutine(LoadEquipmentWithRetry());
 
-            LogDebug("¶Ô»°×°±¸³Ö¾Ã»¯ÏµÍ³³õÊ¼»¯Íê³É");
+            LogDebug("å¯¹è¯è£…å¤‡æŒä¹…åŒ–ç³»ç»Ÿåˆå§‹åŒ–å®Œæˆ");
         }
 
         /// <summary>
-        /// ¶¯Ì¬´´½¨×°±¸²Û£¨Èç¹ûĞèÒª£©
+        /// åŠ¨æ€åˆ›å»ºè£…å¤‡æ§½ï¼ˆå¦‚æœéœ€è¦ï¼‰
         /// </summary>
         private void CreateEquipmentSlotsIfNeeded()
         {
@@ -169,107 +169,107 @@ namespace DialogueSystem
             {
                 GameObject backpackObj = Instantiate(backpackSlotPrefab, midPatternParent);
                 backpackSlot = backpackObj.GetComponent<EquipmentSlot>();
-                LogDebug("¶¯Ì¬´´½¨±³°ü×°±¸²Û");
+                LogDebug("åŠ¨æ€åˆ›å»ºèƒŒåŒ…è£…å¤‡æ§½");
             }
 
             if (tacticalRigSlot == null && tacticalRigSlotPrefab != null && midPatternParent != null)
             {
                 GameObject rigObj = Instantiate(tacticalRigSlotPrefab, midPatternParent);
                 tacticalRigSlot = rigObj.GetComponent<EquipmentSlot>();
-                LogDebug("¶¯Ì¬´´½¨¹Ò¾ß×°±¸²Û");
+                LogDebug("åŠ¨æ€åˆ›å»ºæŒ‚å…·è£…å¤‡æ§½");
             }
         }
 
         /// <summary>
-        /// ×¢²á×°±¸²Ûµ½¹ÜÀíÆ÷
+        /// æ³¨å†Œè£…å¤‡æ§½åˆ°ç®¡ç†å™¨
         /// </summary>
         private void RegisterEquipmentSlots()
         {
             if (equipmentManager == null) return;
 
-            // ÕâĞ©×°±¸²Û»á×Ô¶¯Í¨¹ıEquipmentSlotManagerµÄAwake×¢²á
-            // ÕâÀïÖ»ÊÇÈ·ÈÏ×¢²á×´Ì¬
+            // è¿™äº›è£…å¤‡æ§½ä¼šè‡ªåŠ¨é€šè¿‡EquipmentSlotManagerçš„Awakeæ³¨å†Œ
+            // è¿™é‡Œåªæ˜¯ç¡®è®¤æ³¨å†ŒçŠ¶æ€
             if (backpackSlot != null)
             {
-                LogDebug($"±³°ü×°±¸²ÛÒÑ×¼±¸: {backpackSlot.SlotName}");
+                LogDebug($"èƒŒåŒ…è£…å¤‡æ§½å·²å‡†å¤‡: {backpackSlot.SlotName}");
             }
 
             if (tacticalRigSlot != null)
             {
-                LogDebug($"¹Ò¾ß×°±¸²ÛÒÑ×¼±¸: {tacticalRigSlot.SlotName}");
+                LogDebug($"æŒ‚å…·è£…å¤‡æ§½å·²å‡†å¤‡: {tacticalRigSlot.SlotName}");
             }
         }
 
         #endregion
 
-        #region ±£´æ¹¦ÄÜ
+        #region ä¿å­˜åŠŸèƒ½
 
         /// <summary>
-        /// ±£´æËùÓĞ×°±¸
+        /// ä¿å­˜æ‰€æœ‰è£…å¤‡
         /// </summary>
         public void SaveAllEquipment()
         {
-            // ±£´æ×°±¸£¨±³°ü/¹Ò¾ßµÈ£©µ½ EquipmentSave.es3
+            // ä¿å­˜è£…å¤‡ï¼ˆèƒŒåŒ…/æŒ‚å…·ç­‰ï¼‰åˆ° EquipmentSave.es3
             var equipMgr = EquipmentPersistenceManager.Instance;
             if (equipMgr != null)
             {
-				equipMgr.SaveEquipmentData(); // Ê¹ÓÃ´øÀäÈ´µÄ±£´æÒÔ±ÜÃâ¸ßÆµIO
-                LogDebug("ÒÑ´¥·¢×°±¸´æµµ (EquipmentSave.es3)");
+				equipMgr.SaveEquipmentData(); // ä½¿ç”¨å¸¦å†·å´çš„ä¿å­˜ä»¥é¿å…é«˜é¢‘IO
+                LogDebug("å·²è§¦å‘è£…å¤‡å­˜æ¡£ (EquipmentSave.es3)");
             }
 
-            // ÈİÆ÷ÄÚÈİÓÉ ContainerSaveManager Í¨¹ıÍø¸ñÊÂ¼ş×Ô¶¯±£´æµ½ ContainerData.es3
+            // å®¹å™¨å†…å®¹ç”± ContainerSaveManager é€šè¿‡ç½‘æ ¼äº‹ä»¶è‡ªåŠ¨ä¿å­˜åˆ° ContainerData.es3
         }
 
         /// <summary>
-        /// ±£´æ±³°ü×°±¸
+        /// ä¿å­˜èƒŒåŒ…è£…å¤‡
         /// </summary>
         private void SaveBackpackEquipment()
         {
-            // Ê¹ÓÃÈ«¾Ö´æµµ£¬ÎŞĞèµ¥¶À±£´æ
+            // ä½¿ç”¨å…¨å±€å­˜æ¡£ï¼Œæ— éœ€å•ç‹¬ä¿å­˜
         }
 
         /// <summary>
-        /// ±£´æ¹Ò¾ß×°±¸
+        /// ä¿å­˜æŒ‚å…·è£…å¤‡
         /// </summary>
         private void SaveTacticalRigEquipment()
         {
-            // Ê¹ÓÃÈ«¾Ö´æµµ£¬ÎŞĞèµ¥¶À±£´æ
+            // ä½¿ç”¨å…¨å±€å­˜æ¡£ï¼Œæ— éœ€å•ç‹¬ä¿å­˜
         }
 
         /// <summary>
-        /// ±£´æÈİÆ÷ÄÚÈİ
+        /// ä¿å­˜å®¹å™¨å†…å®¹
         /// </summary>
         private void SaveContainerContent(ItemGrid containerGrid, string fileName)
         {
-            // ÈİÆ÷ÄÚÈİÓÉÈ«¾Ö´æµµÍ³Ò»¹ÜÀí
+            // å®¹å™¨å†…å®¹ç”±å…¨å±€å­˜æ¡£ç»Ÿä¸€ç®¡ç†
         }
 
         #endregion
 
-        #region ¼ÓÔØ¹¦ÄÜ
+        #region åŠ è½½åŠŸèƒ½
 
         /// <summary>
-        /// ¼ÓÔØËùÓĞ×°±¸
+        /// åŠ è½½æ‰€æœ‰è£…å¤‡
         /// </summary>
         public void LoadAllEquipment()
         {
-            // ´Ó EquipmentSave.es3 ¼ÓÔØ×°±¸£»ÈİÆ÷ÓÉ EquipmentPersistenceManager µ÷ÓÃ ContainerSaveManager »Ö¸´
+            // ä» EquipmentSave.es3 åŠ è½½è£…å¤‡ï¼›å®¹å™¨ç”± EquipmentPersistenceManager è°ƒç”¨ ContainerSaveManager æ¢å¤
             var equipMgr = EquipmentPersistenceManager.Instance;
             if (equipMgr != null)
             {
                 equipMgr.LoadEquipmentData();
                 StartCoroutine(EnsureContainerGridsAfterLoad());
-                LogDebug("ÒÑ´¥·¢×°±¸¼ÓÔØ (EquipmentSave.es3)");
+                LogDebug("å·²è§¦å‘è£…å¤‡åŠ è½½ (EquipmentSave.es3)");
             }
         }
 
 		/// <summary>
-		/// È·±£¹ÜÀíÆ÷Óë²ÛÎ»¾ÍĞ÷ºóÔÙ¼ÓÔØ×°±¸£¬²¢¼æÈİ°´Ğè¼ÓÔØÂ·¾¶
+		/// ç¡®ä¿ç®¡ç†å™¨ä¸æ§½ä½å°±ç»ªåå†åŠ è½½è£…å¤‡ï¼Œå¹¶å…¼å®¹æŒ‰éœ€åŠ è½½è·¯å¾„
 		/// </summary>
 		private IEnumerator LoadEquipmentWithRetry()
 		{
-			// µÈ´ı¹ÜÀíÆ÷ÊµÀıÓë²ÛÎ»×¼±¸¾ÍĞ÷
-			int retries = 60; // ×î¶àÔ¼1Ãë£¨60Ö¡£©
+			// ç­‰å¾…ç®¡ç†å™¨å®ä¾‹ä¸æ§½ä½å‡†å¤‡å°±ç»ª
+			int retries = 60; // æœ€å¤šçº¦1ç§’ï¼ˆ60å¸§ï¼‰
 			var equipMgr = EquipmentPersistenceManager.Instance;
 			while (retries-- > 0)
 			{
@@ -286,19 +286,19 @@ namespace DialogueSystem
 			if (equipMgr == null)
 				yield break;
 
-			// ½â³ı¿ÉÄÜµÄÆô¶¯ÆÚÒÖÖÆ£¬±£Ö¤ÄÜ±£´æ/¼ÓÔØ
+			// è§£é™¤å¯èƒ½çš„å¯åŠ¨æœŸæŠ‘åˆ¶ï¼Œä¿è¯èƒ½ä¿å­˜/åŠ è½½
 			equipMgr.EnsureSaveNotSuppressed();
 
-			// ÓÅÏÈ×ß¡°°´Ğè¼ÓÔØ¡±Â·¾¶£ºÄ£Äâ±³°ü´ò¿ªÊÂ¼ş
+			// ä¼˜å…ˆèµ°â€œæŒ‰éœ€åŠ è½½â€è·¯å¾„ï¼šæ¨¡æ‹ŸèƒŒåŒ…æ‰“å¼€äº‹ä»¶
 			equipMgr.OnBackpackOpened();
 
-			// Èç¹ûÈÔÎ´´¥·¢¼ÓÔØÇÒÈ·ÓĞ´æµµ£¬ÔòÖ±½Ó´¥·¢¼ÓÔØ
+			// å¦‚æœä»æœªè§¦å‘åŠ è½½ä¸”ç¡®æœ‰å­˜æ¡£ï¼Œåˆ™ç›´æ¥è§¦å‘åŠ è½½
 			if (equipMgr.HasSavedData())
 			{
 				equipMgr.LoadEquipmentData();
 			}
 
-			// µÈ´ı»Ö¸´Íê³É»ò³¬Ê±
+			// ç­‰å¾…æ¢å¤å®Œæˆæˆ–è¶…æ—¶
 			bool restored = false;
 			System.Action onRestored = () => restored = true;
 			EquipmentPersistenceManager.OnEquipmentRestored += onRestored;
@@ -311,49 +311,49 @@ namespace DialogueSystem
 			}
 			EquipmentPersistenceManager.OnEquipmentRestored -= onRestored;
 
-			// È·±£ÈİÆ÷Íø¸ñ¼¤»î
+			// ç¡®ä¿å®¹å™¨ç½‘æ ¼æ¿€æ´»
 			yield return StartCoroutine(EnsureContainerGridsAfterLoad());
 		}
 
         /// <summary>
-        /// ¼ÓÔØ±³°ü×°±¸
+        /// åŠ è½½èƒŒåŒ…è£…å¤‡
         /// </summary>
         private void LoadBackpackEquipment()
         {
-            // ÓÉÈ«¾Ö¼ÓÔØ´¦Àí
+            // ç”±å…¨å±€åŠ è½½å¤„ç†
         }
 
         /// <summary>
-        /// ¼ÓÔØ¹Ò¾ß×°±¸
+        /// åŠ è½½æŒ‚å…·è£…å¤‡
         /// </summary>
         private void LoadTacticalRigEquipment()
         {
-            // ÓÉÈ«¾Ö¼ÓÔØ´¦Àí
+            // ç”±å…¨å±€åŠ è½½å¤„ç†
         }
 
         /// <summary>
-        /// »Ö¸´×°±¸ÎïÆ·
+        /// æ¢å¤è£…å¤‡ç‰©å“
         /// </summary>
         private IEnumerator RestoreEquipment(EquipmentSlot slot, DialogueEquipmentSaveData saveData, string containerFileName)
         {
-            // È«¾Ö¼ÓÔØ¸ºÔğ»Ö¸´£¬ÕâÀï²»ÔÙµ¥¶ÀÊµÏÖ
+            // å…¨å±€åŠ è½½è´Ÿè´£æ¢å¤ï¼Œè¿™é‡Œä¸å†å•ç‹¬å®ç°
             yield break;
         }
 
         /// <summary>
-        /// ¼ÓÔØÈİÆ÷ÄÚÈİ
+        /// åŠ è½½å®¹å™¨å†…å®¹
         /// </summary>
         private void LoadContainerContent(ItemGrid containerGrid, string fileName)
         {
-            // ÈİÆ÷ÄÚÈİÓÉÈ«¾Ö´æµµÍ³Ò»¹ÜÀí
+            // å®¹å™¨å†…å®¹ç”±å…¨å±€å­˜æ¡£ç»Ÿä¸€ç®¡ç†
         }
 
         /// <summary>
-        /// È«¾Ö¼ÓÔØºó£¬È·±£±³°ü/¹Ò¾ßµÄÈİÆ÷Íø¸ñ±»¼¤»î
+        /// å…¨å±€åŠ è½½åï¼Œç¡®ä¿èƒŒåŒ…/æŒ‚å…·çš„å®¹å™¨ç½‘æ ¼è¢«æ¿€æ´»
         /// </summary>
         private IEnumerator EnsureContainerGridsAfterLoad()
         {
-            yield return null; // µÈÒ»Ö¡µÈ´ı×°±¸»Ö¸´Íê³É
+            yield return null; // ç­‰ä¸€å¸§ç­‰å¾…è£…å¤‡æ¢å¤å®Œæˆ
             if (backpackSlot != null && backpackSlot.HasEquippedItem)
             {
                 backpackSlot.ForceActivateContainerGrid();
@@ -364,10 +364,10 @@ namespace DialogueSystem
             }
         }
 
-		#region ³ÖĞø±£´æ£¨¶Ô»°¼¤»îÆÚ¼ä£©
+		#region æŒç»­ä¿å­˜ï¼ˆå¯¹è¯æ¿€æ´»æœŸé—´ï¼‰
 
-		[Header("³ÖĞø±£´æÉèÖÃ")]
-		[FieldLabel("¶Ô»°¼¤»îÊ±×Ô¶¯±£´æ¼ä¸ô(Ãë)")]
+		[Header("æŒç»­ä¿å­˜è®¾ç½®")]
+		[FieldLabel("å¯¹è¯æ¿€æ´»æ—¶è‡ªåŠ¨ä¿å­˜é—´éš”(ç§’)")]
 		[SerializeField] private float activeAutoSaveInterval = 3f;
 		private Coroutine activeAutoSaveCo;
 
@@ -404,20 +404,20 @@ namespace DialogueSystem
 
         #endregion
 
-        #region ¸¨Öú·½·¨
+        #region è¾…åŠ©æ–¹æ³•
 
         /// <summary>
-        /// ¸ù¾İID»ñÈ¡ÎïÆ·Êı¾İ
+        /// æ ¹æ®IDè·å–ç‰©å“æ•°æ®
         /// </summary>
         private ItemDataSO GetItemDataByID(string itemID)
         {
             if (!int.TryParse(itemID, out int id))
             {
-                Debug.LogWarning($"[DialogueEquipmentPersistence] ÎŞĞ§µÄÎïÆ·ID: {itemID}");
+                Debug.LogWarning($"[DialogueEquipmentPersistence] æ— æ•ˆçš„ç‰©å“ID: {itemID}");
                 return null;
             }
 
-            // ´ÓResources¼ÓÔØËùÓĞItemDataSO
+            // ä»ResourcesåŠ è½½æ‰€æœ‰ItemDataSO
             ItemDataSO[] allItems = Resources.LoadAll<ItemDataSO>("InventorySystemResources/ItemScriptableObject");
             foreach (var item in allItems)
             {
@@ -427,12 +427,12 @@ namespace DialogueSystem
                 }
             }
 
-            Debug.LogWarning($"[DialogueEquipmentPersistence] Î´ÕÒµ½IDÎª {itemID} µÄÎïÆ·");
+            Debug.LogWarning($"[DialogueEquipmentPersistence] æœªæ‰¾åˆ°IDä¸º {itemID} çš„ç‰©å“");
             return null;
         }
 
         /// <summary>
-        /// ´´½¨ÎïÆ·ÊµÀı
+        /// åˆ›å»ºç‰©å“å®ä¾‹
         /// </summary>
         private GameObject CreateItemInstance(ItemDataSO itemData)
         {
@@ -440,20 +440,20 @@ namespace DialogueSystem
 
             try
             {
-                // ¸ù¾İÀà±ğºÍID¼ÓÔØÔ¤ÖÆ¼ş
+                // æ ¹æ®ç±»åˆ«å’ŒIDåŠ è½½é¢„åˆ¶ä»¶
                 string categoryFolder = GetCategoryFolderName(itemData.category);
                 string prefabPath = $"InventorySystemResources/Prefabs/{categoryFolder}/{itemData.id}";
 
                 GameObject prefab = Resources.Load<GameObject>(prefabPath);
                 if (prefab == null)
                 {
-                    Debug.LogWarning($"[DialogueEquipmentPersistence] Î´ÕÒµ½Ô¤ÖÆ¼ş: {prefabPath}");
+                    Debug.LogWarning($"[DialogueEquipmentPersistence] æœªæ‰¾åˆ°é¢„åˆ¶ä»¶: {prefabPath}");
                     return null;
                 }
 
                 GameObject instance = Instantiate(prefab);
                 
-                // ÉèÖÃÎïÆ·Êı¾İ
+                // è®¾ç½®ç‰©å“æ•°æ®
                 ItemDataReader reader = instance.GetComponent<ItemDataReader>();
                 if (reader != null)
                 {
@@ -464,80 +464,80 @@ namespace DialogueSystem
             }
             catch (Exception e)
             {
-                Debug.LogError($"[DialogueEquipmentPersistence] ´´½¨ÎïÆ·ÊµÀıÊ§°Ü: {e.Message}");
+                Debug.LogError($"[DialogueEquipmentPersistence] åˆ›å»ºç‰©å“å®ä¾‹å¤±è´¥: {e.Message}");
                 return null;
             }
         }
 
         /// <summary>
-        /// »ñÈ¡Àà±ğÎÄ¼ş¼ĞÃû³Æ
+        /// è·å–ç±»åˆ«æ–‡ä»¶å¤¹åç§°
         /// </summary>
         private string GetCategoryFolderName(ItemCategory category)
         {
             switch (category)
             {
-                case ItemCategory.Backpack: return "Backpack_±³°ü";
-                case ItemCategory.TacticalRig: return "TacticalRig_Õ½Êõ±³ĞÄ";
-                case ItemCategory.Helmet: return "Helmet_Í·¿ø";
-                case ItemCategory.Armor: return "Armor_»¤¼×";
-                case ItemCategory.Weapon: return "Weapon_ÎäÆ÷";
-                case ItemCategory.Ammunition: return "Ammunition_µ¯Ò©";
-                case ItemCategory.Food: return "Food_Ê³Îï";
-                case ItemCategory.Drink: return "Drink_ÒûÁÏ";
-                case ItemCategory.Sedative: return "Sedative_Õò¾²¼Á";
-                case ItemCategory.Hemostatic: return "Hemostatic_Ö¹Ñª¼Á";
-                case ItemCategory.Healing: return "Healing_ÖÎÁÆÒ©Îï";
-                case ItemCategory.Intelligence: return "Intelligence_Çé±¨";
-                case ItemCategory.Currency: return "Currency_»õ±Ò";
+                case ItemCategory.Backpack: return "Backpack_èƒŒåŒ…";
+                case ItemCategory.TacticalRig: return "TacticalRig_æˆ˜æœ¯èƒŒå¿ƒ";
+                case ItemCategory.Helmet: return "Helmet_å¤´ç›”";
+                case ItemCategory.Armor: return "Armor_æŠ¤ç”²";
+                case ItemCategory.Weapon: return "Weapon_æ­¦å™¨";
+                case ItemCategory.Ammunition: return "Ammunition_å¼¹è¯";
+                case ItemCategory.Food: return "Food_é£Ÿç‰©";
+                case ItemCategory.Drink: return "Drink_é¥®æ–™";
+                case ItemCategory.Sedative: return "Sedative_é•‡é™å‰‚";
+                case ItemCategory.Hemostatic: return "Hemostatic_æ­¢è¡€å‰‚";
+                case ItemCategory.Healing: return "Healing_æ²»ç–—è¯ç‰©";
+                case ItemCategory.Intelligence: return "Intelligence_æƒ…æŠ¥";
+                case ItemCategory.Currency: return "Currency_è´§å¸";
                 case ItemCategory.Special: return "Special";
-                default: return "Helmet_Í·¿ø";
+                default: return "Helmet_å¤´ç›”";
             }
         }
 
         #endregion
 
-        #region ÊÂ¼ş´¦Àí
+        #region äº‹ä»¶å¤„ç†
 
         /// <summary>
-        /// ×°±¸±ä»¯ÊÂ¼ş´¦Àí
+        /// è£…å¤‡å˜åŒ–äº‹ä»¶å¤„ç†
         /// </summary>
         private void OnEquipmentChanged(EquipmentSlotType slotType, ItemDataReader item)
         {
-            // Ö»´¦Àí±³°üºÍ¹Ò¾ßµÄ±ä»¯
+            // åªå¤„ç†èƒŒåŒ…å’ŒæŒ‚å…·çš„å˜åŒ–
             if (slotType != EquipmentSlotType.Backpack && slotType != EquipmentSlotType.TacticalRig)
                 return;
 
             if (!enableAutoSave) return;
 
-            LogDebug($"×°±¸±ä»¯: {slotType} -> {item?.ItemData?.itemName ?? "¿Õ"}");
+            LogDebug($"è£…å¤‡å˜åŒ–: {slotType} -> {item?.ItemData?.itemName ?? "ç©º"}");
 
-            // ÑÓ³Ù±£´æ£¬±ÜÃâÆµ·±IO
+            // å»¶è¿Ÿä¿å­˜ï¼Œé¿å…é¢‘ç¹IO
             CancelInvoke(nameof(DelayedSave));
             Invoke(nameof(DelayedSave), 0.5f);
         }
 
         /// <summary>
-        /// ÈİÆ÷¼¤»îÊÂ¼ş´¦Àí
+        /// å®¹å™¨æ¿€æ´»äº‹ä»¶å¤„ç†
         /// </summary>
         private void OnContainerActivated(EquipmentSlotType slotType, ItemGrid containerGrid)
         {
             if (slotType != EquipmentSlotType.Backpack && slotType != EquipmentSlotType.TacticalRig)
                 return;
 
-            LogDebug($"ÈİÆ÷¼¤»î: {slotType} -> {containerGrid?.GridName}");
+            LogDebug($"å®¹å™¨æ¿€æ´»: {slotType} -> {containerGrid?.GridName}");
         }
 
         /// <summary>
-        /// ÈİÆ÷Í£ÓÃÊÂ¼ş´¦Àí
+        /// å®¹å™¨åœç”¨äº‹ä»¶å¤„ç†
         /// </summary>
         private void OnContainerDeactivated(EquipmentSlotType slotType, ItemGrid containerGrid)
         {
             if (slotType != EquipmentSlotType.Backpack && slotType != EquipmentSlotType.TacticalRig)
                 return;
 
-            LogDebug($"ÈİÆ÷Í£ÓÃ: {slotType} -> {containerGrid?.GridName}");
+            LogDebug($"å®¹å™¨åœç”¨: {slotType} -> {containerGrid?.GridName}");
 
-            // ÈİÆ÷Í£ÓÃÊ±Á¢¼´±£´æ
+            // å®¹å™¨åœç”¨æ—¶ç«‹å³ä¿å­˜
             if (enableAutoSave)
             {
                 DelayedSave();
@@ -545,7 +545,7 @@ namespace DialogueSystem
         }
 
         /// <summary>
-        /// ÑÓ³Ù±£´æ
+        /// å»¶è¿Ÿä¿å­˜
         /// </summary>
         private void DelayedSave()
         {
@@ -554,10 +554,10 @@ namespace DialogueSystem
 
         #endregion
 
-        #region ¹«¹²½Ó¿Ú
+        #region å…¬å…±æ¥å£
 
         /// <summary>
-        /// Çå³ıËùÓĞ±£´æµÄ×°±¸Êı¾İ
+        /// æ¸…é™¤æ‰€æœ‰ä¿å­˜çš„è£…å¤‡æ•°æ®
         /// </summary>
         public void ClearAllSaveData()
         {
@@ -567,35 +567,35 @@ namespace DialogueSystem
                 if (equipMgr != null)
                 {
                     equipMgr.ClearAllSaveData();
-                    LogDebug("ÒÑÇå³ı×°±¸´æµµ (EquipmentSave.es3)");
+                    LogDebug("å·²æ¸…é™¤è£…å¤‡å­˜æ¡£ (EquipmentSave.es3)");
                 }
 
                 var containerMgr = ContainerSaveManager.Instance;
                 if (containerMgr != null)
                 {
                     containerMgr.ClearAllContainerData();
-                    LogDebug("ÒÑÇå³ıÈİÆ÷´æµµ (ContainerData.es3)");
+                    LogDebug("å·²æ¸…é™¤å®¹å™¨å­˜æ¡£ (ContainerData.es3)");
                 }
             }
             catch (Exception e)
             {
-                Debug.LogError($"[DialogueEquipmentPersistence] Çå³ı´æµµÊ§°Ü: {e.Message}");
+                Debug.LogError($"[DialogueEquipmentPersistence] æ¸…é™¤å­˜æ¡£å¤±è´¥: {e.Message}");
             }
         }
 
         /// <summary>
-        /// »ñÈ¡±³°ü×°±¸²Û
+        /// è·å–èƒŒåŒ…è£…å¤‡æ§½
         /// </summary>
         public EquipmentSlot GetBackpackSlot() => backpackSlot;
 
         /// <summary>
-        /// »ñÈ¡¹Ò¾ß×°±¸²Û
+        /// è·å–æŒ‚å…·è£…å¤‡æ§½
         /// </summary>
         public EquipmentSlot GetTacticalRigSlot() => tacticalRigSlot;
 
         #endregion
 
-        #region µ÷ÊÔ
+        #region è°ƒè¯•
 
         private void LogDebug(string message)
         {
@@ -609,7 +609,7 @@ namespace DialogueSystem
     }
 
     /// <summary>
-    /// ¶Ô»°×°±¸±£´æÊı¾İ½á¹¹
+    /// å¯¹è¯è£…å¤‡ä¿å­˜æ•°æ®ç»“æ„
     /// </summary>
     [Serializable]
     public class DialogueEquipmentSaveData
