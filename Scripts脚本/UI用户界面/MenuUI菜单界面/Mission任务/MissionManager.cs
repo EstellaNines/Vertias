@@ -84,10 +84,16 @@ public class MissionManager : MonoBehaviour
 
     // 内部数据存储
     private MissionDataCollection missionDataCollection;
+    // 统一后的任务列表（合并 missions / mainMissions / sideMissions，按读取顺序）
+    private List<MissionData> unifiedMissions = new List<MissionData>();
     private Dictionary<int, MissionData> missionDataDict = new Dictionary<int, MissionData>();
 
     [Header("自动生成设置")]
     [SerializeField] private bool autoGenerateOnStart = true; // 是否在Start时自动生成任务项
+
+    [Header("过滤设置")]
+    [SerializeField] private bool hideAsherMylesMissions = true; // 已完成：隐藏AM任务
+    [SerializeField] private string[] excludedPublishers = new string[] { "Asher Myles", "AM" };
 
     // 存储生成的任务项对象
     private List<GameObject> generatedMissionItems = new List<GameObject>();
@@ -102,7 +108,7 @@ public class MissionManager : MonoBehaviour
     private int currentSelectedIndex = -1;
 
     // 任务类型常量定义
-    public static readonly string[] MISSION_TYPES = { "explore", "combat", "talk" };
+    public static readonly string[] MISSION_TYPES = { "explore", "combat", "talk", "trade" };
     
     // 任务分类常量定义
     public static readonly string[] MISSION_CATEGORIES = { "main", "side", "daily" };
@@ -130,32 +136,53 @@ public class MissionManager : MonoBehaviour
     {
         try
         {
-            // 从Resources文件夹加载JSON文件
             TextAsset jsonFile = Resources.Load<TextAsset>(missionDataFileName);
-            if (jsonFile != null)
-            {
-                string jsonContent = jsonFile.text;
-                missionDataCollection = JsonUtility.FromJson<MissionDataCollection>(jsonContent);
-
-                // 构建字典以便快速查找
-                missionDataDict.Clear();
-                if (missionDataCollection != null && missionDataCollection.missions != null)
-                {
-                    foreach (MissionData mission in missionDataCollection.missions)
-                    {
-                        missionDataDict[mission.id] = mission;
-                    }
-                    Debug.Log($"MissionManager: 成功加载 {missionDataCollection.missions.Count} 个任务数据");
-                }
-                else
-                {
-                    Debug.LogWarning("MissionManager: JSON文件格式错误或为空");
-                }
-            }
-            else
+            if (jsonFile == null)
             {
                 Debug.LogError($"MissionManager: 无法找到文件 {missionDataFileName}.json，请确保文件位于Resources文件夹中");
+                return;
             }
+
+            string jsonContent = jsonFile.text;
+            missionDataCollection = JsonUtility.FromJson<MissionDataCollection>(jsonContent);
+
+            unifiedMissions.Clear();
+            missionDataDict.Clear();
+
+            if (missionDataCollection == null)
+            {
+                Debug.LogWarning("MissionManager: JSON反序列化失败或为空");
+                return;
+            }
+
+            // 兼容旧字段 missions
+            if (missionDataCollection.missions != null)
+            {
+                foreach (MissionData m in missionDataCollection.missions)
+                {
+                    AppendMission(m);
+                }
+            }
+
+            // 新字段 mainMissions / sideMissions
+            if (missionDataCollection.mainMissions != null)
+            {
+                foreach (MissionData m in missionDataCollection.mainMissions)
+                {
+                    if (string.IsNullOrEmpty(m.category)) m.category = "main";
+                    AppendMission(m);
+                }
+            }
+            if (missionDataCollection.sideMissions != null)
+            {
+                foreach (MissionData m in missionDataCollection.sideMissions)
+                {
+                    if (string.IsNullOrEmpty(m.category)) m.category = "side";
+                    AppendMission(m);
+                }
+            }
+
+            Debug.Log($"MissionManager: 成功加载与合并 {unifiedMissions.Count} 个任务数据");
         }
         catch (Exception e)
         {
@@ -211,15 +238,14 @@ public class MissionManager : MonoBehaviour
     // 显示指定任务的详细信息
     public void ShowMissionDescription(int missionIndex)
     {
-        // 检查任务索引是否有效
-        if (!missionDataDict.ContainsKey(missionIndex))
+        // 统一列表优先
+        MissionData missionData = GetMissionData(missionIndex);
+        if (missionData == null)
         {
             Debug.LogWarning($"MissionManager: 任务索引 {missionIndex} 不存在");
             HideMissionDescription();
             return;
         }
-
-        MissionData missionData = missionDataDict[missionIndex];
 
         // 显示任务详情面板
         if (missionDescriptionPanel != null)
@@ -398,6 +424,11 @@ public class MissionManager : MonoBehaviour
     // 获取指定索引的任务数据
     public MissionData GetMissionData(int missionIndex)
     {
+        if (unifiedMissions != null && missionIndex >= 0 && missionIndex < unifiedMissions.Count)
+        {
+            return unifiedMissions[missionIndex];
+        }
+        // 回退：旧逻辑（若索引正好等于ID才命中）
         if (missionDataDict.ContainsKey(missionIndex))
         {
             return missionDataDict[missionIndex];
@@ -408,18 +439,22 @@ public class MissionManager : MonoBehaviour
     // 根据分类获取任务列表
     public List<MissionData> GetMissionsByCategory(string category)
     {
-        List<MissionData> categoryMissions = new List<MissionData>();
-        if (missionDataCollection != null && missionDataCollection.missions != null)
+        List<MissionData> result = new List<MissionData>();
+        IList<MissionData> source = (unifiedMissions != null && unifiedMissions.Count > 0)
+            ? (IList<MissionData>)unifiedMissions
+            : (IList<MissionData>)missionDataCollection?.missions;
+
+        if (source != null)
         {
-            foreach (MissionData mission in missionDataCollection.missions)
+            foreach (var mission in source)
             {
-                if (mission.category == category)
+                if (mission != null && mission.category == category)
                 {
-                    categoryMissions.Add(mission);
+                    result.Add(mission);
                 }
             }
         }
-        return categoryMissions;
+        return result;
     }
     
     // 获取主线任务
@@ -491,13 +526,14 @@ public class MissionManager : MonoBehaviour
         // 重置选中索引
         currentSelectedIndex = -1;
 
-        // 根据当前任务数量生成任务项
-        for (int i = 0; i < currentMissionCount; i++)
+        // 根据数据量生成任务项（优先统一列表），否则退回到 currentMissionCount
+        int displayCount = (unifiedMissions != null && unifiedMissions.Count > 0) ? unifiedMissions.Count : currentMissionCount;
+        for (int i = 0; i < displayCount; i++)
         {
             CreateMissionItem(i);
         }
 
-        Debug.Log($"MissionManager: 生成了 {currentMissionCount} 个任务项");
+        Debug.Log($"MissionManager: 生成了 {displayCount} 个任务项");
     }
 
     // 创建单个任务项
@@ -529,15 +565,14 @@ public class MissionManager : MonoBehaviour
     // 处理任务项点击事件（由MissionSection调用）
     public void OnMissionItemClicked(int missionIndex)
     {
-        // 检查当前任务数量是否大于0
-        if (currentMissionCount <= 0)
+        // 检查任务索引是否有效（以统一列表为准）
+        int totalCount = (unifiedMissions != null && unifiedMissions.Count > 0) ? unifiedMissions.Count : currentMissionCount;
+        if (totalCount <= 0)
         {
             Debug.LogWarning("MissionManager: 当前没有可用任务");
             return;
         }
-
-        // 检查任务索引是否有效
-        if (missionIndex < 0 || missionIndex >= generatedMissionItems.Count)
+        if (missionIndex < 0 || missionIndex >= totalCount)
         {
             Debug.LogWarning($"MissionManager: 无效的任务索引: {missionIndex}");
             return;
@@ -705,5 +740,28 @@ public class MissionManager : MonoBehaviour
         {
             currentMissionCount = 0;
         }
+    }
+
+    // 追加任务到统一列表并维护ID映射
+    private void AppendMission(MissionData m)
+    {
+        if (m == null) return;
+        if (hideAsherMylesMissions && IsExcludedPublisher(m.publisher)) return;
+        unifiedMissions.Add(m);
+        // 用ID作为键，后读到的覆盖同ID
+        missionDataDict[m.id] = m;
+    }
+
+    private bool IsExcludedPublisher(string publisher)
+    {
+        if (string.IsNullOrEmpty(publisher) || excludedPublishers == null) return false;
+        string p = publisher.Trim();
+        for (int i = 0; i < excludedPublishers.Length; i++)
+        {
+            var e = excludedPublishers[i];
+            if (string.IsNullOrEmpty(e)) continue;
+            if (string.Equals(p, e.Trim(), StringComparison.OrdinalIgnoreCase)) return true;
+        }
+        return false;
     }
 }

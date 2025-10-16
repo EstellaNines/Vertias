@@ -58,11 +58,28 @@ public class MissionSection : MonoBehaviour, IPointerClickHandler
         MissionData missionData = missionManager.GetMissionData(missionIndex);
         if (missionData != null)
         {
-            if (missionNameText != null)
-                missionNameText.text = missionData.name;
+			if (missionNameText != null)
+			{
+				// 名称优先显示 missionData.name；可选追加类别标识
+				missionNameText.text = string.IsNullOrEmpty(missionData.category)
+					? missionData.name
+					: $"{missionData.name} [{missionData.category}]";
+			}
 
-            if (missionTypeIcon != null && !string.IsNullOrEmpty(missionData.iconPath))
-                LoadAndSetIcon(missionData.iconPath);
+			if (missionTypeIcon != null)
+			{
+				string iconPath = !string.IsNullOrEmpty(missionData.iconPath)
+					? missionData.iconPath
+					: GetFallbackIconPathByType(missionData.type);
+				if (!string.IsNullOrEmpty(iconPath))
+				{
+					LoadAndSetIcon(iconPath);
+				}
+				else
+				{
+					missionTypeIcon.gameObject.SetActive(false);
+				}
+			}
         }
         else
         {
@@ -73,6 +90,19 @@ public class MissionSection : MonoBehaviour, IPointerClickHandler
                 missionTypeIcon.gameObject.SetActive(false);
         }
     }
+
+	private string GetFallbackIconPathByType(string type)
+	{
+		if (string.IsNullOrEmpty(type)) return null;
+		switch (type.ToLowerInvariant())
+		{
+			case "explore": return "MissionIcon/explore_icon";
+			case "combat": return "MissionIcon/combat_icon"; // 若资源不存在，LoadAndSetIcon会自动隐藏
+			case "talk": return "MissionIcon/talk_icon";
+			case "trade": return "MissionIcon/talk_icon"; // 复用对话图标作为交易回退
+			default: return null;
+		}
+	}
 
     private void LoadAndSetIcon(string iconPath)
     {

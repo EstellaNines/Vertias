@@ -47,31 +47,8 @@ namespace Game.UI
 		[SerializeField] private Color meetRequirementColor = Color.green;
 		[SerializeField] private Color defaultColor = Color.white;
 
-		private MissionDataRoot cachedData;
-
-		#region JSON 数据结构
-		[Serializable]
-		private sealed class MissionDataRoot
-		{
-			public List<Mission> missions;
-		}
-
-		[Serializable]
-		private sealed class Mission
-		{
-			public int id;
-			public string name;
-			public string description;
-			public Requirements requirements;
-		}
-
-		[Serializable]
-		private sealed class Requirements
-		{
-			public int intelligence;
-			public int itemCount;
-		}
-		#endregion
+		// 兼容新版 MissionData.json（与 MissionManager 的结构一致）
+		private MissionDataCollection cachedCollection;
 
 		private void Reset()
 		{
@@ -304,7 +281,8 @@ namespace Game.UI
 		private void UpdateButtonsState()
 		{
 			if (warehouseGrid == null) AutoFindWarehouseGrid();
-			if (submitButton != null) submitButton.interactable = !hasSubmitted;
+			// 仅当满足提交条件时才允许提交
+			if (submitButton != null) submitButton.interactable = !hasSubmitted && TrySubmit();
 			if (claimButton != null) claimButton.interactable = hasSubmitted && warehouseGrid != null;
 		}
 
@@ -356,47 +334,80 @@ namespace Game.UI
 		private void OnGridChanged(Item item, Vector2Int _)
 		{
 			UpdateDisplay();
+			UpdateButtonsState();
 		}
 
 		private void OnGridMoved(Item item, Vector2Int __, Vector2Int ___)
 		{
 			UpdateDisplay();
+			UpdateButtonsState();
 		}
 
 		private void OnGridCleared(ItemGrid _)
 		{
 			UpdateDisplay();
+			UpdateButtonsState();
 		}
 
 		private void LoadMissionDataIfNeeded(bool forceReload = false)
 		{
-			if (!forceReload && cachedData != null) return;
+			if (!forceReload && cachedCollection != null) return;
 			TextAsset json = Resources.Load<TextAsset>("MissionData");
 			if (json == null)
 			{
-				cachedData = new MissionDataRoot { missions = new List<Mission>() };
+				cachedCollection = new MissionDataCollection { missions = new List<MissionData>(), mainMissions = new List<MissionData>(), sideMissions = new List<MissionData>() };
 				return;
 			}
 			try
 			{
-				cachedData = JsonUtility.FromJson<MissionDataRoot>(json.text);
-				if (cachedData == null || cachedData.missions == null)
+				cachedCollection = JsonUtility.FromJson<MissionDataCollection>(json.text);
+				if (cachedCollection == null)
 				{
-					cachedData = new MissionDataRoot { missions = new List<Mission>() };
+					cachedCollection = new MissionDataCollection { missions = new List<MissionData>(), mainMissions = new List<MissionData>(), sideMissions = new List<MissionData>() };
 				}
 			}
 			catch
 			{
-				cachedData = new MissionDataRoot { missions = new List<Mission>() };
+				cachedCollection = new MissionDataCollection { missions = new List<MissionData>(), mainMissions = new List<MissionData>(), sideMissions = new List<MissionData>() };
 			}
 		}
 
 		private int GetRequiredIntelligence()
 		{
-			if (cachedData == null || cachedData.missions == null) return 0;
-			var m = cachedData.missions.Find(x => x.id == selectedMissionId);
+			if (cachedCollection == null) return 0;
+			MissionData m = FindMissionById(selectedMissionId);
 			if (m == null || m.requirements == null) return 0;
 			return Mathf.Max(0, m.requirements.intelligence);
+		}
+
+		private MissionData FindMissionById(int id)
+		{
+			if (cachedCollection == null) return null;
+			if (cachedCollection.mainMissions != null)
+			{
+				for (int i = 0; i < cachedCollection.mainMissions.Count; i++)
+				{
+					var mm = cachedCollection.mainMissions[i];
+					if (mm != null && mm.id == id) return mm;
+				}
+			}
+			if (cachedCollection.sideMissions != null)
+			{
+				for (int i = 0; i < cachedCollection.sideMissions.Count; i++)
+				{
+					var sm = cachedCollection.sideMissions[i];
+					if (sm != null && sm.id == id) return sm;
+				}
+			}
+			if (cachedCollection.missions != null)
+			{
+				for (int i = 0; i < cachedCollection.missions.Count; i++)
+				{
+					var om = cachedCollection.missions[i];
+					if (om != null && om.id == id) return om;
+				}
+			}
+			return null;
 		}
 
 		private int ComputeCurrentIntelligenceSum()
